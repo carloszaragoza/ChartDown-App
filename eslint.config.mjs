@@ -1,0 +1,17 @@
+import js from "@eslint/js";
+import { defineConfig } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import tseslint from "typescript-eslint";
+
+export default defineConfig(
+  {
+    ignores: ["**/dist/**", "**/.next/**", "**/.turbo/**", "**/coverage/**", "**/next-env.d.ts"],
+  },
+  js.configs.recommended,
+  tseslint.configs.recommended,
+  {
+    files: ["apps/web/**/*.{ts,tsx}"],
+    extends: [nextVitals],
+    settings: { next: { rootDir: "apps/web/" } },
+  },
+);

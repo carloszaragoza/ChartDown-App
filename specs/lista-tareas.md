@@ -1,6 +1,6 @@
 # ChartDown App – Task List (MVP)
 
-**Version:** 1.0 · **Date:** October 3, 2026 · **Based on:** SDD Plan v0.2, Technical Plan 1.0, Design Handoff 1.0, ChartDown 0.4
+**Version:** 1.1 · **Date:** October 3, 2026 · **Based on:** SDD Plan v0.2, Technical Plan 1.0, Design Handoff 1.0, ChartDown 0.4
 
 Every task is small, has its requirements (R-xx) and is done only when its tests pass. The order follows dependencies: a task does not start until the tasks it depends on are done.
 
@@ -10,9 +10,11 @@ Every task is small, has its requirements (R-xx) and is done only when its tests
 
 1. Meets every acceptance criterion of its requirements.
 2. Every requirement has at least one test with its id in the name (for example, “R-06.4 a musician never receives notes for another instrument”).
-3. Passes continuous integration: formatting, types and tests.
+3. Passes continuous integration: formatting, lint, types, tests, build and traceability.
 4. The UI follows the Design Handoff (tokens, components, accessibility).
 5. If a rule changed, the spec was updated first.
+6. The pull request title starts with its task id (for example, “T-101: port the parser”). Work that belongs to no task (dependency updates, typo fixes) starts with “chore:” and has no requirements to check.
+7. Every requirement id named in a test exists in the SDD Plan, so a mistyped id never counts as coverage.
 
 ## Milestones
 
