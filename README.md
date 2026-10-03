@@ -29,3 +29,7 @@ pnpm format:check
 ```
 
 If `pnpm` is not installed, update corepack (`npm install -g corepack@latest`) and run `corepack enable`. The corepack bundled with Node 22.16 cannot run pnpm 12.
+
+## Environments
+
+Production runs at https://chartdown.app on Vercel with the `chartdown-prod` Supabase project; pull request previews and local development use `chartdown-dev`. See [docs/infrastructure.md](docs/infrastructure.md).
