@@ -13,6 +13,10 @@ const MESSAGES: Record<WarningCode, (values: Values) => string> = {
   "empty-bar": () => "This bar has no chords",
   "beats-mismatch": (v) => `Beats add up to ${v.sum}, but the meter has ${v.beats}`,
   "landmark-too-long": () => "Lyric landmarks should be 8 words or fewer",
+  "unsupported-version": (v) =>
+    `This chart says ChartDown ${v.version}; this parser reads ${v.supported}`,
+  "header-not-closed": () => "The header needs a closing --- line",
+  "use-with-rows": () => "@use must be the only content line of a section; its own rows are kept",
 };
 
 export type Warn = (line: number, code: WarningCode, values?: Values) => void;

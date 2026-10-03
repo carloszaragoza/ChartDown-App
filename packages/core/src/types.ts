@@ -85,7 +85,10 @@ export type WarningCode =
   | "bad-token"
   | "empty-bar"
   | "beats-mismatch"
-  | "landmark-too-long";
+  | "landmark-too-long"
+  | "unsupported-version"
+  | "header-not-closed"
+  | "use-with-rows";
 
 export interface Warning {
   line: number;
@@ -96,6 +99,8 @@ export interface Warning {
 }
 
 export interface Chart {
+  /** The declared format version, from the `chartdown` header (R-00.4). */
+  version?: string;
   /** Every header field, names lowercased, values as written. */
   header: Record<string, string>;
   key: Key;
