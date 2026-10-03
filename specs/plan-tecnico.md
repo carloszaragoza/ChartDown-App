@@ -243,7 +243,7 @@ No personal data of a departed user remains, which removes the risk with privacy
 ### 12.6 Names, repositories and business model
 
 - **ChartDown** is the language: the notation, the `.chartdown` format, the spec, guides and reference playground. Open on GitHub (spec CC0, code MIT) at `github.com/ChartDown/Language`, so anyone can build their own app.
-- **ChartDown App** is the product we build: catalog, bands, sets, MD layer and per-instrument view. All its code, including the landing page, lives in `github.com/ChartDown/ChartDown-App` (visibility to be confirmed; private is recommended for a subscription product).
+- **ChartDown App** is the product we build: catalog, bands, sets, MD layer and per-instrument view. All its code, including the landing page, lives in the private repository `github.com/carloszaragoza/ChartDown-App` (moved from the ChartDown organization on October 3, 2026).
 - **Domain:** `chartdown.app`.
 - **Business model:** free at first, invite-only; later a subscription with a free tier. It does not change the architecture.
 - **Name policy:** anyone can say their app is “compatible with ChartDown”; nobody can name their product ChartDown or present it as the official one.
