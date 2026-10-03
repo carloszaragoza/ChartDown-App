@@ -8,6 +8,9 @@ import { parseRow } from "./row.js";
 import type { Chart, Key, Meter, Note, Row, Section, Warning } from "./types.js";
 import { createWarning, type Warn } from "./warnings.js";
 
+/** The ChartDown version this parser reads (R-00.4). */
+export const SUPPORTED_VERSION = "0.4";
+
 function parseKey(text: string | undefined): Key {
   const match = /^([A-G][b#]?)(m?)/.exec(text ?? "C");
   return match
@@ -47,8 +50,15 @@ export function parse(source: string): Chart {
   const headerLines: Record<string, number> = {};
   let index = 0;
   if (lines[0]?.trim() === "---") {
-    index = 1;
-    for (; index < lines.length && lines[index]?.trim() !== "---"; index++) {
+    // Without a closing ---, the header ends at the first section so the chart is not lost.
+    let end = lines.findIndex((text, i) => i > 0 && text.trim() === "---");
+    const closed = end !== -1;
+    if (!closed) {
+      warn(1, "header-not-closed");
+      end = lines.findIndex((text, i) => i > 0 && text.trim().startsWith("##"));
+      if (end === -1) end = lines.length;
+    }
+    for (index = 1; index < end; index++) {
       const text = lines[index] as string;
       const match = /^\s*([A-Za-z_][\w-]*)\s*:\s*(.*)$/.exec(text);
       if (match) {
@@ -59,7 +69,15 @@ export function parse(source: string): Chart {
         warn(index + 1, "header-line");
       }
     }
-    index++;
+    if (closed) index++;
+  }
+
+  const version = header.chartdown;
+  if (version !== undefined && version !== SUPPORTED_VERSION) {
+    warn(headerLines.chartdown ?? 1, "unsupported-version", {
+      version,
+      supported: SUPPORTED_VERSION,
+    });
   }
 
   const instruments = parseInstrumentsHeader(
@@ -122,10 +140,15 @@ export function parse(source: string): Chart {
     section.rows.push(row);
   }
 
-  // `@use` copies the rows of the latest earlier section with that name, in the key
-  // in effect where the reusing section starts (spec 5.2).
+  // `@use` copies the rows of the first earlier section with that name, in the key
+  // in effect where the reusing section starts (spec 5.2). It must be the section's
+  // only content line: a section with its own rows keeps them.
   sections.forEach((target, position) => {
-    if (target.use === undefined || target.rows.length > 0) return;
+    if (target.use === undefined) return;
+    if (target.rows.length > 0) {
+      warn(target.use.line, "use-with-rows");
+      return;
+    }
     const name = target.use.name.toLowerCase();
     const original = sections
       .slice(0, position)
@@ -143,5 +166,7 @@ export function parse(source: string): Chart {
   });
 
   warnings.sort((a, b) => a.line - b.line);
-  return { header, key, meter, instruments, sections, warnings };
+  const chart: Chart = { header, key, meter, instruments, sections, warnings };
+  if (version !== undefined) chart.version = version;
+  return chart;
 }

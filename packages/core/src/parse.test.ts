@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parse } from "./parse.js";
+import { parse, SUPPORTED_VERSION } from "./parse.js";
 import { EXAMPLES, fixture } from "./test-helpers.js";
 import type { Chart } from "./types.js";
 
@@ -79,6 +79,35 @@ describe("R-00.3 the parser returns the chart as structured data", () => {
       message: "Can’t read “?”",
       values: { token: "?" },
     });
+  });
+});
+
+describe("R-00.4 the header declares the format version", () => {
+  it("R-00.4 returns the declared version", () => {
+    const chart = parse("---\nchartdown: 0.4\n---\n## A\n1");
+    expect(chart.version).toBe("0.4");
+    expect(chart.warnings).toEqual([]);
+  });
+
+  it("R-00.4 warns when a chart declares a version the parser does not support", () => {
+    expect(parse("---\nchartdown: 0.5\n---\n## A\n1").warnings).toEqual([
+      {
+        line: 2,
+        code: "unsupported-version",
+        message: "This chart says ChartDown 0.5; this parser reads 0.4",
+        values: { version: "0.5", supported: "0.4" },
+      },
+    ]);
+  });
+
+  it("R-00.4 a missing version is not a warning", () => {
+    const chart = parse("---\ntitle: Open Road\n---\n## A\n1");
+    expect("version" in chart).toBe(false);
+    expect(chart.warnings).toEqual([]);
+  });
+
+  it.each(EXAMPLES)("R-00.4 the Language example %s declares the supported version", (name) => {
+    expect(parse(fixture(name)).version).toBe(SUPPORTED_VERSION);
   });
 });
 

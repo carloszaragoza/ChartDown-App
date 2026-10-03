@@ -1,5 +1,5 @@
 // @chartdown/core: the ChartDown parser (spec 0.4).
-export { parse } from "./parse.js";
+export { parse, SUPPORTED_VERSION } from "./parse.js";
 export { EVERYONE, STANDARD_ROLES } from "./roles.js";
 export type {
   Bar,
