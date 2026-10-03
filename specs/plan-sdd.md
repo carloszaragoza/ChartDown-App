@@ -110,7 +110,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-00.1 Instruments in notes use identifiers from the Admin's catalog, not a fixed list inside the parser (decision 5).
 - R-00.2 **MD layer** format: notes anchored to a section of the version (by name and position) and, when needed, to a bar (decision 4).
 - R-00.3 The parser returns the chart as structured data (JSON) so the app never reads raw text.
-- R-00.4 The header declares the format version (`chartdown: 0.4`).
+- R-00.4 The header declares the format version (`chartdown: 0.4`). The parser returns the declared version and warns when a file declares a version it does not support; a missing version is not a warning, and the app writes it into every chart it saves.
 - R-00.5 Remove the `ccli` header field and its examples (decision 10). (Done in ChartDown 0.3.)
 - R-00.6 Pickup bars and tempo or meter changes within a song.
 
