@@ -114,6 +114,12 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-00.5 Remove the `ccli` header field and its examples (decision 10). (Done in ChartDown 0.3.)
 - R-00.6 Pickup bars and tempo or meter changes within a song.
 
+**Interpretations of ChartDown 0.4** (where spec section 12 is silent; candidates for the Language repository)
+
+- Minor keys spell chords like their relative major: Dm uses F's flats (its `b6` is Bb), Em uses G's sharps, Cm uses Eb's flats.
+- Number style shows `-` for every minor quality, not only plain minor: `6m7` reads `6-7`; qualities starting with `maj` are unchanged.
+- A transposed key takes its common name: C, Db, D, Eb, E, F, F#, G, Ab, A, Bb, B; in minor, Cm, C#m, Dm, Ebm, Em, Fm, F#m, Gm, G#m, Am, Bbm, Bm.
+
 **Acceptance criteria**
 
 - Given a valid chart, the parser returns the same structure on every platform.
