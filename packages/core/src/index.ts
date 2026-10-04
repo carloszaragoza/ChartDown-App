@@ -35,6 +35,7 @@ export type {
   Layer,
   LayerNote,
   ParsedLayer,
+  PlaceOptions,
   PlacedNote,
   Placement,
   UnplacedNote,

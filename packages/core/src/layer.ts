@@ -6,6 +6,7 @@ import type {
   LayerNote,
   ParsedLayer,
   ParseOptions,
+  PlaceOptions,
   PlacedNote,
   Placement,
   UnplacedNote,
@@ -163,12 +164,17 @@ export function formatLayer(layer: Layer, options: ParseOptions = {}): string {
   return `${out.join("\n")}\n`;
 }
 
+const countNamed = (chart: Chart, name: string) =>
+  chart.sections.filter((section) => sameName(section.name) === name).length;
+
 /**
  * Places a layer on a chart (R-00.2). Each note lands on the section with its name and
  * occurrence, and on its bar. A note whose anchor is not in the chart is unplaced, with
- * the reason, and is never moved elsewhere, changed or dropped.
+ * the reason, and is never moved elsewhere, changed or dropped. When the chart at a
+ * note's anchored revision is known and the number of sections with its name changed
+ * since, its occurrence may point elsewhere, so the note is unplaced too.
  */
-export function placeLayer(chart: Chart, layer: Layer): Placement {
+export function placeLayer(chart: Chart, layer: Layer, options: PlaceOptions = {}): Placement {
   const sections: PlacedNote[][] = chart.sections.map(() => []);
   const unplaced: UnplacedNote[] = [];
 
@@ -177,8 +183,11 @@ export function placeLayer(chart: Chart, layer: Layer): Placement {
     const matches = chart.sections.flatMap((section, index) =>
       sameName(section.name) === name ? [index] : [],
     );
+    const anchored =
+      note.revision === undefined ? undefined : options.anchoredChart?.(note.revision);
+    const shifted = anchored !== undefined && countNamed(anchored, name) !== matches.length;
     const index =
-      Number.isInteger(note.occurrence) && note.occurrence >= 1
+      !shifted && Number.isInteger(note.occurrence) && note.occurrence >= 1
         ? matches[note.occurrence - 1]
         : undefined;
     const section = index === undefined ? undefined : chart.sections[index];

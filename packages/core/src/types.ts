@@ -133,6 +133,8 @@ export interface Chart {
 export interface LayerNote {
   /** The app's id for the note, carried through unchanged. */
   id?: string;
+  /** The revision the note was anchored to; lets placement notice shifted occurrences. */
+  revision?: string;
   section: string;
   /** 1 for the first section with this name in the chart, 2 for the second, and so on. */
   occurrence: number;
@@ -166,6 +168,14 @@ export type UnplacedReason = "section" | "bar";
 export interface UnplacedNote {
   note: LayerNote;
   reason: UnplacedReason;
+}
+
+export interface PlaceOptions {
+  /**
+   * The chart at the revision a note was anchored to. When it is known, a note is placed
+   * only if the chart still has as many sections with the note's name as that revision.
+   */
+  anchoredChart?: (revision: string) => Chart | undefined;
 }
 
 export interface Placement {

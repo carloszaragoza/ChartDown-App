@@ -88,8 +88,9 @@ describe("R-00.2 MD layer notes are anchored to a section and, when needed, a ba
     expect(JSON.stringify(layer)).toBe(before);
   });
 
-  it("R-00.2 occurrences count the sections with that name in the chart being placed on", () => {
-    // Renaming the first of two choruses makes the second one occurrence 1.
+  it("R-00.2 without a known revision, occurrences count the sections with that name in the chart", () => {
+    // Renaming the first of two choruses makes the second one occurrence 1. Text-form layers carry
+    // no revisions, so this is how they place; app notes are checked against their revision below.
     const layer = parseLayer(LAYER).layer;
     const placement = placeLayer(
       parse(CHART.replace("## Chorus\n4 | 1 | 5 | 6m", "## Hook\n4 | 1 | 5 | 6m")),
@@ -100,6 +101,51 @@ describe("R-00.2 MD layer notes are anchored to a section and, when needed, a ba
       "Walk up in the last bar.",
     ]);
     expect(placement.unplaced).toEqual([{ note: layer.notes[2], reason: "section" }]);
+  });
+
+  it("R-00.2 renaming the first of two choruses flags every chorus note instead of misplacing it", () => {
+    const original = parse(CHART);
+    const layer: Layer = {
+      notes: parseLayer(LAYER).layer.notes.map((n) => ({ ...n, revision: "r1" })),
+    };
+    const renamed = parse(CHART.replace("## Chorus\n4 | 1 | 5 | 6m", "## Hook\n4 | 1 | 5 | 6m"));
+
+    const placement = placeLayer(renamed, layer, {
+      anchoredChart: (r) => (r === "r1" ? original : undefined),
+    });
+    expect(placement.unplaced.map((u) => [u.note.text, u.reason])).toEqual([
+      ["Bigger than the record.", "section"],
+      ["Walk up in the last bar.", "section"],
+      ["Crash on 1.", "section"],
+    ]);
+    expect(placement.sections.flat().map((n) => n.note.text)).toEqual(["Pad swell."]);
+  });
+
+  it("R-00.2 adding another section with the same name flags that name's notes too", () => {
+    const original = parse(CHART);
+    const layer: Layer = { notes: [note({ revision: "r1", text: "First chorus." })] };
+    const placement = placeLayer(parse(`${CHART}## Chorus\n4 | 5\n`), layer, {
+      anchoredChart: () => original,
+    });
+    expect(placement.unplaced).toEqual([{ note: layer.notes[0], reason: "section" }]);
+  });
+
+  it("R-00.2 a note checked against its revision places normally when nothing shifted", () => {
+    const original = parse(CHART);
+    const layer: Layer = {
+      notes: [note({ revision: "r1", occurrence: 2, text: "Second chorus." })],
+    };
+    const edited = parse(CHART.replace("4 | 1 | 5 | 1", "4 | 1 | 5 | 5"));
+    const placement = placeLayer(edited, layer, { anchoredChart: () => original });
+    expect(placement.unplaced).toEqual([]);
+    expect(placement.sections[3]?.map((n) => n.note.text)).toEqual(["Second chorus."]);
+  });
+
+  it("R-00.2 a revision the app cannot find skips the check instead of flagging the note", () => {
+    const layer: Layer = { notes: [note({ revision: "missing" })] };
+    const placement = placeLayer(parse(CHART), layer, { anchoredChart: () => undefined });
+    expect(placement.unplaced).toEqual([]);
+    expect(placement.sections[1]?.map((n) => n.note.revision)).toEqual(["missing"]);
   });
 
   it("R-00.2 a deleted section or a removed second occurrence leaves its notes unplaced", () => {
