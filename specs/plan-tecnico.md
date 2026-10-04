@@ -101,11 +101,12 @@ Tool versions and prices change; confirm them when starting.
 | band_members | band, user, role (MD or musician) | An index guarantees one MD per band (decision 2) |
 | member_instruments | member, instrument | Default instruments (R-04.3) |
 | layers | band, version, hide author notes | One per band and version (decisions 9.1, 9.3) |
-| layer_notes | layer, instrument (empty = everyone), section, optional bar, text, revision it was anchored to | Detects “unplaced” notes when a section changes |
-| sets | band, name, optional date, type | Name unique per band (decision 8) |
-| set_items | set, position, version, pinned revision, set key | Decisions 9 and 9.2 |
-| set_lineup | set, member, instrument | One or more instruments (R-05.3) |
-| set_temp_md | set, member, until | Decisions 2 and 9.6 |
+| layer_notes | layer, section, occurrence, optional bar, text, revision it was anchored to (a revision of the layer's version) | Anchors follow `specs/chartdown-layers-0.5.md`; detects “unplaced” notes when a section changes |
+| layer_note_instruments | note, instrument | No rows = the note is for everyone; one or more instruments otherwise, as in `> MD bass, keys:` |
+| sets | band, name, optional date, type | Name unique per band, ignoring case (decision 8) |
+| set_items | set, position, version, pinned revision (a revision of that version), set key (a key name such as `A` or `Bbm`; empty = the version's key) | Decisions 9 and 9.2 |
+| set_lineup | set, member, instrument | A member of the set's band; one or more instruments (R-05.3) |
+| set_temp_md | set, member, until (the set's date unless given) | One per set, a member of the set's band (decisions 2 and 9.6) |
 | invite_codes | code, type (single use or band), uses, revoked | R-01.7 |
 | waitlist | email, date | R-01.8 |
 | notifications | user, type, detail, read | SPEC-09 |
@@ -113,7 +114,7 @@ Tool versions and prices change; confirm them when starting.
 | event_outbox | type, detail, processed | Source of every notice |
 | reports | version, reporter, reason, status | R-07.2 |
 
-Every table has row-level security from its first migration, closed until its policies exist (section 8). Each migration in `supabase/migrations/` has a matching rollback in `supabase/rollbacks/`, and CI checks that both apply cleanly.
+Rules that tie rows to the same band or the same version (a lineup member of the set's band, a pinned revision of that version) are composite foreign keys, not triggers. Every table has row-level security from its first migration, closed until its policies exist (section 8). Each migration in `supabase/migrations/` has a matching rollback in `supabase/rollbacks/`, and CI checks that both apply cleanly.
 
 **Rules that live in the database**
 
