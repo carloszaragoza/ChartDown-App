@@ -233,6 +233,15 @@ Supabase Auth covers both methods with the same users in a single database:
 
 One person can link several sign-in methods to a single account. Roles (Admin, MD, musician) don't depend on how someone signed in: they live in our tables.
 
+**How it is set up (T-401):**
+
+- Identities with **the same verified email** are linked to one user automatically, so a person who signed up with email and password and later uses Google with that email has one account.
+- Passwords have at least 8 characters, and the email must be confirmed before the first sign-in.
+- A database trigger on `auth.users` creates the profile at sign-up (name from the provider or the email; language from the one chosen in the app), which creates the personal space (R-04.7).
+- The web app keeps the session in cookies (`@supabase/ssr`), refreshed on every request. Confirmation, recovery and provider sign-in all return through `/auth/callback`, which only redirects to paths inside the app.
+- Development uses Supabase's built-in email sender (a few emails per hour). Production needs a transactional email provider before the beta (T-406).
+- Until invite codes (T-402) and the production database are ready, the sign-in pages return 404 in production.
+
 ### 12.2 Public API and MCP server
 
 - **Public API:** Node with TypeScript (not FastAPI), so it reuses `@chartdown/core` and keeps one language across the monorepo; an OpenAPI contract is published. At first, read-only access to the public catalog (songs and versions as ChartDown and JSON).
