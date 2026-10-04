@@ -92,10 +92,10 @@ Tool versions and prices change; confirm them when starting.
 | Table | Key fields | Notes |
 |---|---|---|
 | profiles | id, name, language, platform role | Visitor = no session, no row |
-| instruments | id, slug, English and Spanish names, active | Admin's catalog (R-07.3) |
+| instruments | id, slug, English and Spanish names, aliases (other names a chart may use, as in ChartDown 4.1), active | Admin's catalog (R-07.3); the parser resolves notes with slug and aliases (R-00.1) |
 | user_instruments | user, instrument | What each person plays |
 | songs | id, title, artists | No CCLI data (decision 10) |
-| versions | id, song, owner, author name at publish time, visibility, status (active, frozen, hidden), forked from, current revision, source data | Source is required (R-02.2) |
+| versions | id, song, owner, author name at publish time, visibility, status (active, frozen, hidden), forked from, current revision, source (type, album, year, YouTube link) | The source lives in the version's own columns, so its type can be required (R-02.2) |
 | revisions | id, version, number, ChartDown text, author, date, restored from | Immutable (R-02.8) |
 | bands | id, name, is_personal | Personal space (R-04.7) |
 | band_members | band, user, role (MD or musician) | An index guarantees one MD per band (decision 2) |
@@ -112,6 +112,8 @@ Tool versions and prices change; confirm them when starting.
 | notification_prefs | user, type, channel, active | R-09.5 |
 | event_outbox | type, detail, processed | Source of every notice |
 | reports | version, reporter, reason, status | R-07.2 |
+
+Every table has row-level security from its first migration, closed until its policies exist (section 8). Each migration in `supabase/migrations/` has a matching rollback in `supabase/rollbacks/`, and CI checks that both apply cleanly.
 
 **Rules that live in the database**
 
