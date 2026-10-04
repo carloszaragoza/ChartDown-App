@@ -103,7 +103,10 @@ export type WarningCode =
   | "unsupported-version"
   | "header-not-closed"
   | "use-with-rows"
-  | "unknown-cue-instrument";
+  | "unknown-cue-instrument"
+  | "layer-no-section"
+  | "layer-line"
+  | "bad-bar-heading";
 
 export interface Warning {
   line: number;
@@ -124,4 +127,50 @@ export interface Chart {
   instruments: string[];
   sections: Section[];
   warnings: Warning[];
+}
+
+/** An MD note of a layer, anchored to a section by name and occurrence and optionally to a bar (R-00.2). */
+export interface LayerNote {
+  /** The app's id for the note, carried through unchanged. */
+  id?: string;
+  section: string;
+  /** 1 for the first section with this name in the chart, 2 for the second, and so on. */
+  occurrence: number;
+  /** Bar of the section, counted from 1 across its rows. */
+  bar?: number;
+  roles: Role[];
+  text: string;
+}
+
+export interface Layer {
+  title?: string;
+  notes: LayerNote[];
+}
+
+export interface ParsedLayer {
+  layer: Layer;
+  header: Record<string, string>;
+  version?: string;
+  instruments: string[];
+  warnings: Warning[];
+}
+
+export interface PlacedNote {
+  note: LayerNote;
+  bar?: number;
+}
+
+/** Why a note could not be placed: its section or its bar is not in the chart. */
+export type UnplacedReason = "section" | "bar";
+
+export interface UnplacedNote {
+  note: LayerNote;
+  reason: UnplacedReason;
+}
+
+export interface Placement {
+  /** The notes on each section of the chart, in the chart's section order. */
+  sections: PlacedNote[][];
+  /** Notes whose anchor is not in the chart, unchanged so they are never lost. */
+  unplaced: UnplacedNote[];
 }
