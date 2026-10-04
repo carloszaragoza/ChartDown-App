@@ -21,7 +21,8 @@ insert into auth.users (id, email) values
 insert into public.profiles (id, name) values
   ('00000000-0000-0000-0000-0000000000a1', 'Ana'),
   ('00000000-0000-0000-0000-0000000000b1', 'Ben'),
-  ('00000000-0000-0000-0000-0000000000c1', 'Cleo');
+  ('00000000-0000-0000-0000-0000000000c1', 'Cleo')
+  on conflict (id) do update set name = excluded.name;
 insert into public.bands (id, name) values
   ('00000000-0000-0000-0000-00000000b001', 'Sunday Band'),
   ('00000000-0000-0000-0000-00000000b002', 'Friday Trio');

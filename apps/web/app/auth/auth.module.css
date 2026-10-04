@@ -1,0 +1,59 @@
+.page {
+  display: grid;
+  gap: var(--space-6);
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: var(--space-10) var(--space-4);
+}
+.title {
+  margin: 0;
+  font: var(--type-song-title);
+}
+.form {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border: var(--stroke-hairline) solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+}
+.field {
+  display: grid;
+  gap: var(--space-1);
+  font: var(--type-label);
+}
+.input {
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border: var(--stroke-hairline) solid var(--control-border);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--type-note);
+}
+.hint {
+  font: var(--type-caption);
+  color: var(--ink-muted);
+}
+.message {
+  margin: 0;
+  font: var(--type-note);
+}
+/* Errors use words, not a color of their own (Papel y tinta). */
+.error {
+  margin: 0;
+  font: var(--type-note);
+  font-weight: 600;
+}
+.links {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  font: var(--type-meta);
+}
+.links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  color: var(--dynamic);
+}

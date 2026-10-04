@@ -36,7 +36,8 @@ insert into public.profiles (id, name) values
   ('00000000-0000-0000-0000-0000000000c1', 'Carl'),
   ('00000000-0000-0000-0000-0000000000d1', 'Dora'),
   ('00000000-0000-0000-0000-0000000000e1', 'Eve'),
-  ('00000000-0000-0000-0000-0000000000f1', 'Adam');
+  ('00000000-0000-0000-0000-0000000000f1', 'Adam')
+  on conflict (id) do update set name = excluded.name;
 update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-0000000000f1';
 
 insert into public.bands (id, name) values

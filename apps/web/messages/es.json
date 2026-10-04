@@ -73,5 +73,50 @@
     "time": "Compás",
     "tempo": "Tempo",
     "example": "Ejemplo: Atril, vista de Teclados"
+  },
+  "auth": {
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "newPassword": "Nueva contraseña",
+    "confirmPassword": "Repite la contraseña",
+    "name": "Tu nombre",
+    "signIn": {
+      "title": "Iniciar sesión",
+      "submit": "Entrar",
+      "forgot": "¿Olvidaste tu contraseña?",
+      "noAccount": "¿Eres nuevo?"
+    },
+    "signUp": {
+      "title": "Crear una cuenta",
+      "submit": "Crear cuenta",
+      "hasAccount": "¿Ya tienes una cuenta?",
+      "sent": "Revisa tu correo: te enviamos un enlace para confirmar tu cuenta.",
+      "passwordHint": "Al menos 8 caracteres."
+    },
+    "forgot": {
+      "title": "Restablecer tu contraseña",
+      "submit": "Envíame un enlace",
+      "sent": "Si ese correo tiene una cuenta, le enviamos un enlace para elegir una nueva contraseña.",
+      "back": "Volver a iniciar sesión"
+    },
+    "reset": {
+      "title": "Elige una nueva contraseña",
+      "submit": "Guardar la nueva contraseña"
+    },
+    "account": {
+      "signedInAs": "Sesión iniciada como {name}",
+      "signOut": "Cerrar sesión",
+      "signIn": "Iniciar sesión",
+      "passwordUpdated": "Tu contraseña se actualizó."
+    },
+    "errors": {
+      "invalid_credentials": "Ese correo y esa contraseña no coinciden con ninguna cuenta.",
+      "email_not_confirmed": "Primero confirma tu correo con el enlace que te enviamos.",
+      "weak_password": "Usa al menos 8 caracteres.",
+      "passwords_differ": "Las dos contraseñas no son iguales.",
+      "rate_limited": "Demasiados intentos. Espera un minuto e inténtalo de nuevo.",
+      "link_invalid": "Ese enlace expiró o ya se usó. Pide uno nuevo.",
+      "unknown": "Algo salió mal. Inténtalo de nuevo."
+    }
   }
 }
