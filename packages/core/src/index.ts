@@ -17,3 +17,14 @@ export type {
   Warning,
   WarningCode,
 } from "./types.js";
+export {
+  chordFormatter,
+  keyName,
+  parseKeyName,
+  semitonesBetween,
+  transposeKey,
+  type ChordFormatter,
+  type ChordLabel,
+  type ChordStyle,
+  type DisplayOptions,
+} from "./display.js";
