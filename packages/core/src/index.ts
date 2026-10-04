@@ -30,3 +30,14 @@ export {
   type ChordStyle,
   type DisplayOptions,
 } from "./display.js";
+export { formatLayer, LAYER_VERSION, parseLayer, placeLayer } from "./layer.js";
+export type {
+  Layer,
+  LayerNote,
+  ParsedLayer,
+  PlaceOptions,
+  PlacedNote,
+  Placement,
+  UnplacedNote,
+  UnplacedReason,
+} from "./types.js";

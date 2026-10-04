@@ -1,12 +1,6 @@
-import {
-  createRoleResolver,
-  STANDARD_INSTRUMENTS,
-  EVERYONE,
-  parseInstrumentsHeader,
-  type RoleResolver,
-} from "./roles.js";
+import { parseNote, readHeader } from "./header.js";
 import { parseRow } from "./row.js";
-import type { Chart, Key, Meter, Note, ParseOptions, Row, Section, Warning } from "./types.js";
+import type { Chart, Key, Meter, ParseOptions, Row, Section, Warning } from "./types.js";
 import { createWarning, type Warn } from "./warnings.js";
 
 /** The ChartDown version this parser reads (R-00.4). */
@@ -24,20 +18,6 @@ function parseMeter(text: string | undefined): Meter {
   return match ? { beats: Number(match[1]), unit: Number(match[2]) } : { beats: 4, unit: 4 };
 }
 
-/** `> text`, `> MD: text` or `> MD <instruments>: text` (spec 4). */
-function parseNote(text: string, line: number, roles: RoleResolver, warn: Warn): Note {
-  const match = /^MD(?:\s+([^:]+?))?\s*:\s*(.*)$/i.exec(text);
-  if (!match) return { md: false, roles: [EVERYONE], text, line };
-  const [, names, noteText = ""] = match;
-  let noteRoles = [EVERYONE];
-  if (names !== undefined) {
-    const resolved = roles(names);
-    if (resolved) noteRoles = resolved;
-    else warn(line, "unknown-instrument", { name: names });
-  }
-  return { md: true, roles: noteRoles, text: noteText, line };
-}
-
 /**
  * Parses ChartDown 0.4 text into a chart. Never throws: anything it cannot read is
  * skipped and reported in `warnings` with its line number (spec 13). Instruments come
@@ -48,46 +28,14 @@ export function parse(source: string, options: ParseOptions = {}): Chart {
   const warn: Warn = (line, code, values) => warnings.push(createWarning(line, code, values));
   const lines = source.replace(/\r/g, "").split("\n");
 
-  const header: Record<string, string> = {};
-  const headerLines: Record<string, number> = {};
-  let index = 0;
-  if (lines[0]?.trim() === "---") {
-    // Without a closing ---, the header ends at the first section so the chart is not lost.
-    let end = lines.findIndex((text, i) => i > 0 && text.trim() === "---");
-    const closed = end !== -1;
-    if (!closed) {
-      warn(1, "header-not-closed");
-      end = lines.findIndex((text, i) => i > 0 && text.trim().startsWith("##"));
-      if (end === -1) end = lines.length;
-    }
-    for (index = 1; index < end; index++) {
-      const text = lines[index] as string;
-      const match = /^\s*([A-Za-z_][\w-]*)\s*:\s*(.*)$/.exec(text);
-      if (match) {
-        const name = (match[1] as string).toLowerCase();
-        header[name] = (match[2] as string).trim();
-        headerLines[name] = index + 1;
-      } else if (text.trim()) {
-        warn(index + 1, "header-line");
-      }
-    }
-    if (closed) index++;
-  }
-
-  const version = header.chartdown;
-  if (version !== undefined && version !== SUPPORTED_VERSION) {
-    warn(headerLines.chartdown ?? 1, "unsupported-version", {
-      version,
-      supported: SUPPORTED_VERSION,
-    });
-  }
-
-  const instruments = parseInstrumentsHeader(
-    header.instruments ?? "",
-    headerLines.instruments ?? 1,
-    warn,
-  );
-  const roles = createRoleResolver(options.instruments ?? STANDARD_INSTRUMENTS, instruments);
+  const {
+    fields: header,
+    version,
+    instruments,
+    roles,
+    bodyStart,
+  } = readHeader(lines, SUPPORTED_VERSION, options, warn);
+  let index = bodyStart;
   const key = parseKey(header.key);
   const meter = parseMeter(header.meter);
 
