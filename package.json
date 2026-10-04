@@ -13,7 +13,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
-    "traceability": "pnpm --filter @chartdown/traceability check"
+    "traceability": "pnpm --filter @chartdown/traceability check",
+    "db:start": "supabase start -x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor",
+    "db:test": "supabase test db && bash supabase/scripts/rollback-check.sh && supabase test db"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
