@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Checks that the migrations roll back cleanly and apply again (T-301, Technical Plan 4):
-# every migration has a rollback; rolling back in reverse leaves none of our tables or
-# types; applying the migrations again works. Run against a local Supabase (supabase start).
+# every migration has a rollback; rolling back in reverse leaves none of our tables, types
+# or functions; applying the migrations again works. Run against a local Supabase (supabase start).
 set -euo pipefail
 DB_URL="${DB_URL:-postgresql://postgres:postgres@127.0.0.1:54322/postgres}"
 cd "$(dirname "$0")/.."
@@ -11,7 +11,9 @@ ours() {
   psql "$DB_URL" -At -c "select
     (select count(*) from pg_tables where schemaname = 'public')
     + (select count(*) from pg_type t join pg_namespace n on n.oid = t.typnamespace
-       where n.nspname = 'public' and t.typtype = 'e')"
+       where n.nspname = 'public' and t.typtype = 'e')
+    + (select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+       where n.nspname = 'public')"
 }
 
 migrations=(migrations/*.sql)
@@ -23,7 +25,7 @@ for ((i = ${#migrations[@]} - 1; i >= 0; i--)); do
   run "rollbacks/$(basename "${migrations[$i]}")"
 done
 left=$(ours)
-[ "$left" = "0" ] || { echo "✗ Rolling back left $left tables or types in public"; exit 1; }
+[ "$left" = "0" ] || { echo "✗ Rolling back left $left tables, types or functions in public"; exit 1; }
 echo "✓ Rolled back ${#migrations[@]} migration(s): nothing left in public"
 
 for migration in "${migrations[@]}"; do run "$migration"; done
