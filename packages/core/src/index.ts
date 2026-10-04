@@ -1,6 +1,7 @@
 // @chartdown/core: the ChartDown parser (spec 0.4).
 export { parse, SUPPORTED_VERSION } from "./parse.js";
 export { EVERYONE, STANDARD_INSTRUMENTS } from "./roles.js";
+export { WARNING_CODES } from "./warnings.js";
 export type {
   Bar,
   BarItem,

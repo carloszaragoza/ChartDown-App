@@ -3,4 +3,6 @@ packages:
   - "packages/*"
   - "tools/*"
 allowBuilds:
+  "@parcel/watcher": false
+  "@swc/core": false
   unrs-resolver: false

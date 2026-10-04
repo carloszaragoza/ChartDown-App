@@ -1,0 +1,30 @@
+{
+  "home": {
+    "title": "ChartDown App",
+    "tagline": "Cifrados en números para toda la banda, con las notas de cada músico."
+  },
+  "language": {
+    "label": "Idioma",
+    "en": "English",
+    "es": "Español"
+  },
+  "warnings": {
+    "header-line": "Las líneas del encabezado tienen la forma <code>name: value</code>",
+    "instrument-id": "Los ids de instrumento usan minúsculas, dígitos y -: “{id}”",
+    "unknown-instrument": "Instrumento desconocido “{name}” en una nota <code>MD</code>",
+    "unknown-cue-instrument": "Instrumento desconocido “{name}” en una indicación",
+    "no-section": "Los compases necesitan una sección antes, como <code>## Verse 1</code>",
+    "unknown-directive": "Directiva desconocida “{directive}”",
+    "use-not-found": "No hay una sección anterior llamada “{name}”",
+    "bad-token": "No se puede leer “{token}”",
+    "empty-bar": "Este compás no tiene acordes",
+    "beats-mismatch": "Los tiempos suman {sum}, pero el compás tiene {beats}",
+    "landmark-too-long": "Esta referencia de letra tiene {words} palabras; usa {max} o menos",
+    "unsupported-version": "Este cifrado indica ChartDown {version}; este lector usa la {supported}",
+    "header-not-closed": "El encabezado necesita una línea de cierre <code>---</code>",
+    "use-with-rows": "<code>@use</code> debe ser la única línea de contenido de la sección; se conservan sus propias filas",
+    "layer-no-section": "Las notas necesitan una sección antes, como <code>## Chorus</code>",
+    "layer-line": "Una capa solo contiene secciones, encabezados de compás y notas",
+    "bad-bar-heading": "Los encabezados de compás tienen la forma <code>### Bar 3</code>"
+  }
+}
