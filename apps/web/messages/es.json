@@ -52,5 +52,26 @@
     "offline": "Conéctate a internet para descargar",
     "settings": "Ajustes",
     "newInstrument": "Cajón"
+  },
+  "chart": {
+    "bars": "{count, plural, one {# compás} other {# compases}}",
+    "barsTimes": "{count, plural, one {# compás} other {# compases}} ×{times}",
+    "next": "Siguiente",
+    "notesForYou": "notas para ti",
+    "songForm": "Estructura de la canción",
+    "played": "tocada",
+    "now": "ahora",
+    "hasNotes": "tiene notas para ti",
+    "push": "anticipación",
+    "hold": "nota larga",
+    "stab": "golpe",
+    "fermata": "calderón",
+    "noChord": "sin acorde",
+    "repeatBar": "repite el compás anterior",
+    "tie": "ligado",
+    "key": "Tono",
+    "time": "Compás",
+    "tempo": "Tempo",
+    "example": "Ejemplo: Atril, vista de Teclados"
   }
 }

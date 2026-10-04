@@ -111,13 +111,19 @@ describe("Handoff 3 Button", () => {
     );
   });
 
-  it("uses the red pencil only for View as and instrument tags", () => {
+  it("uses the red pencil only for MD and instruments", () => {
     const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, "");
     const rulesWithMd = Array.from(
       withoutComments.matchAll(/([^{}]+)\{[^}]*var\(--md\)[^}]*\}/g),
       ([, selector]) => selector?.trim(),
     );
-    expect(rulesWithMd).toEqual([".cd-button--view-as", ".cd-tag"]);
+    expect(rulesWithMd).toEqual([
+      ".cd-button--view-as",
+      ".cd-tag",
+      ".cd-bar__cue-instrument",
+      ".cd-note__md",
+      ".cd-form__dot",
+    ]);
   });
 
   it("puts the next arrow after the text and other icons before it", () => {

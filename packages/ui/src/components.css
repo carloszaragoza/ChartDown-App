@@ -87,3 +87,253 @@
 .cd-tag--name-only {
   padding: 0 var(--space-2);
 }
+
+/* Text for screen readers only. */
+.cd-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Bar rows: a row starts with a left line and each bar draws its right line. Square corners. */
+.cd-row {
+  display: grid;
+  border-left: var(--stroke-bar-line) solid var(--ink);
+  border-radius: var(--radius-none);
+}
+.cd-row--sm {
+  border-left: var(--stroke-bar-line-light) solid var(--ink-muted);
+}
+
+.cd-bar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: var(--bar-height);
+  border-right: var(--stroke-bar-line) solid var(--ink);
+  color: var(--ink);
+}
+.cd-bar--xl {
+  font: var(--type-chord-xl);
+}
+.cd-bar--md {
+  font: var(--type-chord-md);
+}
+/* Next-section preview: small and muted, lines included. */
+.cd-bar--sm {
+  height: var(--bar-height-sm);
+  border-right: var(--stroke-bar-line-light) solid var(--ink-muted);
+  color: var(--ink-muted);
+  font: var(--type-chord-sm);
+}
+/* Repeats: a double bar line, three bar-line widths wide so both lines show. */
+.cd-bar--repeat-start {
+  border-left: calc(var(--stroke-bar-line) * 3) double var(--ink);
+}
+.cd-bar--repeat-end {
+  border-right: calc(var(--stroke-bar-line) * 3) double var(--ink);
+}
+.cd-bar--ending {
+  border-top: var(--stroke-bar-line-light) solid var(--ink);
+}
+
+.cd-bar__chords {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 var(--space-2);
+}
+.cd-chord {
+  position: relative;
+  flex-basis: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+.cd-chord__minor {
+  font-size: 0.52em;
+  vertical-align: super;
+}
+.cd-chord__push {
+  margin-right: var(--space-1);
+  color: var(--dynamic);
+  font-size: 0.6em;
+}
+.cd-chord__mark {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%);
+  color: var(--dynamic);
+  font: var(--type-label);
+}
+/* Hold: a diamond around the chord, in the blue pencil like every mark. */
+.cd-chord--hold::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1.05em;
+  height: 1.05em;
+  border: var(--stroke-bar-line-light) solid var(--dynamic);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.cd-bar__top {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-3);
+  right: var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  font: var(--type-caption);
+  color: var(--ink-muted);
+}
+.cd-bar__ending {
+  font: var(--type-label);
+  color: var(--ink);
+}
+.cd-bar__dynamic {
+  font: var(--type-dynamic-mark);
+  color: var(--dynamic);
+}
+.cd-bar__cue-instrument {
+  margin-right: var(--space-1);
+  color: var(--md);
+  font-weight: 700;
+}
+.cd-bar__times {
+  margin-left: auto;
+  font: var(--type-meta);
+  color: var(--ink);
+}
+.cd-bar__lyric {
+  position: absolute;
+  bottom: var(--space-2);
+  left: var(--space-3);
+  right: var(--space-3);
+  overflow: hidden;
+  font: var(--type-caption);
+  color: var(--ink-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* MDNote: the label carries the meaning; never a colored box or border. */
+.cd-note {
+  margin: 0;
+  font: var(--type-note);
+  color: var(--ink);
+}
+.cd-note .cd-tag {
+  margin-right: var(--space-2);
+}
+.cd-note__md {
+  margin-right: var(--space-2);
+  color: var(--md);
+  font-weight: 700;
+}
+.cd-note--plain {
+  color: var(--ink-muted);
+}
+
+/* Section card. */
+.cd-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border: var(--stroke-hairline) solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+}
+.cd-section__header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.cd-section__title {
+  margin: 0;
+  font: var(--type-section-title);
+}
+.cd-section__length {
+  font: var(--type-meta);
+  color: var(--ink-muted);
+}
+
+.cd-next {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.cd-next__title {
+  margin: 0;
+  font: var(--type-meta);
+  color: var(--ink-muted);
+}
+.cd-next__title b {
+  color: var(--ink);
+}
+
+/* FormStrip: chips wrap onto several lines, never scroll sideways. */
+.cd-form__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cd-form__chip {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: var(--space-1) var(--space-2);
+  border: var(--stroke-hairline) solid var(--control-border);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+  text-decoration: none;
+}
+.cd-form__abbreviation {
+  font: var(--type-form-chip);
+}
+.cd-form__length {
+  font: var(--type-caption);
+  color: var(--ink-muted);
+}
+.cd-form__chip--played {
+  background: var(--ground);
+}
+.cd-form__chip--played .cd-form__abbreviation {
+  color: var(--ink-muted);
+}
+.cd-form__chip--current {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ink-inverse);
+}
+.cd-form__chip--current .cd-form__length {
+  color: var(--ink-inverse);
+}
+.cd-form__dot {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: 50%;
+  background: var(--md);
+}
+.cd-form__chip--current .cd-form__dot {
+  box-shadow: 0 0 0 var(--stroke-bar-line-light) var(--ink-inverse);
+}
