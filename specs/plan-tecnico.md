@@ -109,9 +109,9 @@ Tool versions and prices change; confirm them when starting.
 | set_temp_md | set, member, until (the set's date unless given) | One per set, a member of the set's band (decisions 2 and 9.6) |
 | invite_codes | code, type (single use or band), uses, revoked | R-01.7 |
 | waitlist | email, date | R-01.8 |
-| notifications | user, type, detail, read | SPEC-09 |
-| notification_prefs | user, type, channel, active | R-09.5 |
-| event_outbox | type, detail, processed | Source of every notice |
+| notifications | user, type, detail, read at | SPEC-09; each person reads only their own and marks them read; created only by the server process |
+| notification_prefs | user, type, channel (in-app, email, WhatsApp), active | R-09.5; no row means the notice is on; each person manages their own |
+| event_outbox | type, actor, detail, created at, processed at | Source of every notice; written only by database triggers, closed to the API |
 | reports | version, reporter, reason, status | R-07.2 |
 
 Rules that tie rows to the same band or the same version (a lineup member of the set's band, a pinned revision of that version) are composite foreign keys, not triggers. Every table has row-level security from its first migration, closed until its policies exist (section 8). Each migration in `supabase/migrations/` has a matching rollback in `supabase/rollbacks/`, and CI checks that both apply cleanly.
@@ -143,7 +143,7 @@ The second barrier is row-level security: even if someone queries the database d
 
 ## 7. Notices
 
-1. Every important change writes an event: musician added to a set, instrument changed, temporary MD appointed, key changed, new layer note, new revision from the author.
+1. Every important change writes an event, from a database trigger so no path can skip it. Events record facts with what changed: `set_lineup_added` and `set_lineup_removed` (a person and an instrument in a set's lineup), `set_temp_md_appointed`, `set_key_changed` and `set_order_changed` (old and new value), `layer_note_added` (with its instruments) and `revision_added`.
 2. A scheduled job turns each event into notices for the people affected, according to their preferences, with the detail of the change (R-09.3).
 3. In the MVP they arrive in-app in realtime. Phase 2 adds email; push notifications for installed apps on iPad are an option in the same phase. Phase 3 adds WhatsApp.
 
