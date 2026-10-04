@@ -49,9 +49,9 @@ insert into public.band_members (id, band_id, user_id, role) values
   ('00000000-0000-0000-0000-00000000aa04', '00000000-0000-0000-0000-00000000b001', '00000000-0000-0000-0000-0000000000d1', 'musician'),
   ('00000000-0000-0000-0000-00000000aa05', '00000000-0000-0000-0000-00000000b002', '00000000-0000-0000-0000-0000000000e1', 'md');
 insert into public.member_instruments (member_id, instrument_id)
-  select '00000000-0000-0000-0000-00000000aa02', id from public.instruments where slug = 'keys'
+  select '00000000-0000-0000-0000-00000000aa02'::uuid, id from public.instruments where slug = 'keys'
   union all
-  select '00000000-0000-0000-0000-00000000aa03', id from public.instruments where slug = 'bass';
+  select '00000000-0000-0000-0000-00000000aa03'::uuid, id from public.instruments where slug = 'bass';
 
 -- Versions: V1 public (Ana), V2 private (Ana, used in her band's set), V3 private (Eve),
 -- V4 public but hidden by an admin (Eve).
@@ -78,9 +78,9 @@ insert into public.layer_notes (id, layer_id, version_id, section, text, anchore
   ('00000000-0000-0000-0000-00000000ab03', '00000000-0000-0000-0000-0000000001a1', '00000000-0000-0000-0000-0000000000f1', 'Chorus', 'Bass: roots only.', '00000000-0000-0000-0000-0000000000d1'),
   ('00000000-0000-0000-0000-00000000ab04', '00000000-0000-0000-0000-0000000002a1', '00000000-0000-0000-0000-0000000000f1', 'Chorus', 'Eve band: big ending.', '00000000-0000-0000-0000-0000000000d1');
 insert into public.layer_note_instruments (note_id, instrument_id)
-  select '00000000-0000-0000-0000-00000000ab02', id from public.instruments where slug = 'keys'
+  select '00000000-0000-0000-0000-00000000ab02'::uuid, id from public.instruments where slug = 'keys'
   union all
-  select '00000000-0000-0000-0000-00000000ab03', id from public.instruments where slug = 'bass';
+  select '00000000-0000-0000-0000-00000000ab03'::uuid, id from public.instruments where slug = 'bass';
 
 -- Sets: S1 next week (Dora is temporary MD), S2 without a date, S3 yesterday (Dora was
 -- temporary MD), S4 in Eve's band.
