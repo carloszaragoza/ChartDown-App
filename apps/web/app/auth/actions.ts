@@ -1,12 +1,13 @@
 "use server";
 
 import { getLocale } from "next-intl/server";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { authEnabled } from "../../lib/auth/enabled";
 import { authError } from "../../lib/auth/errors";
 import { isProvider } from "../../lib/auth/providers";
 import { safeNext } from "../../lib/auth/redirect";
+import { SIGNUP_EMAIL_COOKIE } from "../../lib/auth/signup";
 import { createClient } from "../../lib/supabase/server";
 
 const MIN_PASSWORD = 8;
@@ -27,13 +28,40 @@ function ensureEnabled() {
   if (!authEnabled()) notFound();
 }
 
+/** Step 1 of creating an account: an invite code and the email it is for (R-01.7). */
+export async function claimInvite(form: FormData): Promise<void> {
+  ensureEnabled();
+  const email = text(form, "email").toLowerCase();
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("claim_invite", { code: text(form, "code"), email });
+  if (data !== "ok") redirect("/auth/sign-up?error=invite_invalid");
+  const secure = (await origin()).startsWith("https://");
+  (await cookies()).set(SIGNUP_EMAIL_COOKIE, email, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure,
+    path: "/",
+    maxAge: 30 * 60,
+  });
+  redirect("/auth/sign-up");
+}
+
+export async function startOver(): Promise<void> {
+  (await cookies()).delete(SIGNUP_EMAIL_COOKIE);
+  redirect("/auth/sign-up");
+}
+
+/** Step 2: a password for the claimed email. The sign-up hook checks the claim again. */
 export async function signUp(form: FormData): Promise<void> {
   ensureEnabled();
+  const store = await cookies();
+  const email = store.get(SIGNUP_EMAIL_COOKIE)?.value;
+  if (!email) redirect("/auth/sign-up");
   const password = secret(form, "password");
   if (password.length < MIN_PASSWORD) redirect("/auth/sign-up?error=weak_password");
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
-    email: text(form, "email"),
+    email,
     password,
     options: {
       emailRedirectTo: `${await origin()}/auth/callback?next=/`,
@@ -42,7 +70,20 @@ export async function signUp(form: FormData): Promise<void> {
   });
   // An email that already has an account gets the same answer, so nobody learns which emails exist.
   if (error) redirect(`/auth/sign-up?error=${authError(error)}`);
+  store.delete(SIGNUP_EMAIL_COOKIE);
   redirect("/auth/sign-up?sent=1");
+}
+
+/** Without a code, a person leaves their email on the waitlist (R-01.8). */
+export async function joinWaitlist(form: FormData): Promise<void> {
+  ensureEnabled();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("join_waitlist", {
+    email: text(form, "email"),
+    language: await getLocale(),
+  });
+  if (error) redirect("/auth/waitlist?error=email_invalid");
+  redirect("/auth/waitlist?sent=1");
 }
 
 export async function signIn(form: FormData): Promise<void> {

@@ -1,14 +1,23 @@
 import { expect, test, type Page } from "@playwright/test";
+import { createInvite, waitlistEntries } from "./admin";
 import { latestLink } from "./mail";
 
 const PASSWORD = "open-road-76";
 const unique = (label: string) =>
   `${label}.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.test`;
 
-async function signUpAndConfirm(page: Page, email: string, name: string) {
+/** Step 1 of creating an account: the invite code and the email (R-01.7). */
+async function claim(page: Page, code: string, email: string) {
   await page.goto("/auth/sign-up");
-  await page.getByLabel("Your name").fill(name);
+  await page.getByLabel("Invite code").fill(code);
   await page.getByLabel("Email").fill(email);
+  await page.getByRole("button", { name: "Continue" }).click();
+}
+
+async function signUpAndConfirm(page: Page, email: string, name: string) {
+  await claim(page, await createInvite(page.request), email);
+  await expect(page.getByText(`Creating an account for ${email}`)).toBeVisible();
+  await page.getByLabel("Your name").fill(name);
   await page.getByLabel("Password").fill(PASSWORD);
   const sentAfter = Date.now();
   await page.getByRole("button", { name: "Create account" }).click();
@@ -39,9 +48,8 @@ test("R-01.1 a person signs up, confirms their email, signs out and signs in aga
 
 test("R-01.1 an account cannot be used before its email is confirmed", async ({ page }) => {
   const email = unique("unconfirmed");
-  await page.goto("/auth/sign-up");
+  await claim(page, await createInvite(page.request), email);
   await page.getByLabel("Your name").fill("Not Yet");
-  await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(PASSWORD);
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("Check your email");
@@ -95,4 +103,38 @@ test("R-01.1 the reset form asks for the same password twice", async ({ page }) 
   await page.getByLabel("Repeat the password").fill("second-choice-2");
   await page.getByRole("button", { name: "Save the new password" }).click();
   await expect(page.getByRole("main").getByRole("alert")).toContainText("not the same");
+});
+
+test("R-01.7 no code, no account", async ({ page }) => {
+  await page.goto("/auth/sign-up");
+  await expect(page.getByLabel("Password")).toHaveCount(0);
+  await claim(page, "ZZZZ-ZZZZ", unique("nocode"));
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "isn’t valid or has been used up",
+  );
+  await expect(page.getByLabel("Password")).toHaveCount(0);
+});
+
+test("R-01.7 a single-use code creates one account only", async ({ page }) => {
+  const code = await createInvite(page.request);
+  await claim(page, code, unique("first"));
+  await page.getByLabel("Your name").fill("First");
+  await page.getByLabel("Password").fill(PASSWORD);
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page.getByRole("main").getByRole("status")).toContainText("Check your email");
+
+  await claim(page, code, unique("second"));
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "isn’t valid or has been used up",
+  );
+});
+
+test("R-01.8 without a code, the waitlist stores the email", async ({ page }) => {
+  const email = unique("fan");
+  await page.goto("/auth/sign-up");
+  await page.getByRole("link", { name: "Join the waitlist" }).click();
+  await page.getByLabel("Email").fill(email.toUpperCase());
+  await page.getByRole("button", { name: "Join the waitlist" }).click();
+  await expect(page.getByRole("main").getByRole("status")).toContainText("We’ll write to you");
+  expect(await waitlistEntries(page.request, email)).toEqual([{ email, language: "en" }]);
 });

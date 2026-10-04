@@ -91,7 +91,13 @@
       "submit": "Crear cuenta",
       "hasAccount": "¿Ya tienes una cuenta?",
       "sent": "Revisa tu correo: te enviamos un enlace para confirmar tu cuenta.",
-      "passwordHint": "Al menos 8 caracteres."
+      "passwordHint": "Al menos 8 caracteres.",
+      "code": "Código de invitación",
+      "continue": "Continuar",
+      "forEmail": "Creando una cuenta para {email}.",
+      "differentCode": "Usar otro código",
+      "noCode": "¿No tienes código?",
+      "providerHint": "Con Google, Microsoft o Apple, usa este mismo correo."
     },
     "forgot": {
       "title": "Restablecer tu contraseña",
@@ -116,12 +122,22 @@
       "passwords_differ": "Las dos contraseñas no son iguales.",
       "rate_limited": "Demasiados intentos. Espera un minuto e inténtalo de nuevo.",
       "link_invalid": "Ese enlace expiró o ya se usó. Pide uno nuevo.",
-      "unknown": "Algo salió mal. Inténtalo de nuevo."
+      "unknown": "Algo salió mal. Inténtalo de nuevo.",
+      "invite_invalid": "Ese código de invitación no es válido o ya se usó.",
+      "invite_required": "Necesitas una invitación para crear una cuenta. Escribe tu código primero o únete a la lista de espera.",
+      "email_invalid": "Escribe un correo válido."
     },
     "providers": {
       "label": "Otras formas de entrar",
       "or": "O bien",
       "continueWith": "Continuar con {provider}"
+    },
+    "waitlist": {
+      "title": "Unirme a la lista de espera",
+      "intro": "ChartDown es solo por invitación durante la beta. Deja tu correo y te escribiremos cuando haya un lugar para ti.",
+      "submit": "Unirme a la lista",
+      "sent": "Gracias. Te escribiremos cuando haya un lugar para ti.",
+      "haveCode": "Tengo un código de invitación"
     }
   }
 }

@@ -16,9 +16,12 @@ export async function GET(request: NextRequest) {
   const tokenHash = params.get("token_hash");
   const type = params.get("type") as EmailOtpType | null;
 
-  let failed: { code?: string | undefined } | null = params.get("error_code")
-    ? { code: "otp_expired" }
-    : null;
+  // A provider sign-in the sign-up hook refused comes back with the hook's message (T-402).
+  const refused = params.get("error_description") ?? "";
+  let failed: { code?: string | undefined; message?: string | undefined } | null =
+    params.get("error") || params.get("error_code")
+      ? { code: "otp_expired", message: refused }
+      : null;
   if (!failed) {
     const supabase = await createClient();
     if (code) failed = (await supabase.auth.exchangeCodeForSession(code)).error;

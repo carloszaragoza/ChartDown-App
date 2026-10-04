@@ -54,3 +54,23 @@ The local stack takes its settings from `supabase/config.toml`. The hosted proje
 Emails come from Supabase's built-in sender, a few per hour; enough for development. Production needs a transactional email provider first (T-406).
 
 Sign-in is hidden in production (`VERCEL_ENV=production`) until invite codes (T-402) and the production database exist.
+
+### Invite codes (T-402)
+
+New accounts need an invite code (R-01.7). Supabase Auth checks it with a "before user created" hook, for every sign-in method:
+
+- **Local and CI:** turned on in `supabase/config.toml`.
+- **`chartdown-dev` (once, after the migration is pushed):** Authentication → Hooks → **Before User Created** → Postgres function → schema `private`, function `hook_before_user_created` → Enable.
+
+Until the Admin screen exists (T-1102), create and revoke codes in the dashboard's SQL editor:
+
+```sql
+-- One person:
+insert into public.invite_codes (note) values ('For Ana') returning code;
+-- A whole band, up to 8 people:
+insert into public.invite_codes (kind, max_uses, note) values ('band', 8, 'Sunday Band') returning code;
+-- Revoke:
+update public.invite_codes set revoked_at = now() where code = 'ABCD-EFGH';
+-- The waitlist:
+select email, language, created_at from public.waitlist order by created_at;
+```

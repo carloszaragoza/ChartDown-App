@@ -39,5 +39,6 @@ describe("R-01.1 sign-in safety", () => {
     expect(authError({ code: "otp_expired" })).toBe("link_invalid");
     expect(authError({ code: "something_new" })).toBe("unknown");
     expect(authError(null)).toBe("unknown");
+    expect(authError({ status: 403, message: "invite_required" })).toBe("invite_required");
   });
 });

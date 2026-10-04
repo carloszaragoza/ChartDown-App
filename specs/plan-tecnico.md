@@ -107,8 +107,9 @@ Tool versions and prices change; confirm them when starting.
 | set_items | set, position, version, pinned revision (a revision of that version), set key (a key name such as `A` or `Bbm`; empty = the version's key) | Decisions 9 and 9.2 |
 | set_lineup | set, member, instrument | A member of the set's band; one or more instruments (R-05.3) |
 | set_temp_md | set, member, until (the set's date unless given) | One per set, a member of the set's band (decisions 2 and 9.6) |
-| invite_codes | code, type (single use or band), uses, revoked | R-01.7 |
-| waitlist | email, date | R-01.8 |
+| invite_codes | code (`XXXX-XXXX`, no look-alike characters, case ignored), type (single use or band), max uses (1, a number, or no limit), uses, note, created by, revoked at | R-01.7; admins only. No expiry date: the Admin revokes |
+| invite_claims | code, email, expires at (30 minutes), used at, user | R-01.7; closed, only its functions use it |
+| waitlist | email (unique, case ignored), language, date | R-01.8; anyone joins through a function that always answers the same; only admins read it |
 | notifications | user, type, detail, read at | SPEC-09; each person reads only their own and marks them read; created only by the server process |
 | notification_prefs | user, type, channel (in-app, email, WhatsApp), active | R-09.5; no row means the notice is on; each person manages their own |
 | event_outbox | type, actor, detail, created at, processed at | Source of every notice; written only by database triggers, closed to the API |
@@ -241,7 +242,8 @@ One person can link several sign-in methods to a single account. Roles (Admin, M
 - The web app keeps the session in cookies (`@supabase/ssr`), refreshed on every request. Confirmation, recovery and provider sign-in all return through `/auth/callback`, which only redirects to paths inside the app.
 - The sign-in and sign-up pages offer a "Continue with" button for each provider enabled in that Supabase project (Google, Microsoft, Apple), read from its public settings, so a provider appears once it is configured.
 - Development uses Supabase's built-in email sender (a few emails per hour). Production needs a transactional email provider before the beta (T-406).
-- Until invite codes (T-402) and the production database are ready, the sign-in pages return 404 in production.
+- **Invite codes (R-01.7, T-402).** Creating an account takes two steps: the person enters their invite code and email, and the server records a claim for that email (30 minutes); then they choose a password or continue with a provider using that email. Supabase Auth's "before user created" hook allows a new account only when a valid claim exists for its email, for every sign-in method, and then uses up the code. Linking a provider to an existing account is not a new account and needs no code. Without a code, a person joins the waitlist (R-01.8).
+- The sign-in pages stay hidden in production until the beta opens: the production database, a transactional email provider (T-406) and the Google app published.
 
 ### 12.2 Public API and MCP server
 
