@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./tokens.css": "./src/tokens.css",
+    "./fonts.css": "./src/fonts.css"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -19,5 +21,9 @@
   "devDependencies": {
     "@types/react": "19.3.0",
     "react": "19.3.0"
-  }
+  },
+  "files": [
+    "src",
+    "fonts"
+  ]
 }
