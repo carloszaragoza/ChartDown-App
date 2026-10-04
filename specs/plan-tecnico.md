@@ -156,6 +156,23 @@ The second barrier is row-level security: even if someone queries the database d
 - **Lyric landmarks:** the parser warns when a quoted landmark is longer than 8 words, enforcing constitution principle 6 without relying only on reports.
 - **Deleted accounts:** resolved in 12.5. Terms of use and the chart license should be reviewed by a lawyer before launch.
 
+### 8.1 Row-level security (T-304)
+
+Every table has policies; nothing is open by default. Helper functions live in a `private` schema that the API does not expose, run with the owner's rights and a fixed `search_path`, and always check the person asking (`auth.uid()`).
+
+| Data | Read | Write |
+|---|---|---|
+| Profiles | Yourself, people who share a band with you, admins | Your own name and language; nobody changes their own platform role |
+| Instruments | Everyone, visitors included | Admins |
+| Songs | Everyone (a song is the work: title and artists) | Create: any user; edit: admins |
+| Versions | Public active or frozen: everyone (R-01.4). Hidden: owner and admins (R-07.2). Private: owner, admins and members of bands that use it in a set or a layer (decision 9) | Create: as yourself, public and active (R-02.3); edit: the owner, revision and source only (R-02.6); visibility, status and owner change only through their flows (T-504, T-1103); never deleted |
+| Revisions | Whoever can read the version | Added by the version's owner; never edited or deleted (R-02.8) |
+| Bands and members | Members of the band | The MD renames the band, removes musicians and sets default instruments; a musician can leave (R-04.4). Creating, inviting and accepting go through functions (T-701) |
+| Layers and layer notes | Layers: band members. Notes: the MD, all; a temporary MD, all notes of the versions in their set; a musician, notes for everyone and for an instrument they play in that band (their default instruments and any instrument in the band's set lineups); nobody outside the band (R-06.2, R-06.4) | The permanent MD only (R-03.5, decision 9.6) |
+| Sets, items, lineup, temporary MD | Members of the band | The MD, everything. A temporary MD, only their set's order, keys and lineup (R-05.5), never the pinned revisions (decision 9.2), until the end of the set's date (UTC) |
+
+Admins see no band, set or layer data (permission matrix); platform metrics come from counting functions (R-07.4). The per-instrument server function (section 5) narrows a musician's notes further to the set they open.
+
 ## 9. Repository and traceability
 
 ```
