@@ -1,0 +1,10 @@
+/* Base page styles from the design tokens (Design Handoff 2). */
+html {
+  background: var(--ground);
+  color: var(--ink);
+  font: var(--type-note);
+}
+
+body {
+  margin: 0;
+}
