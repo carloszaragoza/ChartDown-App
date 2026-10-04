@@ -15,7 +15,8 @@ insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000000b1', 'ben@example.test');
 insert into public.profiles (id, name) values
   ('00000000-0000-0000-0000-0000000000a1', 'Ana'),
-  ('00000000-0000-0000-0000-0000000000b1', 'Ben');
+  ('00000000-0000-0000-0000-0000000000b1', 'Ben')
+  on conflict (id) do update set name = excluded.name;
 
 select is(
   (select count(*)::int from public.bands where personal_owner_id = '00000000-0000-0000-0000-0000000000a1' and is_personal),

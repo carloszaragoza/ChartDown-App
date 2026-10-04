@@ -17,7 +17,8 @@ select has_table('public', 'revisions', 'revisions exists');
 select fk_ok('public', 'profiles', 'id', 'auth', 'users', 'id', 'a profile belongs to an account');
 select enum_has_labels('public', 'platform_role', '{user,admin}'::name[], 'R-01.3 platform roles: user and admin');
 insert into auth.users (id, email) values ('00000000-0000-0000-0000-0000000000a1', 'ana@example.test');
-insert into public.profiles (id, name) values ('00000000-0000-0000-0000-0000000000a1', 'Ana');
+insert into public.profiles (id, name) values ('00000000-0000-0000-0000-0000000000a1', 'Ana')
+  on conflict (id) do update set name = excluded.name;
 select is(
   (select language::text || '/' || role::text from public.profiles where id = '00000000-0000-0000-0000-0000000000a1'),
   'en/user', 'R-01.5 a new profile is in English, as a user'

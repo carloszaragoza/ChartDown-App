@@ -39,3 +39,18 @@ npx vercel env pull                        # writes .env.local with the Developm
 cd ../..
 npx supabase link --project-ref czxcueqmohzzrjoflmrm   # asks for the database password
 ```
+
+## Sign-in (Supabase Auth)
+
+The local stack takes its settings from `supabase/config.toml`. The hosted projects are set in the dashboard, under Authentication. For `chartdown-dev`:
+
+| Setting                 | Where                                               | Value                                                                                                     |
+| ----------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Site URL                | URL Configuration                                   | `https://chart-down-app.vercel.app`                                                                       |
+| Redirect URLs           | URL Configuration                                   | `http://localhost:3000/**` and `https://*-carloszaragozas-projects.vercel.app/**` (pull request previews) |
+| Confirm email           | Sign In / Providers → Email                         | On                                                                                                        |
+| Minimum password length | Sign In / Providers → Email (Password requirements) | 8                                                                                                         |
+
+Emails come from Supabase's built-in sender, a few per hour; enough for development. Production needs a transactional email provider first (T-406).
+
+Sign-in is hidden in production (`VERCEL_ENV=production`) until invite codes (T-402) and the production database exist.

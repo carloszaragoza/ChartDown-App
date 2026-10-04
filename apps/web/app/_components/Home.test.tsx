@@ -28,6 +28,23 @@ describe("R-01.5 the page in each language", () => {
     expect(html).not.toContain(en.home.tagline);
   });
 
+  it("R-01.1 offers sign-in, or shows who is signed in with a way to sign out", () => {
+    const signedOut = renderToString(
+      <NextIntlClientProvider locale="en" messages={en} timeZone="UTC">
+        <Home signInEnabled />
+      </NextIntlClientProvider>,
+    );
+    expect(signedOut).toContain('href="/auth/sign-in"');
+    const signedIn = renderToString(
+      <NextIntlClientProvider locale="es" messages={es} timeZone="UTC">
+        <Home signInEnabled account={{ name: "Ana" }} />
+      </NextIntlClientProvider>,
+    );
+    expect(signedIn).toContain("Sesión iniciada como Ana");
+    expect(signedIn).toContain("Cerrar sesión");
+    expect(render("en")).not.toContain("/auth/sign-in");
+  });
+
   it("R-01.5 each language button is labelled in its own language", () => {
     expect(render("es")).toMatch(/lang="en"[^>]*>English</);
     expect(render("en")).toMatch(/lang="es"[^>]*>Español</);

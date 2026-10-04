@@ -73,5 +73,50 @@
     "time": "Time",
     "tempo": "Tempo",
     "example": "Example: Atril, viewed as Keys"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "newPassword": "New password",
+    "confirmPassword": "Repeat the password",
+    "name": "Your name",
+    "signIn": {
+      "title": "Sign in",
+      "submit": "Sign in",
+      "forgot": "Forgot your password?",
+      "noAccount": "New here?"
+    },
+    "signUp": {
+      "title": "Create an account",
+      "submit": "Create account",
+      "hasAccount": "Already have an account?",
+      "sent": "Check your email: we sent you a link to confirm your account.",
+      "passwordHint": "At least 8 characters."
+    },
+    "forgot": {
+      "title": "Reset your password",
+      "submit": "Send me a link",
+      "sent": "If that email has an account, we sent it a link to choose a new password.",
+      "back": "Back to sign in"
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "submit": "Save the new password"
+    },
+    "account": {
+      "signedInAs": "Signed in as {name}",
+      "signOut": "Sign out",
+      "signIn": "Sign in",
+      "passwordUpdated": "Your password was updated."
+    },
+    "errors": {
+      "invalid_credentials": "That email and password don’t match an account.",
+      "email_not_confirmed": "Confirm your email first, with the link we sent you.",
+      "weak_password": "Use at least 8 characters.",
+      "passwords_differ": "The two passwords are not the same.",
+      "rate_limited": "Too many attempts. Wait a minute and try again.",
+      "link_invalid": "That link has expired or was already used. Ask for a new one.",
+      "unknown": "Something went wrong. Try again."
+    }
   }
 }
