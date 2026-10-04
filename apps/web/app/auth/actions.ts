@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { authEnabled } from "../../lib/auth/enabled";
 import { authError } from "../../lib/auth/errors";
+import { isProvider } from "../../lib/auth/providers";
 import { safeNext } from "../../lib/auth/redirect";
 import { createClient } from "../../lib/supabase/server";
 
@@ -84,4 +85,23 @@ export async function updatePassword(form: FormData): Promise<void> {
   const { error } = await supabase.auth.updateUser({ password });
   if (error) redirect(`/auth/reset-password?error=${authError(error)}`);
   redirect("/?password=updated");
+}
+
+/** "Continue with Google, Microsoft or Apple": off to the provider, back through /auth/callback. */
+export async function signInWithProvider(form: FormData): Promise<void> {
+  ensureEnabled();
+  const provider = text(form, "provider");
+  const next = safeNext(text(form, "next"));
+  if (!isProvider(provider)) redirect("/auth/sign-in?error=unknown");
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo: `${await origin()}/auth/callback?next=${encodeURIComponent(next)}`,
+      // Microsoft only shares the email when asked for it; ChartDown links accounts by email.
+      ...(provider === "azure" ? { scopes: "email" } : {}),
+    },
+  });
+  if (error || !data.url) redirect(`/auth/sign-in?error=${authError(error)}`);
+  redirect(data.url);
 }

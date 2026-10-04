@@ -3,8 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";
+import { enabledProviders } from "../../../lib/auth/providers";
 import { signUp } from "../actions";
 import { AuthPage, Field } from "../AuthPage";
+import { ProviderButtons } from "../ProviderButtons";
 import styles from "../auth.module.css";
 
 type Search = Promise<{ error?: string; sent?: string }>;
@@ -13,6 +15,7 @@ export default async function SignUpPage({ searchParams }: { searchParams: Searc
   if (!authEnabled()) notFound();
   const { error, sent } = await searchParams;
   const t = await getTranslations("auth");
+  const providers = await enabledProviders();
   return (
     <AuthPage title={t("signUp.title")} error={error}>
       {sent ? (
@@ -36,6 +39,7 @@ export default async function SignUpPage({ searchParams }: { searchParams: Searc
           </Button>
         </form>
       )}
+      {!sent && <ProviderButtons providers={providers} />}
       <div className={styles.links}>
         <span>
           {t("signUp.hasAccount")} <Link href="/auth/sign-in">{t("signIn.title")}</Link>

@@ -117,6 +117,11 @@
       "rate_limited": "Demasiados intentos. Espera un minuto e inténtalo de nuevo.",
       "link_invalid": "Ese enlace expiró o ya se usó. Pide uno nuevo.",
       "unknown": "Algo salió mal. Inténtalo de nuevo."
+    },
+    "providers": {
+      "label": "Otras formas de entrar",
+      "or": "O bien",
+      "continueWith": "Continuar con {provider}"
     }
   }
 }
