@@ -1,37 +1,7 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { createInvite, waitlistEntries } from "./admin";
+import { claim, PASSWORD, signIn, signUpAndConfirm, unique } from "./flows";
 import { latestLink } from "./mail";
-
-const PASSWORD = "open-road-76";
-const unique = (label: string) =>
-  `${label}.${Date.now()}.${Math.floor(Math.random() * 1e6)}@example.test`;
-
-/** Step 1 of creating an account: the invite code and the email (R-01.7). */
-async function claim(page: Page, code: string, email: string) {
-  await page.goto("/auth/sign-up");
-  await page.getByLabel("Invite code").fill(code);
-  await page.getByLabel("Email").fill(email);
-  await page.getByRole("button", { name: "Continue" }).click();
-}
-
-async function signUpAndConfirm(page: Page, email: string, name: string) {
-  await claim(page, await createInvite(page.request), email);
-  await expect(page.getByText(`Creating an account for ${email}`)).toBeVisible();
-  await page.getByLabel("Your name").fill(name);
-  await page.getByLabel("Password").fill(PASSWORD);
-  const sentAfter = Date.now();
-  await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Check your email");
-  await page.goto(await latestLink(page.request, email, sentAfter));
-  await expect(page.getByText(`Signed in as ${name}`)).toBeVisible();
-}
-
-async function signIn(page: Page, email: string, password: string) {
-  await page.goto("/auth/sign-in");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(password);
-  await page.getByRole("button", { name: "Sign in" }).click();
-}
 
 test("R-01.1 a person signs up, confirms their email, signs out and signs in again", async ({
   page,

@@ -19,6 +19,7 @@ export function Home({
 }: HomeProps) {
   const t = useTranslations("home");
   const a = useTranslations("auth.account");
+  const p = useTranslations("profile");
   return (
     <main style={{ padding: "var(--space-10)", display: "grid", gap: "var(--space-6)" }}>
       <div
@@ -34,6 +35,13 @@ export function Home({
               <span style={{ font: "var(--type-meta)" }}>
                 {a("signedInAs", { name: account.name })}
               </span>
+              <Link
+                href="/profile"
+                className="cd-button cd-button--secondary"
+                style={{ textDecoration: "none" }}
+              >
+                {p("link")}
+              </Link>
               <Button type="submit">{a("signOut")}</Button>
             </form>
           ) : (

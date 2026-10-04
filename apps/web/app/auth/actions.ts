@@ -9,6 +9,7 @@ import { isProvider } from "../../lib/auth/providers";
 import { safeNext } from "../../lib/auth/redirect";
 import { SIGNUP_EMAIL_COOKIE } from "../../lib/auth/signup";
 import { createClient } from "../../lib/supabase/server";
+import { profileLocale, rememberLocale } from "../../i18n/remember";
 
 const MIN_PASSWORD = 8;
 const text = (form: FormData, name: string) => String(form.get(name) ?? "").trim();
@@ -95,6 +96,10 @@ export async function signIn(form: FormData): Promise<void> {
     password: secret(form, "password"),
   });
   if (error) redirect(`/auth/sign-in?error=${authError(error)}&next=${encodeURIComponent(next)}`);
+  // The profile's language follows the person to any browser (R-01.5).
+  const { data } = await supabase.auth.getUser();
+  const locale = data.user ? await profileLocale(supabase, data.user.id) : undefined;
+  if (locale) await rememberLocale(locale);
   redirect(next);
 }
 
