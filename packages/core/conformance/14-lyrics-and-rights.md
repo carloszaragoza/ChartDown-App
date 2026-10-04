@@ -12,6 +12,6 @@
   "sections": [
     { "rows": [{ "bars": [{ "lyric": "one two three four five six seven eight nine ten" }, {}] }] }
   ],
-  "warnings": [{ "line": 2, "code": "landmark-too-long" }]
+  "warnings": [{ "line": 2, "code": "landmark-too-long", "values": { "words": 10, "max": 8 } }]
 }
 ```

@@ -43,8 +43,10 @@ function parseBar(segment: string, ctx: RowContext): Bar {
   const bar: Bar = { items: [], cues: [] };
 
   let rest = segment.replace(/"([^"]*)"/g, (_, text: string) => {
-    if (text.trim().split(/\s+/).filter(Boolean).length > MAX_LANDMARK_WORDS) {
-      ctx.warn(ctx.line, "landmark-too-long");
+    // A word is anything between spaces (Constitution 6, ChartDown 0.4 section 9).
+    const words = text.split(/\s+/).filter(Boolean).length;
+    if (words > MAX_LANDMARK_WORDS) {
+      ctx.warn(ctx.line, "landmark-too-long", { words, max: MAX_LANDMARK_WORDS });
     }
     bar.lyric = bar.lyric === undefined ? text : `${bar.lyric} / ${text}`;
     return " ";
