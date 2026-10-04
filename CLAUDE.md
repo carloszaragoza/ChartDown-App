@@ -9,6 +9,7 @@ ChartDown App is a web app (desktop and iPad first) where bands write, share and
   - `specs/plan-tecnico.md` – architecture, data model, security.
   - `specs/entrega-diseno.md` – design tokens, components, screens, accessibility.
   - `specs/lista-tareas.md` – the MVP task list (T-001 onward) and the definition of done.
+  - `specs/chartdown-layers-0.5.md` – the MD layer format (anchors, unplaced notes, text form).
 - Never write code for a behavior that is not in a spec. If a rule must change, update the spec first, then the code.
 - Work one task at a time, in the order of `specs/lista-tareas.md`, respecting its dependencies.
 - Every requirement (R-xx) a task touches gets at least one test with the id in its name, e.g. `R-06.4 a musician never receives notes for another instrument`.
