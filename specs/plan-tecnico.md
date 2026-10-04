@@ -97,7 +97,7 @@ Tool versions and prices change; confirm them when starting.
 | songs | id, title, artists | No CCLI data (decision 10) |
 | versions | id, song, owner, author name at publish time, visibility, status (active, frozen, hidden), forked from, current revision, source (type, album, year, YouTube link) | The source lives in the version's own columns, so its type can be required (R-02.2) |
 | revisions | id, version, number, ChartDown text, author, date, restored from | Immutable (R-02.8) |
-| bands | id, name, is_personal | Personal space (R-04.7) |
+| bands | id, name, is_personal, personal owner | Personal space (R-04.7): the personal owner is unique, `is_personal` follows from it, and the band is deleted with the account |
 | band_members | band, user, role (MD or musician) | An index guarantees one MD per band (decision 2) |
 | member_instruments | member, instrument | Default instruments (R-04.3) |
 | layers | band, version, hide author notes | One per band and version (decisions 9.1, 9.3) |
@@ -120,7 +120,7 @@ Every table has row-level security from its first migration, closed until its po
 - **Make private** (R-02.4): in a single transaction, create a private version for the owner from the current revision, and set the public one to “frozen”, keeping the author's name (decision 9.4). Never delete it.
 - **Pinned sets** (decision 9.2): each song in a set points to a revision. A new revision from the author writes an event and a notice to the MD; “Update” changes that reference.
 - **Deleted account** (decision 9.5, see 12.5): personal data is deleted and the person's public versions are credited to “ChartDown”.
-- **Personal space** (R-04.7): when an account is created, a band marked as personal is created with the user as its only member and MD. It accepts no invitations and appears in no list. Since it is a normal band, the MD layer, sets, permissions and offline download work with no extra code.
+- **Personal space** (R-04.7): when an account is created (its profile row), a database trigger creates a band marked as personal with the user as its only member and MD; the trigger runs with the table owner's rights because the tables are closed to users. It accepts no invitations and appears in no list. Since it is a normal band, the MD layer, sets, permissions and offline download work with no extra code.
 
 ## 5. How the per-instrument view works
 
