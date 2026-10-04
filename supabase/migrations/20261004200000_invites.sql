@@ -89,7 +89,8 @@ begin
   end if;
   insert into public.waitlist (email, language)
   values (address, case when join_waitlist.language = 'es' then 'es' else 'en' end::public.interface_language)
-  on conflict (email) do nothing;
+  -- The constraint by name: the parameter called email would make the column ambiguous.
+  on conflict on constraint waitlist_email_key do nothing;
 end;
 $$;
 revoke all on function public.join_waitlist(text, text) from public;
