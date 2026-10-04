@@ -9,6 +9,7 @@ import {
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { AtrilExample } from "./AtrilExample";
 
 // Review page for comparing the components with the "ChartDown – Papel y tinta" design
 // system. Development and preview builds only.
@@ -19,6 +20,7 @@ const INSTRUMENTS = Object.keys(INSTRUMENT_ICONS) as (keyof typeof INSTRUMENT_IC
 function Panel({ theme }: { theme: "light" | "dark" }) {
   const t = useTranslations("design");
   const name = useTranslations("instruments");
+  const chart = useTranslations("chart");
   const row = {
     display: "flex",
     flexWrap: "wrap",
@@ -67,6 +69,11 @@ function Panel({ theme }: { theme: "light" | "dark" }) {
           <InstrumentTag key={id} instrument={id} label={name(id)} variant="compact" />
         ))}
         <InstrumentTag instrument="cajon" label={t("newInstrument")} variant="compact" />
+      </div>
+
+      <h3 style={heading}>{chart("example")}</h3>
+      <div style={{ background: "var(--ground)", padding: "var(--space-6)" }}>
+        <AtrilExample />
       </div>
 
       <h3 style={heading}>{t("icons")}</h3>

@@ -32,6 +32,7 @@ export {
   type DisplayOptions,
 } from "./display.js";
 export { formatLayer, LAYER_VERSION, parseLayer, placeLayer } from "./layer.js";
+export { sectionLength, type SectionLength } from "./length.js";
 export type {
   Layer,
   LayerNote,

@@ -148,6 +148,7 @@ describe("Handoff 2 tokens", () => {
       "--type-caption": "400 14px/1.3 var(--font-text)",
       "--type-code": "400 15px/1.6 var(--font-code)",
       "--type-tag": "700 15px/1.5 var(--font-text)",
+      "--type-form-chip": "600 22px/1 var(--font-display)",
     });
     expect(light["--font-display"]).toMatch(/^"Barlow Condensed"/);
     expect(light["--font-text"]).toMatch(/^"Source Sans 3"/);

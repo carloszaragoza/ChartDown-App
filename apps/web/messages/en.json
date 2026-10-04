@@ -52,5 +52,26 @@
     "offline": "Connect to the internet to download",
     "settings": "Settings",
     "newInstrument": "Cajón"
+  },
+  "chart": {
+    "bars": "{count, plural, one {# bar} other {# bars}}",
+    "barsTimes": "{count, plural, one {# bar} other {# bars}} ×{times}",
+    "next": "Next",
+    "notesForYou": "notes for you",
+    "songForm": "Song form",
+    "played": "played",
+    "now": "now",
+    "hasNotes": "has notes for you",
+    "push": "push",
+    "hold": "hold",
+    "stab": "stab",
+    "fermata": "fermata",
+    "noChord": "no chord",
+    "repeatBar": "repeat the previous bar",
+    "tie": "tied over",
+    "key": "Key",
+    "time": "Time",
+    "tempo": "Tempo",
+    "example": "Example: Atril, viewed as Keys"
   }
 }
