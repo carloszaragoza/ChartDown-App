@@ -117,6 +117,11 @@
       "rate_limited": "Too many attempts. Wait a minute and try again.",
       "link_invalid": "That link has expired or was already used. Ask for a new one.",
       "unknown": "Something went wrong. Try again."
+    },
+    "providers": {
+      "label": "Other ways to sign in",
+      "or": "Or",
+      "continueWith": "Continue with {provider}"
     }
   }
 }

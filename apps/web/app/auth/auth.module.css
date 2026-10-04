@@ -57,3 +57,10 @@
   min-height: var(--target-min);
   color: var(--dynamic);
 }
+.providers {
+  display: grid;
+  gap: var(--space-3);
+}
+.provider {
+  width: 100%;
+}
