@@ -12,7 +12,7 @@ async function signUpAndConfirm(page: Page, email: string, name: string) {
   await page.getByLabel("Password").fill(PASSWORD);
   const sentAfter = Date.now();
   await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page.getByRole("status")).toContainText("Check your email");
+  await expect(page.getByRole("main").getByRole("status")).toContainText("Check your email");
   await page.goto(await latestLink(page.request, email, sentAfter));
   await expect(page.getByText(`Signed in as ${name}`)).toBeVisible();
 }
@@ -44,10 +44,10 @@ test("R-01.1 an account cannot be used before its email is confirmed", async ({ 
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(PASSWORD);
   await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page.getByRole("status")).toContainText("Check your email");
+  await expect(page.getByRole("main").getByRole("status")).toContainText("Check your email");
 
   await signIn(page, email, PASSWORD);
-  await expect(page.getByRole("alert")).toContainText("Confirm your email first");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("Confirm your email first");
 });
 
 test("R-01.1 a wrong password is refused", async ({ page }) => {
@@ -56,7 +56,7 @@ test("R-01.1 a wrong password is refused", async ({ page }) => {
   await page.getByRole("button", { name: "Sign out" }).click();
 
   await signIn(page, email, "not-the-password");
-  await expect(page.getByRole("alert")).toContainText("don’t match an account");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("don’t match an account");
   await expect(page).toHaveURL(/\/auth\/sign-in/);
 });
 
@@ -69,18 +69,20 @@ test("R-01.1 a person recovers their account with a reset email", async ({ page 
   await page.getByLabel("Email").fill(email);
   const sentAfter = Date.now();
   await page.getByRole("button", { name: "Send me a link" }).click();
-  await expect(page.getByRole("status")).toContainText("we sent it a link");
+  await expect(page.getByRole("main").getByRole("status")).toContainText("we sent it a link");
 
   await page.goto(await latestLink(page.request, email, sentAfter));
   await expect(page.getByRole("heading", { name: "Choose a new password" })).toBeVisible();
   await page.getByLabel("New password").fill("new-road-2026");
   await page.getByLabel("Repeat the password").fill("new-road-2026");
   await page.getByRole("button", { name: "Save the new password" }).click();
-  await expect(page.getByRole("status")).toContainText("Your password was updated");
+  await expect(page.getByRole("main").getByRole("status")).toContainText(
+    "Your password was updated",
+  );
 
   await page.getByRole("button", { name: "Sign out" }).click();
   await signIn(page, email, PASSWORD);
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.getByRole("main").getByRole("alert")).toBeVisible();
   await signIn(page, email, "new-road-2026");
   await expect(page.getByText("Signed in as Carl Test")).toBeVisible();
 });
@@ -92,5 +94,5 @@ test("R-01.1 the reset form asks for the same password twice", async ({ page }) 
   await page.getByLabel("New password").fill("first-choice-1");
   await page.getByLabel("Repeat the password").fill("second-choice-2");
   await page.getByRole("button", { name: "Save the new password" }).click();
-  await expect(page.getByRole("alert")).toContainText("not the same");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("not the same");
 });
