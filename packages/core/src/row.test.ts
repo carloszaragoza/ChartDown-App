@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createRoleResolver } from "./roles.js";
+import { createRoleResolver, STANDARD_INSTRUMENTS } from "./roles.js";
 import { parseRow, type RowContext } from "./row.js";
 import type { WarningCode } from "./types.js";
 
@@ -8,7 +8,7 @@ function row(text: string, beatsPerBar = 4) {
   const ctx: RowContext = {
     line: 1,
     beatsPerBar,
-    roles: createRoleResolver(["cello"]),
+    roles: createRoleResolver(STANDARD_INSTRUMENTS, ["cello"]),
     warn: (_line, code) => warnings.push(code),
   };
   return { bars: parseRow(text, ctx), warnings };
@@ -44,10 +44,10 @@ describe("parseRow", () => {
     ]);
   });
 
-  it("keeps a cue with an unknown name as a cue for everyone", () => {
-    expect(row("1 {intro: soft}").bars?.[0]?.cues).toEqual([
-      { roles: ["everyone"], text: "intro: soft" },
-    ]);
+  it("keeps a cue with an unknown name whole, for everyone, with a warning", () => {
+    const { bars, warnings } = row("1 {intro: soft}");
+    expect(bars?.[0]?.cues).toEqual([{ roles: ["everyone"], text: "intro: soft" }]);
+    expect(warnings).toEqual(["unknown-cue-instrument"]);
   });
 
   it("reads lyric landmarks and warns above 8 words", () => {
