@@ -31,3 +31,6 @@ export function createWarning(line: number, code: WarningCode, values?: Values):
   if (values !== undefined) warning.values = values;
   return warning;
 }
+
+/** Every warning code, so the app can check it has a translated message for each. */
+export const WARNING_CODES = Object.keys(MESSAGES) as WarningCode[];

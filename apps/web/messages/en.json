@@ -1,0 +1,30 @@
+{
+  "home": {
+    "title": "ChartDown App",
+    "tagline": "Number charts for the whole band, with each player’s notes."
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "es": "Español"
+  },
+  "warnings": {
+    "header-line": "Header lines look like <code>name: value</code>",
+    "instrument-id": "Instrument ids use lowercase letters, digits and -: “{id}”",
+    "unknown-instrument": "Unknown instrument “{name}” in an <code>MD</code> note",
+    "unknown-cue-instrument": "Unknown instrument “{name}” in a cue",
+    "no-section": "Bars need a section first, like <code>## Verse 1</code>",
+    "unknown-directive": "Unknown directive “{directive}”",
+    "use-not-found": "Can’t find an earlier section named “{name}”",
+    "bad-token": "Can’t read “{token}”",
+    "empty-bar": "This bar has no chords",
+    "beats-mismatch": "Beats add up to {sum}, but the meter has {beats}",
+    "landmark-too-long": "This lyric landmark has {words} words; keep it to {max} or fewer",
+    "unsupported-version": "This chart says ChartDown {version}; this parser reads {supported}",
+    "header-not-closed": "The header needs a closing <code>---</code> line",
+    "use-with-rows": "<code>@use</code> must be the only content line of a section; its own rows are kept",
+    "layer-no-section": "Notes need a section first, like <code>## Chorus</code>",
+    "layer-line": "A layer holds only sections, bar headings and notes",
+    "bad-bar-heading": "Bar headings look like <code>### Bar 3</code>"
+  }
+}

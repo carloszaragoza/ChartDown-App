@@ -2,16 +2,21 @@ import "@chartdown/ui/fonts.css";
 import "@chartdown/ui/tokens.css";
 import "./globals.css";
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: "ChartDown App",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const locale = await getLocale();
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang={locale}>
+      <body>
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+      </body>
     </html>
   );
 }
