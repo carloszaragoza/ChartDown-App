@@ -105,11 +105,7 @@ language sql stable security definer set search_path = '' as $$
     where n.id = note and (
       private.is_md(l.band_id)
       or private.is_temp_md_for_version(l.band_id, n.version_id)
-      or (private.is_member(l.band_id) and (
-        not exists (select 1 from public.layer_note_instruments i where i.note_id = n.id)
-        or exists (select 1 from public.layer_note_instruments i
-                   where i.note_id = n.id and private.plays(l.band_id, i.instrument_id))
-      ))
+      or private.is_member(l.band_id)
     )
   );
 $$;
