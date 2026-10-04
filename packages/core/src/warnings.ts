@@ -16,7 +16,8 @@ const MESSAGES: Record<WarningCode, (values: Values) => string> = {
   "bad-token": (v) => `Can’t read “${v.token}”`,
   "empty-bar": () => "This bar has no chords",
   "beats-mismatch": (v) => `Beats add up to ${v.sum}, but the meter has ${v.beats}`,
-  "landmark-too-long": () => "Lyric landmarks should be 8 words or fewer",
+  "landmark-too-long": (v) =>
+    `This lyric landmark has ${v.words} words; keep it to ${v.max} or fewer`,
   "unsupported-version": (v) =>
     `This chart says ChartDown ${v.version}; this parser reads ${v.supported}`,
   "header-not-closed": () => "The header needs a closing --- line",

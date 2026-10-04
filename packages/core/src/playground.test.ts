@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parse as parsePlayground } from "../fixtures/playground-parser.js";
 import { parse } from "./parse.js";
 import { EXAMPLES, fixture } from "./test-helpers.js";
-import type { BarItem, Chart } from "./types.js";
+import type { BarItem, Chart, WarningCode } from "./types.js";
 
 // The playground's role ids, renamed to the spec's role names in the port.
 const ROLE = new Map([
@@ -56,6 +56,11 @@ function fromPlayground(doc: any) {
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
+// Messages the port changed on purpose, mapped back to the playground's wording.
+const PLAYGROUND_MESSAGES: Partial<Record<WarningCode, string>> = {
+  "landmark-too-long": "Lyric landmarks should be 8 words or fewer", // T-106: says how many words
+};
+
 function fromPort(chart: Chart) {
   const item = (i: BarItem) =>
     i.type === "chord"
@@ -92,7 +97,7 @@ function fromPort(chart: Chart) {
         })),
       })),
     })),
-    warnings: chart.warnings.map((w) => w.message).sort(),
+    warnings: chart.warnings.map((w) => PLAYGROUND_MESSAGES[w.code] ?? w.message).sort(),
   };
 }
 
