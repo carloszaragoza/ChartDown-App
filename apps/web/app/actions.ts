@@ -1,13 +1,25 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { isLocale, LOCALE_COOKIE } from "../i18n/locales";
+import { authEnabled } from "../lib/auth/enabled";
+import { createClient } from "../lib/supabase/server";
+import { isLocale } from "../i18n/locales";
+import { rememberLocale } from "../i18n/remember";
 
-const ONE_YEAR = 60 * 60 * 24 * 365;
-
-/** Switches the interface language (R-01.5). Changing a cookie in an action re-renders the page. */
+/**
+ * Switches the interface language (R-01.5). Signed in, it is saved to the profile too, so it
+ * follows the person to any device. Changing a cookie in an action re-renders the page.
+ */
 export async function setLocale(formData: FormData): Promise<void> {
   const locale = formData.get("locale");
   if (!isLocale(locale)) return;
-  (await cookies()).set(LOCALE_COOKIE, locale, { path: "/", maxAge: ONE_YEAR, sameSite: "lax" });
+  await rememberLocale(locale);
+  if (!authEnabled()) return;
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  if (data.user) {
+    await supabase
+      .from("profiles")
+      .update({ language: locale, updated_at: new Date().toISOString() })
+      .eq("id", data.user.id);
+  }
 }

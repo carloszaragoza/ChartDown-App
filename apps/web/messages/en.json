@@ -139,5 +139,18 @@
       "sent": "Thanks. We’ll write to you when there’s a place for you.",
       "haveCode": "I have an invite code"
     }
+  },
+  "profile": {
+    "title": "Your profile",
+    "name": "Name",
+    "instruments": "Instruments you play",
+    "instrumentsHint": "Choose any; you can change them whenever you like.",
+    "noLongerOffered": "(no longer offered)",
+    "save": "Save",
+    "saved": "Your profile was saved.",
+    "nameRequired": "Write your name.",
+    "error": "Something went wrong. Try again.",
+    "back": "Back",
+    "link": "Your profile"
   }
 }

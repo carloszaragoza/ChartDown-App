@@ -139,5 +139,18 @@
       "sent": "Gracias. Te escribiremos cuando haya un lugar para ti.",
       "haveCode": "Tengo un código de invitación"
     }
+  },
+  "profile": {
+    "title": "Tu perfil",
+    "name": "Nombre",
+    "instruments": "Instrumentos que tocas",
+    "instrumentsHint": "Elige los que quieras; puedes cambiarlos cuando quieras.",
+    "noLongerOffered": "(ya no se ofrece)",
+    "save": "Guardar",
+    "saved": "Tu perfil se guardó.",
+    "nameRequired": "Escribe tu nombre.",
+    "error": "Algo salió mal. Inténtalo de nuevo.",
+    "back": "Volver",
+    "link": "Tu perfil"
   }
 }

@@ -4,6 +4,7 @@ import { authEnabled } from "../../../lib/auth/enabled";
 import { authError } from "../../../lib/auth/errors";
 import { safeNext } from "../../../lib/auth/redirect";
 import { createClient } from "../../../lib/supabase/server";
+import { profileLocale, rememberLocale } from "../../../i18n/remember";
 
 /**
  * Where confirmation, recovery and provider sign-in links return (Technical Plan 12.1):
@@ -28,6 +29,13 @@ export async function GET(request: NextRequest) {
     else if (tokenHash && type)
       failed = (await supabase.auth.verifyOtp({ token_hash: tokenHash, type })).error;
     else failed = { code: "otp_expired" };
+  }
+  if (!failed) {
+    // The profile's language follows the person to any browser (R-01.5).
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    const locale = data.user ? await profileLocale(supabase, data.user.id) : undefined;
+    if (locale) await rememberLocale(locale);
   }
   const target = failed ? `/auth/sign-in?error=${authError(failed)}` : safeNext(params.get("next"));
   return NextResponse.redirect(new URL(target, request.nextUrl.origin));
