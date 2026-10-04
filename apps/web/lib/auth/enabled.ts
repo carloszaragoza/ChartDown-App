@@ -1,6 +1,7 @@
 /**
- * Sign-in is hidden in production until invite codes (T-402) and the production database
- * are ready (Technical Plan 12.1). Development and preview builds have it.
+ * Sign-in is hidden in production until the beta opens: the production database, an email
+ * provider (T-406) and the Google app published (Technical Plan 12.1). Development and preview
+ * builds have it.
  */
 export function authEnabled(env: Record<string, string | undefined> = process.env): boolean {
   return (

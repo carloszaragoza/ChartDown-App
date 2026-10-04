@@ -108,6 +108,9 @@ jobs:
           [ -n "$url" ] && [ -n "$key" ] || { echo "Could not read the local Supabase URL and key"; exit 1; }
           echo "NEXT_PUBLIC_SUPABASE_URL=$url" >> "$GITHUB_ENV"
           echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$key" >> "$GITHUB_ENV"
+          service=$(grep -E '^(SERVICE_ROLE_KEY|SECRET_KEY)=' "$RUNNER_TEMP/supabase.env" | head -1 | cut -d= -f2- | tr -d '"')
+          [ -n "$service" ] || { echo "Could not read the local service key"; exit 1; }
+          echo "SUPABASE_SERVICE_ROLE_KEY=$service" >> "$GITHUB_ENV"
 
       - name: Build
         run: pnpm build
