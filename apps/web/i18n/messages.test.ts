@@ -24,8 +24,9 @@ const codeFragments = (text: string) =>
   Array.from(text.matchAll(/<code>(.*?)<\/code>/g), ([, code]) => code);
 
 // Messages that are the same in both languages on purpose: the product name and the
-// language names, which are always written in their own language.
-const SAME_IN_BOTH = new Set(["home.title", "language.en", "language.es"]);
+// language names, which are always written in their own language, and an instrument name
+// spelled the same in both.
+const SAME_IN_BOTH = new Set(["home.title", "language.en", "language.es", "design.newInstrument"]);
 
 describe("R-01.5 interface in English by default, with Spanish as an option", () => {
   it("R-01.5 English is the default and Spanish is the only other language", () => {

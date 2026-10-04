@@ -1,0 +1,89 @@
+/* Styles for @chartdown/ui components (Design Handoff 3). Tokens only; see tokens.css. */
+
+/* Icon: 24 px grid, 1.75 line, round caps, drawn in the current text color. */
+.cd-icon {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cd-icon .cd-icon-dot {
+  fill: currentColor;
+  stroke: none;
+}
+/* Knocks a knob out of the line behind it, in the color of what it sits on. */
+.cd-icon .cd-icon-knob {
+  fill: var(--cd-icon-knockout, var(--paper));
+}
+
+/* Button: at least 44 px, radius-md, label text. The focus ring comes from tokens.css. */
+.cd-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  min-width: var(--target-min);
+  padding: 0 var(--space-4);
+  border: var(--stroke-hairline) solid transparent;
+  border-radius: var(--radius-md);
+  font: var(--type-label);
+  cursor: pointer;
+}
+.cd-button--primary {
+  --cd-icon-knockout: var(--ink);
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--ink-inverse);
+}
+.cd-button--secondary {
+  background: var(--paper);
+  border-color: var(--control-border);
+  color: var(--ink);
+}
+/* "View as" changes which MD notes you see, so it wears the red pencil. */
+.cd-button--view-as {
+  background: var(--paper);
+  border: var(--stroke-emphasis) solid var(--md);
+  color: var(--md);
+}
+.cd-button--icon-only {
+  padding: 0;
+}
+.cd-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.cd-button-group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.cd-button__reason {
+  font: var(--type-caption);
+  color: var(--ink-muted);
+}
+
+/* InstrumentTag: icon and name in the red pencil. */
+.cd-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-2);
+  border: var(--stroke-emphasis) solid var(--md);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--md);
+  font: var(--type-tag);
+}
+.cd-tag--compact {
+  justify-content: center;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  padding: 0;
+}
+.cd-tag--name-only {
+  padding: 0 var(--space-2);
+}

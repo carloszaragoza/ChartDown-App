@@ -1,5 +1,6 @@
 import "@chartdown/ui/fonts.css";
 import "@chartdown/ui/tokens.css";
+import "@chartdown/ui/components.css";
 import "./globals.css";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";

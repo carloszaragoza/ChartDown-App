@@ -26,5 +26,31 @@
     "layer-no-section": "Las notas necesitan una sección antes, como <code>## Chorus</code>",
     "layer-line": "Una capa solo contiene secciones, encabezados de compás y notas",
     "bad-bar-heading": "Los encabezados de compás tienen la forma <code>### Bar 3</code>"
+  },
+  "instruments": {
+    "drums": "Batería",
+    "bass": "Bajo",
+    "keys": "Teclados",
+    "guitar": "Guitarra",
+    "vocals": "Voces",
+    "saxophone": "Saxofón",
+    "trumpet": "Trompeta",
+    "trombone": "Trombón",
+    "violin": "Violín"
+  },
+  "design": {
+    "title": "Componentes",
+    "light": "Tema claro (Papel)",
+    "dark": "Tema oscuro (Escenario)",
+    "buttons": "Botones",
+    "tags": "Etiquetas de instrumento",
+    "icons": "Íconos",
+    "viewAs": "Ver como",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "downloadSet": "Descargar el set",
+    "offline": "Conéctate a internet para descargar",
+    "settings": "Ajustes",
+    "newInstrument": "Cajón"
   }
 }
