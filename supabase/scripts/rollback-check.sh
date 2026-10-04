@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Checks that the migrations roll back cleanly and apply again (T-301, Technical Plan 4):
-# every migration has a rollback; rolling back in reverse leaves none of our tables, types
-# or functions; applying the migrations again works. Run against a local Supabase (supabase start).
+# every migration has a rollback; rolling back in reverse leaves none of our tables, types,
+# functions, policies or the private schema; applying the migrations again works. Run against a local Supabase (supabase start).
 set -euo pipefail
 DB_URL="${DB_URL:-postgresql://postgres:postgres@127.0.0.1:54322/postgres}"
 cd "$(dirname "$0")/.."
@@ -13,7 +13,9 @@ ours() {
     + (select count(*) from pg_type t join pg_namespace n on n.oid = t.typnamespace
        where n.nspname = 'public' and t.typtype = 'e')
     + (select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-       where n.nspname = 'public')"
+       where n.nspname in ('public', 'private'))
+    + (select count(*) from pg_namespace where nspname = 'private')
+    + (select count(*) from pg_policies where schemaname = 'public')"
 }
 
 migrations=(migrations/*.sql)
