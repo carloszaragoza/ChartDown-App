@@ -13,6 +13,8 @@ Every layer note is anchored to:
 
 Names match ignoring case and leading or trailing spaces, and nothing looser.
 
+In the app, a note also records the **revision it was anchored to** (Technical Plan 4, `layer_notes`). The text form does not carry it.
+
 A note also has its **roles**: everyone, or one or more instruments, resolved like chart notes (ChartDown 0.4, section 4.1, with the Admin's catalog, R-00.1). And it has its **text**, a single line.
 
 ## 2. Placing a layer on a chart
@@ -23,6 +25,8 @@ Each note lands on the section and bar its anchor names. A note whose anchor can
 |---|---|
 | `section` | No section has that name, or the chart has fewer sections with that name than the occurrence |
 | `bar` | The section exists but has fewer bars than the note's bar |
+
+**Occurrences can shift.** Renaming, adding or removing a section with the same name changes which section is the first, second… with that name. So when the revision a note was anchored to is known, a note is placed only if the chart still has **the same number of sections with that name** as that revision. Otherwise the note is unplaced (reason `section`), even if a section with that name and occurrence exists, and the MD anchors it again. For example, renaming the first of two Choruses flags every Chorus note instead of moving the first Chorus's notes onto the second. Adding a third Chorus also flags them: cautious, but never wrong. A note without a known revision, such as one read from the text form, is placed by name and occurrence alone.
 
 There is **no guessing**: a note is never moved to a section or bar that only looks similar. An unplaced note is **never lost or changed**. It keeps its text, roles and anchor, so the MD can anchor it again. Placing a layer never changes the chart or the layer.
 
@@ -65,4 +69,4 @@ As in ChartDown 0.4 (section 13), a reader never stops. It skips what it cannot 
 
 ### Writing a layer
 
-A writer groups notes by section name, then by occurrence, and adds the empty headings needed to reach later occurrences. Within a section it writes the section's own notes first, then the `### Bar` groups in bar order. Writing a layer and reading it back gives the same notes.
+A writer groups notes by section name, then by occurrence, and adds the empty headings needed to reach later occurrences. Within a section it writes the section's own notes first, then the `### Bar` groups in bar order. Writing a layer and reading it back gives the same notes, without the app's note ids and anchored revisions, which the text form does not carry.
