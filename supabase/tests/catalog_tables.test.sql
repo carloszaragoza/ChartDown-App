@@ -1,7 +1,7 @@
 -- T-301 schema tests (pgTAP). Run with: supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(32);
+select plan(29);
 
 -- Check the deferred current-revision link inside this transaction, not at a commit that never comes.
 set constraints all immediate;
@@ -96,22 +96,12 @@ select throws_ok(
   '23503', null, 'R-02.8 a restore comes from a revision of the same version'
 );
 
--- Closed by default: row-level security on every table, no policies yet (T-304).
+-- Row-level security on every table; what each role may see is tested in policies.test.sql (T-304).
 select is(
   (select count(*)::int from pg_class c join pg_namespace n on n.oid = c.relnamespace
     where n.nspname = 'public' and c.relkind = 'r' and not c.relrowsecurity),
   0, 'every table has row-level security'
 );
-select is((select count(*)::int from pg_policies where schemaname = 'public'), 0, 'no policies yet');
--- What the API roles can see, recorded while acting as them, then checked as the owner.
-set local role anon;
-do $$ begin perform set_config('test.seen_by_anon', ((select count(*) from public.instruments) + (select count(*) from public.versions))::text, true); end $$;
-reset role;
-set local role authenticated;
-do $$ begin perform set_config('test.seen_by_user', ((select count(*) from public.instruments) + (select count(*) from public.versions))::text, true); end $$;
-reset role;
-select is(current_setting('test.seen_by_anon'), '0', 'the public key reads nothing');
-select is(current_setting('test.seen_by_user'), '0', 'a signed-in user reads nothing yet');
 
 select * from finish();
 rollback;
