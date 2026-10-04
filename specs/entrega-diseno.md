@@ -47,6 +47,7 @@ Verified contrast (WCAG AA): all text ≥ 4.5:1 on `paper` in both themes; `cont
 | `meta` | Source Sans 3 | 15 / 1.4 | 400 | Key, meter, tempo, chips |
 | `dynamic-mark` | Source Sans 3 | 18 / 1 | 700 italic | Dynamics inside a bar |
 | `caption` | Source Sans 3 | 14 / 1.3 | 400 | Small text; never smaller on iPad |
+| `tag` | Source Sans 3 | 15 / 1.5 | 700 | Instrument name inside an InstrumentTag |
 | code | JetBrains Mono | 15 / 1.6 | 400 | ChartDown editor |
 
 All three families are open-license Google Fonts. They are served by the app (not from Google) so they work offline.
@@ -57,7 +58,7 @@ All three families are open-license Google Fonts. They are served by the app (no
 |---|---|
 | Spacing | `space-1` 4 · `space-2` 8 · `space-3` 12 · `space-4` 16 · `space-6` 24 · `space-8` 32 · `space-10` 40 |
 | Radii | `radius-none` 0 (bars) · `radius-sm` 4 (chips, tags, cards) · `radius-md` 6 (buttons, inputs) |
-| Stroke | `bar-line` 3 · `bar-line-light` 2 · `hairline` 1 |
+| Stroke | `bar-line` 3 · `bar-line-light` 2 · `emphasis` 1.5 (red outlines: InstrumentTag and the View as button) · `hairline` 1 |
 | Size | `target-min` 44 · `bar-height` 128 · `bar-height-sm` 64 |
 
 ## 3. Components
