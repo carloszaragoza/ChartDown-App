@@ -2,7 +2,11 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { findTestedRequirements, requirementsInTestTitles } from "./find-tests.ts";
+import {
+  findTestedRequirements,
+  requirementsInSqlTests,
+  requirementsInTestTitles,
+} from "./find-tests.ts";
 
 describe("requirementsInTestTitles", () => {
   it("reads ids from it, test and describe titles in any quote style", () => {
@@ -33,6 +37,17 @@ describe("requirementsInTestTitles", () => {
   });
 });
 
+describe("requirementsInSqlTests", () => {
+  it("reads ids from pgTAP descriptions and ignores comments", () => {
+    const source = `
+      -- R-09.1 is only mentioned in a comment
+      select is(1, 1, 'R-04.1 a second permanent MD cannot be created');
+      select throws_ok($$insert into t values (1)$$, '23505', null, 'R-04.7 a personal space accepts no other members');
+      select ok(true, 'it''s fine: R-02.8 with an escaped quote');`;
+    expect(requirementsInSqlTests(source)).toEqual(["R-04.1", "R-04.7", "R-02.8"]);
+  });
+});
+
 describe("findTestedRequirements", () => {
   it("scans test files only and skips excluded and build folders", () => {
     const root = mkdtempSync(join(tmpdir(), "traceability-"));
@@ -52,8 +67,20 @@ describe("findTestedRequirements", () => {
       join(root, "tools/traceability/src/b.test.ts"),
       `it("R-00.2 fixture", () => {});`,
     );
+    mkdirSync(join(root, "supabase/tests"), { recursive: true });
+    writeFileSync(
+      join(root, "supabase/tests/bands.test.sql"),
+      `select ok(true, 'R-04.1 one MD per band');`,
+    );
+    writeFileSync(
+      join(root, "supabase/schema.sql"),
+      `comment on table x is 'R-04.5 not a test file';`,
+    );
 
     const tested = findTestedRequirements(root, ["tools/traceability"]);
-    expect(Object.fromEntries(tested)).toEqual({ "R-00.3": ["packages/core/src/parser.test.ts"] });
+    expect(Object.fromEntries(tested)).toEqual({
+      "R-00.3": ["packages/core/src/parser.test.ts"],
+      "R-04.1": ["supabase/tests/bands.test.sql"],
+    });
   });
 });

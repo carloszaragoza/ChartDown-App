@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { extractRequirementIds } from "./requirements.ts";
 
-const TEST_FILE = /\.(test|spec)\.(ts|tsx|js|jsx|mjs)$/;
+const TEST_FILE = /\.(test|spec)\.(ts|tsx|js|jsx|mjs|sql)$/;
 const SKIPPED_DIRS = new Set(["node_modules", "dist", ".next", ".turbo", ".git", "coverage"]);
 
 // it("…"), test("…"), describe("…"), including .only, .concurrent and .each(…).
@@ -16,6 +16,19 @@ export function requirementsInTestTitles(source: string): string[] {
     extractRequirementIds(title ?? ""),
   );
   return [...new Set(ids.flat())];
+}
+
+/**
+ * Requirement ids named in the descriptions of a pgTAP test file: R-xx inside a quoted string,
+ * with -- comments ignored, since every pgTAP assertion ends with its description string.
+ */
+export function requirementsInSqlTests(source: string): string[] {
+  const withoutComments = source.replace(/--[^\n]*/g, "");
+  const strings = Array.from(
+    withoutComments.matchAll(/'((?:''|[^'])*)'/g),
+    ([, text]) => text ?? "",
+  );
+  return [...new Set(strings.flatMap((text) => extractRequirementIds(text)))];
 }
 
 function* testFiles(dir: string, excluded: string[]): Generator<string> {
@@ -40,7 +53,11 @@ export function findTestedRequirements(
     root,
     excluded.map((dir) => join(root, dir)),
   )) {
-    for (const id of requirementsInTestTitles(readFileSync(file, "utf8"))) {
+    const source = readFileSync(file, "utf8");
+    const ids = file.endsWith(".sql")
+      ? requirementsInSqlTests(source)
+      : requirementsInTestTitles(source);
+    for (const id of ids) {
       tested.set(id, [...(tested.get(id) ?? []), relative(root, file)]);
     }
   }
