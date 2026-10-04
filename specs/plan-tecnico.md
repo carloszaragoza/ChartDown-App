@@ -75,7 +75,7 @@ flowchart LR
 |---|---|---|
 | Notation | `@chartdown/core` package in TypeScript: parser, JSON output, numbers and letters, MD layer | Evolves the playground and runs the same in the browser and on the server (SPEC-00) |
 | UI | Next.js (React) with TypeScript, as an installable web app | Fast, discoverable public catalog for visitors (R-01.4); one codebase for desktop and iPad |
-| Languages | next-intl or i18next, English and Spanish strings | R-01.5 |
+| Languages | next-intl or i18next, English and Spanish strings | R-01.5. The language is stored in the profile: signing in applies it, saving the profile or using the language switcher while signed in updates it, and visitors keep it in a cookie |
 | Offline | Service worker (Workbox) + IndexedDB | SPEC-08 |
 | Backend | Supabase: Postgres, auth, row-level security, realtime, storage and functions | Option A |
 | Background | Event table + scheduled job that dispatches it | SPEC-09 |
@@ -93,7 +93,7 @@ Tool versions and prices change; confirm them when starting.
 |---|---|---|
 | profiles | id, name, language, platform role | Visitor = no session, no row |
 | instruments | id, slug, English and Spanish names, aliases (other names a chart may use, as in ChartDown 4.1), active | Admin's catalog (R-07.3); the parser resolves notes with slug and aliases (R-00.1) |
-| user_instruments | user, instrument | What each person plays |
+| user_instruments | user, instrument | What each person plays (R-01.2); each person manages their own; a deactivated instrument can't be added but stays where it is (R-07.3) |
 | songs | id, title, artists | No CCLI data (decision 10) |
 | versions | id, song, owner, author name at publish time, visibility, status (active, frozen, hidden), forked from, current revision, source (type, album, year, YouTube link) | The source lives in the version's own columns, so its type can be required (R-02.2) |
 | revisions | id, version, number, ChartDown text, author, date, restored from | Immutable (R-02.8) |
