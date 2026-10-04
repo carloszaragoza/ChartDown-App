@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createRoleResolver, parseInstrumentsHeader } from "./roles.js";
+import { createRoleResolver, parseInstrumentsHeader, STANDARD_INSTRUMENTS } from "./roles.js";
 
 describe("createRoleResolver", () => {
-  const roles = createRoleResolver(["cello", "banjo"]);
+  const roles = createRoleResolver(STANDARD_INSTRUMENTS, ["cello", "banjo"]);
 
   it("maps every accepted name to its standard role", () => {
     expect(roles("all band everyone")).toEqual(["everyone"]);
@@ -25,6 +25,33 @@ describe("createRoleResolver", () => {
     expect(roles("bass kazoo")).toBeUndefined();
     expect(roles("constructor")).toBeUndefined();
     expect(roles("")).toBeUndefined();
+  });
+});
+
+describe("createRoleResolver with a catalog", () => {
+  const catalog = [
+    { id: "cajon", names: ["cajon", "box"] },
+    { id: "keys", names: ["keys", "piano"] },
+  ];
+  const roles = createRoleResolver(catalog, ["cello"]);
+
+  it("resolves the catalog's ids and names to the catalog id", () => {
+    expect(roles("box & Piano")).toEqual(["cajon", "keys"]);
+  });
+
+  it("does not know standard roles the catalog leaves out", () => {
+    expect(roles("drums")).toBeUndefined();
+  });
+
+  it("always knows the names for everyone, and the catalog cannot redefine them", () => {
+    expect(createRoleResolver([{ id: "band-leader", names: ["band"] }], [])("band")).toEqual([
+      "everyone",
+    ]);
+  });
+
+  it("adds custom ids from the header, but the catalog's meaning of a name wins", () => {
+    expect(roles("cello")).toEqual(["cello"]);
+    expect(createRoleResolver(catalog, ["box"])("box")).toEqual(["cajon"]);
   });
 });
 

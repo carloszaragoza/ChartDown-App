@@ -6,6 +6,7 @@ const MESSAGES: Record<WarningCode, (values: Values) => string> = {
   "header-line": () => "Header lines look like  name: value",
   "instrument-id": (v) => `Instrument ids use lowercase letters, digits and -: “${v.id}”`,
   "unknown-instrument": (v) => `Unknown instrument “${v.name}” in an MD note`,
+  "unknown-cue-instrument": (v) => `Unknown instrument “${v.name}” in a cue`,
   "no-section": () => "Bars need a section first, like  ## Verse 1",
   "unknown-directive": (v) => `Unknown directive “${v.directive}”`,
   "use-not-found": (v) => `Can’t find an earlier section named “${v.name}”`,

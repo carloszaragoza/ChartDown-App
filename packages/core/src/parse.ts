@@ -1,11 +1,12 @@
 import {
   createRoleResolver,
+  STANDARD_INSTRUMENTS,
   EVERYONE,
   parseInstrumentsHeader,
   type RoleResolver,
 } from "./roles.js";
 import { parseRow } from "./row.js";
-import type { Chart, Key, Meter, Note, Row, Section, Warning } from "./types.js";
+import type { Chart, Key, Meter, Note, ParseOptions, Row, Section, Warning } from "./types.js";
 import { createWarning, type Warn } from "./warnings.js";
 
 /** The ChartDown version this parser reads (R-00.4). */
@@ -39,9 +40,10 @@ function parseNote(text: string, line: number, roles: RoleResolver, warn: Warn):
 
 /**
  * Parses ChartDown 0.4 text into a chart. Never throws: anything it cannot read is
- * skipped and reported in `warnings` with its line number (spec 13).
+ * skipped and reported in `warnings` with its line number (spec 13). Instruments come
+ * from `options.instruments`, or the spec's standard roles when it is not given (R-00.1).
  */
-export function parse(source: string): Chart {
+export function parse(source: string, options: ParseOptions = {}): Chart {
   const warnings: Warning[] = [];
   const warn: Warn = (line, code, values) => warnings.push(createWarning(line, code, values));
   const lines = source.replace(/\r/g, "").split("\n");
@@ -85,7 +87,7 @@ export function parse(source: string): Chart {
     headerLines.instruments ?? 1,
     warn,
   );
-  const roles = createRoleResolver(instruments);
+  const roles = createRoleResolver(options.instruments ?? STANDARD_INSTRUMENTS, instruments);
   const key = parseKey(header.key);
   const meter = parseMeter(header.meter);
 

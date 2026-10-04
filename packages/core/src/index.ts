@@ -1,6 +1,6 @@
 // @chartdown/core: the ChartDown parser (spec 0.4).
 export { parse, SUPPORTED_VERSION } from "./parse.js";
-export { EVERYONE, STANDARD_ROLES } from "./roles.js";
+export { EVERYONE, STANDARD_INSTRUMENTS } from "./roles.js";
 export type {
   Bar,
   BarItem,
@@ -8,9 +8,11 @@ export type {
   Chord,
   Cue,
   Dynamic,
+  Instrument,
   Key,
   Meter,
   Note,
+  ParseOptions,
   Role,
   Row,
   Section,

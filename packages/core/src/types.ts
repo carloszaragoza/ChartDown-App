@@ -1,6 +1,20 @@
 /** An instrument role: a standard role (see STANDARD_ROLES), a custom id from the header, or "everyone". */
 export type Role = string;
 
+/** An instrument of the catalog: its id (the Admin's slug) and the names a chart may use for it. */
+export interface Instrument {
+  id: string;
+  names: string[];
+}
+
+export interface ParseOptions {
+  /**
+   * The Admin's instrument catalog (R-00.1). Replaces the spec's standard roles when given.
+   * Include deactivated instruments so older charts still resolve (R-07.3).
+   */
+  instruments?: readonly Instrument[];
+}
+
 export interface Key {
   /** Letter root, for example "G", "Bb" or "F#". */
   root: string;
@@ -88,7 +102,8 @@ export type WarningCode =
   | "landmark-too-long"
   | "unsupported-version"
   | "header-not-closed"
-  | "use-with-rows";
+  | "use-with-rows"
+  | "unknown-cue-instrument";
 
 export interface Warning {
   line: number;

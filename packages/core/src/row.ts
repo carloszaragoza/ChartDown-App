@@ -14,12 +14,17 @@ export interface RowContext {
   warn: Warn;
 }
 
-/** `{instrument: text}` is a cue for those players; any other text is a cue for everyone (spec 9). */
-function parseCue(text: string, roles: RoleResolver): Cue {
+/**
+ * `{instrument: text}` is a cue for those players; any other text is a cue for everyone
+ * (spec 9). An unknown name before a colon is a warning, and the whole cue is kept for
+ * everyone so nothing is lost (spec 4.1).
+ */
+function parseCue(text: string, ctx: RowContext): Cue {
   const match = /^([A-Za-z][A-Za-z,/& ]*?)\s*:\s*(.+)$/.exec(text);
   if (match) {
-    const resolved = roles(match[1] as string);
+    const resolved = ctx.roles(match[1] as string);
     if (resolved) return { roles: resolved, text: (match[2] as string).trim() };
+    ctx.warn(ctx.line, "unknown-cue-instrument", { name: match[1] as string });
   }
   return { roles: [EVERYONE], text };
 }
@@ -48,7 +53,7 @@ function parseBar(segment: string, ctx: RowContext): Bar {
   rest = rest.replace(/\{([^}]*)\}/g, (_, raw: string) => {
     const text = raw.trim();
     if (DYNAMICS.has(text.toLowerCase())) bar.dynamic = text.toLowerCase() as Dynamic;
-    else if (text) bar.cues.push(parseCue(text, ctx.roles));
+    else if (text) bar.cues.push(parseCue(text, ctx));
     return " ";
   });
 
