@@ -48,6 +48,7 @@ Verified contrast (WCAG AA): all text ≥ 4.5:1 on `paper` in both themes; `cont
 | `dynamic-mark` | Source Sans 3 | 18 / 1 | 700 italic | Dynamics inside a bar |
 | `caption` | Source Sans 3 | 14 / 1.3 | 400 | Small text; never smaller on iPad |
 | `tag` | Source Sans 3 | 15 / 1.5 | 700 | Instrument name inside an InstrumentTag |
+| `form-chip` | Barlow Condensed | 22 / 1 | 600 | Section abbreviation in the FormStrip |
 | code | JetBrains Mono | 15 / 1.6 | 400 | ChartDown editor |
 
 All three families are open-license Google Fonts. They are served by the app (not from Google) so they work offline.
@@ -65,7 +66,7 @@ All three families are open-license Google Fonts. They are served by the app (no
 
 | Component | Props | States and rules |
 |---|---|---|
-| **Bar** | chords (root, quality, bass, beats), marks (hold, push, stab, fermata), dynamic, ending, repeat start/end, lyric landmark | Square (`radius-none`); chords share the bar by beats; dynamic top-left; marks in `dynamic` |
+| **Bar** | chords (root, quality, bass, beats), marks (hold, push, stab, fermata), dynamic, cues, ending, repeat start/end, lyric landmark | Square (`radius-none`); chords share the bar by beats; dynamic top-left; marks in `dynamic` (hold = diamond, push = `‹` before, stab = `^` above, fermata = `⌒` above); in number style the minor minus is raised at half size; slash bass inline (`5/7`); cues in `caption` at the top (a cue for everyone in `ink-muted`, an instrument cue led by its name in `md`); lyric landmark in `caption`, `ink-muted`, in quotes at the bottom; repeats as double bar lines with `×N`; endings with their label and a top line. Next-section preview: `bar-height-sm`, `chord-sm`, chords and lines in `ink-muted` |
 | **Section** | name, bar count, visible notes, rows | `paper` card; notes come before the bars |
 | **MDNote** | text, roles | For everyone: the word MD in `md`. For instruments: InstrumentTag. Plain notes in `ink-muted` |
 | **InstrumentTag** | role, variant (default or compact) | Icon + name in `md`; compact = 44 px square with icon only and an `aria-label` |
