@@ -26,5 +26,31 @@
     "layer-no-section": "Notes need a section first, like <code>## Chorus</code>",
     "layer-line": "A layer holds only sections, bar headings and notes",
     "bad-bar-heading": "Bar headings look like <code>### Bar 3</code>"
+  },
+  "instruments": {
+    "drums": "Drums",
+    "bass": "Bass",
+    "keys": "Keys",
+    "guitar": "Guitar",
+    "vocals": "Vocals",
+    "saxophone": "Saxophone",
+    "trumpet": "Trumpet",
+    "trombone": "Trombone",
+    "violin": "Violin"
+  },
+  "design": {
+    "title": "Components",
+    "light": "Light theme (Papel)",
+    "dark": "Dark theme (Escenario)",
+    "buttons": "Buttons",
+    "tags": "Instrument tags",
+    "icons": "Icons",
+    "viewAs": "View as",
+    "previous": "Previous",
+    "next": "Next",
+    "downloadSet": "Download set",
+    "offline": "Connect to the internet to download",
+    "settings": "Settings",
+    "newInstrument": "Cajón"
   }
 }

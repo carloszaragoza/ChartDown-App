@@ -7,7 +7,7 @@ import { Home } from "./Home";
 
 const render = (locale: "en" | "es") =>
   renderToString(
-    <NextIntlClientProvider locale={locale} messages={locale === "en" ? en : es}>
+    <NextIntlClientProvider locale={locale} messages={locale === "en" ? en : es} timeZone="UTC">
       <Home />
     </NextIntlClientProvider>,
   );

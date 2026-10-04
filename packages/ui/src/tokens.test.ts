@@ -29,7 +29,8 @@ function block(css: string, selector: string): Record<string, string> {
 
 const light = block(tokensCss, ":root");
 const systemDark = block(tokensCss, ':root:not([data-theme="light"])');
-const pinnedDark = block(tokensCss, ':root[data-theme="dark"]');
+const pinnedDark = block(tokensCss, '[data-theme="dark"]');
+const pinnedLight = block(tokensCss, '[data-theme="light"]');
 const themes = { light, dark: { ...light, ...pinnedDark } } as const;
 
 // Design Handoff 2.1.
@@ -92,6 +93,13 @@ describe("Handoff 2 tokens", () => {
     expect(systemDark).toEqual(pinnedDark);
   });
 
+  it("the pinned light theme repeats the default light colors exactly", () => {
+    expect(pinnedLight).toEqual(
+      Object.fromEntries(Object.keys(pinnedLight).map((token) => [token, light[token]])),
+    );
+    expect(Object.keys(pinnedLight).sort()).toEqual(Object.keys(HANDOFF_COLORS.light).sort());
+  });
+
   it.each(["light", "dark"] as const)(
     "text tokens reach WCAG AA (4.5:1) on paper and ground in the %s theme",
     (name) => {
@@ -139,6 +147,7 @@ describe("Handoff 2 tokens", () => {
       "--type-dynamic-mark": "italic 700 18px/1 var(--font-text)",
       "--type-caption": "400 14px/1.3 var(--font-text)",
       "--type-code": "400 15px/1.6 var(--font-code)",
+      "--type-tag": "700 15px/1.5 var(--font-text)",
     });
     expect(light["--font-display"]).toMatch(/^"Barlow Condensed"/);
     expect(light["--font-text"]).toMatch(/^"Source Sans 3"/);
@@ -159,6 +168,7 @@ describe("Handoff 2 tokens", () => {
       "--radius-md": "6px",
       "--stroke-bar-line": "3px",
       "--stroke-bar-line-light": "2px",
+      "--stroke-emphasis": "1.5px",
       "--stroke-hairline": "1px",
       "--target-min": "44px",
       "--bar-height": "128px",
@@ -187,6 +197,7 @@ describe("Handoff 2.2 self-hosted fonts", () => {
       "Source Sans 3 italic 700",
       "Source Sans 3 normal 400",
       "Source Sans 3 normal 600",
+      "Source Sans 3 normal 700",
     ]);
   });
 
