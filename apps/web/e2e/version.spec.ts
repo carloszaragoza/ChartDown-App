@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { createVersion } from "./admin";
-import { PASSWORD, signUpAndConfirm, unique } from "./flows";
+import { PASSWORD, signOut, signUpAndConfirm, unique } from "./flows";
 
 const OPEN_ROAD = readFileSync(
   new URL("../../../packages/core/fixtures/open-road.chartdown", import.meta.url),
@@ -26,7 +26,7 @@ test("R-01.4 forking asks the visitor to sign in, then comes back to the version
   const id = await createVersion(request, { title: "Open Road", content: OPEN_ROAD });
   const email = unique("forker");
   await signUpAndConfirm(page, email, "Fork Test");
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOut(page);
 
   await page.goto(`/versions/${id}`);
   await page.getByRole("link", { name: "Fork" }).click();
