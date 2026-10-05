@@ -171,6 +171,7 @@ The second barrier is row-level security: even if someone queries the database d
 - **Download a set:** a function builds a per-person bundle with everything that person sees in the set, and the device stores it.
 - **Open with no internet:** the installed app opens the stored bundle, read-only (decision 9.8).
 - **On reconnect:** compare the bundle's version stamp. If it changed, download the new one and show what changed (R-08.3).
+- **Installable app** (T-901): a web app manifest (name and short name ChartDown, standalone, Papel background and ink theme, icons 192, 512 and maskable 512 from `design/logo/icons`), the Apple touch icon and favicons, all copied into the app so they are served by it, and the iPad metadata. A service worker written for the app, with no library, keeps the static files (fonts, styles, scripts, icons) as they are used and shows an offline page when a page cannot be reached; it stores no pages or data, so nobody reads stale information, until set downloads (T-902). Installing does not depend on signing in, so it works in production too.
 - **On iPad:** install the app on the home screen. Safari may clear data for sites not visited in a while; the installed app reduces this. Test on a real iPad before the MVP.
 
 ## 7. Notices
@@ -277,6 +278,7 @@ One person can link several sign-in methods to a single account. Roles (Admin, M
 - **Invite codes (R-01.7, T-402).** Creating an account takes two steps: the person enters their invite code and email, and the server records a claim for that email (30 minutes); then they choose a password or continue with a provider using that email. Supabase Auth's "before user created" hook allows a new account only when a valid claim exists for its email, for every sign-in method, and then uses up the code. Linking a provider to an existing account is not a new account and needs no code. Without a code, a person joins the waitlist (R-01.8).
 - **Visitors (R-01.4, T-404).** Each public version has a page anyone can open (`/versions/<id>`): song, author, source and the chart in its written key, without any band's layer (R-06.5). "Fork" sends a visitor to sign in and back to that version; for signed-in people the fork itself comes with T-503. A version the person may not read is a page not found.
 - The sign-in pages, and every page that reads the database, stay hidden in production until the beta opens: the production database, a transactional email provider (T-406) and the Google app published.
+- The waitlist is the exception (T-1201): the landing page's form works in production as soon as the production database has its migrations, which its owner applies. Until then, and wherever the database is not configured, the form says it is not available yet. The landing page shows Sign in and "I have an invite code" only where sign-in is enabled.
 
 ### 12.2 Public API and MCP server
 

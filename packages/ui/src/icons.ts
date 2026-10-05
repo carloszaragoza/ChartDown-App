@@ -37,7 +37,21 @@ export const INSTRUMENT_ICONS = {
     '<ellipse cx="9.5" cy="15" rx="4.5" ry="5.5" transform="rotate(-40 9.5 15)"/><path d="m12.5 12 7-7.5"/><circle cx="20.3" cy="3.8" r="1"/><path d="M3 5.5 17.5 21"/>',
 } as const;
 
-export const ICONS = { ...ACTION_ICONS, ...INSTRUMENT_ICONS } as const;
+/**
+ * Icons the approved screens add (design/screens/, Design Handoff 3): drawn on the same grid and
+ * stroke; components.test.tsx checks each against the screens.
+ */
+export const SCREEN_ICONS = {
+  search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
+  fork: '<circle cx="6" cy="5" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="12" cy="19" r="2"/><path d="M6 7v2a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V7M12 12v5"/>',
+  public:
+    '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 2.5 14.4 0 17M12 3.5c-2.5 2.6-2.5 14.4 0 17"/>',
+  private: '<rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  history: '<path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4"/><path d="M12 8v4l3 2"/>',
+  check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+} as const;
+
+export const ICONS = { ...ACTION_ICONS, ...INSTRUMENT_ICONS, ...SCREEN_ICONS } as const;
 export type IconName = keyof typeof ICONS;
 export type InstrumentIconName = keyof typeof INSTRUMENT_ICONS;
 
