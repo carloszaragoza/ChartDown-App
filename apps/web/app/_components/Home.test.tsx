@@ -44,6 +44,7 @@ describe("R-01.5 the page in each language", () => {
     expect(signedIn).toContain("Sesión iniciada como Ana");
     expect(signedIn).toContain("Cerrar sesión");
     expect(signedIn).toContain('href="/versions/new"');
+    expect(signedIn).toContain('href="/bands"');
     expect(render("en")).not.toContain("/auth/sign-in");
   });
 
