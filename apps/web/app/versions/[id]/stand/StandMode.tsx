@@ -183,63 +183,67 @@ export function StandMode({
       data-theme={theme === "stage" ? "dark" : "light"}
       onClickCapture={onClickCapture}
     >
-      {set && (
-        <nav className={styles.setBar} aria-label={t("setBar")}>
-          <div className={styles.setPlace}>
-            <Link href={set.href} className={styles.tool}>
-              {t("set")}
-            </Link>
-            <span>
-              <b className={styles.setName}>{set.name}</b>
-              <span className={styles.meta}>{set.songOf}</span>
+      {/* The top bar of design/screens/02: back to the set or the version, where we are, View as
+          in a set, and Previous and Next (T-707). */}
+      <nav className={styles.setBar} aria-label={set ? t("setBar") : t("turn")}>
+        <div className={styles.setPlace}>
+          <Link href={set ? set.href : `/versions/${versionId}`} className={styles.tool}>
+            {set ? t("set") : t("close")}
+          </Link>
+          <span>
+            {set && <b className={styles.setName}>{set.name}</b>}
+            <span className={styles.meta}>
+              {set
+                ? set.songOf
+                : t("position", { current: current + 1, total: chart.sections.length })}
             </span>
-          </div>
-          <div className={styles.tools}>
-            {set.viewAs && (
-              <details className={styles.viewAs}>
-                <summary className={styles.viewAsButton}>
-                  {t("viewAs")} <b>{set.viewAs.label}</b>
-                </summary>
-                <ul className={styles.viewAsList}>
-                  {set.viewAs.options.map((option) => (
-                    <li key={option.href}>
-                      <a
-                        href={atSection(option.href, current)}
-                        className={styles.tool}
-                        aria-current={option.current ? "true" : undefined}
-                      >
-                        {option.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            )}
-            {current > 0 ? (
-              <a href={href(current - 1)} className={styles.tool}>
-                {t("previous")}
+          </span>
+        </div>
+        <div className={styles.tools}>
+          {set?.viewAs && (
+            <details className={styles.viewAs}>
+              <summary className={styles.viewAsButton}>
+                {t("viewAs")} <b>{set.viewAs.label}</b>
+              </summary>
+              <ul className={styles.viewAsList}>
+                {set.viewAs.options.map((option) => (
+                  <li key={option.href}>
+                    <a
+                      href={atSection(option.href, current)}
+                      className={styles.tool}
+                      aria-current={option.current ? "true" : undefined}
+                    >
+                      {option.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+          {current > 0 ? (
+            <a href={href(current - 1)} className={styles.tool}>
+              {t("previous")}
+            </a>
+          ) : (
+            set?.previousSong && (
+              <a href={set.previousSong} className={styles.tool}>
+                {t("previousSong")}
               </a>
-            ) : (
-              set.previousSong && (
-                <a href={set.previousSong} className={styles.tool}>
-                  {t("previousSong")}
-                </a>
-              )
-            )}
-            {current < last ? (
-              <a href={href(current + 1)} className={`${styles.tool} ${styles.primary}`}>
-                {t("next")}
+            )
+          )}
+          {current < last ? (
+            <a href={href(current + 1)} className={`${styles.tool} ${styles.primary}`}>
+              {t("next")}
+            </a>
+          ) : (
+            set?.nextSong && (
+              <a href={set.nextSong} className={`${styles.tool} ${styles.primary}`}>
+                {t("nextSong")}
               </a>
-            ) : (
-              set.nextSong && (
-                <a href={set.nextSong} className={`${styles.tool} ${styles.primary}`}>
-                  {t("nextSong")}
-                </a>
-              )
-            )}
-          </div>
-        </nav>
-      )}
+            )
+          )}
+        </div>
+      </nav>
       <header className={styles.top}>
         <div className={styles.heading}>
           <h1 className={styles.title}>{title}</h1>
@@ -282,11 +286,6 @@ export function StandMode({
               {t("fullscreen")}
             </button>
           )}
-          {!set && (
-            <Link href={`/versions/${versionId}`} className={styles.tool}>
-              {t("close")}
-            </Link>
-          )}
         </nav>
       </header>
 
@@ -320,30 +319,6 @@ export function StandMode({
           <p className={styles.end}>{t("end")}</p>
         )}
       </div>
-
-      <nav
-        className={set ? styles.hidden : styles.turn}
-        aria-label={t("turn")}
-        hidden={Boolean(set)}
-      >
-        {current > 0 ? (
-          <a href={href(current - 1)} className={styles.page}>
-            {t("previous")}
-          </a>
-        ) : (
-          <span />
-        )}
-        <span className={styles.position}>
-          {t("position", { current: current + 1, total: chart.sections.length })}
-        </span>
-        {current < last ? (
-          <a href={href(current + 1)} className={styles.page}>
-            {t("next")}
-          </a>
-        ) : (
-          <span />
-        )}
-      </nav>
     </div>
   );
 }
