@@ -169,6 +169,7 @@ The second barrier is row-level security: even if someone queries the database d
 - **Download a set:** a function builds a per-person bundle with everything that person sees in the set, and the device stores it.
 - **Open with no internet:** the installed app opens the stored bundle, read-only (decision 9.8).
 - **On reconnect:** compare the bundle's version stamp. If it changed, download the new one and show what changed (R-08.3).
+- **Installable app** (T-901): a web app manifest (name and short name ChartDown, standalone, Papel background and ink theme, icons 192, 512 and maskable 512 from `design/logo/icons`), the Apple touch icon and favicons, all copied into the app so they are served by it, and the iPad metadata. A service worker written for the app, with no library, keeps the static files (fonts, styles, scripts, icons) as they are used and shows an offline page when a page cannot be reached; it stores no pages or data, so nobody reads stale information, until set downloads (T-902). Installing does not depend on signing in, so it works in production too.
 - **On iPad:** install the app on the home screen. Safari may clear data for sites not visited in a while; the installed app reduces this. Test on a real iPad before the MVP.
 
 ## 7. Notices
