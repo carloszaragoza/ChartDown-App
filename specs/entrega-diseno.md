@@ -94,6 +94,7 @@ All three families are open-license Google Fonts. They are served by the app (no
 | Chart editor | SPEC-00, 02, 03 | Text on the left, live preview on the right; public/private; history; parser warnings with line numbers |
 | MD layer editor | SPEC-03 (R-03.5), 06 | Sections, tagged notes, per-instrument form, hide author's notes |
 | Notices (T-1002) | SPEC-09 | Not in the Screens canvas yet; built from these tokens and components. Top bar: a "Notices" link with the unread count beside it (a `paper` badge (`radius-md`) with a `control-border` outline, `ink` text), announced in text ("Notices, 3 unread"); no bell until the design system adds one (section 7). The `/notices` page: newest first; each notice is one sentence saying what changed, in the reader's language, with its set or song and when; unread ones carry the word "New" in `md`; opening one marks it read and goes to what it is about; "Mark all as read". A new notice arrives without reloading |
+| Profile, notices (T-1003) | SPEC-09 (R-09.5) | A "Notices" section of the profile, with its own Save: one checkbox per kind of notice (added to a set, taken off a set, temporary music director, key change, order change, new note for your instruments, new revision for music directors), all on until the person turns one off; under them, "In the app. Email comes later." Turning one off stops new notices of that kind; ones already received stay |
 | Landing (chartdown.app) | SPEC-01 (invites) | Waitlist, sign-in with invite code, link to the language on GitHub |
 
 ## 5. Responsive
