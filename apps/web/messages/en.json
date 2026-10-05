@@ -587,7 +587,8 @@
     "signOut": "Sign out",
     "signIn": "Sign in",
     "notices": "Notices",
-    "unread": "{count, plural, =0 {Notices, none unread} one {Notices, # unread} other {Notices, # unread}}"
+    "unread": "{count, plural, =0 {Notices, none unread} one {Notices, # unread} other {Notices, # unread}}",
+    "admin": "Administration"
   },
   "offline": {
     "title": "You are offline",
@@ -653,6 +654,36 @@
       "order_changed": "When the order of one of my sets changes",
       "note_added": "When there is a new note for my instruments",
       "new_revision": "When a song in my band's sets has a new revision (music directors)"
+    }
+  },
+  "admin": {
+    "title": "Administration",
+    "instruments": {
+      "title": "Instruments",
+      "hint": "The catalog musicians choose from and charts use.",
+      "add": "Add an instrument",
+      "slug": "Id in charts",
+      "slugHint": "Lowercase letters, digits and dashes, as a chart writes it (for example steel-guitar). It cannot change later.",
+      "nameEn": "Name in English",
+      "nameEs": "Name in Spanish",
+      "aliases": "Other names in charts, separated by commas",
+      "addSubmit": "Add instrument",
+      "list": "Instruments in the catalog",
+      "save": "Save",
+      "editOf": "Edit {name}",
+      "inactive": "Not offered any more",
+      "deactivate": "Deactivate {name}",
+      "reactivate": "Reactivate {name}",
+      "saved": "{slug} was saved.",
+      "deactivatedDone": "{slug} is no longer offered; it stays wherever it is used.",
+      "reactivatedDone": "{slug} is offered again.",
+      "problems": {
+        "slug": "Write the id with lowercase letters, digits and dashes only.",
+        "name": "Write a name in both languages, of at most 40 characters.",
+        "alias": "Write each other name with lowercase letters, digits and dashes, separated by commas.",
+        "taken": "That id is already in the catalog.",
+        "unknown": "Something went wrong. Try again."
+      }
     }
   }
 }

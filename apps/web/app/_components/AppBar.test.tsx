@@ -18,6 +18,7 @@ const signedIn: AppBarProps = {
   account: { name: "Alex Rivera" },
   personalSets: "/bands/p1/sets",
   unread: 0,
+  admin: false,
 };
 
 describe("T-706 the app's top bar", () => {
@@ -36,7 +37,7 @@ describe("T-706 the app's top bar", () => {
   });
 
   it("R-01.4 a visitor gets the catalog and Sign in", () => {
-    const html = render({ account: null, personalSets: null, unread: 0 }, "es");
+    const html = render({ account: null, personalSets: null, unread: 0, admin: false }, "es");
     expect(html).toContain('href="/catalog"');
     expect(html).toContain("Iniciar sesión");
     expect(html).not.toContain('href="/bands"');
@@ -63,8 +64,17 @@ describe("T-706 the app's top bar", () => {
     expect(three).toMatch(/aria-hidden="true">3</);
     expect(render({ ...signedIn, unread: 1 }, "es")).toContain('aria-label="Avisos, 1 sin leer"');
     expect(render({ ...signedIn, unread: 120 })).toMatch(/>99\+</);
-    expect(render({ account: null, personalSets: null, unread: 0 })).not.toContain(
+    expect(render({ account: null, personalSets: null, unread: 0, admin: false })).not.toContain(
       'href="/notices"',
+    );
+  });
+
+  it("R-07.3 only admins get the Administration link", () => {
+    expect(render(signedIn)).not.toContain('href="/admin"');
+    expect(render({ ...signedIn, admin: true })).toMatch(/href="\/admin"[^>]*>Administration</);
+    pathname = "/admin/instruments";
+    expect(render({ ...signedIn, admin: true }, "es")).toMatch(
+      /aria-current="page"[^>]*>Administración</,
     );
   });
 

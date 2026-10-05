@@ -587,7 +587,8 @@
     "signOut": "Cerrar sesión",
     "signIn": "Iniciar sesión",
     "notices": "Avisos",
-    "unread": "{count, plural, =0 {Avisos, ninguno sin leer} one {Avisos, # sin leer} other {Avisos, # sin leer}}"
+    "unread": "{count, plural, =0 {Avisos, ninguno sin leer} one {Avisos, # sin leer} other {Avisos, # sin leer}}",
+    "admin": "Administración"
   },
   "offline": {
     "title": "Sin conexión",
@@ -653,6 +654,36 @@
       "order_changed": "Cuando cambia el orden de uno de mis sets",
       "note_added": "Cuando hay una nota nueva para mis instrumentos",
       "new_revision": "Cuando una canción de los sets de mi banda tiene una revisión nueva (dirección musical)"
+    }
+  },
+  "admin": {
+    "title": "Administración",
+    "instruments": {
+      "title": "Instrumentos",
+      "hint": "El catálogo del que eligen los músicos y que usan los charts.",
+      "add": "Agregar un instrumento",
+      "slug": "Id en los charts",
+      "slugHint": "Minúsculas, dígitos y guiones, como lo escribe un chart (por ejemplo steel-guitar). No se puede cambiar después.",
+      "nameEn": "Nombre en inglés",
+      "nameEs": "Nombre en español",
+      "aliases": "Otros nombres en los charts, separados por comas",
+      "addSubmit": "Agregar instrumento",
+      "list": "Instrumentos del catálogo",
+      "save": "Guardar",
+      "editOf": "Editar {name}",
+      "inactive": "Ya no se ofrece",
+      "deactivate": "Desactivar {name}",
+      "reactivate": "Reactivar {name}",
+      "saved": "{slug} quedó guardado.",
+      "deactivatedDone": "{slug} ya no se ofrece; se queda donde ya se usa.",
+      "reactivatedDone": "{slug} se ofrece de nuevo.",
+      "problems": {
+        "slug": "Escribe el id solo con minúsculas, dígitos y guiones.",
+        "name": "Escribe un nombre en ambos idiomas, de 40 caracteres como máximo.",
+        "alias": "Escribe cada otro nombre con minúsculas, dígitos y guiones, separados por comas.",
+        "taken": "Ese id ya está en el catálogo.",
+        "unknown": "Algo salió mal. Inténtalo de nuevo."
+      }
     }
   }
 }

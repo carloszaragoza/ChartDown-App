@@ -127,3 +127,15 @@ export async function songOf(request: APIRequestContext, versionId: string): Pro
   });
   return ((await response.json()) as { song_id: string }[])[0]?.song_id ?? "";
 }
+
+/** Makes the person with this (unique) name an admin, as the platform owner would. */
+export async function makeAdmin(request: APIRequestContext, name: string): Promise<void> {
+  const response = await request.patch(`${url()}/rest/v1/profiles`, {
+    headers: { ...headers(), Prefer: "return=representation" },
+    params: { name: `eq.${name}` },
+    data: { role: "admin" },
+  });
+  const rows = (await response.json()) as unknown[];
+  if (!response.ok() || rows.length !== 1)
+    throw new Error(`Could not make ${name} an admin: ${response.status()}`);
+}
