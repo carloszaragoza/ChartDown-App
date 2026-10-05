@@ -50,6 +50,8 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
   await page.getByLabel("Set name").fill(set);
   await page.getByLabel("Type").selectOption({ label: "Rehearsal" });
   await page.getByRole("button", { name: "Create set" }).click();
+  // Wait for the new set's page before keeping its address.
+  await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   const setAddress = new URL(page.url()).pathname;
   await page.goto(`/versions/${id}`);
   await page.getByLabel("Add to a set").selectOption({ label: `${band} · ${set}` });
