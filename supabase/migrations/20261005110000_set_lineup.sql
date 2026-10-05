@@ -31,7 +31,8 @@ begin
   select distinct save_lineup.set_id, band, (entry ->> 'member_id')::uuid, instrument::uuid
   from jsonb_array_elements(coalesce(save_lineup.entries, '[]'::jsonb)) entry,
        jsonb_array_elements_text(coalesce(entry -> 'instrument_ids', '[]'::jsonb)) instrument
-  on conflict (set_id, member_id, instrument_id) do nothing;
+  -- Named by its constraint: the column set_id would clash with the parameter of that name.
+  on conflict on constraint set_lineup_pkey do nothing;
 end;
 $$;
 revoke all on function public.save_lineup(uuid, jsonb) from public, anon;
