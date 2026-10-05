@@ -2,8 +2,10 @@
    own area if it is taller than the screen; type never shrinks), the next one, and the page
    turn. The theme only changes colors (Design Handoff 2). */
 .stand {
-  display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  /* A column where only the current section stretches, whatever bars come above or below it,
+     so it always sits right under the song map (F-001). */
+  display: flex;
+  flex-direction: column;
   gap: var(--space-3);
   height: 100dvh;
   padding: var(--space-4) var(--space-6);
@@ -58,7 +60,12 @@
   min-width: 0;
   overflow-x: auto;
 }
+/* Every other part keeps its own height. */
+.stand > :not(.current) {
+  flex: none;
+}
 .current {
+  flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
 }
