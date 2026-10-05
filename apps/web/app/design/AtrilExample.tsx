@@ -1,13 +1,7 @@
-import { chordFormatter, parse, parseLayer, placeLayer, type SectionLength } from "@chartdown/core";
-import {
-  FormStrip,
-  formStripItems,
-  NextSection,
-  Section,
-  type FormStripItem,
-  type SectionLabels,
-} from "@chartdown/ui";
+import { chordFormatter, parse, parseLayer, placeLayer } from "@chartdown/core";
+import { FormStrip, formStripItems, NextSection, Section, type FormStripItem } from "@chartdown/ui";
 import { useTranslations } from "next-intl";
+import { useChartLabels } from "../_components/chartLabels";
 
 // The approved "Atril" screen (ChartDown App – Pantallas, 2 and 3): Open Road, the original
 // example song from the ChartDown Language repository, in A, Chorus 2 now, viewed as Keys,
@@ -69,7 +63,6 @@ const CURRENT = 4;
 
 export function AtrilExample() {
   const t = useTranslations("chart");
-  const instruments = useTranslations("instruments");
   const chart = parse(OPEN_ROAD);
   const placement = placeLayer(chart, parseLayer(LAYER).layer);
   const formatter = chordFormatter(chart, { style: "numbers", key: { root: "A", minor: false } });
@@ -82,25 +75,8 @@ export function AtrilExample() {
     ...(placement.sections[index] ?? []).map((placed) => ({ md: true, ...placed.note })),
   ];
   const hasNotesForYou = (index: number) => notesFor(index).some((n) => n.roles.includes(VIEW_AS));
-  const length = ({ perPass, times }: SectionLength) =>
-    times > 1 ? t("barsTimes", { count: perPass, times }) : t("bars", { count: perPass });
-  const instrument = (id: string) =>
-    instruments.has(id as "keys") ? instruments(id as "keys") : id;
-  const labels: SectionLabels = {
-    length,
-    next: t("next"),
-    notesForYou: t("notesForYou"),
-    bar: {
-      push: t("push"),
-      hold: t("hold"),
-      stab: t("stab"),
-      fermata: t("fermata"),
-      noChord: t("noChord"),
-      repeatBar: t("repeatBar"),
-      tie: t("tie"),
-      instrument,
-    },
-  };
+  const labels = useChartLabels();
+  const length = labels.length;
   const describe = (item: FormStripItem) =>
     [
       item.name,

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { createInvite, waitlistEntries } from "./admin";
-import { claim, PASSWORD, signIn, signUpAndConfirm, unique } from "./flows";
+import { claim, PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
 import { latestLink } from "./mail";
 
 test("R-01.1 a person signs up, confirms their email, signs out and signs in again", async ({
@@ -9,8 +9,7 @@ test("R-01.1 a person signs up, confirms their email, signs out and signs in aga
   const email = unique("ana");
   await signUpAndConfirm(page, email, "Ana Test");
 
-  await page.getByRole("button", { name: "Sign out" }).click();
-  await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
+  await signOut(page);
 
   await signIn(page, email, PASSWORD);
   await expect(page.getByText("Signed in as Ana Test")).toBeVisible();
@@ -31,7 +30,7 @@ test("R-01.1 an account cannot be used before its email is confirmed", async ({ 
 test("R-01.1 a wrong password is refused", async ({ page }) => {
   const email = unique("ben");
   await signUpAndConfirm(page, email, "Ben Test");
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOut(page);
 
   await signIn(page, email, "not-the-password");
   await expect(page.getByRole("main").getByRole("alert")).toContainText("don’t match an account");
@@ -41,7 +40,7 @@ test("R-01.1 a wrong password is refused", async ({ page }) => {
 test("R-01.1 a person recovers their account with a reset email", async ({ page }) => {
   const email = unique("carl");
   await signUpAndConfirm(page, email, "Carl Test");
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOut(page);
 
   await page.goto("/auth/forgot-password");
   await page.getByLabel("Email").fill(email);
@@ -58,7 +57,7 @@ test("R-01.1 a person recovers their account with a reset email", async ({ page 
     "Your password was updated",
   );
 
-  await page.getByRole("button", { name: "Sign out" }).click();
+  await signOut(page);
   await signIn(page, email, PASSWORD);
   await expect(page.getByRole("main").getByRole("alert")).toBeVisible();
   await signIn(page, email, "new-road-2026");

@@ -18,6 +18,7 @@ test("R-01.2 a person saves their name and the instruments they play", async ({ 
 
   await page.getByLabel("Vocals").uncheck();
   await page.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByRole("main").getByRole("status")).toContainText("Your profile was saved");
   await page.reload();
   await expect(page.getByLabel("Vocals")).not.toBeChecked();
   await page.goto("/");
@@ -35,6 +36,7 @@ test("R-01.5 the chosen language persists across sessions", async ({ page, conte
   // A new session in a browser that remembers nothing.
   await page.goto("/");
   await page.getByRole("button", { name: "Cerrar sesión" }).click();
+  await expect(page.getByRole("link", { name: "Iniciar sesión" })).toBeVisible();
   await context.clearCookies();
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
@@ -54,6 +56,7 @@ test("R-01.5 the language switcher saves to the profile when signed in", async (
   await expect(page.getByRole("button", { name: "Cerrar sesión" })).toBeVisible();
 
   await page.getByRole("button", { name: "Cerrar sesión" }).click();
+  await expect(page.getByRole("link", { name: "Iniciar sesión" })).toBeVisible();
   await context.clearCookies();
   await signIn(page, email, PASSWORD);
   await expect(page.getByText("Sesión iniciada como Mateo Test")).toBeVisible();
