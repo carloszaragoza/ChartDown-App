@@ -352,7 +352,16 @@
     "hideAuthor": "Ocultar para mi banda",
     "showAuthor": "Mostrar a mi banda",
     "authorHidden": "Las notas del autor quedan ocultas para tu banda.",
-    "authorShown": "Las notas del autor se muestran a tu banda."
+    "authorShown": "Las notas del autor se muestran a tu banda.",
+    "mdNotes": "Notas del director musical",
+    "privateBand": "Tus notas son privadas de {band}. La versión pública no cambia.",
+    "privatePersonal": "Tus notas son privadas de tu espacio personal. La versión pública no cambia.",
+    "hideAuthorShort": "Ocultar las notas del autor",
+    "sections": "Secciones",
+    "noteCount": "{count, plural, one {# nota} other {# notas}}",
+    "sectionNotes": "Notas de {section}",
+    "addTo": "Agregar una nota a {section}",
+    "textPlaceholder": "Corta y directa, como “Fuera en la primera vuelta.”"
   },
   "stand": {
     "tools": "Herramientas del atril",

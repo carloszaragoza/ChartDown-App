@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
-import { PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import { chooseSection, PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
 
 const CHART = "## Verse\n1 | 4\n\n## Chorus\n4 | 5 | 6m | 1\n";
 
@@ -12,7 +12,7 @@ async function switchTo(page: Page, email: string, name: string) {
 }
 
 async function addNote(page: Page, section: string, instrument: string | null, text: string) {
-  await page.getByLabel("Section").selectOption({ label: section });
+  await chooseSection(page, section);
   if (instrument) await page.getByLabel(instrument, { exact: true }).check();
   await page.getByLabel("Note", { exact: true }).fill(text);
   await page.getByRole("button", { name: "Add note" }).click();
@@ -81,7 +81,12 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   await addNote(page, "Chorus", "Keys", notes.keys);
   await addNote(page, "Chorus", "Bass", notes.bass);
   // Each new note starts from a clean form: the bass note is for bass only.
-  await expect(page.getByText("Chorus · Bass", { exact: true })).toBeVisible();
+  const bassRow = page
+    .getByRole("list", { name: "Notes of Chorus" })
+    .getByRole("listitem")
+    .filter({ hasText: notes.bass });
+  await expect(bassRow).toContainText("Bass");
+  await expect(bassRow).not.toContainText("Keys");
 
   // The MD opens stand mode from the set's song: every note, and View as.
   await page.goto(`${setAddress}/songs/1`);

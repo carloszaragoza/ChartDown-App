@@ -45,3 +45,12 @@ export async function signOut(page: Page) {
 export async function openAccount(page: Page) {
   await page.getByLabel(/^Account of /).click();
 }
+
+/** In the layer editor, chooses a section from the list on the left (T-707). */
+export async function chooseSection(page: Page, label: string) {
+  const name = new RegExp(`^${label.replace(/[()]/g, "\\$&")} \\d+ notes?$`);
+  await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name }).click();
+  await expect(
+    page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name }),
+  ).toHaveAttribute("aria-current", "true");
+}

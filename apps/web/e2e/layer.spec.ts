@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { createVersion } from "./admin";
-import { signOut, signUpAndConfirm, unique } from "./flows";
+import { chooseSection, signOut, signUpAndConfirm, unique } from "./flows";
 
 const CHART = "## Verse\n1 | 4\n\n## Chorus\n4 | 5\n\n## Chorus\n4 | 1\n";
 const url = () => process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54321";
@@ -28,18 +28,21 @@ test("R-03.5 a new note is saved in the layer and the public version doesn't cha
   await expect(page.getByText("My notes (personal space)")).toBeVisible();
 
   // A note for keys on bar 2 of the second Chorus.
-  await page.getByLabel("Section").selectOption({ label: "Chorus (2nd)" });
+  await chooseSection(page, "Chorus (2nd)");
+  await expect(page.getByRole("heading", { name: "Add a note to Chorus (2nd)" })).toBeVisible();
   await page.getByLabel("Bar (optional)").fill("2");
   await page.getByLabel("Keys", { exact: true }).check();
   await page.getByLabel("Note", { exact: true }).fill("Pad swell into the last bar.");
   await page.getByRole("button", { name: "Add note" }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("The note was saved.");
 
+  // The page stays on that section, with the note in it; the first Chorus has none.
   const secondChorus = page.locator("#section-3");
   await expect(secondChorus).toContainText("Bar 2 · Pad swell into the last bar.");
   await expect(secondChorus).toContainText("Keys");
-  await expect(page.locator("#section-2")).not.toContainText("Pad swell");
-  await expect(page.getByText("Chorus (2nd) · Bar 2 · Keys")).toBeVisible();
+  const sections = page.getByRole("navigation", { name: "Sections" });
+  await expect(sections.getByRole("link", { name: "Chorus (2nd) 1 note" })).toBeVisible();
+  await expect(sections.getByRole("link", { name: /^Chorus 0 notes$/ })).toBeVisible();
 
   // Editing: a note for everyone in the Verse.
   await page.getByRole("link", { name: "Edit the note: Pad swell into the last bar." }).click();
@@ -51,20 +54,22 @@ test("R-03.5 a new note is saved in the layer and the public version doesn't cha
   await page.getByRole("button", { name: "Save note" }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("The note was saved.");
   await expect(page.locator("#section-1")).toContainText("Everyone soft until the chorus.");
-  await expect(page.getByText("Verse · Everyone")).toBeVisible();
+  await expect(sections.getByRole("link", { name: "Verse 1 note" })).toBeVisible();
+  await expect(sections.getByRole("link", { name: "Chorus (2nd) 0 notes" })).toBeVisible();
 
   // The public version is untouched, and outside a set it shows no layer (R-06.5).
   expect(await saved()).toEqual(before);
   await page.goto(`/versions/${id}`);
   await expect(page.getByText("Everyone soft until the chorus.")).toHaveCount(0);
 
-  // Deleting.
+  // Deleting, from the note's edit form.
   await page.goto(`/versions/${id}/notes`);
+  await page.getByRole("link", { name: "Edit the note: Everyone soft until the chorus." }).click();
   await page
     .getByRole("button", { name: "Delete the note: Everyone soft until the chorus." })
     .click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("The note was deleted.");
-  await expect(page.getByText("No notes yet")).toBeVisible();
+  await expect(sections.getByRole("link", { name: "Verse 0 notes" })).toBeVisible();
 
   // Nobody else reaches the notes page.
   await page.goto("/");
@@ -91,7 +96,7 @@ test("R-00.2 a note whose section is gone is marked unplaced, not lost, and anch
 
   // A band note on the Chorus.
   await page.goto(`${address}/notes`);
-  await page.getByLabel("Section").selectOption({ label: "Chorus" });
+  await chooseSection(page, "Chorus");
   await page.getByLabel("Note", { exact: true }).fill("Big finish, everyone.");
   await page.getByRole("button", { name: "Add note" }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("The note was saved.");
@@ -110,7 +115,11 @@ test("R-00.2 a note whose section is gone is marked unplaced, not lost, and anch
   const unplaced = page.getByRole("region", { name: "1 note needs a new place" });
   await expect(unplaced).toContainText("No longer finds the section “Chorus”");
   await expect(unplaced).toContainText("Big finish, everyone.");
-  await expect(page.locator("#section-2")).not.toContainText("Big finish");
+  await expect(
+    page
+      .getByRole("navigation", { name: "Sections" })
+      .getByRole("link", { name: "Refrain 0 notes" }),
+  ).toBeVisible();
   await unplaced.getByRole("link", { name: "Anchor again: Big finish, everyone." }).click();
   await expect(page.getByRole("heading", { name: "Edit the note" })).toBeVisible();
   await page.getByLabel("Section").selectOption({ label: "Refrain" });
@@ -128,16 +137,16 @@ test("R-06.6 the MD hides the author's notes for the band", async ({ page, reque
   await signUpAndConfirm(page, unique("hide"), "Hal Hide");
   await page.goto(`/versions/${id}/notes`);
   const verse = page.locator("#section-1");
-  const author = page.getByRole("region", { name: "Notes from the version's author" });
-  await expect(author).toContainText("Brushes only, says the author.");
+  const hide = page.getByRole("button", { name: "Hide the author's notes" });
   await expect(verse).toContainText("Brushes only, says the author.");
+  await expect(hide).toHaveAttribute("aria-pressed", "false");
 
-  await author.getByRole("button", { name: "Hide for my band" }).click();
+  await hide.click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("hidden for your band");
   await expect(verse).not.toContainText("Brushes only");
-  await expect(author).toContainText("Hidden for your band.");
+  await expect(hide).toHaveAttribute("aria-pressed", "true");
 
-  await author.getByRole("button", { name: "Show to my band" }).click();
+  await hide.click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("shown to your band");
   await expect(verse).toContainText("Brushes only, says the author.");
 });

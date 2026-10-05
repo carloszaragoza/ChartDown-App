@@ -1,14 +1,14 @@
 import { parse, placeLayer, type Chart } from "@chartdown/core";
-import { Button, type MDNoteData } from "@chartdown/ui";
+import { Button, hasInstrumentIcon, Icon } from "@chartdown/ui";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../lib/auth/enabled";
 import { createClient } from "../../../../lib/supabase/server";
 import { NOTE_MAX, sectionAnchors, toLayer, type NoteRow } from "../../../../lib/versions/notes";
-import { ChartBody } from "../ChartBody";
 import { loadVersion, UUID } from "../load";
 import { deleteNote, saveNote, setAuthorNotes } from "./actions";
+import { SectionView, type SectionNote } from "./SectionView";
 import styles from "./notes.module.css";
 
 // The form's own errors; anything else reads as "could not be saved".
@@ -18,6 +18,8 @@ type Search = Promise<{
   hidden?: string;
   shown?: string;
   band?: string;
+  section?: string;
+  note?: string;
   edit?: string;
   saved?: string;
   deleted?: string;
@@ -120,23 +122,16 @@ export default async function NotesPage({
 
   const t = await getTranslations("notes");
   const barLabel = (bar: number) => t("bar", { bar });
-  const layerNotes = (index: number): MDNoteData[] =>
-    (placement.sections[index] ?? []).map(({ note }) => ({
-      md: true,
-      roles: note.roles,
-      text: note.bar ? `${barLabel(note.bar)} · ${note.text}` : note.text,
-    }));
+  const sources = await getTranslations("version.source");
+  const sourceLabel = [sources(version.source.type), version.source.year].filter(Boolean).join(" ");
   const anchors = sectionAnchors(chart);
   const anchorLabel = (name: string, occurrence: number, count: number) =>
     count > 1 ? t("occurrence", { name, occurrence }) : name;
-  const countOf = new Map(anchors.map((anchor) => [anchor.name.toLowerCase(), anchor.count]));
   const editing = rows.find((row) => row.id === search.edit && UUID.test(search.edit ?? ""));
   const editingIds = new Set(editing?.instruments.map((item) => item.instrument_id) ?? []);
   const offered = instruments
     .filter((instrument) => instrument.active || editingIds.has(instrument.id))
     .sort((a, b) => nameOf(a).localeCompare(nameOf(b), locale));
-  const nameById = new Map(instruments.map((instrument) => [instrument.id, nameOf(instrument)]));
-  const unplacedIds = new Set(placement.unplaced.map((item) => item.note.id));
   const hideAuthor = Boolean(layer?.hide_author_notes);
   const authorNotes = chart.sections.flatMap((section, index) =>
     section.notes.map((note, position) => ({
@@ -147,19 +142,69 @@ export default async function NotesPage({
   );
   const pageHref = (extra = "") => `/versions/${version.id}/notes?band=${band.id}${extra}`;
 
+  // The chosen section: the one asked for, the edited note's, or the first (design 06).
+  const placedIndex = (noteId: string) =>
+    placement.sections.findIndex((notes) => notes.some(({ note }) => note.id === noteId));
+  const asked = Number(search.section);
+  const justSaved = search.note && UUID.test(search.note) ? placedIndex(search.note) : -1;
+  const chosen =
+    editing && placedIndex(editing.id) >= 0
+      ? placedIndex(editing.id)
+      : justSaved >= 0
+        ? justSaved
+        : Number.isInteger(asked) && asked >= 0 && asked < chart.sections.length
+          ? asked
+          : 0;
+  const notesIn = (index: number): SectionNote[] => [
+    ...(hideAuthor ? [] : (chart.sections[index]?.notes ?? [])),
+    ...(placement.sections[index] ?? []).map(({ note }) => ({
+      md: true,
+      roles: note.roles,
+      text: note.bar ? `${barLabel(note.bar)} · ${note.text}` : note.text,
+      editHref: pageHref(`&edit=${note.id}#note-form`),
+      editLabel: t("editNote", { text: note.text }),
+    })),
+  ];
+  const chosenAnchor = anchors[chosen];
+  const formAnchor = editing
+    ? `${editing.section}|${editing.occurrence}`
+    : (chosenAnchor?.value ?? "");
+
   return (
     <main className={styles.page}>
-      <header className={styles.header}>
+      <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>{version.title}</h1>
           <p className={styles.meta}>
-            {band.personal ? t("personal") : t("band", { band: band.name })} · {t("private")}
+            {band.personal ? t("personal") : t("band", { band: band.name })} · {t("mdNotes")}
+          </p>
+          <h1 className={styles.title}>
+            {version.title}
+            {sourceLabel ? ` · ${sourceLabel}` : ""}
+          </h1>
+          <p className={styles.hint}>
+            {band.personal ? t("privatePersonal") : t("privateBand", { band: band.name })}
           </p>
         </div>
-        <Link href={`/versions/${version.id}`} className="cd-button cd-button--secondary">
-          {t("back")}
-        </Link>
-      </header>
+        <div className={styles.headerTools}>
+          {authorNotes.length > 0 && (
+            <form action={setAuthorNotes}>
+              <input type="hidden" name="versionId" value={version.id} />
+              <input type="hidden" name="bandId" value={band.id} />
+              <input type="hidden" name="hide" value={hideAuthor ? "0" : "1"} />
+              <input type="hidden" name="section" value={chosen} />
+              <button type="submit" className={styles.toggle} aria-pressed={hideAuthor}>
+                <span className={styles.box} aria-hidden="true">
+                  {hideAuthor && <Icon name="check" size={16} />}
+                </span>
+                {t("hideAuthorShort")}
+              </button>
+            </form>
+          )}
+          <Link href={`/versions/${version.id}`} className="cd-button cd-button--secondary">
+            {t("back")}
+          </Link>
+        </div>
+      </div>
       {bands.length > 1 && (
         <nav aria-label={t("bands")} className={styles.bands}>
           {bands.map((item) => (
@@ -191,118 +236,151 @@ export default async function NotesPage({
         </p>
       )}
 
-      <div className={styles.panes}>
-        <div className={styles.side}>
-          {placement.unplaced.length > 0 && (
-            <section aria-labelledby="unplaced-notes" className={styles.attention}>
-              <h2 id="unplaced-notes" className={styles.label}>
-                {t("unplacedTitle", { count: placement.unplaced.length })}
-              </h2>
-              <p className={styles.hint}>{t("unplacedHint")}</p>
-              <ul className={styles.items}>
-                {placement.unplaced.map(({ note, reason }) => (
-                  <li key={note.id} className={styles.item}>
-                    <p className={styles.where}>
-                      {reason === "bar"
-                        ? t("noBar", { section: note.section, bar: note.bar ?? 0 })
-                        : t("noSection", { section: note.section })}
-                    </p>
-                    <p className={styles.text}>{note.text}</p>
-                    <Link
-                      href={pageHref(`&edit=${note.id}#note-form`)}
-                      className="cd-button cd-button--secondary"
-                      aria-label={t("anchorNote", { text: note.text })}
-                    >
-                      {t("anchor")}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
+      {placement.unplaced.length > 0 && (
+        <section aria-labelledby="unplaced-notes" className={styles.attention}>
+          <h2 id="unplaced-notes" className={styles.label}>
+            {t("unplacedTitle", { count: placement.unplaced.length })}
+          </h2>
+          <p className={styles.hint}>{t("unplacedHint")}</p>
+          <ul className={styles.items}>
+            {placement.unplaced.map(({ note, reason }) => (
+              <li key={note.id} className={styles.item}>
+                <p className={styles.where}>
+                  {reason === "bar"
+                    ? t("noBar", { section: note.section, bar: note.bar ?? 0 })
+                    : t("noSection", { section: note.section })}
+                </p>
+                <p className={styles.text}>{note.text}</p>
+                <Link
+                  href={pageHref(`&edit=${note.id}#note-form`)}
+                  className="cd-button cd-button--secondary"
+                  aria-label={t("anchorNote", { text: note.text })}
+                >
+                  {t("anchor")}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <div className={styles.layerPanes}>
+        <nav aria-label={t("sections")} className={styles.sectionList}>
+          {anchors.map((anchor, index) => (
+            <Link
+              key={anchor.value}
+              href={pageHref(`&section=${index}`)}
+              className={styles.sectionLink}
+              aria-current={index === chosen && !editing ? "true" : undefined}
+            >
+              <span>{anchorLabel(anchor.name, anchor.occurrence, anchor.count)}</span>
+              <span className={styles.noteCount}>
+                {t("noteCount", { count: notesIn(index).length })}
+              </span>
+            </Link>
+          ))}
+        </nav>
+
+        <SectionView chart={chart} index={chosen} notes={notesIn(chosen)}>
           <form
             // A fresh form for each note, so no value carries over between adding and editing,
             // nor from one added note to the next.
             key={editing?.id ?? `new-${rows.length}`}
             action={saveNote}
-            className={styles.form}
+            className={styles.noteForm}
             id="note-form"
           >
-            <h2 className={styles.label}>{editing ? t("editTitle") : t("addTitle")}</h2>
+            <h3 className={styles.label}>
+              {editing
+                ? t("editTitle")
+                : t("addTo", {
+                    section: chosenAnchor
+                      ? anchorLabel(chosenAnchor.name, chosenAnchor.occurrence, chosenAnchor.count)
+                      : "",
+                  })}
+            </h3>
             <input type="hidden" name="versionId" value={version.id} />
             <input type="hidden" name="bandId" value={band.id} />
             {editing && <input type="hidden" name="noteId" value={editing.id} />}
-            <label className={styles.field}>
-              {t("section")}
-              <select
-                name="anchor"
-                required
-                className={styles.input}
-                defaultValue={editing ? `${editing.section}|${editing.occurrence}` : ""}
-              >
-                <option value="" disabled>
-                  {t("chooseSection")}
-                </option>
-                {anchors.map((anchor) => (
-                  <option key={anchor.value} value={anchor.value}>
-                    {anchorLabel(anchor.name, anchor.occurrence, anchor.count)}
-                  </option>
-                ))}
-                {editing &&
-                  !anchors.some((a) => a.value === `${editing.section}|${editing.occurrence}`) && (
-                    <option value={`${editing.section}|${editing.occurrence}`}>
+            <input type="hidden" name="section" value={chosen} />
+            {editing ? (
+              // Editing may move a note to another section, as anchoring it again does.
+              <label className={styles.field}>
+                {t("section")}
+                <select name="anchor" required className={styles.input} defaultValue={formAnchor}>
+                  {anchors.map((anchor) => (
+                    <option key={anchor.value} value={anchor.value}>
+                      {anchorLabel(anchor.name, anchor.occurrence, anchor.count)}
+                    </option>
+                  ))}
+                  {!anchors.some((a) => a.value === formAnchor) && (
+                    <option value={formAnchor}>
                       {anchorLabel(editing.section, editing.occurrence, 2)}
                     </option>
                   )}
-              </select>
-            </label>
-            <label className={styles.field}>
-              {t("barField")}
-              <input
-                name="bar"
-                type="number"
-                min={1}
-                step={1}
-                inputMode="numeric"
-                className={styles.input}
-                defaultValue={editing?.bar ?? ""}
-              />
-            </label>
+                </select>
+              </label>
+            ) : (
+              <input type="hidden" name="anchor" value={formAnchor} />
+            )}
             <fieldset className={styles.group}>
               <legend className={styles.label}>{t("for")}</legend>
-              <p className={styles.hint}>{t("forHint")}</p>
-              <div className={styles.instruments}>
+              <div className={styles.chips}>
+                <span className={styles.chipEveryone}>{t("everyone")}</span>
                 {offered.map((instrument) => (
-                  <label key={instrument.id} className={styles.check}>
+                  <label key={instrument.id} className={styles.chip}>
                     <input
                       type="checkbox"
                       name="instrument"
                       value={instrument.id}
                       defaultChecked={editingIds.has(instrument.id)}
                     />
+                    {hasInstrumentIcon(instrument.slug) && (
+                      <Icon name={instrument.slug} size={18} />
+                    )}
                     {nameOf(instrument)}
                   </label>
                 ))}
               </div>
+              <p className={styles.hint}>{t("forHint")}</p>
             </fieldset>
-            <div className={styles.field}>
-              <label htmlFor="note-text">{t("text")}</label>
-              <input
-                id="note-text"
-                name="text"
-                required
-                maxLength={NOTE_MAX}
-                className={styles.input}
-                defaultValue={editing?.text ?? ""}
-                autoComplete="off"
-                aria-describedby="note-text-hint"
-              />
-              <span id="note-text-hint" className={styles.hint}>
-                {t("textHint", { max: NOTE_MAX })}
-              </span>
+            <div className={styles.fields}>
+              <div className={styles.field}>
+                <label htmlFor="note-text">{t("text")}</label>
+                <input
+                  id="note-text"
+                  name="text"
+                  required
+                  maxLength={NOTE_MAX}
+                  className={styles.input}
+                  defaultValue={editing?.text ?? ""}
+                  placeholder={t("textPlaceholder")}
+                  autoComplete="off"
+                  aria-describedby="note-text-hint"
+                />
+                <span id="note-text-hint" className={styles.hint}>
+                  {t("textHint", { max: NOTE_MAX })}
+                </span>
+              </div>
+              <label className={styles.field}>
+                {t("barField")}
+                <input
+                  name="bar"
+                  type="number"
+                  min={1}
+                  step={1}
+                  inputMode="numeric"
+                  className={styles.input}
+                  defaultValue={editing?.bar ?? ""}
+                />
+              </label>
             </div>
             <div className={styles.buttons}>
-              <Button type="submit" variant="primary">
+              <Button
+                type="submit"
+                variant="primary"
+                {...(editing ? {} : { icon: "add" as const })}
+              >
                 {editing ? t("saveEdit") : t("add")}
               </Button>
               {editing && (
@@ -312,89 +390,18 @@ export default async function NotesPage({
               )}
             </div>
           </form>
-
-          <section aria-labelledby="layer-notes" className={styles.list}>
-            <h2 id="layer-notes" className={styles.label}>
-              {t("count", { count: rows.length })}
-            </h2>
-            <ul className={styles.items}>
-              {rows.map((row) => {
-                const names = row.instruments.map((item) => nameById.get(item.instrument_id) ?? "");
-                return (
-                  <li key={row.id} className={styles.item}>
-                    <p className={styles.where}>
-                      {anchorLabel(
-                        row.section,
-                        row.occurrence,
-                        countOf.get(row.section.toLowerCase()) ?? 1,
-                      )}
-                      {row.bar ? ` · ${barLabel(row.bar)}` : ""}
-                      {" · "}
-                      {names.length > 0 ? names.join(", ") : t("everyone")}
-                      {unplacedIds.has(row.id) && (
-                        <>
-                          {" "}
-                          · <b>{t("unplaced")}</b>
-                        </>
-                      )}
-                    </p>
-                    <p className={styles.text}>{row.text}</p>
-                    <div className={styles.buttons}>
-                      <Link
-                        href={pageHref(`&edit=${row.id}#note-form`)}
-                        className="cd-button cd-button--secondary"
-                        aria-label={t("editNote", { text: row.text })}
-                      >
-                        {t("edit")}
-                      </Link>
-                      <form action={deleteNote}>
-                        <input type="hidden" name="versionId" value={version.id} />
-                        <input type="hidden" name="bandId" value={band.id} />
-                        <input type="hidden" name="noteId" value={row.id} />
-                        <Button type="submit" aria-label={t("deleteNote", { text: row.text })}>
-                          {t("delete")}
-                        </Button>
-                      </form>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-
-          {authorNotes.length > 0 && (
-            <section aria-labelledby="author-notes" className={styles.list}>
-              <h2 id="author-notes" className={styles.label}>
-                {t("authorTitle")}
-              </h2>
-              <p className={styles.hint}>{hideAuthor ? t("authorHiddenHint") : t("authorHint")}</p>
-              <ul className={styles.items}>
-                {authorNotes.map(({ key, section, note }) => (
-                  <li key={key} className={styles.item}>
-                    <p className={styles.where}>{section}</p>
-                    <p className={hideAuthor ? styles.muted : styles.text}>{note.text}</p>
-                  </li>
-                ))}
-              </ul>
-              <form action={setAuthorNotes}>
-                <input type="hidden" name="versionId" value={version.id} />
-                <input type="hidden" name="bandId" value={band.id} />
-                <input type="hidden" name="hide" value={hideAuthor ? "0" : "1"} />
-                <Button type="submit">{hideAuthor ? t("showAuthor") : t("hideAuthor")}</Button>
-              </form>
-            </section>
+          {editing && (
+            <form action={deleteNote}>
+              <input type="hidden" name="versionId" value={version.id} />
+              <input type="hidden" name="bandId" value={band.id} />
+              <input type="hidden" name="noteId" value={editing.id} />
+              <input type="hidden" name="section" value={chosen} />
+              <Button type="submit" aria-label={t("deleteNote", { text: editing.text })}>
+                {t("delete")}
+              </Button>
+            </form>
           )}
-        </div>
-
-        <section className={styles.preview} aria-label={t("preview")}>
-          <ChartBody
-            chart={chart}
-            notes={(index) => [
-              ...(hideAuthor ? [] : (chart.sections[index]?.notes ?? [])),
-              ...layerNotes(index),
-            ]}
-          />
-        </section>
+        </SectionView>
       </div>
     </main>
   );

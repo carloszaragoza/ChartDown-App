@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
-import { PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import { chooseSection, PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
 
 const CHART = "## Verse\n1 | 4\n\n## Chorus\n4 | 5 | 6m | 1\n";
 
@@ -12,7 +12,7 @@ async function switchTo(page: Page, email: string, name: string) {
 }
 
 async function addNote(page: Page, instrument: string, text: string) {
-  await page.getByLabel("Section").selectOption({ label: "Chorus" });
+  await chooseSection(page, "Chorus");
   await page.getByLabel(instrument, { exact: true }).check();
   await page.getByLabel("Note", { exact: true }).fill(text);
   await page.getByRole("button", { name: "Add note" }).click();
