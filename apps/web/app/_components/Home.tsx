@@ -28,6 +28,15 @@ export function Home({
         style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "var(--space-4)" }}
       >
         <LanguageSwitcher />
+        {signInEnabled && (
+          <Link
+            href="/catalog"
+            className="cd-button cd-button--secondary"
+            style={{ textDecoration: "none" }}
+          >
+            {t("catalog")}
+          </Link>
+        )}
         {signInEnabled &&
           (account ? (
             <form

@@ -2,7 +2,8 @@
   "home": {
     "title": "ChartDown App",
     "tagline": "Number charts for the whole band, with each player’s notes.",
-    "newVersion": "New version"
+    "newVersion": "New version",
+    "catalog": "Catalog"
   },
   "language": {
     "label": "Language",
@@ -242,5 +243,22 @@
     "confirm": "Make private",
     "cancel": "Cancel and go back to the version",
     "error": "This version could not be made private. Try again."
+  },
+  "catalog": {
+    "title": "Catalog",
+    "search": "Search by title, artist or album",
+    "submit": "Search",
+    "sources": "Source",
+    "all": "All",
+    "results": "Songs",
+    "none": "No songs match.",
+    "error": "The catalog could not be loaded. Try again.",
+    "versions": "{count, plural, one {# version} other {# versions}}",
+    "versionsOf": "Versions of {title}",
+    "pages": "Pages",
+    "previous": "Previous",
+    "next": "Next",
+    "home": "Back to home",
+    "back": "Back to the catalog"
   }
 }

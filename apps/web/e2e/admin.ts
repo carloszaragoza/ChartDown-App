@@ -45,7 +45,18 @@ export async function createVersion(
     title,
     content,
     visibility = "public",
-  }: { title: string; content: string; visibility?: "public" | "private" },
+    songId,
+    sourceType = "own_arrangement",
+    album,
+  }: {
+    title: string;
+    content: string;
+    visibility?: "public" | "private";
+    /** Another version of this song, rather than a new song. */
+    songId?: string;
+    sourceType?: "studio" | "live" | "acoustic" | "own_arrangement";
+    album?: string;
+  },
 ): Promise<string> {
   const post = async (table: string, data: unknown) => {
     const response = await request.post(`${url()}/rest/v1/${table}`, {
@@ -56,11 +67,12 @@ export async function createVersion(
       throw new Error(`Could not create ${table}: ${response.status()} ${await response.text()}`);
     return ((await response.json()) as { id: string }[])[0]?.id ?? "";
   };
-  const song = await post("songs", { title, artists: ["ChartDown examples"] });
+  const song = songId ?? (await post("songs", { title, artists: ["ChartDown examples"] }));
   const version = await post("versions", {
     song_id: song,
     author_name: "ChartDown",
-    source_type: "own_arrangement",
+    source_type: sourceType,
+    source_album: album ?? null,
     visibility,
   });
   const revision = await post("revisions", { version_id: version, number: 1, content });
@@ -105,4 +117,13 @@ export async function addRevisions(
     data: { current_revision_id: last },
   });
   if (!patched.ok()) throw new Error(`Could not set the current revision: ${patched.status()}`);
+}
+
+/** The song a version belongs to. */
+export async function songOf(request: APIRequestContext, versionId: string): Promise<string> {
+  const response = await request.get(`${url()}/rest/v1/versions`, {
+    headers: headers(),
+    params: { select: "song_id", id: `eq.${versionId}` },
+  });
+  return ((await response.json()) as { song_id: string }[])[0]?.song_id ?? "";
 }

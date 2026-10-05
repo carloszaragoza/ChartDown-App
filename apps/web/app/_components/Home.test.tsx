@@ -35,6 +35,7 @@ describe("R-01.5 the page in each language", () => {
       </NextIntlClientProvider>,
     );
     expect(signedOut).toContain('href="/auth/sign-in"');
+    expect(signedOut).toContain('href="/catalog"');
     const signedIn = renderToString(
       <NextIntlClientProvider locale="es" messages={es} timeZone="UTC">
         <Home signInEnabled account={{ name: "Ana" }} />
