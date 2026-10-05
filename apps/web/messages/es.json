@@ -163,7 +163,11 @@
       "confirm": "Escribe tu correo para confirmar",
       "submit": "Eliminar mi cuenta",
       "mismatch": "Ese correo no coincide con tu cuenta."
-    }
+    },
+    "prefsTitle": "Avisos",
+    "prefsHint": "En la app. El correo llegará más adelante.",
+    "prefsSave": "Guardar avisos",
+    "prefsSaved": "Tus avisos quedaron guardados."
   },
   "version": {
     "by": "Arreglo de {author}",
@@ -640,6 +644,15 @@
       "order_changed": "Cambió el orden de las canciones de {set}.",
       "note_added": "Nueva nota para {for} en {title}, {place}: «{text}»",
       "new_revision": "{title} tiene una nueva revisión de su autor, la {number}; {set} sigue tocando la revisión {pinned}."
+    },
+    "kinds": {
+      "lineup_added": "Cuando me agregan a un set",
+      "lineup_removed": "Cuando me quitan de un set",
+      "temp_md": "Cuando me dan la dirección musical temporal",
+      "key_changed": "Cuando una canción de mis sets cambia de tonalidad",
+      "order_changed": "Cuando cambia el orden de uno de mis sets",
+      "note_added": "Cuando hay una nota nueva para mis instrumentos",
+      "new_revision": "Cuando una canción de los sets de mi banda tiene una revisión nueva (dirección musical)"
     }
   }
 }

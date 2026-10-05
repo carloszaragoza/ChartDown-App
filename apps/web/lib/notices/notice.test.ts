@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { noticeHref, noticeMessage, type NoticeWords } from "./notice";
+import en from "../../messages/en.json";
+import es from "../../messages/es.json";
+import {
+  NOTICE_TYPES,
+  noticeHref,
+  noticeMessage,
+  preferenceChanges,
+  type NoticeWords,
+} from "./notice";
 
 const words: NoticeWords = {
   instrument: (slug) => ({ bass: "Bass", keys: "Keys" })[slug] ?? slug,
@@ -110,5 +118,34 @@ describe("T-1002 what a notice says", () => {
     expect(noticeHref({ type: "key_changed", detail: set })).toBe("/sets/s1");
     expect(noticeHref({ type: "note_added", detail: { version_id: "v1" } })).toBe("/versions/v1");
     expect(noticeMessage({ type: "something_new", detail: {} }, words)).toBeNull();
+  });
+});
+
+describe("T-1003 choosing which notices to receive", () => {
+  it("R-09.5 turning a kind off saves it off; turning it back on removes the row", () => {
+    const all = new Set<string>(NOTICE_TYPES);
+    expect(preferenceChanges(all, new Set())).toEqual({ turnOff: [], turnOn: [] });
+    const withoutKeys = new Set([...all].filter((type) => type !== "key_changed"));
+    expect(preferenceChanges(withoutKeys, new Set())).toEqual({
+      turnOff: ["key_changed"],
+      turnOn: [],
+    });
+    expect(preferenceChanges(withoutKeys, new Set(["key_changed"]))).toEqual({
+      turnOff: [],
+      turnOn: [],
+    });
+    expect(preferenceChanges(all, new Set(["key_changed", "something_old"]))).toEqual({
+      turnOff: [],
+      turnOn: ["key_changed"],
+    });
+  });
+
+  it("R-09.5 every kind of notice can be chosen and read, in both languages", () => {
+    for (const messages of [en, es]) {
+      for (const type of NOTICE_TYPES) {
+        expect(messages.notices.kinds, type).toHaveProperty(type);
+        expect(messages.notices.types, type).toHaveProperty(type);
+      }
+    }
   });
 });

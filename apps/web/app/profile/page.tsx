@@ -4,9 +4,10 @@ import { notFound, redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { LOCALES } from "../../i18n/locales";
 import { authEnabled } from "../../lib/auth/enabled";
+import { NOTICE_TYPES } from "../../lib/notices/notice";
 import { createClient } from "../../lib/supabase/server";
 import styles from "./profile.module.css";
-import { deleteAccount, saveProfile } from "./actions";
+import { deleteAccount, saveNoticePrefs, saveProfile } from "./actions";
 
 type Search = Promise<{ saved?: string; error?: string }>;
 interface CatalogInstrument {
@@ -17,21 +18,34 @@ interface CatalogInstrument {
   active: boolean;
 }
 
-/** A person's name, interface language and the instruments they play (R-01.2, R-01.5). */
+/**
+ * A person's name, interface language and the instruments they play (R-01.2, R-01.5), and which
+ * notices they receive (R-09.5).
+ */
 export default async function ProfilePage({ searchParams }: { searchParams: Search }) {
   if (!authEnabled()) notFound();
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect("/auth/sign-in?next=/profile");
 
-  const [{ data: profile }, { data: catalog }, { data: mine }] = await Promise.all([
-    supabase.from("profiles").select("name, language").eq("id", auth.user.id).single(),
-    supabase.from("instruments").select("id, slug, name_en, name_es, active"),
-    supabase.from("user_instruments").select("instrument_id").eq("user_id", auth.user.id),
-  ]);
+  const [{ data: profile }, { data: catalog }, { data: mine }, { data: prefs }] = await Promise.all(
+    [
+      supabase.from("profiles").select("name, language").eq("id", auth.user.id).single(),
+      supabase.from("instruments").select("id, slug, name_en, name_es, active"),
+      supabase.from("user_instruments").select("instrument_id").eq("user_id", auth.user.id),
+      supabase
+        .from("notification_prefs")
+        .select("type")
+        .eq("user_id", auth.user.id)
+        .eq("channel", "in_app")
+        .eq("active", false),
+    ],
+  );
   const { saved, error } = await searchParams;
   const t = await getTranslations("profile");
   const languageNames = await getTranslations("language");
+  const kinds = await getTranslations("notices.kinds");
+  const off = new Set((prefs ?? []).map((row) => row.type as string));
   const locale = await getLocale();
 
   const chosen = new Set((mine ?? []).map((row) => row.instrument_id as string));
@@ -47,7 +61,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Sear
       <h1 className={styles.title}>{t("title")}</h1>
       {saved && (
         <p role="status" className={styles.message}>
-          {t("saved")}
+          {saved === "notices" ? t("prefsSaved") : t("saved")}
         </p>
       )}
       {error && (
@@ -110,6 +124,19 @@ export default async function ProfilePage({ searchParams }: { searchParams: Sear
         <Button type="submit" variant="primary">
           {t("save")}
         </Button>
+      </form>
+      <form id="notices" action={saveNoticePrefs} className={styles.form}>
+        <fieldset className={styles.group}>
+          <legend className={styles.legend}>{t("prefsTitle")}</legend>
+          <p className={styles.hint}>{t("prefsHint")}</p>
+          {NOTICE_TYPES.map((type) => (
+            <label key={type} className={styles.choice}>
+              <input type="checkbox" name="notice" value={type} defaultChecked={!off.has(type)} />
+              {kinds(type)}
+            </label>
+          ))}
+        </fieldset>
+        <Button type="submit">{t("prefsSave")}</Button>
       </form>
       <section id="delete" className={styles.form} aria-labelledby="delete-title">
         <h2 id="delete-title" className={styles.legend}>

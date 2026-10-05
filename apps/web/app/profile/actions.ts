@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { isLocale } from "../../i18n/locales";
 import { rememberLocale } from "../../i18n/remember";
 import { authEnabled } from "../../lib/auth/enabled";
+import { preferenceChanges } from "../../lib/notices/notice";
 import { createClient } from "../../lib/supabase/server";
 
 /** Saves a person's name, language and instruments (R-01.2, R-01.5). */
@@ -50,6 +51,40 @@ export async function saveProfile(form: FormData): Promise<void> {
 
   await rememberLocale(language);
   redirect("/profile?saved=1");
+}
+
+/** Saves which notices the person receives in the app (R-09.5). */
+export async function saveNoticePrefs(form: FormData): Promise<void> {
+  if (!authEnabled()) redirect("/");
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) redirect("/auth/sign-in?next=/profile");
+  const userId = auth.user.id;
+
+  const { data: rows } = await supabase
+    .from("notification_prefs")
+    .select("type")
+    .eq("user_id", userId)
+    .eq("channel", "in_app")
+    .eq("active", false);
+  const off = new Set((rows ?? []).map((row) => row.type as string));
+  const { turnOff, turnOn } = preferenceChanges(new Set(form.getAll("notice").map(String)), off);
+  if (turnOff.length > 0) {
+    const { error } = await supabase
+      .from("notification_prefs")
+      .upsert(turnOff.map((type) => ({ user_id: userId, type, channel: "in_app", active: false })));
+    if (error) redirect("/profile?error=unknown#notices");
+  }
+  if (turnOn.length > 0) {
+    const { error } = await supabase
+      .from("notification_prefs")
+      .delete()
+      .eq("user_id", userId)
+      .eq("channel", "in_app")
+      .in("type", turnOn);
+    if (error) redirect("/profile?error=unknown#notices");
+  }
+  redirect("/profile?saved=notices#notices");
 }
 
 /** Deletes the signed-in person's account for good, after they confirm with their email (R-01.6). */

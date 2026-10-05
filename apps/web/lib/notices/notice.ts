@@ -7,6 +7,32 @@ export interface Notice {
   read_at: string | null;
 }
 
+/** The kinds of notice T-1001 makes, in the order the profile offers them (R-09.5). */
+export const NOTICE_TYPES = [
+  "lineup_added",
+  "lineup_removed",
+  "temp_md",
+  "key_changed",
+  "order_changed",
+  "note_added",
+  "new_revision",
+] as const;
+export type NoticeType = (typeof NOTICE_TYPES)[number];
+
+/**
+ * What saving the preferences changes (R-09.5): the kinds now turned off get an "off" row; the
+ * kinds turned back on lose theirs, since no row means the notice is on.
+ */
+export function preferenceChanges(
+  wanted: ReadonlySet<string>,
+  off: ReadonlySet<string>,
+): { turnOff: NoticeType[]; turnOn: NoticeType[] } {
+  return {
+    turnOff: NOTICE_TYPES.filter((type) => !wanted.has(type) && !off.has(type)),
+    turnOn: NOTICE_TYPES.filter((type) => wanted.has(type) && off.has(type)),
+  };
+}
+
 /** How a notice reads: a message under `notices.types` and its values. */
 export interface NoticeMessage {
   key: string;
