@@ -16,6 +16,9 @@ test("R-01.2 a person saves their name and the instruments they play", async ({ 
   await expect(page.getByLabel("Vocals")).toBeChecked();
   await expect(page.getByLabel("Drums")).not.toBeChecked();
 
+  // Without the first save's message, so the next wait sees the second save's own message.
+  await page.goto("/profile");
+  await expect(page.getByRole("main").getByRole("status")).toHaveCount(0);
   await page.getByLabel("Vocals").uncheck();
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("Your profile was saved");
