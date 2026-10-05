@@ -93,6 +93,7 @@ All three families are open-license Google Fonts. They are served by the app (no
 | Catalog | SPEC-02 | Search; filter by source; song with its versions; open and fork |
 | Chart editor | SPEC-00, 02, 03 | Text on the left, live preview on the right; public/private; history; parser warnings with line numbers |
 | MD layer editor | SPEC-03 (R-03.5), 06 | Sections, tagged notes, per-instrument form, hide author's notes |
+| Notices (T-1002) | SPEC-09 | Not in the Screens canvas yet; built from these tokens and components. Top bar: a "Notices" link with the unread count beside it (a `paper` pill with a `control-border` outline, `ink` text), announced in text ("Notices, 3 unread"); no bell until the design system adds one (section 7). The `/notices` page: newest first; each notice is one sentence saying what changed, in the reader's language, with its set or song and when; unread ones carry the word "New" in `md`; opening one marks it read and goes to what it is about; "Mark all as read". A new notice arrives without reloading |
 | Landing (chartdown.app) | SPEC-01 (invites) | Waitlist, sign-in with invite code, link to the language on GitHub |
 
 ## 5. Responsive
