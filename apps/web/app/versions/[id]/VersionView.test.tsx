@@ -143,3 +143,14 @@ describe("R-03.2 the display bar", () => {
     expect(render("en")).not.toContain("written in");
   });
 });
+
+describe("R-03.5 the MD's notes", () => {
+  const notes = 'href="/versions/00000000-0000-0000-0000-0000000000f1/notes"';
+
+  it("R-03.5 a signed-in person opens their notes on a version; a visitor does not", () => {
+    expect(render("en", { signedIn: true })).toContain(notes);
+    expect(render("en", { signedIn: true, owner: true })).toContain(notes);
+    expect(render("es", { signedIn: true })).toContain("Mis notas");
+    expect(render("en")).not.toContain(notes);
+  });
+});

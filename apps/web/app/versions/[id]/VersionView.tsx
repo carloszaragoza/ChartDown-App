@@ -143,6 +143,11 @@ export function VersionView({
             )}
           </div>
         )}
+        {signedIn && notice === undefined && (
+          <Link href={`/versions/${id}/notes`} className="cd-button cd-button--secondary">
+            {t("myNotes")}
+          </Link>
+        )}
         {signedIn && !owner && visibility === "public" && notice === undefined && (
           <form action={forkVersion} className={styles.fork}>
             <input type="hidden" name="versionId" value={id} />

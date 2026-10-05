@@ -184,7 +184,8 @@
     "private": "Privada",
     "frozen": "Versión pública congelada",
     "makePrivate": "Hacer privada",
-    "edit": "Editar"
+    "edit": "Editar",
+    "myNotes": "Mis notas"
   },
   "newVersion": {
     "title": "Nueva versión",
@@ -286,5 +287,43 @@
     "writtenOption": "{key} (escrito)",
     "apply": "Aplicar",
     "written": "Volver al tono escrito, {key}"
+  },
+  "notes": {
+    "personal": "Mis notas (espacio personal)",
+    "band": "Notas de {band}",
+    "private": "solo las ve tu banda",
+    "back": "Volver a la versión",
+    "bands": "Bandas",
+    "saved": "Se guardó la nota.",
+    "deleted": "Se borró la nota.",
+    "addTitle": "Añadir una nota",
+    "editTitle": "Editar la nota",
+    "section": "Sección",
+    "chooseSection": "Elige una sección",
+    "occurrence": "{name} ({occurrence, selectordinal, other {#.ª}})",
+    "barField": "Compás (opcional)",
+    "bar": "Compás {bar}",
+    "for": "Para",
+    "forHint": "Deja todos los instrumentos sin marcar para una nota para todos.",
+    "text": "Nota",
+    "textHint": "Una línea, hasta {max} caracteres.",
+    "add": "Añadir nota",
+    "saveEdit": "Guardar nota",
+    "cancel": "Cancelar",
+    "count": "{count, plural, =0 {Aún no hay notas} one {# nota} other {# notas}}",
+    "everyone": "Todos",
+    "unplaced": "sin ubicar",
+    "edit": "Editar",
+    "editNote": "Editar la nota: {text}",
+    "delete": "Borrar",
+    "deleteNote": "Borrar la nota: {text}",
+    "preview": "Cifrado con las notas",
+    "errors": {
+      "section_required": "Elige la sección de la nota.",
+      "bar_invalid": "El compás debe ser un número entero desde 1.",
+      "text_required": "Escribe la nota.",
+      "text_too_long": "Una nota tiene hasta 280 caracteres.",
+      "unknown": "No se pudo guardar la nota. Inténtalo de nuevo."
+    }
   }
 }

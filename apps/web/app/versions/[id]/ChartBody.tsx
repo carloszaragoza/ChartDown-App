@@ -1,5 +1,11 @@
 import { chordFormatter, type Chart, type ChordStyle, type Key } from "@chartdown/core";
-import { FormStrip, formStripItems, Section, type FormStripItem } from "@chartdown/ui";
+import {
+  FormStrip,
+  formStripItems,
+  Section,
+  type FormStripItem,
+  type MDNoteData,
+} from "@chartdown/ui";
 import { useTranslations } from "next-intl";
 import { useChartLabels } from "../../_components/chartLabels";
 
@@ -11,10 +17,13 @@ export function ChartBody({
   chart,
   style = "numbers",
   homeKey,
+  notes,
 }: {
   chart: Chart;
   style?: ChordStyle;
   homeKey?: Key;
+  /** The notes to show on each section, by its index; the chart's own by default. */
+  notes?: (index: number) => readonly MDNoteData[];
 }) {
   const c = useTranslations("chart");
   const labels = useChartLabels();
@@ -34,6 +43,7 @@ export function ChartBody({
           labels={labels}
           size="md"
           id={`section-${index + 1}`}
+          {...(notes ? { notes: notes(index) } : {})}
         />
       ))}
     </>
