@@ -106,7 +106,9 @@ Every task is small, has its requirements (R-xx) and is done only when its tests
 | T-703 | Set lineup and key per song | R-05.3, R-05.4 | T-702 | S | The set key does not change the version for others |
 | T-704 | Pinned revision per song and an “Update” button | R-05.2, decision 9.2 | T-702, T-502 | S | A new revision from the author doesn't change the set until accepted |
 | T-705 | Temporary MD for a set | R-05.5, decision 9.6 | T-702 | S | Cannot edit other sets or the layer |
-| T-706 | Set screen | Handoff 4 | T-703, T-202 | M | Matches the approved design |
+| T-706 | Set screen (`design/screens/01-set.html`) and the app's top bar (ChartDown, Sets, Catalog, Bands, Personal space, language, account) | Handoff 4 | T-703, T-202, T-801 | M | Matches the approved design |
+| T-707 | Align the screens built before the design export with it: catalog, chart editor, MD layer editor and stand mode in a set (`design/screens/02` to `06`) | Handoff 4 | T-706, T-802 | M | Each screen matches the approved design |
+| T-708 | Optional time of a set, shown with its date | R-05.1 | T-702 | S | A set at 9:00 shows “9:00 AM” with its date |
 
 ## E8 · Per-instrument view (SPEC-06)
 

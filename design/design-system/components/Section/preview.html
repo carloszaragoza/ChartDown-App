@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><style>:root{--ground:#eef1f4;--paper:#fbfcfd;--ink:#16212c;--ink-muted:#566574;--ink-inverse:#fbfcfd;--rule:#b4bec8;--control-border:#7d8a97;--md:#b8322a;--dynamic:#1f4fa8;--focus:#1f4fa8;--font-num:"Barlow Condensed", "Arial Narrow", sans-serif;--font-ui:"Source Sans 3", "Segoe UI", system-ui, sans-serif;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-6:24px;--space-8:32px;--space-10:40px;--radius-none:0;--radius-sm:4px;--radius-md:6px;--bar-line:3px;--bar-line-light:2px;--hairline:1px;--target-min:44px;--bar-height:128px;--bar-height-sm:64px}</style></head><body>
+<!-- @dsCard group="Chart" height=380 subtitle="Title, bar count, MD notes and a row of bars" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,700&display=swap">
+<style>
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font-ui)}
+.card{margin:24px;background:var(--paper);border:var(--hairline) solid var(--rule);border-radius:var(--radius-sm);padding:24px 28px;display:flex;flex-direction:column;gap:14px}
+.head{display:flex;align-items:baseline;gap:14px}
+h2{margin:0;font-family:var(--font-num);font-size:36px;font-weight:600;line-height:1}
+.count{font-size:15px;color:var(--ink-muted)}
+p{margin:0;font-size:18px;line-height:1.4}
+.md{color:var(--md);font-weight:700;margin-right:8px}
+.tag{display:inline-block;padding:0 8px;margin-right:8px;border:1.5px solid var(--md);border-radius:var(--radius-sm);color:var(--md);font-weight:700;font-size:15px}
+.row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-left:var(--bar-line) solid var(--ink);margin-top:6px}
+.bar{position:relative;height:var(--bar-height);border-right:var(--bar-line) solid var(--ink);display:flex;align-items:center;justify-content:space-around;font-family:var(--font-num);font-size:58px;font-weight:600;line-height:1}
+.dyn{position:absolute;top:8px;left:12px;font:italic 700 18px var(--font-ui);color:var(--dynamic)}
+.min{font-size:30px;vertical-align:super}
+</style>
+<section class="card" aria-label="Chorus">
+  <div class="head"><h2>Chorus</h2><span class="count">4 bars</span></div>
+  <p><span class="md">MD</span>Open it up a little. Don't go all out yet.</p>
+  <p><span class="tag">Keys</span>Pad underneath, always under the vocal.</p>
+  <div class="row">
+    <div class="bar"><span class="dyn">mf</span><span>4</span></div>
+    <div class="bar"><span>1</span></div>
+    <div class="bar"><span>5</span></div>
+    <div class="bar"><span>6<span class="min">-</span></span></div>
+  </div>
+</section>
+
+</body></html>

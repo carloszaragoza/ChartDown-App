@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChartDown App – Catalog</title>
+<!-- Static export of the approved design. Reference only: rebuild with real components and tokens. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&amp;family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1f4fa8}a:hover{color:#16212c}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:6px;font:600 16px 'Source Sans 3',sans-serif;cursor:pointer;text-decoration:none;box-sizing:border-box}
+.btn-p{background:#16212c;color:#fbfcfd;border:0}
+.btn-s{background:#fbfcfd;color:#16212c;border:1px solid #7d8a97}
+.btn-v{background:#fbfcfd;color:#b8322a;border:1.5px solid #b8322a}
+.row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-left:3px solid #16212c}
+.bar{position:relative;height:128px;border-right:3px solid #16212c;display:flex;align-items:center;justify-content:space-around;font:600 58px/1 'Barlow Condensed','Arial Narrow',sans-serif;color:#16212c}
+.rowsm{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-left:2px solid #7d8a97}
+.barsm{height:60px;border-right:2px solid #7d8a97;display:flex;align-items:center;justify-content:space-around;font:600 32px/1 'Barlow Condensed','Arial Narrow',sans-serif;color:#566574}
+.min{font-size:.52em;vertical-align:super}
+.dyn{position:absolute;top:8px;left:12px;font:italic 700 18px 'Source Sans 3',sans-serif;color:#1f4fa8}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:1px 8px 1px 6px;margin-right:8px;border:1.5px solid #b8322a;border-radius:4px;color:#b8322a;font:700 15px/1.5 'Source Sans 3',sans-serif;vertical-align:1px}
+.chip{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:52px;min-height:44px;padding:5px 10px;border:1px solid #7d8a97;border-radius:4px;background:#fbfcfd;color:#16212c;text-decoration:none;box-sizing:border-box}
+.chip .ab{font:600 21px/1 'Barlow Condensed','Arial Narrow',sans-serif}
+.chip .n{font:400 14px/1.2 'Source Sans 3',sans-serif;color:#566574}
+.chip.done{background:#eef1f4}
+.chip.done .ab{color:#566574}
+.chip.now{background:#16212c;border-color:#16212c;color:#fbfcfd}
+.chip.now .n{color:#fbfcfd}
+.dot{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:#b8322a}
+.card{background:#fbfcfd;border:1px solid #b4bec8;border-radius:4px}
+.muted{color:#566574}
+.field{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border:1px solid #7d8a97;border-radius:6px;background:#fbfcfd;color:#16212c;font:400 16px 'Source Sans 3',sans-serif;box-sizing:border-box}
+input,textarea{font:inherit;color:inherit;background:transparent;border:0;outline:none}
+.navlink{display:inline-flex;align-items:center;min-height:44px;padding:0 6px;font:600 16px 'Source Sans 3',sans-serif;color:#16212c;text-decoration:none}
+.navlink.cur{text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:2px}
+</style>
+</head>
+<body>
+<div style="min-height: 1060px; background: #eef1f4; color: #16212c; font-family: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif; display: flex; flex-direction: column">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding: 10px 32px; background: #fbfcfd; border-bottom: 1px solid #b4bec8">
+  <a href="#home" style="font: 700 28px/1 'Barlow Condensed', 'Arial Narrow', sans-serif; color: #16212c; text-decoration: none">ChartDown</a>
+  <nav aria-label="Main" style="display: flex; flex-wrap: wrap; gap: 4px 18px"><a class="navlink" href="#sets">Sets</a><a class="navlink cur" href="#catalog">Catalog</a><a class="navlink" href="#bands">Bands</a><a class="navlink" href="#personal">Personal space</a></nav>
+  <div style="flex-grow: 1"></div>
+  <a class="navlink" href="#lang" style="font-weight: 400; color: #566574">EN · ES</a>
+  <button type="button" class="btn btn-s" aria-label="Account: Alex Rivera"><span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: #16212c; color: #fbfcfd; font-size: 14px">AR</span>Alex</button>
+</header>
+<main style="display: flex; flex-direction: column; gap: 18px; width: 100%; max-width: 1280px; margin: 0 auto; padding: 28px 40px; box-sizing: border-box">
+  <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 24px">
+    <div style="flex: 1 1 360px">
+      <h1 style="margin: 0; font: 600 48px/1 'Barlow Condensed', 'Arial Narrow', sans-serif">Catalog</h1>
+      <p style="margin: 6px 0 0; color: #566574">Public ChartDown versions shared by the community. Free to use, fork and play.</p>
+    </div>
+    <a href="#new" class="btn btn-p"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M12 5v14M5 12h14"/></svg>New version</a>
+  </div>
+  <label class="field" style="max-width: 640px"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search the catalog</span><input type="search" placeholder="Search by title, artist or source" style="flex: 1; min-height: 40px"></label>
+  <div role="group" aria-label="Filter by source" style="display: flex; flex-wrap: wrap; gap: 8px"><button type="button" class="btn btn-s" aria-pressed="true" style="background: #16212c; color: #fbfcfd; border-color: #16212c">All sources</button><button type="button" class="btn btn-s" aria-pressed="false" style="">Studio</button><button type="button" class="btn btn-s" aria-pressed="false" style="">Live</button><button type="button" class="btn btn-s" aria-pressed="false" style="">Acoustic</button><button type="button" class="btn btn-s" aria-pressed="false" style="">Own arrangement</button></div>
+  <ul style="display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; list-style: none">
+    <li class="card">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding: 14px 16px">
+        <div style="flex: 1 1 240px; display: flex; flex-direction: column"><span style="font: 600 26px/1.1 'Barlow Condensed', sans-serif">Open Road</span><span style="font-size: 14px; color: #566574">ChartDown examples</span></div>
+        <span style="font-size: 15px; color: #566574">3 versions</span>
+      </div>
+      <ul style="margin: 0; padding: 0; list-style: none"><li style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding: 12px 16px; border-top: 1px solid #b4bec8">
+  <span style="display: inline-flex; padding: 2px 10px; border: 1px solid #7d8a97; border-radius: 4px; font-size: 14px; font-weight: 600">Live 2025</span>
+  <span style="flex: 1 1 200px; display: flex; flex-direction: column"><span>YouTube: live recording</span><span style="font-size: 14px; color: #566574">by Alex Rivera · Key A · 4/4</span></span>
+  <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: #566574"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 2.5 14.4 0 17M12 3.5c-2.5 2.6-2.5 14.4 0 17"/></svg>Public</span>
+  <a href="#open" class="btn btn-s">Open</a>
+  <button type="button" class="btn btn-s"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="12" cy="19" r="2"/><path d="M6 7v2a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V7M12 12v5"/></svg>Fork</button>
+</li><li style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding: 12px 16px; border-top: 1px solid #b4bec8">
+  <span style="display: inline-flex; padding: 2px 10px; border: 1px solid #7d8a97; border-radius: 4px; font-size: 14px; font-weight: 600">Studio</span>
+  <span style="flex: 1 1 200px; display: flex; flex-direction: column"><span>Album version</span><span style="font-size: 14px; color: #566574">by Northside Band · Key G · 4/4</span></span>
+  <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: #566574"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 2.5 14.4 0 17M12 3.5c-2.5 2.6-2.5 14.4 0 17"/></svg>Public</span>
+  <a href="#open" class="btn btn-s">Open</a>
+  <button type="button" class="btn btn-s"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="12" cy="19" r="2"/><path d="M6 7v2a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V7M12 12v5"/></svg>Fork</button>
+</li><li style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding: 12px 16px; border-top: 1px solid #b4bec8">
+  <span style="display: inline-flex; padding: 2px 10px; border: 1px solid #7d8a97; border-radius: 4px; font-size: 14px; font-weight: 600">Own arrangement</span>
+  <span style="flex: 1 1 200px; display: flex; flex-direction: column"><span>Acoustic duo</span><span style="font-size: 14px; color: #566574">by Jordan Lee · Key D · 6/8</span></span>
+  <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: #566574"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 2.5 14.4 0 17M12 3.5c-2.5 2.6-2.5 14.4 0 17"/></svg>Public</span>
+  <a href="#open" class="btn btn-s">Open</a>
+  <button type="button" class="btn btn-s"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="12" cy="19" r="2"/><path d="M6 7v2a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V7M12 12v5"/></svg>Fork</button>
+</li></ul>
+    </li>
+    <li class="card" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding: 14px 16px">
+  <a href="#song" style="flex: 1 1 240px; text-decoration: none; color: #16212c; min-height: 44px; display: flex; flex-direction: column; justify-content: center"><span style="font: 600 26px/1.1 'Barlow Condensed', sans-serif">Lantern Bay</span><span style="font-size: 14px; color: #566574">ChartDown examples</span></a>
+  <span style="font-size: 15px; color: #566574">1 version</span>
+</li><li class="card" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding: 14px 16px">
+  <a href="#song" style="flex: 1 1 240px; text-decoration: none; color: #16212c; min-height: 44px; display: flex; flex-direction: column; justify-content: center"><span style="font: 600 26px/1.1 'Barlow Condensed', sans-serif">Wide River</span><span style="font-size: 14px; color: #566574">Northside Band</span></a>
+  <span style="font-size: 15px; color: #566574">2 versions</span>
+</li><li class="card" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding: 14px 16px">
+  <a href="#song" style="flex: 1 1 240px; text-decoration: none; color: #16212c; min-height: 44px; display: flex; flex-direction: column; justify-content: center"><span style="font: 600 26px/1.1 'Barlow Condensed', sans-serif">Steady Ground</span><span style="font-size: 14px; color: #566574">Maya Cruz</span></a>
+  <span style="font-size: 15px; color: #566574">4 versions</span>
+</li><li class="card" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding: 14px 16px">
+  <a href="#song" style="flex: 1 1 240px; text-decoration: none; color: #16212c; min-height: 44px; display: flex; flex-direction: column; justify-content: center"><span style="font: 600 26px/1.1 'Barlow Condensed', sans-serif">Morning Field</span><span style="font-size: 14px; color: #566574">Chris Vega</span></a>
+  <span style="font-size: 15px; color: #566574">1 version</span>
+</li>
+  </ul>
+</main>
+</div>
+</body>
+</html>

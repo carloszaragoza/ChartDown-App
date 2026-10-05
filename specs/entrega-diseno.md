@@ -2,7 +2,11 @@
 
 **Version:** 1.0 · **Date:** October 3, 2026 · **Status:** design approved
 
-This sheet turns the approved design into exact rules for building the app. It is the reference for every UI task; anything not covered here is in the **ChartDown – Papel y tinta** design system and the **ChartDown App – Screens** canvas.
+This sheet turns the approved design into exact rules for building the app. It is the reference for every UI task; anything not covered here is in the **ChartDown – Papel y tinta** design system and the **ChartDown App – Screens** canvas, both exported to `design/` in the repository (added October 5, 2026):
+
+- `design/screens/` – the 7 approved screens as static HTML (`index.html` opens them). A visual reference: build them with the real components and tokens, never with their inline styles.
+- `design/design-system/` – `tokens.json` (the same values as `packages/ui/src/tokens.css`), the brand book and each component's rules with a preview.
+- `design/logo/` – logos, app icons and favicons; the app takes its icons from here (T-901).
 
 ## 1. Principles the code must respect
 
