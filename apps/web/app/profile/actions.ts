@@ -51,3 +51,16 @@ export async function saveProfile(form: FormData): Promise<void> {
   await rememberLocale(language);
   redirect("/profile?saved=1");
 }
+
+/** Deletes the signed-in person's account for good, after they confirm with their email (R-01.6). */
+export async function deleteAccount(form: FormData): Promise<void> {
+  if (!authEnabled()) redirect("/");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("delete_my_account", {
+    confirm_email: String(form.get("confirm") ?? ""),
+  });
+  if (error) redirect("/profile?error=confirm#delete");
+  // The account no longer exists; this clears the session cookies.
+  await supabase.auth.signOut();
+  redirect("/?account=deleted");
+}

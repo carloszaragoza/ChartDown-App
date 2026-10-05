@@ -6,7 +6,7 @@ import { LOCALES } from "../../i18n/locales";
 import { authEnabled } from "../../lib/auth/enabled";
 import { createClient } from "../../lib/supabase/server";
 import styles from "./profile.module.css";
-import { saveProfile } from "./actions";
+import { deleteAccount, saveProfile } from "./actions";
 
 type Search = Promise<{ saved?: string; error?: string }>;
 interface CatalogInstrument {
@@ -52,7 +52,11 @@ export default async function ProfilePage({ searchParams }: { searchParams: Sear
       )}
       {error && (
         <p role="alert" className={styles.alert}>
-          {error === "name" ? t("nameRequired") : t("error")}
+          {error === "name"
+            ? t("nameRequired")
+            : error === "confirm"
+              ? t("delete.mismatch")
+              : t("error")}
         </p>
       )}
       <form action={saveProfile} className={styles.form}>
@@ -107,6 +111,25 @@ export default async function ProfilePage({ searchParams }: { searchParams: Sear
           {t("save")}
         </Button>
       </form>
+      <section id="delete" className={styles.form} aria-labelledby="delete-title">
+        <h2 id="delete-title" className={styles.legend}>
+          {t("delete.title")}
+        </h2>
+        <p className={styles.message}>{t("delete.explain")}</p>
+        <form action={deleteAccount} className={styles.group}>
+          <label className={styles.field}>
+            {t("delete.confirm")}
+            <input
+              className={styles.input}
+              name="confirm"
+              type="email"
+              autoComplete="off"
+              required
+            />
+          </label>
+          <Button type="submit">{t("delete.submit")}</Button>
+        </form>
+      </section>
       <Link href="/" className={styles.back}>
         {t("back")}
       </Link>

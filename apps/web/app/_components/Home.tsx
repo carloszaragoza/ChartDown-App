@@ -10,12 +10,14 @@ export interface HomeProps {
   /** The signed-in person, if any. */
   account?: { name: string } | null;
   passwordUpdated?: boolean;
+  accountDeleted?: boolean;
 }
 
 export function Home({
   signInEnabled = false,
   account = null,
   passwordUpdated = false,
+  accountDeleted = false,
 }: HomeProps) {
   const t = useTranslations("home");
   const a = useTranslations("auth.account");
@@ -54,6 +56,11 @@ export function Home({
             </Link>
           ))}
       </div>
+      {accountDeleted && (
+        <p role="status" style={{ margin: 0 }}>
+          {a("accountDeleted")}
+        </p>
+      )}
       {passwordUpdated && (
         <p role="status" style={{ margin: 0 }}>
           {a("passwordUpdated")}

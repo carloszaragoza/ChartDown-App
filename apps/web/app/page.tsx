@@ -2,10 +2,10 @@ import { authEnabled } from "../lib/auth/enabled";
 import { createClient } from "../lib/supabase/server";
 import { Home } from "./_components/Home";
 
-type Search = Promise<{ password?: string }>;
+type Search = Promise<{ password?: string; account?: string }>;
 
 export default async function HomePage({ searchParams }: { searchParams: Search }) {
-  const { password } = await searchParams;
+  const { password, account } = await searchParams;
   if (!authEnabled()) return <Home />;
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
@@ -17,6 +17,7 @@ export default async function HomePage({ searchParams }: { searchParams: Search 
       signInEnabled
       account={data.user ? { name: profile?.name ?? data.user.email ?? "" } : null}
       passwordUpdated={password === "updated"}
+      accountDeleted={account === "deleted"}
     />
   );
 }
