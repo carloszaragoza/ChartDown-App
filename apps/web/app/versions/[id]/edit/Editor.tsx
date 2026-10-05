@@ -94,8 +94,8 @@ export function Editor({ versionId, title, visibility, revisionId, content }: Ed
       )}
 
       <div className={styles.panes}>
-        <section className={styles.source} aria-labelledby="chart-text">
-          <label id="chart-text" htmlFor="chart-source" className={styles.label}>
+        <div className={styles.source}>
+          <label htmlFor="chart-source" className={styles.label}>
             {t("text")}
           </label>
           <textarea
@@ -110,7 +110,7 @@ export function Editor({ versionId, title, visibility, revisionId, content }: Ed
             aria-describedby="chart-warnings"
           />
           <Warnings warnings={chart.warnings} onSelect={goTo} />
-        </section>
+        </div>
         <section className={styles.preview} aria-label={t("preview")}>
           <ChartBody chart={chart} />
         </section>
