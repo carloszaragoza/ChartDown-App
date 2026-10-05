@@ -31,9 +31,12 @@ test("R-05.1 a set's name is unique in the band; songs are added, ordered and du
   await page.getByRole("link", { name: "Sets", exact: true }).click();
   await page.getByLabel("Set name").fill(sunday);
   await page.getByLabel("Date (optional)").fill("2030-06-02");
+  await page.getByLabel("Time (optional)").fill("09:00");
   await page.getByLabel("Type").selectOption({ label: "Service" });
   await page.getByRole("button", { name: "Create set" }).click();
   await expect(page.getByRole("heading", { level: 1, name: sunday })).toBeVisible();
+  // R-05.1 (T-708): a set at 9:00 shows 9:00 AM with its date.
+  await expect(page.getByText("Sunday, June 2, 2030 · 9:00 AM")).toBeVisible();
   const setAddress = new URL(page.url()).pathname;
   await page.getByRole("link", { name: `Back to the sets of ${band}` }).click();
   await expect(page.getByRole("region", { name: "Upcoming" })).toContainText(sunday);

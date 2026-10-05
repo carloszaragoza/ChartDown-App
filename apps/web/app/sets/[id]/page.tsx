@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";
 import { effectiveLineup } from "../../../lib/sets/lineup";
+import { setWhen } from "../../../lib/sets/when";
 import { createClient } from "../../../lib/supabase/server";
 import { keysInMode } from "../../versions/[id]/display";
 import { UUID } from "../../versions/[id]/load";
@@ -65,7 +66,17 @@ const STATUS = [
   "appointed",
   "unappointed",
 ];
-const ERRORS = new Set(["name", "date", "type", "name_taken", "confirm", "key", "temp_md"]);
+const ERRORS = new Set([
+  "name",
+  "date",
+  "type",
+  "name_taken",
+  "confirm",
+  "key",
+  "temp_md",
+  "time",
+  "time_needs_date",
+]);
 
 /**
  * A set: its songs in order, each pinned to a revision (R-05.2). Members read it; the MD edits,
@@ -86,7 +97,7 @@ export default async function SetPage({
   if (!auth.user) notFound();
   const { data: set } = await supabase
     .from("sets")
-    .select("id, band_id, name, date, type, band:bands(name, is_personal)")
+    .select("id, band_id, name, date, time, type, band:bands(name, is_personal)")
     .eq("id", id)
     .maybeSingle();
   if (!set) notFound();
@@ -176,9 +187,7 @@ export default async function SetPage({
   const status = STATUS.find((key) => search[key]);
   const t = await getTranslations("sets");
   const format = await getFormatter();
-  const date = set.date
-    ? format.dateTime(new Date(`${set.date}T00:00:00Z`), { dateStyle: "full", timeZone: "UTC" })
-    : t("noDate");
+  const date = setWhen(format, set.date, set.time as string | null, "full") ?? t("noDate");
   const hidden = (itemId?: string) => (
     <>
       <input type="hidden" name="setId" value={set.id} />
@@ -477,6 +486,15 @@ export default async function SetPage({
                 name="date"
                 type="date"
                 defaultValue={set.date ?? ""}
+                className={styles.input}
+              />
+            </label>
+            <label className={styles.field}>
+              {t("time")}
+              <input
+                name="time"
+                type="time"
+                defaultValue={(set.time as string | null)?.slice(0, 5) ?? ""}
                 className={styles.input}
               />
             </label>

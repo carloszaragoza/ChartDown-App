@@ -1,0 +1,34 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><style>:root{--ground:#eef1f4;--paper:#fbfcfd;--ink:#16212c;--ink-muted:#566574;--ink-inverse:#fbfcfd;--rule:#b4bec8;--control-border:#7d8a97;--md:#b8322a;--dynamic:#1f4fa8;--focus:#1f4fa8;--font-num:"Barlow Condensed", "Arial Narrow", sans-serif;--font-ui:"Source Sans 3", "Segoe UI", system-ui, sans-serif;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-6:24px;--space-8:32px;--space-10:40px;--radius-none:0;--radius-sm:4px;--radius-md:6px;--bar-line:3px;--bar-line-light:2px;--hairline:1px;--target-min:44px;--bar-height:128px;--bar-height-sm:64px}</style></head><body>
+<!-- @dsCard height=288 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400&display=swap">
+<style>
+body{margin:0;background:var(--ground)}
+.cover{position:relative;width:960px;height:288px;overflow:hidden;background:var(--ground)}
+svg{position:absolute;left:0;top:0}
+.ink{fill:var(--ink)}
+.md{fill:var(--md)}
+.dyn{fill:var(--dynamic)}
+.paper{fill:var(--paper)}
+.num{fill:var(--paper);font-family:var(--font-num);font-weight:700}
+.sq{rx:var(--radius-none)}
+.name{position:absolute;left:40px;bottom:40px;max-width:440px}
+.name h1{margin:0;font-family:var(--font-num);font-weight:700;font-size:80px;line-height:.92;color:var(--ink)}
+.name p{margin:8px 0 0;font-family:var(--font-ui);font-size:14px;color:var(--ink-muted)}
+</style>
+<div class="cover">
+<svg width="960" height="288" viewBox="0 0 960 288" aria-hidden="true">
+<!-- blocks: ink 320x232 slab bleeding off the top; paper 160x96 relief; md 80x136 bleeding bottom-right; dynamic 48x48 (space multiples) -->
+<!-- arrangement: one tall ink slab with satellites, all right of x=480, square corners (radius-none) -->
+<!-- pattern: one oversized numeral in the num face (Barlow Condensed), the Nashville "1", cut out of the ink slab in paper -->
+<!-- scales: sizes are multiples of space-4 (16), space-6 (24) and space-8 (32); offsets space-10 (40); corners radius-none -->
+<defs><clipPath id="slab"><rect x="560" y="0" width="320" height="232"/></clipPath></defs>
+<rect class="paper sq" x="496" y="152" width="160" height="96"/>
+<rect class="ink sq" x="560" y="0" width="320" height="232"/>
+<text class="num" x="640" y="300" font-size="360" clip-path="url(#slab)">1</text>
+<rect class="md sq" x="880" y="152" width="80" height="136"/>
+<rect class="dyn sq" x="512" y="40" width="48" height="48"/>
+</svg>
+<div class="name"><h1>ChartDown</h1><p>Papel y tinta: the numbers come first.</p></div>
+</div>
+
+</body></html>

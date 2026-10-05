@@ -5,7 +5,9 @@ dist
 coverage
 pnpm-lock.yaml
 specs
-assets
 CLAUDE.md
 packages/core/fixtures
 packages/ui/fixtures
+
+# The approved design, exported as is (a visual reference, not code).
+design

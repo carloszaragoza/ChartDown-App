@@ -1,0 +1,22 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><style>:root{--ground:#eef1f4;--paper:#fbfcfd;--ink:#16212c;--ink-muted:#566574;--ink-inverse:#fbfcfd;--rule:#b4bec8;--control-border:#7d8a97;--md:#b8322a;--dynamic:#1f4fa8;--focus:#1f4fa8;--font-num:"Barlow Condensed", "Arial Narrow", sans-serif;--font-ui:"Source Sans 3", "Segoe UI", system-ui, sans-serif;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-6:24px;--space-8:32px;--space-10:40px;--radius-none:0;--radius-sm:4px;--radius-md:6px;--bar-line:3px;--bar-line-light:2px;--hairline:1px;--target-min:44px;--bar-height:128px;--bar-height-sm:64px}</style></head><body>
+<!-- @dsCard group="Chart" height=200 subtitle="Chords, dynamics, hold, push and stab" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,700&display=swap">
+<style>
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-ui)}
+.row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-left:var(--bar-line) solid var(--ink);margin:24px}
+.bar{position:relative;height:var(--bar-height);border-right:var(--bar-line) solid var(--ink);display:flex;align-items:center;justify-content:space-around;font-family:var(--font-num);font-size:58px;font-weight:600;line-height:1}
+.min{font-size:30px;vertical-align:super}
+.dyn{position:absolute;top:8px;left:12px;font:italic 700 18px var(--font-ui);color:var(--dynamic)}
+.hold{position:relative;padding:0 .2em}
+.hold::before{content:'';position:absolute;left:50%;top:52%;width:1.05em;height:1.05em;border:2px solid var(--ink);transform:translate(-50%,-50%) rotate(45deg)}
+.push{font-size:.6em;color:var(--dynamic);margin-right:2px}
+.mk{position:absolute;top:10px;left:50%;transform:translateX(-50%);font:700 18px var(--font-ui);color:var(--dynamic)}
+</style>
+<div class="row" aria-label="Four example bars">
+  <div class="bar"><span class="dyn">mf</span><span>6<span class="min">-</span></span><span>5</span><span>4</span><span>1</span></div>
+  <div class="bar"><span class="hold">1</span></div>
+  <div class="bar"><span>4</span><span><span class="push" aria-label="push">‹</span>5</span></div>
+  <div class="bar"><span class="mk" aria-hidden="true">^</span><span>1</span></div>
+</div>
+
+</body></html>

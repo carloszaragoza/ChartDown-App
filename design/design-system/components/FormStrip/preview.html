@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><style>:root{--ground:#eef1f4;--paper:#fbfcfd;--ink:#16212c;--ink-muted:#566574;--ink-inverse:#fbfcfd;--rule:#b4bec8;--control-border:#7d8a97;--md:#b8322a;--dynamic:#1f4fa8;--focus:#1f4fa8;--font-num:"Barlow Condensed", "Arial Narrow", sans-serif;--font-ui:"Source Sans 3", "Segoe UI", system-ui, sans-serif;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-6:24px;--space-8:32px;--space-10:40px;--radius-none:0;--radius-sm:4px;--radius-md:6px;--bar-line:3px;--bar-line-light:2px;--hairline:1px;--target-min:44px;--bar-height:128px;--bar-height-sm:64px}</style></head><body>
+<!-- @dsCard group="Navigation" height=150 subtitle="Song map: chart abbreviations, bar counts, progress and MD markers" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,700&display=swap">
+<style>
+body{margin:0;background:var(--ground);font-family:var(--font-ui)}
+nav{padding:24px}
+ol{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+a{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:56px;min-height:var(--target-min);padding:6px 10px;border:1px solid var(--control-border);border-radius:var(--radius-sm);background:var(--paper);color:var(--ink);text-decoration:none}
+a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.ab{font-family:var(--font-num);font-size:22px;font-weight:600;line-height:1}
+.n{font-size:14px;line-height:1.2;color:var(--ink-muted)}
+a.done{background:var(--ground)}
+a.done .ab{color:var(--ink-muted)}
+a[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:var(--ink-inverse)}
+a[aria-current="true"] .n{color:var(--ink-inverse)}
+.dot{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--md)}
+a[aria-current="true"] .dot{box-shadow:0 0 0 2px var(--ink-inverse)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+<nav aria-label="Song form">
+  <ol>
+    <li><a class="done" href="#i" title="Intro, played"><span class="ab">I</span><span class="n">4</span><span class="sr">Intro, 4 bars, played</span></a></li>
+    <li><a class="done" href="#v1" title="Verse 1, played"><span class="ab">V1</span><span class="n">8</span><span class="sr">Verse 1, 8 bars, played</span></a></li>
+    <li><a class="done" href="#c" title="Chorus, played"><span class="dot" aria-hidden="true"></span><span class="ab">C</span><span class="n">8</span><span class="sr">Chorus, 8 bars, played, has notes for you</span></a></li>
+    <li><a class="done" href="#v2" title="Verse 2, played"><span class="ab">V2</span><span class="n">8</span><span class="sr">Verse 2, 8 bars, played</span></a></li>
+    <li><a href="#c2" aria-current="true" title="Chorus 2, now"><span class="ab">C2</span><span class="n">8</span><span class="sr">Chorus 2, 8 bars, now</span></a></li>
+    <li><a href="#b" title="Bridge"><span class="dot" aria-hidden="true"></span><span class="ab">B</span><span class="n">4×2</span><span class="sr">Bridge, 4 bars twice, has notes for you</span></a></li>
+    <li><a href="#lc" title="Last Chorus"><span class="dot" aria-hidden="true"></span><span class="ab">LC</span><span class="n">8</span><span class="sr">Last Chorus, 8 bars, has notes for you</span></a></li>
+  </ol>
+</nav>
+
+</body></html>

@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><style>:root{--ground:#eef1f4;--paper:#fbfcfd;--ink:#16212c;--ink-muted:#566574;--ink-inverse:#fbfcfd;--rule:#b4bec8;--control-border:#7d8a97;--md:#b8322a;--dynamic:#1f4fa8;--focus:#1f4fa8;--font-num:"Barlow Condensed", "Arial Narrow", sans-serif;--font-ui:"Source Sans 3", "Segoe UI", system-ui, sans-serif;--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-6:24px;--space-8:32px;--space-10:40px;--radius-none:0;--radius-sm:4px;--radius-md:6px;--bar-line:3px;--bar-line-light:2px;--hairline:1px;--target-min:44px;--bar-height:128px;--bar-height-sm:64px}</style></head><body>
+<!-- @dsCard group="Chart" height=240 subtitle="Icon and name by default; icon-only for tight spaces" -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,700&display=swap">
+<style>
+body{margin:0;background:var(--paper);font-family:var(--font-ui);color:var(--ink)}
+.wrap{display:flex;flex-direction:column;gap:18px;padding:24px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.lbl{font-size:14px;color:var(--ink-muted);width:96px}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:1px 8px 1px 6px;border:1.5px solid var(--md);border-radius:var(--radius-sm);color:var(--md);font-weight:700;font-size:15px;line-height:1.5}
+.tag svg{width:16px;height:16px}
+.icon{display:inline-flex;align-items:center;justify-content:center;width:var(--target-min);height:var(--target-min);border:1.5px solid var(--md);border-radius:var(--radius-sm);color:var(--md);background:var(--paper)}
+.icon svg{width:22px;height:22px}
+svg{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.dotf{fill:currentColor;stroke:none}
+</style>
+<div class="wrap">
+  <div class="row"><span class="lbl">Tag</span>
+    <span class="tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9v7c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V9"/><ellipse cx="12" cy="9" rx="7" ry="2.5"/><path d="M9.5 7 5.5 3M14.5 7l4-4"/></svg>Drums</span>
+    <span class="tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c6-2 10-6 10-11a5 5 0 0 0-10 0c0 1.7 1.3 3 3 3"/><circle class="dotf" cx="19" cy="7" r="1.2"/><circle class="dotf" cx="19" cy="12" r="1.2"/></svg>Bass</span>
+    <span class="tag"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M9 13v6M15 13v6"/><rect class="dotf" x="7.5" y="5" width="3" height="8"/><rect class="dotf" x="13.5" y="5" width="3" height="8"/></svg>Keys</span>
+    <span class="tag"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="15" r="5"/><circle cx="9" cy="15" r="1.5"/><path d="m12.5 11.5 7-7M18 3l3 3"/></svg>Guitar</span>
+    <span class="tag"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="10" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/></svg>Vocals</span>
+    <span class="tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.5 3 17 4.5M17 4.5 9.5 15a3.5 3.5 0 0 0 6 3.6l1.6-2.6"/><circle class="dotf" cx="12.2" cy="11.3" r="1"/><circle class="dotf" cx="14" cy="8.8" r="1"/></svg>Saxophone</span>
+    <span class="tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h12M15 12l6-3.5v7Z"/><path d="M6 12v3h7v-3M8 8.5V12M10.5 8.5V12M13 8.5V12"/></svg>Trumpet</span>
+    <span class="tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9h11M7 15h11M18 9a3 3 0 0 1 0 6M10 9v6M7 9 2.5 6.5v5Z"/></svg>Trombone</span>
+    <span class="tag"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="9.5" cy="15" rx="4.5" ry="5.5" transform="rotate(-40 9.5 15)"/><path d="m12.5 12 7-7.5"/><circle cx="20.3" cy="3.8" r="1"/><path d="M3 5.5 17.5 21"/></svg>Violin</span>
+  </div>
+  <div class="row"><span class="lbl">Compact</span>
+    <span class="icon" role="img" aria-label="Drums" title="Drums"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9v7c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V9"/><ellipse cx="12" cy="9" rx="7" ry="2.5"/><path d="M9.5 7 5.5 3M14.5 7l4-4"/></svg></span>
+    <span class="icon" role="img" aria-label="Bass" title="Bass"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c6-2 10-6 10-11a5 5 0 0 0-10 0c0 1.7 1.3 3 3 3"/><circle class="dotf" cx="19" cy="7" r="1.2"/><circle class="dotf" cx="19" cy="12" r="1.2"/></svg></span>
+    <span class="icon" role="img" aria-label="Keys" title="Keys"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="M9 13v6M15 13v6"/><rect class="dotf" x="7.5" y="5" width="3" height="8"/><rect class="dotf" x="13.5" y="5" width="3" height="8"/></svg></span>
+    <span class="icon" role="img" aria-label="Guitar" title="Guitar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="15" r="5"/><circle cx="9" cy="15" r="1.5"/><path d="m12.5 11.5 7-7M18 3l3 3"/></svg></span>
+    <span class="icon" role="img" aria-label="Vocals" title="Vocals"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="10" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/></svg></span>
+    <span class="icon" role="img" aria-label="Saxophone" title="Saxophone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.5 3 17 4.5M17 4.5 9.5 15a3.5 3.5 0 0 0 6 3.6l1.6-2.6"/><circle class="dotf" cx="12.2" cy="11.3" r="1"/><circle class="dotf" cx="14" cy="8.8" r="1"/></svg></span>
+    <span class="icon" role="img" aria-label="Trumpet" title="Trumpet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h12M15 12l6-3.5v7Z"/><path d="M6 12v3h7v-3M8 8.5V12M10.5 8.5V12M13 8.5V12"/></svg></span>
+    <span class="icon" role="img" aria-label="Trombone" title="Trombone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9h11M7 15h11M18 9a3 3 0 0 1 0 6M10 9v6M7 9 2.5 6.5v5Z"/></svg></span>
+    <span class="icon" role="img" aria-label="Violin" title="Violin"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="9.5" cy="15" rx="4.5" ry="5.5" transform="rotate(-40 9.5 15)"/><path d="m12.5 12 7-7.5"/><circle cx="20.3" cy="3.8" r="1"/><path d="M3 5.5 17.5 21"/></svg></span>
+  </div>
+</div>
+
+</body></html>

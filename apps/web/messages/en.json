@@ -486,7 +486,9 @@
       "confirm": "Tick the box to confirm.",
       "unknown": "That did not work. Try again.",
       "key": "Choose one of the keys offered.",
-      "temp_md": "Choose a musician of the band."
+      "temp_md": "Choose a musician of the band.",
+      "time": "Write the time as hours and minutes.",
+      "time_needs_date": "A time needs a date."
     },
     "lineup": "Lineup",
     "lineupDefaults": "This set uses the band's default instruments. Save to give it its own lineup.",
@@ -520,6 +522,7 @@
     "tempMdHint": "They can change this set's order, keys and lineup, and nothing else. The role ends after that day.",
     "tempMdAppoint": "Appoint",
     "tempMdChange": "Change",
-    "tempMdRemove": "Remove the role"
+    "tempMdRemove": "Remove the role",
+    "time": "Time (optional)"
   }
 }

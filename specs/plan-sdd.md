@@ -212,7 +212,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 **Requirements**
 
-- R-05.1 The MD creates a set with a name unique within their band (decision 8), an optional date and a type (rehearsal, service, concert).
+- R-05.1 The MD creates a set with a name unique within their band (decision 8), an optional date and time and a type (rehearsal, service, concert).
 - R-05.2 Adds versions to the set and orders them. Each song is pinned to the revision it was added with. If the author publishes a new revision, the MD gets a notice with “Update” and decides; this way an author's change never affects other MDs in the community (decision 9.2).
 - R-05.3 Defines the lineup: which musician plays which instrument, one or several. By default the band's are used.
 - R-05.4 **Key per song in the set.** It does not change the version or affect other users (decision 9).
