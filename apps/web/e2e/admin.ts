@@ -72,3 +72,37 @@ export async function createVersion(
   if (!patched.ok()) throw new Error(`Could not set the current revision: ${patched.status()}`);
   return version;
 }
+
+/** More revisions of a version, saved by its owner, the last one current (R-02.8). */
+export async function addRevisions(
+  request: APIRequestContext,
+  versionId: string,
+  contents: string[],
+): Promise<void> {
+  const read = async (path: string, params: Record<string, string>) => {
+    const response = await request.get(`${url()}/rest/v1/${path}`, { headers: headers(), params });
+    return (await response.json()) as Record<string, unknown>[];
+  };
+  const [version] = await read("versions", { select: "owner_id", id: `eq.${versionId}` });
+  const existing = await read("revisions", { select: "number", version_id: `eq.${versionId}` });
+  let number = Math.max(0, ...existing.map((row) => Number(row.number)));
+  let last = "";
+  for (const content of contents) {
+    number += 1;
+    const response = await request.post(`${url()}/rest/v1/revisions`, {
+      headers: { ...headers(), Prefer: "return=representation" },
+      data: { version_id: versionId, number, content, author_id: version?.owner_id ?? null },
+    });
+    if (!response.ok())
+      throw new Error(
+        `Could not add revision ${number}: ${response.status()} ${await response.text()}`,
+      );
+    last = ((await response.json()) as { id: string }[])[0]?.id ?? "";
+  }
+  const patched = await request.patch(`${url()}/rest/v1/versions`, {
+    headers: headers(),
+    params: { id: `eq.${versionId}` },
+    data: { current_revision_id: last },
+  });
+  if (!patched.ok()) throw new Error(`Could not set the current revision: ${patched.status()}`);
+}

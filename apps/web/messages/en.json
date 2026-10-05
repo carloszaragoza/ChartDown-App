@@ -173,7 +173,8 @@
     "album": "Album: {album}",
     "youtube": "Watch on YouTube",
     "fork": "Fork",
-    "forkHint": "Sign in to make your own copy of this version."
+    "forkHint": "Sign in to make your own copy of this version.",
+    "history": "History"
   },
   "newVersion": {
     "title": "New version",
@@ -211,5 +212,18 @@
       "unknown": "The version could not be published. Try again."
     },
     "publishing": "Publishing…"
+  },
+  "history": {
+    "title": "History",
+    "back": "Back to the version",
+    "backToHistory": "Back to the history",
+    "revision": "Revision {number}",
+    "current": "Current",
+    "restoredFrom": "restored from revision {number}",
+    "restored": "Revision {number} was restored. It is now revision {as}, the current one.",
+    "readOnly": "an earlier revision, read-only",
+    "isCurrent": "the current revision",
+    "restore": "Restore this revision",
+    "restoreError": "This revision could not be restored. Try again."
   }
 }

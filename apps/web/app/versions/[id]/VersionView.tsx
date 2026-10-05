@@ -2,6 +2,7 @@ import { chordFormatter, keyName, type Chart } from "@chartdown/core";
 import { FormStrip, formStripItems, Section, type FormStripItem } from "@chartdown/ui";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { useChartLabels } from "../../_components/chartLabels";
 import styles from "./version.module.css";
 
@@ -20,6 +21,10 @@ export interface VersionViewProps {
   source: VersionSource;
   chart: Chart;
   signedIn: boolean;
+  /** The signed-in person owns this version: they find its history (R-02.8). */
+  owner?: boolean;
+  /** Shown above the chart, e.g. when reading an earlier revision. */
+  notice?: ReactNode;
 }
 
 /** A version as everyone reads it: its chart in the written key, with no band's layer (R-06.5). */
@@ -31,6 +36,8 @@ export function VersionView({
   source,
   chart,
   signedIn,
+  owner = false,
+  notice,
 }: VersionViewProps) {
   const t = useTranslations("version");
   const c = useTranslations("chart");
@@ -45,6 +52,7 @@ export function VersionView({
 
   return (
     <main className={styles.page}>
+      {notice}
       <header className={styles.header}>
         <div className={styles.heading}>
           <h1 className={styles.title}>{title}</h1>
@@ -76,6 +84,11 @@ export function VersionView({
             )}
           </p>
         </div>
+        {owner && (
+          <Link href={`/versions/${id}/history`} className="cd-button cd-button--secondary">
+            {t("history")}
+          </Link>
+        )}
         {!signedIn && (
           <div className={styles.fork}>
             <Link
