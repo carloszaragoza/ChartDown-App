@@ -107,3 +107,10 @@
   color: var(--ink);
   font: var(--type-meta);
 }
+.viewing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}

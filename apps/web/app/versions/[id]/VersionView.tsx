@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { forkVersion } from "./actions";
 import { ChartBody } from "./ChartBody";
 import { DisplayBar } from "./DisplayBar";
-import type { Display } from "./display";
+import { displayHref, type Display } from "./display";
 import type { BasedOn } from "./load";
 import styles from "./version.module.css";
 
@@ -172,7 +172,19 @@ export function VersionView({
           </div>
         )}
       </header>
-      {display && path && <DisplayBar path={path} chart={chart} display={display} />}
+      {display && path && (
+        <div className={styles.viewing}>
+          <DisplayBar path={path} chart={chart} display={display} />
+          {notice === undefined && (
+            <Link
+              href={`/versions/${id}/stand${displayHref("", display, chart)}`}
+              className="cd-button cd-button--primary"
+            >
+              {t("stand")}
+            </Link>
+          )}
+        </div>
+      )}
       <ChartBody
         chart={chart}
         style={display?.style ?? "numbers"}

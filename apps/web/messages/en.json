@@ -185,7 +185,8 @@
     "frozen": "Frozen public version",
     "makePrivate": "Make private",
     "edit": "Edit",
-    "myNotes": "My notes"
+    "myNotes": "My notes",
+    "stand": "Stand mode"
   },
   "newVersion": {
     "title": "New version",
@@ -338,5 +339,17 @@
     "showAuthor": "Show to my band",
     "authorHidden": "The author's notes are hidden for your band.",
     "authorShown": "The author's notes are shown to your band."
+  },
+  "stand": {
+    "tools": "Stand tools",
+    "light": "Light",
+    "stage": "Stage",
+    "fullscreen": "Full screen",
+    "close": "Close",
+    "turn": "Sections",
+    "previous": "Previous",
+    "next": "Next",
+    "position": "Section {current} of {total}",
+    "end": "End of the song"
   }
 }
