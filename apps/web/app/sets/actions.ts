@@ -1,8 +1,10 @@
 "use server";
 
+import { keyName, parse } from "@chartdown/core";
 import { redirect } from "next/navigation";
 import { authEnabled } from "../../lib/auth/enabled";
 import { createClient } from "../../lib/supabase/server";
+import { keysInMode } from "../versions/[id]/display";
 import { UUID } from "../versions/[id]/load";
 
 const TYPES = new Set(["rehearsal", "service", "concert"]);
@@ -111,4 +113,63 @@ export async function duplicateSet(form: FormData): Promise<void> {
   if (error || typeof data !== "string")
     redirect(setPage(setId, `error=${error?.message === "name_taken" ? "name_taken" : "unknown"}`));
   redirect(setPage(data, "duplicated=1"));
+}
+
+/**
+ * The set's whole lineup from the form: for each member, the instruments ticked (R-05.3). Only
+ * what changed is written (save_lineup).
+ */
+export async function saveLineup(form: FormData): Promise<void> {
+  const supabase = await client();
+  const setId = field(form, "setId");
+  if (!UUID.test(setId)) redirect("/bands");
+  const members = form
+    .getAll("member")
+    .map(String)
+    .filter((id) => UUID.test(id));
+  const entries = members.map((memberId) => ({
+    member_id: memberId,
+    instrument_ids: form
+      .getAll(`instrument-${memberId}`)
+      .map(String)
+      .filter((id) => UUID.test(id)),
+  }));
+  const { error } = await supabase.rpc("save_lineup", { set_id: setId, entries });
+  redirect(setPage(setId, error ? "error=unknown" : "lineup=1"));
+}
+
+/** Back to the band's default instruments: the set's own lineup is deleted (R-05.3). */
+export async function resetLineup(form: FormData): Promise<void> {
+  const supabase = await client();
+  const setId = field(form, "setId");
+  if (!UUID.test(setId)) redirect("/bands");
+  const { error } = await supabase.from("set_lineup").delete().eq("set_id", setId);
+  redirect(setPage(setId, error ? "error=unknown" : "defaults=1"));
+}
+
+/**
+ * A song's key in this set, or none for its written key (R-05.4). Only the 12 keys of the
+ * pinned revision's mode; the version never changes.
+ */
+export async function setSongKey(form: FormData): Promise<void> {
+  const supabase = await client();
+  const setId = field(form, "setId");
+  const itemId = field(form, "itemId");
+  const key = field(form, "key");
+  if (!UUID.test(setId) || !UUID.test(itemId)) redirect("/bands");
+  const { data: item } = await supabase
+    .from("set_items")
+    .select("revision:revisions(content)")
+    .eq("id", itemId)
+    .maybeSingle();
+  const revision = Array.isArray(item?.revision) ? item.revision[0] : item?.revision;
+  if (!revision) redirect(setPage(setId, "error=unknown"));
+  const chart = parse((revision as { content: string }).content);
+  if (key && !keysInMode(chart.key.minor).some((option) => keyName(option) === key))
+    redirect(setPage(setId, "error=key"));
+  const { error, count } = await supabase
+    .from("set_items")
+    .update({ set_key: key || null }, { count: "exact" })
+    .eq("id", itemId);
+  redirect(setPage(setId, error || count !== 1 ? "error=unknown" : "key=1"));
 }
