@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
-import { PASSWORD, signIn, signUpAndConfirm, unique } from "./flows";
+import { PASSWORD, signIn, signUpAndConfirm, unique, openAccount } from "./flows";
 
 test("R-01.2 a person saves their name and the instruments they play", async ({ page }) => {
   await signUpAndConfirm(page, unique("profile"), "Ana Test");
+  await openAccount(page);
   await page.getByRole("link", { name: "Your profile" }).click();
   await page.getByLabel("Name").fill("Ana Keys");
   await page.getByLabel("Keys").check();
@@ -31,6 +32,7 @@ test("R-01.2 a person saves their name and the instruments they play", async ({ 
 test("R-01.5 the chosen language persists across sessions", async ({ page, context }) => {
   const email = unique("idioma");
   await signUpAndConfirm(page, email, "Lucía Test");
+  await openAccount(page);
   await page.getByRole("link", { name: "Your profile" }).click();
   await page.getByLabel("Español").check();
   await page.getByRole("button", { name: "Save" }).click();
@@ -68,6 +70,7 @@ test("R-01.5 the language switcher saves to the profile when signed in", async (
 test("R-01.6 a person deletes their account, and it no longer signs in", async ({ page }) => {
   const email = unique("leaving");
   await signUpAndConfirm(page, email, "Leaving Test");
+  await openAccount(page);
   await page.getByRole("link", { name: "Your profile" }).click();
 
   await page.getByLabel("Type your email to confirm").fill("someone-else@example.test");

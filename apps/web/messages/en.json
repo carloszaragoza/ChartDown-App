@@ -535,6 +535,30 @@
     "allNotesMd": "You see every note, as the music director.",
     "allNotesTempMd": "You see every note, as this set's temporary music director.",
     "unplacedNotes": "Notes whose section changed",
-    "startStand": "Start in stand mode"
+    "startStand": "Start in stand mode",
+    "backToSet": "Back to the set",
+    "songsTitle": "Songs",
+    "editSet": "Edit set",
+    "key": "Key",
+    "forYouCount": "{count, plural, one {# for you} other {# for you}}",
+    "notesCount": "{count, plural, one {# note} other {# notes}}",
+    "noNotes": "No notes",
+    "mdShort": "Music director",
+    "you": "{name} (you)",
+    "lineupNote": "Each musician sees the music director's notes for their own instrument.",
+    "allSets": "Sets",
+    "allSetsHint": "Sets of every band you are in, and of your personal space. To create one, open the band."
+  },
+  "appBar": {
+    "home": "ChartDown, home",
+    "main": "Main",
+    "sets": "Sets",
+    "catalog": "Catalog",
+    "bands": "Bands",
+    "personal": "Personal space",
+    "account": "Account of {name}",
+    "profile": "Your profile",
+    "signOut": "Sign out",
+    "signIn": "Sign in"
   }
 }

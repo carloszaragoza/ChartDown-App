@@ -11,7 +11,9 @@ const TYPES = new Set(["rehearsal", "service", "concert"]);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME = /^\d{2}:\d{2}$/;
 const field = (form: FormData, name: string) => String(form.get(name) ?? "").trim();
-const setPage = (setId: string, extra: string) => `/sets/${setId}?${extra}`;
+// Managing a set happens on its edit page; reading it, on the set's own page (T-706).
+const setPage = (setId: string, extra: string) => `/sets/${setId}/edit?${extra}`;
+const setView = (setId: string, extra: string) => `/sets/${setId}?${extra}`;
 
 async function client() {
   if (!authEnabled()) redirect("/");
@@ -43,7 +45,7 @@ export async function createSet(form: FormData): Promise<void> {
   const { error } = await supabase.from("sets").insert({ id, band_id: bandId, ...set });
   if (error)
     redirect(`/bands/${bandId}/sets?error=${error.code === "23505" ? "name_taken" : "unknown"}`);
-  redirect(setPage(id, "created=1"));
+  redirect(setView(id, "created=1"));
 }
 
 /** The MD changes the set's name, date or type. */
@@ -198,7 +200,7 @@ export async function updatePinned(form: FormData): Promise<void> {
   const itemId = field(form, "itemId");
   if (!UUID.test(setId) || !UUID.test(itemId)) redirect("/bands");
   const { error } = await supabase.rpc("update_pinned_revision", { item_id: itemId });
-  redirect(setPage(setId, error ? "error=unknown" : "updated=1"));
+  redirect(setView(setId, error ? "error=unknown" : "updated=1"));
 }
 
 /**

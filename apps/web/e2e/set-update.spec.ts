@@ -48,7 +48,7 @@ test("R-05.2 a new revision from the author doesn't change the set until accepte
   const version = new URL(page.url()).pathname;
   await page.goto("/bands");
   await page.getByRole("link", { name: band }).click();
-  await page.getByRole("link", { name: "Sets", exact: true }).click();
+  await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
   await page.getByLabel("Set name").fill(set);
   await page.getByLabel("Type").selectOption({ label: "Service" });
   await page.getByRole("button", { name: "Create set" }).click();
@@ -88,10 +88,12 @@ test("R-05.2 a new revision from the author doesn't change the set until accepte
   await expect(
     page.getByText("Preview of revision 2. This set still plays revision 1"),
   ).toBeVisible();
-  await page.goto(setAddress);
+  await page.goto(`${setAddress}/edit`);
   await expect(page.getByText("revision 1")).toBeVisible();
+  await page.goto(setAddress);
   await page.getByRole("button", { name: `Update ${title} to the new revision` }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("newest revision");
   await expect(page.getByText("The author has a newer revision")).toHaveCount(0);
+  await page.goto(`${setAddress}/edit`);
   await expect(page.getByText("revision 2")).toBeVisible();
 });
