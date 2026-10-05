@@ -185,7 +185,8 @@
     "frozen": "Versión pública congelada",
     "makePrivate": "Hacer privada",
     "edit": "Editar",
-    "myNotes": "Mis notas"
+    "myNotes": "Mis notas",
+    "stand": "Modo atril"
   },
   "newVersion": {
     "title": "Nueva versión",
@@ -338,5 +339,17 @@
     "showAuthor": "Mostrar a mi banda",
     "authorHidden": "Las notas del autor quedan ocultas para tu banda.",
     "authorShown": "Las notas del autor se muestran a tu banda."
+  },
+  "stand": {
+    "tools": "Herramientas del atril",
+    "light": "Claro",
+    "stage": "Escenario",
+    "fullscreen": "Pantalla completa",
+    "close": "Cerrar",
+    "turn": "Secciones",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "position": "Sección {current} de {total}",
+    "end": "Fin de la canción"
   }
 }
