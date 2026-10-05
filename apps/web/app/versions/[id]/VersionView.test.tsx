@@ -90,3 +90,31 @@ describe("R-02.7 forking", () => {
     expect(render("en")).not.toContain("Based on");
   });
 });
+
+describe("R-02.4 making a version private", () => {
+  const makePrivate = 'href="/versions/00000000-0000-0000-0000-0000000000f1/make-private"';
+
+  it("R-02.4 only the owner of an active public version is offered Make private", () => {
+    expect(render("en", { signedIn: true, owner: true })).toContain(makePrivate);
+    expect(render("en", { signedIn: true })).not.toContain(makePrivate);
+    expect(render("en", { signedIn: true, owner: true, status: "frozen" })).not.toContain(
+      makePrivate,
+    );
+    expect(render("en", { signedIn: true, owner: true, visibility: "private" })).not.toContain(
+      makePrivate,
+    );
+  });
+
+  it("R-02.4 a frozen version says so, and can still be forked", () => {
+    const frozen = render("en", { signedIn: true, status: "frozen" });
+    expect(frozen).toContain("Frozen public version");
+    expect(frozen).toMatch(/<button[^>]*type="submit"[^>]*>.*Fork/);
+    expect(render("es", { status: "frozen" })).toContain("Versión pública congelada");
+  });
+
+  it("R-02.5 a private version says so and offers no fork", () => {
+    const shared = render("en", { signedIn: true, visibility: "private" });
+    expect(shared).toContain("Private");
+    expect(shared).not.toMatch(/<button[^>]*>.*Fork/);
+  });
+});

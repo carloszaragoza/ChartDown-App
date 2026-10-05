@@ -178,7 +178,10 @@
     "basedOn": "Basada en la versión de {author}",
     "basedOnUnknown": "Basada en otra versión",
     "forkCc0": "Tu copia es pública y se comparte bajo CC0, como toda versión pública.",
-    "forkFailed": "No se pudo hacer la copia de esta versión. Inténtalo de nuevo."
+    "forkFailed": "No se pudo hacer la copia de esta versión. Inténtalo de nuevo.",
+    "private": "Privada",
+    "frozen": "Versión pública congelada",
+    "makePrivate": "Hacer privada"
   },
   "newVersion": {
     "title": "Nueva versión",
@@ -229,5 +232,15 @@
     "isCurrent": "la revisión actual",
     "restore": "Restaurar esta revisión",
     "restoreError": "No se pudo restaurar esta revisión. Inténtalo de nuevo."
+  },
+  "makePrivate": {
+    "title": "Hacer privada esta versión",
+    "copy": "Recibes una copia privada con el cifrado actual, y sigues editándola ahí.",
+    "frozen": "Esta versión pública se queda en el catálogo con el nombre {author}, marcada como “Versión pública congelada”. Ya nadie puede editarla, tampoco tú.",
+    "others": "Los sets y las copias de otras personas siguen usando la versión pública. Las versiones públicas se comparten bajo CC0 y se quedan con la comunidad.",
+    "final": "No se puede deshacer.",
+    "confirm": "Hacer privada",
+    "cancel": "Cancelar y volver a la versión",
+    "error": "No se pudo hacer privada esta versión. Inténtalo de nuevo."
   }
 }
