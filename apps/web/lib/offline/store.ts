@@ -73,3 +73,83 @@ export async function storedSets(): Promise<SetBundle[]> {
 export async function forgetSets(): Promise<void> {
   if (available()) await caches.delete(CACHE);
 }
+
+// What changed in each set since it was downloaded, kept until the person dismisses it (T-903).
+const CHANGES = "/offline/changes/";
+const REMOVED = "/offline/removed/";
+/** Sent on the window once downloaded sets are brought up to date, so notices can refresh. */
+export const SYNCED = "chartdown:offline-synced";
+
+const putJson = async (cache: Cache, key: string, value: unknown) =>
+  cache.put(
+    key,
+    new Response(JSON.stringify(value), { headers: { "Content-Type": "application/json" } }),
+  );
+const readJson = async <T>(cache: Cache, key: string): Promise<T | null> => {
+  const response = await cache.match(key);
+  return response ? ((await response.json()) as T) : null;
+};
+
+/**
+ * Brings every downloaded set up to date (R-08.3): a new bundle replaces the kept one when its
+ * stamp differs, and what changed is kept for the notice; a set the person can no longer read is
+ * removed, with a notice. Returns how many sets changed.
+ */
+export async function syncSets(): Promise<number> {
+  if (!available() || !navigator.onLine) return 0;
+  const { setChanges } = await import("./changes");
+  const cache = await caches.open(CACHE);
+  let changed = 0;
+  for (const kept of await storedSets()) {
+    const response = await fetch(`/api/sets/${kept.set.id}/bundle`, { cache: "no-store" }).catch(
+      () => null,
+    );
+    if (!response) continue;
+    if (response.status === 404) {
+      await cache.delete(`${BUNDLES}${kept.set.id}`);
+      await cache.delete(`${CHANGES}${kept.set.id}`);
+      await putJson(cache, `${REMOVED}${kept.set.id}`, { name: kept.set.name });
+      changed += 1;
+      continue;
+    }
+    if (!response.ok) continue;
+    const current = (await response.json()) as SetBundle;
+    const changes = setChanges(kept, current);
+    if (current.stamp === kept.stamp) continue;
+    const pending = (await readJson<unknown[]>(cache, `${CHANGES}${kept.set.id}`)) ?? [];
+    await putJson(cache, `${BUNDLES}${kept.set.id}`, current);
+    if (changes.length > 0)
+      await putJson(cache, `${CHANGES}${kept.set.id}`, [...pending, ...changes]);
+    changed += 1;
+  }
+  if (changed > 0) window.dispatchEvent(new Event(SYNCED));
+  return changed;
+}
+
+export async function changesFor(setId: string): Promise<import("./changes").Change[]> {
+  if (!available()) return [];
+  return (await readJson(await caches.open(CACHE), `${CHANGES}${setId}`)) ?? [];
+}
+
+export async function dismissChanges(setId: string): Promise<void> {
+  if (available()) await (await caches.open(CACHE)).delete(`${CHANGES}${setId}`);
+}
+
+/** Sets removed from the device because the person can no longer read them. */
+export async function removedSets(): Promise<{ id: string; name: string }[]> {
+  if (!available()) return [];
+  const cache = await caches.open(CACHE);
+  const keys = (await cache.keys()).filter((request) =>
+    new URL(request.url).pathname.startsWith(REMOVED),
+  );
+  return Promise.all(
+    keys.map(async (key) => ({
+      id: new URL(key.url).pathname.slice(REMOVED.length),
+      name: (await readJson<{ name: string }>(cache, key.url))?.name ?? "",
+    })),
+  );
+}
+
+export async function dismissRemoved(setId: string): Promise<void> {
+  if (available()) await (await caches.open(CACHE)).delete(`${REMOVED}${setId}`);
+}

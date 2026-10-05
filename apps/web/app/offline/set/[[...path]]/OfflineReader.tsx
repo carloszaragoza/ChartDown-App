@@ -4,7 +4,15 @@ import { keyName, parse, type Chart } from "@chartdown/core";
 import { InstrumentTag } from "@chartdown/ui";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { READER, storedSet, storedSets, type SetBundle } from "../../../../lib/offline/store";
+import {
+  dismissRemoved,
+  READER,
+  removedSets,
+  storedSet,
+  storedSets,
+  SYNCED,
+  type SetBundle,
+} from "../../../../lib/offline/store";
 import { setSongKey } from "../../../../lib/sets/lineup";
 import { songView, type SetSong } from "../../../../lib/sets/song";
 import { setWhen } from "../../../../lib/sets/when";
@@ -12,6 +20,7 @@ import { ChartBody } from "../../../versions/[id]/ChartBody";
 import { readDisplay } from "../../../versions/[id]/display";
 import { readSection } from "../../../versions/[id]/stand/standHref";
 import { StandMode } from "../../../versions/[id]/stand/StandMode";
+import { OfflineChanges } from "../../../_components/OfflineChanges";
 import styles from "../../../sets/sets.module.css";
 
 const noChanges = () => () => {};
@@ -59,10 +68,20 @@ export function OfflineReader() {
   const [bundle, setBundle] = useState<SetBundle | null | undefined>(undefined);
   const [all, setAll] = useState<SetBundle[]>([]);
 
+  const [removed, setRemoved] = useState<{ id: string; name: string }[]>([]);
+
+  // Loads what is kept on the device, again whenever it is brought up to date (T-903).
   useEffect(() => {
     if (!place) return;
-    if (place.kind === "list") void storedSets().then(setAll);
-    else void storedSet(place.setId).then(setBundle);
+    const load = () => {
+      if (place.kind === "list") {
+        void storedSets().then(setAll);
+        void removedSets().then(setRemoved);
+      } else void storedSet(place.setId).then(setBundle);
+    };
+    load();
+    window.addEventListener(SYNCED, load);
+    return () => window.removeEventListener(SYNCED, load);
   }, [place]);
 
   if (!place) return null;
@@ -77,6 +96,22 @@ export function OfflineReader() {
       <main className={styles.page}>
         <h1 className={styles.title}>{t("listTitle")}</h1>
         {banner}
+        {removed.map((item) => (
+          <p key={item.id} role="status" className={styles.message}>
+            {t("removed", { name: item.name })}{" "}
+            <button
+              type="button"
+              className={styles.link}
+              onClick={() =>
+                void dismissRemoved(item.id).then(() =>
+                  setRemoved((now) => now.filter((other) => other.id !== item.id)),
+                )
+              }
+            >
+              {t("gotIt")}
+            </button>
+          </p>
+        ))}
         {all.length === 0 ? (
           <p className={styles.hint}>{t("noneDownloaded")}</p>
         ) : (
@@ -132,6 +167,7 @@ export function OfflineReader() {
           </p>
         </div>
         {banner}
+        <OfflineChanges setId={bundle.set.id} />
         <div className={styles.columns}>
           <section aria-labelledby="songs" className={styles.card}>
             <h2 id="songs" className={styles.cardTitle}>
@@ -253,6 +289,7 @@ export function OfflineReader() {
         </p>
       </div>
       {banner}
+      <OfflineChanges setId={bundle.set.id} />
       <div className={styles.buttons}>
         <a href={`${base}/${song.position}/stand`} className="cd-button cd-button--primary">
           {s("startStand")}

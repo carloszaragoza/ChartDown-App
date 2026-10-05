@@ -10,6 +10,7 @@ import { setWhen } from "../../../lib/sets/when";
 import { createClient } from "../../../lib/supabase/server";
 import { UUID } from "../../versions/[id]/load";
 import { updatePinned } from "../actions";
+import { OfflineChanges } from "../../_components/OfflineChanges";
 import { OfflineButton } from "./OfflineButton";
 import styles from "../sets.module.css";
 
@@ -181,6 +182,7 @@ export default async function SetPage({
           )}
         </div>
       </div>
+      <OfflineChanges setId={set.id} />
       {status && (
         <p role="status" className={styles.message}>
           {status}
