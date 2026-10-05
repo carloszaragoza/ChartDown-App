@@ -46,6 +46,13 @@ describe("requirementsInSqlTests", () => {
       select ok(true, 'it''s fine: R-02.8 with an escaped quote');`;
     expect(requirementsInSqlTests(source)).toEqual(["R-04.1", "R-04.7", "R-02.8"]);
   });
+  it("does not take a -- inside a string for a comment, nor a quote inside a comment", () => {
+    const source = `
+      -- Ben's band: a quote in a comment opens no string.
+      select create_version(e'---\\nkey: G\\n---\\n## Verse\\n1', 'live');
+      select is(1, 1, 'R-06.1 after a ChartDown header in a string');`;
+    expect(requirementsInSqlTests(source)).toEqual(["R-06.1"]);
+  });
 });
 
 describe("findTestedRequirements", () => {

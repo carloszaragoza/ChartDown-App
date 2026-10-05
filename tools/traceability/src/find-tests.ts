@@ -23,9 +23,10 @@ export function requirementsInTestTitles(source: string): string[] {
  * with -- comments ignored, since every pgTAP assertion ends with its description string.
  */
 export function requirementsInSqlTests(source: string): string[] {
-  const withoutComments = source.replace(/--[^\n]*/g, "");
+  // Strings and comments in one pass, so a "--" inside a string (such as a ChartDown header,
+  // "---") is not taken for a comment, and a quote inside a comment opens no string.
   const strings = Array.from(
-    withoutComments.matchAll(/'((?:''|[^'])*)'/g),
+    source.matchAll(/'((?:''|[^'])*)'|--[^\n]*/g),
     ([, text]) => text ?? "",
   );
   return [...new Set(strings.flatMap((text) => extractRequirementIds(text)))];

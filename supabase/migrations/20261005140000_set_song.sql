@@ -7,7 +7,7 @@
 -- the author's notes, and the layer notes they may see. A musician gets the general notes and
 -- those for their instruments in this set (its lineup, or the band's defaults while it has none);
 -- the MD and the set's temporary MD get them all.
-create function public.set_song(set_id uuid, position integer) returns jsonb
+create function public.set_song(set_id uuid, song_position integer) returns jsonb
 language plpgsql stable security invoker set search_path = '' as $$
 declare
   me uuid := auth.uid();
@@ -36,7 +36,7 @@ begin
   join public.revisions r on r.id = i.pinned_revision_id
   join public.versions v on v.id = i.version_id
   join public.songs s on s.id = v.song_id
-  where i.set_id = set_song.set_id and i.position = set_song.position;
+  where i.set_id = set_song.set_id and i.position = set_song.song_position;
   if not found then
     raise exception 'not_found' using errcode = 'insufficient_privilege';
   end if;
@@ -53,7 +53,7 @@ begin
   return jsonb_build_object(
     'set_id', the_set.id,
     'set_name', the_set.name,
-    'position', set_song.position,
+    'position', set_song.song_position,
     'item_id', item.id,
     'version_id', item.version_id,
     'title', item.title,

@@ -88,7 +88,7 @@ select results_eq(
            s ->> 'content' like '%Author says soft%'
     from public.set_song('00000000-0000-0000-0000-00000000c501', 1) s$$,
   $$values ('musician', '["keys"]'::jsonb, 'A', 1, 'Lantern Bay', true)$$,
-  'R-06.1 the song comes with the set''s key, the pinned revision and the musician''s instruments'
+  'R-06.1 the song comes with the key of the set, the pinned revision and the instruments of the musician'
 );
 select is(
   pg_temp.notes('00000000-0000-0000-0000-00000000c502'), array['Everyone soft.', 'Keys pad.', 'Vocals harmony.'],
@@ -96,7 +96,7 @@ select is(
 );
 select is(
   (public.set_song('00000000-0000-0000-0000-00000000c502', 1) -> 'instruments'), '["keys", "vocals"]'::jsonb,
-  'R-06.1 the instruments come from this set''s lineup'
+  'R-06.1 the instruments come from the lineup of this set'
 );
 select results_eq(
   $$select n -> 'instruments', (n ->> 'bar')::int, n ->> 'section'
@@ -110,7 +110,7 @@ select results_eq(
 do $$ begin perform pg_temp.login('00000000-0000-0000-0000-0000000000c1'); end $$;
 select is(
   pg_temp.notes('00000000-0000-0000-0000-00000000c501'), array['Bass walks up.', 'Everyone soft.'],
-  'R-06.1 without a lineup of its own, the set uses the band''s default instruments'
+  'R-06.1 without a lineup of its own, the set uses the default instruments of the band'
 );
 select is(
   pg_temp.notes('00000000-0000-0000-0000-00000000c502'), array['Everyone soft.'],

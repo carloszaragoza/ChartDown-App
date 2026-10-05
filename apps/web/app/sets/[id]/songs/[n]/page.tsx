@@ -36,7 +36,7 @@ export default async function SetSongPage({
   if (!UUID.test(id) || !Number.isInteger(position) || position < 1) notFound();
   const supabase = await createClient();
   const [{ data, error }, { count }] = await Promise.all([
-    supabase.rpc("set_song", { set_id: id, position }),
+    supabase.rpc("set_song", { set_id: id, song_position: position }),
     supabase.from("set_items").select("id", { count: "exact", head: true }).eq("set_id", id),
   ]);
   if (error || !data) notFound();
