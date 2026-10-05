@@ -529,5 +529,10 @@
     "allNotesMd": "You see every note, as the music director.",
     "allNotesTempMd": "You see every note, as this set's temporary music director.",
     "unplacedNotes": "Notes whose section changed"
+  },
+  "offline": {
+    "title": "You are offline",
+    "body": "This page needs a connection. When you are back online, try again.",
+    "retry": "Try again"
   }
 }

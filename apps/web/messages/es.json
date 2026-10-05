@@ -529,5 +529,10 @@
     "allNotesMd": "Ves todas las notas, como director musical.",
     "allNotesTempMd": "Ves todas las notas, como director musical temporal de este set.",
     "unplacedNotes": "Notas cuya sección cambió"
+  },
+  "offline": {
+    "title": "Sin conexión",
+    "body": "Esta página necesita conexión. Cuando vuelvas a estar en línea, inténtalo de nuevo.",
+    "retry": "Intentar de nuevo"
   }
 }
