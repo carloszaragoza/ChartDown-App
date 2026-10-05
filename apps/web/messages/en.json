@@ -473,7 +473,8 @@
       "duplicated": "This is the copy. Give it a date when you have one.",
       "lineup": "The lineup was saved.",
       "defaults": "The set uses the band's instruments again.",
-      "key": "The key was saved."
+      "key": "The key was saved.",
+      "updated": "The song now plays the author's newest revision."
     },
     "errors": {
       "name": "A set name has 1 to 80 characters.",
@@ -497,6 +498,12 @@
     "keySave": "Save key",
     "songOf": "Song {position} of {total}",
     "previousSong": "Previous song",
-    "nextSong": "Next song"
+    "nextSong": "Next song",
+    "newer": "The author has a newer revision: {number} (this set plays {pinned}).",
+    "seeNewer": "See the new one",
+    "seeNewerName": "See the new revision of {title}",
+    "update": "Update",
+    "updateName": "Update {title} to the new revision",
+    "previewing": "Preview of revision {number}. This set still plays revision {pinned} until you update it."
   }
 }

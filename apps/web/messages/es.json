@@ -473,7 +473,8 @@
       "duplicated": "Esta es la copia. Ponle fecha cuando la tengas.",
       "lineup": "Se guardó la alineación.",
       "defaults": "El set vuelve a usar los instrumentos de la banda.",
-      "key": "Se guardó el tono."
+      "key": "Se guardó el tono.",
+      "updated": "La canción ya toca la revisión más nueva del autor."
     },
     "errors": {
       "name": "El nombre de un set tiene de 1 a 80 caracteres.",
@@ -497,6 +498,12 @@
     "keySave": "Guardar tono",
     "songOf": "Canción {position} de {total}",
     "previousSong": "Canción anterior",
-    "nextSong": "Canción siguiente"
+    "nextSong": "Canción siguiente",
+    "newer": "El autor tiene una revisión más nueva: la {number} (este set toca la {pinned}).",
+    "seeNewer": "Ver la nueva",
+    "seeNewerName": "Ver la revisión nueva de {title}",
+    "update": "Actualizar",
+    "updateName": "Actualizar {title} a la revisión nueva",
+    "previewing": "Vista previa de la revisión {number}. Este set sigue tocando la {pinned} hasta que actualices."
   }
 }
