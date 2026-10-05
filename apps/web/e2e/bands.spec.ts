@@ -47,9 +47,11 @@ test("R-04.2 the MD invites, the musician accepts, and whoever leaves loses acce
   await signIn(page, ana, PASSWORD);
   await expect(page.getByText("Signed in as Ana Lead")).toBeVisible();
   await openBand(page, band);
-  await page.getByText("Default instruments of Ben Keys").click();
-  await page.getByLabel("Bass", { exact: true }).check();
-  await page.getByRole("button", { name: "Save instruments" }).click();
+  // Each member has their own form: use Ben's.
+  const benRow = page.getByRole("listitem").filter({ hasText: "Ben Keys" });
+  await benRow.getByText("Default instruments of Ben Keys").click();
+  await benRow.getByLabel("Bass", { exact: true }).check();
+  await benRow.getByRole("button", { name: "Save instruments" }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText(
     "The instruments were saved.",
   );
