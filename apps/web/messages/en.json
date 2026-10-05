@@ -3,7 +3,8 @@
     "title": "ChartDown App",
     "tagline": "Number charts for the whole band, with each player’s notes.",
     "newVersion": "New version",
-    "catalog": "Catalog"
+    "catalog": "Catalog",
+    "bands": "Bands"
   },
   "language": {
     "label": "Language",
@@ -351,5 +352,63 @@
     "next": "Next",
     "position": "Section {current} of {total}",
     "end": "End of the song"
+  },
+  "bands": {
+    "title": "Bands",
+    "mine": "Your bands",
+    "none": "You are not in any band yet.",
+    "md": "Music director",
+    "musician": "Musician",
+    "you": "you",
+    "create": "Create a band",
+    "name": "Band name",
+    "createHint": "You will be its music director and can invite musicians.",
+    "createButton": "Create band",
+    "home": "Back to home",
+    "back": "Back to bands",
+    "invitations": "Invitations",
+    "invitedBy": "{name} invites you to {band}.",
+    "invitedTo": "You are invited to {band}.",
+    "accept": "Accept",
+    "decline": "Decline",
+    "acceptBand": "Accept the invitation to {band}",
+    "declineBand": "Decline the invitation to {band}",
+    "left": "You left the band.",
+    "declined": "You declined the invitation.",
+    "youAreMd": "You are the music director of this band.",
+    "youAreMusician": "You play in this band.",
+    "members": "{count, plural, one {# member} other {# members}}",
+    "noInstruments": "No default instruments yet",
+    "instrumentsOf": "Default instruments of {name}",
+    "saveInstruments": "Save instruments",
+    "remove": "Remove",
+    "removeName": "Remove {name} from the band",
+    "invite": "Invite a musician",
+    "email": "Their email",
+    "inviteHint": "They will see the invitation in the app when they sign in with this email.",
+    "inviteButton": "Send invitation",
+    "pending": "Pending invitations",
+    "cancel": "Cancel",
+    "cancelFor": "Cancel the invitation to {email}",
+    "rename": "Rename the band",
+    "renameButton": "Rename",
+    "leave": "Leave the band",
+    "leaveHint": "You will lose access to its sets and notes at once.",
+    "leaveButton": "Leave the band",
+    "status": {
+      "created": "Your band is ready. Invite your musicians.",
+      "renamed": "The band was renamed.",
+      "invited": "Invitation sent.",
+      "cancelled": "The invitation was cancelled.",
+      "instruments": "The instruments were saved.",
+      "removed": "The musician was removed from the band.",
+      "joined": "Welcome to the band."
+    },
+    "errors": {
+      "name": "A band name has 1 to 80 characters.",
+      "email_invalid": "Write a valid email.",
+      "yourself": "You are already in the band.",
+      "unknown": "That did not work. Try again."
+    }
   }
 }

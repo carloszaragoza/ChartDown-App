@@ -1,6 +1,7 @@
 import { Button } from "@chartdown/ui";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { signOut } from "../auth/actions";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
@@ -11,6 +12,8 @@ export interface HomeProps {
   account?: { name: string } | null;
   passwordUpdated?: boolean;
   accountDeleted?: boolean;
+  /** Shown under the messages, such as the person's band invitations. */
+  children?: ReactNode;
 }
 
 export function Home({
@@ -18,6 +21,7 @@ export function Home({
   account = null,
   passwordUpdated = false,
   accountDeleted = false,
+  children,
 }: HomeProps) {
   const t = useTranslations("home");
   const a = useTranslations("auth.account");
@@ -54,6 +58,13 @@ export function Home({
                 {t("newVersion")}
               </Link>
               <Link
+                href="/bands"
+                className="cd-button cd-button--secondary"
+                style={{ textDecoration: "none" }}
+              >
+                {t("bands")}
+              </Link>
+              <Link
                 href="/profile"
                 className="cd-button cd-button--secondary"
                 style={{ textDecoration: "none" }}
@@ -82,6 +93,7 @@ export function Home({
           {a("passwordUpdated")}
         </p>
       )}
+      {children}
       <h1 style={{ font: "var(--type-song-title)", margin: 0 }}>{t("title")}</h1>
       <p style={{ margin: 0, color: "var(--ink-muted)" }}>{t("tagline")}</p>
     </main>

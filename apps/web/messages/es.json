@@ -3,7 +3,8 @@
     "title": "ChartDown App",
     "tagline": "Cifrados en números para toda la banda, con las notas de cada músico.",
     "newVersion": "Nueva versión",
-    "catalog": "Catálogo"
+    "catalog": "Catálogo",
+    "bands": "Bandas"
   },
   "language": {
     "label": "Idioma",
@@ -351,5 +352,63 @@
     "next": "Siguiente",
     "position": "Sección {current} de {total}",
     "end": "Fin de la canción"
+  },
+  "bands": {
+    "title": "Bandas",
+    "mine": "Tus bandas",
+    "none": "Aún no estás en ninguna banda.",
+    "md": "Director musical",
+    "musician": "Músico",
+    "you": "tú",
+    "create": "Crear una banda",
+    "name": "Nombre de la banda",
+    "createHint": "Serás su director musical y podrás invitar músicos.",
+    "createButton": "Crear banda",
+    "home": "Volver al inicio",
+    "back": "Volver a bandas",
+    "invitations": "Invitaciones",
+    "invitedBy": "{name} te invita a {band}.",
+    "invitedTo": "Te invitan a {band}.",
+    "accept": "Aceptar",
+    "decline": "Rechazar",
+    "acceptBand": "Aceptar la invitación a {band}",
+    "declineBand": "Rechazar la invitación a {band}",
+    "left": "Saliste de la banda.",
+    "declined": "Rechazaste la invitación.",
+    "youAreMd": "Eres el director musical de esta banda.",
+    "youAreMusician": "Tocas en esta banda.",
+    "members": "{count, plural, one {# miembro} other {# miembros}}",
+    "noInstruments": "Aún sin instrumentos por defecto",
+    "instrumentsOf": "Instrumentos por defecto de {name}",
+    "saveInstruments": "Guardar instrumentos",
+    "remove": "Quitar",
+    "removeName": "Quitar a {name} de la banda",
+    "invite": "Invitar a un músico",
+    "email": "Su correo",
+    "inviteHint": "Verá la invitación en la app cuando inicie sesión con este correo.",
+    "inviteButton": "Enviar invitación",
+    "pending": "Invitaciones pendientes",
+    "cancel": "Cancelar",
+    "cancelFor": "Cancelar la invitación a {email}",
+    "rename": "Cambiar el nombre",
+    "renameButton": "Cambiar nombre",
+    "leave": "Salir de la banda",
+    "leaveHint": "Perderás al instante el acceso a sus sets y notas.",
+    "leaveButton": "Salir de la banda",
+    "status": {
+      "created": "Tu banda está lista. Invita a tus músicos.",
+      "renamed": "Se cambió el nombre de la banda.",
+      "invited": "Invitación enviada.",
+      "cancelled": "Se canceló la invitación.",
+      "instruments": "Se guardaron los instrumentos.",
+      "removed": "Se quitó al músico de la banda.",
+      "joined": "Bienvenido a la banda."
+    },
+    "errors": {
+      "name": "El nombre de una banda tiene de 1 a 80 caracteres.",
+      "email_invalid": "Escribe un correo válido.",
+      "yourself": "Ya estás en la banda.",
+      "unknown": "No funcionó. Inténtalo de nuevo."
+    }
   }
 }
