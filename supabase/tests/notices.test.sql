@@ -42,8 +42,8 @@ insert into public.band_members (id, band_id, user_id, role) values
   ('00000000-0000-0000-0000-00000001aa03', '00000000-0000-0000-0000-00000001b001', '00000000-0000-0000-0000-0000000001c1', 'musician'),
   ('00000000-0000-0000-0000-00000001aa04', '00000000-0000-0000-0000-00000001b001', '00000000-0000-0000-0000-0000000001d1', 'musician');
 insert into public.member_instruments (member_id, instrument_id)
-  select '00000000-0000-0000-0000-00000001aa02', id from public.instruments where slug = 'bass'
-  union all select '00000000-0000-0000-0000-00000001aa03', id from public.instruments where slug = 'keys';
+  select '00000000-0000-0000-0000-00000001aa02'::uuid, id from public.instruments where slug = 'bass'
+  union all select '00000000-0000-0000-0000-00000001aa03'::uuid, id from public.instruments where slug = 'keys';
 insert into public.songs (id, title) values
   ('00000000-0000-0000-0000-000000010501', 'Open Road'),
   ('00000000-0000-0000-0000-000000010502', 'Harbor Lights');
@@ -129,8 +129,8 @@ insert into public.layer_notes (id, layer_id, version_id, section, bar, text, an
   ('00000000-0000-0000-0000-00000001ab02', '00000000-0000-0000-0000-0000000101a1', '00000000-0000-0000-0000-0000000100f1', 'Chorus', null, 'Let it ring.', '00000000-0000-0000-0000-0000000100d1', '00000000-0000-0000-0000-0000000001a1'),
   ('00000000-0000-0000-0000-00000001ab03', '00000000-0000-0000-0000-0000000101a1', '00000000-0000-0000-0000-0000000100f1', 'Chorus', null, 'Everyone builds.', '00000000-0000-0000-0000-0000000100d1', '00000000-0000-0000-0000-0000000001a1');
 insert into public.layer_note_instruments (note_id, instrument_id)
-  select '00000000-0000-0000-0000-00000001ab01', id from public.instruments where slug = 'bass'
-  union all select '00000000-0000-0000-0000-00000001ab02', id from public.instruments where slug = 'guitar';
+  select '00000000-0000-0000-0000-00000001ab01'::uuid, id from public.instruments where slug = 'bass'
+  union all select '00000000-0000-0000-0000-00000001ab02'::uuid, id from public.instruments where slug = 'guitar';
 select pg_temp.save();
 select results_eq(
   $$select n ->> 'title', n ->> 'section', (n ->> 'bar')::int, n ->> 'text', n -> 'instruments' from pg_temp.notices('00000000-0000-0000-0000-0000000001b1', 'note_added') n where n ->> 'text' = 'Walk up to the 4.'$$,
