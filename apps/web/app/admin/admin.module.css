@@ -6,6 +6,10 @@
   margin: 0 auto;
   padding: var(--space-10) var(--space-4);
 }
+.section {
+  display: grid;
+  gap: var(--space-3);
+}
 .title {
   margin: 0;
   font: var(--type-song-title);

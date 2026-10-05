@@ -35,6 +35,7 @@ export default async function NoticesPage() {
     writtenKey: t("writtenKey"),
     everyone: t("everyone"),
     place: (section, bar) => (bar ? t("place", { section, bar }) : section),
+    reason: (reason) => t(reason === "lyrics" ? "reasons.lyrics" : "reasons.other"),
   };
   const notices = ((data ?? []) as Notice[]).flatMap((notice) => {
     const message = noticeMessage(notice, words);

@@ -191,7 +191,21 @@
     "makePrivate": "Hacer privada",
     "edit": "Editar",
     "myNotes": "Mis notas",
-    "stand": "Modo atril"
+    "stand": "Modo atril",
+    "hidden": "Oculta por la administración",
+    "report": {
+      "open": "Reportar",
+      "reason": "Motivo",
+      "reasons": {
+        "lyrics": "Tiene la letra completa",
+        "other": "Otra cosa"
+      },
+      "note": "Nota (opcional)",
+      "submit": "Enviar reporte",
+      "sent": "Gracias: la administración lo revisará.",
+      "already": "Ya reportaste esta versión; la administración lo revisará.",
+      "failed": "No se pudo enviar el reporte. Inténtalo de nuevo."
+    }
   },
   "newVersion": {
     "title": "Nueva versión",
@@ -644,7 +658,8 @@
       "key_changed": "{title} en {set} ahora está en {to} (estaba en {from}).",
       "order_changed": "Cambió el orden de las canciones de {set}.",
       "note_added": "Nueva nota para {for} en {title}, {place}: «{text}»",
-      "new_revision": "{title} tiene una nueva revisión de su autor, la {number}; {set} sigue tocando la revisión {pinned}."
+      "new_revision": "{title} tiene una nueva revisión de su autor, la {number}; {set} sigue tocando la revisión {pinned}.",
+      "version_hidden": "La administración ocultó {title} a la comunidad {reason}. Tú todavía la ves."
     },
     "kinds": {
       "lineup_added": "Cuando me agregan a un set",
@@ -653,7 +668,12 @@
       "key_changed": "Cuando una canción de mis sets cambia de tonalidad",
       "order_changed": "Cuando cambia el orden de uno de mis sets",
       "note_added": "Cuando hay una nota nueva para mis instrumentos",
-      "new_revision": "Cuando una canción de los sets de mi banda tiene una revisión nueva (dirección musical)"
+      "new_revision": "Cuando una canción de los sets de mi banda tiene una revisión nueva (dirección musical)",
+      "version_hidden": "Cuando la administración oculta una de mis versiones"
+    },
+    "reasons": {
+      "lyrics": "porque tiene la letra completa",
+      "other": "después de un reporte"
     }
   },
   "admin": {
@@ -711,6 +731,28 @@
         "note": "La nota puede tener 200 caracteres como máximo.",
         "unknown": "Algo salió mal. Inténtalo de nuevo."
       }
+    },
+    "reports": {
+      "title": "Reportes",
+      "hint": "Versiones públicas reportadas y las versiones que ocultaste.",
+      "open": "Reportes abiertos",
+      "none": "No hay reportes abiertos.",
+      "reportedBy": "{count, plural, one {Reportada por # persona} other {Reportada por # personas}}",
+      "reasons": {
+        "lyrics": "Letra completa",
+        "other": "Otra cosa"
+      },
+      "openVersion": "Abrir {title}",
+      "hide": "Ocultar {title}",
+      "hideReason": "Motivo para ocultar",
+      "dismiss": "Descartar reporte",
+      "hidden": "Versiones ocultas",
+      "noneHidden": "No hay versiones ocultas.",
+      "show": "Mostrar {title} de nuevo",
+      "hiddenDone": "{title} quedó oculta; se avisó a su dueño por qué.",
+      "shownDone": "{title} volvió al catálogo.",
+      "dismissedDone": "Se descartó el reporte.",
+      "failed": "No funcionó; quizá ya cambió. Inténtalo de nuevo."
     }
   }
 }

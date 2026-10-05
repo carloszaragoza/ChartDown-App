@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { addToSet } from "../../sets/actions";
-import { forkVersion } from "./actions";
+import { forkVersion, reportVersion } from "./actions";
 import { ChartBody } from "./ChartBody";
 import { DisplayBar } from "./DisplayBar";
 import { displayHref, type Display } from "./display";
@@ -45,6 +45,8 @@ export interface VersionViewProps {
   setFailed?: boolean;
   /** The last fork attempt failed. */
   forkFailed?: boolean;
+  /** How the person's report went (R-07.2). */
+  report?: "sent" | "already" | "failed" | null;
   /** Numbers or letters and the key to show (R-03.2); numbers in the written key by default. */
   display?: Display;
   /** The page's own address, for the display choices. */
@@ -67,6 +69,7 @@ export function VersionView({
   visibility = "public",
   status = "active",
   forkFailed = false,
+  report = null,
   setChoices = [],
   setFailed = false,
   display,
@@ -88,10 +91,14 @@ export function VersionView({
       <header className={styles.header}>
         <div className={styles.heading}>
           <h1 className={styles.title}>{title}</h1>
-          {(visibility === "private" || status === "frozen") && (
+          {(visibility === "private" || status !== "active") && (
             <p>
               <span className={styles.badge}>
-                {visibility === "private" ? t("private") : t("frozen")}
+                {status === "hidden"
+                  ? t("hidden")
+                  : visibility === "private"
+                    ? t("private")
+                    : t("frozen")}
               </span>
             </p>
           )}
@@ -200,6 +207,41 @@ export function VersionView({
             )}
           </form>
         )}
+        {signedIn &&
+          !owner &&
+          visibility === "public" &&
+          status !== "hidden" &&
+          notice === undefined && (
+            <details className={styles.fork} open={report !== null}>
+              <summary className="cd-button cd-button--secondary">{t("report.open")}</summary>
+              {report === "sent" || report === "already" ? (
+                <p role="status" className={styles.hint}>
+                  {t(`report.${report}`)}
+                </p>
+              ) : (
+                <form action={reportVersion} className={styles.fork}>
+                  <input type="hidden" name="versionId" value={id} />
+                  <label className={styles.hint}>
+                    {t("report.reason")}
+                    <select name="reason" className={styles.select} defaultValue="lyrics">
+                      <option value="lyrics">{t("report.reasons.lyrics")}</option>
+                      <option value="other">{t("report.reasons.other")}</option>
+                    </select>
+                  </label>
+                  <label className={styles.hint}>
+                    {t("report.note")}
+                    <textarea name="note" className={styles.select} maxLength={500} rows={3} />
+                  </label>
+                  <Button type="submit">{t("report.submit")}</Button>
+                  {report === "failed" && (
+                    <p role="alert" className={styles.alert}>
+                      {t("report.failed")}
+                    </p>
+                  )}
+                </form>
+              )}
+            </details>
+          )}
         {!signedIn && (
           <div className={styles.fork}>
             <Link

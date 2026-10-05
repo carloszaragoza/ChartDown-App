@@ -10,6 +10,7 @@ export default async function AdminPage() {
   const parts = [
     { href: "/admin/instruments", label: t("instruments.title"), hint: t("instruments.hint") },
     { href: "/admin/invites", label: t("invites.title"), hint: t("invites.hint") },
+    { href: "/admin/reports", label: t("reports.title"), hint: t("reports.hint") },
   ];
   return (
     <main className={styles.page}>

@@ -16,6 +16,7 @@ const words: NoticeWords = {
   writtenKey: "its written key",
   everyone: "everyone",
   place: (section, bar) => (bar ? `${section}, bar ${bar}` : section),
+  reason: (reason) => `because of ${reason}`,
 };
 const set = { set_id: "s1", set_name: "Sunday 12" };
 
@@ -112,6 +113,18 @@ describe("T-1002 what a notice says", () => {
       key: "new_revision",
       values: { title: "Open Road", set: "Sunday 12", number: 2, pinned: 1 },
     });
+  });
+
+  it("R-07.2 the owner of a hidden version reads which one and why, and opens it", () => {
+    const hidden = {
+      type: "version_hidden",
+      detail: { version_id: "v1", title: "Open Road", reason: "lyrics" },
+    };
+    expect(noticeMessage(hidden, words)).toEqual({
+      key: "version_hidden",
+      values: { title: "Open Road", reason: "because of lyrics" },
+    });
+    expect(noticeHref(hidden)).toBe("/versions/v1");
   });
 
   it("R-09.3 a notice opens what it is about; an unknown type is left out", () => {

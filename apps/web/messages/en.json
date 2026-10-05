@@ -191,7 +191,21 @@
     "makePrivate": "Make private",
     "edit": "Edit",
     "myNotes": "My notes",
-    "stand": "Stand mode"
+    "stand": "Stand mode",
+    "hidden": "Hidden by the administrators",
+    "report": {
+      "open": "Report",
+      "reason": "Why",
+      "reasons": {
+        "lyrics": "It has full song lyrics",
+        "other": "Something else"
+      },
+      "note": "Note (optional)",
+      "submit": "Send report",
+      "sent": "Thanks: the administrators will look at it.",
+      "already": "You already reported this version; the administrators will look at it.",
+      "failed": "The report could not be sent. Try again."
+    }
   },
   "newVersion": {
     "title": "New version",
@@ -644,7 +658,8 @@
       "key_changed": "{title} in {set} is now in {to} (it was in {from}).",
       "order_changed": "The order of the songs in {set} changed.",
       "note_added": "New note for {for} in {title}, {place}: “{text}”",
-      "new_revision": "{title} has a new revision from its author, {number}; {set} still plays revision {pinned}."
+      "new_revision": "{title} has a new revision from its author, {number}; {set} still plays revision {pinned}.",
+      "version_hidden": "The administrators hid {title} from the community {reason}. You still see it."
     },
     "kinds": {
       "lineup_added": "When I am added to a set",
@@ -653,7 +668,12 @@
       "key_changed": "When a song in my sets changes key",
       "order_changed": "When the order of one of my sets changes",
       "note_added": "When there is a new note for my instruments",
-      "new_revision": "When a song in my band's sets has a new revision (music directors)"
+      "new_revision": "When a song in my band's sets has a new revision (music directors)",
+      "version_hidden": "When the administrators hide one of my versions"
+    },
+    "reasons": {
+      "lyrics": "because it has full song lyrics",
+      "other": "after a report"
     }
   },
   "admin": {
@@ -711,6 +731,28 @@
         "note": "The note can have at most 200 characters.",
         "unknown": "Something went wrong. Try again."
       }
+    },
+    "reports": {
+      "title": "Reports",
+      "hint": "Public versions people reported, and the versions you hid.",
+      "open": "Open reports",
+      "none": "No open reports.",
+      "reportedBy": "{count, plural, one {Reported by # person} other {Reported by # people}}",
+      "reasons": {
+        "lyrics": "Full song lyrics",
+        "other": "Something else"
+      },
+      "openVersion": "Open {title}",
+      "hide": "Hide {title}",
+      "hideReason": "Reason for hiding",
+      "dismiss": "Dismiss report",
+      "hidden": "Hidden versions",
+      "noneHidden": "No hidden versions.",
+      "show": "Show {title} again",
+      "hiddenDone": "{title} is hidden; its owner was told why.",
+      "shownDone": "{title} is back in the catalog.",
+      "dismissedDone": "The report was dismissed.",
+      "failed": "That did not work; it may have changed already. Try again."
     }
   }
 }
