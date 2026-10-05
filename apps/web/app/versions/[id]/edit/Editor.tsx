@@ -1,9 +1,9 @@
 "use client";
 
-import { parse, type Warning } from "@chartdown/core";
-import { Button } from "@chartdown/ui";
+import { parse, SUPPORTED_VERSION, type Warning } from "@chartdown/core";
+import { Button, Icon } from "@chartdown/ui";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useActionState, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { lineRange } from "../../../../lib/versions/lines";
 import { ChartBody } from "../ChartBody";
@@ -16,6 +16,11 @@ export interface EditorProps {
   visibility: "public" | "private";
   revisionId: string;
   content: string;
+  /** The version's source, as the header shows it ("Own arrangement", "Live 2025"). */
+  source: string;
+  revisionNumber: number;
+  /** When the current revision was saved (ISO). */
+  savedAt: string;
 }
 
 /**
@@ -23,9 +28,20 @@ export interface EditorProps {
  * typing without reloading, and the parser's warnings with their lines. Warnings never block a
  * save.
  */
-export function Editor({ versionId, title, visibility, revisionId, content }: EditorProps) {
+export function Editor({
+  versionId,
+  title,
+  visibility,
+  revisionId,
+  content,
+  source,
+  revisionNumber,
+  savedAt,
+}: EditorProps) {
   const t = useTranslations("editor");
   const v = useTranslations("version");
+  const format = useFormatter();
+  const now = useNow({ updateInterval: 30_000 });
   const [text, setText] = useState(content);
   const [state, action, pending] = useActionState<SaveState, FormData>(saveChart, {
     status: "idle",
@@ -37,6 +53,11 @@ export function Editor({ versionId, title, visibility, revisionId, content }: Ed
   const shown = useDeferredValue(text);
   const chart = useMemo(() => parse(shown), [shown]);
   const area = useRef<HTMLTextAreaElement>(null);
+  // After a save, the header follows the new revision.
+  const saved =
+    state.number && state.savedAt
+      ? { number: state.number, at: state.savedAt }
+      : { number: revisionNumber, at: savedAt };
 
   // Leaving with unsaved changes asks first.
   useEffect(() => {
@@ -60,19 +81,43 @@ export function Editor({ versionId, title, visibility, revisionId, content }: Ed
         <div className={styles.heading}>
           <h1 className={styles.title}>{title}</h1>
           <p className={styles.meta}>
-            <span className={styles.badge}>
-              {visibility === "private" ? v("private") : t("public")}
-            </span>
+            {t("savedLine", {
+              source,
+              number: saved.number,
+              when: format.relativeTime(new Date(saved.at), now),
+            })}{" "}
+            ·{" "}
+            <Link href={`/versions/${versionId}`} className={styles.metaLink}>
+              {t("view")}
+            </Link>
           </p>
         </div>
         <form action={action} className={styles.actions}>
           <input type="hidden" name="versionId" value={versionId} />
           <input type="hidden" name="content" value={text} />
+          {/* Public or private; going private is its own flow (R-02.4) and has no way back. */}
+          <div className={styles.segmented} role="group" aria-label={t("visibility")}>
+            {visibility === "public" ? (
+              <>
+                <span className={styles.segment} aria-current="true">
+                  <Icon name="public" size={18} />
+                  {t("public")}
+                </span>
+                <Link href={`/versions/${versionId}/make-private`} className={styles.segment}>
+                  <Icon name="private" size={18} />
+                  {v("private")}
+                </Link>
+              </>
+            ) : (
+              <span className={styles.segment} aria-current="true">
+                <Icon name="private" size={18} />
+                {v("private")}
+              </span>
+            )}
+          </div>
           <Link href={`/versions/${versionId}/history`} className="cd-button cd-button--secondary">
+            <Icon name="history" size={20} />
             {v("history")}
-          </Link>
-          <Link href={`/versions/${versionId}`} className="cd-button cd-button--secondary">
-            {t("view")}
           </Link>
           <Button
             type="submit"
@@ -95,11 +140,13 @@ export function Editor({ versionId, title, visibility, revisionId, content }: Ed
 
       <div className={styles.panes}>
         <div className={styles.source}>
-          <label htmlFor="chart-source" className={styles.label}>
-            {t("text")}
-          </label>
+          <div className={styles.sourceBar}>
+            <span>ChartDown {chart.version ?? SUPPORTED_VERSION}</span>
+            <span>{t("numbers")}</span>
+          </div>
           <textarea
             id="chart-source"
+            aria-label={t("text")}
             ref={area}
             className={styles.text}
             value={text}
@@ -138,7 +185,10 @@ export function Warnings({
       : warning.message;
   return (
     <div id="chart-warnings" className={styles.warnings}>
-      <h2 className={styles.label}>{t("warnings", { count: warnings.length })}</h2>
+      <h2 className={styles.label}>
+        {warnings.length === 0 && <Icon name="check" size={16} />}
+        {t("warnings", { count: warnings.length })}
+      </h2>
       {warnings.length > 0 && (
         <ul className={styles.warningList}>
           {warnings.map((warning, index) => (

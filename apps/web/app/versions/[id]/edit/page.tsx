@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../lib/auth/enabled";
 import { createClient } from "../../../../lib/supabase/server";
 import { loadVersion } from "../load";
@@ -22,10 +23,11 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
     notFound();
   const { data: revision } = await supabase
     .from("revisions")
-    .select("content")
+    .select("content, number, created_at")
     .eq("id", version.currentRevisionId)
     .maybeSingle();
   if (!revision) notFound();
+  const sources = await getTranslations("version.source");
 
   return (
     <Editor
@@ -34,6 +36,9 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
       visibility={version.visibility}
       revisionId={version.currentRevisionId}
       content={revision.content}
+      source={[sources(version.source.type), version.source.year].filter(Boolean).join(" ")}
+      revisionNumber={revision.number as number}
+      savedAt={revision.created_at as string}
     />
   );
 }

@@ -34,6 +34,9 @@ describe("R-03.1 the chart editor", () => {
         visibility="public"
         revisionId="00000000-0000-0000-0000-0000000000d1"
         content={"## Bridge\n4 | 5 | 6m | 1\n"}
+        source="Own arrangement"
+        revisionNumber={7}
+        savedAt={new Date(Date.now() - 2 * 60_000).toISOString()}
       />,
     );
     expect(html).toContain("Lantern Bay");
@@ -42,5 +45,9 @@ describe("R-03.1 the chart editor", () => {
     expect(html).toMatch(/<h[23][^>]*>[^<]*Bridge/);
     // Nothing changed yet, so there is nothing to save.
     expect(html).toContain("No changes to save");
+    // The header as designed: source, revision and when, Public or Private, History.
+    expect(html).toContain("Own arrangement · Revision 7 · saved 2 minutes ago");
+    expect(html).toContain('href="/versions/00000000-0000-0000-0000-0000000000f1/make-private"');
+    expect(html).toMatch(/ChartDown (<!-- -->)?0\.4/);
   });
 });

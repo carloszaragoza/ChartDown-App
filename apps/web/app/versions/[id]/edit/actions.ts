@@ -12,8 +12,9 @@ export interface SaveState {
   baseRevisionId: string;
   /** The text of that revision. */
   savedContent: string;
-  /** The new revision's number, after a save. */
+  /** The new revision's number and when it was saved (ISO), after a save. */
   number?: number;
+  savedAt?: string;
 }
 
 /**
@@ -55,5 +56,6 @@ export async function saveChart(previous: SaveState, form: FormData): Promise<Sa
     baseRevisionId: created,
     savedContent: content,
     ...(revision ? { number: revision.number as number } : {}),
+    savedAt: new Date().toISOString(),
   };
 }
