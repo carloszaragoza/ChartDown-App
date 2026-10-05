@@ -9,6 +9,7 @@ import { UUID } from "../versions/[id]/load";
 
 const TYPES = new Set(["rehearsal", "service", "concert"]);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
+const TIME = /^\d{2}:\d{2}$/;
 const field = (form: FormData, name: string) => String(form.get(name) ?? "").trim();
 const setPage = (setId: string, extra: string) => `/sets/${setId}?${extra}`;
 
@@ -17,15 +18,18 @@ async function client() {
   return createClient();
 }
 
-/** Name, optional date and type, as the MD wrote them (R-05.1). */
+/** Name, optional date and time, and type, as the MD wrote them (R-05.1, T-708). */
 function readSet(form: FormData) {
   const name = field(form, "name");
   const date = field(form, "date");
+  const time = field(form, "time");
   const type = field(form, "type");
   if (name.length < 1 || name.length > 80) return { error: "name" as const };
   if (date && !DATE.test(date)) return { error: "date" as const };
+  if (time && !TIME.test(time)) return { error: "time" as const };
+  if (time && !date) return { error: "time_needs_date" as const };
   if (!TYPES.has(type)) return { error: "type" as const };
-  return { name, date: date || null, type };
+  return { name, date: date || null, time: time || null, type };
 }
 
 /** The MD creates a set; a name already used in the band is refused (R-05.1, decision 8). */

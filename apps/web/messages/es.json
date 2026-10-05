@@ -486,7 +486,9 @@
       "confirm": "Marca la casilla para confirmar.",
       "unknown": "No funcionó. Inténtalo de nuevo.",
       "key": "Elige uno de los tonos ofrecidos.",
-      "temp_md": "Elige a un músico de la banda."
+      "temp_md": "Elige a un músico de la banda.",
+      "time": "Escribe la hora con horas y minutos.",
+      "time_needs_date": "Una hora necesita una fecha."
     },
     "lineup": "Alineación",
     "lineupDefaults": "Este set usa los instrumentos por defecto de la banda. Guarda para darle su propia alineación.",
@@ -520,6 +522,7 @@
     "tempMdHint": "Podrá cambiar el orden, los tonos y la alineación de este set, y nada más. El rol termina después de ese día.",
     "tempMdAppoint": "Nombrar",
     "tempMdChange": "Cambiar",
-    "tempMdRemove": "Quitar el rol"
+    "tempMdRemove": "Quitar el rol",
+    "time": "Hora (opcional)"
   }
 }

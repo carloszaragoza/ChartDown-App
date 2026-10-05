@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../lib/auth/enabled";
+import { compareSets, setWhen } from "../../../../lib/sets/when";
 import { createClient } from "../../../../lib/supabase/server";
 import { UUID } from "../../../versions/[id]/load";
 import { createSet } from "../../../sets/actions";
@@ -13,9 +14,10 @@ export interface SetRow {
   id: string;
   name: string;
   date: string | null;
+  time: string | null;
   type: "rehearsal" | "service" | "concert";
 }
-const ERRORS = new Set(["name", "date", "type", "name_taken"]);
+const ERRORS = new Set(["name", "date", "time", "time_needs_date", "type", "name_taken"]);
 
 /** Upcoming and past sets of a band, or of the personal space (R-05.6, R-04.7). */
 export default async function BandSetsPage({
@@ -39,35 +41,20 @@ export default async function BandSetsPage({
       .eq("band_id", id)
       .eq("user_id", auth.user.id)
       .maybeSingle(),
-    supabase.from("sets").select("id, name, date, type").eq("band_id", id),
+    supabase.from("sets").select("id, name, date, time, type").eq("band_id", id),
   ]);
   if (!band || !me) notFound();
   const isMd = me.role === "md";
   const sets = (rows ?? []) as SetRow[];
   // Past: dated before today (UTC). Undated sets are upcoming, after the dated ones.
   const today = new Date().toISOString().slice(0, 10);
-  const upcoming = sets
-    .filter((set) => !set.date || set.date >= today)
-    .sort((a, b) =>
-      a.date && b.date
-        ? a.date.localeCompare(b.date) || a.name.localeCompare(b.name)
-        : a.date
-          ? -1
-          : b.date
-            ? 1
-            : a.name.localeCompare(b.name),
-    );
-  const past = sets
-    .filter((set) => set.date && set.date < today)
-    .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+  const upcoming = sets.filter((set) => !set.date || set.date >= today).sort(compareSets);
+  const past = sets.filter((set) => set.date && set.date < today).sort((a, b) => compareSets(b, a));
   const { error, deleted } = await searchParams;
   const t = await getTranslations("sets");
   const format = await getFormatter();
   const title = band.is_personal ? t("mySets") : t("bandSets", { band: band.name });
-  const when = (set: SetRow) =>
-    set.date
-      ? format.dateTime(new Date(`${set.date}T00:00:00Z`), { dateStyle: "medium", timeZone: "UTC" })
-      : t("noDate");
+  const when = (set: SetRow) => setWhen(format, set.date, set.time) ?? t("noDate");
   const list = (items: SetRow[], label: string, empty: string, key: string) => (
     <section aria-labelledby={key} className={styles.list}>
       <h2 id={key} className={styles.label}>
@@ -124,6 +111,10 @@ export default async function BandSetsPage({
           <label className={styles.field}>
             {t("date")}
             <input name="date" type="date" className={styles.input} />
+          </label>
+          <label className={styles.field}>
+            {t("time")}
+            <input name="time" type="time" className={styles.input} />
           </label>
           <label className={styles.field}>
             {t("type")}
