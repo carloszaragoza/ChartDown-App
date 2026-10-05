@@ -154,3 +154,19 @@ describe("R-03.5 the MD's notes", () => {
     expect(render("en")).not.toContain(notes);
   });
 });
+
+describe("R-05.2 adding a version to a set", () => {
+  it("R-05.2 the MD chooses one of their sets; nobody else sees the choice", () => {
+    const html = render("en", {
+      signedIn: true,
+      setChoices: [
+        { id: "00000000-0000-0000-0000-00000000c501", band: "Harbor Band", name: "Sunday" },
+        { id: "00000000-0000-0000-0000-00000000c502", band: null, name: "Practice" },
+      ],
+    });
+    expect(html).toContain("Add to a set");
+    expect(html).toContain("Harbor Band · Sunday");
+    expect(html).toContain("My sets · Practice");
+    expect(render("en", { signedIn: true })).not.toContain("Add to a set");
+  });
+});

@@ -24,14 +24,15 @@ const codeFragments = (text: string) =>
   Array.from(text.matchAll(/<code>(.*?)<\/code>/g), ([, code]) => code);
 
 // Messages that are the same in both languages on purpose: the product name and the
-// language names, which are always written in their own language, and an instrument name
-// spelled the same in both.
+// language names, which are always written in their own language, an instrument name
+// spelled the same in both, and "Sets", which Spanish-speaking musicians say too.
 const SAME_IN_BOTH = new Set([
   "home.title",
   "language.en",
   "language.es",
   "design.newInstrument",
   "chart.tempo",
+  "bands.sets",
 ]);
 
 describe("R-01.5 interface in English by default, with Spanish as an option", () => {

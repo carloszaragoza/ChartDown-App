@@ -94,6 +94,9 @@ export default async function BandPage({
         <h1 className={styles.title}>{band.name}</h1>
         <p className={styles.hint}>{isMd ? t("youAreMd") : t("youAreMusician")}</p>
       </div>
+      <Link href={`/bands/${band.id}/sets`} className="cd-button cd-button--primary">
+        {t("sets")}
+      </Link>
       {status && (
         <p role="status" className={styles.message}>
           {t(`status.${status}`)}
