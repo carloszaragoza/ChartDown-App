@@ -173,3 +173,13 @@ export async function setSongKey(form: FormData): Promise<void> {
     .eq("id", itemId);
   redirect(setPage(setId, error || count !== 1 ? "error=unknown" : "key=1"));
 }
+
+/** The MD moves a song to its version's current revision, the one the author published (R-05.2). */
+export async function updatePinned(form: FormData): Promise<void> {
+  const supabase = await client();
+  const setId = field(form, "setId");
+  const itemId = field(form, "itemId");
+  if (!UUID.test(setId) || !UUID.test(itemId)) redirect("/bands");
+  const { error } = await supabase.rpc("update_pinned_revision", { item_id: itemId });
+  redirect(setPage(setId, error ? "error=unknown" : "updated=1"));
+}

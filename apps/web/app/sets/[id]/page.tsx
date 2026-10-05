@@ -16,6 +16,7 @@ import {
   resetLineup,
   saveLineup,
   setSongKey,
+  updatePinned,
   updateSet,
 } from "../actions";
 import styles from "../sets.module.css";
@@ -26,7 +27,13 @@ interface Item {
   id: string;
   position: number;
   set_key: string | null;
-  version: One<{ id: string; author_name: string; song: One<{ title: string }> }>;
+  version: One<{
+    id: string;
+    author_name: string;
+    current_revision_id: string | null;
+    song: One<{ title: string }>;
+  }>;
+  pinned_revision_id: string;
   revision: One<{ number: number; content: string }>;
 }
 interface Member {
@@ -95,7 +102,7 @@ export default async function SetPage({
     supabase
       .from("set_items")
       .select(
-        "id, position, set_key, version:versions(id, author_name, song:songs(title)), revision:revisions(number, content)",
+        "id, position, set_key, pinned_revision_id, version:versions(id, author_name, current_revision_id, song:songs(title)), revision:revisions(number, content)",
       )
       .eq("set_id", id)
       .order("position"),
@@ -113,6 +120,27 @@ export default async function SetPage({
     (!tempMd?.until || (tempMd.until as string) >= today);
   const canArrange = isMd || isTempMd;
   const items = (rows ?? []) as Item[];
+  // Songs whose author has published a newer revision than the one pinned (decision 9.2).
+  const newer = items.filter((item) => {
+    const current = one(item.version)?.current_revision_id;
+    return current && current !== item.pinned_revision_id;
+  });
+  const { data: currentRows } = newer.length
+    ? await supabase
+        .from("revisions")
+        .select("id, number")
+        .in(
+          "id",
+          newer.map((item) => one(item.version)?.current_revision_id as string),
+        )
+    : { data: [] };
+  const currentNumber = new Map(
+    (currentRows ?? []).map((row) => [row.id as string, row.number as number]),
+  );
+  const newerNumber = (item: Item) => {
+    const current = one(item.version)?.current_revision_id;
+    return current && current !== item.pinned_revision_id ? currentNumber.get(current) : undefined;
+  };
   const charts = new Map(items.map((item) => [item.id, parse(one(item.revision)?.content ?? "")]));
   const written = (item: Item) => keyName(charts.get(item.id)?.key ?? { root: "C", minor: false });
   const minor = (item: Item) => Boolean(charts.get(item.id)?.key.minor);
@@ -190,6 +218,37 @@ export default async function SetPage({
                         ? t("inKey", { key: item.set_key, written: written(item) })
                         : t("writtenKey", { key: written(item) })}
                     </span>
+                    {newerNumber(item) !== undefined && (
+                      <div className={styles.update}>
+                        <p className={styles.text}>
+                          {t("newer", {
+                            number: newerNumber(item) ?? 0,
+                            pinned: one(item.revision)?.number ?? 0,
+                          })}
+                        </p>
+                        {isMd && (
+                          <div className={styles.buttons}>
+                            <Link
+                              href={`/sets/${set.id}/songs/${item.position}?preview=new`}
+                              className="cd-button cd-button--secondary"
+                              aria-label={t("seeNewerName", { title })}
+                            >
+                              {t("seeNewer")}
+                            </Link>
+                            <form action={updatePinned}>
+                              {hidden(item.id)}
+                              <Button
+                                type="submit"
+                                variant="primary"
+                                aria-label={t("updateName", { title })}
+                              >
+                                {t("update")}
+                              </Button>
+                            </form>
+                          </div>
+                        )}
+                      </div>
+                    )}
                     {canArrange && (
                       <form action={setSongKey} className={styles.keyForm}>
                         {hidden(item.id)}
