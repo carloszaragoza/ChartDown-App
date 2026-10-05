@@ -470,7 +470,10 @@
       "added": "The song was added at the end of the set.",
       "moved": "The order was saved.",
       "removed": "The song was removed from the set.",
-      "duplicated": "This is the copy. Give it a date when you have one."
+      "duplicated": "This is the copy. Give it a date when you have one.",
+      "lineup": "The lineup was saved.",
+      "defaults": "The set uses the band's instruments again.",
+      "key": "The key was saved."
     },
     "errors": {
       "name": "A set name has 1 to 80 characters.",
@@ -478,7 +481,22 @@
       "type": "Choose a type.",
       "name_taken": "Your band already has a set with that name.",
       "confirm": "Tick the box to confirm.",
-      "unknown": "That did not work. Try again."
-    }
+      "unknown": "That did not work. Try again.",
+      "key": "Choose one of the keys offered."
+    },
+    "lineup": "Lineup",
+    "lineupDefaults": "This set uses the band's default instruments. Save to give it its own lineup.",
+    "lineupOwn": "This set has its own lineup.",
+    "lineupSave": "Save lineup",
+    "lineupReset": "Back to the band's instruments",
+    "sitsOut": "Not playing in this set",
+    "inKey": "in {key} (written in {written})",
+    "writtenKey": "in {key}, as written",
+    "keyFor": "Key of {title}",
+    "keyWritten": "As written ({key})",
+    "keySave": "Save key",
+    "songOf": "Song {position} of {total}",
+    "previousSong": "Previous song",
+    "nextSong": "Next song"
   }
 }

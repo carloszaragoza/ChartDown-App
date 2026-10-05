@@ -1,11 +1,23 @@
+import { keyName, parse } from "@chartdown/core";
 import { Button } from "@chartdown/ui";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";
+import { effectiveLineup } from "../../../lib/sets/lineup";
 import { createClient } from "../../../lib/supabase/server";
+import { keysInMode } from "../../versions/[id]/display";
 import { UUID } from "../../versions/[id]/load";
-import { deleteSet, duplicateSet, moveItem, removeItem, updateSet } from "../actions";
+import {
+  deleteSet,
+  duplicateSet,
+  moveItem,
+  removeItem,
+  resetLineup,
+  saveLineup,
+  setSongKey,
+  updateSet,
+} from "../actions";
 import styles from "../sets.module.css";
 
 type Search = Promise<Record<string, string | undefined>>;
@@ -15,11 +27,33 @@ interface Item {
   position: number;
   set_key: string | null;
   version: One<{ id: string; author_name: string; song: One<{ title: string }> }>;
-  revision: One<{ number: number }>;
+  revision: One<{ number: number; content: string }>;
+}
+interface Member {
+  id: string;
+  user_id: string;
+  profile: One<{ name: string }>;
+  instruments: { instrument_id: string }[];
+}
+interface CatalogInstrument {
+  id: string;
+  name_en: string;
+  name_es: string;
+  active: boolean;
 }
 const one = <T,>(value: One<T>): T | null => (Array.isArray(value) ? (value[0] ?? null) : value);
-const STATUS = ["created", "saved", "added", "moved", "removed", "duplicated"];
-const ERRORS = new Set(["name", "date", "type", "name_taken", "confirm"]);
+const STATUS = [
+  "created",
+  "saved",
+  "added",
+  "moved",
+  "removed",
+  "duplicated",
+  "lineup",
+  "defaults",
+  "key",
+];
+const ERRORS = new Set(["name", "date", "type", "name_taken", "confirm", "key"]);
 
 /**
  * A set: its songs in order, each pinned to a revision (R-05.2). Members read it; the MD edits,
@@ -44,23 +78,59 @@ export default async function SetPage({
     .eq("id", id)
     .maybeSingle();
   if (!set) notFound();
-  const [{ data: me }, { data: rows }] = await Promise.all([
+  const [
+    { data: memberRows },
+    { data: rows },
+    { data: lineupRows },
+    { data: tempMd },
+    { data: catalog },
+  ] = await Promise.all([
     supabase
       .from("band_members")
-      .select("role")
+      .select(
+        "id, user_id, role, profile:profiles(name), instruments:member_instruments(instrument_id)",
+      )
       .eq("band_id", set.band_id)
-      .eq("user_id", auth.user.id)
-      .maybeSingle(),
+      .order("joined_at"),
     supabase
       .from("set_items")
       .select(
-        "id, position, set_key, version:versions(id, author_name, song:songs(title)), revision:revisions(number)",
+        "id, position, set_key, version:versions(id, author_name, song:songs(title)), revision:revisions(number, content)",
       )
       .eq("set_id", id)
       .order("position"),
+    supabase.from("set_lineup").select("member_id, instrument_id").eq("set_id", id),
+    supabase.from("set_temp_md").select("member_id, until").eq("set_id", id).maybeSingle(),
+    supabase.from("instruments").select("id, name_en, name_es, active"),
   ]);
+  const members = (memberRows ?? []) as (Member & { role: "md" | "musician" })[];
+  const me = members.find((member) => member.user_id === auth.user.id);
   const isMd = me?.role === "md";
+  // The set's temporary MD edits its order, keys and lineup too (R-05.5, T-705).
+  const today = new Date().toISOString().slice(0, 10);
+  const isTempMd =
+    Boolean(me && tempMd && tempMd.member_id === me.id) &&
+    (!tempMd?.until || (tempMd.until as string) >= today);
+  const canArrange = isMd || isTempMd;
   const items = (rows ?? []) as Item[];
+  const charts = new Map(items.map((item) => [item.id, parse(one(item.revision)?.content ?? "")]));
+  const written = (item: Item) => keyName(charts.get(item.id)?.key ?? { root: "C", minor: false });
+  const minor = (item: Item) => Boolean(charts.get(item.id)?.key.minor);
+  const ownLineup = (lineupRows ?? []).length > 0;
+  const lineup = effectiveLineup(
+    members.map((member) => ({
+      id: member.id,
+      defaults: member.instruments.map((row) => row.instrument_id),
+    })),
+    (lineupRows ?? []) as { member_id: string; instrument_id: string }[],
+  );
+  const lineupOf = (member: Member) => lineup.get(member.id) ?? [];
+  const locale = await getLocale();
+  const instruments = (catalog ?? []) as CatalogInstrument[];
+  const nameOf = (instrument: CatalogInstrument) =>
+    locale === "es" ? instrument.name_es : instrument.name_en;
+  const nameById = new Map(instruments.map((instrument) => [instrument.id, nameOf(instrument)]));
+  const profileName = (member: Member) => one(member.profile)?.name ?? "";
   const band = one(set.band as One<{ name: string; is_personal: boolean }>);
   const search = await searchParams;
   const status = STATUS.find((key) => search[key]);
@@ -110,15 +180,39 @@ export default async function SetPage({
                 <li key={item.id} className={styles.song}>
                   <span className={styles.position}>{item.position}</span>
                   <div className={styles.songText}>
-                    <Link href={`/versions/${version?.id}`} className={styles.link}>
+                    <Link href={`/sets/${set.id}/songs/${item.position}`} className={styles.link}>
                       {title}
                     </Link>
                     <span className={styles.hint}>
                       {t("by", { author: version?.author_name ?? "" })} ·{" "}
-                      {t("revision", { number: one(item.revision)?.number ?? 0 })}
+                      {t("revision", { number: one(item.revision)?.number ?? 0 })} ·{" "}
+                      {item.set_key
+                        ? t("inKey", { key: item.set_key, written: written(item) })
+                        : t("writtenKey", { key: written(item) })}
                     </span>
+                    {canArrange && (
+                      <form action={setSongKey} className={styles.keyForm}>
+                        {hidden(item.id)}
+                        <label className={styles.keyLabel}>
+                          {t("keyFor", { title })}
+                          <select
+                            name="key"
+                            defaultValue={item.set_key ?? ""}
+                            className={styles.select}
+                          >
+                            <option value="">{t("keyWritten", { key: written(item) })}</option>
+                            {keysInMode(minor(item)).map((key) => (
+                              <option key={keyName(key)} value={keyName(key)}>
+                                {keyName(key)}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <Button type="submit">{t("keySave")}</Button>
+                      </form>
+                    )}
                   </div>
-                  {isMd && (
+                  {canArrange && (
                     <div className={styles.buttons}>
                       {index > 0 && (
                         <form action={moveItem}>
@@ -138,12 +232,14 @@ export default async function SetPage({
                           </Button>
                         </form>
                       )}
-                      <form action={removeItem}>
-                        {hidden(item.id)}
-                        <Button type="submit" aria-label={t("removeName", { title })}>
-                          {t("remove")}
-                        </Button>
-                      </form>
+                      {isMd && (
+                        <form action={removeItem}>
+                          {hidden(item.id)}
+                          <Button type="submit" aria-label={t("removeName", { title })}>
+                            {t("remove")}
+                          </Button>
+                        </form>
+                      )}
                     </div>
                   )}
                 </li>
@@ -158,6 +254,70 @@ export default async function SetPage({
               {t("catalog")}
             </Link>
           </p>
+        )}
+      </section>
+
+      <section aria-labelledby="lineup" className={styles.list}>
+        <h2 id="lineup" className={styles.label}>
+          {t("lineup")}
+        </h2>
+        <p className={styles.hint}>{ownLineup ? t("lineupOwn") : t("lineupDefaults")}</p>
+        {canArrange ? (
+          <form action={saveLineup} className={styles.form}>
+            {hidden()}
+            {members.map((member) => {
+              const plays = new Set(lineupOf(member));
+              return (
+                <fieldset key={member.id} className={styles.group}>
+                  <legend className={styles.label}>{profileName(member)}</legend>
+                  <input type="hidden" name="member" value={member.id} />
+                  <div className={styles.instruments}>
+                    {instruments
+                      .filter((instrument) => instrument.active || plays.has(instrument.id))
+                      .sort((a, b) => nameOf(a).localeCompare(nameOf(b), locale))
+                      .map((instrument) => (
+                        <label key={instrument.id} className={styles.check}>
+                          <input
+                            type="checkbox"
+                            name={`instrument-${member.id}`}
+                            value={instrument.id}
+                            defaultChecked={plays.has(instrument.id)}
+                          />
+                          {nameOf(instrument)}
+                        </label>
+                      ))}
+                  </div>
+                </fieldset>
+              );
+            })}
+            <div className={styles.buttons}>
+              <Button type="submit" variant="primary">
+                {t("lineupSave")}
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <ul className={styles.items}>
+            {members.map((member) => {
+              const plays = lineupOf(member).map(
+                (instrumentId) => nameById.get(instrumentId) ?? "",
+              );
+              return (
+                <li key={member.id} className={styles.row}>
+                  <span className={styles.text}>{profileName(member)}</span>
+                  <span className={styles.hint}>
+                    {plays.length > 0 ? plays.join(", ") : t("sitsOut")}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        {canArrange && ownLineup && (
+          <form action={resetLineup}>
+            {hidden()}
+            <Button type="submit">{t("lineupReset")}</Button>
+          </form>
         )}
       </section>
 

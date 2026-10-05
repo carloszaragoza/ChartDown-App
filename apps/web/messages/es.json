@@ -470,7 +470,10 @@
       "added": "La canción se agregó al final del set.",
       "moved": "Se guardó el orden.",
       "removed": "Se quitó la canción del set.",
-      "duplicated": "Esta es la copia. Ponle fecha cuando la tengas."
+      "duplicated": "Esta es la copia. Ponle fecha cuando la tengas.",
+      "lineup": "Se guardó la alineación.",
+      "defaults": "El set vuelve a usar los instrumentos de la banda.",
+      "key": "Se guardó el tono."
     },
     "errors": {
       "name": "El nombre de un set tiene de 1 a 80 caracteres.",
@@ -478,7 +481,22 @@
       "type": "Elige un tipo.",
       "name_taken": "Tu banda ya tiene un set con ese nombre.",
       "confirm": "Marca la casilla para confirmar.",
-      "unknown": "No funcionó. Inténtalo de nuevo."
-    }
+      "unknown": "No funcionó. Inténtalo de nuevo.",
+      "key": "Elige uno de los tonos ofrecidos."
+    },
+    "lineup": "Alineación",
+    "lineupDefaults": "Este set usa los instrumentos por defecto de la banda. Guarda para darle su propia alineación.",
+    "lineupOwn": "Este set tiene su propia alineación.",
+    "lineupSave": "Guardar alineación",
+    "lineupReset": "Volver a los instrumentos de la banda",
+    "sitsOut": "No toca en este set",
+    "inKey": "en {key} (escrita en {written})",
+    "writtenKey": "en {key}, como está escrita",
+    "keyFor": "Tono de {title}",
+    "keyWritten": "Como está escrita ({key})",
+    "keySave": "Guardar tono",
+    "songOf": "Canción {position} de {total}",
+    "previousSong": "Canción anterior",
+    "nextSong": "Canción siguiente"
   }
 }
