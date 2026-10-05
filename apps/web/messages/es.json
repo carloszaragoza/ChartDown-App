@@ -582,5 +582,10 @@
     "profile": "Tu perfil",
     "signOut": "Cerrar sesión",
     "signIn": "Iniciar sesión"
+  },
+  "offline": {
+    "title": "Sin conexión",
+    "body": "Esta página necesita conexión. Cuando vuelvas a estar en línea, inténtalo de nuevo.",
+    "retry": "Intentar de nuevo"
   }
 }

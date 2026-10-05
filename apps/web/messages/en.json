@@ -582,5 +582,10 @@
     "profile": "Your profile",
     "signOut": "Sign out",
     "signIn": "Sign in"
+  },
+  "offline": {
+    "title": "You are offline",
+    "body": "This page needs a connection. When you are back online, try again.",
+    "retry": "Try again"
   }
 }
