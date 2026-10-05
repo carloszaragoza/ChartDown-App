@@ -3,6 +3,7 @@ import { Button } from "@chartdown/ui";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
+import { addToSet } from "../../sets/actions";
 import { forkVersion } from "./actions";
 import { ChartBody } from "./ChartBody";
 import { DisplayBar } from "./DisplayBar";
@@ -15,6 +16,13 @@ export interface VersionSource {
   album: string | null;
   year: number | null;
   youtube: string | null;
+}
+
+/** A set this person may add the version to; band null means their personal space. */
+export interface SetChoice {
+  id: string;
+  band: string | null;
+  name: string;
 }
 
 export interface VersionViewProps {
@@ -32,6 +40,9 @@ export interface VersionViewProps {
   /** A private version, or a public one frozen when its owner made it private (R-02.4). */
   visibility?: "public" | "private";
   status?: "active" | "frozen" | "hidden";
+  /** The sets of the bands where this person is the MD (R-05.2). */
+  setChoices?: SetChoice[];
+  setFailed?: boolean;
   /** The last fork attempt failed. */
   forkFailed?: boolean;
   /** Numbers or letters and the key to show (R-03.2); numbers in the written key by default. */
@@ -56,11 +67,14 @@ export function VersionView({
   visibility = "public",
   status = "active",
   forkFailed = false,
+  setChoices = [],
+  setFailed = false,
   display,
   path,
   notice,
 }: VersionViewProps) {
   const t = useTranslations("version");
+  const s = useTranslations("sets");
   const c = useTranslations("chart");
   const facts = [
     t(`source.${source.type}`),
@@ -147,6 +161,32 @@ export function VersionView({
           <Link href={`/versions/${id}/notes`} className="cd-button cd-button--secondary">
             {t("myNotes")}
           </Link>
+        )}
+        {setChoices.length > 0 && notice === undefined && (
+          <form action={addToSet} className={styles.addToSet}>
+            <input type="hidden" name="versionId" value={id} />
+            <label className={styles.keyLabel}>
+              {s("addTo")}
+              <select name="setId" required defaultValue="" className={styles.select}>
+                <option value="" disabled>
+                  {s("chooseSet")}
+                </option>
+                {setChoices.map((choice) => (
+                  <option key={choice.id} value={choice.id}>
+                    {choice.band
+                      ? `${choice.band} · ${choice.name}`
+                      : `${s("mySets")} · ${choice.name}`}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Button type="submit">{s("addButton")}</Button>
+            {setFailed && (
+              <p role="alert" className={styles.alert}>
+                {s("addFailed")}
+              </p>
+            )}
+          </form>
         )}
         {signedIn && !owner && visibility === "public" && notice === undefined && (
           <form action={forkVersion} className={styles.fork}>

@@ -32,8 +32,12 @@ export default async function BandsPage({ searchParams }: { searchParams: Search
     supabase.rpc("my_invitations"),
   ]);
   // The personal space is not a band to list (R-04.7).
-  const bands = ((memberships ?? []) as Membership[])
-    .map((row) => ({ role: row.role, band: Array.isArray(row.band) ? row.band[0] : row.band }))
+  const all = ((memberships ?? []) as Membership[]).map((row) => ({
+    role: row.role,
+    band: Array.isArray(row.band) ? row.band[0] : row.band,
+  }));
+  const personal = all.find((row) => row.band?.is_personal)?.band;
+  const bands = all
     .filter((row) => row.band && !row.band.is_personal)
     .sort((a, b) => (a.band?.name ?? "").localeCompare(b.band?.name ?? ""));
   const search = await searchParams;
@@ -53,6 +57,11 @@ export default async function BandsPage({ searchParams }: { searchParams: Search
         </p>
       )}
       <Invitations invitations={(invitations ?? []) as Invitation[]} />
+      {personal && (
+        <Link href={`/bands/${personal.id}/sets`} className="cd-button cd-button--secondary">
+          {t("mySets")}
+        </Link>
+      )}
 
       <section aria-labelledby="my-bands" className={styles.list}>
         <h2 id="my-bands" className={styles.label}>
