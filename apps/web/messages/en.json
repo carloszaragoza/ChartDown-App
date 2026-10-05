@@ -74,7 +74,8 @@
     "key": "Key",
     "time": "Time",
     "tempo": "Tempo",
-    "example": "Example: Atril, viewed as Keys"
+    "example": "Example: Atril, viewed as Keys",
+    "writtenIn": "(written in {key})"
   },
   "auth": {
     "email": "Email",
@@ -275,5 +276,15 @@
     "preview": "Preview",
     "warnings": "{count, plural, =0 {No warnings} one {# warning} other {# warnings}}",
     "line": "Line {line}:"
+  },
+  "viewer": {
+    "label": "Display",
+    "style": "Numbers or letters",
+    "numbers": "Numbers",
+    "letters": "Letters",
+    "key": "Key",
+    "writtenOption": "{key} (written)",
+    "apply": "Apply",
+    "written": "Back to the written key, {key}"
   }
 }

@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { forkVersion } from "./actions";
 import { ChartBody } from "./ChartBody";
+import { DisplayBar } from "./DisplayBar";
+import type { Display } from "./display";
 import type { BasedOn } from "./load";
 import styles from "./version.module.css";
 
@@ -32,6 +34,10 @@ export interface VersionViewProps {
   status?: "active" | "frozen" | "hidden";
   /** The last fork attempt failed. */
   forkFailed?: boolean;
+  /** Numbers or letters and the key to show (R-03.2); numbers in the written key by default. */
+  display?: Display;
+  /** The page's own address, for the display choices. */
+  path?: string;
   /** Shown above the chart, e.g. when reading an earlier revision. */
   notice?: ReactNode;
 }
@@ -50,6 +56,8 @@ export function VersionView({
   visibility = "public",
   status = "active",
   forkFailed = false,
+  display,
+  path,
   notice,
 }: VersionViewProps) {
   const t = useTranslations("version");
@@ -102,8 +110,11 @@ export function VersionView({
             </p>
           )}
           <p className={styles.meta}>
-            {c("key")} <b>{keyName(chart.key)}</b> · {c("time")}{" "}
-            <b>{chart.header.meter ?? "4/4"}</b>
+            {c("key")} <b>{keyName(display?.key ?? chart.key)}</b>
+            {display && keyName(display.key) !== keyName(chart.key) && (
+              <> {c("writtenIn", { key: keyName(chart.key) })}</>
+            )}{" "}
+            · {c("time")} <b>{chart.header.meter ?? "4/4"}</b>
             {chart.header.tempo && (
               <>
                 {" · "}
@@ -156,7 +167,12 @@ export function VersionView({
           </div>
         )}
       </header>
-      <ChartBody chart={chart} />
+      {display && path && <DisplayBar path={path} chart={chart} display={display} />}
+      <ChartBody
+        chart={chart}
+        style={display?.style ?? "numbers"}
+        homeKey={display?.key ?? chart.key}
+      />
     </main>
   );
 }

@@ -2,6 +2,7 @@ import { parse } from "@chartdown/core";
 import { notFound } from "next/navigation";
 import { authEnabled } from "../../../lib/auth/enabled";
 import { createClient } from "../../../lib/supabase/server";
+import { readDisplay } from "./display";
 import { loadBasedOn, loadVersion } from "./load";
 import { VersionView } from "./VersionView";
 
@@ -15,7 +16,7 @@ export default async function VersionPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ fork?: string }>;
+  searchParams: Promise<{ fork?: string; view?: string; key?: string }>;
 }) {
   if (!authEnabled()) notFound();
   const { id } = await params;
@@ -30,6 +31,8 @@ export default async function VersionPage({
   ]);
   if (!revision) notFound();
 
+  const search = await searchParams;
+  const chart = parse(revision.content);
   return (
     <VersionView
       id={version.id}
@@ -37,13 +40,15 @@ export default async function VersionPage({
       artists={version.artists}
       author={version.author}
       source={version.source}
-      chart={parse(revision.content)}
+      chart={chart}
+      display={readDisplay(chart, search)}
+      path={`/versions/${version.id}`}
       signedIn={Boolean(auth.user)}
       owner={Boolean(auth.user) && auth.user?.id === version.ownerId}
       basedOn={basedOn}
       visibility={version.visibility}
       status={version.status}
-      forkFailed={(await searchParams).fork === "failed"}
+      forkFailed={search.fork === "failed"}
     />
   );
 }

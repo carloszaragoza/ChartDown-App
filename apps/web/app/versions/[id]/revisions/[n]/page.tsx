@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../../lib/auth/enabled";
 import { createClient } from "../../../../../lib/supabase/server";
 import styles from "../../history.module.css";
+import { readDisplay } from "../../display";
 import { loadVersion } from "../../load";
 import { VersionView } from "../../VersionView";
 import { restoreRevision } from "./actions";
@@ -16,7 +17,7 @@ export default async function RevisionPage({
   searchParams,
 }: {
   params: Promise<{ id: string; n: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; view?: string; key?: string }>;
 }) {
   if (!authEnabled()) notFound();
   const { id, n } = await params;
@@ -36,7 +37,9 @@ export default async function RevisionPage({
     .eq("number", number)
     .maybeSingle();
   if (!revision) notFound();
-  const { error } = await searchParams;
+  const search = await searchParams;
+  const { error } = search;
+  const chart = parse(revision.content);
   const t = await getTranslations("history");
   const isCurrent = revision.id === version.currentRevisionId;
 
@@ -75,7 +78,9 @@ export default async function RevisionPage({
       artists={version.artists}
       author={version.author}
       source={version.source}
-      chart={parse(revision.content)}
+      chart={chart}
+      display={readDisplay(chart, search)}
+      path={`/versions/${version.id}/revisions/${number}`}
       signedIn
       notice={notice}
     />

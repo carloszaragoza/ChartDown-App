@@ -129,3 +129,17 @@ describe("R-02.6 only the owner edits", () => {
     expect(render("en", { signedIn: true, owner: true, status: "frozen" })).not.toContain(edit);
   });
 });
+
+describe("R-03.2 the display bar", () => {
+  it("R-03.2 the header shows the key being viewed and the written key", () => {
+    const html = render("en", {
+      display: { style: "letters", key: { root: "A", minor: false } },
+      path: "/versions/00000000-0000-0000-0000-0000000000f1",
+    });
+    expect(html).toMatch(/Key(<!-- -->)? <b>A<\/b>/);
+    expect(html).toContain("(written in G)");
+    expect(html).toContain("Back to the written key, G");
+    expect(html).toContain('href="/versions/00000000-0000-0000-0000-0000000000f1?key=A"');
+    expect(render("en")).not.toContain("written in");
+  });
+});
