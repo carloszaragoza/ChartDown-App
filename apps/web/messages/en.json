@@ -324,6 +324,19 @@
       "text_required": "Write the note.",
       "text_too_long": "A note is up to 280 characters.",
       "unknown": "The note could not be saved. Try again."
-    }
+    },
+    "unplacedTitle": "{count, plural, one {# note needs a new place} other {# notes need a new place}}",
+    "unplacedHint": "The chart changed since these notes were written. They are kept as they were until you anchor them again.",
+    "noSection": "No longer finds the section “{section}”",
+    "noBar": "“{section}” no longer has bar {bar}",
+    "anchor": "Anchor again",
+    "anchorNote": "Anchor again: {text}",
+    "authorTitle": "Notes from the version's author",
+    "authorHint": "Your band sees them along with your notes.",
+    "authorHiddenHint": "Hidden for your band.",
+    "hideAuthor": "Hide for my band",
+    "showAuthor": "Show to my band",
+    "authorHidden": "The author's notes are hidden for your band.",
+    "authorShown": "The author's notes are shown to your band."
   }
 }

@@ -51,3 +51,31 @@ export async function deleteNote(form: FormData): Promise<void> {
     .eq("id", noteId);
   redirect(back(versionId, bandId, error || count !== 1 ? "error=unknown" : "deleted=1"));
 }
+
+/**
+ * Hides or shows the version author's notes for the band (decision 9.3, R-06.6). The setting
+ * lives on the band's layer, created here if the band has none yet.
+ */
+export async function setAuthorNotes(form: FormData): Promise<void> {
+  if (!authEnabled()) redirect("/");
+  const versionId = String(form.get("versionId") ?? "");
+  const bandId = String(form.get("bandId") ?? "");
+  const hide = form.get("hide") === "1";
+  if (!UUID.test(versionId) || !UUID.test(bandId)) redirect("/");
+  const supabase = await createClient();
+  const { data: layer } = await supabase
+    .from("layers")
+    .select("id")
+    .eq("band_id", bandId)
+    .eq("version_id", versionId)
+    .maybeSingle();
+  const { error } = layer
+    ? await supabase
+        .from("layers")
+        .update({ hide_author_notes: hide, updated_at: new Date().toISOString() })
+        .eq("id", layer.id)
+    : await supabase
+        .from("layers")
+        .insert({ band_id: bandId, version_id: versionId, hide_author_notes: hide });
+  redirect(back(versionId, bandId, error ? "error=unknown" : hide ? "hidden=1" : "shown=1"));
+}
