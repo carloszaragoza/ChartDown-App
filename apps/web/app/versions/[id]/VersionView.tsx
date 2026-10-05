@@ -1,10 +1,10 @@
-import { chordFormatter, keyName, type Chart } from "@chartdown/core";
-import { Button, FormStrip, formStripItems, Section, type FormStripItem } from "@chartdown/ui";
+import { keyName, type Chart } from "@chartdown/core";
+import { Button } from "@chartdown/ui";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import { useChartLabels } from "../../_components/chartLabels";
 import { forkVersion } from "./actions";
+import { ChartBody } from "./ChartBody";
 import type { BasedOn } from "./load";
 import styles from "./version.module.css";
 
@@ -54,9 +54,6 @@ export function VersionView({
 }: VersionViewProps) {
   const t = useTranslations("version");
   const c = useTranslations("chart");
-  const labels = useChartLabels();
-  const formatter = chordFormatter(chart, { style: "numbers" });
-  const describe = (item: FormStripItem) => `${item.name}, ${labels.length(item.length)}`;
   const facts = [
     t(`source.${source.type}`),
     source.album && t("album", { album: source.album }),
@@ -117,6 +114,11 @@ export function VersionView({
         </div>
         {owner && (
           <div className={styles.actions}>
+            {status === "active" && (
+              <Link href={`/versions/${id}/edit`} className="cd-button cd-button--primary">
+                {t("edit")}
+              </Link>
+            )}
             <Link href={`/versions/${id}/history`} className="cd-button cd-button--secondary">
               {t("history")}
             </Link>
@@ -154,20 +156,7 @@ export function VersionView({
           </div>
         )}
       </header>
-      <FormStrip
-        items={formStripItems(chart, -1, () => false)}
-        labels={{ nav: c("songForm"), describe }}
-      />
-      {chart.sections.map((section, index) => (
-        <Section
-          key={index}
-          section={section}
-          formatter={formatter}
-          labels={labels}
-          size="md"
-          id={`section-${index + 1}`}
-        />
-      ))}
+      <ChartBody chart={chart} />
     </main>
   );
 }
