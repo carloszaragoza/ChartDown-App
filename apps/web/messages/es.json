@@ -2,7 +2,8 @@
   "home": {
     "title": "ChartDown App",
     "tagline": "Cifrados en números para toda la banda, con las notas de cada músico.",
-    "newVersion": "Nueva versión"
+    "newVersion": "Nueva versión",
+    "catalog": "Catálogo"
   },
   "language": {
     "label": "Idioma",
@@ -242,5 +243,22 @@
     "confirm": "Hacer privada",
     "cancel": "Cancelar y volver a la versión",
     "error": "No se pudo hacer privada esta versión. Inténtalo de nuevo."
+  },
+  "catalog": {
+    "title": "Catálogo",
+    "search": "Busca por título, artista o álbum",
+    "submit": "Buscar",
+    "sources": "Fuente",
+    "all": "Todas",
+    "results": "Canciones",
+    "none": "Ninguna canción coincide.",
+    "error": "No se pudo cargar el catálogo. Inténtalo de nuevo.",
+    "versions": "{count, plural, one {# versión} other {# versiones}}",
+    "versionsOf": "Versiones de {title}",
+    "pages": "Páginas",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "home": "Volver al inicio",
+    "back": "Volver al catálogo"
   }
 }
