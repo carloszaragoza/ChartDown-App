@@ -221,8 +221,9 @@ export default async function NotesPage({
             </section>
           )}
           <form
-            // A fresh form for each note, so no value carries over between adding and editing.
-            key={editing?.id ?? "new"}
+            // A fresh form for each note, so no value carries over between adding and editing,
+            // nor from one added note to the next.
+            key={editing?.id ?? `new-${rows.length}`}
             action={saveNote}
             className={styles.form}
             id="note-form"

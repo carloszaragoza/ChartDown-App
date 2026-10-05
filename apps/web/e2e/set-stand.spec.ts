@@ -76,9 +76,12 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   }
   await page.goto(`/versions/${v1}/notes`);
   await page.getByRole("navigation", { name: "Bands" }).getByRole("link", { name: band }).click();
+  await expect(page.getByText(`Notes of ${band}`)).toBeVisible();
   await addNote(page, "Verse", null, notes.all);
   await addNote(page, "Chorus", "Keys", notes.keys);
   await addNote(page, "Chorus", "Bass", notes.bass);
+  // Each new note starts from a clean form: the bass note is for bass only.
+  await expect(page.getByText("Chorus · Bass", { exact: true })).toBeVisible();
 
   // The MD opens stand mode from the set's song: every note, and View as.
   await page.goto(`${setAddress}/songs/1`);
