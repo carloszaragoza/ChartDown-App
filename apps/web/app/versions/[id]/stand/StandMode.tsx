@@ -1,7 +1,14 @@
 "use client";
 
 import { chordFormatter, keyName, parse, type Key } from "@chartdown/core";
-import { FormStrip, formStripItems, NextSection, Section, type FormStripItem } from "@chartdown/ui";
+import {
+  FormStrip,
+  formStripItems,
+  NextSection,
+  Section,
+  type FormStripItem,
+  type MDNoteData,
+} from "@chartdown/ui";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
@@ -26,9 +33,33 @@ export interface StandModeProps {
   style: Display["style"];
   homeKey: Key;
   theme: StandTheme;
+  /** Where this stand mode lives; the version's by default. */
+  path?: string;
+  /** Kept in every address of this page, such as View as (`as=bass`). */
+  keep?: Record<string, string>;
+  /** In a set (T-802): each section's notes and whether it has notes for this person. */
+  notes?: readonly (readonly MDNoteData[])[];
+  forYou?: readonly boolean[];
+  set?: StandSet;
+}
+
+/** A set's stand mode: back to the set, which song this is, View as, and the next songs. */
+export interface StandSet {
+  href: string;
+  name: string;
+  songOf: string;
+  previousSong?: string;
+  nextSong?: string;
+  viewAs?: { label: string; options: { label: string; href: string; current: boolean }[] };
 }
 
 const noChanges = () => () => {};
+
+/** A link that keeps the section being read, so switching View as stays on it. */
+function atSection(href: string, section: number): string {
+  if (section === 0) return href;
+  return `${href}${href.includes("?") ? "&" : "?"}s=${section + 1}`;
+}
 
 // Keys that page-turner pedals and keyboards send.
 const FORWARD = new Set(["ArrowRight", "ArrowDown", "PageDown", " "]);
@@ -47,6 +78,11 @@ export function StandMode({
   style,
   homeKey,
   theme,
+  path = `/versions/${versionId}/stand`,
+  keep = {},
+  notes,
+  forYou = [],
+  set,
 }: StandModeProps) {
   const t = useTranslations("stand");
   const c = useTranslations("chart");
@@ -61,7 +97,7 @@ export function StandMode({
     () => false,
   );
   const root = useRef<HTMLDivElement>(null);
-  const path = `/versions/${versionId}/stand`;
+  const atEdge = useRef({ first: true, last: false });
   const display: Display = { style, key: homeKey };
   const formatter = chordFormatter(chart, { style, key: homeKey });
   const last = chart.sections.length - 1;
@@ -70,6 +106,7 @@ export function StandMode({
       path,
       { section, display: changes.display ?? display, theme: changes.theme ?? theme },
       chart,
+      keep,
     );
 
   // Moves to a section (or by a step from the current one) and keeps the address in step.
@@ -80,7 +117,7 @@ export function StandMode({
         window.history.replaceState(
           null,
           "",
-          standHref(path, { section: next, display, theme }, chart),
+          standHref(path, { section: next, display, theme }, chart, keep),
         );
         return next;
       }),
@@ -95,20 +132,25 @@ export function StandMode({
         return;
       if (FORWARD.has(event.key)) {
         event.preventDefault();
-        move((now) => now + 1);
+        // At a song's edge, the pedal goes on to the next song of the set.
+        if (atEdge.current.last && set?.nextSong) window.location.assign(set.nextSong);
+        else move((now) => now + 1);
       } else if (BACK.has(event.key)) {
         event.preventDefault();
-        move((now) => now - 1);
+        if (atEdge.current.first && set?.previousSong) window.location.assign(set.previousSong);
+        else move((now) => now - 1);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [move]);
+  }, [move, set?.nextSong, set?.previousSong]);
 
-  const items = formStripItems(chart, current, () => false).map((item, index) => ({
-    ...item,
-    href: href(index),
-  }));
+  const items = formStripItems(chart, current, (index) => Boolean(forYou[index])).map(
+    (item, index) => ({
+      ...item,
+      href: href(index),
+    }),
+  );
   const sectionHrefs = items.map((item) => item.href);
   // A link to another section of this song (FormStrip, Previous, Next) moves without a page load.
   const onClickCapture = (event: MouseEvent<HTMLDivElement>) => {
@@ -126,6 +168,9 @@ export function StandMode({
     ]
       .filter(Boolean)
       .join(", ");
+  useEffect(() => {
+    atEdge.current = { first: current === 0, last: current === last };
+  }, [current, last]);
   const now = chart.sections[current];
   const next = chart.sections[current + 1];
   const written = keyName(chart.key);
@@ -138,6 +183,63 @@ export function StandMode({
       data-theme={theme === "stage" ? "dark" : "light"}
       onClickCapture={onClickCapture}
     >
+      {set && (
+        <nav className={styles.setBar} aria-label={t("setBar")}>
+          <div className={styles.setPlace}>
+            <Link href={set.href} className={styles.tool}>
+              {t("set")}
+            </Link>
+            <span>
+              <b className={styles.setName}>{set.name}</b>
+              <span className={styles.meta}>{set.songOf}</span>
+            </span>
+          </div>
+          <div className={styles.tools}>
+            {set.viewAs && (
+              <details className={styles.viewAs}>
+                <summary className={styles.viewAsButton}>
+                  {t("viewAs")} <b>{set.viewAs.label}</b>
+                </summary>
+                <ul className={styles.viewAsList}>
+                  {set.viewAs.options.map((option) => (
+                    <li key={option.href}>
+                      <a
+                        href={atSection(option.href, current)}
+                        className={styles.tool}
+                        aria-current={option.current ? "true" : undefined}
+                      >
+                        {option.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+            {current > 0 ? (
+              <a href={href(current - 1)} className={styles.tool}>
+                {t("previous")}
+              </a>
+            ) : (
+              set.previousSong && (
+                <a href={set.previousSong} className={styles.tool}>
+                  {t("previousSong")}
+                </a>
+              )
+            )}
+            {current < last ? (
+              <a href={href(current + 1)} className={`${styles.tool} ${styles.primary}`}>
+                {t("next")}
+              </a>
+            ) : (
+              set.nextSong && (
+                <a href={set.nextSong} className={`${styles.tool} ${styles.primary}`}>
+                  {t("nextSong")}
+                </a>
+              )
+            )}
+          </div>
+        </nav>
+      )}
       <header className={styles.top}>
         <div className={styles.heading}>
           <h1 className={styles.title}>{title}</h1>
@@ -180,9 +282,11 @@ export function StandMode({
               {t("fullscreen")}
             </button>
           )}
-          <Link href={`/versions/${versionId}`} className={styles.tool}>
-            {t("close")}
-          </Link>
+          {!set && (
+            <Link href={`/versions/${versionId}`} className={styles.tool}>
+              {t("close")}
+            </Link>
+          )}
         </nav>
       </header>
 
@@ -199,6 +303,7 @@ export function StandMode({
             labels={labels}
             size="xl"
             id="current-section"
+            {...(notes ? { notes: notes[current] ?? [] } : {})}
           />
         )}
       </main>
@@ -209,14 +314,18 @@ export function StandMode({
             section={next}
             formatter={formatter}
             labels={labels}
-            hasNotesForYou={false}
+            hasNotesForYou={Boolean(forYou[current + 1])}
           />
         ) : (
           <p className={styles.end}>{t("end")}</p>
         )}
       </div>
 
-      <nav className={styles.turn} aria-label={t("turn")}>
+      <nav
+        className={set ? styles.hidden : styles.turn}
+        aria-label={t("turn")}
+        hidden={Boolean(set)}
+      >
         {current > 0 ? (
           <a href={href(current - 1)} className={styles.page}>
             {t("previous")}

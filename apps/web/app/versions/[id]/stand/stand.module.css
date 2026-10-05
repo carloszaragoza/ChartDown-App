@@ -97,3 +97,64 @@
   font: var(--type-meta);
   color: var(--ink-muted);
 }
+/* In a set (T-802): the set's bar on top, with View as and Previous and Next. */
+.setBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--stroke-hairline) solid var(--rule);
+}
+.setPlace {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.setPlace > span {
+  display: grid;
+}
+.setName {
+  font: var(--type-label);
+}
+.primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--ink-inverse);
+}
+.viewAs {
+  position: relative;
+}
+.viewAsButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border: var(--stroke-hairline) solid var(--md);
+  border-radius: var(--radius-md);
+  color: var(--md);
+  font: var(--type-meta);
+  cursor: pointer;
+  list-style: none;
+}
+.viewAsList {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-1) 0 0;
+  padding: var(--space-2);
+  border: var(--stroke-hairline) solid var(--rule);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  list-style: none;
+}
+.viewAsList [aria-current="true"] {
+  border-color: var(--ink);
+  font-weight: 600;
+}
+.hidden {
+  display: none;
+}

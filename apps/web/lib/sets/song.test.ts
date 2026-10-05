@@ -1,6 +1,6 @@
 import { parse } from "@chartdown/core";
 import { describe, expect, it } from "vitest";
-import { songView, type SetSong } from "./song";
+import { songView, viewAs, viewAsOptions, type SetSong } from "./song";
 
 const chart = parse(
   "## Verse\n> MD: Author: everyone soft.\n> MD bass: Author: bass out.\n> MD keys: Author: keys pad.\n1 | 4\n\n## Chorus\n4 | 5\n",
@@ -56,5 +56,45 @@ describe("R-06.2 a set's song for each musician", () => {
     expect(view.unplaced.map((item) => [item.note.text, item.reason])).toEqual([
       ["Build it.", "section"],
     ]);
+  });
+});
+
+describe("R-06.3 View as, for the MD", () => {
+  // The MD receives every note from the server.
+  const all = song({
+    role: "md",
+    instruments: [],
+    notes: [
+      note("n1", "Chorus", "Big chorus."),
+      note("n2", "Chorus", "Pad up.", ["keys"], 2),
+      note("n3", "Verse", "Bass out.", ["bass"]),
+    ],
+  });
+
+  it("R-06.3 all notes for the MD, with every instrument's note marked", () => {
+    const view = songView(chart, all);
+    expect(view.sections.flat().map((shown) => shown.text)).toHaveLength(6);
+    expect(view.sections[0]?.filter((shown) => shown.forYou).map((shown) => shown.text)).toEqual([
+      "Author: bass out.",
+      "Author: keys pad.",
+      "Bass out.",
+    ]);
+  });
+
+  it("R-06.3 view as bass shows the general and bass notes only", () => {
+    const view = songView(chart, viewAs(all, "bass"));
+    expect(texts(view, 0)).toEqual(["Author: everyone soft.", "Author: bass out.", "Bass out."]);
+    expect(texts(view, 1)).toEqual(["Big chorus."]);
+    expect(view.forYou).toBe(2);
+  });
+
+  it("R-06.3 a musician cannot view as another instrument", () => {
+    const musician = song();
+    expect(viewAs(musician, "bass")).toBe(musician);
+    expect(viewAs(all, "all")).toBe(all);
+  });
+
+  it("R-06.3 the choices are the instruments playing and those with a note", () => {
+    expect(viewAsOptions(all, ["drums", "keys"])).toEqual(["bass", "drums", "keys"]);
   });
 });

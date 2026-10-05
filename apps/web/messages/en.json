@@ -351,7 +351,13 @@
     "previous": "Previous",
     "next": "Next",
     "position": "Section {current} of {total}",
-    "end": "End of the song"
+    "end": "End of the song",
+    "setBar": "Set",
+    "set": "Set",
+    "viewAs": "View as",
+    "previousSong": "Previous song",
+    "nextSong": "Next song",
+    "allNotes": "All notes"
   },
   "bands": {
     "title": "Bands",
@@ -528,6 +534,7 @@
     "notesForYou": "{count, plural, =0 {No notes for your instruments in this song} one {# note for you} other {# notes for you}}",
     "allNotesMd": "You see every note, as the music director.",
     "allNotesTempMd": "You see every note, as this set's temporary music director.",
-    "unplacedNotes": "Notes whose section changed"
+    "unplacedNotes": "Notes whose section changed",
+    "startStand": "Start in stand mode"
   }
 }
