@@ -24,8 +24,10 @@ test("R-02.7 the fork shows “Based on the version by…”", async ({ page }) 
   await expect(page.getByRole("link", { name: "History" })).toHaveCount(0);
   await page.getByRole("button", { name: "Fork" }).click();
 
-  await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
-  expect(new URL(page.url()).pathname).not.toBe(original);
+  // The copy has its own address; wait until the page has moved there.
+  await page.waitForURL(
+    (url) => /^\/versions\/[0-9a-f-]{36}$/.test(url.pathname) && url.pathname !== original,
+  );
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
   await expect(page.getByText("Arrangement by Ben Forker")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Bridge" })).toBeVisible();
