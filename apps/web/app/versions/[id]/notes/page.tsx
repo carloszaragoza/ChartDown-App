@@ -8,13 +8,15 @@ import { createClient } from "../../../../lib/supabase/server";
 import { NOTE_MAX, sectionAnchors, toLayer, type NoteRow } from "../../../../lib/versions/notes";
 import { ChartBody } from "../ChartBody";
 import { loadVersion, UUID } from "../load";
-import { deleteNote, saveNote } from "./actions";
+import { deleteNote, saveNote, setAuthorNotes } from "./actions";
 import styles from "./notes.module.css";
 
 // The form's own errors; anything else reads as "could not be saved".
 const NOTE_ERRORS = new Set(["section_required", "bar_invalid", "text_required", "text_too_long"]);
 
 type Search = Promise<{
+  hidden?: string;
+  shown?: string;
   band?: string;
   edit?: string;
   saved?: string;
@@ -73,7 +75,7 @@ export default async function NotesPage({
     supabase.from("revisions").select("content").eq("id", version.currentRevisionId).maybeSingle(),
     supabase
       .from("layers")
-      .select("id")
+      .select("id, hide_author_notes")
       .eq("band_id", band.id)
       .eq("version_id", version.id)
       .maybeSingle(),
@@ -135,6 +137,14 @@ export default async function NotesPage({
     .sort((a, b) => nameOf(a).localeCompare(nameOf(b), locale));
   const nameById = new Map(instruments.map((instrument) => [instrument.id, nameOf(instrument)]));
   const unplacedIds = new Set(placement.unplaced.map((item) => item.note.id));
+  const hideAuthor = Boolean(layer?.hide_author_notes);
+  const authorNotes = chart.sections.flatMap((section, index) =>
+    section.notes.map((note, position) => ({
+      key: `${index}-${position}`,
+      section: section.name,
+      note,
+    })),
+  );
   const pageHref = (extra = "") => `/versions/${version.id}/notes?band=${band.id}${extra}`;
 
   return (
@@ -164,9 +174,15 @@ export default async function NotesPage({
           ))}
         </nav>
       )}
-      {(search.saved || search.deleted) && (
+      {(search.saved || search.deleted || search.hidden || search.shown) && (
         <p role="status" className={styles.message}>
-          {search.saved ? t("saved") : t("deleted")}
+          {search.saved
+            ? t("saved")
+            : search.deleted
+              ? t("deleted")
+              : search.hidden
+                ? t("authorHidden")
+                : t("authorShown")}
         </p>
       )}
       {search.error && (
@@ -177,6 +193,33 @@ export default async function NotesPage({
 
       <div className={styles.panes}>
         <div className={styles.side}>
+          {placement.unplaced.length > 0 && (
+            <section aria-labelledby="unplaced-notes" className={styles.attention}>
+              <h2 id="unplaced-notes" className={styles.label}>
+                {t("unplacedTitle", { count: placement.unplaced.length })}
+              </h2>
+              <p className={styles.hint}>{t("unplacedHint")}</p>
+              <ul className={styles.items}>
+                {placement.unplaced.map(({ note, reason }) => (
+                  <li key={note.id} className={styles.item}>
+                    <p className={styles.where}>
+                      {reason === "bar"
+                        ? t("noBar", { section: note.section, bar: note.bar ?? 0 })
+                        : t("noSection", { section: note.section })}
+                    </p>
+                    <p className={styles.text}>{note.text}</p>
+                    <Link
+                      href={pageHref(`&edit=${note.id}#note-form`)}
+                      className="cd-button cd-button--secondary"
+                      aria-label={t("anchorNote", { text: note.text })}
+                    >
+                      {t("anchor")}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           <form
             // A fresh form for each note, so no value carries over between adding and editing.
             key={editing?.id ?? "new"}
@@ -317,12 +360,38 @@ export default async function NotesPage({
               })}
             </ul>
           </section>
+
+          {authorNotes.length > 0 && (
+            <section aria-labelledby="author-notes" className={styles.list}>
+              <h2 id="author-notes" className={styles.label}>
+                {t("authorTitle")}
+              </h2>
+              <p className={styles.hint}>{hideAuthor ? t("authorHiddenHint") : t("authorHint")}</p>
+              <ul className={styles.items}>
+                {authorNotes.map(({ key, section, note }) => (
+                  <li key={key} className={styles.item}>
+                    <p className={styles.where}>{section}</p>
+                    <p className={hideAuthor ? styles.muted : styles.text}>{note.text}</p>
+                  </li>
+                ))}
+              </ul>
+              <form action={setAuthorNotes}>
+                <input type="hidden" name="versionId" value={version.id} />
+                <input type="hidden" name="bandId" value={band.id} />
+                <input type="hidden" name="hide" value={hideAuthor ? "0" : "1"} />
+                <Button type="submit">{hideAuthor ? t("showAuthor") : t("hideAuthor")}</Button>
+              </form>
+            </section>
+          )}
         </div>
 
         <section className={styles.preview} aria-label={t("preview")}>
           <ChartBody
             chart={chart}
-            notes={(index) => [...(chart.sections[index]?.notes ?? []), ...layerNotes(index)]}
+            notes={(index) => [
+              ...(hideAuthor ? [] : (chart.sections[index]?.notes ?? [])),
+              ...layerNotes(index),
+            ]}
           />
         </section>
       </div>

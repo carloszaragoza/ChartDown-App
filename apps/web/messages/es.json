@@ -324,6 +324,19 @@
       "text_required": "Escribe la nota.",
       "text_too_long": "Una nota tiene hasta 280 caracteres.",
       "unknown": "No se pudo guardar la nota. Inténtalo de nuevo."
-    }
+    },
+    "unplacedTitle": "{count, plural, one {# nota necesita un nuevo lugar} other {# notas necesitan un nuevo lugar}}",
+    "unplacedHint": "El cifrado cambió desde que se escribieron estas notas. Se guardan tal cual hasta que las vuelvas a ubicar.",
+    "noSection": "Ya no encuentra la sección “{section}”",
+    "noBar": "“{section}” ya no tiene el compás {bar}",
+    "anchor": "Volver a ubicar",
+    "anchorNote": "Volver a ubicar: {text}",
+    "authorTitle": "Notas del autor de la versión",
+    "authorHint": "Tu banda las ve junto con tus notas.",
+    "authorHiddenHint": "Ocultas para tu banda.",
+    "hideAuthor": "Ocultar para mi banda",
+    "showAuthor": "Mostrar a mi banda",
+    "authorHidden": "Las notas del autor quedan ocultas para tu banda.",
+    "authorShown": "Las notas del autor se muestran a tu banda."
   }
 }

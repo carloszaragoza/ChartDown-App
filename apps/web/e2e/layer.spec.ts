@@ -71,3 +71,73 @@ test("R-03.5 a new note is saved in the layer and the public version doesn't cha
   await signOut(page);
   expect((await page.goto(`/versions/${id}/notes`))?.status()).toBe(404);
 });
+
+test("R-00.2 a note whose section is gone is marked unplaced, not lost, and anchored again", async ({
+  page,
+}) => {
+  const title = `Paper Boats ${Date.now()}`;
+  await signUpAndConfirm(page, unique("anchor"), "Rae Anchor");
+  await page.getByRole("link", { name: "New version" }).click();
+  await page.getByLabel("Find the song by title").fill(title);
+  await page.getByRole("button", { name: "Search" }).click();
+  await page.getByRole("link", { name: "Create a new song" }).click();
+  await page
+    .getByLabel("Chart (ChartDown)")
+    .fill("## Verse\n> MD: Start soft, the author's way.\n1 | 4\n\n## Chorus\n4 | 5\n");
+  await page.getByLabel("Own arrangement").check();
+  await page.getByRole("button", { name: "Publish version" }).click();
+  await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
+  const address = new URL(page.url()).pathname;
+
+  // A band note on the Chorus.
+  await page.goto(`${address}/notes`);
+  await page.getByLabel("Section").selectOption({ label: "Chorus" });
+  await page.getByLabel("Note", { exact: true }).fill("Big finish, everyone.");
+  await page.getByRole("button", { name: "Add note" }).click();
+  await expect(page.getByRole("main").getByRole("status")).toContainText("The note was saved.");
+  await expect(page.locator("#section-2")).toContainText("Big finish, everyone.");
+
+  // The author renames the Chorus.
+  await page.goto(`${address}/edit`);
+  await page
+    .getByLabel("Chart (ChartDown)")
+    .fill("## Verse\n> MD: Start soft, the author's way.\n1 | 4\n\n## Refrain\n4 | 5\n");
+  await page.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByRole("main").getByRole("status")).toContainText("Saved as revision 2.");
+
+  // The note is unplaced but kept, and can be anchored again.
+  await page.goto(`${address}/notes`);
+  const unplaced = page.getByRole("region", { name: "1 note needs a new place" });
+  await expect(unplaced).toContainText("No longer finds the section “Chorus”");
+  await expect(unplaced).toContainText("Big finish, everyone.");
+  await expect(page.locator("#section-2")).not.toContainText("Big finish");
+  await unplaced.getByRole("link", { name: "Anchor again: Big finish, everyone." }).click();
+  await expect(page.getByRole("heading", { name: "Edit the note" })).toBeVisible();
+  await page.getByLabel("Section").selectOption({ label: "Refrain" });
+  await page.getByRole("button", { name: "Save note" }).click();
+  await expect(page.getByRole("main").getByRole("status")).toContainText("The note was saved.");
+  await expect(page.getByRole("region", { name: /need.* a new place/ })).toHaveCount(0);
+  await expect(page.locator("#section-2")).toContainText("Big finish, everyone.");
+});
+
+test("R-06.6 the MD hides the author's notes for the band", async ({ page, request }) => {
+  const id = await createVersion(request, {
+    title: `Tin Roof ${Date.now()}`,
+    content: "## Verse\n> MD: Brushes only, says the author.\n1 | 4\n",
+  });
+  await signUpAndConfirm(page, unique("hide"), "Hal Hide");
+  await page.goto(`/versions/${id}/notes`);
+  const verse = page.locator("#section-1");
+  const author = page.getByRole("region", { name: "Notes from the version's author" });
+  await expect(author).toContainText("Brushes only, says the author.");
+  await expect(verse).toContainText("Brushes only, says the author.");
+
+  await author.getByRole("button", { name: "Hide for my band" }).click();
+  await expect(page.getByRole("main").getByRole("status")).toContainText("hidden for your band");
+  await expect(verse).not.toContainText("Brushes only");
+  await expect(author).toContainText("Hidden for your band.");
+
+  await author.getByRole("button", { name: "Show to my band" }).click();
+  await expect(page.getByRole("main").getByRole("status")).toContainText("shown to your band");
+  await expect(verse).toContainText("Brushes only, says the author.");
+});

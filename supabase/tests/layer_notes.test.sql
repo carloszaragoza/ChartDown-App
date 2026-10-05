@@ -2,7 +2,7 @@
 -- changes. Run with: supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(12);
+select plan(15);
 
 create function pg_temp.login(person uuid) returns void language plpgsql as $$
 begin
@@ -124,6 +124,31 @@ select throws_ok(
 select is(
   (select count(*)::int from public.layer_notes where version_id = current_setting('test.version')::uuid),
   0, 'R-06.4 the author of the version cannot read another band''s notes'
+);
+
+-- The band's MD hides the author's notes for the band (decision 9.3); a musician cannot.
+do $$ begin perform pg_temp.login('00000000-0000-0000-0000-0000000000b1'); end $$;
+select lives_ok(
+  $$select public.save_layer_note('00000000-0000-0000-0000-00000000ba01', current_setting('test.version')::uuid,
+      null, 'Verse', 1, null, 'Harbor plays it soft.', null)$$,
+  'R-06.6 the MD writes on another band''s layer of the same version'
+);
+update public.layers set hide_author_notes = true
+where band_id = current_setting('test.personal')::uuid and version_id = current_setting('test.version')::uuid;
+do $$ begin perform pg_temp.login('00000000-0000-0000-0000-0000000000c1'); end $$;
+update public.layers set hide_author_notes = true
+where band_id = '00000000-0000-0000-0000-00000000ba01';
+do $$ begin perform pg_temp.logout(); end $$;
+select results_eq(
+  $$select hide_author_notes from public.layers
+    where band_id = current_setting('test.personal')::uuid and version_id = current_setting('test.version')::uuid$$,
+  $$values (true)$$,
+  'R-06.6 the MD hides the author''s notes for the band'
+);
+select results_eq(
+  $$select hide_author_notes from public.layers where band_id = '00000000-0000-0000-0000-00000000ba01'$$,
+  $$values (false)$$,
+  'R-06.6 a musician cannot hide the author''s notes'
 );
 
 do $$ begin perform pg_temp.logout(); end $$;
