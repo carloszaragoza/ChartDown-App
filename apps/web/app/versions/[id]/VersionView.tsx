@@ -27,6 +27,9 @@ export interface VersionViewProps {
   owner?: boolean;
   /** For a fork, the version it is based on (R-02.7). */
   basedOn?: BasedOn | null;
+  /** A private version, or a public one frozen when its owner made it private (R-02.4). */
+  visibility?: "public" | "private";
+  status?: "active" | "frozen" | "hidden";
   /** The last fork attempt failed. */
   forkFailed?: boolean;
   /** Shown above the chart, e.g. when reading an earlier revision. */
@@ -44,6 +47,8 @@ export function VersionView({
   signedIn,
   owner = false,
   basedOn = null,
+  visibility = "public",
+  status = "active",
   forkFailed = false,
   notice,
 }: VersionViewProps) {
@@ -64,6 +69,13 @@ export function VersionView({
       <header className={styles.header}>
         <div className={styles.heading}>
           <h1 className={styles.title}>{title}</h1>
+          {(visibility === "private" || status === "frozen") && (
+            <p>
+              <span className={styles.badge}>
+                {visibility === "private" ? t("private") : t("frozen")}
+              </span>
+            </p>
+          )}
           {artists.length > 0 && <p className={styles.meta}>{artists.join(", ")}</p>}
           <p className={styles.meta}>
             {t("by", { author })} · {facts.join(" · ")}
@@ -104,11 +116,21 @@ export function VersionView({
           </p>
         </div>
         {owner && (
-          <Link href={`/versions/${id}/history`} className="cd-button cd-button--secondary">
-            {t("history")}
-          </Link>
+          <div className={styles.actions}>
+            <Link href={`/versions/${id}/history`} className="cd-button cd-button--secondary">
+              {t("history")}
+            </Link>
+            {visibility === "public" && status === "active" && (
+              <Link
+                href={`/versions/${id}/make-private`}
+                className="cd-button cd-button--secondary"
+              >
+                {t("makePrivate")}
+              </Link>
+            )}
+          </div>
         )}
-        {signedIn && !owner && notice === undefined && (
+        {signedIn && !owner && visibility === "public" && notice === undefined && (
           <form action={forkVersion} className={styles.fork}>
             <input type="hidden" name="versionId" value={id} />
             <Button type="submit">{t("fork")}</Button>

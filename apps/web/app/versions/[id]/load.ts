@@ -9,6 +9,8 @@ export interface LoadedVersion {
   author: string;
   currentRevisionId: string | null;
   forkedFromId: string | null;
+  visibility: "public" | "private";
+  status: "active" | "frozen" | "hidden";
   title: string;
   artists: string[];
   source: VersionSource;
@@ -26,7 +28,7 @@ export async function loadVersion(
   const { data: version } = await supabase
     .from("versions")
     .select(
-      "id, owner_id, author_name, forked_from_id, source_type, source_album, source_year, source_youtube_url, current_revision_id, song:songs(title, artists)",
+      "id, owner_id, author_name, forked_from_id, visibility, status, source_type, source_album, source_year, source_youtube_url, current_revision_id, song:songs(title, artists)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -41,6 +43,8 @@ export async function loadVersion(
     author: version.author_name,
     currentRevisionId: version.current_revision_id,
     forkedFromId: version.forked_from_id,
+    visibility: version.visibility,
+    status: version.status,
     title: song?.title ?? "",
     artists: song?.artists ?? [],
     source: {

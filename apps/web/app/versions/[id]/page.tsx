@@ -41,6 +41,8 @@ export default async function VersionPage({
       signedIn={Boolean(auth.user)}
       owner={Boolean(auth.user) && auth.user?.id === version.ownerId}
       basedOn={basedOn}
+      visibility={version.visibility}
+      status={version.status}
       forkFailed={(await searchParams).fork === "failed"}
     />
   );

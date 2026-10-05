@@ -178,7 +178,10 @@
     "basedOn": "Based on the version by {author}",
     "basedOnUnknown": "Based on another version",
     "forkCc0": "Your copy is public and shared under CC0, like every public version.",
-    "forkFailed": "This version could not be forked. Try again."
+    "forkFailed": "This version could not be forked. Try again.",
+    "private": "Private",
+    "frozen": "Frozen public version",
+    "makePrivate": "Make private"
   },
   "newVersion": {
     "title": "New version",
@@ -229,5 +232,15 @@
     "isCurrent": "the current revision",
     "restore": "Restore this revision",
     "restoreError": "This revision could not be restored. Try again."
+  },
+  "makePrivate": {
+    "title": "Make this version private",
+    "copy": "You get a private copy with the current chart, and you keep editing it there.",
+    "frozen": "This public version stays in the catalog under the name {author}, marked “Frozen public version”. Nobody can edit it anymore, you included.",
+    "others": "Other people's sets and forks keep using the public version. Public versions are shared under CC0 and stay with the community.",
+    "final": "This cannot be undone.",
+    "confirm": "Make private",
+    "cancel": "Cancel and go back to the version",
+    "error": "This version could not be made private. Try again."
   }
 }

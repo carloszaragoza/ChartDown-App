@@ -55,7 +55,7 @@ export default async function RevisionPage({
           {t("backToHistory")}
         </Link>
       </div>
-      {!isCurrent && (
+      {!isCurrent && version.status === "active" && (
         <form action={restoreRevision}>
           <input type="hidden" name="versionId" value={version.id} />
           <input type="hidden" name="revisionId" value={revision.id} />
