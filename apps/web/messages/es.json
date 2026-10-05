@@ -173,7 +173,8 @@
     "album": "Álbum: {album}",
     "youtube": "Ver en YouTube",
     "fork": "Hacer mi copia",
-    "forkHint": "Inicia sesión para hacer tu propia copia de esta versión."
+    "forkHint": "Inicia sesión para hacer tu propia copia de esta versión.",
+    "history": "Historial"
   },
   "newVersion": {
     "title": "Nueva versión",
@@ -211,5 +212,18 @@
       "unknown": "No se pudo publicar la versión. Inténtalo de nuevo."
     },
     "publishing": "Publicando…"
+  },
+  "history": {
+    "title": "Historial",
+    "back": "Volver a la versión",
+    "backToHistory": "Volver al historial",
+    "revision": "Revisión {number}",
+    "current": "Actual",
+    "restoredFrom": "restaurada de la revisión {number}",
+    "restored": "Se restauró la revisión {number}. Ahora es la revisión {as}, la actual.",
+    "readOnly": "una revisión anterior, solo lectura",
+    "isCurrent": "la revisión actual",
+    "restore": "Restaurar esta revisión",
+    "restoreError": "No se pudo restaurar esta revisión. Inténtalo de nuevo."
   }
 }

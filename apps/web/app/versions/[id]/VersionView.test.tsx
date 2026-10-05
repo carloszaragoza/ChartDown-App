@@ -59,3 +59,14 @@ describe("R-01.4 a public version as everyone reads it", () => {
     expect(render("en", { signedIn: true })).not.toContain("/auth/sign-in");
   });
 });
+
+describe("R-02.8 the owner finds the history", () => {
+  const history = 'href="/versions/00000000-0000-0000-0000-0000000000f1/history"';
+
+  it("R-02.8 only the owner sees the History link", () => {
+    expect(render("en", { signedIn: true, owner: true })).toContain(history);
+    expect(render("es", { signedIn: true, owner: true })).toContain("Historial");
+    expect(render("en", { signedIn: true })).not.toContain(history);
+    expect(render("en")).not.toContain(history);
+  });
+});
