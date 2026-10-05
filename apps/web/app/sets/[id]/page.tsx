@@ -59,6 +59,7 @@ const STATUS = [
   "lineup",
   "defaults",
   "key",
+  "updated",
 ];
 const ERRORS = new Set(["name", "date", "type", "name_taken", "confirm", "key"]);
 
