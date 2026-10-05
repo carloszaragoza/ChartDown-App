@@ -80,6 +80,8 @@ All three families are open-license Google Fonts. They are served by the app (no
 
 **FormStrip abbreviations:** Intro I · Verse V1, V2 · Pre-chorus PC · Chorus C, C2 · Bridge B · Instrumental Inst · Tag T · Last Chorus LC · Outro O. Custom names: their initials.
 
+**Icons from the approved screens** (`design/screens/`, same rules as the set): search, fork, public, private, history and check. The Icon component draws them exactly as the screens do.
+
 **Instrument icons:** drums, bass, keys, guitar, vocals, saxophone, trumpet, trombone, violin. An instrument without an icon shows its name only.
 
 ## 4. Screens
