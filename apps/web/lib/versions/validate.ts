@@ -1,3 +1,5 @@
+import { normalizeLineBreaks } from "./lines";
+
 /** The sources a version may have (R-02.2), in the order the form offers them. */
 export const SOURCE_TYPES = ["studio", "live", "acoustic", "own_arrangement"] as const;
 export type SourceType = (typeof SOURCE_TYPES)[number];
@@ -48,7 +50,7 @@ export function readVersionForm(form: FormData): VersionValues {
     title: text("title"),
     artists: text("artists"),
     author: text("author"),
-    content: text("content"),
+    content: normalizeLineBreaks(text("content")),
     sourceType: text("sourceType"),
     album: text("album"),
     year: text("year"),

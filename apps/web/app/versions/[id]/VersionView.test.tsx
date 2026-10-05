@@ -118,3 +118,14 @@ describe("R-02.4 making a version private", () => {
     expect(shared).not.toMatch(/<button[^>]*>.*Fork/);
   });
 });
+
+describe("R-02.6 only the owner edits", () => {
+  const edit = 'href="/versions/00000000-0000-0000-0000-0000000000f1/edit"';
+
+  it("R-02.6 the owner of an active version sees Edit; nobody else does", () => {
+    expect(render("en", { signedIn: true, owner: true })).toContain(edit);
+    expect(render("en", { signedIn: true })).not.toContain(edit);
+    expect(render("en")).not.toContain(edit);
+    expect(render("en", { signedIn: true, owner: true, status: "frozen" })).not.toContain(edit);
+  });
+});

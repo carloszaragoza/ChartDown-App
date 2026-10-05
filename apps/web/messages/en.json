@@ -182,7 +182,8 @@
     "forkFailed": "This version could not be forked. Try again.",
     "private": "Private",
     "frozen": "Frozen public version",
-    "makePrivate": "Make private"
+    "makePrivate": "Make private",
+    "edit": "Edit"
   },
   "newVersion": {
     "title": "New version",
@@ -260,5 +261,19 @@
     "next": "Next",
     "home": "Back to home",
     "back": "Back to the catalog"
+  },
+  "editor": {
+    "public": "Public",
+    "view": "View version",
+    "save": "Save",
+    "saving": "Saving…",
+    "noChanges": "No changes to save",
+    "saved": "Saved as revision {number}.",
+    "changed": "This version changed since you opened it, in another tab or device. Your text is still here: copy it, reload the page and save again.",
+    "error": "The chart could not be saved. Try again.",
+    "text": "Chart (ChartDown)",
+    "preview": "Preview",
+    "warnings": "{count, plural, =0 {No warnings} one {# warning} other {# warnings}}",
+    "line": "Line {line}:"
   }
 }

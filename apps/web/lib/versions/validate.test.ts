@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validateVersion, type VersionValues } from "./validate";
+import { readVersionForm, validateVersion, type VersionValues } from "./validate";
 
 const SONG = "00000000-0000-0000-0000-000000000501";
 const filled: VersionValues = {
@@ -65,5 +65,13 @@ describe("validateVersion", () => {
 
   it("R-02.1 parser warnings do not stop a save", () => {
     expect(check({ content: "## Verse\n1 | ??? | 4" })).toHaveProperty("input");
+  });
+});
+
+describe("readVersionForm", () => {
+  it("R-02.1 the chart is kept with the line breaks it was written with", () => {
+    const form = new FormData();
+    form.set("content", "## Verse\r\n1 | 4\r\n");
+    expect(readVersionForm(form).content).toBe("## Verse\n1 | 4\n");
   });
 });
