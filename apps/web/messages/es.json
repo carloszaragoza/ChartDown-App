@@ -152,5 +152,18 @@
     "error": "Algo salió mal. Inténtalo de nuevo.",
     "back": "Volver",
     "link": "Tu perfil"
+  },
+  "version": {
+    "by": "Arreglo de {author}",
+    "source": {
+      "studio": "Grabación de estudio",
+      "live": "En vivo",
+      "acoustic": "Acústica",
+      "own_arrangement": "Arreglo propio"
+    },
+    "album": "Álbum: {album}",
+    "youtube": "Ver en YouTube",
+    "fork": "Hacer mi copia",
+    "forkHint": "Inicia sesión para hacer tu propia copia de esta versión."
   }
 }

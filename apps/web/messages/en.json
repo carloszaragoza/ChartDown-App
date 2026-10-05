@@ -152,5 +152,18 @@
     "error": "Something went wrong. Try again.",
     "back": "Back",
     "link": "Your profile"
+  },
+  "version": {
+    "by": "Arrangement by {author}",
+    "source": {
+      "studio": "Studio recording",
+      "live": "Live",
+      "acoustic": "Acoustic",
+      "own_arrangement": "Own arrangement"
+    },
+    "album": "Album: {album}",
+    "youtube": "Watch on YouTube",
+    "fork": "Fork",
+    "forkHint": "Sign in to make your own copy of this version."
   }
 }
