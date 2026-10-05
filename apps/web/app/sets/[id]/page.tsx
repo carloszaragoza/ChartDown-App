@@ -12,7 +12,9 @@ import {
   deleteSet,
   duplicateSet,
   moveItem,
+  appointTempMd,
   removeItem,
+  removeTempMd,
   resetLineup,
   saveLineup,
   setSongKey,
@@ -60,8 +62,10 @@ const STATUS = [
   "defaults",
   "key",
   "updated",
+  "appointed",
+  "unappointed",
 ];
-const ERRORS = new Set(["name", "date", "type", "name_taken", "confirm", "key"]);
+const ERRORS = new Set(["name", "date", "type", "name_taken", "confirm", "key", "temp_md"]);
 
 /**
  * A set: its songs in order, each pinned to a revision (R-05.2). Members read it; the MD edits,
@@ -120,6 +124,13 @@ export default async function SetPage({
     Boolean(me && tempMd && tempMd.member_id === me.id) &&
     (!tempMd?.until || (tempMd.until as string) >= today);
   const canArrange = isMd || isTempMd;
+  const tempMember = members.find((member) => member.id === tempMd?.member_id);
+  const tempUntil = tempMd?.until
+    ? (await getFormatter()).dateTime(new Date(`${tempMd.until as string}T00:00:00Z`), {
+        dateStyle: "medium",
+        timeZone: "UTC",
+      })
+    : null;
   const items = (rows ?? []) as Item[];
   // Songs whose author has published a newer revision than the one pinned (decision 9.2).
   const newer = items.filter((item) => {
@@ -314,6 +325,70 @@ export default async function SetPage({
               {t("catalog")}
             </Link>
           </p>
+        )}
+      </section>
+
+      <section aria-labelledby="temp-md" className={styles.list}>
+        <h2 id="temp-md" className={styles.label}>
+          {t("tempMd")}
+        </h2>
+        {isTempMd && (
+          <p className={styles.text}>
+            {tempUntil ? t("youAreTempMdUntil", { date: tempUntil }) : t("youAreTempMd")}
+          </p>
+        )}
+        {!isTempMd && (
+          <p className={styles.hint}>
+            {tempMember
+              ? tempUntil
+                ? t("tempMdIsUntil", { name: profileName(tempMember), date: tempUntil })
+                : t("tempMdIs", { name: profileName(tempMember) })
+              : t("noTempMd")}
+          </p>
+        )}
+        {isMd && (
+          <form action={appointTempMd} className={styles.form}>
+            {hidden()}
+            <label className={styles.field}>
+              {t("tempMdWho")}
+              <select
+                name="memberId"
+                required
+                defaultValue={tempMember?.id ?? ""}
+                className={styles.input}
+              >
+                <option value="" disabled>
+                  {t("chooseMusician")}
+                </option>
+                {members
+                  .filter((member) => member.role === "musician")
+                  .map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {profileName(member)}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <label className={styles.field}>
+              {t("tempMdUntil")}
+              <input
+                name="until"
+                type="date"
+                defaultValue={(tempMd?.until as string | null) ?? set.date ?? ""}
+                className={styles.input}
+              />
+            </label>
+            <p className={styles.hint}>{t("tempMdHint")}</p>
+            <div className={styles.buttons}>
+              <Button type="submit">{tempMember ? t("tempMdChange") : t("tempMdAppoint")}</Button>
+            </div>
+          </form>
+        )}
+        {isMd && tempMember && (
+          <form action={removeTempMd}>
+            {hidden()}
+            <Button type="submit">{t("tempMdRemove")}</Button>
+          </form>
         )}
       </section>
 

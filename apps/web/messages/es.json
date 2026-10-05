@@ -474,7 +474,9 @@
       "lineup": "Se guardó la alineación.",
       "defaults": "El set vuelve a usar los instrumentos de la banda.",
       "key": "Se guardó el tono.",
-      "updated": "La canción ya toca la revisión más nueva del autor."
+      "updated": "La canción ya toca la revisión más nueva del autor.",
+      "appointed": "Se nombró al director musical temporal.",
+      "unappointed": "Se quitó el rol de director musical temporal."
     },
     "errors": {
       "name": "El nombre de un set tiene de 1 a 80 caracteres.",
@@ -483,7 +485,8 @@
       "name_taken": "Tu banda ya tiene un set con ese nombre.",
       "confirm": "Marca la casilla para confirmar.",
       "unknown": "No funcionó. Inténtalo de nuevo.",
-      "key": "Elige uno de los tonos ofrecidos."
+      "key": "Elige uno de los tonos ofrecidos.",
+      "temp_md": "Elige a un músico de la banda."
     },
     "lineup": "Alineación",
     "lineupDefaults": "Este set usa los instrumentos por defecto de la banda. Guarda para darle su propia alineación.",
@@ -504,6 +507,19 @@
     "seeNewerName": "Ver la revisión nueva de {title}",
     "update": "Actualizar",
     "updateName": "Actualizar {title} a la revisión nueva",
-    "previewing": "Vista previa de la revisión {number}. Este set sigue tocando la {pinned} hasta que actualices."
+    "previewing": "Vista previa de la revisión {number}. Este set sigue tocando la {pinned} hasta que actualices.",
+    "tempMd": "Director musical temporal",
+    "noTempMd": "Nadie. El director musical arma este set.",
+    "tempMdIs": "{name} arma este set.",
+    "tempMdIsUntil": "{name} arma este set hasta el {date}.",
+    "youAreTempMd": "Eres el director musical temporal de este set: puedes cambiar su orden, tonos y alineación.",
+    "youAreTempMdUntil": "Eres el director musical temporal de este set hasta el {date}: puedes cambiar su orden, tonos y alineación.",
+    "tempMdWho": "Músico",
+    "chooseMusician": "Elige un músico",
+    "tempMdUntil": "Hasta",
+    "tempMdHint": "Podrá cambiar el orden, los tonos y la alineación de este set, y nada más. El rol termina después de ese día.",
+    "tempMdAppoint": "Nombrar",
+    "tempMdChange": "Cambiar",
+    "tempMdRemove": "Quitar el rol"
   }
 }
