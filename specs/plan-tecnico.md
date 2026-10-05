@@ -271,6 +271,13 @@ Vercel for the app and the landing page, Supabase for data and auth, and Cloudfl
 
 No personal data of a departed user remains, which removes the risk with privacy laws.
 
+**How deleting works (T-405).** The person deletes their own account from their profile, confirming with their email; it is immediate and final. In one transaction:
+
+- Their public versions, frozen ones included, stay in the catalog without an owner, credited to "ChartDown". Revisions and layer notes they wrote stay without an author.
+- Their private versions are deleted, and with them the songs that used them in any set and any layer on them.
+- In each band where they were the permanent MD and others remain, the longest-standing member becomes the MD, and an event lets the band know.
+- Everything else that is theirs is deleted: the account and its sign-in methods, the profile, their instruments, their personal space with its sets and layer, their memberships, lineups and temporary MD roles, notices and preferences, their waitlist entry and invite claims, and the events that name them.
+
 **License of charts:** every public chart is published under **CC0**. The terms of use say so at publish time.
 
 ### 12.6 Names, repositories and business model
