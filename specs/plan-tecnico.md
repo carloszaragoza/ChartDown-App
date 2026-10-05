@@ -160,6 +160,8 @@ This is the heart of the app (SPEC-06), so it has two barriers.
 3. It returns the pinned revision's ChartDown text, the set's key and **only** the layer notes that are general or for their instruments. The MD and that set's temporary MD receive all of them.
 4. The device renders it with `@chartdown/core`.
 
+In detail (T-801): the server function is `set_song(set, position)`, run with the person's own permissions so row-level security still applies. In one answer, which offline download (T-902) can store as it is, it returns the pinned revision's text and number, the set's key, the person's role in the set (MD, temporary MD or musician), their instruments in this set (the set's lineup, or the band's defaults while the set has none of its own), whether the band hides the author's notes, and the layer notes with their section, occurrence, bar, instruments and anchored revision: for a musician only the general ones and those for their instruments in this set, which narrows the policy (any instrument they play in the band) to this set; a musician who does not play in it gets the general ones only. The page places them with `@chartdown/core`, marks the ones for this musician, and lists unplaced notes apart. The author's notes, written in the chart, are filtered with the same rule on screen only, and are hidden if the band hides them. “View as” for the MD comes with T-802.
+
 The second barrier is row-level security: even if someone queries the database directly, Postgres never returns notes for other instruments or other bands. Notes the author left inside a public version are already public, so there the filter is only presentational.
 
 ## 6. Offline
