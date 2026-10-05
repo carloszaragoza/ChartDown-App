@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { authEnabled } from "../../../../lib/auth/enabled";
 import { createClient } from "../../../../lib/supabase/server";
+import { normalizeLineBreaks } from "../../../../lib/versions/lines";
 import { UUID } from "../load";
 
 export interface SaveState {
@@ -22,7 +23,7 @@ export interface SaveState {
 export async function saveChart(previous: SaveState, form: FormData): Promise<SaveState> {
   if (!authEnabled()) redirect("/");
   const versionId = String(form.get("versionId") ?? "");
-  const content = String(form.get("content") ?? "");
+  const content = normalizeLineBreaks(String(form.get("content") ?? ""));
   if (!UUID.test(versionId)) return { ...previous, status: "error" };
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();

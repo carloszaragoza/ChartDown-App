@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lineRange } from "./lines";
+import { lineRange, normalizeLineBreaks } from "./lines";
 
 describe("lineRange", () => {
   const text = "## Verse\n1 | 4\n\n5 | ???";
@@ -13,5 +13,11 @@ describe("lineRange", () => {
 
   it("R-03.1 a line past the end goes to the end", () => {
     expect(lineRange(text, 9)).toEqual({ start: text.length, end: text.length });
+  });
+});
+
+describe("normalizeLineBreaks", () => {
+  it("R-03.1 a chart sent by a form is saved with the line breaks the editor holds", () => {
+    expect(normalizeLineBreaks("## Verse\r\n1 | 4\r\n\r5")).toBe("## Verse\n1 | 4\n\n5");
   });
 });

@@ -9,3 +9,11 @@ export function lineRange(text: string, line: number): { start: number; end: num
   const end = text.indexOf("\n", start);
   return { start, end: end === -1 ? text.length : end };
 }
+
+/**
+ * A chart's text with every line break as \n. Browsers send form text with \r\n, so what is
+ * saved would otherwise differ from what the editor holds.
+ */
+export function normalizeLineBreaks(text: string): string {
+  return text.replace(/\r\n?/g, "\n");
+}
