@@ -1,7 +1,8 @@
 {
   "home": {
     "title": "ChartDown App",
-    "tagline": "Number charts for the whole band, with each player’s notes."
+    "tagline": "Number charts for the whole band, with each player’s notes.",
+    "newVersion": "New version"
   },
   "language": {
     "label": "Language",
@@ -173,5 +174,42 @@
     "youtube": "Watch on YouTube",
     "fork": "Fork",
     "forkHint": "Sign in to make your own copy of this version."
+  },
+  "newVersion": {
+    "title": "New version",
+    "back": "Back to home",
+    "changeSong": "Choose another song",
+    "search": {
+      "label": "Find the song by title",
+      "submit": "Search",
+      "results": "Songs in the catalog",
+      "none": "No songs match. Create it as a new song.",
+      "use": "Use {title}",
+      "useShort": "Use this song",
+      "newSong": "Create a new song"
+    },
+    "song": "Song",
+    "songTitle": "Song title",
+    "artists": "Artists",
+    "artistsHint": "Separate several artists with commas.",
+    "chart": "Chart (ChartDown)",
+    "author": "Arrangement by",
+    "source": "Source",
+    "sourceHint": "Which recording this chart follows. Required.",
+    "album": "Album (optional)",
+    "year": "Year (optional)",
+    "youtube": "YouTube link (optional)",
+    "cc0": "Public versions are shared under CC0: anyone may use them, and they stay with the community even if you delete your account.",
+    "publish": "Publish version",
+    "errors": {
+      "source_required": "Choose a source: studio recording, live, acoustic or own arrangement.",
+      "title_required": "Write the song title (up to 200 characters).",
+      "author_required": "Write who made the arrangement (up to 80 characters).",
+      "chart_required": "Write the chart before publishing.",
+      "year_invalid": "The year must be a whole number between 1800 and 2200.",
+      "youtube_invalid": "The link must be a YouTube address starting with https://.",
+      "unknown": "The version could not be published. Try again."
+    },
+    "publishing": "Publishing…"
   }
 }

@@ -38,6 +38,13 @@ export function Home({
                 {a("signedInAs", { name: account.name })}
               </span>
               <Link
+                href="/versions/new"
+                className="cd-button cd-button--primary"
+                style={{ textDecoration: "none" }}
+              >
+                {t("newVersion")}
+              </Link>
+              <Link
                 href="/profile"
                 className="cd-button cd-button--secondary"
                 style={{ textDecoration: "none" }}
