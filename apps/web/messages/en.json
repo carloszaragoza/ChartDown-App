@@ -113,7 +113,8 @@
       "signedInAs": "Signed in as {name}",
       "signOut": "Sign out",
       "signIn": "Sign in",
-      "passwordUpdated": "Your password was updated."
+      "passwordUpdated": "Your password was updated.",
+      "accountDeleted": "Your account was deleted."
     },
     "errors": {
       "invalid_credentials": "That email and password don’t match an account.",
@@ -151,7 +152,14 @@
     "nameRequired": "Write your name.",
     "error": "Something went wrong. Try again.",
     "back": "Back",
-    "link": "Your profile"
+    "link": "Your profile",
+    "delete": {
+      "title": "Delete your account",
+      "explain": "This deletes your account, your profile, your personal space and your private versions, for good. Your public versions stay with the community, credited to “ChartDown”. In bands you lead, the longest-standing member takes over as music director.",
+      "confirm": "Type your email to confirm",
+      "submit": "Delete my account",
+      "mismatch": "That email does not match your account."
+    }
   },
   "version": {
     "by": "Arrangement by {author}",

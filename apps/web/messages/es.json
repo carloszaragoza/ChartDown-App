@@ -113,7 +113,8 @@
       "signedInAs": "Sesión iniciada como {name}",
       "signOut": "Cerrar sesión",
       "signIn": "Iniciar sesión",
-      "passwordUpdated": "Tu contraseña se actualizó."
+      "passwordUpdated": "Tu contraseña se actualizó.",
+      "accountDeleted": "Tu cuenta se eliminó."
     },
     "errors": {
       "invalid_credentials": "Ese correo y esa contraseña no coinciden con ninguna cuenta.",
@@ -151,7 +152,14 @@
     "nameRequired": "Escribe tu nombre.",
     "error": "Algo salió mal. Inténtalo de nuevo.",
     "back": "Volver",
-    "link": "Tu perfil"
+    "link": "Tu perfil",
+    "delete": {
+      "title": "Eliminar tu cuenta",
+      "explain": "Esto elimina tu cuenta, tu perfil, tu espacio personal y tus versiones privadas, para siempre. Tus versiones públicas se quedan con la comunidad, firmadas «ChartDown». En las bandas que diriges, el miembro más antiguo pasa a dirigirlas.",
+      "confirm": "Escribe tu correo para confirmar",
+      "submit": "Eliminar mi cuenta",
+      "mismatch": "Ese correo no coincide con tu cuenta."
+    }
   },
   "version": {
     "by": "Arreglo de {author}",

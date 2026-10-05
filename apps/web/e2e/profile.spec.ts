@@ -61,3 +61,25 @@ test("R-01.5 the language switcher saves to the profile when signed in", async (
   await signIn(page, email, PASSWORD);
   await expect(page.getByText("Sesión iniciada como Mateo Test")).toBeVisible();
 });
+
+test("R-01.6 a person deletes their account, and it no longer signs in", async ({ page }) => {
+  const email = unique("leaving");
+  await signUpAndConfirm(page, email, "Leaving Test");
+  await page.getByRole("link", { name: "Your profile" }).click();
+
+  await page.getByLabel("Type your email to confirm").fill("someone-else@example.test");
+  await page.getByRole("button", { name: "Delete my account" }).click();
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "does not match your account",
+  );
+
+  await page.getByLabel("Type your email to confirm").fill(email);
+  await page.getByRole("button", { name: "Delete my account" }).click();
+  await expect(page.getByRole("main").getByRole("status")).toContainText(
+    "Your account was deleted",
+  );
+  await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
+
+  await signIn(page, email, PASSWORD);
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("don’t match an account");
+});
