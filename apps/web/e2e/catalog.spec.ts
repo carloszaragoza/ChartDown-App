@@ -37,9 +37,12 @@ test("R-02.10 a visitor searches the catalog and opens a version", async ({ page
   // Search by album, then narrow by source.
   await page.getByLabel("Search by title, artist or album").fill("Night Sessions");
   await page.getByRole("button", { name: "Search" }).click();
-  await expect(results.filter({ hasText: title })).toContainText("1 version");
+  // The album finds the song; only the source type narrows how many versions are counted.
+  await expect(page).toHaveURL(/q=Night\+Sessions/);
+  await expect(results.filter({ hasText: title })).toContainText("2 versions");
   await page.getByLabel("Search by title, artist or album").fill(title);
   await page.getByRole("button", { name: "Search" }).click();
+  await expect(page).not.toHaveURL(/Night/);
   await page
     .getByRole("navigation", { name: "Source" })
     .getByRole("link", { name: "Live" })
