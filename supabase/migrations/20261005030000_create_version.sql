@@ -18,8 +18,10 @@ language plpgsql volatile security invoker set search_path = '' as $$
 declare
   me uuid := auth.uid();
   song uuid := create_version.song_id;
-  created uuid;
-  first_revision uuid;
+  -- Chosen here, not returned by the inserts: RETURNING would also apply the read policy, whose
+  -- helper looks the version up and cannot yet see a row inserted by the same statement.
+  created uuid := gen_random_uuid();
+  first_revision uuid := gen_random_uuid();
 begin
   if me is null then
     raise exception 'Sign in to publish a version' using errcode = 'insufficient_privilege';
@@ -34,17 +36,15 @@ begin
     returning id into song;
   end if;
 
-  insert into public.versions (song_id, owner_id, author_name, source_type, source_album, source_year, source_youtube_url)
+  insert into public.versions (id, song_id, owner_id, author_name, source_type, source_album, source_year, source_youtube_url)
   values (
-    song, me, btrim(create_version.author_name), create_version.source_type,
+    created, song, me, btrim(create_version.author_name), create_version.source_type,
     nullif(btrim(create_version.source_album), ''), create_version.source_year,
     nullif(btrim(create_version.source_youtube_url), '')
-  )
-  returning id into created;
+  );
 
-  insert into public.revisions (version_id, number, content, author_id)
-  values (created, 1, create_version.content, me)
-  returning id into first_revision;
+  insert into public.revisions (id, version_id, number, content, author_id)
+  values (first_revision, created, 1, create_version.content, me);
 
   update public.versions set current_revision_id = first_revision where id = created;
   return created;
