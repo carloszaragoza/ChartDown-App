@@ -49,11 +49,24 @@ export async function updateSet(form: FormData): Promise<void> {
   if (!UUID.test(setId)) redirect("/bands");
   const set = readSet(form);
   if ("error" in set) redirect(setPage(setId, `error=${set.error}`));
+  const [{ data: before }, { data: tempMd }] = await Promise.all([
+    supabase.from("sets").select("date").eq("id", setId).maybeSingle(),
+    supabase.from("set_temp_md").select("until").eq("set_id", setId).maybeSingle(),
+  ]);
   const { error, count } = await supabase
     .from("sets")
     .update({ ...set, updated_at: new Date().toISOString() }, { count: "exact" })
     .eq("id", setId);
   if (error) redirect(setPage(setId, `error=${error.code === "23505" ? "name_taken" : "unknown"}`));
+  // The temporary MD's day follows the set's date, unless it had been set to another day.
+  if (
+    count === 1 &&
+    tempMd &&
+    tempMd.until === (before?.date ?? null) &&
+    before?.date !== set.date
+  ) {
+    await supabase.from("set_temp_md").update({ until: set.date }).eq("set_id", setId);
+  }
   redirect(setPage(setId, count === 1 ? "saved=1" : "error=unknown"));
 }
 
@@ -182,4 +195,46 @@ export async function updatePinned(form: FormData): Promise<void> {
   if (!UUID.test(setId) || !UUID.test(itemId)) redirect("/bands");
   const { error } = await supabase.rpc("update_pinned_revision", { item_id: itemId });
   redirect(setPage(setId, error ? "error=unknown" : "updated=1"));
+}
+
+/**
+ * The MD appoints a musician of the band as the set's temporary MD, until a day (the set's
+ * date by default) (R-05.5). Appointing someone else replaces the previous one, so the new
+ * appointment is recorded as its own event.
+ */
+export async function appointTempMd(form: FormData): Promise<void> {
+  const supabase = await client();
+  const setId = field(form, "setId");
+  const memberId = field(form, "memberId");
+  const until = field(form, "until");
+  if (!UUID.test(setId)) redirect("/bands");
+  if (!UUID.test(memberId)) redirect(setPage(setId, "error=temp_md"));
+  if (until && !DATE.test(until)) redirect(setPage(setId, "error=date"));
+  const { data: set } = await supabase.from("sets").select("band_id").eq("id", setId).maybeSingle();
+  const { data: member } = await supabase
+    .from("band_members")
+    .select("role")
+    .eq("id", memberId)
+    .eq("band_id", set?.band_id ?? "")
+    .maybeSingle();
+  // Only a musician of the band; the MD does not appoint themselves.
+  if (!set || member?.role !== "musician") redirect(setPage(setId, "error=temp_md"));
+  const { error: removed } = await supabase.from("set_temp_md").delete().eq("set_id", setId);
+  if (removed) redirect(setPage(setId, "error=unknown"));
+  const { error } = await supabase.from("set_temp_md").insert({
+    set_id: setId,
+    band_id: set.band_id,
+    member_id: memberId,
+    ...(until ? { until } : {}),
+  });
+  redirect(setPage(setId, error ? "error=unknown" : "appointed=1"));
+}
+
+/** The MD ends the temporary MD's role before the set's date (R-05.5). */
+export async function removeTempMd(form: FormData): Promise<void> {
+  const supabase = await client();
+  const setId = field(form, "setId");
+  if (!UUID.test(setId)) redirect("/bands");
+  const { error } = await supabase.from("set_temp_md").delete().eq("set_id", setId);
+  redirect(setPage(setId, error ? "error=unknown" : "unappointed=1"));
 }
