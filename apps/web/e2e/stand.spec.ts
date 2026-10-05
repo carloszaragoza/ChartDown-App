@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { createVersion } from "./admin";
+import { gapUnderSongMap } from "./flows";
 
 const OPEN_ROAD = readFileSync(
   new URL("../../../packages/core/fixtures/open-road.chartdown", import.meta.url),
@@ -76,3 +77,22 @@ test("R-03.3 every section reads without zooming on an iPad in landscape", async
   expect(await size()).toBe(lightSize);
   expect(await background()).not.toBe(lightBackground);
 });
+
+for (const [orientation, viewport] of [
+  ["portrait", { width: 820, height: 1180 }],
+  ["landscape", { width: 1180, height: 820 }],
+] as const) {
+  test(`R-03.3 on an iPad in ${orientation}, the section sits right under the song map`, async ({
+    page,
+    request,
+  }) => {
+    await page.setViewportSize(viewport);
+    const id = await createVersion(request, { title: "Open Road", content: OPEN_ROAD });
+    await page.goto(`/versions/${id}/stand?s=4`);
+    await expect(
+      page.getByRole("main").getByRole("heading", { level: 2, name: "Verse 2" }),
+    ).toBeVisible();
+    // F-001: no empty space between the song map and the section to read.
+    expect(await gapUnderSongMap(page)).toBeLessThan(40);
+  });
+}

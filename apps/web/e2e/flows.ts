@@ -44,4 +44,12 @@ export async function signOut(page: Page) {
 /** Opens the account menu of the top bar, where the profile and sign out are (T-706). */
 export async function openAccount(page: Page) {
   await page.getByLabel(/^Account of /).click();
+/** How far below the song map the current section starts, in stand mode (F-001). */
+export async function gapUnderSongMap(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const map = document.querySelector('nav[aria-label="Song form"]');
+    const section = document.querySelector("main");
+    if (!map || !section) return Number.POSITIVE_INFINITY;
+    return section.getBoundingClientRect().top - map.getBoundingClientRect().bottom;
+  });
 }

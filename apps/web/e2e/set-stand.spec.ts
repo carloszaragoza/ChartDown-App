@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
-import { PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import { PASSWORD, signIn, signOut, signUpAndConfirm, unique, gapUnderSongMap } from "./flows";
 
 const CHART = "## Verse\n1 | 4\n\n## Chorus\n4 | 5 | 6m | 1\n";
 
@@ -87,6 +87,8 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   await page.goto(`${setAddress}/songs/1`);
   await page.getByRole("link", { name: "Start in stand mode" }).click();
   await expect(page.getByText(`Song 1 of 2`)).toBeVisible();
+  // F-001: in a set too, the section sits right under the song map.
+  expect(await gapUnderSongMap(page)).toBeLessThan(40);
   const current = page.getByRole("main");
   await expect(current).toContainText(notes.all);
   await page.getByRole("link", { name: "Next", exact: true }).click();
