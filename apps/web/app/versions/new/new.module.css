@@ -1,0 +1,122 @@
+.page {
+  display: grid;
+  gap: var(--space-6);
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: var(--space-10) var(--space-4);
+}
+.title {
+  margin: 0;
+  font: var(--type-song-title);
+}
+.form {
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--space-6);
+  border: var(--stroke-hairline) solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+}
+.search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-3);
+}
+.search .field {
+  flex: 1 1 16rem;
+}
+.field {
+  display: grid;
+  gap: var(--space-1);
+  font: var(--type-label);
+}
+.input,
+.chart {
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border: var(--stroke-hairline) solid var(--control-border);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--type-note);
+}
+.chart {
+  padding: var(--space-3);
+  font: var(--type-code);
+  resize: vertical;
+}
+.group {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.legend {
+  margin: 0 0 var(--space-2);
+  font: var(--type-label);
+}
+.choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr));
+  gap: var(--space-2);
+}
+/* Every choice is a full 44 px target, label included. */
+.choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  font: var(--type-note);
+  cursor: pointer;
+}
+.choice input {
+  width: var(--space-6);
+  height: var(--space-6);
+  margin: 0;
+}
+.hint {
+  margin: 0;
+  font: var(--type-caption);
+  color: var(--ink-muted);
+}
+.notice,
+.alert {
+  margin: 0;
+  font: var(--type-note);
+}
+.alert {
+  font-weight: 600;
+}
+.results {
+  display: grid;
+  gap: var(--space-2);
+}
+.list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.song {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: var(--stroke-hairline) solid var(--rule);
+}
+.songTitle {
+  font: var(--type-note);
+  font-weight: 600;
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  color: var(--dynamic);
+  font: var(--type-meta);
+}

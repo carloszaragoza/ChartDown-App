@@ -119,6 +119,8 @@ Rules that tie rows to the same band or the same version (a lineup member of the
 
 **Rules that live in the database**
 
+- **Create a version** (R-02.1 to R-02.3, T-501): in a single transaction, with the person's own permissions, create the song if it is new, the version (public, active, owned by the person, with its required source), its first revision, and make that revision current. A chart is saved even if the parser warns; the editor shows the warnings (T-601). When publishing, the person is told that public versions are shared under CC0 and stay with the community even if they delete their account (12.5).
+
 - **Make private** (R-02.4): in a single transaction, create a private version for the owner from the current revision, and set the public one to “frozen”, keeping the author's name (decision 9.4). Never delete it.
 - **Pinned sets** (decision 9.2): each song in a set points to a revision. A new revision from the author writes an event and a notice to the MD; “Update” changes that reference.
 - **Deleted account** (decision 9.5, see 12.5): personal data is deleted and the person's public versions are credited to “ChartDown”.

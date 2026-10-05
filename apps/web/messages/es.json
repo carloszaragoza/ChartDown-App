@@ -1,7 +1,8 @@
 {
   "home": {
     "title": "ChartDown App",
-    "tagline": "Cifrados en números para toda la banda, con las notas de cada músico."
+    "tagline": "Cifrados en números para toda la banda, con las notas de cada músico.",
+    "newVersion": "Nueva versión"
   },
   "language": {
     "label": "Idioma",
@@ -173,5 +174,42 @@
     "youtube": "Ver en YouTube",
     "fork": "Hacer mi copia",
     "forkHint": "Inicia sesión para hacer tu propia copia de esta versión."
+  },
+  "newVersion": {
+    "title": "Nueva versión",
+    "back": "Volver al inicio",
+    "changeSong": "Elegir otra canción",
+    "search": {
+      "label": "Busca la canción por título",
+      "submit": "Buscar",
+      "results": "Canciones del catálogo",
+      "none": "Ninguna canción coincide. Créala como canción nueva.",
+      "use": "Usar {title}",
+      "useShort": "Usar esta canción",
+      "newSong": "Crear una canción nueva"
+    },
+    "song": "Canción",
+    "songTitle": "Título de la canción",
+    "artists": "Artistas",
+    "artistsHint": "Separa varios artistas con comas.",
+    "chart": "Cifrado (ChartDown)",
+    "author": "Arreglo de",
+    "source": "Fuente",
+    "sourceHint": "Qué grabación sigue este cifrado. Obligatoria.",
+    "album": "Álbum (opcional)",
+    "year": "Año (opcional)",
+    "youtube": "Enlace de YouTube (opcional)",
+    "cc0": "Las versiones públicas se comparten bajo CC0: cualquiera puede usarlas, y se quedan con la comunidad aunque borres tu cuenta.",
+    "publish": "Publicar versión",
+    "errors": {
+      "source_required": "Elige una fuente: grabación de estudio, en vivo, acústica o arreglo propio.",
+      "title_required": "Escribe el título de la canción (hasta 200 caracteres).",
+      "author_required": "Escribe quién hizo el arreglo (hasta 80 caracteres).",
+      "chart_required": "Escribe el cifrado antes de publicar.",
+      "year_invalid": "El año debe ser un número entero entre 1800 y 2200.",
+      "youtube_invalid": "El enlace debe ser una dirección de YouTube que empiece por https://.",
+      "unknown": "No se pudo publicar la versión. Inténtalo de nuevo."
+    },
+    "publishing": "Publicando…"
   }
 }
