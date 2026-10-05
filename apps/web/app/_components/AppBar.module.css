@@ -29,6 +29,19 @@
   font: var(--type-label);
   text-decoration: none;
 }
+.count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.5rem;
+  margin-left: var(--space-2);
+  padding: 0 var(--space-1);
+  border: var(--stroke-hairline) solid var(--control-border);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--type-caption);
+  font-weight: 700;
+}
 .link[aria-current="page"] {
   text-decoration: underline;
   text-decoration-thickness: 2px;

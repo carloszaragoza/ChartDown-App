@@ -9,6 +9,7 @@ import type { ReactNode } from "react";
 import { authEnabled } from "../lib/auth/enabled";
 import { createClient } from "../lib/supabase/server";
 import { AppBar, type AppBarProps } from "./_components/AppBar";
+import { NoticesLive } from "./_components/NoticesLive";
 import { OfflineSync } from "./_components/OfflineSync";
 import { ServiceWorker } from "./_components/ServiceWorker";
 
@@ -27,18 +28,25 @@ export const viewport: Viewport = {
 };
 
 /** Who is signed in, for the top bar; nothing while sign-in is hidden (production). */
-async function barProps(): Promise<AppBarProps | null> {
+async function barProps(): Promise<(AppBarProps & { userId: string | null }) | null> {
   if (!authEnabled()) return null;
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
-  if (!data.user) return { account: null, personalSets: null };
-  const [{ data: profile }, { data: personal }] = await Promise.all([
+  if (!data.user) return { account: null, personalSets: null, unread: 0, userId: null };
+  const [{ data: profile }, { data: personal }, { count }] = await Promise.all([
     supabase.from("profiles").select("name").eq("id", data.user.id).maybeSingle(),
     supabase.from("bands").select("id").eq("personal_owner_id", data.user.id).maybeSingle(),
+    supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", data.user.id)
+      .is("read_at", null),
   ]);
   return {
     account: { name: profile?.name ?? data.user.email ?? "" },
     personalSets: personal ? `/bands/${personal.id}/sets` : null,
+    unread: count ?? 0,
+    userId: data.user.id,
   };
 }
 
@@ -49,8 +57,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body>
         <NextIntlClientProvider>
           <ServiceWorker />
-          {bar && <AppBar {...bar} />}
+          {bar && (
+            <AppBar account={bar.account} personalSets={bar.personalSets} unread={bar.unread} />
+          )}
           {bar?.account && <OfflineSync />}
+          {bar?.userId && <NoticesLive userId={bar.userId} />}
           {children}
         </NextIntlClientProvider>
       </body>

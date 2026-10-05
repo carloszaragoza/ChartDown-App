@@ -581,7 +581,9 @@
     "account": "Account of {name}",
     "profile": "Your profile",
     "signOut": "Sign out",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "notices": "Notices",
+    "unread": "{count, plural, =0 {Notices, none unread} one {Notices, # unread} other {Notices, # unread}}"
   },
   "offline": {
     "title": "You are offline",
@@ -617,6 +619,27 @@
       "noteRemoved": "Note removed from {title}, {section}: “{text}”",
       "lineup": "{name} now plays: {to}.",
       "sitsOut": "not playing in this set"
+    }
+  },
+  "notices": {
+    "title": "Notices",
+    "list": "Your notices",
+    "none": "No notices yet. When something changes in your bands, it shows up here.",
+    "new": "New",
+    "markAll": "Mark all as read",
+    "noDate": "no date",
+    "writtenKey": "its written key",
+    "everyone": "everyone",
+    "place": "{section}, bar {bar}",
+    "types": {
+      "lineup_added": "You were added to {set} ({when}) on {instrument}.",
+      "lineup_removed": "You were taken off {set} ({when}) on {instrument}.",
+      "temp_md": "You are the temporary music director of {set} until {until}.",
+      "temp_md_open": "You are the temporary music director of {set}.",
+      "key_changed": "{title} in {set} is now in {to} (it was in {from}).",
+      "order_changed": "The order of the songs in {set} changed.",
+      "note_added": "New note for {for} in {title}, {place}: “{text}”",
+      "new_revision": "{title} has a new revision from its author, {number}; {set} still plays revision {pinned}."
     }
   }
 }
