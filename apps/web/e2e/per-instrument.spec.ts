@@ -16,6 +16,8 @@ async function addNote(page: Page, instrument: string, text: string) {
   await page.getByLabel(instrument, { exact: true }).check();
   await page.getByLabel("Note", { exact: true }).fill(text);
   await page.getByRole("button", { name: "Add note" }).click();
+  // Wait for this note in the list: the status is still there from the previous note.
+  await expect(page.getByRole("main").getByText(text, { exact: true })).toBeVisible();
   await expect(page.getByRole("main").getByRole("status")).toContainText("The note was saved.");
 }
 
