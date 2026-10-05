@@ -46,6 +46,7 @@ export async function openAccount(page: Page) {
   await page.getByLabel(/^Account of /).click();
 }
 
+<<<<<<< HEAD
 /** In the layer editor, chooses a section from the list on the left (T-707). */
 export async function chooseSection(page: Page, label: string) {
   const name = new RegExp(`^${label.replace(/[()]/g, "\\$&")} \\d+ notes?$`);
@@ -53,4 +54,14 @@ export async function chooseSection(page: Page, label: string) {
   await expect(
     page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name }),
   ).toHaveAttribute("aria-current", "true");
+=======
+/** How far below the song map the current section starts, in stand mode (F-001). */
+export async function gapUnderSongMap(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const map = document.querySelector('nav[aria-label="Song form"]');
+    const section = document.querySelector("main");
+    if (!map || !section) return Number.POSITIVE_INFINITY;
+    return section.getBoundingClientRect().top - map.getBoundingClientRect().bottom;
+  });
+>>>>>>> t-707b-editor-design
 }
