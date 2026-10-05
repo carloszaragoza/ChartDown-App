@@ -70,3 +70,23 @@ describe("R-02.8 the owner finds the history", () => {
     expect(render("en")).not.toContain(history);
   });
 });
+
+describe("R-02.7 forking", () => {
+  it("R-02.6 a signed-in person who is not the owner sees Fork, never History", () => {
+    const other = render("en", { signedIn: true });
+    expect(other).toMatch(/<button[^>]*type="submit"[^>]*>.*Fork/);
+    expect(other).toContain("shared under CC0");
+    const owner = render("en", { signedIn: true, owner: true });
+    expect(owner).not.toMatch(/<button[^>]*>.*Fork/);
+  });
+
+  it("R-02.7 a fork shows the version it is based on", () => {
+    const fork = render("en", {
+      basedOn: { id: "00000000-0000-0000-0000-0000000000f2", author: "Ana" },
+    });
+    expect(fork).toContain('href="/versions/00000000-0000-0000-0000-0000000000f2"');
+    expect(fork).toContain("Based on the version by Ana");
+    expect(render("es", { basedOn: "unknown" })).toContain("Basada en otra versión");
+    expect(render("en")).not.toContain("Based on");
+  });
+});

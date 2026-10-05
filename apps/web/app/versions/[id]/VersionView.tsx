@@ -1,9 +1,11 @@
 import { chordFormatter, keyName, type Chart } from "@chartdown/core";
-import { FormStrip, formStripItems, Section, type FormStripItem } from "@chartdown/ui";
+import { Button, FormStrip, formStripItems, Section, type FormStripItem } from "@chartdown/ui";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { useChartLabels } from "../../_components/chartLabels";
+import { forkVersion } from "./actions";
+import type { BasedOn } from "./load";
 import styles from "./version.module.css";
 
 export interface VersionSource {
@@ -23,6 +25,10 @@ export interface VersionViewProps {
   signedIn: boolean;
   /** The signed-in person owns this version: they find its history (R-02.8). */
   owner?: boolean;
+  /** For a fork, the version it is based on (R-02.7). */
+  basedOn?: BasedOn | null;
+  /** The last fork attempt failed. */
+  forkFailed?: boolean;
   /** Shown above the chart, e.g. when reading an earlier revision. */
   notice?: ReactNode;
 }
@@ -37,6 +43,8 @@ export function VersionView({
   chart,
   signedIn,
   owner = false,
+  basedOn = null,
+  forkFailed = false,
   notice,
 }: VersionViewProps) {
   const t = useTranslations("version");
@@ -73,6 +81,17 @@ export function VersionView({
               </>
             )}
           </p>
+          {basedOn && (
+            <p className={styles.meta}>
+              {basedOn === "unknown" ? (
+                t("basedOnUnknown")
+              ) : (
+                <Link href={`/versions/${basedOn.id}`} className={styles.link}>
+                  {t("basedOn", { author: basedOn.author })}
+                </Link>
+              )}
+            </p>
+          )}
           <p className={styles.meta}>
             {c("key")} <b>{keyName(chart.key)}</b> · {c("time")}{" "}
             <b>{chart.header.meter ?? "4/4"}</b>
@@ -88,6 +107,18 @@ export function VersionView({
           <Link href={`/versions/${id}/history`} className="cd-button cd-button--secondary">
             {t("history")}
           </Link>
+        )}
+        {signedIn && !owner && notice === undefined && (
+          <form action={forkVersion} className={styles.fork}>
+            <input type="hidden" name="versionId" value={id} />
+            <Button type="submit">{t("fork")}</Button>
+            <p className={styles.hint}>{t("forkCc0")}</p>
+            {forkFailed && (
+              <p role="alert" className={styles.alert}>
+                {t("forkFailed")}
+              </p>
+            )}
+          </form>
         )}
         {!signedIn && (
           <div className={styles.fork}>

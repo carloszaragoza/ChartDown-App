@@ -8,6 +8,7 @@ export interface LoadedVersion {
   ownerId: string | null;
   author: string;
   currentRevisionId: string | null;
+  forkedFromId: string | null;
   title: string;
   artists: string[];
   source: VersionSource;
@@ -25,7 +26,7 @@ export async function loadVersion(
   const { data: version } = await supabase
     .from("versions")
     .select(
-      "id, owner_id, author_name, source_type, source_album, source_year, source_youtube_url, current_revision_id, song:songs(title, artists)",
+      "id, owner_id, author_name, forked_from_id, source_type, source_album, source_year, source_youtube_url, current_revision_id, song:songs(title, artists)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -39,6 +40,7 @@ export async function loadVersion(
     ownerId: version.owner_id,
     author: version.author_name,
     currentRevisionId: version.current_revision_id,
+    forkedFromId: version.forked_from_id,
     title: song?.title ?? "",
     artists: song?.artists ?? [],
     source: {
@@ -48,4 +50,20 @@ export async function loadVersion(
       youtube: version.source_youtube_url,
     },
   };
+}
+
+/** What a fork is based on: the original and its author, or "unknown" if it can no longer be read. */
+export type BasedOn = { id: string; author: string } | "unknown";
+
+export async function loadBasedOn(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  forkedFromId: string | null,
+): Promise<BasedOn | null> {
+  if (!forkedFromId) return null;
+  const { data } = await supabase
+    .from("versions")
+    .select("id, author_name")
+    .eq("id", forkedFromId)
+    .maybeSingle();
+  return data ? { id: data.id, author: data.author_name } : "unknown";
 }
