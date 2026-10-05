@@ -177,7 +177,13 @@ export default async function NotesPage({
 
       <div className={styles.panes}>
         <div className={styles.side}>
-          <form action={saveNote} className={styles.form} id="note-form">
+          <form
+            // A fresh form for each note, so no value carries over between adding and editing.
+            key={editing?.id ?? "new"}
+            action={saveNote}
+            className={styles.form}
+            id="note-form"
+          >
             <h2 className={styles.label}>{editing ? t("editTitle") : t("addTitle")}</h2>
             <input type="hidden" name="versionId" value={version.id} />
             <input type="hidden" name="bandId" value={band.id} />

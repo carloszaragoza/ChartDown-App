@@ -43,6 +43,7 @@ test("R-03.5 a new note is saved in the layer and the public version doesn't cha
 
   // Editing: a note for everyone in the Verse.
   await page.getByRole("link", { name: "Edit the note: Pad swell into the last bar." }).click();
+  await expect(page.getByRole("heading", { name: "Edit the note" })).toBeVisible();
   await page.getByLabel("Section").selectOption({ label: "Verse" });
   await page.getByLabel("Bar (optional)").fill("");
   await page.getByLabel("Keys", { exact: true }).uncheck();
