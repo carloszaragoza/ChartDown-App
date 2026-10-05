@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { Button } from "./Button";
 import { Icon } from "./Icon";
-import { ACTION_ICONS, ICONS, INSTRUMENT_ICONS, type IconName } from "./icons";
+import { ACTION_ICONS, ICONS, INSTRUMENT_ICONS, SCREEN_ICONS, type IconName } from "./icons";
 import { InstrumentTag } from "./InstrumentTag";
 
 const read = (path: string) => readFileSync(new URL(path, import.meta.url), "utf8");
@@ -31,11 +31,22 @@ describe("Handoff 3 Icon", () => {
   );
 
   it("draws every icon exactly as the design system does", () => {
-    expect(Object.keys(ICONS).sort()).toEqual(Object.keys(drawn).sort());
-    for (const name of Object.keys(ICONS) as IconName[]) {
+    const fromSet = Object.keys(ICONS).filter((name) => !Object.hasOwn(SCREEN_ICONS, name));
+    expect(fromSet.sort()).toEqual(Object.keys(drawn).sort());
+    for (const name of fromSet as IconName[]) {
       const inner = /<svg[^>]*>(.*)<\/svg>/.exec(render(<Icon name={name} />))?.[1];
       const asDrawn = inner?.replaceAll("cd-icon-knob", "knob").replaceAll("cd-icon-dot", "dotf");
       expect(asDrawn, name).toBe(drawn[name]);
+    }
+  });
+
+  it("draws the icons the approved screens add exactly as the screens do", () => {
+    const screens = ["04-catalog", "05-chart-editor", "01-set"]
+      .map((name) => read(`../../../design/screens/${name}.html`))
+      .join("");
+    for (const [name, body] of Object.entries(SCREEN_ICONS)) {
+      expect(screens, name).toContain(body);
+      expect(render(<Icon name={name as IconName} />), name).toContain(body);
     }
   });
 

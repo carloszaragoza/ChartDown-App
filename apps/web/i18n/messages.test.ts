@@ -33,6 +33,7 @@ const SAME_IN_BOTH = new Set([
   "design.newInstrument",
   "chart.tempo",
   "bands.sets",
+  "landing.footer.copyright",
 ]);
 
 describe("R-01.5 interface in English by default, with Spanish as an option", () => {
