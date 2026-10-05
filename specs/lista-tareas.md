@@ -110,6 +110,14 @@ Every task is small, has its requirements (R-xx) and is done only when its tests
 | T-707 | Align the screens built before the design export with it: catalog, chart editor, MD layer editor and stand mode in a set (`design/screens/02` to `06`) | Handoff 4 | T-706, T-802 | M | Each screen matches the approved design |
 | T-708 | Optional time of a set, shown with its date | R-05.1 | T-702 | S | A set at 9:00 shows “9:00 AM” with its date |
 
+## Pending fixes
+
+Bugs found while reviewing; each is fixed with a test that would have caught it.
+
+| ID | Problem | Found | Cause | Fix | Test |
+|---|---|---|---|---|---|
+| F-001 | In stand mode (version and set), on iPad in portrait and landscape, a large empty space separates the song map from the section to read, which is pushed to the bottom of the screen | October 5, 2026, on a real iPad | Adding the top bar (T-802, T-707) moved every part of the stand-mode grid down one row, so the row that takes the free space became the song map's instead of the current section's | The current section's row takes the free space again, and the section sits right under the song map | End-to-end at iPad portrait and landscape: the current section starts right below the song map |
+
 ## E8 · Per-instrument view (SPEC-06)
 
 | ID | Task | Requirements | Depends on | Size | Tests / evidence |
