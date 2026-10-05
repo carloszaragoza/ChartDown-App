@@ -184,7 +184,8 @@
     "private": "Private",
     "frozen": "Frozen public version",
     "makePrivate": "Make private",
-    "edit": "Edit"
+    "edit": "Edit",
+    "myNotes": "My notes"
   },
   "newVersion": {
     "title": "New version",
@@ -286,5 +287,43 @@
     "writtenOption": "{key} (written)",
     "apply": "Apply",
     "written": "Back to the written key, {key}"
+  },
+  "notes": {
+    "personal": "My notes (personal space)",
+    "band": "Notes of {band}",
+    "private": "only your band sees them",
+    "back": "Back to the version",
+    "bands": "Bands",
+    "saved": "The note was saved.",
+    "deleted": "The note was deleted.",
+    "addTitle": "Add a note",
+    "editTitle": "Edit the note",
+    "section": "Section",
+    "chooseSection": "Choose a section",
+    "occurrence": "{name} ({occurrence, selectordinal, one {#st} two {#nd} few {#rd} other {#th}})",
+    "barField": "Bar (optional)",
+    "bar": "Bar {bar}",
+    "for": "For",
+    "forHint": "Leave every instrument unchecked for a note for everyone.",
+    "text": "Note",
+    "textHint": "One line, up to {max} characters.",
+    "add": "Add note",
+    "saveEdit": "Save note",
+    "cancel": "Cancel",
+    "count": "{count, plural, =0 {No notes yet} one {# note} other {# notes}}",
+    "everyone": "Everyone",
+    "unplaced": "unplaced",
+    "edit": "Edit",
+    "editNote": "Edit the note: {text}",
+    "delete": "Delete",
+    "deleteNote": "Delete the note: {text}",
+    "preview": "Chart with the notes",
+    "errors": {
+      "section_required": "Choose the section the note goes with.",
+      "bar_invalid": "The bar must be a whole number from 1.",
+      "text_required": "Write the note.",
+      "text_too_long": "A note is up to 280 characters.",
+      "unknown": "The note could not be saved. Try again."
+    }
   }
 }

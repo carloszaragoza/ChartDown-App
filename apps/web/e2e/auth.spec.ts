@@ -102,6 +102,8 @@ test("R-01.8 without a code, the waitlist stores the email", async ({ page }) =>
   const email = unique("fan");
   await page.goto("/auth/sign-up");
   await page.getByRole("link", { name: "Join the waitlist" }).click();
+  // The sign-up page has an Email field too: fill the waitlist's own.
+  await expect(page).toHaveURL(/\/auth\/waitlist/);
   await page.getByLabel("Email").fill(email.toUpperCase());
   await page.getByRole("button", { name: "Join the waitlist" }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("We’ll write to you");
