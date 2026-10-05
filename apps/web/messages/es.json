@@ -174,7 +174,11 @@
     "youtube": "Ver en YouTube",
     "fork": "Hacer mi copia",
     "forkHint": "Inicia sesión para hacer tu propia copia de esta versión.",
-    "history": "Historial"
+    "history": "Historial",
+    "basedOn": "Basada en la versión de {author}",
+    "basedOnUnknown": "Basada en otra versión",
+    "forkCc0": "Tu copia es pública y se comparte bajo CC0, como toda versión pública.",
+    "forkFailed": "No se pudo hacer la copia de esta versión. Inténtalo de nuevo."
   },
   "newVersion": {
     "title": "Nueva versión",

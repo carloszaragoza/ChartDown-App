@@ -174,7 +174,11 @@
     "youtube": "Watch on YouTube",
     "fork": "Fork",
     "forkHint": "Sign in to make your own copy of this version.",
-    "history": "History"
+    "history": "History",
+    "basedOn": "Based on the version by {author}",
+    "basedOnUnknown": "Based on another version",
+    "forkCc0": "Your copy is public and shared under CC0, like every public version.",
+    "forkFailed": "This version could not be forked. Try again."
   },
   "newVersion": {
     "title": "New version",

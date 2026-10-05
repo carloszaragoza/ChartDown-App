@@ -43,3 +43,9 @@
   color: var(--ink-muted);
   text-align: right;
 }
+.alert {
+  margin: 0;
+  font: var(--type-note);
+  font-weight: 600;
+  text-align: right;
+}
