@@ -4,6 +4,8 @@ import { Button } from "@chartdown/ui";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
+import { forgetSets } from "../../lib/offline/store";
 import { signOut } from "../auth/actions";
 import styles from "./AppBar.module.css";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -32,6 +34,11 @@ export function initials(name: string): string {
 export function AppBar({ account, personalSets }: AppBarProps) {
   const t = useTranslations("appBar");
   const pathname = usePathname() ?? "/";
+  // Signed out, this device forgets the sets downloaded to read offline (T-902), so nobody else
+  // using it reads someone's notes.
+  useEffect(() => {
+    if (!account) void forgetSets();
+  }, [account]);
   if (pathname.endsWith("/stand")) return null;
   // A visitor's home is the landing page, which has its own top bar (T-1201).
   if (!account && pathname === "/") return null;

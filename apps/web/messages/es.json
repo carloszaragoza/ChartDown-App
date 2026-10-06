@@ -586,7 +586,19 @@
   "offline": {
     "title": "Sin conexión",
     "body": "Esta página necesita conexión. Cuando vuelvas a estar en línea, inténtalo de nuevo.",
-    "retry": "Intentar de nuevo"
+    "retry": "Intentar de nuevo",
+    "download": "Descargar para sin conexión",
+    "downloadAgain": "Descargar de nuevo",
+    "downloading": "Descargando…",
+    "downloaded": "Descargado para sin conexión",
+    "downloadFailed": "No se pudo descargar el set. Inténtalo de nuevo.",
+    "openOffline": "Abrir sin conexión",
+    "readOnly": "Copia sin conexión en este dispositivo, solo lectura.",
+    "listTitle": "Sets descargados",
+    "noneDownloaded": "Aún no hay sets descargados en este dispositivo.",
+    "notDownloadedTitle": "No está en este dispositivo",
+    "notDownloaded": "Este set no está descargado en este dispositivo. Descárgalo desde el set cuando tengas conexión.",
+    "allDownloaded": "Ver los sets descargados"
   },
   "landing": {
     "nav": "Principal",

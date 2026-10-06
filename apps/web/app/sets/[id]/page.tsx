@@ -10,6 +10,7 @@ import { setWhen } from "../../../lib/sets/when";
 import { createClient } from "../../../lib/supabase/server";
 import { UUID } from "../../versions/[id]/load";
 import { updatePinned } from "../actions";
+import { OfflineButton } from "./OfflineButton";
 import styles from "../sets.module.css";
 
 type One<T> = T | T[] | null;
@@ -172,6 +173,7 @@ export default async function SetPage({
               {t("editSet")}
             </Link>
           )}
+          {items.length > 0 && <OfflineButton setId={set.id} />}
           {items.length > 0 && (
             <Link href={`/sets/${set.id}/songs/1/stand`} className="cd-button cd-button--primary">
               {t("startStand")}

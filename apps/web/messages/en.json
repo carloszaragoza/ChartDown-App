@@ -586,7 +586,19 @@
   "offline": {
     "title": "You are offline",
     "body": "This page needs a connection. When you are back online, try again.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "download": "Download for offline",
+    "downloadAgain": "Download again",
+    "downloading": "Downloading…",
+    "downloaded": "Downloaded for offline",
+    "downloadFailed": "The set could not be downloaded. Try again.",
+    "openOffline": "Open offline",
+    "readOnly": "Offline copy on this device, read-only.",
+    "listTitle": "Downloaded sets",
+    "noneDownloaded": "No sets are downloaded on this device yet.",
+    "notDownloadedTitle": "Not on this device",
+    "notDownloaded": "This set is not downloaded on this device. Download it from the set while you have a connection.",
+    "allDownloaded": "See the downloaded sets"
   },
   "landing": {
     "nav": "Main",
