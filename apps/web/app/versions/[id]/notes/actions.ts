@@ -6,8 +6,12 @@ import { createClient } from "../../../../lib/supabase/server";
 import { readNoteForm } from "../../../../lib/versions/notes";
 import { UUID } from "../load";
 
-const back = (versionId: string, bandId: string, extra: string) =>
-  `/versions/${versionId}/notes?band=${bandId}&${extra}`;
+const back = (versionId: string, bandId: string, extra: string, form?: FormData) => {
+  // Back to the section the person was working on (T-707).
+  const section = Number(form?.get("section"));
+  const at = Number.isInteger(section) && section >= 0 ? `&section=${section}` : "";
+  return `/versions/${versionId}/notes?band=${bandId}${at}&${extra}`;
+};
 
 /** Saves a note on the band's layer, creating the layer with its first note (R-03.5, R-06.6). */
 export async function saveNote(form: FormData): Promise<void> {
@@ -20,10 +24,12 @@ export async function saveNote(form: FormData): Promise<void> {
 
   const checked = readNoteForm(form);
   if ("error" in checked)
-    redirect(back(versionId, bandId, `error=${checked.error}${editing ? `&edit=${editing}` : ""}`));
+    redirect(
+      back(versionId, bandId, `error=${checked.error}${editing ? `&edit=${editing}` : ""}`, form),
+    );
   const supabase = await createClient();
   const { input } = checked;
-  const { error } = await supabase.rpc("save_layer_note", {
+  const { data: saved, error } = await supabase.rpc("save_layer_note", {
     band_id: bandId,
     version_id: versionId,
     note_id: editing,
@@ -33,8 +39,10 @@ export async function saveNote(form: FormData): Promise<void> {
     note_text: input.text,
     instrument_ids: input.instrumentIds,
   });
-  if (error) redirect(back(versionId, bandId, `error=unknown${editing ? `&edit=${editing}` : ""}`));
-  redirect(back(versionId, bandId, "saved=1"));
+  if (error)
+    redirect(back(versionId, bandId, `error=unknown${editing ? `&edit=${editing}` : ""}`, form));
+  // The page opens on the section where the note now is (T-707).
+  redirect(back(versionId, bandId, `saved=1&note=${String(saved)}`));
 }
 
 /** Deletes a note of the band's layer; only the band's MD may (R-03.5). */
@@ -49,7 +57,7 @@ export async function deleteNote(form: FormData): Promise<void> {
     .from("layer_notes")
     .delete({ count: "exact" })
     .eq("id", noteId);
-  redirect(back(versionId, bandId, error || count !== 1 ? "error=unknown" : "deleted=1"));
+  redirect(back(versionId, bandId, error || count !== 1 ? "error=unknown" : "deleted=1", form));
 }
 
 /**
@@ -77,5 +85,5 @@ export async function setAuthorNotes(form: FormData): Promise<void> {
     : await supabase
         .from("layers")
         .insert({ band_id: bandId, version_id: versionId, hide_author_notes: hide });
-  redirect(back(versionId, bandId, error ? "error=unknown" : hide ? "hidden=1" : "shown=1"));
+  redirect(back(versionId, bandId, error ? "error=unknown" : hide ? "hidden=1" : "shown=1", form));
 }

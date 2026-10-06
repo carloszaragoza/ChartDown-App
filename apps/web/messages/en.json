@@ -352,7 +352,16 @@
     "hideAuthor": "Hide for my band",
     "showAuthor": "Show to my band",
     "authorHidden": "The author's notes are hidden for your band.",
-    "authorShown": "The author's notes are shown to your band."
+    "authorShown": "The author's notes are shown to your band.",
+    "mdNotes": "Music director's notes",
+    "privateBand": "Your notes are private to {band}. The public version does not change.",
+    "privatePersonal": "Your notes are private to your personal space. The public version does not change.",
+    "hideAuthorShort": "Hide the author's notes",
+    "sections": "Sections",
+    "noteCount": "{count, plural, one {# note} other {# notes}}",
+    "sectionNotes": "Notes of {section}",
+    "addTo": "Add a note to {section}",
+    "textPlaceholder": "Short and direct, like “Out on the first pass.”"
   },
   "stand": {
     "tools": "Stand tools",

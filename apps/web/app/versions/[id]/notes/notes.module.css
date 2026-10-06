@@ -158,3 +158,176 @@
   color: var(--ink-muted);
   text-decoration: line-through;
 }
+/* As design/screens/06-md-layer-editor.html draws it (T-707). */
+.headerTools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: var(--type-meta);
+  cursor: pointer;
+}
+.box {
+  display: inline-grid;
+  place-items: center;
+  width: var(--space-6);
+  height: var(--space-6);
+  border: var(--stroke-hairline) solid var(--control-border);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+}
+.toggle[aria-pressed="true"] .box {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ink-inverse);
+}
+.toggle:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+/* The sections beside the chosen one on iPad landscape and desktop; stacked below that. */
+.layerPanes {
+  display: grid;
+  gap: var(--space-6);
+  align-items: start;
+}
+@media (min-width: 1024px) {
+  .layerPanes {
+    grid-template-columns: minmax(12rem, 1fr) minmax(0, 3fr);
+  }
+}
+.sectionList {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border: var(--stroke-hairline) solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+}
+.sectionLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font: var(--type-note);
+  text-decoration: none;
+}
+.sectionLink[aria-current="true"] {
+  background: var(--ink);
+  color: var(--ink-inverse);
+  font-weight: 600;
+}
+.noteCount {
+  font: var(--type-caption);
+}
+.sectionCard {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border: var(--stroke-hairline) solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+}
+.sectionTitle {
+  margin: 0;
+  font: var(--type-section-title);
+}
+.sectionLength {
+  font: var(--type-meta);
+  color: var(--ink-muted);
+}
+.noteList {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.noteRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.iconButton {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--target-min);
+  height: var(--target-min);
+  border: var(--stroke-hairline) solid var(--control-border);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+}
+.iconButton:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.rule {
+  width: 100%;
+  margin: var(--space-2) 0;
+  border: 0;
+  border-top: var(--stroke-hairline) solid var(--rule);
+}
+.noteForm {
+  display: grid;
+  gap: var(--space-4);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+/* Instruments are checkboxes drawn as chips; none chosen means everyone, so that chip fills. */
+.chip,
+.chipEveryone {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: 0 var(--space-4);
+  border: var(--stroke-hairline) solid var(--md);
+  border-radius: var(--radius-md);
+  color: var(--md);
+  font: var(--type-label);
+  cursor: pointer;
+}
+.chip input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.chip:has(input:checked),
+.chips:not(:has(input:checked)) .chipEveryone {
+  background: var(--md);
+  color: var(--ink-inverse);
+}
+.chip:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.chipEveryone {
+  cursor: default;
+}
+.fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 10rem;
+  gap: var(--space-3);
+}
