@@ -1,0 +1,14 @@
+{
+  "name": "chartdown-astryx-prototype",
+  "private": true,
+  "description": "Reference dependencies of the approved ChartDown App prototype. Pin these versions in apps/web.",
+  "dependencies": {
+    "@astryxdesign/core": "^0.6.5",
+    "@astryxdesign/theme-neutral": "^0.6.5",
+    "@astryxdesign/cli": "^0.6.5",
+    "@heroicons/react": "^2.2.0",
+    "@stylexjs/stylex": "^0.19.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  }
+}
