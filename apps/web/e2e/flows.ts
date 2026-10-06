@@ -12,6 +12,7 @@ export async function claim(page: Page, code: string, email: string) {
   await page.goto("/auth/sign-up");
   await page.getByLabel("Invite code").fill(code);
   await page.getByLabel("Email").fill(email);
+  await page.getByRole("checkbox", { name: /^I accept the Terms of Use/ }).check();
   await page.getByRole("button", { name: "Continue" }).click();
 }
 
