@@ -41,7 +41,7 @@ Every task is small, has its requirements (R-xx) and is done only when its tests
 | ID | Task | Requirements | Depends on | Size | Tests / evidence |
 |---|---|---|---|---|---|
 | T-101 | Port the playground parser to TypeScript with a typed syntax tree | R-00.3 | T-001 | M | The three examples from the Language repository parse with no warnings |
-| T-102 | Conformance suite: one case per rule of spec 0.4 | R-00.3, R-00.4 | T-101 | M | Every spec section has passing cases |
+| T-102 | Conformance suite: one case per rule of spec 0.4, and no CCLI field (decision 10) | R-00.3, R-00.4, R-00.5 | T-101 | M | Every spec section has passing cases |
 | T-103 | Numbers and letters, transposition and key changes (`@key`) | SPEC-00 | T-101 | S | Transposing G → A, and Em with `b3`, gives the right chords |
 | T-104 | Instruments: list injected from the Admin's catalog plus those declared in the header | R-00.1 | T-101 | S | An unknown instrument warns and is shown to everyone |
 | T-105 | MD layer format: notes anchored to section and bar; detect “unplaced” notes (documented as ChartDown 0.5) | R-00.2 | T-101 | M | Renaming a section flags its notes without losing them |
@@ -117,6 +117,7 @@ Bugs found while reviewing; each is fixed with a test that would have caught it.
 | ID | Problem | Found | Cause | Fix | Test |
 |---|---|---|---|---|---|
 | F-001 | In stand mode (version and set), on iPad in portrait and landscape, a large empty space separates the song map from the section to read, which is pushed to the bottom of the screen | October 5, 2026, on a real iPad | Adding the top bar (T-802, T-707) moved every part of the stand-mode grid down one row, so the row that takes the free space became the song map's instead of the current section's | The current section's row takes the free space again, and the section sits right under the song map. **Fixed** in PR #43 (T-802) | End-to-end at iPad portrait and landscape: the current section starts right below the song map |
+| F-002 | An invite code is used up even when creating the account fails, so the person cannot try again with it | October 6, 2026, the owner's first sign-up in production | The sign-up hook marked the claim and counted the use before the account existed; when Supabase Auth then undid the account (the confirmation email failed), the hook's changes stayed | The hook only checks the claim; the trigger that creates the profile marks the claim and counts the use, in the same transaction as the account | pgTAP: a claim checked by the hook but with no account created leaves the code and the claim usable |
 
 ## E8 · Per-instrument view (SPEC-06)
 
