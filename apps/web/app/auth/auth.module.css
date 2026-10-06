@@ -64,3 +64,17 @@
 .provider {
   width: 100%;
 }
+/* Accepting the terms at sign-up (T-1202): the whole line is a 44 px target. */
+.accept {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  font: var(--type-meta);
+}
+.accept input {
+  flex: none;
+  width: var(--space-6);
+  height: var(--space-6);
+  margin: 0;
+}

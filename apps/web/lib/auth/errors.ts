@@ -9,6 +9,7 @@ export const AUTH_ERRORS = [
   "invite_invalid",
   "invite_required",
   "email_invalid",
+  "terms_required",
   "unknown",
 ] as const;
 export type AuthError = (typeof AUTH_ERRORS)[number];

@@ -43,6 +43,23 @@ export default async function SignUpPage({ searchParams }: { searchParams: Searc
             spellCheck={false}
           />
           <Field label={t("email")} name="email" type="email" autoComplete="email" />
+          <label className={styles.accept}>
+            <input type="checkbox" name="terms" value="accepted" required />
+            <span>
+              {t.rich("signUp.acceptTerms", {
+                terms: (chunks) => (
+                  <Link href="/terms" target="_blank">
+                    {chunks}
+                  </Link>
+                ),
+                privacy: (chunks) => (
+                  <Link href="/privacy" target="_blank">
+                    {chunks}
+                  </Link>
+                ),
+              })}
+            </span>
+          </label>
           <Button type="submit" variant="primary">
             {t("signUp.continue")}
           </Button>

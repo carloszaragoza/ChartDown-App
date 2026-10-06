@@ -101,7 +101,8 @@
       "forEmail": "Creando una cuenta para {email}.",
       "differentCode": "Usar otro código",
       "noCode": "¿No tienes código?",
-      "providerHint": "Con Google, Microsoft o Apple, usa este mismo correo."
+      "providerHint": "Con Google, Microsoft o Apple, usa este mismo correo.",
+      "acceptTerms": "Acepto los <terms>Términos de uso</terms> y el <privacy>Aviso de privacidad</privacy>."
     },
     "forgot": {
       "title": "Restablecer tu contraseña",
@@ -130,7 +131,8 @@
       "unknown": "Algo salió mal. Inténtalo de nuevo.",
       "invite_invalid": "Ese código de invitación no es válido o ya se usó.",
       "invite_required": "Necesitas una invitación para crear una cuenta. Escribe tu código primero o únete a la lista de espera.",
-      "email_invalid": "Escribe un correo válido."
+      "email_invalid": "Escribe un correo válido.",
+      "terms_required": "Para crear una cuenta, acepta los Términos de uso y el Aviso de privacidad."
     },
     "providers": {
       "label": "Otras formas de entrar",
@@ -821,8 +823,16 @@
     },
     "footer": {
       "copyright": "© 2026 ChartDown · chartdown.app",
-      "language": "El lenguaje en GitHub"
+      "language": "El lenguaje en GitHub",
+      "terms": "Términos",
+      "privacy": "Privacidad"
     },
     "catalog": "Catálogo"
+  },
+  "legal": {
+    "terms": "Términos de uso",
+    "privacy": "Aviso de privacidad",
+    "home": "ChartDown, inicio",
+    "other": "Lee también: {name}"
   }
 }

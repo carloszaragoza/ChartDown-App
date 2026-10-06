@@ -8,6 +8,7 @@ import { authError } from "../../lib/auth/errors";
 import { isProvider } from "../../lib/auth/providers";
 import { safeNext } from "../../lib/auth/redirect";
 import { SIGNUP_EMAIL_COOKIE } from "../../lib/auth/signup";
+import { TERMS_VERSION } from "../../lib/legal/texts";
 import { createClient } from "../../lib/supabase/server";
 import { profileLocale, rememberLocale } from "../../i18n/remember";
 
@@ -33,8 +34,14 @@ function ensureEnabled() {
 export async function claimInvite(form: FormData): Promise<void> {
   ensureEnabled();
   const email = text(form, "email").toLowerCase();
+  // Creating an account means accepting the Terms of Use and the Privacy Notice (T-1202).
+  if (form.get("terms") !== "accepted") redirect("/auth/sign-up?error=terms_required");
   const supabase = await createClient();
-  const { data } = await supabase.rpc("claim_invite", { code: text(form, "code"), email });
+  const { data } = await supabase.rpc("claim_invite", {
+    code: text(form, "code"),
+    email,
+    terms_version: TERMS_VERSION,
+  });
   if (data !== "ok") redirect("/auth/sign-up?error=invite_invalid");
   const secure = (await origin()).startsWith("https://");
   (await cookies()).set(SIGNUP_EMAIL_COOKIE, email, {

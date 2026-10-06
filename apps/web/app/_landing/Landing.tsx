@@ -216,6 +216,12 @@ export function Landing({
           <a href={LANGUAGE_URL} className={styles.link}>
             {t("footer.language")}
           </a>
+          <Link href="/terms" className={styles.link}>
+            {t("footer.terms")}
+          </Link>
+          <Link href="/privacy" className={styles.link}>
+            {t("footer.privacy")}
+          </Link>
         </div>
       </footer>
     </div>
