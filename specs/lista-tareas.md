@@ -41,7 +41,7 @@ Every task is small, has its requirements (R-xx) and is done only when its tests
 | ID | Task | Requirements | Depends on | Size | Tests / evidence |
 |---|---|---|---|---|---|
 | T-101 | Port the playground parser to TypeScript with a typed syntax tree | R-00.3 | T-001 | M | The three examples from the Language repository parse with no warnings |
-| T-102 | Conformance suite: one case per rule of spec 0.4 | R-00.3, R-00.4 | T-101 | M | Every spec section has passing cases |
+| T-102 | Conformance suite: one case per rule of spec 0.4, and no CCLI field (decision 10) | R-00.3, R-00.4, R-00.5 | T-101 | M | Every spec section has passing cases |
 | T-103 | Numbers and letters, transposition and key changes (`@key`) | SPEC-00 | T-101 | S | Transposing G → A, and Em with `b3`, gives the right chords |
 | T-104 | Instruments: list injected from the Admin's catalog plus those declared in the header | R-00.1 | T-101 | S | An unknown instrument warns and is shown to everyone |
 | T-105 | MD layer format: notes anchored to section and bar; detect “unplaced” notes (documented as ChartDown 0.5) | R-00.2 | T-101 | M | Renaming a section flags its notes without losing them |
