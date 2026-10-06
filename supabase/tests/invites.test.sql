@@ -2,7 +2,7 @@
 -- Run with: supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(27);
+select plan(29);
 
 create function pg_temp.login(person uuid) returns void language plpgsql as $$
 begin
@@ -24,6 +24,18 @@ create function pg_temp.creating(email text, provider text default 'email') retu
   select jsonb_build_object('user', jsonb_build_object(
     'id', gen_random_uuid(), 'email', email, 'app_metadata', jsonb_build_object('provider', provider)));
 $$;
+-- What Supabase Auth does: runs the hook, then creates the account only if the hook allows it.
+create function pg_temp.create_account(email text, provider text default 'email') returns jsonb
+language plpgsql as $$
+declare
+  event jsonb := pg_temp.creating(email, provider);
+  result jsonb := private.hook_before_user_created(event);
+begin
+  if result = '{}'::jsonb then
+    insert into auth.users (id, email) values ((event -> 'user' ->> 'id')::uuid, lower(email));
+  end if;
+  return result;
+end $$;
 create function pg_temp.refused(result jsonb) returns boolean language sql as $$
   select result -> 'error' ->> 'message' = 'invite_required' and (result -> 'error' ->> 'http_code')::int = 403;
 $$;
@@ -59,24 +71,31 @@ select is(public.claim_invite(' abcd efgh ', ' Ana@Example.test '), 'ok', 'R-01.
 select is((select email from public.invite_claims order by created_at desc limit 1), 'ana@example.test', 'R-01.7 the claim keeps the email, ignoring case');
 
 -- The hook lets the claimed email in, once.
-select is(private.hook_before_user_created(pg_temp.creating('ANA@example.test')), '{}'::jsonb, 'R-01.7 a valid code creates the account');
+-- F-002: the hook allows the account, but creating it fails (say, the email cannot be sent).
+select is(private.hook_before_user_created(pg_temp.creating('ANA@example.test')), '{}'::jsonb, 'R-01.7 the hook allows a valid claim');
+select is(
+  (select uses from public.invite_codes where code = 'ABCD-EFGH') * 10
+    + (select count(*)::int from public.invite_claims where email = 'ana@example.test' and used_at is null),
+  1, 'F-002 a sign-up that fails after the hook leaves the code and the claim usable'
+);
+select is(pg_temp.create_account('ANA@example.test'), '{}'::jsonb, 'R-01.7 a valid code creates the account');
 select is((select uses from public.invite_codes where code = 'ABCD-EFGH'), 1, 'R-01.7 creating the account uses up the code');
 select is((select count(*)::int from public.invite_claims where used_at is not null and user_id is not null), 1, 'R-01.7 the claim records the account it created');
 select is(public.claim_invite('ABCD-EFGH', 'ben@example.test'), 'invalid', 'R-01.7 a used single-use code cannot be claimed again');
-select ok(pg_temp.refused(private.hook_before_user_created(pg_temp.creating('ana@example.test'))), 'R-01.7 a used claim does not create a second account');
+select ok(pg_temp.refused(pg_temp.create_account('ana@example.test')), 'R-01.7 a used claim does not create a second account');
 
 -- A band code lets several people in, up to its limit, by email or Google.
 select is(public.claim_invite('BAND-2222', 'carl@example.test'), 'ok', 'R-01.7 a band code is claimed by a member');
 select is(public.claim_invite('BAND-2222', 'dora@example.test'), 'ok', 'R-01.7 and by another');
-select is(private.hook_before_user_created(pg_temp.creating('carl@example.test', 'google')), '{}'::jsonb, 'R-01.7 a band member joins with Google');
-select is(private.hook_before_user_created(pg_temp.creating('dora@example.test')), '{}'::jsonb, 'R-01.7 another band member joins');
+select is(pg_temp.create_account('carl@example.test', 'google'), '{}'::jsonb, 'R-01.7 a band member joins with Google');
+select is(pg_temp.create_account('dora@example.test'), '{}'::jsonb, 'R-01.7 another band member joins');
 select is(public.claim_invite('BAND-2222', 'eve@example.test'), 'invalid', 'R-01.7 a band code stops at its limit');
 
 -- A claim lasts 30 minutes; the Admin can revoke a code in between.
 insert into public.invite_codes (code) values ('LATE-4444');
 select is(public.claim_invite('LATE-4444', 'late@example.test'), 'ok', 'a claim is recorded');
 update public.invite_claims set expires_at = now() - interval '1 minute' where email = 'late@example.test';
-select ok(pg_temp.refused(private.hook_before_user_created(pg_temp.creating('late@example.test'))), 'R-01.7 an expired claim creates no account');
+select ok(pg_temp.refused(pg_temp.create_account('late@example.test')), 'R-01.7 an expired claim creates no account');
 
 -- The waitlist (R-01.8).
 do $$ begin perform pg_temp.visitor(); end $$;
