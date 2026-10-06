@@ -1,5 +1,5 @@
 import { chordFormatter, parse } from "chartdown";
-import { Button, Icon, Section, type IconName } from "@chartdown/ui";
+import { Button, ChartDownLogo, Icon, Section, type IconName } from "@chartdown/ui";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useChartLabels } from "../_components/chartLabels";
@@ -50,7 +50,7 @@ export function Landing({
     <div className={styles.landing}>
       <header className={styles.bar}>
         <Link href="/" className={styles.brand}>
-          ChartDown
+          <ChartDownLogo size={36} />
         </Link>
         <nav aria-label={t("nav")} className={styles.nav}>
           <a href="#how" className={styles.navLink}>

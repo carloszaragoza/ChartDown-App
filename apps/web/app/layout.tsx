@@ -17,7 +17,16 @@ export const metadata: Metadata = {
   title: "ChartDown App",
   // Installed on the iPad home screen (T-901): its icon and full screen.
   appleWebApp: { capable: true, title: "ChartDown", statusBarStyle: "default" },
-  icons: { apple: "/icons/apple-touch-icon.png" },
+  // The logo kit's icons (Design Handoff 7): iPhone, iPad Pro and iPad home screens.
+  icons: {
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180" },
+      { url: "/icons/ipad-pro-167.png", sizes: "167x167" },
+      { url: "/icons/ipad-152.png", sizes: "152x152" },
+    ],
+  },
+  // Link previews use app/opengraph-image.png, from the logo kit.
+  metadataBase: new URL("https://www.chartdown.app"),
 };
 
 export const viewport: Viewport = {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@chartdown/ui";
+import { Button, ChartDownLogo } from "@chartdown/ui";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -84,7 +84,7 @@ export function AppBar({ account, personalSets, unread, admin }: AppBarProps) {
   return (
     <header className={styles.bar}>
       <Link href="/" className={styles.brand} aria-label={t("home")}>
-        ChartDown
+        <ChartDownLogo size={28} />
       </Link>
       <nav aria-label={t("main")} className={styles.nav}>
         {links.map((link) => (

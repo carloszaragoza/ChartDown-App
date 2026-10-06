@@ -1,27 +1,50 @@
-# ChartDown logo
+# ChartDown logo kit
 
-The ChartDown mark: one circle split by the stem of the D. The left half is the C, the right half is the D, and two red dots beside the stem turn it into a repeat sign.
+Final logo: concept 3C, One bar (rounded). Two bar lines and four rhythm slashes; the first beat, in red pencil, is the MD's cue.
+Start with `guide.pdf` (one page: clear space, minimum sizes, colors, do and don't).
 
-## Files
+## svg/ and png/  (svg = master, png = transparent; vector PDFs are in the original kit)
+- `chartdown-horizontal-*`      symbol + name (default)
+- `chartdown-stacked-*`         symbol above name
+- `chartdown-symbol-*`          symbol alone
+- `chartdown-symbol-small-*`    two-beat symbol for 24 px and below
+- `chartdown-app-horizontal-*`, `chartdown-app-stacked-*`   with "App", secondary to the name
 
-| Folder | Files | Use |
+Color versions: `color-on-light`, `color-on-dark`, `black`, `white`. All text is converted to outlines.
+
+## icons/  (square, full bleed, no rounded corners; the system rounds them)
+- `app-icon-1024.png` (App Store / master), `app-icon.svg`
+- `pwa-512.png`, `pwa-192.png`, `pwa-maskable-512.png` (symbol inside the central 80 %)
+- `apple-touch-icon-180.png`, `ipad-pro-167.png`, `ipad-152.png`
+
+## favicon/
+- `favicon.svg` (follows the browser's light or dark theme), `favicon.ico` (16, 32, 48), `favicon-16/32/48.png`
+
+```html
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon-180.png">
+```
+
+## social/
+- `avatar-500.png` (GitHub organization and social; works as a circle)
+- `open-graph-1200x630.png` (link previews)
+- `email-header-600x150.png`
+
+## In the app
+`packages/ui` `ChartDownLogo`: symbol, horizontal or stacked; `app` and `mono` options; colors from `--chartdown-ink` and `--chartdown-cue`.
+
+```css
+:root { --chartdown-ink: #16212C; --chartdown-cue: #B8322A; }
+[data-theme="dark"] { --chartdown-ink: #E6EDF3; --chartdown-cue: #FF8478; }
+```
+
+## Colors (Papel y tinta)
+| Role | Light | Dark |
 |---|---|---|
-| `svg/` | `chartdown-mark` (light, dark, mono) | The symbol alone |
-| `svg/` | `chartdown-logo`, `chartdown-app-logo` (light, dark) | Symbol with the name; text converted to outlines |
-| `svg/` | `chartdown-app-icon` (light, dark, maskable) | Square app icon, full bleed: the system rounds the corners |
-| `svg/` | `favicon.svg` | Browser tab icon; switches to light ink in dark mode |
-| `png/` | Logos at 4x, mark at 512 px | Docs, README files, social |
-| `icons/` | `app-icon-1024` … `152`, `apple-touch-icon`, `favicon` 16/32/48 and `.ico` | App stores, iPad home screen, PWA, browsers |
+| Ink | #16212C | #E6EDF3 |
+| Red pencil (cue, first slash only) | #B8322A | #FF8478 |
+| Paper | #FBFCFD | #17212B |
 
-## Colors
-
-- Light: ink `#16212C`, dots `#B8322A`.
-- Dark: ink `#E6EDF3`, dots `#FF8478`, on `#0F161D`.
-- One color: `chartdown-mark-mono.svg` uses `currentColor`, so it takes the color of the surrounding text.
-
-## Rules
-
-- Keep clear space around the logo of at least half the symbol's height.
-- Minimum size: 16 px for the symbol, 96 px wide for the full logo.
-- Never stretch, rotate, outline or add shadows. Never change the dots to another color than the red pencil (or the single color in the mono version).
-- The name uses Barlow Condensed (SIL Open Font License), already converted to outlines in the SVG files.
+Fonts: Barlow Condensed (name) and Source Sans 3 (interface), both SIL Open Font License.
+The logo is original work; all rights belong to ChartDown.
