@@ -618,5 +618,75 @@
       "lineup": "{name} now plays: {to}.",
       "sitsOut": "not playing in this set"
     }
+  },
+  "landing": {
+    "nav": "Main",
+    "signIn": "Sign in",
+    "requestInvite": "Request an invite",
+    "hero": {
+      "title": "One song for the whole band. Cues for every player.",
+      "lead": "ChartDown App turns plain-text Nashville Number charts into band charts on iPad and desktop, with music director notes for each instrument.",
+      "try": "Try the notation",
+      "free": "Free during the invite-only beta.",
+      "example": "Example chart",
+      "viewing": "Viewing as {instrument}"
+    },
+    "how": {
+      "title": "How it works",
+      "write": {
+        "title": "Write it in ChartDown",
+        "text": "Plain text that reads like a chart: sections, bars, numbers, and notes for each instrument."
+      },
+      "set": {
+        "title": "Build your set",
+        "text": "Pick the versions you play, set the key for each song and assign every musician an instrument."
+      },
+      "play": {
+        "title": "Play from your part",
+        "text": "Everyone sees the same song. Each player sees the cues meant for them."
+      }
+    },
+    "stage": {
+      "title": "Built for the stage",
+      "saved": {
+        "title": "Every change saved",
+        "text": "Go back to any revision. Sets stay on the version you chose."
+      },
+      "offline": {
+        "title": "Offline sets",
+        "text": "Download a set before you leave. Every chart opens in airplane mode."
+      },
+      "stand": {
+        "title": "Stand mode",
+        "text": "Full screen, big numbers, one tap to the next section."
+      },
+      "part": {
+        "title": "Your part only",
+        "text": "Each musician sees the music director's notes for their own instrument."
+      }
+    },
+    "language": {
+      "nav": "The language",
+      "title": "ChartDown is an open language",
+      "text": "The notation is public domain (CC0) and lives on GitHub. Write your charts once, keep them as plain text forever, and use them in any app that supports ChartDown.",
+      "spec": "Read the spec on GitHub",
+      "example": "The same chorus, written in ChartDown"
+    },
+    "invite": {
+      "title": "Join the beta",
+      "text": "ChartDown App is invite-only while we test it with real bands.",
+      "email": "Email",
+      "placeholder": "you@example.com",
+      "submit": "Join the waitlist",
+      "sent": "Thanks. If this email is not on the list yet, it is now; we will write when there is a place for you.",
+      "invalid": "Enter a valid email address.",
+      "unavailable": "The waitlist is not available yet. Come back soon.",
+      "haveCode": "I have an invite code"
+    },
+    "footer": {
+      "copyright": "© 2026 ChartDown · chartdown.app",
+      "language": "The language on GitHub"
+    },
+    "catalog": "Catalog"
   }
 }
