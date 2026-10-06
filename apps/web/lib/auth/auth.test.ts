@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { authEnabled } from "./enabled";
+import { authEnabled, waitlistEnabled } from "./enabled";
 import { authError } from "./errors";
 import { safeNext } from "./redirect";
 
@@ -30,6 +30,12 @@ describe("R-01.1 sign-in safety", () => {
     expect(authEnabled({ ...configured, VERCEL_ENV: "preview" })).toBe(true);
     expect(authEnabled({ ...configured })).toBe(true);
     expect(authEnabled({ VERCEL_ENV: "preview" })).toBe(false);
+  });
+
+  it("R-01.8 the waitlist works in production too, wherever the database is configured", () => {
+    expect(waitlistEnabled({ ...configured, VERCEL_ENV: "production" })).toBe(true);
+    expect(waitlistEnabled({ ...configured })).toBe(true);
+    expect(waitlistEnabled({ VERCEL_ENV: "production" })).toBe(false);
   });
 
   it("R-01.1 sign-in errors map to messages the interface explains", () => {

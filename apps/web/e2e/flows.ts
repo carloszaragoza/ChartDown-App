@@ -43,7 +43,7 @@ export async function signOut(page: Page) {
 
 /** Opens the account menu of the top bar, where the profile and sign out are (T-706). */
 export async function openAccount(page: Page) {
-  await page.getByLabel(/^Account of /).click();
+  await page.getByLabel(/^(Account of|Cuenta de) /).click();
 }
 
 /** How far below the song map the current section starts, in stand mode (F-001). */
