@@ -40,8 +40,11 @@ select results_eq(
 );
 
 -- With a provider, the same: the claim comes first.
-select public.claim_invite('TRMS-2222', 'ben@example.test', '2026-10-beta');
-select pg_temp.create_account('00000000-0000-0000-0000-0000000004b1', 'ben@example.test', 'google');
+-- Inside a block, so their own answers ("ok") are not read as test results.
+do $$ begin
+  perform public.claim_invite('TRMS-2222', 'ben@example.test', '2026-10-beta');
+  perform pg_temp.create_account('00000000-0000-0000-0000-0000000004b1', 'ben@example.test', 'google');
+end $$;
 select is(
   (select terms_version from public.profiles where id = '00000000-0000-0000-0000-0000000004b1'), '2026-10-beta',
   'T-1202 an account made with Google records the terms too'
