@@ -77,32 +77,9 @@
   font: var(--type-meta);
   color: var(--ink-muted);
 }
-.turn {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: var(--space-4);
-}
-/* Big targets, well above 44 px, for a quick tap between sections. */
-.page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(var(--target-min) * 1.5);
-  border: var(--stroke-hairline) solid var(--control-border);
-  border-radius: var(--radius-md);
-  color: var(--ink);
-  font: var(--type-label);
-  text-decoration: none;
-}
-.page:focus-visible,
 .tool:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
-}
-.position {
-  font: var(--type-meta);
-  color: var(--ink-muted);
 }
 /* In a set (T-802): the set's bar on top, with View as and Previous and Next. */
 .setBar {
@@ -161,7 +138,4 @@
 .viewAsList [aria-current="true"] {
   border-color: var(--ink);
   font-weight: 600;
-}
-.hidden {
-  display: none;
 }
