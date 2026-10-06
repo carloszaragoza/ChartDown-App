@@ -114,7 +114,8 @@ Tool versions and prices change; confirm them when starting.
 | notifications | user, type, detail, read at | SPEC-09; each person reads only their own and marks them read; created only by the server process |
 | notification_prefs | user, type, channel (in-app, email, WhatsApp), active | R-09.5; no row means the notice is on; each person manages their own |
 | event_outbox | type, actor, detail, created at, processed at | Source of every notice; written only by database triggers, closed to the API |
-| reports | version, reporter, reason, status | R-07.2 |
+| reports | version, reporter, reason (full lyrics or other), note (at most 500 characters), status (open, hidden, dismissed), created at, resolved by, resolved at | R-07.2, T-1103: a signed-in person reports a public version once while the report is open; only admins read reports and resolve them, through functions |
+| admin_log | admin, action, what (table and id), detail, at | Section 8, T-1101: written only by database triggers when an admin changes the instrument catalog, invite codes or a version's visibility to the community, so no path can skip it; admins read it; never edited or deleted |
 
 Rules that tie rows to the same band or the same version (a lineup member of the set's band, a pinned revision of that version) are composite foreign keys, not triggers. Every table has row-level security from its first migration, closed until its policies exist (section 8). Each migration in `supabase/migrations/` has a matching rollback in `supabase/rollbacks/`, and CI checks that both apply cleanly.
 
@@ -183,13 +184,13 @@ The second barrier is row-level security: even if someone queries the database d
 ## 7. Notices
 
 1. Every important change writes an event, from a database trigger so no path can skip it. Events record facts with what changed: `set_lineup_added` and `set_lineup_removed` (a person and an instrument in a set's lineup), `set_temp_md_appointed`, `set_key_changed` and `set_order_changed` (old and new value), `layer_note_added` (with its instruments) and `revision_added`.
-2. When the change is saved, at the end of its transaction, each event becomes notices for the people affected, according to their preferences, with the detail of the change (R-09.3); the event is then marked processed (T-1001). There is no scheduled job, so a notice arrives instantly; the log stays for the email of phase 2. Who receives what: a musician added to or removed from a set's lineup (the set's name, date and time, and the instrument), and the member appointed temporary MD (until when), R-09.1; the set's members when a song's key changes (the song, the old key and the new one) or the order changes (once per change, not per song moved), and whoever plays a new note's instruments in the band, or everyone in it for a general note (the song, section, bar and text), R-09.2; the MD of each band whose sets use a version that gets a new revision from its author (which revision each set still plays), R-09.4. Nobody is notified of their own change. A notice keeps what it says at the time, so later renames do not change it. A notice the person turned off is not created (R-09.5, T-1003).
+2. When the change is saved, at the end of its transaction, each event becomes notices for the people affected, according to their preferences, with the detail of the change (R-09.3); the event is then marked processed (T-1001). There is no scheduled job, so a notice arrives instantly; the log stays for the email of phase 2. Who receives what: a musician added to or removed from a set's lineup (the set's name, date and time, and the instrument), and the member appointed temporary MD (until when), R-09.1; the set's members when a song's key changes (the song, the old key and the new one) or the order changes (once per change, not per song moved), and whoever plays a new note's instruments in the band, or everyone in it for a general note (the song, section, bar and text), R-09.2; the MD of each band whose sets use a version that gets a new revision from its author (which revision each set still plays), R-09.4. The owner of a version an admin hides, with the version and the reason (R-07.2, T-1103). Nobody is notified of their own change. A notice keeps what it says at the time, so later renames do not change it. A notice the person turned off is not created (R-09.5, T-1003).
 3. In the MVP they arrive in-app in realtime, through Supabase Realtime on `notifications`, which respects row-level security (T-1002); the end-to-end tests start the Realtime service too. Phase 2 adds email; push notifications for installed apps on iPad are an option in the same phase. Phase 3 adds WhatsApp.
 
 ## 8. Security, privacy and rights
 
 - Row-level security on every table, closed by default.
-- Every Admin action is logged.
+- Every Admin action is logged in `admin_log`, by database triggers on what the Admin changes (instruments, invite codes, hiding and showing versions), never by the app alone (T-1101).
 - Rate limits on server functions.
 - Daily database backups.
 - **Lyric landmarks:** the parser warns when a quoted landmark is longer than 8 words, enforcing constitution principle 6 without relying only on reports.
@@ -201,10 +202,12 @@ Every table has policies; nothing is open by default. Helper functions live in a
 
 | Data | Read | Write |
 |---|---|---|
+| Reports | Admins; nobody else, not even the reporter | Create: a signed-in person, as themselves, on a public version they do not own; resolve: admins, through `hide_version` and `dismiss_report` (T-1103) |
+| Admin log | Admins | Nobody through the API: only triggers write it |
 | Profiles | Yourself, people who share a band with you, admins | Your own name and language; nobody changes their own platform role |
 | Instruments | Everyone, visitors included | Admins |
 | Songs | Everyone (a song is the work: title and artists) | Create: any user; edit: admins |
-| Versions | Public active or frozen: everyone (R-01.4). Hidden: owner and admins (R-07.2). Private: owner, admins and members of bands that use it in a set or a layer (decision 9) | Create: as yourself, public and active (R-02.3); edit: the owner, revision and source only, while active (R-02.6, R-02.4); visibility, status and owner change only through their flows (T-504, T-1103); never deleted |
+| Versions | Public active or frozen: everyone (R-01.4). Hidden: owner and admins (R-07.2). Private: owner, admins and members of bands that use it in a set or a layer (decision 9) | Create: as yourself, public and active (R-02.3); edit: the owner, revision and source only, while active (R-02.6, R-02.4); visibility, status and owner change only through their flows (T-504, T-1103: an admin hides an active public version, which closes its open reports, and shows it again); never deleted |
 | Revisions | Whoever can read the version | Added by the version's owner while it is active; never edited or deleted (R-02.8) |
 | Bands and members | Members of the band | The MD renames the band, removes musicians and sets default instruments; a musician can leave (R-04.4). Creating, inviting and accepting go through functions (T-701) |
 | Band invitations | The band's MD; the invitee, matched by the email they sign in with | The MD invites and cancels; only the invitee answers, through a function (T-701) |

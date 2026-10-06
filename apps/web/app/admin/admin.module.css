@@ -1,0 +1,103 @@
+/* The Admin's pages (Design Handoff 4, Administration): paper card lists on the ground. */
+.page {
+  display: grid;
+  gap: var(--space-6);
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: var(--space-10) var(--space-4);
+}
+.title {
+  margin: 0;
+  font: var(--type-song-title);
+}
+.label {
+  margin: 0;
+  font: var(--type-label);
+}
+.hint {
+  margin: 0;
+  font: var(--type-meta);
+  color: var(--ink-muted);
+}
+.message,
+.alert {
+  margin: 0;
+  font: var(--type-note);
+}
+.alert {
+  font-weight: 600;
+}
+.items {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  border: var(--stroke-hairline) solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  list-style: none;
+}
+.item {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+.item + .item {
+  border-top: var(--stroke-hairline) solid var(--rule);
+}
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  color: var(--dynamic);
+  font: var(--type-label);
+}
+.link:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.form {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: var(--stroke-hairline) solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+}
+.fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--space-3);
+  align-items: end;
+}
+.field {
+  display: grid;
+  gap: var(--space-1);
+  font: var(--type-label);
+}
+.input,
+.select {
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border: var(--stroke-hairline) solid var(--control-border);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--type-note);
+}
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+}
+.name {
+  font: var(--type-section-title);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.inactive {
+  color: var(--ink-muted);
+}

@@ -17,6 +17,8 @@ export interface AppBarProps {
   personalSets: string | null;
   /** How many of their notices are unread (T-1002). */
   unread: number;
+  /** Whether they are an admin, who gets the Administration link (E11). */
+  admin: boolean;
 }
 
 /** The initials of a name, for the account button: “Alex Rivera” → AR. */
@@ -33,7 +35,7 @@ export function initials(name: string): string {
  * The app's top bar (Handoff 4, `design/screens/01-set.html`): ChartDown, Sets, Catalog, Bands,
  * Personal space, the notices, the language and the account. Stand mode has none, since it fills the screen.
  */
-export function AppBar({ account, personalSets, unread }: AppBarProps) {
+export function AppBar({ account, personalSets, unread, admin }: AppBarProps) {
   const t = useTranslations("appBar");
   const pathname = usePathname() ?? "/";
   // Signed out, this device forgets the sets downloaded to read offline (T-902), so nobody else
@@ -72,6 +74,9 @@ export function AppBar({ account, personalSets, unread }: AppBarProps) {
                 active: isPersonal(pathname, personalSets),
               },
             ]
+          : []),
+        ...(admin
+          ? [{ href: "/admin", label: t("admin"), active: pathname.startsWith("/admin") }]
           : []),
       ]
     : [{ href: "/catalog", label: t("catalog"), active: pathname.startsWith("/catalog") }];

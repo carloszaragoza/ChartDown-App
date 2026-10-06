@@ -32,9 +32,10 @@ async function barProps(): Promise<(AppBarProps & { userId: string | null }) | n
   if (!authEnabled()) return null;
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
-  if (!data.user) return { account: null, personalSets: null, unread: 0, userId: null };
+  if (!data.user)
+    return { account: null, personalSets: null, unread: 0, admin: false, userId: null };
   const [{ data: profile }, { data: personal }, { count }] = await Promise.all([
-    supabase.from("profiles").select("name").eq("id", data.user.id).maybeSingle(),
+    supabase.from("profiles").select("name, role").eq("id", data.user.id).maybeSingle(),
     supabase.from("bands").select("id").eq("personal_owner_id", data.user.id).maybeSingle(),
     supabase
       .from("notifications")
@@ -46,6 +47,7 @@ async function barProps(): Promise<(AppBarProps & { userId: string | null }) | n
     account: { name: profile?.name ?? data.user.email ?? "" },
     personalSets: personal ? `/bands/${personal.id}/sets` : null,
     unread: count ?? 0,
+    admin: profile?.role === "admin",
     userId: data.user.id,
   };
 }
@@ -58,7 +60,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <NextIntlClientProvider>
           <ServiceWorker />
           {bar && (
-            <AppBar account={bar.account} personalSets={bar.personalSets} unread={bar.unread} />
+            <AppBar
+              account={bar.account}
+              personalSets={bar.personalSets}
+              unread={bar.unread}
+              admin={bar.admin}
+            />
           )}
           {bar?.account && <OfflineSync />}
           {bar?.userId && <NoticesLive userId={bar.userId} />}
