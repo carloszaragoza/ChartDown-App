@@ -16,7 +16,7 @@ Both Supabase projects are on the free plan. Free projects pause after a week wi
 
 - Project `chart-down-app`, connected to `github.com/carloszaragoza/ChartDown-App`.
 - Root directory `apps/web`, framework Next.js, region `iad1`.
-- Build command `pnpm turbo run build` (`apps/web/vercel.json`), so workspace packages such as `@chartdown/core` are built first.
+- Build command `pnpm turbo run build` (`apps/web/vercel.json`), so workspace packages such as `chartdown` are built first.
 - Environment variables: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, set per target to the Supabase project above. Only the publishable key; the secret key is added when a task needs it, as a sensitive variable.
 
 ## Domain and DNS (Cloudflare)

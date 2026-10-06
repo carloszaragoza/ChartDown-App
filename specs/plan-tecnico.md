@@ -73,7 +73,7 @@ flowchart LR
 
 | Piece | Choice | Why |
 |---|---|---|
-| Notation | `@chartdown/core` package in TypeScript: parser, JSON output, numbers and letters, MD layer | Evolves the playground and runs the same in the browser and on the server (SPEC-00) |
+| Notation | `chartdown` package in TypeScript: parser, JSON output, numbers and letters, MD layer | Evolves the playground and runs the same in the browser and on the server (SPEC-00) |
 | UI | Next.js (React) with TypeScript, as an installable web app | Fast, discoverable public catalog for visitors (R-01.4); one codebase for desktop and iPad |
 | Languages | next-intl or i18next, English and Spanish strings | R-01.5. The language is stored in the profile: signing in applies it, saving the profile or using the language switcher while signed in updates it, and visitors keep it in a cookie |
 | Offline | Service worker (Workbox) + IndexedDB | SPEC-08 |
@@ -165,9 +165,9 @@ This is the heart of the app (SPEC-06), so it has two barriers.
 1. A musician opens a song from their set.
 2. A server function checks they are a member of the band and looks up their instruments in that set's lineup.
 3. It returns the pinned revision's ChartDown text, the set's key and **only** the layer notes that are general or for their instruments. The MD and that set's temporary MD receive all of them.
-4. The device renders it with `@chartdown/core`.
+4. The device renders it with `chartdown`.
 
-In detail (T-801): the server function is `set_song(set, position)`, run with the person's own permissions so row-level security still applies. In one answer, which offline download (T-902) can store as it is, it returns the pinned revision's text and number, the set's key, the person's role in the set (MD, temporary MD or musician), their instruments in this set (the set's lineup, or the band's defaults while the set has none of its own), whether the band hides the author's notes, and the layer notes with their section, occurrence, bar, instruments and anchored revision: for a musician only the general ones and those for their instruments in this set, which narrows the policy (any instrument they play in the band) to this set; a musician who does not play in it gets the general ones only. The page places them with `@chartdown/core`, marks the ones for this musician, and lists unplaced notes apart. The author's notes, written in the chart, are filtered with the same rule on screen only, and are hidden if the band hides them. “View as” for the MD comes with T-802.
+In detail (T-801): the server function is `set_song(set, position)`, run with the person's own permissions so row-level security still applies. In one answer, which offline download (T-902) can store as it is, it returns the pinned revision's text and number, the set's key, the person's role in the set (MD, temporary MD or musician), their instruments in this set (the set's lineup, or the band's defaults while the set has none of its own), whether the band hides the author's notes, and the layer notes with their section, occurrence, bar, instruments and anchored revision: for a musician only the general ones and those for their instruments in this set, which narrows the policy (any instrument they play in the band) to this set; a musician who does not play in it gets the general ones only. The page places them with `chartdown`, marks the ones for this musician, and lists unplaced notes apart. The author's notes, written in the chart, are filtered with the same rule on screen only, and are hidden if the band hides them. “View as” for the MD comes with T-802.
 
 The second barrier is row-level security: even if someone queries the database directly, Postgres never returns notes for other instruments or other bands. Notes the author left inside a public version are already public, so there the filter is only presentational.
 
@@ -235,7 +235,7 @@ ChartDown-App/
 
 This is the basis for the task list.
 
-1. **Core:** turn the playground into `@chartdown/core`, JSON output, layer format (R-00.1 to R-00.5).
+1. **Core:** turn the playground into `chartdown`, JSON output, layer format (R-00.1 to R-00.5).
 2. **Database:** schema, row-level security and its tests.
 3. **Accounts:** auth, profiles, English and Spanish, invite codes (SPEC-01).
 4. **Catalog:** songs, versions, revisions, fork, make private (SPEC-02).
@@ -291,7 +291,7 @@ One person can link several sign-in methods to a single account. Roles (Admin, M
 
 ### 12.2 Public API and MCP server
 
-- **Public API:** Node with TypeScript (not FastAPI), so it reuses `@chartdown/core` and keeps one language across the monorepo; an OpenAPI contract is published. At first, read-only access to the public catalog (songs and versions as ChartDown and JSON).
+- **Public API:** Node with TypeScript (not FastAPI), so it reuses `chartdown` and keeps one language across the monorepo; an OpenAPI contract is published. At first, read-only access to the public catalog (songs and versions as ChartDown and JSON).
 - **Permissioned access:** when the API touches band data, it runs with the user's token, so the same row-level security decides what is visible. An API key never bypasses the privacy of the MD layer.
 - **MCP server:** TypeScript, on top of the public API, so an AI assistant can search songs, read a version or, with the user's permission, build a set.
 - **Phases:** read API in phase 2; permissioned writes and the MCP server in phase 3.
@@ -328,5 +328,6 @@ No personal data of a departed user remains, which removes the risk with privacy
 - **ChartDown** is the language: the notation, the `.chartdown` format, the spec, guides and reference playground. Open on GitHub (spec CC0, code MIT) at `github.com/ChartDown/Language`, so anyone can build their own app.
 - **ChartDown App** is the product we build: catalog, bands, sets, MD layer and per-instrument view. All its code, including the landing page, lives in the private repository `github.com/carloszaragoza/ChartDown-App` (moved from the ChartDown organization on October 3, 2026).
 - **Domain:** `chartdown.app`.
+- **npm package:** the parser in `packages/core` is published as `chartdown`, MIT, with the version of the ChartDown spec it implements in its description (T-107). The `@chartdown` scope on npm belongs to an unrelated project (maps for role-playing games), so the package has no scope. Its owner publishes it from their npm account; the repository it points to is the public language repository.
 - **Business model:** free at first, invite-only; later a subscription with a free tier. It does not change the architecture.
 - **Name policy:** anyone can say their app is “compatible with ChartDown”; nobody can name their product ChartDown or present it as the official one.

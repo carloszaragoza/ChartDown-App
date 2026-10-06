@@ -36,7 +36,7 @@ Every task is small, has its requirements (R-xx) and is done only when its tests
 | T-003 | Supabase projects (development and production), Vercel, and the `chartdown.app` domain on Cloudflare | Technical Plan 12.4 | T-001 | S | The empty app responds at chartdown.app |
 | T-004 | Add the approved specs to `specs/` in markdown | Constitution | T-001 | S | All specs are in the repository |
 
-## E1 · `@chartdown/core` (SPEC-00)
+## E1 · `chartdown` (SPEC-00)
 
 | ID | Task | Requirements | Depends on | Size | Tests / evidence |
 |---|---|---|---|---|---|
@@ -46,7 +46,7 @@ Every task is small, has its requirements (R-xx) and is done only when its tests
 | T-104 | Instruments: list injected from the Admin's catalog plus those declared in the header | R-00.1 | T-101 | S | An unknown instrument warns and is shown to everyone |
 | T-105 | MD layer format: notes anchored to section and bar; detect “unplaced” notes (documented as ChartDown 0.5) | R-00.2 | T-101 | M | Renaming a section flags its notes without losing them |
 | T-106 | Warning for lyric landmarks longer than 8 words | Constitution 6 | T-101 | S | A 9-word landmark produces a warning |
-| T-107 | Publish `@chartdown/core` to npm under MIT | Technical Plan 12.6 | T-102 | S | The package installs in a new project |
+| T-107 | Publish `chartdown` to npm under MIT (the `@chartdown` scope belongs to another project) | Technical Plan 12.6 | T-102 | S | The package installs in a new project |
 
 ## E2 · Design system in code
 
@@ -54,7 +54,7 @@ Every task is small, has its requirements (R-xx) and is done only when its tests
 |---|---|---|---|---|---|
 | T-201 | Tokens as CSS variables (light and dark) and self-hosted fonts | Handoff 2 | T-001 | S | AA contrast verified in both themes |
 | T-202 | Icon, Button and InstrumentTag components (default and compact) | Handoff 3 | T-201 | M | 44 px buttons, visible focus, accessible labels |
-| T-203 | Bar, Section, MDNote and FormStrip components rendering the `@chartdown/core` tree | Handoff 3 | T-202, T-101 | L | The example chart looks like the approved design |
+| T-203 | Bar, Section, MDNote and FormStrip components rendering the `chartdown` tree | Handoff 3 | T-202, T-101 | L | The example chart looks like the approved design |
 | T-204 | English and Spanish i18n foundation | R-01.5 | T-001 | S | Switching to Spanish translates the whole UI, never the syntax |
 
 ## E3 · Database and permissions

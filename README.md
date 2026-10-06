@@ -8,7 +8,7 @@ The specs in `specs/` are the source of truth. Start with `specs/plan-sdd.md`.
 
 | Path            | What it is                                               |
 | --------------- | -------------------------------------------------------- |
-| `packages/core` | `@chartdown/core`, the ChartDown parser (MIT)            |
+| `packages/core` | `chartdown`, the ChartDown parser (MIT)                  |
 | `packages/ui`   | `@chartdown/ui`, shared components                       |
 | `apps/web`      | `@chartdown/web`, the Next.js app and landing page       |
 | `supabase/`     | Postgres schema, row-level security and server functions |
