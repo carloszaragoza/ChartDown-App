@@ -12,6 +12,8 @@ export default defineConfig(
       "**/coverage/**",
       "**/next-env.d.ts",
       "packages/core/fixtures/**",
+      // The design's reference code: a prototype to read, not part of the app.
+      "design/**",
     ],
   },
   js.configs.recommended,
