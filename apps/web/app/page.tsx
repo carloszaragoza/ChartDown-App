@@ -15,12 +15,13 @@ export default async function HomePage({ searchParams }: { searchParams: Search 
       signInEnabled={authEnabled()}
       waitlistReady={waitlistEnabled()}
       result={RESULTS.includes(waitlist ?? "") ? (waitlist as WaitlistResult) : null}
+      accountDeleted={account === "deleted"}
     />
   );
   if (!authEnabled()) return landing;
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
-  if (!data.user && account !== "deleted") return landing;
+  if (!data.user) return landing;
   const [profile, invitations] = data.user
     ? await Promise.all([
         supabase

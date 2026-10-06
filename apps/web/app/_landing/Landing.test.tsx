@@ -59,6 +59,14 @@ describe("T-1201 the landing page", () => {
     expect(html).not.toMatch(/<button[^>]*>[^<]*View as/);
   });
 
+  it("R-01.6 after deleting an account, the landing page says so", () => {
+    const html = render({ signInEnabled: true, waitlistReady: true, accountDeleted: true });
+    expect(html).toMatch(/role="status"[^>]*>Your account was deleted/);
+    expect(render({ signInEnabled: true, waitlistReady: true })).not.toContain(
+      "Your account was deleted",
+    );
+  });
+
   it("R-01.5 the landing page reads in Spanish", () => {
     const html = render({ signInEnabled: true, waitlistReady: true }, "es");
     expect(html).toContain("Una canción para toda la banda.");

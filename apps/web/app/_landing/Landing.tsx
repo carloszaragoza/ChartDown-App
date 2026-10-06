@@ -25,14 +25,22 @@ export interface LandingProps {
   waitlistReady: boolean;
   /** How the last waitlist request went. */
   result?: WaitlistResult | null;
+  /** The person just deleted their account (R-01.6). */
+  accountDeleted?: boolean;
 }
 
 /**
  * The landing page at chartdown.app (T-1201, design/screens/07-landing.html): what ChartDown App
  * is, the open language, and the invite-only beta's waitlist.
  */
-export function Landing({ signInEnabled, waitlistReady, result = null }: LandingProps) {
+export function Landing({
+  signInEnabled,
+  waitlistReady,
+  result = null,
+  accountDeleted = false,
+}: LandingProps) {
   const t = useTranslations("landing");
+  const account = useTranslations("auth.account");
   const labels = useChartLabels();
   const chart = parse(EXAMPLE_CHART);
   const section = chart.sections[0];
@@ -71,6 +79,11 @@ export function Landing({ signInEnabled, waitlistReady, result = null }: Landing
       </header>
 
       <main className={styles.main}>
+        {accountDeleted && (
+          <p role="status" className={styles.lead}>
+            {account("accountDeleted")}
+          </p>
+        )}
         <section className={styles.hero} aria-labelledby="hero-title">
           <div className={styles.pitch}>
             <h1 id="hero-title" className={styles.headline}>
