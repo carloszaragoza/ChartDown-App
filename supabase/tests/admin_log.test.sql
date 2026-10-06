@@ -55,11 +55,14 @@ select lives_ok(
   $$update public.instruments set active = false where slug = 'bass'$$,
   'R-07.3 an instrument in use can be deactivated'
 );
+-- Checked as the database owner: an admin does not read other people's instruments.
+select pg_temp.logout();
 select ok(
   (select exists (select 1 from public.user_instruments ui join public.instruments i on i.id = ui.instrument_id
     where i.slug = 'bass' and ui.user_id = '00000000-0000-0000-0000-0000000002b1')),
   'R-07.3 a deactivated instrument stays where it is used'
 );
+select pg_temp.login('00000000-0000-0000-0000-0000000002a1');
 
 insert into public.invite_codes (kind, max_uses, note) values ('band', 10, 'Cedar Band');
 update public.invite_codes set revoked_at = now() where note = 'Cedar Band';
