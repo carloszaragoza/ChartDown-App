@@ -47,7 +47,7 @@ test("R-03.5 a new note is saved in the layer and the public version doesn't cha
   // Editing: a note for everyone in the Verse.
   await page.getByRole("link", { name: "Edit the note: Pad swell into the last bar." }).click();
   await expect(page.getByRole("heading", { name: "Edit the note" })).toBeVisible();
-  await page.getByLabel("Section", { exact: true }).selectOption({ label: "Verse" });
+  await page.locator('select[name="anchor"]').selectOption({ label: "Verse" });
   await page.getByLabel("Bar (optional)").fill("");
   await page.getByLabel("Keys", { exact: true }).uncheck();
   await page.getByLabel("Note", { exact: true }).fill("Everyone soft until the chorus.");
@@ -122,7 +122,7 @@ test("R-00.2 a note whose section is gone is marked unplaced, not lost, and anch
   ).toBeVisible();
   await unplaced.getByRole("link", { name: "Anchor again: Big finish, everyone." }).click();
   await expect(page.getByRole("heading", { name: "Edit the note" })).toBeVisible();
-  await page.getByLabel("Section", { exact: true }).selectOption({ label: "Refrain" });
+  await page.locator('select[name="anchor"]').selectOption({ label: "Refrain" });
   await page.getByRole("button", { name: "Save note" }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("The note was saved.");
   await expect(page.getByRole("region", { name: /need.* a new place/ })).toHaveCount(0);
