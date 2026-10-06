@@ -96,8 +96,8 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Start Supabase (database, auth, API and mail)
-        run: supabase start -x realtime,storage-api,imgproxy,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      - name: Start Supabase (database, auth, API, mail and realtime)
+        run: supabase start -x storage-api,imgproxy,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
 
       # The local stack's URL and public key; they are fixed demo values, not secrets.
       - name: Point the app at the local Supabase

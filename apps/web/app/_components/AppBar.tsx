@@ -15,6 +15,8 @@ export interface AppBarProps {
   account: { name: string } | null;
   /** Their personal space's sets (R-04.7). */
   personalSets: string | null;
+  /** How many of their notices are unread (T-1002). */
+  unread: number;
 }
 
 /** The initials of a name, for the account button: “Alex Rivera” → AR. */
@@ -29,9 +31,9 @@ export function initials(name: string): string {
 
 /**
  * The app's top bar (Handoff 4, `design/screens/01-set.html`): ChartDown, Sets, Catalog, Bands,
- * Personal space, the language and the account. Stand mode has none, since it fills the screen.
+ * Personal space, the notices, the language and the account. Stand mode has none, since it fills the screen.
  */
-export function AppBar({ account, personalSets }: AppBarProps) {
+export function AppBar({ account, personalSets, unread }: AppBarProps) {
   const t = useTranslations("appBar");
   const pathname = usePathname() ?? "/";
   // Signed out, this device forgets the sets downloaded to read offline (T-902), so nobody else
@@ -92,6 +94,21 @@ export function AppBar({ account, personalSets }: AppBarProps) {
         ))}
       </nav>
       <div className={styles.end}>
+        {account && (
+          <Link
+            href="/notices"
+            className={styles.link}
+            aria-label={t("unread", { count: unread })}
+            aria-current={pathname === "/notices" ? "page" : undefined}
+          >
+            {t("notices")}
+            {unread > 0 && (
+              <span className={styles.count} aria-hidden="true">
+                {unread > 99 ? "99+" : unread}
+              </span>
+            )}
+          </Link>
+        )}
         <LanguageSwitcher />
         {account ? (
           <details className={styles.account}>

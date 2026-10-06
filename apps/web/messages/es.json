@@ -581,7 +581,9 @@
     "account": "Cuenta de {name}",
     "profile": "Tu perfil",
     "signOut": "Cerrar sesión",
-    "signIn": "Iniciar sesión"
+    "signIn": "Iniciar sesión",
+    "notices": "Avisos",
+    "unread": "{count, plural, =0 {Avisos, ninguno sin leer} one {Avisos, # sin leer} other {Avisos, # sin leer}}"
   },
   "offline": {
     "title": "Sin conexión",
@@ -617,6 +619,27 @@
       "noteRemoved": "Nota quitada de {title}, {section}: “{text}”",
       "lineup": "{name} ahora toca: {to}.",
       "sitsOut": "no toca en este set"
+    }
+  },
+  "notices": {
+    "title": "Avisos",
+    "list": "Tus avisos",
+    "none": "Aún no tienes avisos. Cuando algo cambie en tus bandas, aparecerá aquí.",
+    "new": "Nuevo",
+    "markAll": "Marcar todo como leído",
+    "noDate": "sin fecha",
+    "writtenKey": "su tonalidad escrita",
+    "everyone": "todos",
+    "place": "{section}, compás {bar}",
+    "types": {
+      "lineup_added": "Te agregaron a {set} ({when}) en {instrument}.",
+      "lineup_removed": "Te quitaron de {set} ({when}) en {instrument}.",
+      "temp_md": "Tienes la dirección musical temporal de {set} hasta el {until}.",
+      "temp_md_open": "Tienes la dirección musical temporal de {set}.",
+      "key_changed": "{title} en {set} ahora está en {to} (estaba en {from}).",
+      "order_changed": "Cambió el orden de las canciones de {set}.",
+      "note_added": "Nueva nota para {for} en {title}, {place}: «{text}»",
+      "new_revision": "{title} tiene una nueva revisión de su autor, la {number}; {set} sigue tocando la revisión {pinned}."
     }
   },
   "landing": {

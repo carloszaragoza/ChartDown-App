@@ -14,7 +14,11 @@ const render = (props: AppBarProps, locale: "en" | "es" = "en") =>
       <AppBar {...props} />
     </NextIntlClientProvider>,
   );
-const signedIn: AppBarProps = { account: { name: "Alex Rivera" }, personalSets: "/bands/p1/sets" };
+const signedIn: AppBarProps = {
+  account: { name: "Alex Rivera" },
+  personalSets: "/bands/p1/sets",
+  unread: 0,
+};
 
 describe("T-706 the app's top bar", () => {
   beforeEach(() => {
@@ -33,7 +37,7 @@ describe("T-706 the app's top bar", () => {
 
   it("R-01.4 a visitor gets the catalog and Sign in", () => {
     pathname = "/catalog";
-    const html = render({ account: null, personalSets: null }, "es");
+    const html = render({ account: null, personalSets: null, unread: 0 }, "es");
     expect(html).toContain('href="/catalog"');
     expect(html).toContain("Iniciar sesión");
     expect(html).not.toContain('href="/bands"');
@@ -51,8 +55,21 @@ describe("T-706 the app's top bar", () => {
     pathname = "/sets/s1/songs/1/stand";
     expect(render(signedIn)).toBe("");
     pathname = "/";
-    expect(render({ account: null, personalSets: null })).toBe("");
+    expect(render({ account: null, personalSets: null, unread: 0 })).toBe("");
     expect(render(signedIn)).toContain('href="/sets"');
+  });
+
+  it("R-09.3 the notices link says how many are unread, in both languages", () => {
+    expect(render(signedIn)).toContain('aria-label="Notices, none unread"');
+    const three = render({ ...signedIn, unread: 3 });
+    expect(three).toContain('href="/notices"');
+    expect(three).toContain('aria-label="Notices, 3 unread"');
+    expect(three).toMatch(/aria-hidden="true">3</);
+    expect(render({ ...signedIn, unread: 1 }, "es")).toContain('aria-label="Avisos, 1 sin leer"');
+    expect(render({ ...signedIn, unread: 120 })).toMatch(/>99\+</);
+    expect(render({ account: null, personalSets: null, unread: 0 })).not.toContain(
+      'href="/notices"',
+    );
   });
 
   it("T-706 initials for the account button", () => {
