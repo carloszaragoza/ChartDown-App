@@ -33,6 +33,7 @@ const SAME_IN_BOTH = new Set([
   "design.newInstrument",
   "chart.tempo",
   "bands.sets",
+  "landing.footer.copyright",
   "stand.setBar",
   "stand.set",
   "appBar.sets",

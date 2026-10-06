@@ -148,6 +148,8 @@ select ok(
 );
 
 -- Notices: the server process creates them; each person reads and marks only their own.
+-- Start clean: the changes above already made their notices (T-1001, tested in notices.test.sql).
+delete from public.notifications;
 insert into public.notifications (id, user_id, type, detail) values
   ('00000000-0000-0000-0000-00000000c001', '00000000-0000-0000-0000-0000000000a1', 'new_revision', '{"version_id":"f1"}'),
   ('00000000-0000-0000-0000-00000000c002', '00000000-0000-0000-0000-0000000000b1', 'added_to_set', '{"set_id":"5e01"}');

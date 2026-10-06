@@ -1,0 +1,236 @@
+/* The landing page (design/screens/07-landing.html), in the design system's tokens. */
+.landing {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--ground);
+  color: var(--ink);
+}
+.bar,
+.main,
+.footerInner {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-6);
+  padding: var(--space-4) var(--space-10);
+}
+.brand {
+  color: var(--ink);
+  font: var(--type-section-title);
+  font-weight: 700;
+  text-decoration: none;
+}
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+}
+.navLink,
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  color: var(--dynamic);
+  font: var(--type-label);
+}
+.navLink {
+  color: var(--ink);
+  text-decoration: none;
+}
+.end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+}
+.brand:focus-visible,
+.navLink:focus-visible,
+.link:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--space-10) + var(--space-8));
+  padding: var(--space-8) var(--space-10) calc(var(--space-8) * 2);
+}
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-10);
+  align-items: center;
+}
+.pitch {
+  display: flex;
+  flex: 1 1 420px;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.headline {
+  margin: 0;
+  font: var(--type-song-title);
+}
+.lead {
+  margin: 0;
+  color: var(--ink-muted);
+  font: var(--type-note);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.meta {
+  color: var(--ink-muted);
+  font: var(--type-meta);
+}
+.example {
+  display: flex;
+  flex: 1 1 480px;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  margin: 0;
+}
+.viewing {
+  display: inline-flex;
+  align-self: flex-end;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--dynamic);
+  font: var(--type-label);
+}
+.block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+.heading {
+  margin: 0;
+  font: var(--type-section-title);
+}
+.steps,
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cards {
+  gap: var(--space-4);
+}
+.step {
+  display: flex;
+  flex: 1 1 260px;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.number {
+  font: var(--type-chord-md);
+  font-weight: 700;
+}
+.stepTitle {
+  margin: 0;
+  font: var(--type-form-chip);
+}
+.text {
+  margin: 0;
+  color: var(--ink-muted);
+  font: var(--type-note);
+}
+.card {
+  box-sizing: border-box;
+  border: var(--stroke-hairline) solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+}
+.cards .card {
+  display: flex;
+  flex: 1 1 240px;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 24rem;
+  padding: var(--space-6);
+}
+.language {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-6);
+}
+.code {
+  flex: 1 1 420px;
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-4);
+  overflow-x: auto;
+  border-radius: var(--radius-sm);
+  background: var(--ground);
+  font: var(--type-code);
+  white-space: pre-wrap;
+}
+.waitlist {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 640px;
+}
+.field {
+  display: flex;
+  flex: 1 1 300px;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--ink-muted);
+  font: var(--type-meta);
+}
+.input {
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border: var(--stroke-hairline) solid var(--control-border);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--type-note);
+}
+.footer {
+  margin-top: auto;
+  border-top: var(--stroke-hairline) solid var(--rule);
+  background: var(--paper);
+}
+.footerInner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-6);
+  padding: var(--space-6) var(--space-10);
+  color: var(--ink-muted);
+  font: var(--type-meta);
+}
+@media (max-width: 640px) {
+  .bar,
+  .main,
+  .footerInner {
+    padding-inline: var(--space-4);
+  }
+  .main {
+    gap: var(--space-10);
+  }
+}
