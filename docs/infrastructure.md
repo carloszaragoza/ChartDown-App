@@ -53,7 +53,23 @@ The local stack takes its settings from `supabase/config.toml`. The hosted proje
 
 Emails come from Supabase's built-in sender, a few per hour; enough for development. Production needs a transactional email provider first (T-406).
 
-Sign-in is hidden in production (`VERCEL_ENV=production`) until invite codes (T-402) and the production database exist.
+Sign-in is open in development and previews. In production it opens only with `BETA_OPEN=true` in Vercel's Production environment (T-1203); with any other value, redeploy and it is hidden again.
+
+### Opening the beta in production (`chartdown-prod`, T-1203)
+
+In this order. Nobody but the owner touches production.
+
+1. **Plan:** move `chartdown-prod` to Pro, so it never pauses.
+2. **Migrations,** keeping the CLI linked to dev: copy the connection string from the dashboard (Connect → Session pooler) and run
+   `npx supabase db push --db-url "postgresql://…"`.
+3. **Authentication:**
+   - Hooks → **Before User Created** → Postgres function → schema `private`, function `hook_before_user_created` → Enable. Without it, accounts need no invite code.
+   - URL Configuration → Site URL `https://www.chartdown.app`; Redirect URLs `https://www.chartdown.app/**`.
+   - Sign In / Providers → Email: Confirm email on; minimum password length 8.
+   - Emails → SMTP Settings (Resend, T-406): host `smtp.resend.com`, port `465`, user `resend`, password a Resend API key for production only, sender `no-reply@chartdown.app`.
+4. **Vercel → Environment Variables → Production:** the Supabase URL and publishable key of `chartdown-prod`, and `BETA_OPEN=true`. Redeploy.
+5. **The first admin,** in the dashboard's SQL editor: create a code (`insert into public.invite_codes (note) values ('Owner') returning code;`), sign up with it at www.chartdown.app, then `update public.profiles set role = 'admin' where id = (select id from auth.users where email = '…');`. From then on, codes come from `/admin/invites`.
+6. **Check:** the confirmation email arrives within a minute (T-406).
 
 ### Invite codes (T-402)
 

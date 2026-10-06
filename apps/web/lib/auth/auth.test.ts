@@ -32,6 +32,14 @@ describe("R-01.1 sign-in safety", () => {
     expect(authEnabled({ VERCEL_ENV: "preview" })).toBe(false);
   });
 
+  it("T-1203 production opens sign-in only with BETA_OPEN=true, and closes it with any other value", () => {
+    const production = { ...configured, VERCEL_ENV: "production" };
+    expect(authEnabled({ ...production, BETA_OPEN: "true" })).toBe(true);
+    expect(authEnabled({ ...production, BETA_OPEN: "false" })).toBe(false);
+    expect(authEnabled({ ...production, BETA_OPEN: "TRUE " })).toBe(false);
+    expect(authEnabled({ VERCEL_ENV: "production", BETA_OPEN: "true" })).toBe(false);
+  });
+
   it("R-01.8 the waitlist works in production too, wherever the database is configured", () => {
     expect(waitlistEnabled({ ...configured, VERCEL_ENV: "production" })).toBe(true);
     expect(waitlistEnabled({ ...configured })).toBe(true);
