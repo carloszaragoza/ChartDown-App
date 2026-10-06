@@ -2,7 +2,8 @@ import { expect, test, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
 import { signOut, signUpAndConfirm, unique } from "./flows";
 
-const songs = (page: Page) => page.getByRole("region", { name: /songs?$/ }).getByRole("listitem");
+// The set's songs: "3 songs" on its edit page, "Songs" on the set screen.
+const songs = (page: Page) => page.getByRole("region", { name: /songs?$/i }).getByRole("listitem");
 
 test("R-05.1 a set's name is unique in the band; songs are added, ordered and duplicated", async ({
   page,
@@ -28,7 +29,7 @@ test("R-05.1 a set's name is unique in the band; songs are added, ordered and du
   await expect(page.getByRole("main").getByRole("status")).toContainText("Invitation sent.");
 
   // A set, and the same name again is refused (R-05.1).
-  await page.getByRole("link", { name: "Sets", exact: true }).click();
+  await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
   await page.getByLabel("Set name").fill(sunday);
   await page.getByLabel("Date (optional)").fill("2030-06-02");
   await page.getByLabel("Time (optional)").fill("09:00");
@@ -38,7 +39,7 @@ test("R-05.1 a set's name is unique in the band; songs are added, ordered and du
   // R-05.1 (T-708): a set at 9:00 shows 9:00 AM with its date.
   await expect(page.getByText("Sunday, June 2, 2030 · 9:00 AM")).toBeVisible();
   const setAddress = new URL(page.url()).pathname;
-  await page.getByRole("link", { name: `Back to the sets of ${band}` }).click();
+  await page.getByRole("main").getByRole("link", { name: band }).click();
   await expect(page.getByRole("region", { name: "Upcoming" })).toContainText(sunday);
   await page.getByLabel("Set name").fill(`  ${sunday.toLowerCase()} `);
   await page.getByLabel("Type").selectOption({ label: "Rehearsal" });

@@ -61,7 +61,7 @@ test("R-06.4 the keyboardist's device never receives the bass notes", async ({ p
   );
 
   // A set with the song, and the band's notes for keys and for bass.
-  await page.getByRole("link", { name: "Sets", exact: true }).click();
+  await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
   await page.getByLabel("Set name").fill(set);
   await page.getByLabel("Type").selectOption({ label: "Rehearsal" });
   await page.getByRole("button", { name: "Create set" }).click();
@@ -77,6 +77,11 @@ test("R-06.4 the keyboardist's device never receives the bass notes", async ({ p
   await addNote(page, "Keys", keysNote);
   await addNote(page, "Bass", bassNote);
 
+  // T-706: the set screen offers the music director Edit set.
+  await page.goto(setAddress);
+  await expect(page.getByRole("link", { name: "Edit set" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Start in stand mode" })).toBeVisible();
+
   // The music director sees both.
   await page.goto(`${setAddress}/songs/1`);
   await expect(page.getByText("You see every note, as the music director.")).toBeVisible();
@@ -85,6 +90,16 @@ test("R-06.4 the keyboardist's device never receives the bass notes", async ({ p
 
   // Ben gets the keys note, and the bass note is nowhere in what his browser received.
   await switchTo(page, ben, "Ben Keys");
+  // T-706: on the set screen, the song with its key and his notes, and the lineup, without Edit set.
+  await page.goto(setAddress);
+  const songRow = page.getByRole("region", { name: "Songs" }).getByRole("listitem");
+  await expect(songRow).toContainText(title);
+  await expect(songRow).toContainText("Key C");
+  await expect(songRow).toContainText("1 for you");
+  const lineup = page.getByRole("region", { name: "Lineup" });
+  await expect(lineup).toContainText("Ben Keys (you)");
+  await expect(lineup).toContainText("Keys");
+  await expect(page.getByRole("link", { name: "Edit set" })).toHaveCount(0);
   const response = await page.goto(`${setAddress}/songs/1`);
   await expect(page.getByText("1 note for you")).toBeVisible();
   await expect(page.locator("#section-2")).toContainText(keysNote);

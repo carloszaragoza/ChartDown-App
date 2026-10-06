@@ -46,7 +46,7 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
   await expect(page.getByText("Signed in as Ana Keys")).toBeVisible();
   await page.goto("/bands");
   await page.getByRole("link", { name: band }).click();
-  await page.getByRole("link", { name: "Sets", exact: true }).click();
+  await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
   await page.getByLabel("Set name").fill(set);
   await page.getByLabel("Type").selectOption({ label: "Rehearsal" });
   await page.getByRole("button", { name: "Create set" }).click();

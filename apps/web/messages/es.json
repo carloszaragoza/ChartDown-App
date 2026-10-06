@@ -535,7 +535,31 @@
     "allNotesMd": "Ves todas las notas, como director musical.",
     "allNotesTempMd": "Ves todas las notas, como director musical temporal de este set.",
     "unplacedNotes": "Notas cuya sección cambió",
-    "startStand": "Empezar en atril"
+    "startStand": "Empezar en atril",
+    "backToSet": "Volver al set",
+    "songsTitle": "Canciones",
+    "editSet": "Editar set",
+    "key": "Tono",
+    "forYouCount": "{count, plural, one {# para ti} other {# para ti}}",
+    "notesCount": "{count, plural, one {# nota} other {# notas}}",
+    "noNotes": "Sin notas",
+    "mdShort": "Director musical",
+    "you": "{name} (tú)",
+    "lineupNote": "Cada músico ve las notas del director musical para su propio instrumento.",
+    "allSets": "Sets",
+    "allSetsHint": "Los sets de todas tus bandas y de tu espacio personal. Para crear uno, abre la banda."
+  },
+  "appBar": {
+    "home": "ChartDown, inicio",
+    "main": "Principal",
+    "sets": "Sets",
+    "catalog": "Catálogo",
+    "bands": "Bandas",
+    "personal": "Espacio personal",
+    "account": "Cuenta de {name}",
+    "profile": "Tu perfil",
+    "signOut": "Cerrar sesión",
+    "signIn": "Iniciar sesión"
   },
   "offline": {
     "title": "Sin conexión",

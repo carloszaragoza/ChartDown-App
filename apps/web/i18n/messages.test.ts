@@ -36,6 +36,8 @@ const SAME_IN_BOTH = new Set([
   "landing.footer.copyright",
   "stand.setBar",
   "stand.set",
+  "appBar.sets",
+  "sets.allSets",
 ]);
 
 describe("R-01.5 interface in English by default, with Spanish as an option", () => {

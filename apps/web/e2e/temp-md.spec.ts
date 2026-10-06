@@ -12,7 +12,7 @@ async function switchTo(page: Page, email: string, name: string) {
 async function createSet(page: Page, band: string, name: string, date: string) {
   await page.goto("/bands");
   await page.getByRole("link", { name: band }).click();
-  await page.getByRole("link", { name: "Sets", exact: true }).click();
+  await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
   await page.getByLabel("Set name").fill(name);
   await page.getByLabel("Date (optional)").fill(date);
   await page.getByLabel("Type").selectOption({ label: "Service" });
@@ -62,7 +62,7 @@ test("R-05.5 the temporary MD cannot edit other sets or the layer", async ({ pag
   await addSong(page, v1, `${band} · ${sunday}`);
   await addSong(page, v2, `${band} · ${sunday}`);
   await addSong(page, v1, `${band} · ${friday}`);
-  await page.goto(sundayAddress);
+  await page.goto(`${sundayAddress}/edit`);
   await expect(page.getByText("Nobody. The music director arranges this set.")).toBeVisible();
   await page.getByLabel("Musician").selectOption({ label: "Ben Temp" });
   await expect(page.getByLabel("Until")).toHaveValue("2030-06-09");
@@ -73,6 +73,7 @@ test("R-05.5 the temporary MD cannot edit other sets or the layer", async ({ pag
   // Ben arranges Sunday: order and key, and nothing else.
   await switchTo(page, ben, "Ben Temp");
   await page.goto(sundayAddress);
+  await page.getByRole("link", { name: "Edit set" }).click();
   await expect(page.getByText("You are this set's temporary music director until")).toBeVisible();
   await page.getByRole("button", { name: `Move ${second} up` }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("The order was saved.");
@@ -95,11 +96,13 @@ test("R-05.5 the temporary MD cannot edit other sets or the layer", async ({ pag
 
   // Ana removes the role; Ben's controls go away.
   await switchTo(page, ana, "Ana Lead");
-  await page.goto(sundayAddress);
+  await page.goto(`${sundayAddress}/edit`);
   await page.getByRole("button", { name: "Remove the role" }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("role was removed");
   await switchTo(page, ben, "Ben Temp");
-  await page.goto(sundayAddress);
+  await page.goto(`${sundayAddress}/edit`);
+  // Without the role, the edit page sends him back to the set, with no Edit set.
+  await expect(page).toHaveURL(new RegExp(`${sundayAddress}$`));
+  await expect(page.getByRole("link", { name: "Edit set" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /^Move / })).toHaveCount(0);
-  await expect(page.getByText("Nobody. The music director arranges this set.")).toBeVisible();
 });

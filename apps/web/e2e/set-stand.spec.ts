@@ -64,7 +64,7 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   );
 
   // A set with two songs; the first has a note for everyone, one for keys and one for bass.
-  await page.getByRole("link", { name: "Sets", exact: true }).click();
+  await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
   await page.getByLabel("Set name").fill(set);
   await page.getByLabel("Type").selectOption({ label: "Concert" });
   await page.getByRole("button", { name: "Create set" }).click();
