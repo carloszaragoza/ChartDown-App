@@ -81,7 +81,8 @@ export function songView(
   const placement = placeLayer(chart, layer, anchoredChart ? { anchoredChart } : {});
   let forYou = 0;
   const shown = (roles: string[], text: string, bar?: number): ShownNote => {
-    const forMe = isForMe(roles);
+    // Seeing every note, the ones "for you" are those for any instrument rather than everyone.
+    const forMe = seesAll ? !roles.includes(EVERYONE) : isForMe(roles);
     if (forMe) forYou += 1;
     return { md: true, roles, text, ...(bar ? { bar } : {}), forYou: forMe };
   };
@@ -92,7 +93,27 @@ export function songView(
       : section.notes
           .filter((note) => visible(note.roles))
           .map((note) => ({ ...shown(note.roles, note.text), md: note.md }))),
-    ...(placement.sections[index] ?? []).map(({ note }) => shown(note.roles, note.text, note.bar)),
+    ...(placement.sections[index] ?? [])
+      .filter(({ note }) => visible(note.roles))
+      .map(({ note }) => shown(note.roles, note.text, note.bar)),
   ]);
   return { sections, unplaced: placement.unplaced, forYou };
+}
+
+/**
+ * “View as” (R-06.3): the MD or the set's temporary MD sees the song exactly as a musician
+ * playing that instrument would. Nothing changes for a musician, who only has their own notes.
+ */
+export function viewAs<T extends Pick<SetSong, "role" | "instruments">>(
+  song: T,
+  as: string | null | undefined,
+): T {
+  if (song.role === "musician" || !as || as === "all") return song;
+  return { ...song, role: "musician", instruments: [as] };
+}
+
+/** The instruments the MD may view as: those playing in the set and any with a note here. */
+export function viewAsOptions(song: Pick<SetSong, "notes">, playing: string[]): string[] {
+  const inNotes = song.notes.flatMap((note) => note.instruments);
+  return [...new Set([...playing, ...inNotes])].sort();
 }

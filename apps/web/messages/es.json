@@ -351,7 +351,13 @@
     "previous": "Anterior",
     "next": "Siguiente",
     "position": "Sección {current} de {total}",
-    "end": "Fin de la canción"
+    "end": "Fin de la canción",
+    "setBar": "Set",
+    "set": "Set",
+    "viewAs": "Ver como",
+    "previousSong": "Canción anterior",
+    "nextSong": "Canción siguiente",
+    "allNotes": "Todas las notas"
   },
   "bands": {
     "title": "Bandas",
@@ -528,7 +534,8 @@
     "notesForYou": "{count, plural, =0 {No hay notas para tus instrumentos en esta canción} one {# nota para ti} other {# notas para ti}}",
     "allNotesMd": "Ves todas las notas, como director musical.",
     "allNotesTempMd": "Ves todas las notas, como director musical temporal de este set.",
-    "unplacedNotes": "Notas cuya sección cambió"
+    "unplacedNotes": "Notas cuya sección cambió",
+    "startStand": "Empezar en atril"
   },
   "offline": {
     "title": "Sin conexión",

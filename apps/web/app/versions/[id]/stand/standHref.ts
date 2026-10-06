@@ -11,13 +11,20 @@ export interface StandPlace {
 }
 
 /** Where stand mode is: the section (from 1 in the address), view, key and theme (R-03.3). */
-export function standHref(path: string, place: StandPlace, chart: Chart): string {
+export function standHref(
+  path: string,
+  place: StandPlace,
+  chart: Chart,
+  keep: Record<string, string> = {},
+): string {
   const params = new URLSearchParams();
   if (place.section > 0) params.set("s", String(place.section + 1));
   if (place.display.style === "letters") params.set("view", "letters");
   if (keyName(place.display.key) !== keyName(chart.key))
     params.set("key", keyName(place.display.key));
   if (place.theme === "stage") params.set("theme", "stage");
+  // Anything else the page keeps, such as View as (T-802).
+  for (const [name, value] of Object.entries(keep)) params.set(name, value);
   const query = params.toString();
   return query ? `${path}?${query}` : path;
 }

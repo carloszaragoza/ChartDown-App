@@ -39,3 +39,13 @@ export async function signOut(page: Page) {
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
 }
+
+/** How far below the song map the current section starts, in stand mode (F-001). */
+export async function gapUnderSongMap(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const map = document.querySelector('nav[aria-label="Song form"]');
+    const section = document.querySelector("main");
+    if (!map || !section) return Number.POSITIVE_INFINITY;
+    return section.getBoundingClientRect().top - map.getBoundingClientRect().bottom;
+  });
+}

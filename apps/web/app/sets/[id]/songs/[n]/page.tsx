@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../../lib/auth/enabled";
 import { setSongKey } from "../../../../../lib/sets/lineup";
-import { songView, type SetSong } from "../../../../../lib/sets/song";
+import { songView, viewAs, viewAsOptions, type SetSong } from "../../../../../lib/sets/song";
 import { createClient } from "../../../../../lib/supabase/server";
 import { ChartBody } from "../../../../versions/[id]/ChartBody";
 import { UUID } from "../../../../versions/[id]/load";
@@ -28,7 +28,7 @@ export default async function SetSongPage({
   searchParams,
 }: {
   params: Promise<{ id: string; n: string }>;
-  searchParams: Promise<{ view?: string; preview?: string }>;
+  searchParams: Promise<{ view?: string; preview?: string; as?: string }>;
 }) {
   if (!authEnabled()) notFound();
   const { id, n } = await params;
@@ -41,7 +41,10 @@ export default async function SetSongPage({
   ]);
   if (error || !data) notFound();
   const song = data as SetSong;
-  const { view, preview } = await searchParams;
+  const { view, preview, as: asked } = await searchParams;
+  // View as, for the MD and the set's temporary MD (R-06.3); nothing changes for a musician.
+  const leads = song.role !== "musician";
+  const as = leads && asked && /^[a-z0-9-]+$/.test(asked) ? asked : null;
 
   // The author's newer revision, only for the MD, only when asked for, only if there is one.
   const newerId =
@@ -67,7 +70,11 @@ export default async function SetSongPage({
   const anchored = new Map<string, Chart>([[song.revision_id, parse(song.content)]]);
   for (const row of anchoredRows ?? [])
     anchored.set(row.id as string, parse(row.content as string));
-  const shown = songView(chart, song, (revisionId) => anchored.get(revisionId));
+  const shown = songView(chart, viewAs(song, as), (revisionId) => anchored.get(revisionId));
+  const instruments = await getTranslations("instruments");
+  const nameOf = (slug: string) =>
+    instruments.has(slug as "keys") ? instruments(slug as "keys") : slug;
+  const s = await getTranslations("stand");
 
   const homeKey = setSongKey(chart, song.set_key);
   const style = view === "letters" ? "letters" : "numbers";
@@ -82,6 +89,12 @@ export default async function SetSongPage({
       ? `${path}?${[query, "preview=new"].filter(Boolean).join("&")}`
       : `${path}${query ? `?${query}` : ""}`;
   const barLabel = (bar: number) => t("bar", { bar });
+  const query = (params: Record<string, string>) => {
+    const text = new URLSearchParams(
+      Object.entries(params).filter(([, value]) => value) as [string, string][],
+    ).toString();
+    return text ? `?${text}` : "";
+  };
 
   return (
     <main className={styles.wide}>
@@ -117,13 +130,36 @@ export default async function SetSongPage({
           )}
         </p>
         <p className={styles.hint}>
-          {song.role === "musician"
+          {!leads || as
             ? t("notesForYou", { count: shown.forYou })
             : song.role === "md"
               ? t("allNotesMd")
               : t("allNotesTempMd")}
         </p>
       </div>
+      <div className={styles.buttons}>
+        <Link
+          href={`${path}/stand${query({ view: style === "letters" ? "letters" : "", as: as ?? "" })}`}
+          className="cd-button cd-button--primary"
+        >
+          {t("startStand")}
+        </Link>
+      </div>
+      {leads && (
+        <nav aria-label={s("viewAs")} className={styles.buttons}>
+          <span className={styles.hint}>{s("viewAs")}</span>
+          {[null, ...viewAsOptions(song, song.instruments)].map((option) => (
+            <Link
+              key={option ?? "all"}
+              href={`${path}${query({ view: style === "letters" ? "letters" : "", as: option ?? "" })}`}
+              className={styles.choice}
+              aria-current={as === option ? "true" : undefined}
+            >
+              {option ? nameOf(option) : s("allNotes")}
+            </Link>
+          ))}
+        </nav>
+      )}
       <nav aria-label={v("style")} className={styles.buttons}>
         {(["numbers", "letters"] as const).map((option) => (
           <Link
