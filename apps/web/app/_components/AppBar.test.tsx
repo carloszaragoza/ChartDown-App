@@ -37,6 +37,7 @@ describe("T-706 the app's top bar", () => {
   });
 
   it("R-01.4 a visitor gets the catalog and Sign in", () => {
+    pathname = "/catalog";
     const html = render({ account: null, personalSets: null, unread: 0, admin: false }, "es");
     expect(html).toContain('href="/catalog"');
     expect(html).toContain("Iniciar sesión");
@@ -54,6 +55,9 @@ describe("T-706 the app's top bar", () => {
     expect(personal).not.toMatch(/aria-current="page"[^>]*>Bands</);
     pathname = "/sets/s1/songs/1/stand";
     expect(render(signedIn)).toBe("");
+    pathname = "/";
+    expect(render({ account: null, personalSets: null, unread: 0, admin: false })).toBe("");
+    expect(render(signedIn)).toContain('href="/sets"');
   });
 
   it("R-09.3 the notices link says how many are unread, in both languages", () => {

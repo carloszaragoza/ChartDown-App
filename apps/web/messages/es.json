@@ -712,5 +712,75 @@
         "unknown": "Algo salió mal. Inténtalo de nuevo."
       }
     }
+  },
+  "landing": {
+    "nav": "Principal",
+    "signIn": "Iniciar sesión",
+    "requestInvite": "Pedir una invitación",
+    "hero": {
+      "title": "Una canción para toda la banda. Indicaciones para cada músico.",
+      "lead": "ChartDown App convierte charts del sistema de números de Nashville en texto plano en charts de banda para iPad y computadora, con notas del director musical para cada instrumento.",
+      "try": "Probar la notación",
+      "free": "Gratis durante la beta por invitación.",
+      "example": "Chart de ejemplo",
+      "viewing": "Viendo como {instrument}"
+    },
+    "how": {
+      "title": "Cómo funciona",
+      "write": {
+        "title": "Escríbelo en ChartDown",
+        "text": "Texto plano que se lee como un chart: secciones, compases, números y notas para cada instrumento."
+      },
+      "set": {
+        "title": "Arma tu set",
+        "text": "Elige las versiones que tocan, fija la tonalidad de cada canción y asigna un instrumento a cada músico."
+      },
+      "play": {
+        "title": "Toca desde tu parte",
+        "text": "Todos ven la misma canción. Cada músico ve las indicaciones que son para él o ella."
+      }
+    },
+    "stage": {
+      "title": "Hecho para el escenario",
+      "saved": {
+        "title": "Cada cambio guardado",
+        "text": "Vuelve a cualquier revisión. Los sets se quedan en la versión que elegiste."
+      },
+      "offline": {
+        "title": "Sets sin conexión",
+        "text": "Descarga un set antes de salir. Cada chart abre en modo avión."
+      },
+      "stand": {
+        "title": "Modo atril",
+        "text": "Pantalla completa, números grandes, un toque a la siguiente sección."
+      },
+      "part": {
+        "title": "Solo tu parte",
+        "text": "Cada músico ve las notas del director musical para su propio instrumento."
+      }
+    },
+    "language": {
+      "nav": "El lenguaje",
+      "title": "ChartDown es un lenguaje abierto",
+      "text": "La notación es de dominio público (CC0) y vive en GitHub. Escribe tus charts una vez, guárdalos como texto plano para siempre y úsalos en cualquier app que soporte ChartDown.",
+      "spec": "Leer la especificación en GitHub",
+      "example": "El mismo coro, escrito en ChartDown"
+    },
+    "invite": {
+      "title": "Únete a la beta",
+      "text": "ChartDown App es por invitación mientras la probamos con bandas reales.",
+      "email": "Correo",
+      "placeholder": "tu@ejemplo.com",
+      "submit": "Unirme a la lista de espera",
+      "sent": "Gracias. Si este correo aún no estaba en la lista, ya está; te escribiremos cuando haya lugar para ti.",
+      "invalid": "Escribe un correo válido.",
+      "unavailable": "La lista de espera aún no está disponible. Vuelve pronto.",
+      "haveCode": "Tengo un código de invitación"
+    },
+    "footer": {
+      "copyright": "© 2026 ChartDown · chartdown.app",
+      "language": "El lenguaje en GitHub"
+    },
+    "catalog": "Catálogo"
   }
 }
