@@ -29,7 +29,8 @@ test("R-02.10 a visitor searches the catalog and opens a version", async ({ page
   await page.getByRole("link", { name: "Catalog" }).click();
   await page.getByLabel("Search by title, artist or album").fill(title);
   await page.getByRole("button", { name: "Search" }).click();
-  const results = page.getByRole("list", { name: "Songs" }).getByRole("listitem");
+  // Each song is a card; its versions are listed inside it once it is open.
+  const results = page.getByRole("list", { name: "Songs" }).locator(":scope > li");
   await expect(results).toHaveCount(1);
   await expect(results).toContainText(title);
   await expect(results).toContainText("2 versions");
@@ -56,13 +57,22 @@ test("R-02.10 a visitor searches the catalog and opens a version", async ({ page
   await expect(page.getByText("No songs match.")).toBeVisible();
 
   // The song lists its two public versions; the private one never appears.
-  await page.getByRole("navigation", { name: "Source" }).getByRole("link", { name: "All" }).click();
-  await results.getByRole("link", { name: title }).click();
-  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+  await page
+    .getByRole("navigation", { name: "Source" })
+    .getByRole("link", { name: "All sources" })
+    .click();
+  await expect(page).not.toHaveURL(/source=/);
+  // The only result opens in place, with its versions to open or fork.
   const versions = page.getByRole("list", { name: `Versions of ${title}` }).getByRole("listitem");
   await expect(versions).toHaveCount(2);
+  await expect(versions.filter({ hasText: "Live" })).toContainText("Key C · 4/4");
+  await expect(versions.filter({ hasText: "Live" })).toContainText("Album: Night Sessions");
+  await expect(versions.first().getByRole("link", { name: "Fork" })).toBeVisible();
   await expect(page.locator(`a[href="/versions/${hidden}"]`)).toHaveCount(0);
-  await versions.filter({ hasText: "Live" }).getByRole("link").click();
+  await versions
+    .filter({ hasText: "Live" })
+    .getByRole("link", { name: /^Open / })
+    .click();
   await expect(page).toHaveURL(new RegExp(`/versions/${live}$`));
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
 });
