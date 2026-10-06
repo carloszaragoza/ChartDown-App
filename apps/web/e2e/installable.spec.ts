@@ -15,10 +15,20 @@ test("T-901 the app is installable: manifest, icons and a service worker", async
     "href",
     "/manifest.webmanifest",
   );
-  await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute(
-    "href",
-    "/icons/apple-touch-icon.png",
-  );
+  // The logo kit's home-screen icons: iPhone, iPad Pro and iPad (Design Handoff 7).
+  const touch = page.locator('link[rel="apple-touch-icon"]');
+  await expect(touch).toHaveCount(3);
+  for (const [href, sizes] of [
+    ["/icons/apple-touch-icon.png", "180x180"],
+    ["/icons/ipad-pro-167.png", "167x167"],
+    ["/icons/ipad-152.png", "152x152"],
+  ]) {
+    await expect(page.locator(`link[rel="apple-touch-icon"][href="${href}"]`)).toHaveAttribute(
+      "sizes",
+      sizes as string,
+    );
+    expect((await request.get(href as string)).status(), href).toBe(200);
+  }
   // The service worker takes charge of the page.
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.reload();

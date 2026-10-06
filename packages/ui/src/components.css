@@ -337,3 +337,12 @@
 .cd-form__chip--current .cd-form__dot {
   box-shadow: 0 0 0 var(--stroke-bar-line-light) var(--ink-inverse);
 }
+
+/* The ChartDown logo (Design Handoff 7): ink for the bar lines, slashes and name; the red
+   pencil for the first slash only. */
+.cd-logo {
+  --chartdown-ink: var(--ink);
+  --chartdown-cue: var(--md);
+  display: block;
+  flex: none;
+}

@@ -115,9 +115,13 @@ All three families are open-license Google Fonts. They are served by the app (no
 
 ## 7. Logo and icons
 
-- The `chartdown-logo` package: mark (light, dark, one-color), logos with the name, app icons from 1024 to 152 px, a maskable icon and the favicon (SVG that adapts to dark mode, plus PNG and ICO).
-- Site and app use `favicon.svg` and `apple-touch-icon.png`; the web app manifest uses the 192 and 512 px icons and the maskable one.
-- The text in the logos is already converted to outlines.
+The logo is **concept 3C, "One bar"**: one bar of a chart, two bar lines and four rhythm slashes; the first slash, in red pencil, is the music director's cue that starts the band. The kit lives in `design/logo/` (its guide: `design/logo/guide.pdf`).
+
+- **Versions:** horizontal (symbol + name, the default), stacked (symbol above the name, for square and narrow spaces), symbol alone (app icon, avatar, favicon), and the two-beat **small symbol** for 24 px and below. "App" versions add "App", always secondary to the name.
+- **Colors:** ink `#16212C` on light, `#E6EDF3` on dark, for the bar lines, the slashes and the name; red pencil `#B8322A` on light, `#FF8478` on dark, **for the first slash only**. In the app the logo takes them from the `ink` and `md` tokens, so it follows the theme. Black and white versions for one-color uses.
+- **Rules:** clear space of at least half the symbol's height on every side; symbol at least 16 px, horizontal logo at least 96 px wide; never stretched, rotated, all red, shadowed or with slashes added or removed. Red is an accent, never the meaning: the logo reads the same in one color.
+- **Where:** the top bar and the landing page show the horizontal logo, with the accessible name "ChartDown"; the favicon (an SVG that follows the browser's light or dark theme, plus ICO), the iPad and Apple touch icons, the web app manifest (192, 512 and maskable 512 px) and the Open Graph image for link previews come from the kit.
+- The text in every logo file is converted to outlines (Barlow Condensed Bold, "App" in Medium).
 
 ## 8. Sources of truth
 

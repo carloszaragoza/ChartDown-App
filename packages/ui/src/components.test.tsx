@@ -134,6 +134,8 @@ describe("Handoff 3 Button", () => {
       ".cd-bar__cue-instrument",
       ".cd-note__md",
       ".cd-form__dot",
+      // The logo's first slash is the music director's cue (Design Handoff 7).
+      ".cd-logo",
     ]);
   });
 
