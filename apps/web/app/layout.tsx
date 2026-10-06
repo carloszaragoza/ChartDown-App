@@ -9,6 +9,7 @@ import type { ReactNode } from "react";
 import { authEnabled } from "../lib/auth/enabled";
 import { createClient } from "../lib/supabase/server";
 import { AppBar, type AppBarProps } from "./_components/AppBar";
+import { OfflineSync } from "./_components/OfflineSync";
 import { ServiceWorker } from "./_components/ServiceWorker";
 
 export const metadata: Metadata = {
@@ -49,6 +50,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <NextIntlClientProvider>
           <ServiceWorker />
           {bar && <AppBar {...bar} />}
+          {bar?.account && <OfflineSync />}
           {children}
         </NextIntlClientProvider>
       </body>

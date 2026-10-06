@@ -598,7 +598,26 @@
     "noneDownloaded": "Aún no hay sets descargados en este dispositivo.",
     "notDownloadedTitle": "No está en este dispositivo",
     "notDownloaded": "Este set no está descargado en este dispositivo. Descárgalo desde el set cuando tengas conexión.",
-    "allDownloaded": "Ver los sets descargados"
+    "allDownloaded": "Ver los sets descargados",
+    "changedTitle": "Este set cambió mientras estabas sin conexión",
+    "gotIt": "Entendido",
+    "removed": "“{name}” se quitó de este dispositivo: ya no puedes leerlo.",
+    "changes": {
+      "name": "El set ahora se llama “{to}” (antes “{from}”).",
+      "when": "La fecha cambió: {to} (antes {from}).",
+      "none": "sin fecha",
+      "songAdded": "Canción nueva: {title}.",
+      "songRemoved": "{title} salió del set.",
+      "songMoved": "{title} pasó de {from} a {to}.",
+      "key": "{title} ahora va en {to} (antes en {from}).",
+      "written": "su tono escrito",
+      "revision": "{title} toca la revisión {to} del autor (antes la {from}).",
+      "noteAdded": "Nota nueva en {title}, {section}: “{text}”",
+      "noteChanged": "Nota cambiada en {title}, {section}: “{text}”",
+      "noteRemoved": "Nota quitada de {title}, {section}: “{text}”",
+      "lineup": "{name} ahora toca: {to}.",
+      "sitsOut": "no toca en este set"
+    }
   },
   "landing": {
     "nav": "Principal",

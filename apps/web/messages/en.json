@@ -598,7 +598,26 @@
     "noneDownloaded": "No sets are downloaded on this device yet.",
     "notDownloadedTitle": "Not on this device",
     "notDownloaded": "This set is not downloaded on this device. Download it from the set while you have a connection.",
-    "allDownloaded": "See the downloaded sets"
+    "allDownloaded": "See the downloaded sets",
+    "changedTitle": "This set changed while you were offline",
+    "gotIt": "Got it",
+    "removed": "“{name}” was removed from this device: you can no longer read it.",
+    "changes": {
+      "name": "The set is now called “{to}” (it was “{from}”).",
+      "when": "The date changed: {to} (it was {from}).",
+      "none": "no date",
+      "songAdded": "New song: {title}.",
+      "songRemoved": "{title} left the set.",
+      "songMoved": "{title} moved from {from} to {to}.",
+      "key": "{title} is now in {to} (it was in {from}).",
+      "written": "its written key",
+      "revision": "{title} plays the author's revision {to} (it was {from}).",
+      "noteAdded": "New note in {title}, {section}: “{text}”",
+      "noteChanged": "Note changed in {title}, {section}: “{text}”",
+      "noteRemoved": "Note removed from {title}, {section}: “{text}”",
+      "lineup": "{name} now plays: {to}.",
+      "sitsOut": "not playing in this set"
+    }
   },
   "landing": {
     "nav": "Main",
