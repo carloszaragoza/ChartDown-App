@@ -1,6 +1,6 @@
 "use client";
 
-import { chordFormatter, keyName, parse, type Key } from "@chartdown/core";
+import { chordFormatter, keyName, parse, type Key } from "chartdown";
 import {
   FormStrip,
   formStripItems,

@@ -1,4 +1,4 @@
-import { parse } from "@chartdown/core";
+import { parse } from "chartdown";
 import { NextIntlClientProvider } from "next-intl";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";

@@ -1,4 +1,4 @@
-import { STANDARD_INSTRUMENTS } from "@chartdown/core";
+import { STANDARD_INSTRUMENTS } from "chartdown";
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";

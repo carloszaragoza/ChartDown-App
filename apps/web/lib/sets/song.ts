@@ -1,10 +1,4 @@
-import {
-  EVERYONE,
-  placeLayer,
-  type Chart,
-  type LayerNote,
-  type UnplacedNote,
-} from "@chartdown/core";
+import { EVERYONE, placeLayer, type Chart, type LayerNote, type UnplacedNote } from "chartdown";
 
 /** What `set_song` returns: a set's song as the person opening it may see it (T-801). */
 export interface SetSong {

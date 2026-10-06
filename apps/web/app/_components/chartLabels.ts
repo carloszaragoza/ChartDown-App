@@ -1,4 +1,4 @@
-import type { SectionLength } from "@chartdown/core";
+import type { SectionLength } from "chartdown";
 import type { SectionLabels } from "@chartdown/ui";
 import { useTranslations } from "next-intl";
 

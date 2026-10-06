@@ -1,4 +1,4 @@
-import { keyName, parse } from "@chartdown/core";
+import { keyName, parse } from "chartdown";
 import { Button } from "@chartdown/ui";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";

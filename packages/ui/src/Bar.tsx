@@ -1,4 +1,4 @@
-import type { Bar as BarData, BarItem, ChordFormatter, Row } from "@chartdown/core";
+import type { Bar as BarData, BarItem, ChordFormatter, Row } from "chartdown";
 
 export type BarSize = "xl" | "md" | "sm";
 

@@ -14,7 +14,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@chartdown/core": "workspace:*"
+    "chartdown": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19"

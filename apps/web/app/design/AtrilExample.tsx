@@ -1,4 +1,4 @@
-import { chordFormatter, parse, parseLayer, placeLayer } from "@chartdown/core";
+import { chordFormatter, parse, parseLayer, placeLayer } from "chartdown";
 import { FormStrip, formStripItems, NextSection, Section, type FormStripItem } from "@chartdown/ui";
 import { useTranslations } from "next-intl";
 import { useChartLabels } from "../_components/chartLabels";

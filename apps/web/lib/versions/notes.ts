@@ -1,4 +1,4 @@
-import { EVERYONE, type Chart, type Layer } from "@chartdown/core";
+import { EVERYONE, type Chart, type Layer } from "chartdown";
 
 /** A section a note can be anchored to: its name and which one of that name it is (R-00.2). */
 export interface SectionAnchor {
@@ -67,7 +67,7 @@ export interface NoteRow {
   instruments: { instrument_id: string }[];
 }
 
-/** The band's notes as a layer for @chartdown/core: roles are instrument slugs, or everyone. */
+/** The band's notes as a layer for chartdown: roles are instrument slugs, or everyone. */
 export function toLayer(
   rows: NoteRow[],
   slugOf: (instrumentId: string) => string | undefined,

@@ -1,4 +1,4 @@
-import { parse, type Chart } from "@chartdown/core";
+import { parse, type Chart } from "chartdown";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../../../lib/auth/enabled";

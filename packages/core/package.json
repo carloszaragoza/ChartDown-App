@@ -1,7 +1,19 @@
 {
-  "name": "@chartdown/core",
-  "version": "0.0.0",
-  "description": "ChartDown notation parser (spec 0.4).",
+  "name": "chartdown",
+  "version": "0.1.0",
+  "description": "Parser for ChartDown (spec 0.4), a plain-text notation for Nashville Number System charts: sections, bars, numbers, keys and notes for each instrument.",
+  "keywords": [
+    "chartdown",
+    "nashville-number-system",
+    "chord-chart",
+    "music",
+    "parser"
+  ],
+  "homepage": "https://github.com/ChartDown/Language",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChartDown/Language.git"
+  },
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -13,8 +25,17 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src",
+    "!src/**/*.test.ts",
+    "!src/test-helpers.ts",
+    "README.md",
+    "LICENSE"
   ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",

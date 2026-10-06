@@ -1,6 +1,6 @@
 "use client";
 
-import { parse, SUPPORTED_VERSION, type Warning } from "@chartdown/core";
+import { parse, SUPPORTED_VERSION, type Warning } from "chartdown";
 import { Button, Icon } from "@chartdown/ui";
 import Link from "next/link";
 import { useFormatter, useNow, useTranslations } from "next-intl";

@@ -1,4 +1,4 @@
-import { chordFormatter, type Chart, type ChordStyle, type Key } from "@chartdown/core";
+import { chordFormatter, type Chart, type ChordStyle, type Key } from "chartdown";
 import {
   FormStrip,
   formStripItems,

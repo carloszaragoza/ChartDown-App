@@ -1,4 +1,4 @@
-import { keyName, type Chart } from "@chartdown/core";
+import { keyName, type Chart } from "chartdown";
 import { Button } from "@chartdown/ui";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
