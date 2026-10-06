@@ -8,7 +8,7 @@ test("R-01.2 a person saves their name and the instruments they play", async ({ 
   await page.getByLabel("Name").fill("Ana Keys");
   await page.getByLabel("Keys", { exact: true }).check();
   await page.getByLabel("Vocals", { exact: true }).check();
-  await page.getByRole("button", { name: "Save" }).click();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("Your profile was saved");
 
   await page.reload();
@@ -21,7 +21,7 @@ test("R-01.2 a person saves their name and the instruments they play", async ({ 
   await page.goto("/profile");
   await expect(page.getByRole("main").getByRole("status")).toHaveCount(0);
   await page.getByLabel("Vocals", { exact: true }).uncheck();
-  await page.getByRole("button", { name: "Save" }).click();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("Your profile was saved");
   await page.reload();
   await expect(page.getByLabel("Vocals", { exact: true })).not.toBeChecked();
@@ -35,7 +35,7 @@ test("R-01.5 the chosen language persists across sessions", async ({ page, conte
   await openAccount(page);
   await page.getByRole("link", { name: "Your profile" }).click();
   await page.getByLabel("Español").check();
-  await page.getByRole("button", { name: "Save" }).click();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("Tu perfil se guardó");
 
   // A new session in a browser that remembers nothing.

@@ -163,7 +163,11 @@
       "confirm": "Type your email to confirm",
       "submit": "Delete my account",
       "mismatch": "That email does not match your account."
-    }
+    },
+    "prefsTitle": "Notices",
+    "prefsHint": "In the app. Email comes later.",
+    "prefsSave": "Save notices",
+    "prefsSaved": "Your notice choices were saved."
   },
   "version": {
     "by": "Arrangement by {author}",
@@ -640,6 +644,15 @@
       "order_changed": "The order of the songs in {set} changed.",
       "note_added": "New note for {for} in {title}, {place}: “{text}”",
       "new_revision": "{title} has a new revision from its author, {number}; {set} still plays revision {pinned}."
+    },
+    "kinds": {
+      "lineup_added": "When I am added to a set",
+      "lineup_removed": "When I am taken off a set",
+      "temp_md": "When I am made temporary music director",
+      "key_changed": "When a song in my sets changes key",
+      "order_changed": "When the order of one of my sets changes",
+      "note_added": "When there is a new note for my instruments",
+      "new_revision": "When a song in my band's sets has a new revision (music directors)"
     }
   },
   "landing": {
