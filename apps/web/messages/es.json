@@ -288,7 +288,10 @@
     "text": "Cifrado (ChartDown)",
     "preview": "Vista previa",
     "warnings": "{count, plural, =0 {Sin avisos} one {# aviso} other {# avisos}}",
-    "line": "Línea {line}:"
+    "line": "Línea {line}:",
+    "savedLine": "{source} · Revisión {number} · guardada {when}",
+    "visibility": "Visibilidad",
+    "numbers": "Números"
   },
   "viewer": {
     "label": "Visualización",

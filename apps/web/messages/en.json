@@ -288,7 +288,10 @@
     "text": "Chart (ChartDown)",
     "preview": "Preview",
     "warnings": "{count, plural, =0 {No warnings} one {# warning} other {# warnings}}",
-    "line": "Line {line}:"
+    "line": "Line {line}:",
+    "savedLine": "{source} · Revision {number} · saved {when}",
+    "visibility": "Visibility",
+    "numbers": "Numbers"
   },
   "viewer": {
     "label": "Display",

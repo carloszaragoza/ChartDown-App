@@ -110,3 +110,61 @@
 .line {
   font-weight: 600;
 }
+/* As design/screens/05-chart-editor.html draws it (T-707). */
+.metaLink {
+  color: var(--dynamic);
+}
+.segmented {
+  display: inline-flex;
+  border: var(--stroke-hairline) solid var(--control-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.segment {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  padding: 0 var(--space-4);
+  color: var(--ink);
+  font: var(--type-label);
+  text-decoration: none;
+}
+.segment[aria-current="true"] {
+  background: var(--ink);
+  color: var(--ink-inverse);
+}
+.source {
+  border: var(--stroke-hairline) solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  gap: 0;
+}
+.sourceBar {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--stroke-hairline) solid var(--rule);
+  font: var(--type-caption);
+  color: var(--ink-muted);
+}
+.source .text {
+  border: 0;
+  border-radius: 0;
+}
+.source .warnings {
+  padding: var(--space-2) var(--space-3);
+  border-top: var(--stroke-hairline) solid var(--rule);
+}
+.source .warnings .label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font: var(--type-caption);
+}
+.preview {
+  padding: var(--space-4);
+  border: var(--stroke-hairline) solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+}
