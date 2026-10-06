@@ -16,6 +16,7 @@ export const NOTICE_TYPES = [
   "order_changed",
   "note_added",
   "new_revision",
+  "version_hidden",
 ] as const;
 export type NoticeType = (typeof NOTICE_TYPES)[number];
 
@@ -52,6 +53,8 @@ export interface NoticeWords {
   everyone: string;
   /** Where a note is: its section, and its bar when it has one. */
   place: (section: string, bar: number | null) => string;
+  /** Why the administrators hid a version (R-07.2). */
+  reason: (reason: string) => string;
 }
 
 const text = (value: unknown): string => (typeof value === "string" ? value : "");
@@ -60,7 +63,8 @@ const textOrNull = (value: unknown): string | null => (typeof value === "string"
 /** Where opening a notice takes the person: the set, or the song for a note. */
 export function noticeHref(notice: Pick<Notice, "type" | "detail">): string {
   const { detail } = notice;
-  if (notice.type === "note_added") return `/versions/${text(detail.version_id)}`;
+  if (notice.type === "note_added" || notice.type === "version_hidden")
+    return `/versions/${text(detail.version_id)}`;
   const set = text(detail.set_id);
   return set ? `/sets/${set}` : "/notices";
 }
@@ -128,6 +132,11 @@ export function noticeMessage(
           number: Number(detail.number) || 0,
           pinned: Number(detail.pinned_number) || 0,
         },
+      };
+    case "version_hidden":
+      return {
+        key: "version_hidden",
+        values: { title, reason: words.reason(text(detail.reason)) },
       };
     default:
       return null;

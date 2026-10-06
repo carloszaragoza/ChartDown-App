@@ -32,3 +32,24 @@ export async function makePrivate(form: FormData): Promise<void> {
   if (error || typeof created !== "string") redirect(`/versions/${versionId}/make-private?error=1`);
   redirect(`/versions/${created}`);
 }
+
+/** Reports a public version to the administrators, with a reason and an optional note (R-07.2). */
+export async function reportVersion(form: FormData): Promise<void> {
+  if (!authEnabled()) redirect("/");
+  const versionId = String(form.get("versionId") ?? "");
+  if (!UUID.test(versionId)) redirect("/");
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) redirect(`/auth/sign-in?next=${encodeURIComponent(`/versions/${versionId}`)}`);
+
+  const reason = form.get("reason") === "lyrics" ? "lyrics" : "other";
+  const note = String(form.get("note") ?? "")
+    .trim()
+    .slice(0, 500);
+  // Row-level security decides who may report what; nobody reads a report back but admins.
+  const { error } = await supabase
+    .from("reports")
+    .insert({ version_id: versionId, reporter_id: auth.user.id, reason, note: note || null });
+  const result = !error ? "sent" : error.code === "23505" ? "already" : "failed";
+  redirect(`/versions/${versionId}?report=${result}`);
+}

@@ -16,7 +16,13 @@ export default async function VersionPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ fork?: string; view?: string; key?: string; set?: string }>;
+  searchParams: Promise<{
+    fork?: string;
+    view?: string;
+    key?: string;
+    set?: string;
+    report?: string;
+  }>;
 }) {
   if (!authEnabled()) notFound();
   const { id } = await params;
@@ -50,6 +56,11 @@ export default async function VersionPage({
       visibility={version.visibility}
       status={version.status}
       forkFailed={search.fork === "failed"}
+      report={
+        search.report === "sent" || search.report === "already" || search.report === "failed"
+          ? search.report
+          : null
+      }
       setChoices={setChoices}
       setFailed={search.set === "failed"}
     />
