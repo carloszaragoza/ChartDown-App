@@ -1,4 +1,4 @@
-import { parse } from "@chartdown/core";
+import { parse } from "chartdown";
 import { describe, expect, it } from "vitest";
 import { songView, viewAs, viewAsOptions, type SetSong } from "./song";
 

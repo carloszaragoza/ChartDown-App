@@ -1,4 +1,4 @@
-import { keyName, type Chart } from "@chartdown/core";
+import { keyName, type Chart } from "chartdown";
 import type { Display } from "../display";
 
 export type StandTheme = "light" | "stage";

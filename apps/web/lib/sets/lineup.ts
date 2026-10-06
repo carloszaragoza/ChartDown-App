@@ -1,4 +1,4 @@
-import { parseKeyName, type Chart, type Key } from "@chartdown/core";
+import { parseKeyName, type Chart, type Key } from "chartdown";
 
 /**
  * What a member plays in a set (R-05.3): the set's own lineup when it has one, where no

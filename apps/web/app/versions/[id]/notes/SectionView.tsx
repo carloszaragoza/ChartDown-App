@@ -1,4 +1,4 @@
-import { chordFormatter, sectionLength, type Chart } from "@chartdown/core";
+import { chordFormatter, sectionLength, type Chart } from "chartdown";
 import { BarRow, Icon, MDNote, type MDNoteData } from "@chartdown/ui";
 import Link from "next/link";
 import { useTranslations } from "next-intl";

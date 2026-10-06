@@ -5,7 +5,7 @@ import {
   placeLayer,
   type Chart,
   type DisplayOptions,
-} from "@chartdown/core";
+} from "chartdown";
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";

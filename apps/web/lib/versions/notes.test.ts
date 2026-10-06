@@ -1,4 +1,4 @@
-import { parse, placeLayer } from "@chartdown/core";
+import { parse, placeLayer } from "chartdown";
 import { describe, expect, it } from "vitest";
 import { readNoteForm, sectionAnchors, toLayer, type NoteRow } from "./notes";
 

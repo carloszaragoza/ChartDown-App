@@ -1,4 +1,4 @@
-import { WARNING_CODES } from "@chartdown/core";
+import { WARNING_CODES } from "chartdown";
 import { describe, expect, it } from "vitest";
 import en from "../messages/en.json";
 import es from "../messages/es.json";

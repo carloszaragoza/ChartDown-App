@@ -3,7 +3,7 @@ import {
   type ChordFormatter,
   type Section as SectionData,
   type SectionLength,
-} from "@chartdown/core";
+} from "chartdown";
 import { BarRow, type BarLabels } from "./Bar";
 import { MDNote, orderNotes, type MDNoteData } from "./MDNote";
 

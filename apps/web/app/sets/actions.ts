@@ -1,6 +1,6 @@
 "use server";
 
-import { keyName, parse } from "@chartdown/core";
+import { keyName, parse } from "chartdown";
 import { redirect } from "next/navigation";
 import { authEnabled } from "../../lib/auth/enabled";
 import { createClient } from "../../lib/supabase/server";

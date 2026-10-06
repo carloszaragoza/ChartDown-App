@@ -5,7 +5,7 @@ import {
   type Chart,
   type ChordStyle,
   type Key,
-} from "@chartdown/core";
+} from "chartdown";
 
 /** How a chart is shown (R-03.2): numbers or letters, in a home key. The chart never changes. */
 export interface Display {

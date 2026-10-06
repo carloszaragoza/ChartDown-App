@@ -1,4 +1,4 @@
-import { parse, placeLayer, type Chart } from "@chartdown/core";
+import { parse, placeLayer, type Chart } from "chartdown";
 import { Button, hasInstrumentIcon, Icon } from "@chartdown/ui";
 import Link from "next/link";
 import { notFound } from "next/navigation";

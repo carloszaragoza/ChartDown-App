@@ -1,4 +1,4 @@
-import { parse } from "@chartdown/core";
+import { parse } from "chartdown";
 import { notFound } from "next/navigation";
 import { authEnabled } from "../../../lib/auth/enabled";
 import { createClient } from "../../../lib/supabase/server";

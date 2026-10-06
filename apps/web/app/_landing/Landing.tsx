@@ -1,4 +1,4 @@
-import { chordFormatter, parse } from "@chartdown/core";
+import { chordFormatter, parse } from "chartdown";
 import { Button, Icon, Section, type IconName } from "@chartdown/ui";
 import Link from "next/link";
 import { useTranslations } from "next-intl";

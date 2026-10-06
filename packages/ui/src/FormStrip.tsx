@@ -1,4 +1,4 @@
-import { sectionLength, type Chart, type SectionLength } from "@chartdown/core";
+import { sectionLength, type Chart, type SectionLength } from "chartdown";
 
 export type FormState = "played" | "current" | "upcoming";
 

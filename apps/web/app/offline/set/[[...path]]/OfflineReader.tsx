@@ -1,6 +1,6 @@
 "use client";
 
-import { keyName, parse, type Chart } from "@chartdown/core";
+import { keyName, parse, type Chart } from "chartdown";
 import { InstrumentTag } from "@chartdown/ui";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
