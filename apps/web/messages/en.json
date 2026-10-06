@@ -684,6 +684,33 @@
         "taken": "That id is already in the catalog.",
         "unknown": "Something went wrong. Try again."
       }
+    },
+    "invites": {
+      "title": "Invite codes",
+      "hint": "Create and revoke the codes people need to join the beta.",
+      "create": "Create a code",
+      "kind": "Kind",
+      "kinds": {
+        "single_use": "Single use",
+        "band": "Band code"
+      },
+      "maxUses": "Uses (band codes)",
+      "maxUsesHint": "A single-use code works once. Leave the uses empty for a band code with no limit.",
+      "note": "Note (who it is for)",
+      "createSubmit": "Create code",
+      "list": "Codes, newest first",
+      "none": "No codes yet.",
+      "uses": "{uses} of {max} used",
+      "usesNoLimit": "{uses} used, no limit",
+      "revoked": "Revoked",
+      "revoke": "Revoke {code}",
+      "created": "Code {code} was created.",
+      "revokedDone": "Code {code} was revoked: it no longer works.",
+      "problems": {
+        "uses": "The uses must be a whole number from 1 to 10,000, or empty for no limit.",
+        "note": "The note can have at most 200 characters.",
+        "unknown": "Something went wrong. Try again."
+      }
     }
   },
   "landing": {

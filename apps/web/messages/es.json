@@ -684,6 +684,33 @@
         "taken": "Ese id ya está en el catálogo.",
         "unknown": "Algo salió mal. Inténtalo de nuevo."
       }
+    },
+    "invites": {
+      "title": "Códigos de invitación",
+      "hint": "Crea y revoca los códigos para unirse a la beta.",
+      "create": "Crear un código",
+      "kind": "Tipo",
+      "kinds": {
+        "single_use": "De un solo uso",
+        "band": "Código de banda"
+      },
+      "maxUses": "Usos (códigos de banda)",
+      "maxUsesHint": "Un código de un solo uso funciona una vez. Deja los usos vacíos para un código de banda sin límite.",
+      "note": "Nota (para quién es)",
+      "createSubmit": "Crear código",
+      "list": "Códigos, los más nuevos primero",
+      "none": "Aún no hay códigos.",
+      "uses": "{uses} de {max} usados",
+      "usesNoLimit": "{uses} usados, sin límite",
+      "revoked": "Revocado",
+      "revoke": "Revocar {code}",
+      "created": "Se creó el código {code}.",
+      "revokedDone": "Se revocó el código {code}: ya no funciona.",
+      "problems": {
+        "uses": "Los usos deben ser un número entero de 1 a 10.000, o nada para sin límite.",
+        "note": "La nota puede tener 200 caracteres como máximo.",
+        "unknown": "Algo salió mal. Inténtalo de nuevo."
+      }
     }
   },
   "landing": {

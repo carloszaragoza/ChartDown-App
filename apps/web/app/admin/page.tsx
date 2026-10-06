@@ -9,6 +9,7 @@ export default async function AdminPage() {
   const t = await getTranslations("admin");
   const parts = [
     { href: "/admin/instruments", label: t("instruments.title"), hint: t("instruments.hint") },
+    { href: "/admin/invites", label: t("invites.title"), hint: t("invites.hint") },
   ];
   return (
     <main className={styles.page}>
