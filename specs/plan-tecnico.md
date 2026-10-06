@@ -91,7 +91,7 @@ Tool versions and prices change; confirm them when starting.
 
 | Table | Key fields | Notes |
 |---|---|---|
-| profiles | id, name, language, platform role | Visitor = no session, no row |
+| profiles | id, name, language, platform role, terms version and when it was accepted | Visitor = no session, no row. The terms version is the one accepted at sign-up (T-1202), copied from the invite claim when the account is created |
 | instruments | id, slug, English and Spanish names, aliases (other names a chart may use, as in ChartDown 4.1), active | Admin's catalog (R-07.3); the parser resolves notes with slug and aliases (R-00.1) |
 | user_instruments | user, instrument | What each person plays (R-01.2); each person manages their own; a deactivated instrument can't be added but stays where it is (R-07.3) |
 | songs | id, title, artists | No CCLI data (decision 10) |
@@ -109,7 +109,7 @@ Tool versions and prices change; confirm them when starting.
 | set_lineup | set, member, instrument | A member of the set's band; one or more instruments (R-05.3) |
 | set_temp_md | set, member, until (the set's date unless given) | One per set, a member of the set's band (decisions 2 and 9.6) |
 | invite_codes | code (`XXXX-XXXX`, no look-alike characters, case ignored), type (single use or band), max uses (1, a number, or no limit), uses, note, created by, revoked at | R-01.7; admins only. No expiry date: the Admin revokes |
-| invite_claims | code, email, expires at (30 minutes), used at, user | R-01.7; closed, only its functions use it |
+| invite_claims | code, email, expires at (30 minutes), used at, user, terms version accepted and when | R-01.7; closed, only its functions use it. Accepting the Terms of Use and the Privacy Notice is part of claiming a code, so it covers a password and every sign-in provider alike (T-1202) |
 | waitlist | email (unique, case ignored), language, date | R-01.8; anyone joins through a function that always answers the same; only admins read it |
 | notifications | user, type, detail, read at | SPEC-09; each person reads only their own and marks them read; created only by the server process |
 | notification_prefs | user, type, channel (in-app, email, WhatsApp), active | R-09.5; no row means the notice is on; each person manages their own |
@@ -195,6 +195,7 @@ The second barrier is row-level security: even if someone queries the database d
 - Daily database backups.
 - **Lyric landmarks:** the parser warns when a quoted landmark is longer than 8 words, enforcing constitution principle 6 without relying only on reports.
 - **Deleted accounts:** resolved in 12.5. Terms of use and the chart license should be reviewed by a lawyer before launch.
+- **Terms of Use and Privacy Notice (T-1202):** private-beta texts at `/terms` and `/privacy`, in English and Spanish (the Spanish is a translation), with contact@chartdown.app. Creating an account requires accepting both at the first step; the version accepted is kept on the profile. A new version of the texts gets a new version id.
 
 ### 8.1 Row-level security (T-304)
 
