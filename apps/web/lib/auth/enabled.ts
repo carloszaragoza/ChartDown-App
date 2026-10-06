@@ -9,3 +9,11 @@ export function authEnabled(env: Record<string, string | undefined> = process.en
     Boolean(env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)
   );
 }
+
+/**
+ * The landing page's waitlist works wherever the database is configured, production included
+ * (T-1201): it needs no email provider or sign-in.
+ */
+export function waitlistEnabled(env: Record<string, string | undefined> = process.env): boolean {
+  return Boolean(env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
+}

@@ -40,6 +40,8 @@ export function AppBar({ account, personalSets }: AppBarProps) {
     if (!account) void forgetSets();
   }, [account]);
   if (pathname.endsWith("/stand")) return null;
+  // A visitor's home is the landing page, which has its own top bar (T-1201).
+  if (!account && pathname === "/") return null;
 
   const links = account
     ? [
