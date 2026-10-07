@@ -944,8 +944,12 @@
       "lead": "ChartDown App turns plain-text Nashville Number charts into band charts on iPad and desktop, with music director notes for each instrument.",
       "try": "Try the notation",
       "free": "Free during the invite-only beta.",
-      "example": "Example chart",
-      "viewing": "Viewing as {instrument}"
+      "example": "An original example chart",
+      "viewing": "Viewing as {instrument}",
+      "everyone": "Everyone",
+      "viewAs": "View as",
+      "meta": "{title} · Key {key} · {tempo} bpm · {meter}",
+      "bar": "bar {bar}"
     },
     "how": {
       "title": "How it works",
@@ -979,7 +983,8 @@
       "part": {
         "title": "Your part only",
         "text": "Each musician sees the music director's notes for their own instrument."
-      }
+      },
+      "frame": "The chorus in stand mode"
     },
     "language": {
       "nav": "The language",
@@ -1005,7 +1010,10 @@
       "terms": "Terms",
       "privacy": "Privacy"
     },
-    "catalog": "Catalog"
+    "catalog": "Catalog",
+    "ending": {
+      "title": "Bring it to Sunday."
+    }
   },
   "legal": {
     "terms": "Terms of Use",

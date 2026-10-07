@@ -944,8 +944,12 @@
       "lead": "ChartDown App convierte charts del sistema de números de Nashville en texto plano en charts de banda para iPad y computadora, con notas del director musical para cada instrumento.",
       "try": "Probar la notación",
       "free": "Gratis durante la beta por invitación.",
-      "example": "Chart de ejemplo",
-      "viewing": "Viendo como {instrument}"
+      "example": "Un cifrado original de ejemplo",
+      "viewing": "Viendo como {instrument}",
+      "everyone": "Todos",
+      "viewAs": "Ver como",
+      "meta": "{title} · Tono {key} · {tempo} bpm · {meter}",
+      "bar": "compás {bar}"
     },
     "how": {
       "title": "Cómo funciona",
@@ -979,7 +983,8 @@
       "part": {
         "title": "Solo tu parte",
         "text": "Cada músico ve las notas del director musical para su propio instrumento."
-      }
+      },
+      "frame": "El coro en modo atril"
     },
     "language": {
       "nav": "El lenguaje",
@@ -1005,7 +1010,10 @@
       "terms": "Términos",
       "privacy": "Privacidad"
     },
-    "catalog": "Catálogo"
+    "catalog": "Catálogo",
+    "ending": {
+      "title": "Llévalo al domingo."
+    }
   },
   "legal": {
     "terms": "Términos de uso",
