@@ -23,7 +23,9 @@
   --chart-repeat-line: calc(var(--border-width) * 5) double var(--chart-ink);
   --chart-split-line: calc(var(--border-width) * 1.5) dashed var(--color-border-emphasized);
   --chart-bar-min-width: calc(var(--spacing-12) * 3.5);
-  --chart-cell-padding: var(--spacing-2);
+  /* More room than chart-tokens.css's spacing-2: a number right against the bar line is hard to
+     read (owner, October 7, 2026). */
+  --chart-cell-padding: var(--spacing-4);
 
   /* Beat slashes: color, size and weight together, never color alone */
   --chart-beat-strong-color: var(--color-text-primary);
@@ -152,7 +154,7 @@
 }
 .cd-chart__cell--split {
   border-inline-start: var(--chart-split-line);
-  padding-inline-start: var(--spacing-1);
+  padding-inline-start: var(--spacing-2);
 }
 .cd-chart__chord {
   position: relative;
