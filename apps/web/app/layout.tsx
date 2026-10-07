@@ -5,6 +5,7 @@ import "../theme/chartdown-stand.css";
 import "@chartdown/ui/fonts.css";
 import "@chartdown/ui/tokens.css";
 import "@chartdown/ui/components.css";
+import "@chartdown/ui/chart.css";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";

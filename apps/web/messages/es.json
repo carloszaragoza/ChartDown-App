@@ -194,7 +194,14 @@
     "tempo": "Tempo",
     "example": "Ejemplo: Atril, vista de Teclados",
     "writtenIn": "(escrito en {key})",
-    "nthTime": "{time, selectordinal, other {#.ª}} vez"
+    "nthTime": "{time, selectordinal, other {#.ª}} vez",
+    "keyChange": "Cambio de tono: {key}",
+    "beat": "Tiempo {beat}: {strength}",
+    "beatStrength": {
+      "strong": "fuerte",
+      "semi": "semifuerte",
+      "weak": "débil"
+    }
   },
   "auth": {
     "email": "Correo electrónico",

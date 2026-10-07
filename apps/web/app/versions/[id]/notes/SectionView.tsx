@@ -82,7 +82,14 @@ export function SectionView({
         )}
         <VStack gap={3}>
           {section.rows.map((row, position) => (
-            <BarRow key={position} row={row} formatter={formatter} labels={labels.bar} />
+            <BarRow
+              key={position}
+              row={row}
+              formatter={formatter}
+              labels={labels.bar}
+              meter={chart.meter}
+              size="md"
+            />
           ))}
         </VStack>
         <Divider />

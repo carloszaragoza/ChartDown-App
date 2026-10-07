@@ -1,72 +1,71 @@
-import { Grid } from "@astryxdesign/core/Grid";
-import { HStack } from "@astryxdesign/core/HStack";
-import { Text } from "@astryxdesign/core/Text";
-import type { Bar as BarData, BarItem, ChordFormatter, Row } from "chartdown";
+import {
+  keyName,
+  type Bar as BarData,
+  type BarItem,
+  type ChordFormatter,
+  type Meter,
+  type Row,
+} from "chartdown";
+import type { CSSProperties } from "react";
 import { DEFAULT_BAR_LABELS, type BarLabels } from "./Bar";
+import { barSpans, beatStrength, COLUMNS_PER_BEAT } from "./beats";
 
 const DYNAMIC_TEXT: Record<string, string> = { cresc: "cresc.", decresc: "decresc." };
+const FOUR_FOUR: Meter = { beats: 4, unit: 4 };
 
-// Bar lines are the chart's own drawing (Design Handoff 2.0, section 3), made from theme tokens:
-// three border widths in the primary text color, two in the emphasized border color when small.
-const line = (small: boolean) =>
-  small
-    ? "calc(var(--border-width) * 2) solid var(--color-border-emphasized)"
-    : "calc(var(--border-width) * 3) solid var(--color-text-primary)";
-
-function Chord({
+function Item({
   item,
   row,
   formatter,
   labels,
-  small,
 }: {
   item: BarItem;
   row: Row;
   formatter: ChordFormatter;
   labels: BarLabels;
-  small: boolean;
 }) {
-  const size = small ? "2xl" : "4xl";
-  const color = small ? "secondary" : "primary";
   if (item.type !== "chord") {
-    const [glyph, words] = {
-      "no-chord": ["N.C.", labels.noChord],
-      "repeat-bar": ["%", labels.repeatBar],
-      tie: ["⁀", labels.tie],
+    const [glyph, words, extra] = {
+      "no-chord": ["N.C.", labels.noChord, " cd-chart__no-chord"],
+      "repeat-bar": ["%", labels.repeatBar, ""],
+      tie: ["⁀", labels.tie, ""],
     }[item.type];
     return (
-      <Text size={size} weight="semibold" color={color}>
+      <span className={`cd-chart__chord cd-chart__muted${extra}`}>
         <span aria-hidden="true">{glyph}</span>
         <span className="cd-visually-hidden">{words}</span>
-      </Text>
+      </span>
     );
   }
   const { root, quality, bass } = formatter.chord(item, row);
-  const marks = [
+  const said = [
     item.push && labels.push,
     item.hold && labels.hold,
     item.stab && labels.stab,
     item.fermata && labels.fermata,
   ].filter(Boolean);
+  const name = (
+    <>
+      {root}
+      {quality && <sup className="cd-chart__quality">{quality}</sup>}
+      {bass && <span className="cd-chart__bass">/{bass}</span>}
+    </>
+  );
   return (
-    <span style={{ flexGrow: item.beats, textAlign: "center" }}>
-      <Text size={size} weight="semibold" color={color} hasTabularNumbers>
-        {item.push && <span aria-hidden="true">‹</span>}
-        {root}
-        {quality && (
-          <sup style={{ fontSize: "0.5em", marginInlineStart: "var(--spacing-0-5)" }}>
-            {quality}
-          </sup>
-        )}
-        {bass && `/${bass}`}
-        {(item.stab || item.fermata) && (
-          <sup aria-hidden="true" style={{ fontSize: "0.5em" }}>
-            {item.stab ? "^" : ""}
-            {item.fermata ? "⌒" : ""}
-          </sup>
-        )}
-        {marks.length > 0 && <span className="cd-visually-hidden">{` (${marks.join(", ")})`}</span>}
-      </Text>
+    <span className="cd-chart__chord">
+      {(item.stab || item.fermata) && (
+        <span className="cd-chart__marks" aria-hidden="true">
+          {item.stab && <span>^</span>}
+          {item.fermata && <span>𝄐</span>}
+        </span>
+      )}
+      {item.push && (
+        <span className="cd-chart__push" aria-hidden="true">
+          ‹
+        </span>
+      )}
+      {item.hold ? <span className="cd-chart__hold">{name}</span> : name}
+      {said.length > 0 && <span className="cd-visually-hidden">{` (${said.join(", ")})`}</span>}
     </span>
   );
 }
@@ -74,68 +73,77 @@ function Chord({
 function OneBar({
   bar,
   row,
+  meter,
   first,
-  small,
   formatter,
   labels,
 }: {
   bar: BarData;
   row: Row;
+  meter: Meter;
   first: boolean;
-  small: boolean;
   formatter: ChordFormatter;
   labels: BarLabels;
 }) {
+  const columns = meter.beats * COLUMNS_PER_BEAT;
+  const spans = barSpans(bar.items, meter);
+  const grid = { "--chart-cols": columns } as CSSProperties;
+  const classes = [
+    "cd-chart__bar",
+    first && "cd-chart__bar--first",
+    bar.repeatStart && "cd-chart__bar--repeat-start",
+    bar.repeatEnd && "cd-chart__bar--repeat-end",
+    bar.ending && "cd-chart__bar--ending",
+  ].filter(Boolean);
   return (
-    // Each bar spans three lines shared by the whole row (marks, chords, lyric) through a
-    // subgrid, so a bar with a dynamic, a cue or ×2 never pushes its chords off the row's line.
-    <div
-      role="group"
-      style={{
-        display: "grid",
-        gridRow: "span 3",
-        gridTemplateRows: "subgrid",
-        rowGap: "var(--spacing-1)",
-        alignContent: "center",
-        minHeight: small ? "var(--spacing-12)" : "calc(var(--spacing-12) * 2)",
-        borderInlineEnd: line(small),
-        ...(first || bar.repeatStart ? { borderInlineStart: line(small) } : {}),
-        paddingInline: "var(--spacing-2)",
-        paddingBlock: "var(--spacing-1)",
-      }}
-    >
-      <HStack gap={2} vAlign="center">
-        {bar.ending && <Text type="supporting">{bar.ending.join(", ")}.</Text>}
+    <div role="group" className={classes.join(" ")}>
+      <div className="cd-chart__tags">
+        {bar.ending && <span className="cd-chart__ending">{bar.ending.join(", ")}.</span>}
         {bar.dynamic && (
-          <Text type="supporting" weight="bold" color="accent">
-            <i>{DYNAMIC_TEXT[bar.dynamic] ?? bar.dynamic}</i>
-          </Text>
+          <i className="cd-chart__dynamic">{DYNAMIC_TEXT[bar.dynamic] ?? bar.dynamic}</i>
         )}
         {bar.cues.map((cue, index) => (
-          <Text key={index} type="supporting">
+          <span key={index} className="cd-chart__cue">
             {!cue.roles.includes("everyone") && (
-              <strong style={{ color: "var(--color-text-red)" }}>
-                {cue.roles.map(labels.instrument).join(", ")}{" "}
-              </strong>
+              <b className="cd-chart__cue-role">{cue.roles.map(labels.instrument).join(", ")} </b>
             )}
             {cue.text}
-          </Text>
+          </span>
         ))}
-        {bar.repeatEnd && <Text type="supporting">×{bar.repeatEnd.times}</Text>}
-      </HStack>
-      <HStack gap={2} vAlign="center" hAlign="around" width="100%">
-        {bar.items.map((item, index) => (
-          <Chord
-            key={index}
-            item={item}
-            row={row}
-            formatter={formatter}
-            labels={labels}
-            small={small}
-          />
-        ))}
-      </HStack>
-      <div>{bar.lyric !== undefined && <Text type="supporting">“{bar.lyric}”</Text>}</div>
+        {bar.repeatEnd && <span className="cd-chart__times">×{bar.repeatEnd.times}</span>}
+      </div>
+      {/* Each chord starts at its beat and spans its length; a dashed line marks a change. */}
+      <div className="cd-chart__grid" style={grid}>
+        {bar.items.map((item, index) => {
+          const at = spans[index] ?? { start: 1, span: columns };
+          return (
+            <span
+              key={index}
+              className={`cd-chart__cell${index > 0 ? " cd-chart__cell--split" : ""}`}
+              style={{ gridColumn: `${at.start} / span ${at.span}` }}
+            >
+              <Item item={item} row={row} formatter={formatter} labels={labels} />
+            </span>
+          );
+        })}
+      </div>
+      {/* One slash per beat, by strength; the chords are read in order, so these are hidden. */}
+      <div className="cd-chart__grid" style={grid} aria-hidden="true">
+        {Array.from({ length: meter.beats }, (_, beat) => {
+          const strength = beatStrength(beat, meter.beats, meter.unit);
+          return (
+            <span
+              key={beat}
+              className={`cd-chart__beat cd-chart__beat--${strength}`}
+              style={{ gridColumn: `${beat * COLUMNS_PER_BEAT + 1} / span ${COLUMNS_PER_BEAT}` }}
+              title={labels.beat(beat + 1, strength)}
+            >
+              /
+            </span>
+          );
+        })}
+      </div>
+      <div className="cd-chart__lyric">{bar.lyric !== undefined && `“${bar.lyric}”`}</div>
     </div>
   );
 }
@@ -144,30 +152,53 @@ export interface BarRowProps {
   /** A row of a chart, from the `chartdown` tree. */
   row: Row;
   formatter: ChordFormatter;
+  /** The chart's meter, for the beats of each bar; 4/4 when not given. */
+  meter?: Meter;
   labels?: BarLabels;
-  /** "sm" is the next-section preview: smaller, in the secondary color. */
-  size?: "lg" | "sm";
+  /**
+   * "lg" is stand mode, "md" the viewer and the editors, "sm" the next-section preview: smaller,
+   * in the secondary color.
+   */
+  size?: "lg" | "md" | "sm";
 }
 
 /**
- * A row of bars (Design Handoff 2.0, section 3): square bar lines, chord numbers in large tabular
- * figures, quality marks as superscripts, dynamics in the accent color. Four bars per row.
+ * A row of bars, drawn by the chart viewer rules (T-1309, design/chart-viewer): each bar has a
+ * tags line, its chords on a grid of 12 columns per beat, a slash per beat by strength and the
+ * lyric landmark; every bar of the row shares those lines, so the chords stand on one baseline.
+ * Repeats draw double bar lines, endings a label and a top line, and a key change a line above.
  */
-export function BarRow({ row, formatter, labels = DEFAULT_BAR_LABELS, size = "lg" }: BarRowProps) {
-  const small = size === "sm";
+export function BarRow({
+  row,
+  formatter,
+  meter = FOUR_FOUR,
+  labels = DEFAULT_BAR_LABELS,
+  size = "lg",
+}: BarRowProps) {
+  // As many columns as the row has bars, as the approved prototype draws it.
+  const bars = { "--chart-bars": Math.max(1, row.bars.length) } as CSSProperties;
   return (
-    <Grid columns={Math.max(4, row.bars.length)} gap={0}>
-      {row.bars.map((bar, index) => (
-        <OneBar
-          key={index}
-          bar={bar}
-          row={row}
-          first={index === 0}
-          small={small}
-          formatter={formatter}
-          labels={labels}
-        />
-      ))}
-    </Grid>
+    <div className={`cd-chart cd-chart--${size}`}>
+      {row.keyChange && (
+        <div className="cd-chart__key-change">
+          {labels.keyChange(keyName(formatter.rowKey(row)))}
+        </div>
+      )}
+      <div className="cd-chart__scroll">
+        <div className="cd-chart__bars" style={bars}>
+          {row.bars.map((bar, index) => (
+            <OneBar
+              key={index}
+              bar={bar}
+              row={row}
+              meter={meter}
+              first={index === 0}
+              formatter={formatter}
+              labels={labels}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

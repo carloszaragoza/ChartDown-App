@@ -16,7 +16,7 @@ const body = (style: "numbers" | "letters", key?: string) =>
   );
 // The root of each chord, drawn large in its bar (its quality, such as m, is drawn apart).
 const chords = (html: string) =>
-  [...html.matchAll(/data-size="4xl"[^>]*>([^<]+)/g)].map((match) => match[1]);
+  [...html.matchAll(/class="cd-chart__chord">([^<]+)/g)].map((match) => match[1]);
 
 describe("R-03.2 numbers or letters, and transposition", () => {
   it("R-03.2 letters show the chords in the written key", () => {

@@ -1,0 +1,49 @@
+/*
+ * ChartDown chart viewer tokens.
+ * Every value maps to an Astryx theme token, so the chart follows the app's
+ * light and dark themes automatically. Import after the Astryx theme CSS.
+ * Only the chord-number font is outside Astryx (see CHART-VIEWER.md, section 2).
+ */
+:root {
+  /* Type */
+  --chart-font-numbers: "Barlow Condensed", var(--font-family-heading);
+  --chart-font-text: var(--font-family-body);
+  --chart-chord-size: var(--font-size-4xl);        /* stand mode; viewer and editor may use --font-size-3xl */
+  --chart-chord-size-preview: var(--font-size-2xl);
+  --chart-chord-weight: var(--font-weight-semibold);
+  --chart-quality-scale: 0.5;                       /* superscript: m, 7, sus, add9 ... (em) */
+  --chart-bass-scale: 0.75;                         /* slash bass: /3 (em) */
+
+  /* Ink */
+  --chart-ink: var(--color-text-primary);           /* chord numbers, bar lines */
+  --chart-ink-muted: var(--color-text-secondary);   /* section bar counts, N.C., %, next-section preview */
+  --chart-surface: var(--color-background-card);
+
+  /* Bar lines and splits */
+  --chart-bar-line: calc(var(--border-width) * 3) solid var(--chart-ink);
+  --chart-repeat-line: calc(var(--border-width) * 5) double var(--chart-ink);
+  --chart-split-line: calc(var(--border-width) * 1.5) dashed var(--color-border-emphasized);
+  --chart-bar-min-width: calc(var(--spacing-12) * 3.5);
+  --chart-cell-padding: var(--spacing-2);
+
+  /* Beat slashes: strong, semi-strong, weak (color + size + weight, never color alone) */
+  --chart-beat-strong-color: var(--color-text-primary);
+  --chart-beat-strong-size: var(--font-size-lg);
+  --chart-beat-strong-weight: var(--font-weight-bold);
+  --chart-beat-semi-color: var(--color-text-secondary);
+  --chart-beat-semi-size: var(--font-size-base);
+  --chart-beat-semi-weight: var(--font-weight-bold);
+  --chart-beat-weak-color: var(--color-border-emphasized);
+  --chart-beat-weak-size: var(--font-size-sm);
+  --chart-beat-weak-weight: var(--font-weight-normal);
+
+  /* Meaning colors */
+  --chart-md: var(--color-text-red);                /* MD label, instrument tags, instrument cues */
+  --chart-md-border: var(--color-border-red);
+  --chart-dynamic: var(--color-text-accent);        /* p, mf, cresc., push, stab, fermata marks */
+
+  /* Hold (diamond) */
+  --chart-hold-box: 1.5em;                          /* square that contains the chord, centered */
+  --chart-hold-diamond: 1.06em;                     /* side of the square rotated 45deg; its diagonal fits the box */
+  --chart-hold-stroke: calc(var(--border-width) * 2) solid var(--chart-ink);
+}

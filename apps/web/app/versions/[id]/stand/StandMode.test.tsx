@@ -38,7 +38,9 @@ describe("R-03.3 stand mode", () => {
     expect(current).toMatch(/role="group"/);
     // The preview of the next section, small and in the secondary color.
     expect(html).toContain("Verse 2");
-    expect(html).toContain("var(--color-border-emphasized)");
+    // The current section at stand mode's size; the next one as the small preview (chart.css).
+    expect(html).toContain("cd-chart cd-chart--lg");
+    expect(html).toContain("cd-chart cd-chart--sm");
     expect(html).toContain("Section 3 of 7");
   });
 
