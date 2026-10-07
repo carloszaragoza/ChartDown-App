@@ -16,7 +16,7 @@ test("R-01.2 a person saves their name and the instruments they play", async ({ 
   await page.getByLabel("Name").fill("Ana Keys");
   await page.getByLabel("Keys", { exact: true }).check();
   await page.getByLabel("Vocals", { exact: true }).check();
-  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.getByRole("button", { name: "Save profile" }).click();
   await expectStatus(page, "Your profile was saved");
 
   await page.reload();
@@ -27,9 +27,9 @@ test("R-01.2 a person saves their name and the instruments they play", async ({ 
 
   // Without the first save's message, so the next wait sees the second save's own message.
   await page.goto("/profile");
-  await expect(page.getByRole("main").getByRole("status")).toHaveCount(0);
+  await expect(page.getByText("Your profile was saved")).toHaveCount(0);
   await page.getByLabel("Vocals", { exact: true }).uncheck();
-  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.getByRole("button", { name: "Save profile" }).click();
   await expectStatus(page, "Your profile was saved");
   await page.reload();
   await expect(page.getByLabel("Vocals", { exact: true })).not.toBeChecked();
@@ -41,8 +41,8 @@ test("R-01.5 the chosen language persists across sessions", async ({ page, conte
   const email = unique("idioma");
   await signUpAndConfirm(page, email, "Lucía Test");
   await openProfile(page);
-  await page.getByLabel("Español").check();
-  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.getByRole("main").getByRole("radio", { name: "Español" }).click();
+  await page.getByRole("button", { name: "Save profile" }).click();
   await expectStatus(page, "Tu perfil se guardó");
 
   // A new session in a browser that remembers nothing.
@@ -79,12 +79,11 @@ test("R-01.6 a person deletes their account, and it no longer signs in", async (
   const email = unique("leaving");
   await signUpAndConfirm(page, email, "Leaving Test");
   await openProfile(page);
+  await page.getByRole("link", { name: "Account" }).click();
 
+  // The button waits for the person's own email (Design Handoff 2.0 screen 15).
   await page.getByLabel("Type your email to confirm").fill("someone-else@example.test");
-  await page.getByRole("button", { name: "Delete my account" }).click();
-  await expect(page.getByRole("main").getByRole("alert")).toContainText(
-    "does not match your account",
-  );
+  await expect(page.getByRole("button", { name: "Delete my account" })).toBeDisabled();
 
   await page.getByLabel("Type your email to confirm").fill(email);
   await page.getByRole("button", { name: "Delete my account" }).click();

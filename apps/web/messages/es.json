@@ -220,7 +220,9 @@
       "differentCode": "Usar otro código",
       "noCode": "¿No tienes código?",
       "providerHint": "Con Google, Microsoft o Apple, usa este mismo correo.",
-      "acceptTerms": "Acepto los <terms>Términos de uso</terms> y el <privacy>Aviso de privacidad</privacy>."
+      "acceptTerms": "Acepto los <terms>Términos de uso</terms> y el <privacy>Aviso de privacidad</privacy>.",
+      "acceptPlain": "Acepto los Términos de uso y el Aviso de privacidad.",
+      "readTerms": "Lee los <terms>Términos de uso</terms> y el <privacy>Aviso de privacidad</privacy>."
     },
     "forgot": {
       "title": "Restablecer tu contraseña",
@@ -269,9 +271,9 @@
     "title": "Tu perfil",
     "name": "Nombre",
     "instruments": "Instrumentos que tocas",
-    "instrumentsHint": "Elige los que quieras; puedes cambiarlos cuando quieras.",
+    "instrumentsHint": "Las bandas los usan como tus instrumentos por defecto. Las notas de tu director los siguen.",
     "noLongerOffered": "(ya no se ofrece)",
-    "save": "Guardar",
+    "save": "Guardar perfil",
     "saved": "Tu perfil se guardó.",
     "nameRequired": "Escribe tu nombre.",
     "error": "Algo salió mal. Inténtalo de nuevo.",
@@ -285,9 +287,44 @@
       "mismatch": "Ese correo no coincide con tu cuenta."
     },
     "prefsTitle": "Avisos",
-    "prefsHint": "En la app. El correo llegará más adelante.",
+    "prefsHint": "Los avisos por correo llegan en una versión posterior.",
     "prefsSave": "Guardar avisos",
-    "prefsSaved": "Tus avisos quedaron guardados."
+    "prefsSaved": "Tus avisos quedaron guardados.",
+    "nameHint": "Lo ven tus bandas y aparece en las versiones que publicas.",
+    "languageHint": "Cambia la app al guardar. La sintaxis de los cifrados nunca cambia.",
+    "allSaved": "Todos los cambios guardados",
+    "unsaved": "Cambios sin guardar",
+    "roleAdmin": "Administrador",
+    "roleMember": "Miembro",
+    "instrumentCount": "{count, plural, =0 {sin instrumentos} one {# instrumento} other {# instrumentos}}",
+    "tabs": {
+      "profile": "Perfil",
+      "notices": "Avisos",
+      "account": "Cuenta"
+    },
+    "groups": {
+      "rhythm": "Ritmo",
+      "harmony": "Armonía",
+      "voice": "Voz y vientos",
+      "other": "Otros"
+    },
+    "noticeGroups": {
+      "sets": "Tus sets",
+      "songs": "Canciones de tus sets",
+      "md": "Como director musical",
+      "versions": "Tus versiones"
+    },
+    "prefsBannerTitle": "Los avisos llegan en la app",
+    "prefsAutosave": "Los cambios en los avisos se guardan al moverlos.",
+    "signIn": {
+      "title": "Cómo inicias sesión",
+      "google": "Google",
+      "apple": "Apple",
+      "azure": "Microsoft",
+      "password": "Correo y contraseña",
+      "notSet": "Sin configurar",
+      "connected": "Conectado"
+    }
   },
   "version": {
     "by": "Arreglo de {author}",
@@ -776,7 +813,8 @@
       "noteRemoved": "Nota quitada de {title}, {section}: “{text}”",
       "lineup": "{name} ahora toca: {to}.",
       "sitsOut": "no toca en este set"
-    }
+    },
+    "downloadedSets": "Sets descargados"
   },
   "notices": {
     "title": "Avisos",

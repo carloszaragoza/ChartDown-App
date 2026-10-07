@@ -73,7 +73,7 @@ export async function saveNoticePrefs(form: FormData): Promise<void> {
     const { error } = await supabase
       .from("notification_prefs")
       .upsert(turnOff.map((type) => ({ user_id: userId, type, channel: "in_app", active: false })));
-    if (error) redirect("/profile?error=unknown#notices");
+    if (error) redirect("/profile?tab=notices&error=unknown");
   }
   if (turnOn.length > 0) {
     const { error } = await supabase
@@ -82,9 +82,9 @@ export async function saveNoticePrefs(form: FormData): Promise<void> {
       .eq("user_id", userId)
       .eq("channel", "in_app")
       .in("type", turnOn);
-    if (error) redirect("/profile?error=unknown#notices");
+    if (error) redirect("/profile?tab=notices&error=unknown");
   }
-  redirect("/profile?saved=notices#notices");
+  redirect("/profile?tab=notices&saved=notices");
 }
 
 /** Deletes the signed-in person's account for good, after they confirm with their email (R-01.6). */
@@ -94,7 +94,7 @@ export async function deleteAccount(form: FormData): Promise<void> {
   const { error } = await supabase.rpc("delete_my_account", {
     confirm_email: String(form.get("confirm") ?? ""),
   });
-  if (error) redirect("/profile?error=confirm#delete");
+  if (error) redirect("/profile?tab=account&error=confirm");
   // The account no longer exists; this clears the session cookies.
   await supabase.auth.signOut();
   redirect("/?account=deleted");

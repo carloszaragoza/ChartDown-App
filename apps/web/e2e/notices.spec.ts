@@ -107,12 +107,16 @@ test("R-09.5 a notice Luis turned off is not delivered; the others still are", a
   request,
 }) => {
   const { set, title, luis } = await bandWithSet(page, request, async (luisPage) => {
-    await luisPage.goto("/profile");
-    await luisPage.getByLabel("When I am added to a set").uncheck();
-    await luisPage.getByRole("button", { name: "Save notices" }).click();
+    await luisPage.goto("/profile?tab=notices");
+    // Each switch saves at once (Design Handoff 2.0 screen 15).
+    await luisPage.getByRole("switch", { name: "When I am added to a set" }).click();
     await expectStatus(luisPage, "Your notice choices were saved.");
-    await expect(luisPage.getByLabel("When I am added to a set")).not.toBeChecked();
-    await expect(luisPage.getByLabel("When a song in my sets changes key")).toBeChecked();
+    await expect(
+      luisPage.getByRole("switch", { name: "When I am added to a set" }),
+    ).not.toBeChecked();
+    await expect(
+      luisPage.getByRole("switch", { name: "When a song in my sets changes key" }),
+    ).toBeChecked();
   });
 
   // Ana puts Luis on bass and changes the song's key.

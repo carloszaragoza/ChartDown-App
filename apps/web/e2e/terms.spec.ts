@@ -24,8 +24,10 @@ test("T-1202 creating an account needs the terms accepted, and the profile keeps
   request,
 }) => {
   await page.goto("/auth/sign-up");
+  // Continue waits for the terms to be accepted.
   const accept = page.getByRole("checkbox", { name: /^I accept the Terms of Use/ });
-  await expect(accept).toHaveAttribute("required", "");
+  await expect(accept).not.toBeChecked();
+  await expect(page.getByRole("button", { name: "Continue" })).toBeDisabled();
   await expect(page.getByRole("link", { name: "Terms of Use" })).toHaveAttribute("href", "/terms");
   await expect(page.getByRole("link", { name: "Privacy Notice" })).toHaveAttribute(
     "href",

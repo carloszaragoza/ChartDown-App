@@ -1,11 +1,12 @@
-import { Button } from "@chartdown/ui";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Text } from "@astryxdesign/core/Text";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";
 import { joinWaitlist } from "../actions";
-import { AuthPage, Field } from "../AuthPage";
-import styles from "../auth.module.css";
+import { AuthForm, AuthPage, Field } from "../AuthPage";
 
 type Search = Promise<{ error?: string; sent?: string }>;
 
@@ -17,23 +18,19 @@ export default async function WaitlistPage({ searchParams }: { searchParams: Sea
   return (
     <AuthPage title={t("waitlist.title")} error={error}>
       {sent ? (
-        <p role="status" className={styles.message}>
-          {t("waitlist.sent")}
-        </p>
+        <Banner status="success" title={t("waitlist.sent")} />
       ) : (
         <>
-          <p className={styles.message}>{t("waitlist.intro")}</p>
-          <form action={joinWaitlist} className={styles.form}>
+          <Text color="secondary">{t("waitlist.intro")}</Text>
+          <AuthForm action={joinWaitlist}>
             <Field label={t("email")} name="email" type="email" autoComplete="email" />
-            <Button type="submit" variant="primary">
-              {t("waitlist.submit")}
-            </Button>
-          </form>
+            <Button type="submit" variant="primary" label={t("waitlist.submit")} width="100%" />
+          </AuthForm>
         </>
       )}
-      <div className={styles.links}>
+      <Text>
         <Link href="/auth/sign-up">{t("waitlist.haveCode")}</Link>
-      </div>
+      </Text>
     </AuthPage>
   );
 }
