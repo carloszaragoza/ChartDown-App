@@ -325,6 +325,8 @@ No personal data of a departed user remains, which removes the risk with privacy
 - In each band where they were the permanent MD and others remain, the longest-standing member becomes the MD, and an event lets the band know.
 - Everything else that is theirs is deleted: the account and its sign-in methods, the profile, their instruments, their personal space with its sets and layer, their memberships, lineups and temporary MD roles, notices and preferences, their waitlist entry and invite claims, and the events that name them.
 
+**License of the code:** the repository is public to read but not open source: all rights reserved (root `LICENSE`), except `packages/core` (`chartdown`, MIT) and third-party packages and fonts under their own licenses (decided October 7, 2026).
+
 **License of charts:** every public chart is published under **CC0**. The terms of use say so at publish time.
 
 ### 12.6 Names, repositories and business model
