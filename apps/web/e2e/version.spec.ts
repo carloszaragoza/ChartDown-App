@@ -14,9 +14,9 @@ test("R-01.4 a visitor reads a public version without an account", async ({ page
   await expect(page.getByRole("heading", { level: 1, name: "Open Road" })).toBeVisible();
   await expect(page.getByText("Arrangement by ChartDown")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Last Chorus" })).toBeVisible();
-  await expect(
-    page.getByRole("navigation", { name: "Song form" }).getByRole("link"),
-  ).toHaveCount(7);
+  await expect(page.getByRole("navigation", { name: "Song form" }).getByRole("link")).toHaveCount(
+    7,
+  );
 });
 
 test("R-01.4 forking asks the visitor to sign in, then comes back to the version", async ({
