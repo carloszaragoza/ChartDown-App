@@ -35,7 +35,8 @@ import {Squares2X2Icon as GridSolid, FlagIcon as FlagSolid, MusicalNoteIcon as I
 import {Grid} from '@astryxdesign/core/Grid';
 import {Badge} from '@astryxdesign/core/Badge';
 import {CheckboxList, CheckboxListItem} from '@astryxdesign/core/CheckboxList';
-import {ExclamationTriangleIcon} from '@heroicons/react/24/outline';
+import {ExclamationTriangleIcon, HomeIcon, ArrowPathIcon, UsersIcon, ChartBarIcon} from '@heroicons/react/24/outline';
+import {HomeIcon as HomeSolid} from '@heroicons/react/24/solid';
 import {BellIcon, ArrowRightOnRectangleIcon, CheckIcon} from '@heroicons/react/24/outline';
 import {BellIcon as BellSolid} from '@heroicons/react/24/solid';
 import {DrumsIcon, BassIcon, KeysIcon, GuitarIcon, VocalsIcon, SaxIcon, TrumpetIcon, TromboneIcon, ViolinIcon} from './InstrumentIcons';
@@ -49,7 +50,7 @@ import {
 import {QueueListIcon as QueueListSolid, BookOpenIcon as BookOpenSolid, UserGroupIcon as UserGroupSolid, UserIcon as UserSolid, PencilSquareIcon as PencilSolid, ChatBubbleLeftRightIcon as ChatSolid, ArrowsPointingOutIcon as StandSolid} from '@heroicons/react/24/solid';
 import {BarRow, MDNotes, type Bar} from './Chart';
 
-type Screen = 'set' | 'stand' | 'catalog' | 'editor' | 'layer' | 'bands' | 'band' | 'newversion' | 'invites' | 'personal' | 'admin' | 'instruments' | 'reports' | 'notices' | 'profile';
+type Screen = 'set' | 'stand' | 'catalog' | 'editor' | 'layer' | 'bands' | 'band' | 'newversion' | 'invites' | 'personal' | 'admin' | 'instruments' | 'reports' | 'notices' | 'profile' | 'home';
 
 const songs = [
   {n: 1, title: 'Open Road', source: 'Live 2025', key: 'A', notes: 2},
@@ -116,6 +117,7 @@ function Nav({screen, go, lang, setLang, unread}: {screen: Screen; go: (s: Scree
         </VStack>
       }>
       <SideNavSection title="Home" isHeaderHidden>
+        <SideNavItem label="Home" icon={HomeIcon} selectedIcon={HomeSolid} isSelected={screen === 'home'} onClick={() => go('home')} />
         <SideNavItem label="Notices" icon={BellIcon} selectedIcon={BellSolid} isSelected={screen === 'notices'} onClick={() => go('notices')}
           endContent={unread > 0 ? <Badge variant="error" label={String(unread)} /> : undefined} />
       </SideNavSection>
@@ -1097,8 +1099,230 @@ function ProfileScreen({lang, setLang}: {lang: string; setLang: (v: string) => v
   );
 }
 
+
+type Usage = {title: string; source: string; d7: [number, number]; d30: [number, number]; all: [number, number]} & Record<string, unknown>;
+
+function HomeScreen({go, notices}: {go: (s: Screen) => void; notices: Notice[]}) {
+  const [role, setRole] = useState<'md' | 'musician' | 'new'>('md');
+  const [period, setPeriod] = useState<'d7' | 'd30' | 'all'>('d30');
+  const [steps, setSteps] = useState({instruments: false, band: false, version: false, set: false});
+  const usage: Usage[] = [
+    {title: 'Open Road', source: 'Live 2025', d7: [3, 9], d30: [7, 21], all: [12, 38]},
+    {title: 'Lantern Bay', source: 'Own arrangement', d7: [1, 4], d30: [2, 6], all: [4, 11]},
+    {title: 'Steady Ground', source: 'Acoustic', d7: [0, 0], d30: [1, 3], all: [3, 8]},
+  ];
+  const totalBands = usage.reduce((a, u) => a + u[period][0], 0);
+  const totalMusicians = usage.reduce((a, u) => a + u[period][1], 0);
+  const max = Math.max(...usage.map(u => u[period][1]), 1);
+  const periodLabel = {d7: 'last 7 days', d30: 'last 30 days', all: 'all time'}[period];
+  const people = [
+    {name: 'Carlos Zaragoza', role: 'Music director · Keys'}, {name: 'Sam Ortiz', role: 'Drums'}, {name: 'Jordan Lee', role: 'Bass'},
+    {name: 'Maya Cruz', role: 'Guitar'}, {name: 'Chris Vega', role: 'Vocals'},
+  ];
+  const isMD = role === 'md';
+  const isNew = role === 'new';
+  const me = isMD ? {name: 'Carlos', line: 'Music director of LifeStone Church · Keys', inst: 'Keys', icon: KeysIcon}
+    : {name: 'Sam', line: 'Drums in LifeStone Church', inst: 'Drums', icon: DrumsIcon};
+  const stat = (label: string, value: string, hint: string, to: Screen) => (
+    <Card key={label} padding={4}>
+      <VStack gap={1}>
+        <Text type="supporting">{label}</Text>
+        <Heading level={2} type="display-3">{value}</Heading>
+        <HStack hAlign="between" vAlign="center"><Text type="supporting">{hint}</Text><Button label={`Open ${label.toLowerCase()}`} isIconOnly size="sm" variant="ghost" icon={<Icon icon={ArrowRightIcon} />} onClick={() => go(to)} /></HStack>
+      </VStack>
+    </Card>
+  );
+  const done = Object.values(steps).filter(Boolean).length;
+  const step = (key: keyof typeof steps, title: string, description: string, action: string, to: Screen) => (
+    <Item key={key} as="li"
+      startContent={steps[key] ? <Icon icon={CheckCircleIcon} color="success" /> : <Text type="large" color="secondary" hasTabularNumbers>{Object.keys(steps).indexOf(key) + 1}</Text>}
+      label={<Text weight="semibold">{title}</Text>} description={description}
+      endContent={steps[key] ? <Text type="supporting">Done</Text> : <Button label={action} size="sm" onClick={() => { setSteps({...steps, [key]: true}); }} />} />
+  );
+  const previewSwitch = (
+    <Banner status="info" collapsible={false} title="Prototype preview"
+      description="See Home as each kind of user."
+      endContent={
+        <SegmentedControl label="Preview Home as" value={role} onChange={v => setRole(v as 'md' | 'musician' | 'new')} size="sm">
+          <SegmentedControlItem value="md" label="Music director" />
+          <SegmentedControlItem value="musician" label="Musician" />
+          <SegmentedControlItem value="new" label="New user" />
+        </SegmentedControl>} />
+  );
+
+  if (isNew) {
+    return (
+      <Layout
+        header={<PageHeader over="Sunday, October 11" title="Welcome to ChartDown, Alex" meta={<Text color="secondary">Four steps and your band can play from the same charts.</Text>} />}
+        content={
+          <LayoutContent padding={6}>
+            <VStack gap={6}>
+              {previewSwitch}
+              <Card padding={0}>
+                <Section padding={4} paddingBlockEnd={2}>
+                  <HStack hAlign="between" vAlign="center"><Heading level={2}>Get started</Heading><Text type="supporting">{done} of 4 done</Text></HStack>
+                </Section>
+                <List hasDividers>
+                  {step('instruments', 'Choose your instruments', 'So your music director\u2019s notes reach you.', 'Choose', 'profile')}
+                  {step('band', 'Join or create a band', 'Accept an invitation from your MD, or start your own band.', 'Go to bands', 'bands')}
+                  {step('version', 'Publish your first version', 'Write a chart in ChartDown or start from the catalog.', 'New version', 'newversion')}
+                  {step('set', 'Create your first set', 'Practice on your own in your personal space.', 'Create set', 'personal')}
+                </List>
+              </Card>
+              <EmptyState icon={<Icon icon={CalendarDaysIcon} size="lg" color="secondary" />} title="No upcoming sets"
+                description="When your music director adds you to a set, it shows up here." />
+            </VStack>
+          </LayoutContent>
+        }
+        end={
+          <LayoutPanel width={340} hasDivider padding={5} label="Help">
+            <VStack gap={5}>
+              <VStack gap={2}>
+                <Heading level={2}>Joining a band?</Heading>
+                <Text color="secondary">Ask your music director to invite this email. The invitation appears in Notices.</Text>
+              </VStack>
+              <VStack gap={2}>
+                <Heading level={2}>New to number charts?</Heading>
+                <Text color="secondary">Try the playground and the quick guide to ChartDown.</Text>
+                <HStack><Button label="Open the guide" size="sm" icon={<Icon icon={BookOpenIcon} />} /></HStack>
+              </VStack>
+            </VStack>
+          </LayoutPanel>
+        }
+      />
+    );
+  }
+
+  return (
+    <Layout
+      header={<PageHeader over="Sunday, October 11" title={`Good evening, ${me.name}`}
+        meta={<Text color="secondary">{me.line}</Text>}
+        actions={<>
+          <Button label="Create set" icon={<Icon icon={PlusIcon} />} onClick={() => go('personal')} />
+          <Button label="New version" variant="primary" icon={<Icon icon={MusicalNoteIcon} />} onClick={() => go('newversion')} />
+        </>} />}
+      content={
+        <LayoutContent padding={6}>
+          <VStack gap={6}>
+            {previewSwitch}
+            <Card padding={5}>
+              <VStack gap={4}>
+                <HStack hAlign="between" vAlign="start">
+                  <VStack gap={1}>
+                    <Text type="supporting">Next up · tomorrow</Text>
+                    <Heading level={2}>Sunday 12 – Service</Heading>
+                    <Text color="secondary">LifeStone Church · Sunday, October 12 at 9:00 AM · 6 songs · you play {me.inst}</Text>
+                  </VStack>
+                  <HStack gap={1} vAlign="center"><StatusDot variant="success" label="Downloaded for offline" /><Text type="supporting">Offline ready</Text></HStack>
+                </HStack>
+                <HStack gap={2} vAlign="center" wrap="wrap">
+                  <Token label={isMD ? '7 notes for you' : '4 notes for you'} color="red" size="sm" />
+                  <Token label="Open Road in A" size="sm" />
+                  <Token label="Lantern Bay in Em" size="sm" />
+                  <Text type="supporting">+4 more</Text>
+                </HStack>
+                <HStack gap={2}>
+                  <Button label="Start stand mode" variant="primary" icon={<Icon icon={ArrowsPointingOutIcon} />} onClick={() => go('stand')} />
+                  <Button label="Open set" onClick={() => go('set')} />
+                </HStack>
+              </VStack>
+            </Card>
+
+            <Grid columns={{minWidth: 140}} gap={4}>
+              {stat('Bands', isMD ? '2' : '1', isMD ? 'Including Personal' : 'LifeStone Church', 'bands')}
+              {stat('Upcoming sets', isMD ? '3' : '2', 'Next: tomorrow', 'set')}
+              {stat('My versions', isMD ? '4' : '0', isMD ? '3 public · 1 private' : 'None yet', 'catalog')}
+              {stat('Musicians', '6', 'in your band', 'band')}
+            </Grid>
+
+            {isMD ? (
+              <Card padding={0}>
+                <Section padding={4} paddingBlockEnd={2}>
+                  <HStack hAlign="between" vAlign="center" gap={3} wrap="wrap">
+                    <VStack gap={0}>
+                      <Heading level={2}>How your versions are used</Heading>
+                      <Text type="supporting">{totalMusicians} musicians in {totalBands} {totalBands === 1 ? 'band' : 'bands'} played your public versions · {periodLabel}</Text>
+                    </VStack>
+                    <SegmentedControl label="Period" value={period} onChange={v => setPeriod(v as 'd7' | 'd30' | 'all')} size="sm">
+                      <SegmentedControlItem value="d7" label="7 days" />
+                      <SegmentedControlItem value="d30" label="30 days" />
+                      <SegmentedControlItem value="all" label="All time" />
+                    </SegmentedControl>
+                  </HStack>
+                </Section>
+                <Table<Usage> data={usage} idKey="title" columns={[
+                  {key: 'title', header: 'Version', renderCell: r => <VStack gap={0}><Text weight="semibold">{r.title}</Text><Text type="supporting">{r.source}</Text></VStack>},
+                  {key: 'bands', header: 'Bands', width: 90, renderCell: r => <Text hasTabularNumbers>{r[period][0]}</Text>},
+                  {key: 'musicians', header: 'Musicians', renderCell: r => (
+                    <HStack gap={2} vAlign="center">
+                      <Text hasTabularNumbers>{r[period][1]}</Text>
+                      <div aria-hidden="true" style={{flex: 1, maxWidth: 'calc(var(--spacing-12) * 4)', height: 'var(--spacing-2)', background: 'var(--color-background-secondary)', borderRadius: 'var(--radius-full)'}}>
+                        <div style={{width: `${(r[period][1] / max) * 100}%`, height: '100%', background: 'var(--color-accent)', borderRadius: 'var(--radius-full)'}} />
+                      </div>
+                    </HStack>)},
+                ]} />
+              </Card>
+            ) : (
+              <Card padding={5}>
+                <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
+                  <VStack gap={1}>
+                    <Heading level={2}>Share your own arrangements</Heading>
+                    <Text color="secondary">Publish a version and see how many musicians play it.</Text>
+                  </VStack>
+                  <Button label="New version" icon={<Icon icon={MusicalNoteIcon} />} onClick={() => go('newversion')} />
+                </HStack>
+              </Card>
+            )}
+
+            <VStack gap={2}>
+              <HStack hAlign="between" vAlign="center"><Heading level={2}>Recent activity</Heading><Button label="All notices" variant="ghost" size="sm" onClick={() => go('notices')} /></HStack>
+              <List hasDividers>
+                {notices.slice(0, 3).map(n => (
+                  <Item key={n.id} as="li" onClick={() => go(n.to)} startContent={<StatusDot variant={n.unread ? 'accent' : 'neutral'} label={n.unread ? 'Unread' : 'Read'} />}
+                    label={n.title} description={n.detail} endContent={<Text type="supporting" textWrap="nowrap">{n.when}</Text>} />
+                ))}
+              </List>
+            </VStack>
+          </VStack>
+        </LayoutContent>
+      }
+      end={
+        <LayoutPanel width={340} hasDivider padding={5} label="For you">
+          <VStack gap={6}>
+            <VStack gap={2}>
+              <Heading level={2}>Needs your attention</Heading>
+              <List density="compact">
+                {isMD ? <>
+                  <Item as="li" onClick={() => go('set')} startContent={<Icon icon={ArrowPathIcon} color="secondary" />} label="2 songs have new revisions" description="Sunday 12 · review and update" />
+                  <Item as="li" onClick={() => go('band')} startContent={<Icon icon={EnvelopeIcon} color="secondary" />} label="2 invitations pending" description="LifeStone Church" />
+                  <Item as="li" onClick={() => go('reports')} startContent={<Icon icon={FlagIcon} color="secondary" />} label="1 open report" description="Administration" />
+                </> : <>
+                  <Item as="li" onClick={() => go('stand')} startContent={<Icon icon={ChatBubbleLeftRightIcon} color="secondary" />} label="4 new notes for Drums" description="Sunday 12 · read them before rehearsal" />
+                  <Item as="li" onClick={() => go('notices')} startContent={<Icon icon={ArrowPathIcon} color="secondary" />} label="Key changed in Open Road" description="Now in A" />
+                </>}
+              </List>
+            </VStack>
+            <VStack gap={2}>
+              <HStack hAlign="between" vAlign="center"><Heading level={2}>Your band</Heading>{isMD && <Button label="Manage" variant="ghost" size="sm" onClick={() => go('band')} />}</HStack>
+              <Text type="supporting">LifeStone Church · 6 musicians</Text>
+              <List density="compact">
+                {people.filter(p => !(isMD && p.name === 'Carlos Zaragoza')).map(p => <Item key={p.name} as="li" startContent={<Avatar name={p.name} size="sm" />} label={!isMD && p.name === 'Sam Ortiz' ? `${p.name} (you)` : p.name} description={p.role} />)}
+              </List>
+            </VStack>
+            <VStack gap={2}>
+              <HStack hAlign="between" vAlign="center"><Heading level={2}>Your instruments</Heading><Button label="Edit" variant="ghost" size="sm" onClick={() => go('profile')} /></HStack>
+              <HStack gap={2} wrap="wrap"><Token label={me.inst} color="red" icon={<Icon icon={me.icon} />} /></HStack>
+              <Text type="supporting">Your MD notes follow these instruments.</Text>
+            </VStack>
+          </VStack>
+        </LayoutPanel>
+      }
+    />
+  );
+}
+
 export function App() {
-  const [screen, setScreen] = useState<Screen>('set');
+  const [screen, setScreen] = useState<Screen>('home');
   const [lang, setLang] = useState('en');
   const [notices, setNotices] = useState<Notice[]>([
     {id: 1, title: 'You were added to Sunday 12', detail: 'LifeStone Church · Service · Sunday, October 12 at 9:00 AM · Keys', when: '2h ago', unread: true, to: 'set'},
@@ -1108,6 +1332,7 @@ export function App() {
   const unread = notices.filter(n => n.unread).length;
   return (
     <AppShell sideNav={<Nav screen={screen} go={setScreen} lang={lang} setLang={setLang} unread={unread} />} height="fill">
+      {screen === 'home' && <HomeScreen go={setScreen} notices={notices} />}
       {screen === 'notices' && <NoticesScreen go={setScreen} notices={notices} setNotices={setNotices} />}
       {screen === 'set' && <SetScreen go={setScreen} />}
       {screen === 'stand' && <StandScreen go={setScreen} />}

@@ -163,12 +163,14 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-02.8 **History:** every save creates a revision. The owner sees the revisions and can go back to an earlier one; going back is also recorded (decision 7).
 - R-02.9 Duplicates are allowed. The catalog shows how many versions each song has.
 - R-02.10 Search by title, artist and source.
+- R-02.11 **Credit in numbers:** the author of a public version (active or frozen) sees how many bands and how many musicians have it in a set, over the last 7 days, the last 30 days or all time. **Totals only:** never which bands, sets or people, never anything of a band's notes, and never for anyone but the author. Private versions are not counted. It is the community's thanks to those who share their arrangements, and the Terms and Privacy Notice say so.
 
 **Acceptance criteria**
 
 - Given a public version by user A, when user B opens it, then B sees the chart and “Fork”, but not “Edit”.
 - Given a public version by A that B uses in a set, when A makes it private, then B's set still opens the public version and A has a private copy they can edit.
 - Given a version with five revisions, when the owner goes back to the third, then the chart shows that content and the history records the restore as a new revision.
+- Given A's public version in sets of two bands with three and two members, when A opens Home, then A sees 2 bands and 5 musicians and nothing that names those bands, their sets or their members; when B, who is not the author, asks for those numbers, B gets nothing.
 
 ### SPEC-03 · Chart editor and viewer
 

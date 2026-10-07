@@ -7,13 +7,32 @@ Every screen uses `AppShell` with the side navigation, and a `Layout` with a pag
 - **Specs:** SPEC-01 (language, roles), SPEC-09 (notices).
 - **SideNav** (`collapsible`):
   - **Header:** `SideNavHeading` "ChartDown" with the current band as subheading. Its menu switches between the user's bands and Personal space, plus "All bands".
-  - **Notices** at the top, with a red `Badge` showing the unread count.
+  - **Home** first (the screen shown after sign-in), then **Notices**, with a red `Badge` showing the unread count.
   - **Play:** Sets, Stand mode.
   - **Create:** Catalog, New version, Chart editor, MD notes.
   - **People:** Bands, Personal space.
   - **Administration** (admins only): Overview, Instruments, Invite codes, Reports (warning `Badge` with open reports).
   - **Footer:** language `SegmentedControl` (English / Español) and the user `Item` (avatar, name, role and instrument) that opens the profile, with a Sign out icon button.
 - On a phone, the side nav becomes a drawer (Astryx default).
+
+## 00 · Home — `00-home.png`, `00-home-musician.png`, `00-home-new-user.png`
+- **Purpose:** the first screen after sign-in. It answers "what's next, what needs me, and how is my work doing?"
+- **Specs:** SPEC-05 (sets), SPEC-06 (notes for you), SPEC-08 (offline), SPEC-09 (notices), SPEC-02 (versions), SPEC-04 (bands).
+- **Header:** today's date as overline; "Good morning / afternoon / evening, {first name}"; role and instruments in the main band. Actions: "Create set" and primary "New version" (only for users who can create).
+- **Next up `Card`:** the nearest upcoming set across all bands: relative day, name and type, band, date and time, song count, the instrument the user plays in it, offline `StatusDot`, a red `Token` "N notes for you", the first songs with their set keys, and buttons "Start stand mode" (primary) and "Open set". If there's no upcoming set, show an `EmptyState` with "Create set".
+- **Stats `Grid`** (4 `Card`s, one row on desktop, wraps on narrow screens): Bands, Upcoming sets, My versions (public / private), Musicians in your bands. Each card links to its screen.
+- **"How your versions are used" `Card`:** period `SegmentedControl` (7 days, 30 days, All time); summary line ("N musicians in M bands played your public versions"); `Table` with version, bands and musicians, plus a small horizontal bar relative to the top version. Counts come from sets that include the version in the period. Only the user's **public** versions; never show who the other bands are.
+- **Recent activity:** the latest 3 notices as a `List`, with "All notices".
+- **End panel (340), "For you":**
+  - **Needs your attention:** actionable items only: new revisions to review in your sets (MD), pending invitations (MD), open reports (admins), invitations to join a band (musicians). Hidden when empty.
+  - **Your band:** members of the current band with `Avatar`, name and instrument, and "Manage" (MD). Users in several bands see the band chosen in the side nav switcher.
+  - **Your instruments:** red instrument `Token`s with icons and "Edit" (opens the profile).
+- **Three variants** (the prototype has a "Prototype preview" banner to switch between them; **don't build that banner**, it's only for review):
+  - **Music director** (`00-home.png`): everything above.
+  - **Musician** (`00-home-musician.png`): same next-up card and stats. Instead of the usage table (no public versions yet), a card "Share your own arrangements" with "New version". "Needs your attention" shows new notes for their instrument and changes in their sets. "Your band" has no Manage button and marks the user with "(you)".
+  - **New user** (`00-home-new-user.png`, no bands and no versions): header "Welcome to ChartDown, {first name}"; a "Get started" `Card` with a 4-step checklist (choose your instruments, join or create a band, publish your first version, create your first set), each with a button and a "Done" state, and a "N of 4 done" counter; an `EmptyState` "No upcoming sets". End panel with help: how to join a band and a link to the ChartDown guide.
+- The variant comes from the data (role in the current band, number of versions and bands), not from a setting.
+- **Privacy:** usage numbers are aggregated counts. Never reveal names of other bands or musicians that use a version.
 
 ## 01 · Notices — `01-notices.png`
 - **Specs:** SPEC-09 (R-09.1 to R-09.3).
