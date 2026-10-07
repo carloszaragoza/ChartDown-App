@@ -2,7 +2,13 @@ import { rootCallback } from "../lib/auth/callback";
 import { authEnabled, waitlistEnabled } from "../lib/auth/enabled";
 import { createClient } from "../lib/supabase/server";
 import { redirect } from "next/navigation";
-import { Home } from "./_components/Home";
+import { Banner } from "@astryxdesign/core/Banner";
+import { VStack } from "@astryxdesign/core/VStack";
+import { cookies } from "next/headers";
+import { getLocale, getTranslations } from "next-intl/server";
+import { BAND_COOKIE } from "../lib/shell/shell";
+import { loadHome, type UsagePeriod } from "./_home/load";
+import { HomeView } from "./_home/HomeView";
 import { Landing, type WaitlistResult } from "./_landing/Landing";
 import { Invitations, type Invitation } from "./_components/Invitations";
 
@@ -34,25 +40,30 @@ export default async function HomePage({ searchParams }: { searchParams: Search 
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
   if (!data.user) return landing;
-  const [profile, invitations] = data.user
-    ? await Promise.all([
-        supabase
-          .from("profiles")
-          .select("name")
-          .eq("id", data.user.id)
-          .maybeSingle()
-          .then((r) => r.data),
-        supabase.rpc("my_invitations").then((r) => (r.data ?? []) as Invitation[]),
-      ])
-    : [null, []];
+  // Signed in: their Home (T-1308).
+  const usage: UsagePeriod = search.usage === "7" ? 7 : search.usage === "all" ? null : 30;
+  const [store, locale, invitations, a] = await Promise.all([
+    cookies(),
+    getLocale(),
+    supabase.rpc("my_invitations").then((r) => (r.data ?? []) as Invitation[]),
+    getTranslations("auth.account"),
+  ]);
+  const home = await loadHome(supabase, data.user.id, {
+    chosenBand: store.get(BAND_COOKIE)?.value,
+    usage,
+    locale,
+  });
   return (
-    <Home
-      signInEnabled
-      account={data.user ? { name: profile?.name ?? data.user.email ?? "" } : null}
-      passwordUpdated={password === "updated"}
-      accountDeleted={account === "deleted"}
-    >
-      <Invitations invitations={invitations} />
-    </Home>
+    <HomeView
+      data={home}
+      usage={usage}
+      messages={
+        <VStack gap={3}>
+          {account === "deleted" && <Banner status="success" title={a("accountDeleted")} />}
+          {password === "updated" && <Banner status="success" title={a("passwordUpdated")} />}
+          <Invitations invitations={invitations} />
+        </VStack>
+      }
+    />
   );
 }

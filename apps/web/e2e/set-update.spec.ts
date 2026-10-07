@@ -8,13 +8,14 @@ import {
   addToSet,
   expectStatus,
   createSet,
+  expectSignedIn,
 } from "./flows";
 
 async function switchTo(page: Page, email: string, name: string) {
   await page.goto("/");
   await signOut(page);
   await signIn(page, email, PASSWORD);
-  await expect(page.getByText(`Signed in as ${name}`)).toBeVisible();
+  await expectSignedIn(page, name);
 }
 
 test("R-05.2 a new revision from the author doesn't change the set until accepted", async ({

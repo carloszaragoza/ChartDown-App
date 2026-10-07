@@ -1,6 +1,14 @@
 import { expect, test } from "@playwright/test";
 import { makeAdmin } from "./admin";
-import { PASSWORD, signIn, signOut, signUpAndConfirm, unique, expectStatus } from "./flows";
+import {
+  PASSWORD,
+  signIn,
+  signOut,
+  signUpAndConfirm,
+  unique,
+  expectStatus,
+  expectSignedIn,
+} from "./flows";
 
 // Original example songs only; no lyrics (CLAUDE.md).
 test("R-07.2 a reported version the Admin hides leaves the catalog and its owner gets a notice", async ({
@@ -59,7 +67,7 @@ test("R-07.2 a reported version the Admin hides leaves the catalog and its owner
 
   // Dana is told which version and why, and still sees it, marked hidden.
   await signIn(page, dana, PASSWORD);
-  await expect(page.getByText("Signed in as Dana Owner")).toBeVisible();
+  await expectSignedIn(page, "Dana Owner");
   await expect(page.getByRole("link", { name: /^Notices\s*1$/ })).toBeVisible();
   await page.goto("/notices");
   await page

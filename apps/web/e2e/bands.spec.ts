@@ -7,6 +7,7 @@ import {
   unique,
   expectStatus,
   setInstruments,
+  expectSignedIn,
 } from "./flows";
 
 async function openBand(page: Page, name: string) {
@@ -53,7 +54,7 @@ test("R-04.2 the MD invites, the musician accepts, and whoever leaves loses acce
 
   // Ana sets Ben's default instrument (R-04.3).
   await signIn(page, ana, PASSWORD);
-  await expect(page.getByText("Signed in as Ana Lead")).toBeVisible();
+  await expectSignedIn(page, "Ana Lead");
   await openBand(page, band);
   await setInstruments(page, "Ben Keys", ["Bass"]);
   await expectStatus(page, "The instruments were saved.");
@@ -64,7 +65,7 @@ test("R-04.2 the MD invites, the musician accepts, and whoever leaves loses acce
 
   // Ben leaves and loses access at once (R-04.4).
   await signIn(page, ben, PASSWORD);
-  await expect(page.getByText("Signed in as Ben Keys")).toBeVisible();
+  await expectSignedIn(page, "Ben Keys");
   await openBand(page, band);
   // Leaving is in the band's Settings tab (Design Handoff 2.0, the screens table).
   await page.getByRole("link", { name: "Settings" }).click();

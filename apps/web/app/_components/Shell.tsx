@@ -22,6 +22,7 @@ import {
   ArrowRightStartOnRectangleIcon,
   ArrowsPointingOutIcon,
   BellIcon,
+  HomeIcon,
   BookOpenIcon,
   ChatBubbleLeftRightIcon,
   CheckIcon,
@@ -37,6 +38,7 @@ import {
 import {
   ArrowsPointingOutIcon as ArrowsPointingOutSolid,
   BellIcon as BellSolid,
+  HomeIcon as HomeSolid,
   BookOpenIcon as BookOpenSolid,
   ChatBubbleLeftRightIcon as ChatSolid,
   FlagIcon as FlagSolid,
@@ -163,6 +165,7 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
       footerIcons={<SideNavCollapseButton size="lg" />}
     >
       <SideNavSection title={t("home")} isHeaderHidden>
+        {item("home", t("homeLink"), "/", HomeIcon, HomeSolid)}
         {item(
           "notices",
           t("notices"),

@@ -10,6 +10,7 @@ import {
   expectStatus,
   createSet,
   setKey,
+  expectSignedIn,
 } from "./flows";
 
 const CHART = "---\nkey: G\n---\n## Verse\n1 | 4 | 5 | 1\n";
@@ -53,7 +54,7 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
   await signOut(page);
 
   await signIn(page, ana, PASSWORD);
-  await expect(page.getByText("Signed in as Ana Keys")).toBeVisible();
+  await expectSignedIn(page, "Ana Keys");
   await page.goto("/bands");
   await page.getByRole("link", { name: band, exact: true }).click();
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
@@ -79,7 +80,7 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
 
   // Ben reads the set and plays the song in A, as letters.
   await signIn(page, ben, PASSWORD);
-  await expect(page.getByText("Signed in as Ben Bass")).toBeVisible();
+  await expectSignedIn(page, "Ben Bass");
   await page.goto(setAddress);
   await expect(page.getByRole("region", { name: "Lineup" })).toContainText("Ben Bass");
   await expect(page.getByRole("region", { name: "Lineup" })).toContainText("Bass");

@@ -11,6 +11,7 @@ import {
   expectStatus,
   createSet,
   setKey,
+  expectSignedIn,
 } from "./flows";
 
 test("R-08.3 a change made while offline appears as a notice", async ({
@@ -66,7 +67,7 @@ test("R-08.3 a change made while offline appears as a notice", async ({
   const other = await browser.newContext();
   const anaPage = await other.newPage();
   await signIn(anaPage, ana, PASSWORD);
-  await expect(anaPage.getByText("Signed in as Ana Sync")).toBeVisible();
+  await expectSignedIn(anaPage, "Ana Sync");
   await anaPage.goto(`/sets/${setId}/edit`);
   await setKey(anaPage, title, "A");
   await expectStatus(anaPage, "The key was saved.");

@@ -4,7 +4,124 @@
     "tagline": "Number charts for the whole band, with each player’s notes.",
     "newVersion": "New version",
     "catalog": "Catalog",
-    "bands": "Bands"
+    "bands": "Bands",
+    "personal": "Personal space",
+    "newSubtitle": "Four steps and your band can play from the same charts.",
+    "personalSubtitle": "Your personal space",
+    "mdOf": "Music director of {band}",
+    "playsIn": "{instruments} in {band}",
+    "musicianIn": "Musician in {band}",
+    "undated": "no date yet",
+    "welcome": "Welcome to ChartDown, {name}",
+    "hello": "Hello, {name}",
+    "morning": "Good morning, {name}",
+    "afternoon": "Good afternoon, {name}",
+    "evening": "Good evening, {name}",
+    "createSet": "Create set",
+    "nextUp": "Next up",
+    "youPlay": "you play {instruments}",
+    "notesForYou": "{count, plural, one {# note for you} other {# notes for you}}",
+    "songIn": "{title} in {key}",
+    "more": "+{count} more",
+    "openSet": "Open set",
+    "noUpcoming": "No upcoming sets",
+    "noUpcomingNew": "When your music director adds you to a set, it shows up here.",
+    "noUpcomingHint": "Create one in your band or your personal space.",
+    "getStarted": "Get started",
+    "done": "{count} of 4 done",
+    "stepDone": "Done",
+    "steps": {
+      "instruments": {
+        "title": "Choose your instruments",
+        "hint": "So your music director's notes reach you.",
+        "action": "Choose"
+      },
+      "band": {
+        "title": "Join or create a band",
+        "hint": "Accept an invitation from your music director, or start your own band.",
+        "action": "Go to bands"
+      },
+      "version": {
+        "title": "Publish your first version",
+        "hint": "Write a chart in ChartDown or start from the catalog.",
+        "action": "New version"
+      },
+      "set": {
+        "title": "Create your first set",
+        "hint": "Practice on your own in your personal space.",
+        "action": "Create set"
+      }
+    },
+    "stats": {
+      "bands": "Bands",
+      "withPersonal": "Including Personal space",
+      "upcoming": "Upcoming sets",
+      "next": "Next: {when}",
+      "none": "None yet",
+      "versions": "My versions",
+      "publicPrivate": "{public} public · {private} private",
+      "noneYet": "None yet",
+      "musicians": "Musicians",
+      "inBand": "in your band"
+    },
+    "usage": {
+      "title": "How your versions are used",
+      "summary": "{musicians, plural, one {# musician} other {# musicians}} in {bands, plural, one {# band} other {# bands}} played your public versions · {period}",
+      "noneYet": "No band has played your public versions in this period yet.",
+      "period": "Period",
+      "7": "last 7 days",
+      "30": "last 30 days",
+      "all": "all time",
+      "choice": {
+        "7": "7 days",
+        "30": "30 days",
+        "all": "All time"
+      },
+      "version": "Version",
+      "bands": "Bands",
+      "musicians": "Musicians",
+      "relative": "How {title} compares with your most played version",
+      "privacy": "Totals only: you never see which bands or musicians they are."
+    },
+    "share": {
+      "title": "Share your own arrangements",
+      "hint": "Publish a version and see how many musicians play it.",
+      "action": "Publish a version"
+    },
+    "recent": "Recent activity",
+    "allNotices": "All notices",
+    "read": "Read",
+    "unread": "New",
+    "help": {
+      "label": "Help",
+      "joinTitle": "Joining a band?",
+      "join": "Ask your music director to invite this email. The invitation appears here and in Notices.",
+      "guideTitle": "New to number charts?",
+      "guide": "Read the quick guide to ChartDown, the plain-text notation your charts are written in.",
+      "openGuide": "Open the guide"
+    },
+    "attention": {
+      "title": "Needs your attention",
+      "newer": "{count, plural, one {# song has a new revision} other {# songs have new revisions}}",
+      "newerHint": "{set} · review and update",
+      "pending": "{count, plural, one {# invitation pending} other {# invitations pending}}",
+      "reports": "{count, plural, one {# open report} other {# open reports}}",
+      "admin": "Administration",
+      "notes": "{count, plural, one {# new note for you} other {# new notes for you}}",
+      "notesHint": "Read them before rehearsal",
+      "keys": "{count, plural, one {# key changed} other {# keys changed}}",
+      "keysHint": "In your sets"
+    },
+    "forYou": "For you",
+    "yourBand": "Your band",
+    "manage": "Manage",
+    "bandLine": "{band} · {count, plural, one {# musician} other {# musicians}}",
+    "you": "{name} (you)",
+    "md": "Music director",
+    "yourInstruments": "Your instruments",
+    "edit": "Edit",
+    "noInstruments": "No instruments yet.",
+    "instrumentsHint": "Your director's notes follow these instruments."
   },
   "language": {
     "label": "Language",
@@ -888,7 +1005,8 @@
     "roleAdmin": "Admin",
     "roleMember": "Member",
     "noInstruments": "No instruments yet",
-    "collapse": "Collapse the menu"
+    "collapse": "Collapse the menu",
+    "homeLink": "Home"
   },
   "mine": {
     "title": "Your versions",

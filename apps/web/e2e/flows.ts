@@ -25,7 +25,7 @@ export async function signUpAndConfirm(page: Page, email: string, name: string) 
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("Check your email");
   await page.goto(await latestLink(page.request, email, sentAfter));
-  await expect(page.getByText(`Signed in as ${name}`)).toBeVisible();
+  await expectSignedIn(page, name);
 }
 
 export async function signIn(page: Page, email: string, password: string) {
@@ -144,4 +144,10 @@ export async function writeChart(page: Page, text: string) {
 export async function setKey(page: Page, title: string, key: string) {
   await page.getByRole("combobox", { name: `Key of ${title}` }).click();
   await page.getByRole("option", { name: key, exact: true }).click();
+}
+
+/** The person is signed in: their name at the foot of the side navigation (T-1301, T-1308). */
+export async function expectSignedIn(page: Page, name: string) {
+  // The person's link to their profile, in any language.
+  await expect(page.locator('a[href="/profile"]').filter({ hasText: name }).first()).toBeVisible();
 }

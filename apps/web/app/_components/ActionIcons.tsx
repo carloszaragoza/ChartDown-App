@@ -2,7 +2,14 @@
 
 import { Icon } from "@astryxdesign/core/Icon";
 import {
+  ArrowPathIcon,
+  ArrowRightIcon,
   ArrowsPointingOutIcon,
+  BookOpenIcon,
+  ChatBubbleLeftRightIcon,
+  EnvelopeIcon,
+  FlagIcon,
+  MusicalNoteIcon,
   DocumentDuplicateIcon,
   GlobeAltIcon,
   PencilSquareIcon,
@@ -30,4 +37,32 @@ export function AddIcon() {
 
 export function PublicIcon() {
   return <Icon icon={GlobeAltIcon} size="sm" color="secondary" />;
+}
+
+export function RevisionIcon() {
+  return <Icon icon={ArrowPathIcon} color="secondary" />;
+}
+
+export function InviteIcon() {
+  return <Icon icon={EnvelopeIcon} color="secondary" />;
+}
+
+export function ReportIcon() {
+  return <Icon icon={FlagIcon} color="secondary" />;
+}
+
+export function NoteIcon() {
+  return <Icon icon={ChatBubbleLeftRightIcon} color="secondary" />;
+}
+
+export function GoIcon() {
+  return <Icon icon={ArrowRightIcon} size="sm" color="secondary" />;
+}
+
+export function VersionIcon() {
+  return <Icon icon={MusicalNoteIcon} />;
+}
+
+export function GuideIcon() {
+  return <Icon icon={BookOpenIcon} />;
 }
