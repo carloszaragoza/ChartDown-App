@@ -5,7 +5,6 @@ import { Button } from "@astryxdesign/core/Button";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Item } from "@astryxdesign/core/Item";
 import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
 import { List } from "@astryxdesign/core/List";
@@ -13,7 +12,6 @@ import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
-import { ArrowsPointingOutIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
@@ -24,6 +22,7 @@ import { setWhen } from "../../../lib/sets/when";
 import { createClient } from "../../../lib/supabase/server";
 import { UUID } from "../../versions/[id]/load";
 import { updatePinned } from "../actions";
+import { EditIcon, StandIcon } from "../../_components/ActionIcons";
 import { OfflineChanges } from "../../_components/OfflineChanges";
 import { OfflineButton } from "./OfflineButton";
 
@@ -187,18 +186,14 @@ export default async function SetPage({
             <HStack gap={2} vAlign="center" wrap="wrap">
               {items.length > 0 && <OfflineButton setId={set.id} />}
               {canArrange && (
-                <Button
-                  label={t("editSet")}
-                  href={`/sets/${set.id}/edit`}
-                  icon={<Icon icon={PencilSquareIcon} />}
-                />
+                <Button label={t("editSet")} href={`/sets/${set.id}/edit`} icon={<EditIcon />} />
               )}
               {items.length > 0 && (
                 <Button
                   label={t("startStand")}
                   variant="primary"
                   href={`/sets/${set.id}/songs/1/stand`}
-                  icon={<Icon icon={ArrowsPointingOutIcon} />}
+                  icon={<StandIcon />}
                 />
               )}
             </HStack>

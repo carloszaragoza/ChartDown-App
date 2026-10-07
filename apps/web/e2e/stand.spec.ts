@@ -31,7 +31,7 @@ test("R-03.3 every section reads without zooming on an iPad in landscape", async
 }) => {
   const id = await createVersion(request, { title: "Open Road", content: OPEN_ROAD });
   await page.goto(`/versions/${id}`);
-  await page.getByRole("link", { name: "Stand mode" }).click();
+  await page.getByRole("main").getByRole("link", { name: "Stand mode" }).click();
   await expect(page).toHaveURL(new RegExp(`/versions/${id}/stand$`));
   await page.evaluate(() => Object.assign(window, { stillHere: true }));
 
