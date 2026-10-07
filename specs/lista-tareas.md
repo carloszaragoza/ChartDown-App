@@ -175,6 +175,7 @@ The redesign of Design Handoff 2.0, one block per pull request. Until a block is
 | T-1305 | Administration: Overview, Instruments, Invite codes and Reports | SPEC-07, R-01.7 | T-1301 | M | Screens 11 to 14 match the design |
 | T-1306 | Profile, the sign-in pages, Terms and Privacy, and the offline page | SPEC-01, 08, 09 | T-1301 | M | Screen 15 matches the design; the others use the same components |
 | T-1308 | Home after sign-in: music director, musician and new user; usage of public versions | SPEC-02 (R-02.11), 04, 05, 06, 09 | T-1301 | L | Screen 00 matches the design in its three variants; `version_usage` returns totals only, and nothing to anyone but the author (SQL test) |
+| T-1309 | Chart viewer: every ChartDown 0.4 element drawn by `design/chart-viewer` (beat grid and slashes, splits, marks, repeats, endings, key changes) in the viewer, editors and stand mode | SPEC-03, Handoff 3 | T-1301 | M | Each screenshot in `design/chart-viewer/screens` matches the app's rendering of the same source; light and dark |
 | T-1307 | Landing page redesigned with the `impeccable` skill | SPEC-01 | T-1301 | M | Not generic: the owner approves the proposal; waitlist and sign-in keep working |
 
 ## Phase 2

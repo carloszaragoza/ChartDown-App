@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ChartDown 0.4 – Visual reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,700&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--ground:#eef1f4;--paper:#fbfcfd;--ink:#16212c;--muted:#566574;--rule:#b4bec8;--ctrl:#7d8a97;--md:#b8322a;--dyn:#1f4fa8;--code:#f3f6f9;
+--num:'Barlow Condensed','Arial Narrow',Arial,sans-serif;--ui:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ground:#0f161d;--paper:#17212b;--ink:#e6edf3;--muted:#98a8b8;--rule:#3a4857;--ctrl:#64748a;--md:#ff8478;--dyn:#86aaff;--code:#121b24}}
+:root[data-theme="dark"]{--ground:#0f161d;--paper:#17212b;--ink:#e6edf3;--muted:#98a8b8;--rule:#3a4857;--ctrl:#64748a;--md:#ff8478;--dyn:#86aaff;--code:#121b24}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.5 var(--ui)}
+a{color:var(--dyn)}
+button,select{font:inherit;color:inherit}
+button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--dyn);outline-offset:2px}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:10px 20px;padding:12px 24px;background:var(--paper);border-bottom:1px solid var(--rule)}
+.brand{font:700 26px/1 var(--num)}
+.brand small{font:400 15px var(--ui);color:var(--muted);margin-left:8px}
+.ctrls{margin-left:auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--ctrl);border-radius:6px;overflow:hidden}
+.seg button{border:0;background:var(--paper);padding:0 14px;min-height:40px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--ctrl)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+label.k{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:15px}
+select{min-height:40px;border:1px solid var(--ctrl);border-radius:6px;background:var(--paper);padding:0 10px}
+main{max-width:1180px;margin:0 auto;padding:24px}
+.intro h1{font:600 44px/1 var(--num);margin:0 0 8px}
+.intro p{margin:0;color:var(--muted);max-width:760px}
+nav#toc{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 8px}
+nav#toc a{padding:3px 10px;border:1px solid var(--ctrl);border-radius:4px;background:var(--paper);color:var(--ink);text-decoration:none;font-size:14px}
+.ex{margin-top:26px}
+.ex h2{font:600 30px/1.1 var(--num);margin:0 0 4px}
+.lead{margin:0 0 10px;color:var(--muted);max-width:820px}
+.pair{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,8fr);gap:14px;align-items:start}
+@media (max-width:860px){.pair{grid-template-columns:1fr}.top{padding:10px 14px}main{padding:16px}}
+.src{margin:0;padding:14px;background:var(--code);border:1px solid var(--rule);border-radius:4px;font:14px/1.6 var(--mono);white-space:pre-wrap;overflow-x:auto}
+.out{background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:14px 16px;min-width:0;overflow-x:auto}
+.meta{display:flex;flex-wrap:wrap;gap:4px 18px;color:var(--muted);font-size:15px;margin-bottom:6px}
+.meta strong{color:var(--ink);font:600 22px/1 var(--num)}
+.meta b{color:var(--ink);margin-left:4px}
+.sec{margin-top:8px}
+.sec+.sec{margin-top:16px}
+.sec h4{font:600 22px/1 var(--num);margin:0 0 6px}
+.note{margin:3px 0;font-size:15px;color:var(--muted)}
+.note.md{color:var(--ink)}
+.note.md>b{color:var(--md);margin-right:6px}
+.role{display:inline-block;padding:0 7px;margin-right:6px;border:1.5px solid var(--md);border-radius:4px;color:var(--md);font-weight:700;font-size:13px}
+.keychg{margin:8px 0 2px;font:600 16px var(--num);color:var(--dyn)}
+.row{display:grid;grid-template-columns:repeat(var(--n),minmax(170px,1fr));border-left:2.5px solid var(--ink);margin:6px 0;min-width:calc(var(--n) * 170px)}
+.bar{position:relative;border-right:2.5px solid var(--ink);padding:22px 0 20px;display:flex;flex-direction:column;justify-content:center}
+.bar.rs{border-left:5px double var(--ink)}
+.bar.re{border-right:5px double var(--ink)}
+.bar.end{border-top:1.5px solid var(--ink)}
+.tags{position:absolute;top:2px;left:8px;right:8px;display:flex;gap:8px;align-items:baseline;font-size:12.5px;line-height:1.2;white-space:nowrap;overflow:hidden}
+.endlab{font-weight:700}
+.dyn{font-style:italic;font-weight:700;color:var(--dyn);font-size:14px}
+.cue{color:var(--muted)}
+.cue b{color:var(--md)}
+.times{margin-left:auto;font-weight:700}
+.grid{display:grid;align-items:end}
+.cell{display:flex;flex-direction:column;align-items:flex-start;padding:0 8px;min-width:0}
+.cell.split{border-left:1.5px dashed var(--rule)}
+.ch{position:relative;font:600 34px/1 var(--num);white-space:nowrap}
+.ch sup{font-size:.5em;font-weight:600;margin-left:1px}
+.ch .bass{font-size:.75em}
+.hold{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:1.5em;height:1.5em;padding:0 .3em;margin:-.25em 0}
+.hold::before{content:'';position:absolute;top:50%;left:50%;width:1.06em;height:1.06em;border:2px solid var(--ink);transform:translate(-50%,-50%) rotate(45deg)}
+.push{font-size:.6em;color:var(--dyn);margin-right:2px}
+.mk{position:absolute;top:-12px;left:2px;font:700 14px/1 var(--ui);color:var(--dyn)}
+.mk+.mk{left:14px}
+.nc{font:600 20px/1.7 var(--num);color:var(--muted)}
+.sym{font:600 34px/1 var(--num);color:var(--muted)}
+.ticks{margin-top:6px}
+.tick{padding-left:8px;font:400 15px/1 var(--mono)}
+.tick.strong{color:var(--ink);font-weight:700;font-size:18px}
+.tick.semi{color:var(--muted);font-weight:700;font-size:16px}
+.tick.weak{color:var(--rule);font-weight:400;font-size:14px}
+.lyr{position:absolute;left:8px;right:8px;bottom:2px;font-size:12px;font-style:italic;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.warn{margin:8px 0 0;padding:0 0 0 18px;color:var(--md);font-size:14px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;color:var(--muted);font-size:14px}
+footer{max-width:1180px;margin:30px auto 40px;padding:0 24px;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">ChartDown <small>0.4 visual reference</small></div>
+  <div class="ctrls">
+    <div class="seg" role="group" aria-label="Chord style">
+      <button type="button" data-mode="numbers" aria-pressed="true">Numbers</button>
+      <button type="button" data-mode="letters" aria-pressed="false">Letters</button>
+    </div>
+    <label class="k">Transpose
+      <select id="shift" aria-label="Transpose letters">
+        <option value="0">Written key</option><option value="1">+1</option><option value="2">+2</option><option value="-1">−1</option><option value="-2">−2</option>
+      </select></label>
+    <label class="k">View as
+      <select id="role" aria-label="View notes as">
+        <option value="everyone">Everyone</option><option value="drums">Drums</option><option value="bass">Bass</option><option value="keys">Keys</option>
+        <option value="gtr">Guitar</option><option value="vox">Vocals</option><option value="sax">Saxophone</option><option value="tpt">Trumpet</option><option value="cello">Cello</option>
+      </select></label>
+  </div>
+</header>
+<main>
+  <div class="intro">
+    <h1>Every part of the language, drawn</h1>
+    <p>Each example shows the ChartDown text on the left and how a renderer draws it on the right. Under every bar, one slash marks each beat, so you can see exactly how long each chord lasts.</p>
+    <div class="legend"><span><b>/</b> one beat: <b style="color:var(--ink)">strong</b>, <b style="color:var(--muted)">semi-strong</b>, <span style="color:var(--rule)">weak</span></span><span>dashed line = chord change inside a bar</span><span>◇ around a chord = hold, let it ring</span></div>
+  </div>
+  <nav id="toc" aria-label="Examples"></nav>
+  <div id="examples"></div>
+</main>
+<footer>ChartDown specification 0.4 · public domain (CC0) · github.com/ChartDown/Language · Example songs are original.</footer>
+<script>
+"use strict";
+/* ---------- Music helpers ---------- */
+const SCALE = [0,2,4,5,7,9,11];
+const LET = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+const SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const FLAT  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+const NUMS  = ['1','b2','2','b3','3','4','#4','5','b6','6','b7','7'];
+const DYN = new Set(['pp','p','mp','mf','f','ff','cresc','decresc']);
+const KEY_LIST = ['C','Db','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+
+const isNum = s => /^[b#]?[1-7]$/.test(s);
+function keySemi(k){
+  const m = /^([A-G])([b#]?)/.exec(k || 'C');
+  if(!m) return 0;
+  return (LET[m[1]] + (m[2]==='#'?1:m[2]==='b'?-1:0) + 12) % 12;
+}
+const useFlats = k => k === 'F' || /b/.test(k || '');
+function rel(str, srcKey){
+  const n = /^([b#]?)([1-7])$/.exec(str);
+  if(n){
+    let s = SCALE[+n[2]-1];
+    if(n[1]==='b') s--; else if(n[1]==='#') s++;
+    return (s + 12) % 12;
+  }
+  const l = /^([A-G])([b#]?)$/.exec(str);
+  const a = LET[l[1]] + (l[2]==='#'?1:l[2]==='b'?-1:0);
+  return (((a - keySemi(srcKey)) % 12) + 12) % 12;
+}
+function showRoot(str, mode, srcKey, dispKey){
+  if(mode === 'numbers') return isNum(str) ? str : NUMS[rel(str, srcKey)];
+  if(!isNum(str) && dispKey === srcKey) return str;
+  const names = useFlats(dispKey) ? FLAT : SHARP;
+  return names[(keySemi(dispKey) + rel(str, srcKey)) % 12];
+}
+
+/* ---------- Roles ---------- */
+const ROLE_ALIAS = {all:'all',band:'all',everyone:'all',drums:'drums',drum:'drums',perc:'drums',
+  bass:'bass',keys:'keys',piano:'keys',pad:'keys',synth:'keys',gtr:'gtr',guitar:'gtr',eg:'gtr',ag:'gtr',
+  vox:'vox',vocals:'vox',lead:'vox',bgv:'vox',bgvs:'vox',
+  sax:'sax',saxophone:'sax',tpt:'tpt',trumpet:'tpt',tbn:'tbn',trombone:'tbn',vln:'vln',violin:'vln'};
+const ROLE_LABEL = {drums:'Drums',bass:'Bass',keys:'Keys',gtr:'Guitar',vox:'Vocals',sax:'Saxophone',tpt:'Trumpet',tbn:'Trombone',vln:'Violin'};
+let CUSTOM = {};
+const roleLabel = r => ROLE_LABEL[r] || CUSTOM[r] || (r.charAt(0).toUpperCase() + r.slice(1));
+function parseRoles(s){
+  const parts = s.split(/[,\/&\s]+/).filter(Boolean).map(x => x.toLowerCase());
+  if(!parts.length) return null;
+  const out = [];
+  for(const p of parts){ const r = ROLE_ALIAS[p] || (CUSTOM[p] ? p : null); if(!r) return null; if(!out.includes(r)) out.push(r); }
+  return out;
+}
+function parseNote(t, n, warn){
+  const m = /^MD(?:\s+([^:]+?))?\s*:\s*(.*)$/i.exec(t);
+  if(m){
+    let roles = ['all'];
+    if(m[1]){ const r = parseRoles(m[1]); if(r) roles = r; else warn(n, 'Unknown instrument \u201c' + m[1] + '\u201d in an MD note'); }
+    return {md:true, roles, text:m[2]};
+  }
+  return {md:false, roles:['all'], text:t};
+}
+function parseCue(t){
+  const m = /^([A-Za-z][A-Za-z,\/& ]*?)\s*:\s*(.+)$/.exec(t);
+  if(m){ const r = parseRoles(m[1]); if(r) return {roles:r, text:m[2].trim()}; }
+  return {roles:['all'], text:t};
+}
+
+/* ---------- Parser ---------- */
+function parseToken(tok){
+  if(tok === '%') return {t:'rep'};
+  if(tok === '=') return {t:'tie'};
+  if(tok === 'x' || tok === 'X') return {t:'nc'};
+  let s = tok, push=false, hold=false, stab=false, ferm=false, beats=1, explicit=false;
+  while(/[!~]$/.test(s)){ if(s.endsWith('!')) stab = true; else ferm = true; s = s.slice(0,-1); }
+  const bm = s.match(/:(\d+(?:\.\d+)?)$/);
+  if(bm){ beats = parseFloat(bm[1]); explicit = true; s = s.slice(0, bm.index); }
+  if(s.startsWith("'")){ push = true; s = s.slice(1); }
+  if(s.startsWith('<') && s.endsWith('>')){ hold = true; s = s.slice(1,-1); }
+  const cm = s.match(/^([b#]?[1-7]|[A-G][b#]?)([^\/]*)(?:\/([b#]?[1-7]|[A-G][b#]?))?$/);
+  if(!cm) return null;
+  let q = cm[2];
+  if(q === '-') q = 'm'; else if(q.startsWith('-')) q = 'm' + q.slice(1);
+  return {t:'chord', root:cm[1], q, bass:cm[3]||null, beats, explicit, push, hold, stab, ferm};
+}
+
+function parseBar(seg, n, warn, bpb){
+  const bar = {items:[], lyric:null, cues:[], dyn:null, ending:null};
+  seg = seg.replace(/"([^"]*)"/g, (_, t) => {
+    if(t.trim().split(/\s+/).filter(Boolean).length > 8) warn(n, 'Lyric landmarks should be 8 words or fewer');
+    bar.lyric = bar.lyric ? bar.lyric + ' / ' + t : t; return ' ';
+  });
+  seg = seg.replace(/\{([^}]*)\}/g, (_, t) => {
+    t = t.trim();
+    if(DYN.has(t.toLowerCase())) bar.dyn = t.toLowerCase(); else if(t) bar.cues.push(parseCue(t));
+    return ' ';
+  });
+  seg = seg.replace(/^\s*\[(\d+(?:[,-]\d+)*)\]/, (_, e) => { bar.ending = e; return ' '; });
+  seg.trim().split(/\s+/).filter(Boolean).forEach(tok => {
+    const it = parseToken(tok);
+    if(it) bar.items.push(it); else warn(n, 'Can\u2019t read \u201c' + tok + '\u201d');
+  });
+  if(!bar.items.length) warn(n, 'This bar has no chords');
+  const ch = bar.items.filter(i => i.t === 'chord');
+  if(ch.some(i => i.explicit)){
+    const sum = ch.reduce((a, i) => a + i.beats, 0);
+    if(Math.abs(sum - bpb) > 0.001) warn(n, 'Beats add up to ' + sum + ', but the meter has ' + bpb);
+  }
+  return bar;
+}
+
+function parseRow(line, n, warn, bpb){
+  let rs = false, re = false, times = 2;
+  if(line.startsWith('|:')){ rs = true; line = line.slice(2); }
+  else if(line.startsWith('|')) line = line.slice(1);
+  const m = line.match(/:\|\s*(?:x\s*(\d+))?\s*$/);
+  if(m){ re = true; if(m[1]) times = parseInt(m[1],10); line = line.slice(0, m.index); }
+  else if(line.endsWith('|')) line = line.slice(0,-1);
+  const bars = line.split('|').map(s => s.trim()).filter(Boolean).map(s => parseBar(s, n, warn, bpb));
+  if(!bars.length) return null;
+  if(rs) bars[0].rs = true;
+  if(re){ bars[bars.length-1].re = true; bars[bars.length-1].times = times; }
+  return {bars};
+}
+
+function parse(src){
+  const doc = {meta:{}, sections:[], warnings:[]};
+  const warn = (line, msg) => doc.warnings.push({line, msg});
+  const lines = src.replace(/\r/g,'').split('\n');
+  let i = 0;
+  if(lines[0] && lines[0].trim() === '---'){
+    i = 1;
+    while(i < lines.length && lines[i].trim() !== '---'){
+      const m = lines[i].match(/^\s*([A-Za-z_][\w-]*)\s*:\s*(.*)$/);
+      if(m) doc.meta[m[1].toLowerCase()] = m[2].trim();
+      else if(lines[i].trim()) warn(i+1, 'Header lines look like  name: value');
+      i++;
+    }
+    i++;
+  }
+  CUSTOM = {};
+  (doc.meta.instruments || '').split(',').map(x => x.trim().toLowerCase()).filter(Boolean).forEach(id => {
+    if(/^[a-z0-9-]+$/.test(id)) CUSTOM[id] = id.charAt(0).toUpperCase() + id.slice(1); else warn(0, 'Instrument ids use lowercase letters, digits and -: \u201c' + id + '\u201d');
+  });
+  const km = /^([A-G][b#]?)(m?)/.exec(doc.meta.key || 'C');
+  doc.keyRoot = km ? km[1] : 'C';
+  doc.minor = !!(km && km[2]);
+  const mm = /^(\d+)\s*\/\s*(\d+)$/.exec(doc.meta.meter || '4/4');
+  const bpb = mm ? parseInt(mm[1],10) : 4;
+
+  let cur = null, docKey = null, pendingLabel = null;
+  for(; i < lines.length; i++){
+    const line = lines[i].trim(), n = i + 1;
+    if(!line || line.startsWith('//')) continue;
+    if(line.startsWith('##')){
+      cur = {name: line.replace(/^#+\s*/,'') || 'Section', notes:[], rows:[], use:null, startKey:docKey};
+      doc.sections.push(cur); continue;
+    }
+    if(!cur){ warn(n, 'Bars need a section first, like  ## Verse 1'); continue; }
+    if(line.startsWith('>')){ cur.notes.push(parseNote(line.replace(/^>\s?/,''), n, warn)); continue; }
+    const u = line.match(/^@use\s+(.+)$/i);
+    if(u){ cur.use = u[1].trim(); continue; }
+    const kc = line.match(/^@key\s+([A-G][b#]?)(m?)\s*$/);
+    if(kc){ docKey = kc[1]; pendingLabel = kc[1] + kc[2]; continue; }
+    if(line.startsWith('@')){ warn(n, 'Unknown directive \u201c' + line.split(/\s/)[0] + '\u201d'); continue; }
+    const row = parseRow(line, n, warn, bpb);
+    if(row){
+      row.key = docKey;
+      if(pendingLabel){ row.keyLabel = pendingLabel; pendingLabel = null; }
+      cur.rows.push(row);
+    }
+  }
+  doc.sections.forEach((s, idx) => {
+    if(s.use && !s.rows.length){
+      const src2 = doc.sections.slice(0, idx).find(x => x.name.toLowerCase() === s.use.toLowerCase() && x.rows.length);
+      if(src2){
+        s.rows = JSON.parse(JSON.stringify(src2.rows));
+        s.rows.forEach(r => { r.key = s.startKey; delete r.keyLabel; });
+      } else warn(0, 'Can\u2019t find an earlier section named \u201c' + s.use + '\u201d');
+    }
+  });
+  return doc;
+}
+
+
+const EXAMPLES = [
+{id:'header', title:'1 · Header', text:'The header sits between two lines of three dashes. It sets the key, tempo and meter for everything below.', src:`---
+chartdown: 0.4
+title: Open Road
+artists: ChartDown examples
+key: G
+tempo: 76
+meter: 4/4
+feel: Straight
+---
+
+## Verse
+1 | 4 | 6m | 5`},
+{id:'even', title:'2 · Bars and even splits', text:'Bars are separated by |. Chords in the same bar share it evenly: two chords get two beats each, four chords get one beat each.', src:`---
+key: G
+meter: 4/4
+---
+
+## Even splits
+1 | 4 1 | 6m 5 4 1 | 5`},
+{id:'uneven', title:'3 · Uneven splits with :beats', text:'Add :beats to say exactly how long each chord lasts. The grid under each bar shows one slash per beat, and every chord starts at its own beat.', src:`---
+key: G
+meter: 4/4
+---
+
+## Uneven splits
+4:2 4:1 5:1 | 1:3 4:1 | 6m:1.5 5:2.5 | 1:1 4:2 5:1`},
+{id:'meters', title:'4 · Meters: 3/4 and 6/8', text:'Beats per bar come from the meter. In 4/4, beat 1 is strong, beat 3 semi-strong, and beats 2 and 4 weak. In 6/8 there are six slashes in two groups of three: the first is strong, the fourth semi-strong.', src:`---
+key: D
+meter: 6/8
+---
+
+## Ballad in 6/8
+1 | 4:3 5:3 | 6m | 4:3 5:2 5:1`},
+{id:'meter34', title:'', text:'In 3/4 the first beat is strong and the other two are weak.', src:`---
+key: F
+meter: 3/4
+---
+
+## Waltz in 3/4
+1 | 4:2 5:1 | 1 | 2m 5`},
+{id:'chords', title:'5 · Chords', text:'Minor, sevenths, sus, extensions, chords outside the key and slash chords (bass note after the slash).', src:`---
+key: G
+---
+
+## Chord qualities
+6m 5sus 5 | 4maj7 1/3 | b7 4add9 | 2m7 5/7`},
+{id:'special', title:'6 · Rests and repeats of a bar', text:'x is no chord, % repeats the previous bar, = keeps the previous chord ringing across the bar line.', src:`---
+key: G
+---
+
+## Special bars
+1 | % | 4 x | <5> | =`},
+{id:'marks', title:'7 · Pushes, holds, stabs and fermatas', text:'A leading apostrophe is a push (play it early). Angle brackets draw a diamond around the chord: hold it and let it ring for the whole bar instead of playing the groove. It is optional. ! is a stab (short and accented), ~ is a fermata (wait for the cue).', src:`---
+key: G
+---
+
+## Expression
+1 '4 | <5> | 1! 1! 4! 5! | <1>~`},
+{id:'dynamics', title:'8 · Dynamics, cues and lyric landmarks', text:'Curly braces add dynamics or cues to a bar; a cue can target one instrument. Quotes add a short lyric landmark (8 words at most).', src:`---
+key: G
+---
+
+## Build
+{p} 1 "Morning on the road" | {cresc} 4 {drums: in} | {mf} 6m 5 | {f} 4 {bass: walk up}`},
+{id:'notes', title:'9 · MD notes for everyone and for one instrument', text:'Lines starting with > MD are music director notes. Use the View as menu at the top to see only the notes for one instrument.', src:`---
+key: G
+---
+
+## Chorus
+> MD: Open it up a little. Don't go all out yet.
+> MD drums: Light groove, hi-hat or ride.
+> MD bass, keys: Root notes only.
+> A plain note, not from the MD.
+4 | 1 | 5 | 6m`},
+{id:'repeats', title:'10 · Repeats and endings', text:'|: and :| mark a repeat, x3 says how many times in total, [1] and [2] are first and second endings.', src:`---
+key: G
+---
+
+## Bridge
+|: 6m | 4 | 1 | [1] 5 :| x2
+[2] 5:2 4:1 5:1 |`},
+{id:'use', title:'11 · Reusing a section', text:'@use copies the bars of an earlier section. The new section keeps its own notes.', src:`---
+key: G
+---
+
+## Chorus
+4 | 1 | 5 | 6m
+
+## Chorus 2
+> MD: A touch bigger.
+@use Chorus`},
+{id:'keychange', title:'12 · Key changes', text:'@key changes the key from the next row on. Numbers stay the same; switch to Letters to see the new chords.', src:`---
+key: G
+---
+
+## Last Chorus
+4 | 1 | 5 | 1
+@key A
+4 | 1 | 5 | 1`},
+{id:'minor', title:'13 · Minor keys', text:'In a minor key, 1 is the tonic: 1m is the home chord, b3, b6 and b7 are the major chords of the natural minor scale.', src:`---
+key: Em
+meter: 4/4
+---
+
+## Verse
+1m | b6 | b3 | b7`},
+{id:'custom', title:'14 · Custom instruments', text:'Declare extra instruments in the header with instruments:, then use them like any other role.', src:`---
+key: G
+instruments: cello
+---
+
+## Intro
+> MD cello: Long notes, bow lightly.
+> MD sax, tpt: Horn line on the second pass.
+1 | 4 | 1 | 5`},
+];
+
+/* ---------- Visual renderer ---------- */
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const state = {mode:'numbers', shift:0, role:'everyone'};
+const visible = roles => state.role === 'everyone' || roles.includes('all') || roles.includes(state.role);
+const RES = 12; // grid columns per beat: handles halves, thirds and quarters
+
+function keyName(semi, flats){ return (flats ? FLAT : SHARP)[(semi % 12 + 12) % 12]; }
+function rowCtx(row, doc){
+  const src = row.key || doc.keyRoot;
+  const dispSemi = keySemi(src) + state.shift;
+  const flats = useFlats(keyName(keySemi(doc.keyRoot) + state.shift, false)) || /b/.test(src);
+  return {src, disp: keyName(dispSemi, flats)};
+}
+
+function beatsOf(bar, bpb){
+  const ch = bar.items;
+  const explicit = ch.filter(i => i.explicit);
+  if (!explicit.length) return ch.map(() => bpb / ch.length);
+  const used = explicit.reduce((a, i) => a + i.beats, 0);
+  const rest = ch.length - explicit.length;
+  const each = rest ? Math.max(bpb - used, 0) / rest : 0;
+  return ch.map(i => i.explicit ? i.beats : each);
+}
+
+function chordLabel(c, ctx){
+  if (c.t === 'nc') return '<span class="nc">N.C.</span>';
+  if (c.t === 'rep') return '<span class="sym" title="Repeat the previous bar">%</span>';
+  if (c.t === 'tie') return '<span class="sym" title="Keep the previous chord">⁀</span>';
+  const root = showRoot(c.root, state.mode, ctx.src, ctx.disp);
+  const bass = c.bass ? showRoot(c.bass, state.mode, ctx.src, ctx.disp) : '';
+  let q = c.q; if (q === 'm' && state.mode === 'numbers') q = '-';
+  const marks = (c.stab ? '<span class="mk" title="Stab">^</span>' : '') + (c.ferm ? '<span class="mk" title="Fermata">𝄐</span>' : '');
+  const body = `${esc(root)}${q ? `<sup>${esc(q)}</sup>` : ''}${bass ? `<span class="bass">/${esc(bass)}</span>` : ''}`;
+  return `<span class="ch">${marks}${c.push ? '<span class="push" title="Push">‹</span>' : ''}${c.hold ? `<span class="hold" title="Hold: let the chord ring for its whole length">${body}</span>` : body}</span>`;
+}
+
+
+// Beat strength: "strong" (beat 1), "semi" (the secondary accent), "weak" (the rest).
+// 4/4: 1 strong, 3 semi, 2 and 4 weak. 3/4: 1 strong, 2 and 3 weak.
+// Compound meters (6/8, 9/8, 12/8) are counted in groups of three eighths:
+// the first eighth of the bar is strong, the first of every other group is semi.
+function beatStrength(k, bpb, den) {
+  if (k === 0) return 'strong';
+  if (den === 8 && bpb % 3 === 0 && bpb > 3) return k % 3 === 0 ? 'semi' : 'weak';
+  if (bpb === 4 && k === 2) return 'semi';
+  if (bpb === 6 && den !== 8 && k === 3) return 'semi';
+  return 'weak';
+}
+
+function barHTML(b, ctx, bpb, meterDen){
+  const beats = beatsOf(b, bpb);
+  const total = bpb * RES;
+  let col = 1, cells = '';
+  b.items.forEach((c, i) => {
+    const span = Math.max(1, Math.round(beats[i] * RES));
+    cells += `<div class="cell${i ? ' split' : ''}" style="grid-column:${col} / span ${span}">${chordLabel(c, ctx)}</div>`;
+    col += span;
+  });
+  let ticks = '';
+  for (let k = 0; k < bpb; k++) {
+    const level = beatStrength(k, bpb, meterDen);
+    ticks += `<span class="tick ${level}" style="grid-column:${k * RES + 1} / span ${RES}" title="Beat ${k + 1}: ${level}">/</span>`;
+  }
+  const tags = (b.ending ? `<span class="endlab">${esc(b.ending)}.</span>` : '') +
+    (b.dyn ? `<span class="dyn">${esc(b.dyn === 'cresc' ? 'cresc.' : b.dyn === 'decresc' ? 'decresc.' : b.dyn)}</span>` : '') +
+    b.cues.filter(c => visible(c.roles)).map(c => `<span class="cue">${c.roles.includes('all') ? '' : `<b>${esc(c.roles.map(roleLabel).join(', '))}</b> `}${esc(c.text)}</span>`).join('') +
+    (b.re ? `<span class="times">×${b.times}</span>` : '');
+  return `<div class="bar${b.rs ? ' rs' : ''}${b.re ? ' re' : ''}${b.ending ? ' end' : ''}">
+    <div class="tags">${tags}</div>
+    <div class="grid" style="grid-template-columns:repeat(${total},minmax(0,1fr))">${cells}</div>
+    <div class="grid ticks" style="grid-template-columns:repeat(${total},minmax(0,1fr))" aria-hidden="true">${ticks}</div>
+    ${b.lyric ? `<span class="lyr">“${esc(b.lyric)}”</span>` : ''}
+  </div>`;
+}
+
+function renderChart(src){
+  const doc = parse(src);
+  const mm = /^(\d+)\s*\/\s*(\d+)$/.exec(doc.meta.meter || '4/4');
+  const bpb = mm ? +mm[1] : 4, den = mm ? +mm[2] : 4;
+  const dispKey = keyName(keySemi(doc.keyRoot) + state.shift, useFlats(doc.keyRoot));
+  let h = '';
+  if (doc.meta.title || doc.meta.tempo || doc.meta.key) {
+    h += `<div class="meta">${doc.meta.title ? `<strong>${esc(doc.meta.title)}</strong>` : ''}
+      <span>Key <b>${esc(state.mode === 'letters' ? dispKey + (doc.minor ? 'm' : '') : doc.keyRoot + (doc.minor ? 'm' : '') + ' (1)')}</b></span>
+      <span>Time <b>${esc(doc.meta.meter || '4/4')}</b></span>
+      ${doc.meta.tempo ? `<span>Tempo <b>${esc(doc.meta.tempo)}</b></span>` : ''}
+      ${doc.meta.feel ? `<span>Feel <b>${esc(doc.meta.feel)}</b></span>` : ''}</div>`;
+  }
+  doc.sections.forEach(s => {
+    h += `<section class="sec"><h4>${esc(s.name)}</h4>`;
+    s.notes.filter(n => visible(n.roles)).forEach(n => {
+      const who = n.roles.includes('all') ? '' : n.roles.map(r => `<span class="role">${esc(roleLabel(r))}</span>`).join('');
+      h += `<p class="note${n.md ? ' md' : ''}">${n.md ? '<b>MD</b>' : ''}${who}${esc(n.text)}</p>`;
+    });
+    s.rows.forEach(r => {
+      const ctx = rowCtx(r, doc);
+      if (r.keyLabel) h += `<p class="keychg">Key change: ${esc(state.mode === 'letters' ? ctx.disp : r.keyLabel)}</p>`;
+      h += `<div class="row" style="--n:${r.bars.length}">${r.bars.map(b => barHTML(b, ctx, bpb, den)).join('')}</div>`;
+    });
+    h += '</section>';
+  });
+  if (doc.warnings.length) h += `<ul class="warn">${doc.warnings.map(w => `<li>${w.line ? 'Line ' + w.line + ': ' : ''}${esc(w.msg)}</li>`).join('')}</ul>`;
+  return h;
+}
+
+function renderAll(){
+  document.getElementById('examples').innerHTML = EXAMPLES.map(e => `
+    <article class="ex" id="${e.id}">
+      ${e.title ? `<h2>${esc(e.title)}</h2>` : ''}
+      ${e.text ? `<p class="lead">${esc(e.text)}</p>` : ''}
+      <div class="pair">
+        <pre class="src" aria-label="ChartDown source">${esc(e.src)}</pre>
+        <div class="out" aria-label="Rendered chart">${renderChart(e.src)}</div>
+      </div>
+    </article>`).join('');
+}
+function setMode(m){ state.mode = m; document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m)); renderAll(); }
+document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+document.getElementById('shift').addEventListener('change', e => { state.shift = +e.target.value; renderAll(); });
+document.getElementById('role').addEventListener('change', e => { state.role = e.target.value; renderAll(); });
+document.getElementById('toc').innerHTML = EXAMPLES.filter(e => e.title).map(e => `<a href="#${e.id}">${esc(e.title.replace(/^\d+ · /, ''))}</a>`).join('');
+renderAll();
+
+</script>
+</body>
+</html>
