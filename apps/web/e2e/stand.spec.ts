@@ -104,7 +104,7 @@ test.describe("on an iPad, during a performance", () => {
     const id = await createVersion(request, {
       title: `Tall Pines ${Date.now()}`,
       content:
-        "## Intro\n1 | 4\n\n## Bridge\n4 | 5\n\n## Bridge\n4 | 5\n\n## Bridge\n4 | 5\n\n## Ending\n1\n",
+        "## Intro\n1 | 4\n\n## Bridge 1\n4 | 5\n\n## Bridge 1\n4 | 5\n\n## Bridge 1\n4 | 5\n\n## Ending\n1\n",
     });
     await page.goto(`/versions/${id}/stand?s=2`);
     const form = page.getByRole("navigation", { name: "Song form" });
@@ -122,7 +122,7 @@ test.describe("on an iPad, during a performance", () => {
     }
     // The current section is marked, and a repeated one says which time it is.
     await expect(form.locator('[aria-current="true"]')).toHaveCount(1);
-    await expect(form.getByRole("link", { name: /Bridge.*2nd time/ })).toBeVisible();
+    await expect(form.getByRole("link", { name: /Bridge 1.*2nd time/ })).toBeVisible();
     for (const name of ["Previous", "Next"]) {
       const box = await page.getByRole("link", { name, exact: true }).boundingBox();
       expect(Math.round(box?.height ?? 0), name).toBeGreaterThanOrEqual(56);

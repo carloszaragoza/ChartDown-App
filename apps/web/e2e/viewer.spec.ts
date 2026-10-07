@@ -22,7 +22,7 @@ test("R-03.2 changing the key does not change the saved version", async ({ page,
 
   await page.goto(`/versions/${id}`);
   const intro = page.locator("#section-1");
-  await expect(page.getByText("Key G")).toBeVisible();
+  await expect(page.getByText("Key G", { exact: true })).toBeVisible();
   await expect(intro).toContainText("6");
 
   const style = page.getByRole("radiogroup", { name: "Numbers or letters" });
