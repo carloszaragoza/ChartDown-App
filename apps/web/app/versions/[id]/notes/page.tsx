@@ -1,15 +1,23 @@
 import { parse, placeLayer, type Chart } from "chartdown";
-import { Button, hasInstrumentIcon, Icon } from "@chartdown/ui";
-import Link from "next/link";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Heading } from "@astryxdesign/core/Heading";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Item } from "@astryxdesign/core/Item";
+import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
+import { List } from "@astryxdesign/core/List";
+import { Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../lib/auth/enabled";
 import { createClient } from "../../../../lib/supabase/server";
 import { NOTE_MAX, sectionAnchors, toLayer, type NoteRow } from "../../../../lib/versions/notes";
 import { loadVersion, UUID } from "../load";
-import { deleteNote, saveNote, setAuthorNotes } from "./actions";
+import { deleteNote } from "./actions";
+import { NoteForm } from "./NoteForm";
+import { BandChoice, HideAuthorSwitch } from "./NotesControls";
 import { SectionView, type SectionNote } from "./SectionView";
-import styles from "./notes.module.css";
 
 // The form's own errors; anything else reads as "could not be saved".
 const NOTE_ERRORS = new Set(["section_required", "bar_invalid", "text_required", "text_too_long"]);
@@ -38,8 +46,9 @@ interface CatalogInstrument {
 }
 
 /**
- * The band's MD layer on a version (R-03.5, R-06.6): the chart, read-only, with the band's notes
- * on it, and the form to add, edit or delete them. Only the band's MD sees this page.
+ * The band's MD layer on a version (R-03.5, R-06.6; Design Handoff 2.0 screen 07): the sections in
+ * a panel with their note counts; the chosen one, read-only, with the band's notes on it and the
+ * form to add, edit or delete them. Only the band's MD sees this page.
  */
 export default async function NotesPage({
   params,
@@ -170,239 +179,209 @@ export default async function NotesPage({
     ? `${editing.section}|${editing.occurrence}`
     : (chosenAnchor?.value ?? "");
 
+  const message =
+    search.saved || search.deleted || search.hidden || search.shown
+      ? search.saved
+        ? t("saved")
+        : search.deleted
+          ? t("deleted")
+          : search.hidden
+            ? t("authorHidden")
+            : t("authorShown")
+      : null;
+
   return (
-    <div className={styles.page}>
-      <div className={styles.header}>
-        <div>
-          <p className={styles.meta}>
-            {band.personal ? t("personal") : t("band", { band: band.name })} · {t("mdNotes")}
-          </p>
-          <h1 className={styles.title}>
-            {version.title}
-            {sourceLabel ? ` · ${sourceLabel}` : ""}
-          </h1>
-          <p className={styles.hint}>
-            {band.personal ? t("privatePersonal") : t("privateBand", { band: band.name })}
-          </p>
-        </div>
-        <div className={styles.headerTools}>
-          {authorNotes.length > 0 && (
-            <form action={setAuthorNotes}>
-              <input type="hidden" name="versionId" value={version.id} />
-              <input type="hidden" name="bandId" value={band.id} />
-              <input type="hidden" name="hide" value={hideAuthor ? "0" : "1"} />
-              <input type="hidden" name="section" value={chosen} />
-              <button type="submit" className={styles.toggle} aria-pressed={hideAuthor}>
-                <span className={styles.box} aria-hidden="true">
-                  {hideAuthor && <Icon name="check" size={16} />}
-                </span>
-                {t("hideAuthorShort")}
-              </button>
-            </form>
-          )}
-          <Link href={`/versions/${version.id}`} className="cd-button cd-button--secondary">
-            {t("back")}
-          </Link>
-        </div>
-      </div>
-      {bands.length > 1 && (
-        <nav aria-label={t("bands")} className={styles.bands}>
-          {bands.map((item) => (
-            <Link
-              key={item.id}
-              href={`/versions/${version.id}/notes?band=${item.id}`}
-              className={styles.choice}
-              aria-current={item.id === band.id ? "true" : undefined}
-            >
-              {item.personal ? t("personal") : item.name}
-            </Link>
-          ))}
-        </nav>
-      )}
-      {(search.saved || search.deleted || search.hidden || search.shown) && (
-        <p role="status" className={styles.message}>
-          {search.saved
-            ? t("saved")
-            : search.deleted
-              ? t("deleted")
-              : search.hidden
-                ? t("authorHidden")
-                : t("authorShown")}
-        </p>
-      )}
-      {search.error && (
-        <p role="alert" className={`${styles.message} ${styles.alert}`}>
-          {t(`errors.${NOTE_ERRORS.has(search.error) ? search.error : "unknown"}`)}
-        </p>
-      )}
-
-      {placement.unplaced.length > 0 && (
-        <section aria-labelledby="unplaced-notes" className={styles.attention}>
-          <h2 id="unplaced-notes" className={styles.label}>
-            {t("unplacedTitle", { count: placement.unplaced.length })}
-          </h2>
-          <p className={styles.hint}>{t("unplacedHint")}</p>
-          <ul className={styles.items}>
-            {placement.unplaced.map(({ note, reason }) => (
-              <li key={note.id} className={styles.item}>
-                <p className={styles.where}>
-                  {reason === "bar"
-                    ? t("noBar", { section: note.section, bar: note.bar ?? 0 })
-                    : t("noSection", { section: note.section })}
-                </p>
-                <p className={styles.text}>{note.text}</p>
-                <Link
-                  href={pageHref(`&edit=${note.id}#note-form`)}
-                  className="cd-button cd-button--secondary"
-                  aria-label={t("anchorNote", { text: note.text })}
-                >
-                  {t("anchor")}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      <div className={styles.layerPanes}>
-        <nav aria-label={t("sections")} className={styles.sectionList}>
-          {anchors.map((anchor, index) => (
-            <Link
-              key={anchor.value}
-              href={pageHref(`&section=${index}`)}
-              className={styles.sectionLink}
-              aria-current={index === chosen && !editing ? "true" : undefined}
-            >
-              <span>{anchorLabel(anchor.name, anchor.occurrence, anchor.count)}</span>
-              <span className={styles.noteCount}>
-                {t("noteCount", { count: notesIn(index).length })}
-              </span>
-            </Link>
-          ))}
-        </nav>
-
-        <SectionView chart={chart} index={chosen} notes={notesIn(chosen)}>
-          <form
-            // A fresh form for each note, so no value carries over between adding and editing,
-            // nor from one added note to the next.
-            key={editing?.id ?? `new-${rows.length}`}
-            action={saveNote}
-            className={styles.noteForm}
-            id="note-form"
-          >
-            <h3 className={styles.label}>
-              {editing
-                ? t("editTitle")
-                : t("addTo", {
-                    section: chosenAnchor
-                      ? anchorLabel(chosenAnchor.name, chosenAnchor.occurrence, chosenAnchor.count)
-                      : "",
-                  })}
-            </h3>
-            <input type="hidden" name="versionId" value={version.id} />
-            <input type="hidden" name="bandId" value={band.id} />
-            {editing && <input type="hidden" name="noteId" value={editing.id} />}
-            <input type="hidden" name="section" value={chosen} />
-            {editing ? (
-              // Editing may move a note to another section, as anchoring it again does.
-              <label className={styles.field}>
-                {t("section")}
-                <select name="anchor" required className={styles.input} defaultValue={formAnchor}>
-                  {anchors.map((anchor) => (
-                    <option key={anchor.value} value={anchor.value}>
-                      {anchorLabel(anchor.name, anchor.occurrence, anchor.count)}
-                    </option>
-                  ))}
-                  {!anchors.some((a) => a.value === formAnchor) && (
-                    <option value={formAnchor}>
-                      {anchorLabel(editing.section, editing.occurrence, 2)}
-                    </option>
-                  )}
-                </select>
-              </label>
-            ) : (
-              <input type="hidden" name="anchor" value={formAnchor} />
-            )}
-            <fieldset className={styles.group}>
-              <legend className={styles.label}>{t("for")}</legend>
-              <div className={styles.chips}>
-                <span className={styles.chipEveryone}>{t("everyone")}</span>
-                {offered.map((instrument) => (
-                  <label key={instrument.id} className={styles.chip}>
-                    <input
-                      type="checkbox"
-                      name="instrument"
-                      value={instrument.id}
-                      defaultChecked={editingIds.has(instrument.id)}
-                    />
-                    {hasInstrumentIcon(instrument.slug) && (
-                      <Icon name={instrument.slug} size={18} />
-                    )}
-                    {nameOf(instrument)}
-                  </label>
-                ))}
-              </div>
-              <p className={styles.hint}>{t("forHint")}</p>
-            </fieldset>
-            <div className={styles.fields}>
-              <div className={styles.field}>
-                <label htmlFor="note-text">{t("text")}</label>
-                <input
-                  id="note-text"
-                  name="text"
-                  required
-                  maxLength={NOTE_MAX}
-                  className={styles.input}
-                  defaultValue={editing?.text ?? ""}
-                  placeholder={t("textPlaceholder")}
-                  autoComplete="off"
-                  aria-describedby="note-text-hint"
+    <Layout
+      height="auto"
+      // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
+      padding={8}
+      header={
+        <LayoutHeader hasDivider>
+          <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
+            <VStack gap={1}>
+              <Text type="supporting">
+                {band.personal ? t("personal") : t("band", { band: band.name })} · {t("mdNotes")}
+              </Text>
+              <Heading level={1}>
+                {version.title}
+                {sourceLabel ? ` · ${sourceLabel}` : ""}
+              </Heading>
+              <Text color="secondary">
+                {band.personal ? t("privatePersonal") : t("privateBand", { band: band.name })}
+              </Text>
+            </VStack>
+            <HStack gap={3} vAlign="center" wrap="wrap">
+              {authorNotes.length > 0 && (
+                <HideAuthorSwitch
+                  versionId={version.id}
+                  bandId={band.id}
+                  section={chosen}
+                  hidden={hideAuthor}
+                  label={t("hideAuthorShort")}
                 />
-                <span id="note-text-hint" className={styles.hint}>
-                  {t("textHint", { max: NOTE_MAX })}
-                </span>
-              </div>
-              <label className={styles.field}>
-                {t("barField")}
-                <input
-                  name="bar"
-                  type="number"
-                  min={1}
-                  step={1}
-                  inputMode="numeric"
-                  className={styles.input}
-                  defaultValue={editing?.bar ?? ""}
-                />
-              </label>
-            </div>
-            <div className={styles.buttons}>
-              <Button
-                type="submit"
-                variant="primary"
-                {...(editing ? {} : { icon: "add" as const })}
-              >
-                {editing ? t("saveEdit") : t("add")}
-              </Button>
-              {editing && (
-                <Link href={pageHref()} className="cd-button cd-button--secondary">
-                  {t("cancel")}
-                </Link>
               )}
-            </div>
-          </form>
-          {editing && (
-            <form action={deleteNote}>
-              <input type="hidden" name="versionId" value={version.id} />
-              <input type="hidden" name="bandId" value={band.id} />
-              <input type="hidden" name="noteId" value={editing.id} />
-              <input type="hidden" name="section" value={chosen} />
-              <Button type="submit" aria-label={t("deleteNote", { text: editing.text })}>
-                {t("delete")}
-              </Button>
-            </form>
-          )}
-        </SectionView>
-      </div>
-    </div>
+              <Button label={t("back")} href={`/versions/${version.id}`} />
+            </HStack>
+          </HStack>
+        </LayoutHeader>
+      }
+      start={
+        <LayoutPanel width={260} hasDivider padding={2} label={t("sections")}>
+          <nav aria-label={t("sections")}>
+            <List>
+              {anchors.map((anchor, index) => (
+                <Item
+                  key={anchor.value}
+                  as="li"
+                  href={pageHref(`&section=${index}`)}
+                  isSelected={index === chosen && !editing}
+                  label={anchorLabel(anchor.name, anchor.occurrence, anchor.count)}
+                  endContent={
+                    <Text type="supporting">
+                      {t("noteCount", { count: notesIn(index).length })}
+                    </Text>
+                  }
+                />
+              ))}
+            </List>
+          </nav>
+        </LayoutPanel>
+      }
+      content={
+        <LayoutContent padding={8}>
+          <VStack gap={5}>
+            {bands.length > 1 && (
+              <BandChoice
+                label={t("bands")}
+                current={band.id}
+                bands={bands.map((item) => ({
+                  id: item.id,
+                  name: item.personal ? t("personal") : item.name,
+                  href: `/versions/${version.id}/notes?band=${item.id}`,
+                }))}
+              />
+            )}
+            {message && <Banner status="success" title={message} />}
+            {search.error && (
+              <Banner
+                status="error"
+                title={t(`errors.${NOTE_ERRORS.has(search.error) ? search.error : "unknown"}`)}
+              />
+            )}
+
+            {placement.unplaced.length > 0 && (
+              <section aria-labelledby="unplaced-notes">
+                <VStack gap={2}>
+                  <Heading level={2} id="unplaced-notes">
+                    {t("unplacedTitle", { count: placement.unplaced.length })}
+                  </Heading>
+                  <Text color="secondary">{t("unplacedHint")}</Text>
+                  <List hasDividers edgeCompensation="inline">
+                    {placement.unplaced.map(({ note, reason }) => (
+                      <Item
+                        key={note.id}
+                        as="li"
+                        label={note.text}
+                        description={
+                          reason === "bar"
+                            ? t("noBar", { section: note.section, bar: note.bar ?? 0 })
+                            : t("noSection", { section: note.section })
+                        }
+                        endContent={
+                          <Button
+                            label={t("anchorNote", { text: note.text })}
+                            href={pageHref(`&edit=${note.id}#note-form`)}
+                          >
+                            {t("anchor")}
+                          </Button>
+                        }
+                      />
+                    ))}
+                  </List>
+                </VStack>
+              </section>
+            )}
+
+            <SectionView chart={chart} index={chosen} notes={notesIn(chosen)}>
+              <NoteForm
+                // A fresh form for each note, so no value carries over between adding and
+                // editing, nor from one added note to the next.
+                key={editing?.id ?? `new-${rows.length}`}
+                versionId={version.id}
+                bandId={band.id}
+                section={chosen}
+                anchor={formAnchor}
+                anchors={[
+                  ...anchors.map((anchor) => ({
+                    value: anchor.value,
+                    label: anchorLabel(anchor.name, anchor.occurrence, anchor.count),
+                  })),
+                  ...(editing && !anchors.some((anchor) => anchor.value === formAnchor)
+                    ? [
+                        {
+                          value: formAnchor,
+                          label: anchorLabel(editing.section, editing.occurrence, 2),
+                        },
+                      ]
+                    : []),
+                ]}
+                instruments={offered.map((instrument) => ({
+                  id: instrument.id,
+                  name: nameOf(instrument),
+                }))}
+                editing={
+                  editing
+                    ? {
+                        id: editing.id,
+                        text: editing.text,
+                        bar: editing.bar,
+                        instrumentIds: [...editingIds],
+                      }
+                    : null
+                }
+                cancelHref={pageHref()}
+                words={{
+                  title: editing
+                    ? t("editTitle")
+                    : t("addTo", {
+                        section: chosenAnchor
+                          ? anchorLabel(
+                              chosenAnchor.name,
+                              chosenAnchor.occurrence,
+                              chosenAnchor.count,
+                            )
+                          : "",
+                      }),
+                  section: t("section"),
+                  for: t("for"),
+                  forHint: t("forHint"),
+                  text: t("text"),
+                  textPlaceholder: t("textPlaceholder"),
+                  textHint: t("textHint", { max: NOTE_MAX }),
+                  bar: t("barField"),
+                  submit: editing ? t("saveEdit") : t("add"),
+                  cancel: t("cancel"),
+                }}
+              />
+              {editing && (
+                <form action={deleteNote}>
+                  <input type="hidden" name="versionId" value={version.id} />
+                  <input type="hidden" name="bandId" value={band.id} />
+                  <input type="hidden" name="noteId" value={editing.id} />
+                  <input type="hidden" name="section" value={chosen} />
+                  <Button
+                    type="submit"
+                    variant="destructive"
+                    label={t("deleteNote", { text: editing.text })}
+                  >
+                    {t("delete")}
+                  </Button>
+                </form>
+              )}
+            </SectionView>
+          </VStack>
+        </LayoutContent>
+      }
+    />
   );
 }

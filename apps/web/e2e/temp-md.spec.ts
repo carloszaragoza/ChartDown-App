@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
-import { PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import { PASSWORD, signIn, signOut, signUpAndConfirm, unique, addToSet } from "./flows";
 
 async function switchTo(page: Page, email: string, name: string) {
   await page.goto("/");
@@ -23,8 +23,7 @@ async function createSet(page: Page, band: string, name: string, date: string) {
 
 async function addSong(page: Page, version: string, label: string) {
   await page.goto(`/versions/${version}`);
-  await page.getByLabel("Add to a set").selectOption({ label });
-  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await addToSet(page, label);
   await expect(page.getByRole("main").getByRole("status")).toContainText("added at the end");
 }
 
@@ -92,7 +91,7 @@ test("R-05.5 the temporary MD cannot edit other sets or the layer", async ({ pag
   await expect(page.getByLabel(`Key of ${first}`)).toHaveCount(0);
   await page.goto(`/versions/${v1}/notes`);
   await expect(page.getByText("My notes (personal space)")).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "Bands" })).toHaveCount(0);
+  await expect(page.getByRole("radiogroup", { name: "Bands" })).toHaveCount(0);
 
   // Ana removes the role; Ben's controls go away.
   await switchTo(page, ana, "Ana Lead");

@@ -25,11 +25,12 @@ test("R-03.2 changing the key does not change the saved version", async ({ page,
   await expect(page.getByText("Key G")).toBeVisible();
   await expect(intro).toContainText("6");
 
-  await page.getByRole("link", { name: "Letters" }).click();
+  const style = page.getByRole("radiogroup", { name: "Numbers or letters" });
+  await style.getByRole("radio", { name: "Letters" }).click();
   await expect(page).toHaveURL(/view=letters/);
   await expect(intro).toContainText("E");
-  await page.getByLabel("Key").selectOption("A");
-  await page.getByRole("button", { name: "Apply" }).click();
+  await page.getByRole("combobox", { name: "Key" }).click();
+  await page.getByRole("option", { name: "A", exact: true }).click();
   await expect(page).toHaveURL(/view=letters&key=A/);
   await expect(page.getByText("(written in G)")).toBeVisible();
   await expect(intro).toContainText("F#");
@@ -37,7 +38,7 @@ test("R-03.2 changing the key does not change the saved version", async ({ page,
   await page.getByRole("link", { name: "Back to the written key, G" }).click();
   await expect(page).toHaveURL(new RegExp(`/versions/${id}\\?view=letters$`));
   await page.goto(`/versions/${id}`);
-  await expect(page.getByRole("link", { name: "Numbers" })).toHaveAttribute("aria-current", "true");
+  await expect(style.getByRole("radio", { name: "Numbers" })).toBeChecked();
   await expect(page.getByText("(written in")).toHaveCount(0);
   expect(await saved()).toEqual(before);
 });

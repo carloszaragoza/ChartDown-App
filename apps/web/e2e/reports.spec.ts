@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { makeAdmin } from "./admin";
-import { PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import { PASSWORD, signIn, signOut, signUpAndConfirm, unique, expectStatus } from "./flows";
 
 // Original example songs only; no lyrics (CLAUDE.md).
 test("R-07.2 a reported version the Admin hides leaves the catalog and its owner gets a notice", async ({
@@ -24,18 +24,19 @@ test("R-07.2 a reported version the Admin hides leaves the catalog and its owner
   const address = new URL(page.url()).pathname;
   await expect(page.getByRole("button", { name: "Report" })).toHaveCount(0);
   await expect(page.getByText("Report", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "More actions" })).toHaveCount(0);
   await signOut(page);
 
   // Ben reports it.
   await signUpAndConfirm(page, unique("reporter"), "Ben Reporter");
   await page.goto(address);
-  await page.getByText("Report", { exact: true }).click();
-  await page.getByLabel("Why").selectOption({ label: "It has full song lyrics" });
+  // Report is a secondary action, in the version's More actions menu.
+  await page.getByRole("button", { name: "More actions" }).click();
+  await page.getByRole("menuitem", { name: "Report" }).click();
+  await page.getByLabel("It has full song lyrics").check();
   await page.getByLabel("Note (optional)").fill("The whole verse is written out.");
   await page.getByRole("button", { name: "Send report" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText(
-    "the administrators will look at it",
-  );
+  await expectStatus(page, "the administrators will look at it");
   await signOut(page);
 
   // The Admin hides it.

@@ -1,6 +1,6 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
-import { PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import { PASSWORD, signIn, signOut, signUpAndConfirm, unique, addToSet } from "./flows";
 
 const CHART = "---\nkey: G\n---\n## Verse\n1 | 4 | 5 | 1\n";
 
@@ -50,8 +50,7 @@ async function bandWithSet(
   await page.getByRole("button", { name: "Create set" }).click();
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   await page.goto(`/versions/${id}`);
-  await page.getByLabel("Add to a set").selectOption({ label: `${band} · ${set}` });
-  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await addToSet(page, `${band} · ${set}`);
   await expect(page.getByRole("main").getByRole("status")).toContainText("added at the end");
   return { set, title, luis };
 }

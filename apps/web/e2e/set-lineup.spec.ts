@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { createVersion } from "./admin";
-import { PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import { PASSWORD, signIn, signOut, signUpAndConfirm, unique, addToSet } from "./flows";
 
 const CHART = "---\nkey: G\n---\n## Verse\n1 | 4 | 5 | 1\n";
 const url = () => process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54321";
@@ -54,8 +54,7 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   const setAddress = new URL(page.url()).pathname;
   await page.goto(`/versions/${id}`);
-  await page.getByLabel("Add to a set").selectOption({ label: `${band} · ${set}` });
-  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await addToSet(page, `${band} · ${set}`);
   await expect(page.getByRole("main").getByRole("status")).toContainText("added at the end");
 
   // The key for this set, and the set's own lineup (R-05.3, R-05.4).

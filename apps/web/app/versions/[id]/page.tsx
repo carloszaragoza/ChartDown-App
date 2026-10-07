@@ -57,7 +57,10 @@ export default async function VersionPage({
       status={version.status}
       forkFailed={search.fork === "failed"}
       report={
-        search.report === "sent" || search.report === "already" || search.report === "failed"
+        search.report === "open" ||
+        search.report === "sent" ||
+        search.report === "already" ||
+        search.report === "failed"
           ? search.report
           : null
       }

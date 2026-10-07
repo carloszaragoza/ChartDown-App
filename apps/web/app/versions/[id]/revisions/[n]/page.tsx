@@ -1,11 +1,11 @@
 import { parse } from "chartdown";
-import { Button } from "@chartdown/ui";
-import Link from "next/link";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { HStack } from "@astryxdesign/core/HStack";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../../lib/auth/enabled";
 import { createClient } from "../../../../../lib/supabase/server";
-import styles from "../../history.module.css";
 import { readDisplay } from "../../display";
 import { loadVersion } from "../../load";
 import { VersionView } from "../../VersionView";
@@ -43,31 +43,25 @@ export default async function RevisionPage({
   const t = await getTranslations("history");
   const isCurrent = revision.id === version.currentRevisionId;
 
+  // A read-only banner above the chart, with the way back and, for an earlier one, Restore.
   const notice = (
-    <section className={styles.notice} aria-label={t("revision", { number })}>
-      <div>
-        <p>
-          <b>{t("revision", { number })}</b> · {isCurrent ? t("isCurrent") : t("readOnly")}
-        </p>
-        {error && (
-          <p role="alert" className={styles.alert}>
-            {t("restoreError")}
-          </p>
+    <section aria-label={t("revision", { number })}>
+      <HStack gap={3} vAlign="center" wrap="wrap">
+        <Banner
+          status="info"
+          title={`${t("revision", { number })} · ${isCurrent ? t("isCurrent") : t("readOnly")}`}
+        />
+        <Button label={t("backToHistory")} href={`/versions/${version.id}/history`} />
+        {!isCurrent && version.status === "active" && (
+          <form action={restoreRevision}>
+            <input type="hidden" name="versionId" value={version.id} />
+            <input type="hidden" name="revisionId" value={revision.id} />
+            <input type="hidden" name="number" value={number} />
+            <Button type="submit" variant="primary" label={t("restore")} />
+          </form>
         )}
-        <Link href={`/versions/${version.id}/history`} className={styles.back}>
-          {t("backToHistory")}
-        </Link>
-      </div>
-      {!isCurrent && version.status === "active" && (
-        <form action={restoreRevision}>
-          <input type="hidden" name="versionId" value={version.id} />
-          <input type="hidden" name="revisionId" value={revision.id} />
-          <input type="hidden" name="number" value={number} />
-          <Button type="submit" variant="primary">
-            {t("restore")}
-          </Button>
-        </form>
-      )}
+      </HStack>
+      {error && <Banner status="error" title={t("restoreError")} />}
     </section>
   );
 

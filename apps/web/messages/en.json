@@ -206,8 +206,10 @@
       "submit": "Send report",
       "sent": "Thanks: the administrators will look at it.",
       "already": "You already reported this version; the administrators will look at it.",
-      "failed": "The report could not be sent. Try again."
-    }
+      "failed": "The report could not be sent. Try again.",
+      "title": "Report this version"
+    },
+    "more": "More actions"
   },
   "newVersion": {
     "title": "New version",
@@ -272,7 +274,8 @@
     "final": "This cannot be undone.",
     "confirm": "Make private",
     "cancel": "Cancel and go back to the version",
-    "error": "This version could not be made private. Try again."
+    "error": "This version could not be made private. Try again.",
+    "consequences": "What happens"
   },
   "catalog": {
     "title": "Catalog",

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import { PASSWORD, signIn, signOut, signUpAndConfirm, unique, addToSet } from "./flows";
 
 async function switchTo(page: Page, email: string, name: string) {
   await page.goto("/");
@@ -55,8 +55,7 @@ test("R-05.2 a new revision from the author doesn't change the set until accepte
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   const setAddress = new URL(page.url()).pathname;
   await page.goto(version);
-  await page.getByLabel("Add to a set").selectOption({ label: `${band} · ${set}` });
-  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await addToSet(page, `${band} · ${set}`);
   await expect(page.getByText("revision 1")).toBeVisible();
 
   // As the author, she saves revision 2: the set stays on revision 1.

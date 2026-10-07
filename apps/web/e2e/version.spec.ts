@@ -15,7 +15,7 @@ test("R-01.4 a visitor reads a public version without an account", async ({ page
   await expect(page.getByText("Arrangement by ChartDown")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Last Chorus" })).toBeVisible();
   await expect(
-    page.getByRole("navigation", { name: "Song form" }).getByRole("listitem"),
+    page.getByRole("navigation", { name: "Song form" }).getByRole("link"),
   ).toHaveCount(7);
 });
 

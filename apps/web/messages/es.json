@@ -206,8 +206,10 @@
       "submit": "Enviar reporte",
       "sent": "Gracias: la administración lo revisará.",
       "already": "Ya reportaste esta versión; la administración lo revisará.",
-      "failed": "No se pudo enviar el reporte. Inténtalo de nuevo."
-    }
+      "failed": "No se pudo enviar el reporte. Inténtalo de nuevo.",
+      "title": "Reportar esta versión"
+    },
+    "more": "Más acciones"
   },
   "newVersion": {
     "title": "Nueva versión",
@@ -272,7 +274,8 @@
     "final": "No se puede deshacer.",
     "confirm": "Hacer privada",
     "cancel": "Cancelar y volver a la versión",
-    "error": "No se pudo hacer privada esta versión. Inténtalo de nuevo."
+    "error": "No se pudo hacer privada esta versión. Inténtalo de nuevo.",
+    "consequences": "Qué pasa"
   },
   "catalog": {
     "title": "Catálogo",

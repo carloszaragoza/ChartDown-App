@@ -1,6 +1,14 @@
 import { expect, test } from "@playwright/test";
 import { createVersion } from "./admin";
-import { chooseSection, PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import {
+  chooseSection,
+  PASSWORD,
+  signIn,
+  signOut,
+  signUpAndConfirm,
+  unique,
+  addToSet,
+} from "./flows";
 
 test("R-08.3 a change made while offline appears as a notice", async ({
   page,
@@ -35,8 +43,7 @@ test("R-08.3 a change made while offline appears as a notice", async ({
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   const setId = new URL(page.url()).pathname.split("/")[2] ?? "";
   await page.goto(`/versions/${version}`);
-  await page.getByLabel("Add to a set").selectOption({ label: `${band} · ${set}` });
-  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await addToSet(page, `${band} · ${set}`);
   await expect(page.getByRole("main").getByRole("status")).toContainText("added at the end");
   await page.goto("/");
   await signOut(page);
@@ -65,8 +72,8 @@ test("R-08.3 a change made while offline appears as a notice", async ({
   await expect(anaPage.getByRole("main").getByRole("status")).toContainText("The key was saved.");
   await anaPage.goto(`/versions/${version}/notes`);
   await anaPage
-    .getByRole("navigation", { name: "Bands" })
-    .getByRole("link", { name: band })
+    .getByRole("radiogroup", { name: "Bands" })
+    .getByRole("radio", { name: band })
     .click();
   await expect(anaPage.getByText(`Notes of ${band}`)).toBeVisible();
   await chooseSection(anaPage, "Chorus");

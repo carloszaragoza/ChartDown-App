@@ -1,6 +1,14 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
-import { chooseSection, PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import {
+  chooseSection,
+  PASSWORD,
+  signIn,
+  signOut,
+  signUpAndConfirm,
+  unique,
+  addToSet,
+} from "./flows";
 
 const CHART = "## Verse\n1 | 4\n\n## Chorus\n4 | 5 | 6m | 1\n";
 
@@ -66,12 +74,11 @@ test("R-08.2 R-08.4 in airplane mode every song opens with its notes, read-only"
   const setId = new URL(page.url()).pathname.split("/")[2] ?? "";
   for (const version of versions) {
     await page.goto(`/versions/${version}`);
-    await page.getByLabel("Add to a set").selectOption({ label: `${band} · ${set}` });
-    await page.getByRole("button", { name: "Add", exact: true }).click();
+    await addToSet(page, `${band} · ${set}`);
     await expect(page.getByRole("main").getByRole("status")).toContainText("added at the end");
   }
   await page.goto(`/versions/${versions[0]}/notes`);
-  await page.getByRole("navigation", { name: "Bands" }).getByRole("link", { name: band }).click();
+  await page.getByRole("radiogroup", { name: "Bands" }).getByRole("radio", { name: band }).click();
   await expect(page.getByText(`Notes of ${band}`)).toBeVisible();
   for (const [instrument, text] of [
     ["Keys", keysNote],

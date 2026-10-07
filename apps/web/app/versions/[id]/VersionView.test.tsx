@@ -2,10 +2,14 @@ import { parse } from "chartdown";
 import { NextIntlClientProvider } from "next-intl";
 import { readFileSync } from "node:fs";
 import { renderToString } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import en from "../../../messages/en.json";
 import es from "../../../messages/es.json";
-import { VersionView, type VersionViewProps } from "./VersionView";
+import { setChoiceLabel, VersionView, type VersionViewProps } from "./VersionView";
+
+vi.mock("./actions", () => ({ forkVersion: () => undefined, reportVersion: () => undefined }));
+vi.mock("../../sets/actions", () => ({ addToSet: () => undefined }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: () => undefined }) }));
 
 const openRoad = parse(
   readFileSync(
@@ -42,7 +46,9 @@ describe("R-01.4 a public version as everyone reads it", () => {
     expect(html).toContain("Arrangement by Carlos");
     expect(html).toContain("Own arrangement · 2026");
     expect(html).toContain("Watch on YouTube");
-    expect(html.match(/class="cd-section"/g)).toHaveLength(openRoad.sections.length);
+    expect(html.match(/<section aria-label="[^"]*" id="section-\d+"/g)).toHaveLength(
+      openRoad.sections.length,
+    );
   });
 
   it("R-06.5 shows no band's layer, only the author's own notes", () => {
@@ -136,10 +142,11 @@ describe("R-03.2 the display bar", () => {
       display: { style: "letters", key: { root: "A", minor: false } },
       path: "/versions/00000000-0000-0000-0000-0000000000f1",
     });
-    expect(html).toMatch(/Key(<!-- -->)? <b>A<\/b>/);
+    expect(html).toContain("Key A");
     expect(html).toContain("(written in G)");
     expect(html).toContain("Back to the written key, G");
-    expect(html).toContain('href="/versions/00000000-0000-0000-0000-0000000000f1?key=A"');
+    // Stand mode opens in the same view.
+    expect(html).toMatch(/href="\/versions\/[^"]*\/stand\?[^"]*key=A/);
     expect(render("en")).not.toContain("written in");
   });
 });
@@ -165,8 +172,12 @@ describe("R-05.2 adding a version to a set", () => {
       ],
     });
     expect(html).toContain("Add to a set");
-    expect(html).toContain("Harbor Band · Sunday");
-    expect(html).toContain("My sets · Practice");
+    expect(setChoiceLabel({ id: "c501", band: "Harbor Band", name: "Sunday" }, "My sets")).toBe(
+      "Harbor Band · Sunday",
+    );
+    expect(setChoiceLabel({ id: "c502", band: null, name: "Practice" }, "My sets")).toBe(
+      "My sets · Practice",
+    );
     expect(render("en", { signedIn: true })).not.toContain("Add to a set");
   });
 });

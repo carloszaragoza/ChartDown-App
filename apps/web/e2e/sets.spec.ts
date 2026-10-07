@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
-import { signOut, signUpAndConfirm, unique } from "./flows";
+import { signOut, signUpAndConfirm, unique, addToSet } from "./flows";
 
 // The set's songs: "3 songs" on its edit page, "Songs" on the set screen.
 const songs = (page: Page) => page.getByRole("region", { name: /songs?$/i }).getByRole("listitem");
@@ -51,8 +51,7 @@ test("R-05.1 a set's name is unique in the band; songs are added, ordered and du
   // Songs are added from their versions, at the end (R-05.2).
   for (const version of versions) {
     await page.goto(`/versions/${version}`);
-    await page.getByLabel("Add to a set").selectOption({ label: `${band} · ${sunday}` });
-    await page.getByRole("button", { name: "Add", exact: true }).click();
+    await addToSet(page, `${band} · ${sunday}`);
     await expect(page.getByRole("main").getByRole("status")).toContainText("added at the end");
   }
   await expect(songs(page)).toHaveText(
