@@ -1,5 +1,5 @@
 import { chordFormatter, sectionLength, type Chart } from "chartdown";
-import { BarRow, Icon, MDNote, type MDNoteData } from "@chartdown/ui";
+import { Icon, LegacyBarRow, MDNote, type MDNoteData } from "@chartdown/ui";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
@@ -55,7 +55,13 @@ export function SectionView({
         ))}
       </ul>
       {section.rows.map((row, position) => (
-        <BarRow key={position} row={row} formatter={formatter} size="md" labels={labels.bar} />
+        <LegacyBarRow
+          key={position}
+          row={row}
+          formatter={formatter}
+          size="md"
+          labels={labels.bar}
+        />
       ))}
       <hr className={styles.rule} />
       {children}

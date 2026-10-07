@@ -13,7 +13,7 @@ export default async function AdminPage() {
     { href: "/admin/reports", label: t("reports.title"), hint: t("reports.hint") },
   ];
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <h1 className={styles.title}>{t("title")}</h1>
       <ul className={styles.items}>
         {parts.map((part) => (
@@ -25,6 +25,6 @@ export default async function AdminPage() {
           </li>
         ))}
       </ul>
-    </main>
+    </div>
   );
 }

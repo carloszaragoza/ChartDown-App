@@ -104,7 +104,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
   };
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>{t("title")}</h1>
@@ -269,6 +269,6 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
           )}
         </nav>
       )}
-    </main>
+    </div>
   );
 }

@@ -97,7 +97,7 @@ export default async function SetSongPage({
   };
 
   return (
-    <main className={styles.wide}>
+    <div className={styles.wide}>
       <p className={styles.hint}>
         <Link href={`/sets/${song.set_id}`} className={styles.link}>
           {song.set_name}
@@ -214,6 +214,6 @@ export default async function SetSongPage({
           <span />
         )}
       </nav>
-    </main>
+    </div>
   );
 }

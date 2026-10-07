@@ -14,7 +14,7 @@ export function AuthPage({
 }) {
   const t = useTranslations("auth.errors");
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <h1 className={styles.title}>{title}</h1>
       {isAuthError(error) && (
         <p role="alert" className={styles.error}>
@@ -22,7 +22,7 @@ export function AuthPage({
         </p>
       )}
       {children}
-    </main>
+    </div>
   );
 }
 

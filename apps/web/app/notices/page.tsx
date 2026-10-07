@@ -44,7 +44,7 @@ export default async function NoticesPage() {
   const unread = notices.some((notice) => !notice.read_at);
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <div className={styles.head}>
         <h1 className={styles.title}>{t("title")}</h1>
         {unread && (
@@ -80,6 +80,6 @@ export default async function NoticesPage() {
           ))}
         </ul>
       )}
-    </main>
+    </div>
   );
 }

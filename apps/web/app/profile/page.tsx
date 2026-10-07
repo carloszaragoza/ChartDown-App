@@ -57,7 +57,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Sear
     .sort((a, b) => nameOf(a).localeCompare(nameOf(b), locale));
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <h1 className={styles.title}>{t("title")}</h1>
       {saved && (
         <p role="status" className={styles.message}>
@@ -160,6 +160,6 @@ export default async function ProfilePage({ searchParams }: { searchParams: Sear
       <Link href="/" className={styles.back}>
         {t("back")}
       </Link>
-    </main>
+    </div>
   );
 }

@@ -29,7 +29,7 @@ test("R-01.4 forking asks the visitor to sign in, then comes back to the version
   await signOut(page);
 
   await page.goto(`/versions/${id}`);
-  await page.getByRole("link", { name: "Fork" }).click();
+  await page.getByRole("link", { name: "Fork", exact: true }).click();
   await expect(page).toHaveURL(/\/auth\/sign-in\?next=/);
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(PASSWORD);
@@ -37,7 +37,7 @@ test("R-01.4 forking asks the visitor to sign in, then comes back to the version
 
   await expect(page).toHaveURL(new RegExp(`/versions/${id}$`));
   await expect(page.getByRole("heading", { level: 1, name: "Open Road" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Fork" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Fork", exact: true })).toHaveCount(0);
 });
 
 test("R-02.5 a private version is not found for a visitor", async ({ page, request }) => {

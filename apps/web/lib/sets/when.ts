@@ -35,3 +35,14 @@ export function compareSets(
   if ((a.time ?? "") !== (b.time ?? "")) return (a.time ?? "").localeCompare(b.time ?? "");
   return a.name.localeCompare(b.name);
 }
+
+/**
+ * The set the side navigation's Stand mode opens (Design Handoff 2.0, section 4): the next one
+ * from today, dated sets first; null when there is none.
+ */
+export function nextSet<T extends { date: string | null; time?: string | null; name: string }>(
+  sets: readonly T[],
+  today: string,
+): T | null {
+  return [...sets].filter((set) => !set.date || set.date >= today).sort(compareSets)[0] ?? null;
+}

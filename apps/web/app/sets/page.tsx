@@ -67,11 +67,11 @@ export default async function AllSetsPage() {
   );
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <h1 className={styles.title}>{t("allSets")}</h1>
       {list(upcoming, t("upcoming"), t("noUpcoming"), "upcoming")}
       {list(past, t("past"), t("noPast"), "past")}
       <p className={styles.hint}>{t("allSetsHint")}</p>
-    </main>
+    </div>
   );
 }

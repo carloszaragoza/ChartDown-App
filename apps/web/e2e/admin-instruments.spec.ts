@@ -12,17 +12,14 @@ test("R-07.3 the Admin adds, renames and deactivates an instrument, never deleti
 
   // Not an admin yet: the area does not exist for them.
   await signUpAndConfirm(page, unique("admin"), name);
-  await expect(page.getByRole("link", { name: "Administration" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Overview" })).toHaveCount(0);
   const hidden = await page.goto("/admin/instruments");
   expect(hidden?.status()).toBe(404);
 
   await makeAdmin(request, name);
   await page.goto("/");
-  await page
-    .getByRole("navigation", { name: "Main" })
-    .getByRole("link", { name: "Administration" })
-    .click();
-  await page.getByRole("link", { name: "Instruments" }).click();
+  await page.getByRole("link", { name: "Overview" }).click();
+  await page.getByRole("main").getByRole("link", { name: "Instruments" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Instruments" })).toBeVisible();
 
   const add = page.getByRole("form", { name: "Add an instrument" });

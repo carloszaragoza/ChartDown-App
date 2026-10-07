@@ -1,10 +1,9 @@
 import { expect, test } from "@playwright/test";
-import { PASSWORD, signIn, signUpAndConfirm, unique, openAccount } from "./flows";
+import { PASSWORD, openProfile, signIn, signOut, signUpAndConfirm, unique } from "./flows";
 
 test("R-01.2 a person saves their name and the instruments they play", async ({ page }) => {
   await signUpAndConfirm(page, unique("profile"), "Ana Test");
-  await openAccount(page);
-  await page.getByRole("link", { name: "Your profile" }).click();
+  await openProfile(page);
   await page.getByLabel("Name").fill("Ana Keys");
   await page.getByLabel("Keys", { exact: true }).check();
   await page.getByLabel("Vocals", { exact: true }).check();
@@ -32,16 +31,14 @@ test("R-01.2 a person saves their name and the instruments they play", async ({ 
 test("R-01.5 the chosen language persists across sessions", async ({ page, context }) => {
   const email = unique("idioma");
   await signUpAndConfirm(page, email, "Lucía Test");
-  await openAccount(page);
-  await page.getByRole("link", { name: "Your profile" }).click();
+  await openProfile(page);
   await page.getByLabel("Español").check();
   await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("Tu perfil se guardó");
 
   // A new session in a browser that remembers nothing.
   await page.goto("/");
-  await openAccount(page);
-  await page.getByRole("button", { name: "Cerrar sesión" }).click();
+  await signOut(page);
   await expect(page.getByRole("link", { name: "Iniciar sesión" })).toBeVisible();
   await context.clearCookies();
   await page.goto("/");
@@ -58,11 +55,10 @@ test("R-01.5 the language switcher saves to the profile when signed in", async (
 }) => {
   const email = unique("switch");
   await signUpAndConfirm(page, email, "Mateo Test");
-  await page.getByRole("button", { name: "Español" }).click();
-  await expect(page.getByLabel("Cuenta de Mateo Test")).toBeVisible();
+  await page.getByRole("radio", { name: "Español" }).click();
+  await expect(page.getByRole("button", { name: "Cerrar sesión" })).toBeVisible();
 
-  await openAccount(page);
-  await page.getByRole("button", { name: "Cerrar sesión" }).click();
+  await signOut(page);
   await expect(page.getByRole("link", { name: "Iniciar sesión" })).toBeVisible();
   await context.clearCookies();
   await signIn(page, email, PASSWORD);
@@ -72,8 +68,7 @@ test("R-01.5 the language switcher saves to the profile when signed in", async (
 test("R-01.6 a person deletes their account, and it no longer signs in", async ({ page }) => {
   const email = unique("leaving");
   await signUpAndConfirm(page, email, "Leaving Test");
-  await openAccount(page);
-  await page.getByRole("link", { name: "Your profile" }).click();
+  await openProfile(page);
 
   await page.getByLabel("Type your email to confirm").fill("someone-else@example.test");
   await page.getByRole("button", { name: "Delete my account" }).click();

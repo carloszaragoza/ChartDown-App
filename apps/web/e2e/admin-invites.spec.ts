@@ -11,7 +11,7 @@ test("R-01.7 the Admin creates and revokes invite codes; a revoked code stops wo
   await signUpAndConfirm(page, unique("admininvites"), name);
   await makeAdmin(request, name);
   await page.goto("/admin");
-  await page.getByRole("link", { name: "Invite codes" }).click();
+  await page.getByRole("main").getByRole("link", { name: "Invite codes" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Invite codes" })).toBeVisible();
 
   // A band code for ten people.

@@ -4,7 +4,7 @@ import { signOut, signUpAndConfirm, unique } from "./flows";
 test("R-03.1 the preview updates without reloading", async ({ page }) => {
   const title = `Ember Hill ${Date.now()}`;
   await signUpAndConfirm(page, unique("editor"), "Eli Editor");
-  await page.getByRole("link", { name: "New version" }).click();
+  await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
   await page.getByRole("button", { name: "Search" }).click();
   await page.getByRole("link", { name: "Create a new song" }).click();
@@ -14,7 +14,7 @@ test("R-03.1 the preview updates without reloading", async ({ page }) => {
   await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
   const address = new URL(page.url()).pathname;
 
-  await page.getByRole("link", { name: "Edit" }).click();
+  await page.getByRole("main").getByRole("link", { name: "Edit", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`${address}/edit$`));
   const save = page.getByRole("button", { name: "Save" });
   await expect(save).toBeDisabled();
@@ -46,14 +46,16 @@ test("R-03.1 the preview updates without reloading", async ({ page }) => {
 
   await page.getByRole("link", { name: "View version" }).click();
   await expect(page.getByRole("heading", { name: "Coda" })).toBeVisible();
-  await page.getByRole("link", { name: "History" }).click();
+  await page.getByRole("main").getByRole("link", { name: "History" }).click();
   await expect(page.getByRole("listitem").first()).toContainText("Revision 2");
 
   // Only the owner edits (R-02.6).
   await page.goto("/");
   await signOut(page);
   await page.goto(address);
-  await expect(page.getByRole("link", { name: "Edit" })).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("link", { name: "Edit", exact: true })).toHaveCount(
+    0,
+  );
   expect((await page.goto(`${address}/edit`))?.status()).toBe(404);
 });
 
@@ -64,7 +66,7 @@ test("R-03.1 saving refuses a version that changed elsewhere and keeps the text"
   const page = await context.newPage();
   const title = `Twin Tabs ${Date.now()}`;
   await signUpAndConfirm(page, unique("tabs"), "Tess Tabs");
-  await page.getByRole("link", { name: "New version" }).click();
+  await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
   await page.getByRole("button", { name: "Search" }).click();
   await page.getByRole("link", { name: "Create a new song" }).click();

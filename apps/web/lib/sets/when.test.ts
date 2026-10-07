@@ -1,6 +1,6 @@
 import { createFormatter } from "next-intl";
 import { describe, expect, it } from "vitest";
-import { compareSets, setWhen } from "./when";
+import { compareSets, nextSet, setWhen } from "./when";
 
 const en = createFormatter({ locale: "en", timeZone: "UTC" });
 const es = createFormatter({ locale: "es", timeZone: "UTC" });
@@ -31,5 +31,20 @@ describe("R-05.1 a set's date and time", () => {
       "Evening",
       "Someday",
     ]);
+  });
+});
+
+describe("T-1301 Stand mode in the side navigation", () => {
+  it("T-1301 opens the next set from today, dated sets before undated ones", () => {
+    const sets = [
+      { id: "past", date: "2026-10-01", time: null, name: "Old" },
+      { id: "later", date: "2026-10-20", time: null, name: "Later" },
+      { id: "undated", date: null, time: null, name: "Someday" },
+      { id: "today-evening", date: "2026-10-07", time: "19:00", name: "Tonight" },
+      { id: "today-morning", date: "2026-10-07", time: "09:30", name: "Morning" },
+    ];
+    expect(nextSet(sets, "2026-10-07")?.id).toBe("today-morning");
+    expect(nextSet(sets, "2026-10-21")?.id).toBe("undated");
+    expect(nextSet([sets[0]!], "2026-10-07")).toBeNull();
   });
 });

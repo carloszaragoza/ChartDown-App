@@ -39,7 +39,7 @@ export default async function NewVersionPage({ searchParams }: { searchParams: S
     ]);
     if (chosen !== "new" && !song) notFound();
     return (
-      <main className={styles.page}>
+      <div className={styles.page}>
         <h1 className={styles.title}>{t("title")}</h1>
         <VersionForm
           song={(song as Song | null) ?? null}
@@ -49,7 +49,7 @@ export default async function NewVersionPage({ searchParams }: { searchParams: S
         <Link href="/versions/new" className={styles.back}>
           {t("changeSong")}
         </Link>
-      </main>
+      </div>
     );
   }
 
@@ -65,7 +65,7 @@ export default async function NewVersionPage({ searchParams }: { searchParams: S
   const results = (found ?? []) as Song[];
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <h1 className={styles.title}>{t("title")}</h1>
       <form className={styles.search} role="search">
         <label className={styles.field}>
@@ -115,6 +115,6 @@ export default async function NewVersionPage({ searchParams }: { searchParams: S
       <Link href="/" className={styles.back}>
         {t("back")}
       </Link>
-    </main>
+    </div>
   );
 }

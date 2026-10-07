@@ -80,7 +80,7 @@ export default async function BandSetsPage({
   );
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <h1 className={styles.title}>{title}</h1>
       {deleted && (
         <p role="status" className={styles.message}>
@@ -137,6 +137,6 @@ export default async function BandSetsPage({
       <Link href={band.is_personal ? "/bands" : `/bands/${band.id}`} className={styles.back}>
         {band.is_personal ? t("backToBands") : t("backToBand", { band: band.name })}
       </Link>
-    </main>
+    </div>
   );
 }

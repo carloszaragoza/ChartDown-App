@@ -76,7 +76,7 @@ export function Editor({
   };
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <header className={styles.header}>
         <div className={styles.heading}>
           <h1 className={styles.title}>{title}</h1>
@@ -162,7 +162,7 @@ export function Editor({
           <ChartBody chart={chart} />
         </section>
       </div>
-    </main>
+    </div>
   );
 }
 
