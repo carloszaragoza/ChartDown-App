@@ -30,7 +30,7 @@ test("R-03.2 changing the key does not change the saved version", async ({ page,
   await expect(page).toHaveURL(/view=letters/);
   await expect(intro).toContainText("E");
   await page.getByRole("combobox", { name: "Key" }).click();
-  await page.getByRole("option", { name: "A", exact: true }).click();
+  await page.getByRole("option", { name: "Key A", exact: true }).click();
   await expect(page).toHaveURL(/view=letters&key=A/);
   await expect(page.getByText("(written in G)")).toBeVisible();
   await expect(intro).toContainText("F#");

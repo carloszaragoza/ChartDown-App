@@ -367,7 +367,7 @@ export function OfflineReader() {
           </LayoutHeader>
         }
         content={
-          <LayoutContent>
+          <LayoutContent isScrollable={false}>
             <VStack gap={5}>
               {banner}
               <OfflineChanges setId={bundle.set.id} />
