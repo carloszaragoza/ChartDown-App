@@ -1,15 +1,32 @@
-import { Button } from "@chartdown/ui";
-import Link from "next/link";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { EmptyState } from "@astryxdesign/core/EmptyState";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Layout, LayoutContent } from "@astryxdesign/core/Layout";
+import { List, ListItem } from "@astryxdesign/core/List";
+import { Text } from "@astryxdesign/core/Text";
+import { Token } from "@astryxdesign/core/Token";
+import { VStack } from "@astryxdesign/core/VStack";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { requireAdmin } from "../../../lib/admin/guard";
-import styles from "../admin.module.css";
+import { HideIcon, ReportIcon, ShowIcon } from "../../_components/ActionIcons";
+import { PageTabs } from "../../_components/PageTabs";
+import { AdminHeader } from "../AdminHeader";
 import { dismissReport, hideVersion, showVersion } from "./actions";
 
-type Search = Promise<{ hidden?: string; shown?: string; dismissed?: string; error?: string }>;
+type Search = Promise<{
+  tab?: string;
+  hidden?: string;
+  shown?: string;
+  dismissed?: string;
+  error?: string;
+}>;
 type One<T> = T | T[] | null;
+type Source = "studio" | "live" | "acoustic" | "own_arrangement";
 interface VersionRow {
   id: string;
   author_name: string;
+  source_type: Source;
   song: One<{ title: string }>;
 }
 interface ReportRow {
@@ -17,150 +34,205 @@ interface ReportRow {
   reason: "lyrics" | "other";
   note: string | null;
   created_at: string;
+  reporter: One<{ name: string | null }>;
   version: One<VersionRow>;
 }
 const one = <T,>(value: One<T>): T | null => (Array.isArray(value) ? (value[0] ?? null) : value);
+const VERSION = "id, author_name, source_type, song:songs(title)";
 
 /**
- * Reports (T-1103, R-07.2): open reports grouped by version, oldest first, to hide the version or
- * dismiss each report; hidden versions, to show again.
+ * Reports (Design Handoff 2.0 screen 14, T-1103, R-07.2): two tabs that live in the address.
+ * Open reports, oldest first, one item each, to view the version, dismiss the report or hide the
+ * version; and hidden versions, to show again.
  */
 export default async function AdminReportsPage({ searchParams }: { searchParams: Search }) {
   const { supabase } = await requireAdmin();
   const [{ data: reports }, { data: hidden }] = await Promise.all([
     supabase
       .from("reports")
-      .select("id, reason, note, created_at, version:versions(id, author_name, song:songs(title))")
+      .select(
+        `id, reason, note, created_at, reporter:profiles!reports_reporter_id_fkey(name), version:versions(${VERSION})`,
+      )
       .eq("status", "open")
       .order("created_at"),
     supabase
       .from("versions")
-      .select("id, author_name, song:songs(title)")
+      .select(VERSION)
       .eq("status", "hidden")
       .order("updated_at", { ascending: false }),
   ]);
+  const open = (reports ?? []) as unknown as ReportRow[];
+  const hiddenVersions = (hidden ?? []) as unknown as VersionRow[];
   const t = await getTranslations("admin.reports");
   const admin = await getTranslations("admin");
+  const sources = await getTranslations("version.source");
   const format = await getFormatter();
-  const { hidden: hiddenDone, shown, dismissed, error } = await searchParams;
-
-  const byVersion = new Map<string, { version: VersionRow; reports: ReportRow[] }>();
-  for (const report of (reports ?? []) as ReportRow[]) {
-    const version = one(report.version);
-    if (!version) continue;
-    const group = byVersion.get(version.id) ?? { version, reports: [] };
-    group.reports.push(report);
-    byVersion.set(version.id, group);
-  }
+  const search = await searchParams;
+  const tab = search.tab === "hidden" ? "hidden" : "open";
   const titleOf = (version: VersionRow) => one(version.song)?.title ?? "";
-  const status = hiddenDone
-    ? t("hiddenDone", { title: hiddenDone })
-    : shown
-      ? t("shownDone", { title: shown })
-      : dismissed
+  const byLine = (version: VersionRow) =>
+    t("by", { source: sources(version.source_type), author: version.author_name });
+  const status = search.hidden
+    ? t("hiddenDone", { title: search.hidden })
+    : search.shown
+      ? t("shownDone", { title: search.shown })
+      : search.dismissed
         ? t("dismissedDone")
         : null;
 
   return (
-    <div className={styles.page}>
-      <Link href="/admin" className={styles.link}>
-        {admin("title")}
-      </Link>
-      <h1 className={styles.title}>{t("title")}</h1>
-      {status && (
-        <p role="status" className={styles.message}>
-          {status}
-        </p>
-      )}
-      {error && (
-        <p role="alert" className={styles.alert}>
-          {t("failed")}
-        </p>
-      )}
+    <Layout
+      height="auto"
+      // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
+      padding={8}
+      contentWidth={960}
+      header={
+        <AdminHeader
+          area={{ label: admin("title"), isLink: true }}
+          title={t("title")}
+          description={t("description")}
+          tabs={
+            <PageTabs
+              current={tab}
+              tabs={[
+                {
+                  value: "open",
+                  label: t("openTab", { count: open.length }),
+                  href: "/admin/reports",
+                },
+                {
+                  value: "hidden",
+                  label: t("hiddenTab", { count: hiddenVersions.length }),
+                  href: "/admin/reports?tab=hidden",
+                },
+              ]}
+            />
+          }
+        />
+      }
+      content={
+        <LayoutContent>
+          <VStack gap={4}>
+            {status && <Banner status="success" title={status} />}
+            {search.error && <Banner status="error" title={t("failed")} />}
 
-      <section aria-labelledby="open-title" className={styles.section}>
-        <h2 id="open-title" className={styles.label}>
-          {t("open")}
-        </h2>
-        {byVersion.size === 0 ? (
-          <p className={styles.hint}>{t("none")}</p>
-        ) : (
-          <ul className={styles.items}>
-            {[...byVersion.values()].map(({ version, reports: list }) => (
-              <li key={version.id} className={styles.item} aria-label={titleOf(version)}>
-                <div className={styles.head}>
-                  <Link href={`/versions/${version.id}`} className={styles.link}>
-                    {t("openVersion", { title: titleOf(version) })}
-                  </Link>
-                  <span className={styles.hint}>
-                    {version.author_name} · {t("reportedBy", { count: list.length })}
-                  </span>
-                </div>
-                {list.map((report) => (
-                  <div key={report.id} className={styles.head}>
-                    <span className={styles.message}>
-                      {t(`reasons.${report.reason}`)}
-                      {report.note ? `: ${report.note}` : ""}
-                    </span>
-                    <span className={styles.hint}>
-                      {format.dateTime(new Date(report.created_at), { dateStyle: "medium" })}
-                    </span>
-                    <form action={dismissReport}>
-                      <input type="hidden" name="reportId" value={report.id} />
-                      <Button type="submit">{t("dismiss")}</Button>
-                    </form>
-                  </div>
-                ))}
-                <form action={hideVersion} className={styles.fields}>
-                  <input type="hidden" name="versionId" value={version.id} />
-                  <input type="hidden" name="title" value={titleOf(version)} />
-                  <label className={styles.field}>
-                    {t("hideReason")}
-                    <select
-                      name="reason"
-                      className={styles.select}
-                      defaultValue={list.some((r) => r.reason === "lyrics") ? "lyrics" : "other"}
-                    >
-                      <option value="lyrics">{t("reasons.lyrics")}</option>
-                      <option value="other">{t("reasons.other")}</option>
-                    </select>
-                  </label>
-                  <Button type="submit" variant="primary">
-                    {t("hide", { title: titleOf(version) })}
-                  </Button>
-                </form>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+            {tab === "open" &&
+              (open.length === 0 ? (
+                <EmptyState
+                  title={t("none")}
+                  description={t("noneDescription")}
+                  icon={<ReportIcon />}
+                />
+              ) : (
+                <List aria-label={t("open")}>
+                  {open.map((report) => {
+                    const version = one(report.version);
+                    if (!version) return null;
+                    const title = titleOf(version);
+                    const reporter = one(report.reporter)?.name;
+                    const date = format.dateTime(new Date(report.created_at), {
+                      dateStyle: "medium",
+                    });
+                    return (
+                      <ListItem
+                        key={report.id}
+                        startContent={<ReportIcon />}
+                        label={title}
+                        description={
+                          <VStack gap={1}>
+                            <Text type="supporting">{byLine(version)}</Text>
+                            <HStack gap={2} vAlign="center" wrap="wrap">
+                              <Token
+                                label={t(`reasons.${report.reason}`)}
+                                size="sm"
+                                color={report.reason === "lyrics" ? "orange" : "gray"}
+                              />
+                              <Text type="supporting">
+                                {reporter
+                                  ? t("reportedOn", { name: reporter, date })
+                                  : t("reportedOnNoName", { date })}
+                              </Text>
+                            </HStack>
+                            {report.note && <Text>“{report.note}”</Text>}
+                          </VStack>
+                        }
+                        endContent={
+                          <HStack gap={2} vAlign="center" wrap="wrap">
+                            <Button
+                              label={t("viewOf", { title })}
+                              href={`/versions/${version.id}`}
+                              variant="ghost"
+                            >
+                              {t("view")}
+                            </Button>
+                            <form action={dismissReport}>
+                              <input type="hidden" name="reportId" value={report.id} />
+                              <Button type="submit" label={t("dismissOf", { title })}>
+                                {t("dismiss")}
+                              </Button>
+                            </form>
+                            <form action={hideVersion}>
+                              <input type="hidden" name="versionId" value={version.id} />
+                              <input type="hidden" name="title" value={title} />
+                              <Button
+                                type="submit"
+                                variant="destructive"
+                                icon={<HideIcon />}
+                                label={t("hide", { title })}
+                              >
+                                {t("hideShort")}
+                              </Button>
+                            </form>
+                          </HStack>
+                        }
+                      />
+                    );
+                  })}
+                </List>
+              ))}
 
-      <section aria-labelledby="hidden-title" className={styles.section}>
-        <h2 id="hidden-title" className={styles.label}>
-          {t("hidden")}
-        </h2>
-        {(hidden ?? []).length === 0 ? (
-          <p className={styles.hint}>{t("noneHidden")}</p>
-        ) : (
-          <ul className={styles.items}>
-            {((hidden ?? []) as VersionRow[]).map((version) => (
-              <li key={version.id} className={styles.item}>
-                <div className={styles.head}>
-                  <Link href={`/versions/${version.id}`} className={styles.link}>
-                    {titleOf(version)}
-                  </Link>
-                  <span className={styles.hint}>{version.author_name}</span>
-                </div>
-                <form action={showVersion} className={styles.actions}>
-                  <input type="hidden" name="versionId" value={version.id} />
-                  <input type="hidden" name="title" value={titleOf(version)} />
-                  <Button type="submit">{t("show", { title: titleOf(version) })}</Button>
-                </form>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </div>
+            {tab === "hidden" &&
+              (hiddenVersions.length === 0 ? (
+                <EmptyState title={t("noneHidden")} description={t("noneHiddenDescription")} />
+              ) : (
+                <List aria-label={t("hidden")}>
+                  {hiddenVersions.map((version) => {
+                    const title = titleOf(version);
+                    return (
+                      <ListItem
+                        key={version.id}
+                        label={title}
+                        description={byLine(version)}
+                        endContent={
+                          <HStack gap={2} vAlign="center">
+                            <Button
+                              label={t("viewOf", { title })}
+                              href={`/versions/${version.id}`}
+                              variant="ghost"
+                            >
+                              {t("view")}
+                            </Button>
+                            <form action={showVersion}>
+                              <input type="hidden" name="versionId" value={version.id} />
+                              <input type="hidden" name="title" value={title} />
+                              <Button
+                                type="submit"
+                                icon={<ShowIcon />}
+                                label={t("show", { title })}
+                              >
+                                {t("showShort")}
+                              </Button>
+                            </form>
+                          </HStack>
+                        }
+                      />
+                    );
+                  })}
+                </List>
+              ))}
+          </VStack>
+        </LayoutContent>
+      }
+    />
   );
 }
