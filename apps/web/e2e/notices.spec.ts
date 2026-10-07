@@ -9,6 +9,7 @@ import {
   addToSet,
   expectStatus,
   createSet,
+  setKey,
 } from "./flows";
 
 const CHART = "---\nkey: G\n---\n## Verse\n1 | 4 | 5 | 1\n";
@@ -117,8 +118,7 @@ test("R-09.5 a notice Luis turned off is not delivered; the others still are", a
   await page.getByRole("group", { name: "Luis Bass" }).getByLabel("Bass", { exact: true }).check();
   await page.getByRole("button", { name: "Save lineup" }).click();
   await expectStatus(page, "The lineup was saved.");
-  await page.getByLabel(`Key of ${title}`).selectOption("A");
-  await page.getByRole("button", { name: "Save key" }).click();
+  await setKey(page, title, "A");
   await expectStatus(page, "The key was saved.");
   await page.goto("/");
   await signOut(page);

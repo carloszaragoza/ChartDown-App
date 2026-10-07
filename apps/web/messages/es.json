@@ -622,7 +622,8 @@
     "dateLabel": "Fecha",
     "timeLabel": "Hora",
     "createMissing": "Escribe un nombre y elige un tipo primero.",
-    "personalHint": "Tus propios sets: nadie más los ve."
+    "personalHint": "Tus propios sets: nadie más los ve.",
+    "settings": "Ajustes"
   },
   "offline": {
     "title": "Sin conexión",

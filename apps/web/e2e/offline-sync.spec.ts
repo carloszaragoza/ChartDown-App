@@ -10,6 +10,7 @@ import {
   addToSet,
   expectStatus,
   createSet,
+  setKey,
 } from "./flows";
 
 test("R-08.3 a change made while offline appears as a notice", async ({
@@ -67,8 +68,7 @@ test("R-08.3 a change made while offline appears as a notice", async ({
   await signIn(anaPage, ana, PASSWORD);
   await expect(anaPage.getByText("Signed in as Ana Sync")).toBeVisible();
   await anaPage.goto(`/sets/${setId}/edit`);
-  await anaPage.getByLabel(`Key of ${title}`).selectOption("A");
-  await anaPage.getByRole("button", { name: "Save key" }).click();
+  await setKey(anaPage, title, "A");
   await expectStatus(anaPage, "The key was saved.");
   await anaPage.goto(`/versions/${version}/notes`);
   await anaPage

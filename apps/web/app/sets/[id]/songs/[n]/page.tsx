@@ -1,16 +1,26 @@
 import { keyName, parse, type Chart } from "chartdown";
-import { Button } from "@chartdown/ui";
-import Link from "next/link";
+import { Banner } from "@astryxdesign/core/Banner";
+import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
+import { Button } from "@astryxdesign/core/Button";
+import { Heading } from "@astryxdesign/core/Heading";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Item } from "@astryxdesign/core/Item";
+import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
+import { List } from "@astryxdesign/core/List";
+import { Text } from "@astryxdesign/core/Text";
+import { Token } from "@astryxdesign/core/Token";
+import { VStack } from "@astryxdesign/core/VStack";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../../lib/auth/enabled";
 import { setSongKey } from "../../../../../lib/sets/lineup";
 import { songView, viewAs, viewAsOptions, type SetSong } from "../../../../../lib/sets/song";
 import { createClient } from "../../../../../lib/supabase/server";
-import { ChartBody } from "../../../../versions/[id]/ChartBody";
+import { StandIcon } from "../../../../_components/ActionIcons";
+import { ChartPreview } from "../../../../_components/ChartPreview";
+import { LinkChoice } from "../../../../_components/LinkChoice";
 import { UUID } from "../../../../versions/[id]/load";
 import { updatePinned } from "../../../actions";
-import styles from "../../../sets.module.css";
 
 interface Revision {
   number: number;
@@ -22,6 +32,7 @@ interface Revision {
  * pinned revision in the set's key, as numbers or letters, with the notes they may see. The
  * server (`set_song`) decides which band notes reach this device; nobody else's arrive. With
  * `?preview=new` the MD previews the author's newer revision before updating (decision 9.2).
+ * Laid out as the version page (Design Handoff 2.0, the screens table: Song in a set).
  */
 export default async function SetSongPage({
   params,
@@ -96,124 +107,130 @@ export default async function SetSongPage({
     return text ? `?${text}` : "";
   };
 
+  const standHref = `${path}/stand${query({ view: style === "letters" ? "letters" : "", as: as ?? "" })}`;
+
   return (
-    <div className={styles.wide}>
-      <p className={styles.hint}>
-        <Link href={`/sets/${song.set_id}`} className={styles.link}>
-          {song.set_name}
-        </Link>{" "}
-        · {t("songOf", { position, total })}
-      </p>
-      {newer && (
-        <div className={styles.update}>
-          <p className={styles.text}>
-            {t("previewing", { number: revision.number, pinned: song.revision_number })}
-          </p>
-          <form action={updatePinned}>
-            <input type="hidden" name="setId" value={song.set_id} />
-            <input type="hidden" name="itemId" value={song.item_id} />
-            <Button type="submit" variant="primary">
-              {t("update")}
-            </Button>
-          </form>
-        </div>
-      )}
-      <div>
-        <h1 className={styles.title}>{song.title}</h1>
-        <p className={styles.hint}>
-          {t("by", { author: song.author_name })} · {t("revision", { number: revision.number })}
-        </p>
-        <p className={styles.hint}>
-          {c("key")} <b>{keyName(homeKey)}</b>
-          {keyName(homeKey) !== keyName(chart.key) && (
-            <> {c("writtenIn", { key: keyName(chart.key) })}</>
-          )}
-        </p>
-        <p className={styles.hint}>
-          {!leads || as
-            ? t("notesForYou", { count: shown.forYou })
-            : song.role === "md"
-              ? t("allNotesMd")
-              : t("allNotesTempMd")}
-        </p>
-      </div>
-      <div className={styles.buttons}>
-        <Link
-          href={`${path}/stand${query({ view: style === "letters" ? "letters" : "", as: as ?? "" })}`}
-          className="cd-button cd-button--primary"
-        >
-          {t("startStand")}
-        </Link>
-      </div>
-      {leads && (
-        <nav aria-label={s("viewAs")} className={styles.buttons}>
-          <span className={styles.hint}>{s("viewAs")}</span>
-          {[null, ...viewAsOptions(song, song.instruments)].map((option) => (
-            <Link
-              key={option ?? "all"}
-              href={`${path}${query({ view: style === "letters" ? "letters" : "", as: option ?? "" })}`}
-              className={styles.choice}
-              aria-current={as === option ? "true" : undefined}
-            >
-              {option ? nameOf(option) : s("allNotes")}
-            </Link>
-          ))}
-        </nav>
-      )}
-      <nav aria-label={v("style")} className={styles.buttons}>
-        {(["numbers", "letters"] as const).map((option) => (
-          <Link
-            key={option}
-            href={withPreview(option === "letters" ? "view=letters" : "")}
-            className={styles.choice}
-            aria-current={style === option ? "true" : undefined}
-          >
-            {v(option)}
-          </Link>
-        ))}
-      </nav>
-      {shown.unplaced.length > 0 && (
-        <section aria-labelledby="unplaced" className={styles.update}>
-          <h2 id="unplaced" className={styles.label}>
-            {t("unplacedNotes")}
-          </h2>
-          <ul className={styles.items}>
-            {shown.unplaced.map(({ note }) => (
-              <li key={note.id} className={styles.text}>
-                {note.section} · {note.text}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-      <ChartBody
-        chart={chart}
-        style={style}
-        homeKey={homeKey}
-        notes={(index) =>
-          (shown.sections[index] ?? []).map((note) => ({
-            md: note.md,
-            roles: note.roles,
-            text: note.bar ? `${barLabel(note.bar)} · ${note.text}` : note.text,
-          }))
-        }
-      />
-      <nav aria-label={t("songs", { count: total })} className={styles.turn}>
-        {position > 1 ? (
-          <Link href={`/sets/${song.set_id}/songs/${position - 1}${keep}`} className={styles.link}>
-            {t("previousSong")}
-          </Link>
-        ) : (
-          <span />
-        )}
-        {position < total ? (
-          <Link href={`/sets/${song.set_id}/songs/${position + 1}${keep}`} className={styles.link}>
-            {t("nextSong")}
-          </Link>
-        ) : (
-          <span />
-        )}
-      </nav>
-    </div>
+    <Layout
+      height="auto"
+      // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
+      padding={8}
+      contentWidth={1040}
+      header={
+        <LayoutHeader hasDivider>
+          <HStack gap={4} vAlign="start" hAlign="between" wrap="wrap">
+            <VStack gap={1}>
+              <Breadcrumbs variant="supporting">
+                <BreadcrumbItem href={`/sets/${song.set_id}`}>{song.set_name}</BreadcrumbItem>
+                <BreadcrumbItem>{t("songOf", { position, total })}</BreadcrumbItem>
+              </Breadcrumbs>
+              <Heading level={1}>{song.title}</Heading>
+              <HStack gap={2} vAlign="center" wrap="wrap">
+                <Token label={`${c("key")} ${keyName(homeKey)}`} size="sm" />
+                {keyName(homeKey) !== keyName(chart.key) && (
+                  <Text type="supporting">{c("writtenIn", { key: keyName(chart.key) })}</Text>
+                )}
+                <Token label={`${c("time")} ${chart.header.meter ?? "4/4"}`} size="sm" />
+              </HStack>
+              <Text color="secondary">
+                {t("by", { author: song.author_name })} ·{" "}
+                {t("revision", { number: revision.number })} ·{" "}
+                {!leads || as
+                  ? t("notesForYou", { count: shown.forYou })
+                  : song.role === "md"
+                    ? t("allNotesMd")
+                    : t("allNotesTempMd")}
+              </Text>
+            </VStack>
+            <HStack gap={2} vAlign="center" wrap="wrap">
+              <Button
+                label={t("previousSong")}
+                href={`/sets/${song.set_id}/songs/${position - 1}${keep}`}
+                isDisabled={position <= 1}
+              />
+              <Button
+                label={t("nextSong")}
+                href={`/sets/${song.set_id}/songs/${position + 1}${keep}`}
+                isDisabled={position >= total}
+              />
+              <Button
+                label={t("startStand")}
+                variant="primary"
+                href={standHref}
+                icon={<StandIcon />}
+              />
+            </HStack>
+          </HStack>
+        </LayoutHeader>
+      }
+      content={
+        <LayoutContent>
+          <VStack gap={5}>
+            {newer && (
+              <Banner
+                status="info"
+                title={t("previewing", { number: revision.number, pinned: song.revision_number })}
+                endContent={
+                  <form action={updatePinned}>
+                    <input type="hidden" name="setId" value={song.set_id} />
+                    <input type="hidden" name="itemId" value={song.item_id} />
+                    <Button type="submit" variant="primary" label={t("update")} />
+                  </form>
+                }
+              />
+            )}
+            <HStack gap={4} vAlign="center" wrap="wrap">
+              <LinkChoice
+                label={v("style")}
+                current={style}
+                options={(["numbers", "letters"] as const).map((option) => ({
+                  value: option,
+                  label: v(option),
+                  href: withPreview(option === "letters" ? "view=letters" : ""),
+                }))}
+              />
+              {leads && (
+                <LinkChoice
+                  label={s("viewAs")}
+                  current={as ?? "all"}
+                  options={[null, ...viewAsOptions(song, song.instruments)].map((option) => ({
+                    value: option ?? "all",
+                    label: option ? nameOf(option) : s("allNotes"),
+                    href: `${path}${query({ view: style === "letters" ? "letters" : "", as: option ?? "" })}`,
+                  }))}
+                />
+              )}
+            </HStack>
+            {shown.unplaced.length > 0 && (
+              <section aria-labelledby="unplaced">
+                <VStack gap={2}>
+                  <Heading level={2} id="unplaced">
+                    {t("unplacedNotes")}
+                  </Heading>
+                  <List hasDividers edgeCompensation="inline">
+                    {shown.unplaced.map(({ note }) => (
+                      <Item key={note.id} as="li" label={note.text} description={note.section} />
+                    ))}
+                  </List>
+                </VStack>
+              </section>
+            )}
+            <ChartPreview
+              chart={chart}
+              style={style}
+              homeKey={homeKey}
+              isFramed
+              hasForm
+              notes={chart.sections.map((_, index) =>
+                (shown.sections[index] ?? []).map((note) => ({
+                  md: note.md,
+                  roles: note.roles,
+                  text: note.bar ? `${barLabel(note.bar)} · ${note.text}` : note.text,
+                })),
+              )}
+            />
+          </VStack>
+        </LayoutContent>
+      }
+    />
   );
 }

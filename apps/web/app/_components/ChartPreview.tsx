@@ -79,6 +79,7 @@ export function ChartPreview({
   homeKey,
   isFramed = false,
   hasForm = false,
+  notes,
 }: {
   chart: Chart;
   style?: ChordStyle;
@@ -86,6 +87,11 @@ export function ChartPreview({
   isFramed?: boolean;
   /** The song form above the sections, each abbreviation a link to its section. */
   hasForm?: boolean;
+  /**
+   * The notes to show on each section, by its index; the chart's own by default. A list, not a
+   * function, so a server component can pass it.
+   */
+  notes?: readonly (readonly MDNoteData[])[];
 }) {
   const labels = useChartLabels();
   const c = useTranslations("chart");
@@ -127,6 +133,7 @@ export function ChartPreview({
           labels={labels}
           id={`section-${index + 1}`}
           isFramed={isFramed}
+          {...(notes ? { notes: notes[index] ?? [] } : {})}
         />
       ))}
     </VStack>

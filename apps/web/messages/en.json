@@ -622,7 +622,8 @@
     "dateLabel": "Date",
     "timeLabel": "Time",
     "createMissing": "Write a name and choose a type first.",
-    "personalHint": "Your own sets: nobody else sees them."
+    "personalHint": "Your own sets: nobody else sees them.",
+    "settings": "Settings"
   },
   "offline": {
     "title": "You are offline",
