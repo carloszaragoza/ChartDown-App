@@ -51,15 +51,17 @@ test("R-07.2 a reported version the Admin hides leaves the catalog and its owner
   await signUpAndConfirm(page, unique("admin"), adminName);
   await makeAdmin(request, adminName);
   await page.goto("/admin/reports");
-  const reported = page.getByRole("listitem", { name: title });
-  await expect(reported).toContainText("Reported by 1 person");
-  await expect(reported).toContainText("Full song lyrics: The whole verse is written out.");
-  await reported.getByRole("button", { name: `Hide ${title}` }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText(
-    `${title} is hidden; its owner was told why.`,
-  );
-  await expect(page.getByRole("button", { name: `Show ${title} again` })).toBeVisible();
-  await expect(page.getByRole("listitem", { name: title })).toHaveCount(0);
+  await expect(page.getByText(/^Open reports \(\d+\)$/)).toBeVisible();
+  const reported = page.getByRole("listitem").filter({ hasText: title });
+  await expect(reported).toContainText("Reported by Ben Reporter");
+  await expect(reported).toContainText("Full song lyrics");
+  await expect(reported).toContainText("“The whole verse is written out.”");
+  // No reason to pick: it comes from the reports (lyrics here).
+  await reported.getByRole("button", { name: `Hide version ${title}` }).click();
+  await expectStatus(page, `${title} is hidden; its owner was told why.`);
+  await expect(page.getByRole("listitem").filter({ hasText: title })).toHaveCount(0);
+  await page.goto("/admin/reports?tab=hidden");
+  await expect(page.getByRole("button", { name: `Show again: ${title}` })).toBeVisible();
 
   await page.goto(`/catalog?q=${encodeURIComponent(title)}`);
   await expect(page.getByText("No songs match.")).toBeVisible();

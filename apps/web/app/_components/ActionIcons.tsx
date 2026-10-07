@@ -7,6 +7,12 @@ import {
   ArrowsPointingOutIcon,
   BookOpenIcon,
   ChatBubbleLeftRightIcon,
+  CheckCircleIcon,
+  ClipboardDocumentIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  KeyIcon,
+  NoSymbolIcon,
   EnvelopeIcon,
   FlagIcon,
   MusicalNoteIcon,
@@ -65,4 +71,32 @@ export function VersionIcon() {
 
 export function GuideIcon() {
   return <Icon icon={BookOpenIcon} />;
+}
+
+export function InviteCodeIcon() {
+  return <Icon icon={KeyIcon} color="secondary" />;
+}
+
+export function InstrumentsIcon() {
+  return <Icon icon={MusicalNoteIcon} color="secondary" />;
+}
+
+export function DeactivateIcon() {
+  return <Icon icon={NoSymbolIcon} />;
+}
+
+export function ReactivateIcon() {
+  return <Icon icon={CheckCircleIcon} />;
+}
+
+export function CopyIcon() {
+  return <Icon icon={ClipboardDocumentIcon} />;
+}
+
+export function HideIcon() {
+  return <Icon icon={EyeSlashIcon} />;
+}
+
+export function ShowIcon() {
+  return <Icon icon={EyeIcon} />;
 }
