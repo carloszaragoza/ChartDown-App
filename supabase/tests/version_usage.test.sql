@@ -3,7 +3,7 @@
 -- Run with: supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(9);
+select plan(10);
 
 create function pg_temp.login(person uuid) returns void language plpgsql as $$
 begin
@@ -73,17 +73,22 @@ end $$;
 -- Ana, the author.
 do $$ begin perform pg_temp.login('00000000-0000-0000-0000-0000000011a1'); end $$;
 select results_eq(
-  $$select version_id, bands, musicians from public.version_usage(null)$$,
+  $$select version_id, bands, musicians from public.version_usage(null) where version_id is not null$$,
   format($$values (%L::uuid, 2, 4)$$, current_setting('test.public')),
   'R-02.11 all time: two bands (personal spaces aside) and four musicians use her public version'
 );
 select results_eq(
-  $$select bands, musicians from public.version_usage(30)$$,
+  $$select bands, musicians from public.version_usage(null) where version_id is null$$,
+  $$values (2, 4)$$,
+  'R-02.11 the totals row counts each band and each musician once'
+);
+select results_eq(
+  $$select bands, musicians from public.version_usage(30) where version_id is not null$$,
   $$values (1, 2)$$,
   'R-02.11 the last 30 days count only sets dated in them'
 );
 select results_eq(
-  $$select bands, musicians from public.version_usage(7)$$,
+  $$select bands, musicians from public.version_usage(7) where version_id is not null$$,
   $$values (1, 2)$$,
   'R-02.11 the last 7 days too'
 );
