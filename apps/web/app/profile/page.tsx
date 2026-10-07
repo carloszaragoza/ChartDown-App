@@ -1,15 +1,24 @@
-import { Button, hasInstrumentIcon, Icon } from "@chartdown/ui";
-import Link from "next/link";
+import { Avatar } from "@astryxdesign/core/Avatar";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Card } from "@astryxdesign/core/Card";
+import { Heading } from "@astryxdesign/core/Heading";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Item } from "@astryxdesign/core/Item";
+import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
+import { List } from "@astryxdesign/core/List";
+import { StatusDot } from "@astryxdesign/core/StatusDot";
+import { Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
+import { hasInstrumentIcon, Icon } from "@chartdown/ui";
 import { notFound, redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { LOCALES } from "../../i18n/locales";
 import { authEnabled } from "../../lib/auth/enabled";
-import { NOTICE_TYPES } from "../../lib/notices/notice";
 import { createClient } from "../../lib/supabase/server";
-import styles from "./profile.module.css";
-import { deleteAccount, saveNoticePrefs, saveProfile } from "./actions";
+import { PageTabs } from "../_components/PageTabs";
+import { DeleteAccountForm, NoticeSwitches, ProfileForm } from "./ProfileControls";
 
-type Search = Promise<{ saved?: string; error?: string }>;
+type Search = Promise<{ saved?: string; error?: string; tab?: string }>;
 interface CatalogInstrument {
   id: string;
   slug: string;
@@ -18,9 +27,25 @@ interface CatalogInstrument {
   active: boolean;
 }
 
+// The instruments in the design's three cards; the Admin's own instruments go in a fourth.
+const GROUPS = [
+  { key: "rhythm", slugs: ["drums", "bass"] },
+  { key: "harmony", slugs: ["keys", "guitar", "violin"] },
+  { key: "voice", slugs: ["vocals", "saxophone", "trumpet", "trombone"] },
+] as const;
+// The notices, in the design's groups (R-09.5).
+const NOTICE_GROUPS = [
+  { key: "sets", types: ["lineup_added", "lineup_removed", "temp_md"] },
+  { key: "songs", types: ["key_changed", "order_changed", "note_added"] },
+  { key: "md", types: ["new_revision"] },
+  { key: "versions", types: ["version_hidden"] },
+] as const;
+const PROVIDERS = ["google", "apple", "azure"] as const;
+
 /**
- * A person's name, interface language and the instruments they play (R-01.2, R-01.5), and which
- * notices they receive (R-09.5).
+ * The person's profile (Design Handoff 2.0 screen 15), in three tabs that live in the address:
+ * name, language and the instruments they play (R-01.2, R-01.5); which notices they receive
+ * (R-09.5); and how they sign in, and deleting the account (R-01.6).
  */
 export default async function ProfilePage({ searchParams }: { searchParams: Search }) {
   if (!authEnabled()) notFound();
@@ -30,7 +55,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Sear
 
   const [{ data: profile }, { data: catalog }, { data: mine }, { data: prefs }] = await Promise.all(
     [
-      supabase.from("profiles").select("name, language").eq("id", auth.user.id).single(),
+      supabase.from("profiles").select("name, language, role").eq("id", auth.user.id).single(),
       supabase.from("instruments").select("id, slug, name_en, name_es, active"),
       supabase.from("user_instruments").select("instrument_id").eq("user_id", auth.user.id),
       supabase
@@ -41,11 +66,11 @@ export default async function ProfilePage({ searchParams }: { searchParams: Sear
         .eq("active", false),
     ],
   );
-  const { saved, error } = await searchParams;
+  const { saved, error, tab: asked } = await searchParams;
+  const tab = asked === "notices" || asked === "account" ? asked : "profile";
   const t = await getTranslations("profile");
   const languageNames = await getTranslations("language");
   const kinds = await getTranslations("notices.kinds");
-  const off = new Set((prefs ?? []).map((row) => row.type as string));
   const locale = await getLocale();
 
   const chosen = new Set((mine ?? []).map((row) => row.instrument_id as string));
@@ -55,111 +80,180 @@ export default async function ProfilePage({ searchParams }: { searchParams: Sear
   const offered = ((catalog ?? []) as CatalogInstrument[])
     .filter((instrument) => instrument.active || chosen.has(instrument.id))
     .sort((a, b) => nameOf(a).localeCompare(nameOf(b), locale));
+  const asItem = (instrument: CatalogInstrument) => ({
+    id: instrument.id,
+    name: nameOf(instrument),
+    icon: hasInstrumentIcon(instrument.slug) ? <Icon name={instrument.slug} size={20} /> : null,
+    ...(!instrument.active ? { note: t("noLongerOffered") } : {}),
+  });
+  const grouped = new Set<string>(GROUPS.flatMap((group) => group.slugs));
+  const groups = [
+    ...GROUPS.map((group) => ({
+      title: t(`groups.${group.key}`),
+      instruments: group.slugs.flatMap((slug) => {
+        const instrument = offered.find((item) => item.slug === slug);
+        return instrument ? [asItem(instrument)] : [];
+      }),
+    })),
+    {
+      title: t("groups.other"),
+      instruments: offered.filter((item) => !grouped.has(item.slug)).map(asItem),
+    },
+  ].filter((group) => group.instruments.length > 0);
+  const name = profile?.name ?? "";
+  const email = auth.user.email ?? "";
+  const identities = (auth.user.identities ?? []).map((identity) => identity.provider);
+  const facts = [
+    email,
+    profile?.role === "admin" ? t("roleAdmin") : t("roleMember"),
+    t("instrumentCount", { count: chosen.size }),
+  ].join(" · ");
 
   return (
-    <div className={styles.page}>
-      <h1 className={styles.title}>{t("title")}</h1>
-      {saved && (
-        <p role="status" className={styles.message}>
-          {saved === "notices" ? t("prefsSaved") : t("saved")}
-        </p>
-      )}
-      {error && (
-        <p role="alert" className={styles.alert}>
-          {error === "name"
-            ? t("nameRequired")
-            : error === "confirm"
-              ? t("delete.mismatch")
-              : t("error")}
-        </p>
-      )}
-      <form action={saveProfile} className={styles.form}>
-        <label className={styles.field}>
-          {t("name")}
-          <input
-            className={styles.input}
-            name="name"
-            defaultValue={profile?.name ?? ""}
-            required
-            maxLength={80}
-            autoComplete="name"
-          />
-        </label>
-
-        <fieldset className={styles.group}>
-          <legend className={styles.legend}>{languageNames("label")}</legend>
-          {LOCALES.map((option) => (
-            <label key={option} className={styles.choice} lang={option}>
-              <input
-                type="radio"
-                name="language"
-                value={option}
-                defaultChecked={(profile?.language ?? locale) === option}
-              />
-              {languageNames(option)}
-            </label>
-          ))}
-        </fieldset>
-
-        <fieldset className={styles.group}>
-          <legend className={styles.legend}>{t("instruments")}</legend>
-          <p className={styles.hint}>{t("instrumentsHint")}</p>
-          <div className={styles.instruments}>
-            {offered.map((instrument) => (
-              <label key={instrument.id} className={styles.choice}>
-                <input
-                  type="checkbox"
-                  name="instrument"
-                  value={instrument.id}
-                  defaultChecked={chosen.has(instrument.id)}
-                />
-                {hasInstrumentIcon(instrument.slug) && <Icon name={instrument.slug} size={20} />}
-                {nameOf(instrument)}
-                {!instrument.active && <span className={styles.hint}>{t("noLongerOffered")}</span>}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <Button type="submit" variant="primary">
-          {t("save")}
-        </Button>
-      </form>
-      <form id="notices" action={saveNoticePrefs} className={styles.form}>
-        <fieldset className={styles.group}>
-          <legend className={styles.legend}>{t("prefsTitle")}</legend>
-          <p className={styles.hint}>{t("prefsHint")}</p>
-          {NOTICE_TYPES.map((type) => (
-            <label key={type} className={styles.choice}>
-              <input type="checkbox" name="notice" value={type} defaultChecked={!off.has(type)} />
-              {kinds(type)}
-            </label>
-          ))}
-        </fieldset>
-        <Button type="submit">{t("prefsSave")}</Button>
-      </form>
-      <section id="delete" className={styles.form} aria-labelledby="delete-title">
-        <h2 id="delete-title" className={styles.legend}>
-          {t("delete.title")}
-        </h2>
-        <p className={styles.message}>{t("delete.explain")}</p>
-        <form action={deleteAccount} className={styles.group}>
-          <label className={styles.field}>
-            {t("delete.confirm")}
-            <input
-              className={styles.input}
-              name="confirm"
-              type="email"
-              autoComplete="off"
-              required
+    <Layout
+      height="auto"
+      // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
+      padding={8}
+      contentWidth={760}
+      header={
+        <LayoutHeader>
+          <VStack gap={4}>
+            <HStack gap={4} vAlign="center">
+              <Avatar name={name} size="xl" tooltip={false} />
+              <VStack gap={0.5}>
+                <Heading level={1}>{name}</Heading>
+                <Text color="secondary">{facts}</Text>
+              </VStack>
+            </HStack>
+            <PageTabs
+              current={tab}
+              tabs={[
+                { value: "profile", label: t("tabs.profile"), href: "/profile" },
+                { value: "notices", label: t("tabs.notices"), href: "/profile?tab=notices" },
+                { value: "account", label: t("tabs.account"), href: "/profile?tab=account" },
+              ]}
             />
-          </label>
-          <Button type="submit">{t("delete.submit")}</Button>
-        </form>
-      </section>
-      <Link href="/" className={styles.back}>
-        {t("back")}
-      </Link>
-    </div>
+          </VStack>
+        </LayoutHeader>
+      }
+      content={
+        <LayoutContent>
+          <VStack gap={5}>
+            {saved && (
+              <Banner status="success" title={saved === "notices" ? t("prefsSaved") : t("saved")} />
+            )}
+            {error && (
+              <Banner
+                status="error"
+                title={
+                  error === "name"
+                    ? t("nameRequired")
+                    : error === "confirm"
+                      ? t("delete.mismatch")
+                      : t("error")
+                }
+              />
+            )}
+
+            {tab === "profile" && (
+              <ProfileForm
+                name={name}
+                language={profile?.language ?? locale}
+                languages={LOCALES.map((option) => ({
+                  value: option,
+                  label: languageNames(option),
+                }))}
+                groups={groups}
+                chosen={[...chosen]}
+                words={{
+                  name: t("name"),
+                  nameHint: t("nameHint"),
+                  language: languageNames("label"),
+                  languageHint: t("languageHint"),
+                  instruments: t("instruments"),
+                  instrumentsHint: t("instrumentsHint"),
+                  save: t("save"),
+                  allSaved: t("allSaved"),
+                  unsaved: t("unsaved"),
+                }}
+              />
+            )}
+
+            {tab === "notices" && (
+              <VStack gap={5}>
+                <Banner status="info" title={t("prefsBannerTitle")} description={t("prefsHint")} />
+                <NoticeSwitches
+                  groups={NOTICE_GROUPS.map((group) => ({
+                    title: t(`noticeGroups.${group.key}`),
+                    kinds: group.types.map((type) => ({ type, label: kinds(type) })),
+                  }))}
+                  off={(prefs ?? []).map((row) => row.type as string)}
+                />
+                <Text type="supporting">{t("prefsAutosave")}</Text>
+              </VStack>
+            )}
+
+            {tab === "account" && (
+              <VStack gap={6}>
+                <section aria-labelledby="sign-in-methods">
+                  <VStack gap={2}>
+                    <Heading level={2} id="sign-in-methods">
+                      {t("signIn.title")}
+                    </Heading>
+                    <List hasDividers edgeCompensation="inline">
+                      {PROVIDERS.filter((provider) => identities.includes(provider)).map(
+                        (provider) => (
+                          <Item
+                            key={provider}
+                            as="li"
+                            label={t(`signIn.${provider}`)}
+                            description={email}
+                            endContent={
+                              <HStack gap={1} vAlign="center">
+                                <StatusDot variant="success" label={t("signIn.connected")} />
+                                <Text type="supporting">{t("signIn.connected")}</Text>
+                              </HStack>
+                            }
+                          />
+                        ),
+                      )}
+                      <Item
+                        as="li"
+                        label={t("signIn.password")}
+                        description={identities.includes("email") ? email : t("signIn.notSet")}
+                        {...(identities.includes("email")
+                          ? {
+                              endContent: (
+                                <HStack gap={1} vAlign="center">
+                                  <StatusDot variant="success" label={t("signIn.connected")} />
+                                  <Text type="supporting">{t("signIn.connected")}</Text>
+                                </HStack>
+                              ),
+                            }
+                          : {})}
+                      />
+                    </List>
+                  </VStack>
+                </section>
+                <Card>
+                  <section aria-labelledby="delete-title">
+                    <VStack gap={3}>
+                      <Heading level={2} id="delete-title">
+                        {t("delete.title")}
+                      </Heading>
+                      <Text>{t("delete.explain")}</Text>
+                      <DeleteAccountForm
+                        email={email}
+                        words={{ confirm: t("delete.confirm"), submit: t("delete.submit") }}
+                      />
+                    </VStack>
+                  </section>
+                </Card>
+              </VStack>
+            )}
+          </VStack>
+        </LayoutContent>
+      }
+    />
   );
 }

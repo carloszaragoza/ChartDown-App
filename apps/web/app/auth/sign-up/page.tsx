@@ -1,4 +1,9 @@
-import { Button } from "@chartdown/ui";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Link as AstryxLink } from "@astryxdesign/core/Link";
+import { Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
@@ -7,9 +12,9 @@ import { authEnabled } from "../../../lib/auth/enabled";
 import { enabledProviders } from "../../../lib/auth/providers";
 import { SIGNUP_EMAIL_COOKIE } from "../../../lib/auth/signup";
 import { claimInvite, signUp, startOver } from "../actions";
-import { AuthPage, Field } from "../AuthPage";
+import { AcceptAndContinue } from "../AuthControls";
+import { AuthForm, AuthPage, Field } from "../AuthPage";
 import { ProviderButtons } from "../ProviderButtons";
-import styles from "../auth.module.css";
 
 type Search = Promise<{ error?: string; sent?: string }>;
 
@@ -23,9 +28,7 @@ export default async function SignUpPage({ searchParams }: { searchParams: Searc
   if (sent) {
     return (
       <AuthPage title={t("signUp.title")}>
-        <p role="status" className={styles.message}>
-          {t("signUp.sent")}
-        </p>
+        <Banner status="success" title={t("signUp.sent")} />
       </AuthPage>
     );
   }
@@ -33,45 +36,38 @@ export default async function SignUpPage({ searchParams }: { searchParams: Searc
   if (!claimed) {
     return (
       <AuthPage title={t("signUp.title")} error={error}>
-        <form action={claimInvite} className={styles.form}>
-          <Field
-            label={t("signUp.code")}
-            name="code"
-            type="text"
-            autoComplete="off"
-            autoCapitalize="characters"
-            spellCheck={false}
-          />
+        <AuthForm action={claimInvite}>
+          <Field label={t("signUp.code")} name="code" autoComplete="off" />
           <Field label={t("email")} name="email" type="email" autoComplete="email" />
-          <label className={styles.accept}>
-            <input type="checkbox" name="terms" value="accepted" required />
-            <span>
-              {t.rich("signUp.acceptTerms", {
-                terms: (chunks) => (
-                  <Link href="/terms" target="_blank">
-                    {chunks}
-                  </Link>
-                ),
-                privacy: (chunks) => (
-                  <Link href="/privacy" target="_blank">
-                    {chunks}
-                  </Link>
-                ),
-              })}
-            </span>
-          </label>
-          <Button type="submit" variant="primary">
-            {t("signUp.continue")}
-          </Button>
-        </form>
-        <div className={styles.links}>
-          <span>
+          <AcceptAndContinue
+            label={t("signUp.acceptPlain")}
+            submit={t("signUp.continue")}
+            links={
+              <Text type="supporting">
+                {t.rich("signUp.readTerms", {
+                  terms: (chunks) => (
+                    <AstryxLink href="/terms" target="_blank">
+                      {chunks}
+                    </AstryxLink>
+                  ),
+                  privacy: (chunks) => (
+                    <AstryxLink href="/privacy" target="_blank">
+                      {chunks}
+                    </AstryxLink>
+                  ),
+                })}
+              </Text>
+            }
+          />
+        </AuthForm>
+        <VStack gap={1}>
+          <Text color="secondary">
             {t("signUp.noCode")} <Link href="/auth/waitlist">{t("waitlist.title")}</Link>
-          </span>
-          <span>
+          </Text>
+          <Text color="secondary">
             {t("signUp.hasAccount")} <Link href="/auth/sign-in">{t("signIn.title")}</Link>
-          </span>
-        </div>
+          </Text>
+        </VStack>
       </AuthPage>
     );
   }
@@ -79,25 +75,24 @@ export default async function SignUpPage({ searchParams }: { searchParams: Searc
   const providers = await enabledProviders();
   return (
     <AuthPage title={t("signUp.title")} error={error}>
-      <p className={styles.message}>{t("signUp.forEmail", { email: claimed })}</p>
-      <form action={signUp} className={styles.form}>
-        <Field label={t("name")} name="name" type="text" autoComplete="name" maxLength={80} />
+      <Text color="secondary">{t("signUp.forEmail", { email: claimed })}</Text>
+      <AuthForm action={signUp}>
+        <Field label={t("name")} name="name" autoComplete="name" />
         <Field
           label={t("password")}
           hint={t("signUp.passwordHint")}
           name="password"
           type="password"
           autoComplete="new-password"
-          minLength={8}
         />
-        <Button type="submit" variant="primary">
-          {t("signUp.submit")}
-        </Button>
-      </form>
-      {providers.length > 0 && <p className={styles.hint}>{t("signUp.providerHint")}</p>}
+        <Button type="submit" variant="primary" label={t("signUp.submit")} width="100%" />
+      </AuthForm>
+      {providers.length > 0 && <Text type="supporting">{t("signUp.providerHint")}</Text>}
       <ProviderButtons providers={providers} />
-      <form action={startOver} className={styles.links}>
-        <Button type="submit">{t("signUp.differentCode")}</Button>
+      <form action={startOver}>
+        <HStack>
+          <Button type="submit" variant="ghost" label={t("signUp.differentCode")} />
+        </HStack>
       </form>
     </AuthPage>
   );

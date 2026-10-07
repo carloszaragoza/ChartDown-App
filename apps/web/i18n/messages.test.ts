@@ -39,6 +39,10 @@ const SAME_IN_BOTH = new Set([
   "sets.allSets",
   "nav.sets",
   "nav.roleAdmin",
+  // Brand names of the sign-in providers (T-1306).
+  "profile.signIn.google",
+  "profile.signIn.apple",
+  "profile.signIn.azure",
 ]);
 
 describe("R-01.5 interface in English by default, with Spanish as an option", () => {

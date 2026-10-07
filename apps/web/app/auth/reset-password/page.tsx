@@ -1,11 +1,10 @@
-import { Button } from "@chartdown/ui";
+import { Button } from "@astryxdesign/core/Button";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";
 import { createClient } from "../../../lib/supabase/server";
 import { updatePassword } from "../actions";
-import { AuthPage, Field } from "../AuthPage";
-import styles from "../auth.module.css";
+import { AuthForm, AuthPage, Field } from "../AuthPage";
 
 type Search = Promise<{ error?: string }>;
 
@@ -19,26 +18,22 @@ export default async function ResetPasswordPage({ searchParams }: { searchParams
   const t = await getTranslations("auth");
   return (
     <AuthPage title={t("reset.title")} error={error}>
-      <form action={updatePassword} className={styles.form}>
+      <AuthForm action={updatePassword}>
         <Field
           label={t("newPassword")}
           hint={t("signUp.passwordHint")}
           name="password"
           type="password"
           autoComplete="new-password"
-          minLength={8}
         />
         <Field
           label={t("confirmPassword")}
           name="confirm"
           type="password"
           autoComplete="new-password"
-          minLength={8}
         />
-        <Button type="submit" variant="primary">
-          {t("reset.submit")}
-        </Button>
-      </form>
+        <Button type="submit" variant="primary" label={t("reset.submit")} width="100%" />
+      </AuthForm>
     </AuthPage>
   );
 }

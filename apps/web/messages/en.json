@@ -220,7 +220,9 @@
       "differentCode": "Use a different code",
       "noCode": "No invite code?",
       "providerHint": "With Google, Microsoft or Apple, use this same email.",
-      "acceptTerms": "I accept the <terms>Terms of Use</terms> and the <privacy>Privacy Notice</privacy>."
+      "acceptTerms": "I accept the <terms>Terms of Use</terms> and the <privacy>Privacy Notice</privacy>.",
+      "acceptPlain": "I accept the Terms of Use and the Privacy Notice.",
+      "readTerms": "Read the <terms>Terms of Use</terms> and the <privacy>Privacy Notice</privacy>."
     },
     "forgot": {
       "title": "Reset your password",
@@ -269,9 +271,9 @@
     "title": "Your profile",
     "name": "Name",
     "instruments": "Instruments you play",
-    "instrumentsHint": "Choose any; you can change them whenever you like.",
+    "instrumentsHint": "Bands use these as your default instruments. Your director's notes follow them.",
     "noLongerOffered": "(no longer offered)",
-    "save": "Save",
+    "save": "Save profile",
     "saved": "Your profile was saved.",
     "nameRequired": "Write your name.",
     "error": "Something went wrong. Try again.",
@@ -285,9 +287,44 @@
       "mismatch": "That email does not match your account."
     },
     "prefsTitle": "Notices",
-    "prefsHint": "In the app. Email comes later.",
+    "prefsHint": "Email notices come in a later version.",
     "prefsSave": "Save notices",
-    "prefsSaved": "Your notice choices were saved."
+    "prefsSaved": "Your notice choices were saved.",
+    "nameHint": "Shown to your bands and on the versions you publish.",
+    "languageHint": "Changes the app when you save. Chart syntax never changes.",
+    "allSaved": "All changes saved",
+    "unsaved": "Unsaved changes",
+    "roleAdmin": "Admin",
+    "roleMember": "Member",
+    "instrumentCount": "{count, plural, =0 {no instruments} one {# instrument} other {# instruments}}",
+    "tabs": {
+      "profile": "Profile",
+      "notices": "Notices",
+      "account": "Account"
+    },
+    "groups": {
+      "rhythm": "Rhythm",
+      "harmony": "Harmony",
+      "voice": "Voice and horns",
+      "other": "Other"
+    },
+    "noticeGroups": {
+      "sets": "Your sets",
+      "songs": "Songs in your sets",
+      "md": "As music director",
+      "versions": "Your versions"
+    },
+    "prefsBannerTitle": "Notices arrive in the app",
+    "prefsAutosave": "Changes to notices are saved as you switch them.",
+    "signIn": {
+      "title": "How you sign in",
+      "google": "Google",
+      "apple": "Apple",
+      "azure": "Microsoft",
+      "password": "Email and password",
+      "notSet": "Not set up",
+      "connected": "Connected"
+    }
   },
   "version": {
     "by": "Arrangement by {author}",
@@ -776,7 +813,8 @@
       "noteRemoved": "Note removed from {title}, {section}: “{text}”",
       "lineup": "{name} now plays: {to}.",
       "sitsOut": "not playing in this set"
-    }
+    },
+    "downloadedSets": "Downloaded sets"
   },
   "notices": {
     "title": "Notices",
