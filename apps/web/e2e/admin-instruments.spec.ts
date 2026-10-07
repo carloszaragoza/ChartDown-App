@@ -19,7 +19,7 @@ test("R-07.3 the Admin adds, renames and deactivates an instrument, never deleti
   await makeAdmin(request, name);
   await page.goto("/");
   await page.getByRole("link", { name: "Overview" }).click();
-  await page.getByRole("link", { name: "Instruments" }).click();
+  await page.getByRole("main").getByRole("link", { name: "Instruments" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Instruments" })).toBeVisible();
 
   const add = page.getByRole("form", { name: "Add an instrument" });

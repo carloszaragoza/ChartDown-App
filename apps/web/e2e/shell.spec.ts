@@ -31,6 +31,7 @@ test("T-1301 a signed-in person gets every section; only admins get Administrati
   const name = `Shell Test ${Date.now()}`;
   await signUpAndConfirm(page, unique("shell"), name);
   await page.goto("/sets");
+  const nav = page.getByRole("navigation", { name: "Side navigation" });
   for (const link of [
     "Notices",
     "Sets",
@@ -42,8 +43,8 @@ test("T-1301 a signed-in person gets every section; only admins get Administrati
     "Bands",
     "Personal space",
   ])
-    await expect(page.getByRole("link", { name: link, exact: true }), link).toBeVisible();
-  await expect(page.getByRole("link", { name: "Sets", exact: true })).toHaveAttribute(
+    await expect(nav.getByRole("link", { name: link, exact: true }), link).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Sets", exact: true })).toHaveAttribute(
     "aria-current",
     "page",
   );
@@ -51,16 +52,16 @@ test("T-1301 a signed-in person gets every section; only admins get Administrati
   await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
 
   // With no version open, the editor and the notes lead to Your versions.
-  await page.getByRole("link", { name: "Chart editor", exact: true }).click();
+  await nav.getByRole("link", { name: "Chart editor", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Your versions" })).toBeVisible();
   await expect(page.getByText("No versions yet")).toBeVisible();
 
   await makeAdmin(request, name);
   await page.reload();
   for (const link of ["Overview", "Instruments", "Invite codes", "Reports"])
-    await expect(page.getByRole("link", { name: link, exact: true }), link).toBeVisible();
+    await expect(nav.getByRole("link", { name: link, exact: true }), link).toBeVisible();
 
   // Stand mode with no sets yet opens the sets list.
-  await page.getByRole("link", { name: "Stand mode", exact: true }).click();
+  await nav.getByRole("link", { name: "Stand mode", exact: true }).click();
   await expect(page).toHaveURL(/\/sets$/);
 });

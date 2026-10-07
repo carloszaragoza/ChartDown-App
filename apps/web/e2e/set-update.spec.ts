@@ -37,7 +37,7 @@ test("R-05.2 a new revision from the author doesn't change the set until accepte
 
   // Ana publishes a version and puts it in a set.
   await switchTo(page, ana, "Ana Pin");
-  await page.getByRole("link", { name: "New version" }).click();
+  await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
   await page.getByRole("button", { name: "Search" }).click();
   await page.getByRole("link", { name: "Create a new song" }).click();

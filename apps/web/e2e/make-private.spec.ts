@@ -4,7 +4,7 @@ import { signOut, signUpAndConfirm, unique } from "./flows";
 test("R-02.4 making a version private keeps a frozen public version", async ({ page }) => {
   const title = `Salt Marsh ${Date.now()}`;
   await signUpAndConfirm(page, unique("private"), "Ana Private");
-  await page.getByRole("link", { name: "New version" }).click();
+  await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
   await page.getByRole("button", { name: "Search" }).click();
   await page.getByRole("link", { name: "Create a new song" }).click();

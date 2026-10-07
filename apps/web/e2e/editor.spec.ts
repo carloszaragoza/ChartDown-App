@@ -4,7 +4,7 @@ import { signOut, signUpAndConfirm, unique } from "./flows";
 test("R-03.1 the preview updates without reloading", async ({ page }) => {
   const title = `Ember Hill ${Date.now()}`;
   await signUpAndConfirm(page, unique("editor"), "Eli Editor");
-  await page.getByRole("link", { name: "New version" }).click();
+  await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
   await page.getByRole("button", { name: "Search" }).click();
   await page.getByRole("link", { name: "Create a new song" }).click();
@@ -64,7 +64,7 @@ test("R-03.1 saving refuses a version that changed elsewhere and keeps the text"
   const page = await context.newPage();
   const title = `Twin Tabs ${Date.now()}`;
   await signUpAndConfirm(page, unique("tabs"), "Tess Tabs");
-  await page.getByRole("link", { name: "New version" }).click();
+  await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
   await page.getByRole("button", { name: "Search" }).click();
   await page.getByRole("link", { name: "Create a new song" }).click();

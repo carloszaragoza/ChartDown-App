@@ -10,7 +10,7 @@ test("R-02.8 restoring revision 3 creates a new revision", async ({ page, reques
   await signUpAndConfirm(page, unique("history"), "Dana History");
 
   // Revision 1 through the app, revisions 2 to 5 as later saves.
-  await page.getByRole("link", { name: "New version" }).click();
+  await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
   await page.getByRole("button", { name: "Search" }).click();
   await page.getByRole("link", { name: "Create a new song" }).click();

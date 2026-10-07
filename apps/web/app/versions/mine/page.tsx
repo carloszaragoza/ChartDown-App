@@ -8,7 +8,6 @@ import { List } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";
@@ -62,7 +61,7 @@ export default async function YourVersionsPage() {
               <Heading level={1}>{t("title")}</Heading>
               <Text color="secondary">{t("description")}</Text>
             </VStack>
-            <Button label={t("newVersion")} variant="primary" href="/versions/new" as={Link} />
+            <Button label={t("newVersion")} variant="primary" href="/versions/new" />
           </HStack>
         </LayoutHeader>
       }
@@ -72,9 +71,7 @@ export default async function YourVersionsPage() {
             <EmptyState
               title={t("emptyTitle")}
               description={t("emptyDescription")}
-              actions={
-                <Button label={t("newVersion")} variant="primary" href="/versions/new" as={Link} />
-              }
+              actions={<Button label={t("newVersion")} variant="primary" href="/versions/new" />}
             />
           ) : (
             <List hasDividers>
@@ -94,7 +91,6 @@ export default async function YourVersionsPage() {
                         variant="ghost"
                         size="sm"
                         href={`/versions/${row.id}`}
-                        as={Link}
                       >
                         {t("openShort")}
                       </Button>
@@ -103,7 +99,6 @@ export default async function YourVersionsPage() {
                           label={t("edit", { title: title(row) })}
                           size="sm"
                           href={`/versions/${row.id}/edit`}
-                          as={Link}
                         >
                           {t("editShort")}
                         </Button>
@@ -112,7 +107,6 @@ export default async function YourVersionsPage() {
                         label={t("notes", { title: title(row) })}
                         size="sm"
                         href={`/versions/${row.id}/notes`}
-                        as={Link}
                       >
                         {t("notesShort")}
                       </Button>

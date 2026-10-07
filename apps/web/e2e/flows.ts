@@ -60,6 +60,9 @@ export async function chooseSection(page: Page, label: string) {
 
 /** How far below the song map the current section starts, in stand mode (F-001). */
 export async function gapUnderSongMap(page: Page): Promise<number> {
+  // After a client-side navigation into stand mode, wait until both are in place.
+  await page.locator('nav[aria-label="Song form"]').waitFor();
+  await page.locator("main").waitFor();
   return page.evaluate(() => {
     const map = document.querySelector('nav[aria-label="Song form"]');
     const section = document.querySelector("main");

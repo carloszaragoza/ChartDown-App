@@ -55,7 +55,7 @@ test("R-01.5 the language switcher saves to the profile when signed in", async (
 }) => {
   const email = unique("switch");
   await signUpAndConfirm(page, email, "Mateo Test");
-  await page.getByRole("button", { name: "Español" }).click();
+  await page.getByRole("radio", { name: "Español" }).click();
   await expect(page.getByRole("button", { name: "Cerrar sesión" })).toBeVisible();
 
   await signOut(page);

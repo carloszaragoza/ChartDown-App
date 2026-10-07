@@ -4,7 +4,7 @@ import { signOut, signUpAndConfirm, unique } from "./flows";
 
 // Original example songs only; no lyrics (CLAUDE.md).
 async function startNewSong(page: Page, title: string) {
-  await page.getByRole("link", { name: "New version" }).click();
+  await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
   await page.getByRole("button", { name: "Search" }).click();
   await expect(page.getByText("No songs match")).toBeVisible();
@@ -55,7 +55,7 @@ test("R-02.1 a version of a song already in the catalog", async ({ page, request
   const title = `Quiet Mile ${Date.now()}`;
   await createVersion(request, { title, content: "## Verse\n1 | 4" });
   await signUpAndConfirm(page, unique("second"), "Cleo Second");
-  await page.getByRole("link", { name: "New version" }).click();
+  await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
   await page.getByRole("button", { name: "Search" }).click();
   await page.getByRole("link", { name: `Use ${title}` }).click();
