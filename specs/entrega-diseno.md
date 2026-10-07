@@ -33,7 +33,7 @@ The redesign is built in the blocks of E13 (`lista-tareas.md`); until a screen's
 
 | Component | Rules |
 |---|---|
-| **BarRow** | A row of bars of a chart, rendered from the `chartdown` tree (never a simplified parser). Square bar lines (three times the border width, primary text color; twice, emphasized border color, in the small size); chord numbers in large tabular figures; minor and quality marks as superscripts at half size; dynamics in italics in the accent color, top left of the bar. `size="sm"` is the next-section preview: smaller and in the secondary color. Four bars per row. |
+| **BarRow** | A row of bars of a chart, rendered from the `chartdown` tree (never a simplified parser). Square bar lines (three times the border width, primary text color; twice, emphasized border color, in the small size); chord numbers in large tabular figures; minor and quality marks as superscripts at half size; dynamics in italics in the accent color, top left of the bar. A bar's marks (ending, dynamic, cues, repeat count such as ×2) sit on a line above its chords, and every bar of the row shares that line, so the chord numbers of a row always stand on one baseline whether or not a bar has marks. `size="sm"` is the next-section preview: smaller and in the secondary color. Four bars per row. |
 | **MDNotes** | A music director's notes: a red `Token` with "MD" (for everyone) or the instrument's name and icon, followed by the note's text. |
 | **Instrument icons** | Drums, bass, keys, guitar, vocals, saxophone, trumpet, trombone, violin: stroke icons on a 24 px grid, the same drawings as version 1. Red only inside instrument contexts. An instrument without an icon shows its name only. |
 | **ChartDownLogo** | Section 7. |
