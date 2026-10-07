@@ -1,7 +1,6 @@
 import { Grid } from "@astryxdesign/core/Grid";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Text } from "@astryxdesign/core/Text";
-import { VStack } from "@astryxdesign/core/VStack";
 import type { Bar as BarData, BarItem, ChordFormatter, Row } from "chartdown";
 import { DEFAULT_BAR_LABELS, type BarLabels } from "./Bar";
 
@@ -87,11 +86,17 @@ function OneBar({
   formatter: ChordFormatter;
   labels: BarLabels;
 }) {
-  const top = bar.ending || bar.dynamic || bar.cues.length > 0 || bar.repeatEnd;
   return (
+    // Each bar spans three lines shared by the whole row (marks, chords, lyric) through a
+    // subgrid, so a bar with a dynamic, a cue or ×2 never pushes its chords off the row's line.
     <div
       role="group"
       style={{
+        display: "grid",
+        gridRow: "span 3",
+        gridTemplateRows: "subgrid",
+        rowGap: "var(--spacing-1)",
+        alignContent: "center",
         minHeight: small ? "var(--spacing-12)" : "calc(var(--spacing-12) * 2)",
         borderInlineEnd: line(small),
         ...(first || bar.repeatStart ? { borderInlineStart: line(small) } : {}),
@@ -99,42 +104,38 @@ function OneBar({
         paddingBlock: "var(--spacing-1)",
       }}
     >
-      <VStack gap={1} height="100%">
-        {top && (
-          <HStack gap={2} vAlign="center">
-            {bar.ending && <Text type="supporting">{bar.ending.join(", ")}.</Text>}
-            {bar.dynamic && (
-              <Text type="supporting" weight="bold" color="accent">
-                <i>{DYNAMIC_TEXT[bar.dynamic] ?? bar.dynamic}</i>
-              </Text>
-            )}
-            {bar.cues.map((cue, index) => (
-              <Text key={index} type="supporting">
-                {!cue.roles.includes("everyone") && (
-                  <strong style={{ color: "var(--color-text-red)" }}>
-                    {cue.roles.map(labels.instrument).join(", ")}{" "}
-                  </strong>
-                )}
-                {cue.text}
-              </Text>
-            ))}
-            {bar.repeatEnd && <Text type="supporting">×{bar.repeatEnd.times}</Text>}
-          </HStack>
+      <HStack gap={2} vAlign="center">
+        {bar.ending && <Text type="supporting">{bar.ending.join(", ")}.</Text>}
+        {bar.dynamic && (
+          <Text type="supporting" weight="bold" color="accent">
+            <i>{DYNAMIC_TEXT[bar.dynamic] ?? bar.dynamic}</i>
+          </Text>
         )}
-        <HStack gap={2} vAlign="center" hAlign="around" width="100%">
-          {bar.items.map((item, index) => (
-            <Chord
-              key={index}
-              item={item}
-              row={row}
-              formatter={formatter}
-              labels={labels}
-              small={small}
-            />
-          ))}
-        </HStack>
-        {bar.lyric !== undefined && <Text type="supporting">“{bar.lyric}”</Text>}
-      </VStack>
+        {bar.cues.map((cue, index) => (
+          <Text key={index} type="supporting">
+            {!cue.roles.includes("everyone") && (
+              <strong style={{ color: "var(--color-text-red)" }}>
+                {cue.roles.map(labels.instrument).join(", ")}{" "}
+              </strong>
+            )}
+            {cue.text}
+          </Text>
+        ))}
+        {bar.repeatEnd && <Text type="supporting">×{bar.repeatEnd.times}</Text>}
+      </HStack>
+      <HStack gap={2} vAlign="center" hAlign="around" width="100%">
+        {bar.items.map((item, index) => (
+          <Chord
+            key={index}
+            item={item}
+            row={row}
+            formatter={formatter}
+            labels={labels}
+            small={small}
+          />
+        ))}
+      </HStack>
+      <div>{bar.lyric !== undefined && <Text type="supporting">“{bar.lyric}”</Text>}</div>
     </div>
   );
 }

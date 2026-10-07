@@ -28,6 +28,24 @@ describe("T-1301 BarRow, the Astryx chart row", () => {
     expect(html).toContain("<i>mf</i>");
   });
 
+  it("T-1301 a bar's marks (×2, a dynamic) never push its chords off the row's line", () => {
+    const repeat = parse("## Verse 1\n|: 1 | 4 1 | 6m7b5 5 | 4sus4 1Maj7 :| x2\n");
+    const html = render(
+      <BarRow
+        row={repeat.sections[0]!.rows[0]!}
+        formatter={chordFormatter(repeat, { style: "numbers" })}
+      />,
+    );
+    expect(text(html)).toContain("×2");
+    // Every bar spans the row's three shared lines (marks, chords, lyric) as a subgrid.
+    const bars = html.match(/<div role="group" style="[^"]*"/g) ?? [];
+    expect(bars).toHaveLength(4);
+    for (const bar of bars) {
+      expect(bar).toContain("grid-template-rows:subgrid");
+      expect(bar).toContain("grid-row:span 3");
+    }
+  });
+
   it("T-1301 shows letters in another key from the same tree", () => {
     const letters = chordFormatter(chart, { style: "letters", key: { root: "A", minor: false } });
     expect(text(render(<BarRow row={row} formatter={letters} />))).toBe("mf D A E/G# F# m");
