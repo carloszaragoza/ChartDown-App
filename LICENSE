@@ -1,0 +1,16 @@
+Copyright (c) 2026 Carlos Zaragoza. All rights reserved.
+
+This repository is public so that it can be read; it is not open source. No license is granted
+to copy, modify, distribute, sublicense or use this code, in whole or in part, except as stated
+below or with written permission from the copyright holder.
+
+Exceptions, under their own licenses:
+
+- packages/core (the `chartdown` parser) is released under the MIT License; see
+  packages/core/LICENSE.
+- The ChartDown language specification (github.com/ChartDown/Language) is released under CC0.
+- Charts that users publish as public versions in ChartDown App are released by their authors
+  under CC0, as the Terms of Use say.
+- Third-party packages and fonts keep their own licenses.
+
+For permission requests, write to contact@chartdown.app.

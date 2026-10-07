@@ -1,5 +1,6 @@
 {
   "name": "@chartdown/traceability",
+  "license": "UNLICENSED",
   "version": "0.0.0",
   "private": true,
   "description": "CI check: every requirement (R-xx) a task touches has a test named with its id.",
