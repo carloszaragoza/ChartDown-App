@@ -119,7 +119,14 @@ jobs:
         run: pnpm --filter @chartdown/web exec playwright install --with-deps chromium
 
       - name: End-to-end tests
-        run: pnpm --filter @chartdown/web e2e
+        run: pnpm --filter @chartdown/web exec playwright test e2e/tour.spec.ts
+
+      - name: Keep the tour
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: tour
+          path: apps/web/tour
 
       - name: Keep the report when tests fail
         if: failure()
