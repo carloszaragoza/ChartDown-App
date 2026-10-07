@@ -80,12 +80,12 @@ test("R-09.1 R-09.3 adding Luis to the set reaches him instantly, saying what ch
     name: new RegExp(`^New\\s*You were added to ${set} \\(no date\\) on Bass\\.$`),
   });
   await expect(notice).toBeVisible({ timeout: 15_000 });
-  await expect(luisPage.getByRole("link", { name: "Notices, 1 unread" })).toBeVisible();
+  await expect(luisPage.getByRole("link", { name: /^Notices\s*1$/ })).toBeVisible();
 
   // Opening it goes to the set and marks it read.
   await notice.click();
   await expect(luisPage.getByRole("heading", { level: 1, name: set })).toBeVisible();
-  await expect(luisPage.getByRole("link", { name: "Notices, none unread" })).toBeVisible();
+  await expect(luisPage.getByRole("link", { name: "Notices", exact: true })).toBeVisible();
 
   // Ana made the change, so she has no notice of it (R-09.3).
   await page.goto("/notices");

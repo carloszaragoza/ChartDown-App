@@ -194,6 +194,10 @@ describe("Handoff 2.2 self-hosted fonts", () => {
   it("has a font face for every family, weight and style the type styles use", () => {
     expect(faces.map((f) => `${f.family} ${f.style} ${f.weight}`).sort()).toEqual([
       "Barlow Condensed normal 600",
+      // Figtree, the Astryx theme's font (Design Handoff 2.0, section 2): a variable weight range,
+      // 300 to 900, read here by its first value.
+      "Figtree italic 300",
+      "Figtree normal 300",
       "JetBrains Mono normal 400",
       "Source Sans 3 italic 700",
       "Source Sans 3 normal 400",
@@ -211,7 +215,7 @@ describe("Handoff 2.2 self-hosted fonts", () => {
   });
 
   it("ships the open font license of every family", () => {
-    for (const family of ["barlowcondensed", "sourcesans3", "jetbrainsmono"]) {
+    for (const family of ["barlowcondensed", "sourcesans3", "jetbrainsmono", "figtree"]) {
       expect(read(`../fonts/OFL-${family}.txt`)).toContain("SIL OPEN FONT LICENSE Version 1.1");
     }
   });

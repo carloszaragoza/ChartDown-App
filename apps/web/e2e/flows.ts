@@ -35,16 +35,18 @@ export async function signIn(page: Page, email: string, password: string) {
   await page.getByRole("button", { name: "Sign in" }).click();
 }
 
-/** Signs out and waits until the home page shows it, so the next step sees no session. */
+/** Signs out from the side navigation and waits for the landing page, so the next step sees no session. */
 export async function signOut(page: Page) {
-  await openAccount(page);
-  await page.getByRole("button", { name: "Sign out" }).click();
-  await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
+  await page.getByRole("button", { name: /^(Sign out|Cerrar sesión)$/ }).click();
+  await expect(
+    page.getByRole("link", { name: /^(Sign in|Iniciar sesión)$/ }).first(),
+  ).toBeVisible();
 }
 
-/** Opens the account menu of the top bar, where the profile and sign out are (T-706). */
-export async function openAccount(page: Page) {
-  await page.getByLabel(/^(Account of|Cuenta de) /).click();
+/** Opens the profile from the person's link at the foot of the side navigation (T-1301). */
+export async function openProfile(page: Page) {
+  await page.locator('a[href="/profile"]').first().click();
+  await expect(page).toHaveURL(/\/profile$/);
 }
 
 /** In the layer editor, chooses a section from the list on the left (T-707). */

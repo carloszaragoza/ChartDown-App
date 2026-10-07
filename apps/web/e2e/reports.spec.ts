@@ -59,7 +59,7 @@ test("R-07.2 a reported version the Admin hides leaves the catalog and its owner
   // Dana is told which version and why, and still sees it, marked hidden.
   await signIn(page, dana, PASSWORD);
   await expect(page.getByText("Signed in as Dana Owner")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Notices, 1 unread" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /^Notices\s*1$/ })).toBeVisible();
   await page.goto("/notices");
   await page
     .getByRole("button", {
