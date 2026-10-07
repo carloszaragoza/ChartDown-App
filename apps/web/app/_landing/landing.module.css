@@ -1,236 +1,712 @@
-/* The landing page (design/screens/07-landing.html), in the design system's tokens. */
+/* The landing's red-pen chart sheet (T-1307): one Nashville Number chart on a music stand.
+   Design tokens only; the chart face (Barlow Condensed) and the text face (Source Sans 3) are
+   self-hosted. Numbers and bar lines are the only full-strength ink; red is the music
+   director's pen and always names who a note is for. */
+
 .landing {
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
-  background: var(--ground);
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--type-note);
+  caret-color: var(--md);
+}
+.landing ::selection {
+  background: color-mix(in srgb, var(--md) 22%, transparent);
   color: var(--ink);
 }
-.bar,
-.main,
-.footerInner {
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
+.landing :focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
 }
-.bar {
+.landing a {
+  text-underline-offset: 0.2em;
+}
+
+/* Top strip: the logo, the reading links and the way in. */
+.top {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2) var(--space-6);
-  padding: var(--space-4) var(--space-10);
+  gap: var(--space-3) var(--space-6);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--space-4) clamp(var(--space-4), 5vw, 64px);
 }
 .brand {
-  color: var(--ink);
-  font: var(--type-section-title);
-  font-weight: 700;
-  text-decoration: none;
-}
-.nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-4);
-}
-.navLink,
-.link {
   display: inline-flex;
   align-items: center;
   min-height: var(--target-min);
-  color: var(--dynamic);
-  font: var(--type-label);
+}
+.nav {
+  display: flex;
+  gap: var(--space-2);
 }
 .navLink {
-  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  color: var(--ink-muted);
+  font: var(--type-label);
   text-decoration: none;
+}
+.navLink:hover {
+  color: var(--ink);
+  text-decoration: underline;
 }
 .end {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
-  margin-left: auto;
+  margin-inline-start: auto;
 }
-.brand:focus-visible,
-.navLink:focus-visible,
-.link:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
-.main {
-  display: flex;
-  flex-direction: column;
-  gap: calc(var(--space-10) + var(--space-8));
-  padding: var(--space-8) var(--space-10) calc(var(--space-8) * 2);
-}
-.hero {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-10);
+
+/* Buttons in the sheet's ink. */
+.primary,
+.secondary {
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-height: var(--target-min);
+  padding: 0 var(--space-6);
+  border-radius: var(--radius-md);
+  font: var(--type-label);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-.pitch {
-  display: flex;
-  flex: 1 1 420px;
-  flex-direction: column;
-  gap: var(--space-4);
-  min-width: 0;
+.primary {
+  border: var(--stroke-emphasis) solid var(--ink);
+  background: var(--ink);
+  color: var(--ink-inverse);
+}
+.primary:hover {
+  background: color-mix(in srgb, var(--ink) 86%, var(--paper));
+}
+.secondary {
+  border: var(--stroke-emphasis) solid var(--control-border);
+  background: transparent;
+  color: var(--ink);
+}
+.secondary:hover {
+  border-color: var(--ink);
+}
+
+.main {
+  display: grid;
+}
+.notice {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--space-3) clamp(var(--space-4), 5vw, 64px);
+  font: var(--type-label);
+}
+
+/* The sheet: the chart's title line, then the chorus at stand scale. */
+.sheet {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(var(--space-4), 2.6vw, var(--space-8)) clamp(var(--space-4), 5vw, 64px)
+    clamp(var(--space-6), 3vw, var(--space-10));
+}
+.titleLine {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--space-4) var(--space-8);
+  padding-bottom: var(--space-4);
+  border-bottom: var(--stroke-bar-line) solid var(--ink);
 }
 .headline {
+  max-width: 22ch;
   margin: 0;
-  font: var(--type-song-title);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(40px, 5.2vw, 76px);
+  line-height: 0.94;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.chartMeta {
+  margin: 0;
+  color: var(--ink-muted);
+  font: var(--type-tag);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  white-space: nowrap;
 }
 .lead {
-  margin: 0;
+  max-width: 62ch;
+  margin: var(--space-4) 0 0;
   color: var(--ink-muted);
   font: var(--type-note);
 }
-.actions {
+
+.sheetFigure {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+  gap: var(--space-4) clamp(var(--space-6), 4vw, 56px);
+  margin: clamp(var(--space-6), 2.6vw, var(--space-8)) 0 0;
+}
+.sectionLine {
+  grid-column: 1 / -1;
   display: flex;
-  flex-wrap: wrap;
+  align-items: baseline;
   gap: var(--space-3);
 }
-.meta {
+.sectionName {
+  font: var(--type-section-title);
+  font-size: clamp(30px, 3vw, 40px);
+}
+.hashes {
+  color: var(--rule);
+}
+.sectionLength {
   color: var(--ink-muted);
   font: var(--type-meta);
 }
-.example {
-  display: flex;
-  flex: 1 1 480px;
-  flex-direction: column;
-  gap: var(--space-3);
-  min-width: 0;
-  margin: 0;
+
+/* Four bars that never wrap: they scale, as a chart row does on a stand. */
+.bars {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-self: start;
 }
-.viewing {
-  display: inline-flex;
-  align-self: flex-end;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--dynamic);
-  font: var(--type-label);
+.bar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: clamp(110px, 13vw, 170px);
+  border-inline-end: var(--stroke-bar-line) solid var(--ink);
 }
-.block {
+.bar:first-child {
+  border-inline-start: var(--stroke-bar-line) solid var(--ink);
+}
+.chords {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
   gap: var(--space-4);
 }
-.heading {
-  margin: 0;
-  font: var(--type-section-title);
+.chord {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(54px, 8vw, 112px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
-.steps,
-.cards {
+.quality {
+  margin-inline-start: 0.04em;
+  font-size: 0.5em;
+  vertical-align: super;
+}
+.dynamic {
+  position: absolute;
+  top: var(--space-2);
+  inset-inline-start: var(--space-3);
+  color: var(--dynamic);
+  font: var(--type-dynamic-mark);
+}
+.penCircle {
+  position: absolute;
+  inset: 6% 8%;
+  width: 84%;
+  height: 88%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--md);
+  stroke-width: 3;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 100;
+  animation: pen 640ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* The margin: who the notes are for, and the director's notes in red pen. */
+.margin {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+}
+.viewAs {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-8);
-  width: 100%;
+  gap: var(--space-2);
+}
+.viewOption {
+  min-height: var(--target-min);
+  padding: 0 var(--space-4);
+  border: var(--stroke-emphasis) solid var(--control-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink);
+  font: var(--type-label);
+  cursor: pointer;
+}
+.viewOption[aria-checked="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ink-inverse);
+}
+.viewing {
+  margin: 0;
+  color: var(--ink-muted);
+  font: var(--type-caption);
+}
+.notes {
+  display: grid;
+  gap: var(--space-4);
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.cards {
-  gap: var(--space-4);
+.note {
+  position: relative;
+  display: grid;
+  gap: var(--space-1);
+  padding-bottom: var(--space-3);
 }
-.step {
-  display: flex;
-  flex: 1 1 260px;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-.number {
-  font: var(--type-chord-md);
-  font-weight: 700;
-}
-.stepTitle {
-  margin: 0;
-  font: var(--type-form-chip);
-}
-.text {
-  margin: 0;
-  color: var(--ink-muted);
-  font: var(--type-note);
-}
-.card {
-  box-sizing: border-box;
-  border: var(--stroke-hairline) solid var(--rule);
+.noteTag {
+  justify-self: start;
+  padding: 0 var(--space-2);
   border-radius: var(--radius-sm);
-  background: var(--paper);
+  background: color-mix(in srgb, var(--md) 14%, var(--paper));
+  color: var(--md);
+  font: var(--type-tag);
 }
-.cards .card {
-  display: flex;
-  flex: 1 1 240px;
-  flex-direction: column;
-  gap: var(--space-2);
-  max-width: 24rem;
-  padding: var(--space-6);
-}
-.language {
+.noteHead {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-6);
-  padding: var(--space-6);
+  align-items: baseline;
+  gap: var(--space-2);
 }
-.code {
-  flex: 1 1 420px;
-  min-width: 0;
+.noteBar {
+  color: var(--md);
+  font: var(--type-caption);
+}
+.noteText {
+  font-family: var(--font-text);
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1.35;
+}
+.penUnderline {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  width: 92%;
+  height: 10px;
+  overflow: visible;
+  fill: none;
+  stroke: var(--md);
+  stroke-width: 2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 100;
+  animation: pen 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* The note is written as the pen moves: its words appear left to right. */
+.noteHead,
+.noteText {
+  animation: write 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.note:nth-child(2) > * {
+  animation-delay: 90ms;
+}
+.note:nth-child(3) > * {
+  animation-delay: 180ms;
+}
+
+@keyframes write {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+@keyframes pen {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* The stand's ledge: the waitlist where the pencil rests. */
+.ledge {
+  background: var(--ink);
+  color: var(--ink-inverse);
+}
+.ledgeInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: var(--space-6) clamp(var(--space-8), 5vw, 72px);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(var(--space-6), 3vw, var(--space-10)) clamp(var(--space-4), 5vw, 64px);
+}
+.ledgeTitle {
   margin: 0;
-  padding: var(--space-4);
-  overflow-x: auto;
-  border-radius: var(--radius-sm);
-  background: var(--ground);
-  font: var(--type-code);
-  white-space: pre-wrap;
+  color: var(--ink-inverse);
+  font: var(--type-song-title);
+  font-size: clamp(34px, 4vw, 52px);
+}
+.ledgeCopy {
+  display: grid;
+  gap: var(--space-3);
+}
+.ledgeText {
+  margin: 0;
+  color: color-mix(in srgb, var(--ink-inverse) 82%, var(--ink));
+  font: var(--type-note);
+}
+.ledgeAction {
+  display: grid;
+  gap: var(--space-3);
+}
+.ledgeLink {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  color: var(--ink-inverse);
+  font: var(--type-label);
 }
 .waitlist {
   display: flex;
-  flex-wrap: wrap;
   align-items: flex-end;
   gap: var(--space-3);
-  width: 100%;
-  max-width: 640px;
 }
 .field {
-  display: flex;
-  flex: 1 1 300px;
-  flex-direction: column;
+  display: grid;
+  flex: 1;
   gap: var(--space-1);
-  color: var(--ink-muted);
-  font: var(--type-meta);
+}
+.fieldLabel {
+  font: var(--type-label);
 }
 .input {
-  min-height: var(--target-min);
-  padding: 0 var(--space-3);
-  border: var(--stroke-hairline) solid var(--control-border);
+  min-height: calc(var(--target-min) + var(--space-2));
+  padding: 0 var(--space-4);
+  border: var(--stroke-emphasis) solid transparent;
   border-radius: var(--radius-md);
   background: var(--paper);
   color: var(--ink);
   font: var(--type-note);
 }
-.footer {
-  margin-top: auto;
-  border-top: var(--stroke-hairline) solid var(--rule);
+.input::placeholder {
+  color: var(--ink-muted);
+}
+.ledge .primary {
+  min-height: calc(var(--target-min) + var(--space-2));
+  border-color: var(--paper);
   background: var(--paper);
+  color: var(--ink);
+}
+.ledge .primary:hover {
+  background: color-mix(in srgb, var(--paper) 88%, var(--ink));
+}
+
+/* The rest of the page keeps reading as the chart: "## " section labels and bar lines. */
+.block {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(56px, 7vw, 104px) clamp(var(--space-4), 5vw, 64px) 0;
+}
+.blockTitle {
+  margin: 0 0 var(--space-8);
+  font: var(--type-song-title);
+  font-size: clamp(36px, 4.4vw, 56px);
+}
+.blockTitle::before {
+  content: "## " / "";
+  color: var(--rule);
+}
+/* How it works as a set list: number, title, a line of text, a rule under each. */
+.setList,
+.callouts {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.setItem {
+  display: grid;
+  grid-template-columns: 3ch minmax(0, 18rem) minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-2) var(--space-6);
+  padding: var(--space-4) 0;
+  border-bottom: var(--stroke-hairline) solid var(--rule);
+}
+.setItem:first-child {
+  border-top: var(--stroke-bar-line) solid var(--ink);
+}
+.setNumber {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.setTitle {
+  margin: 0;
+  font: var(--type-label);
+  font-size: 1.2rem;
+}
+
+/* Built for the stage: stand mode drawn in ink, with numbered callouts beside it. */
+.stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-8) clamp(var(--space-8), 5vw, 72px);
+}
+.standFrame {
+  display: grid;
+  gap: var(--space-6);
+  margin: 0;
+  padding: var(--space-4) var(--space-6) var(--space-8);
+  border: var(--stroke-bar-line) solid var(--ink);
+  border-radius: var(--radius-md);
+}
+.standTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--stroke-hairline) solid var(--rule);
+}
+.standStrip,
+.standStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.standTab {
+  display: inline-grid;
+  place-items: center;
+  min-width: var(--target-min);
+  min-height: var(--target-min);
+  border: var(--stroke-emphasis) solid var(--control-border);
+  border-radius: var(--radius-md);
+  font: var(--type-label);
+}
+.standTab[data-current] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ink-inverse);
+}
+.standBars {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.standBars > .callout {
+  position: absolute;
+  top: calc(var(--space-2) * -1);
+  inset-inline-end: calc(var(--space-2) * -1);
+}
+.standBar {
+  padding: var(--space-3) 0;
+  border-inline-end: var(--stroke-bar-line) solid var(--ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 1;
+  text-align: center;
+}
+.standBar:first-of-type {
+  border-inline-start: var(--stroke-bar-line) solid var(--ink);
+}
+.standNote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-text);
+  font-style: italic;
+  font-size: 1.15rem;
+}
+/* An ink callout mark: a small numbered ring, never red (red is the director's). */
+.callout {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: var(--stroke-emphasis) solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--type-tag);
+  font-style: normal;
+}
+.callouts {
+  gap: 0;
+}
+.calloutItem {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-4) 0;
+  border-bottom: var(--stroke-hairline) solid var(--rule);
+}
+.calloutItem:first-child {
+  padding-top: 0;
+}
+.calloutItem .text {
+  grid-column: 2;
+}
+.text {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--ink-muted);
+  font: var(--type-note);
+}
+
+/* The open language: the same chorus as plain text. */
+.language {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-8) clamp(var(--space-8), 5vw, 72px);
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(56px, 7vw, 104px) clamp(var(--space-4), 5vw, 64px) 0;
+}
+.languageCopy {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+}
+.languageCopy .blockTitle {
+  margin: 0;
+}
+.code {
+  margin: 0;
+  padding: var(--space-6);
+  overflow-x: auto;
+  border: var(--stroke-hairline) solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--ground);
+  color: var(--ink);
+  font: var(--type-code);
+}
+
+/* The ending: a fermata, and the way in once more. */
+.ending {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-6);
+  padding: clamp(72px, 9vw, 128px) var(--space-4);
+  text-align: center;
+}
+.fermata {
+  width: 72px;
+  height: 40px;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.fermata circle {
+  fill: var(--ink);
+  stroke: none;
+}
+.endingTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(44px, 6vw, 80px);
+  line-height: 1;
+}
+
+.footer {
+  border-top: var(--stroke-hairline) solid var(--rule);
 }
 .footerInner {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-2) var(--space-6);
-  padding: var(--space-6) var(--space-10);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--space-6) clamp(var(--space-4), 5vw, 64px);
   color: var(--ink-muted);
   font: var(--type-meta);
 }
-@media (max-width: 640px) {
-  .bar,
-  .main,
-  .footerInner {
-    padding-inline: var(--space-4);
+.footerLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  color: var(--ink);
+}
+
+@media (max-width: 960px) {
+  .sheetFigure,
+  .ledgeInner,
+  .language {
+    grid-template-columns: minmax(0, 1fr);
   }
-  .main {
-    gap: var(--space-10);
+  .stage {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .nav {
+    display: none;
+  }
+  .top {
+    gap: var(--space-2);
+  }
+  .end {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-inline-start: 0;
+  }
+  .end .primary,
+  .end .secondary {
+    padding: 0 var(--space-3);
+  }
+  .titleLine {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .chartMeta {
+    text-align: start;
+    white-space: normal;
+  }
+  .setItem {
+    grid-template-columns: 3ch minmax(0, 1fr);
+  }
+  .setItem .text {
+    grid-column: 2;
+  }
+  .standFrame {
+    padding-inline: var(--space-3);
+  }
+  .waitlist {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .penCircle,
+  .penUnderline,
+  .noteHead,
+  .noteText {
+    animation: none;
   }
 }
