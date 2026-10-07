@@ -62,7 +62,7 @@ test("R-07.2 a reported version the Admin hides leaves the catalog and its owner
   await expect(page.getByRole("link", { name: /^Notices\s*1$/ })).toBeVisible();
   await page.goto("/notices");
   await page
-    .getByRole("button", {
+    .getByRole("link", {
       name: new RegExp(
         `The administrators hid ${title} from the community because it has full song lyrics\\.`,
       ),

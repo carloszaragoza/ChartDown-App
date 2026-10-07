@@ -30,15 +30,15 @@ const render = (overrides: Partial<StandModeProps> = {}) =>
   );
 
 describe("R-03.3 stand mode", () => {
-  it("R-03.3 the current section is drawn in chord-xl and the next in chord-sm", () => {
+  it("R-03.3 the current section is drawn large in a card and the next one as a small preview", () => {
     const html = render({ section: 2 });
     const current = html.slice(html.indexOf('id="current-section"'));
-    expect(current).toMatch(
-      /^id="current-section"><header class="cd-section__header"><h2[^>]*>Chorus</,
-    );
-    expect(html).toContain("cd-bar--xl");
-    expect(html).toMatch(/cd-next[^"]*"/);
+    // The current section: its name, then its bars (BarRow, Design Handoff 2.0 screen 03).
+    expect(current).toMatch(/^id="current-section"[^>]*>.*?<h2[^>]*>Chorus<\/h2>/s);
+    expect(current).toMatch(/role="group"/);
+    // The preview of the next section, small and in the secondary color.
     expect(html).toContain("Verse 2");
+    expect(html).toContain("var(--color-border-emphasized)");
     expect(html).toContain("Section 3 of 7");
   });
 

@@ -589,7 +589,8 @@
     "you": "{name} (you)",
     "lineupNote": "Each musician sees the music director's notes for their own instrument.",
     "allSets": "Sets",
-    "allSetsHint": "Sets of every band you are in, and of your personal space. To create one, open the band."
+    "allSetsHint": "Sets of every band you are in, and of your personal space. To create one, open the band.",
+    "notesDot": "Notes for you"
   },
   "offline": {
     "title": "You are offline",
@@ -661,7 +662,11 @@
     "reasons": {
       "lyrics": "because it has full song lyrics",
       "other": "after a report"
-    }
+    },
+    "description": "What changed in your bands and sets.",
+    "caughtUp": "You're all caught up",
+    "nothingUnread": "Every notice is already read.",
+    "read": "Read"
   },
   "admin": {
     "title": "Administration",
