@@ -12,6 +12,7 @@ import {
   type ChordFormatter,
   type ChordStyle,
   type Key,
+  type Meter,
   type Section,
 } from "chartdown";
 import {
@@ -37,6 +38,10 @@ export interface ChartSectionProps {
   id?: string;
   /** In a card, as in stand mode; plain in the editors' previews. */
   isFramed?: boolean;
+  /** The chart's meter, for each bar's beats. */
+  meter?: Meter;
+  /** "lg" in stand mode; "md" in the viewer and the editors (CHART-VIEWER.md 2). */
+  size?: "lg" | "md";
 }
 
 /**
@@ -50,6 +55,8 @@ export function ChartSection({
   notes,
   id,
   isFramed = false,
+  meter,
+  size = "md",
 }: ChartSectionProps) {
   const body = (
     <section aria-label={section.name} {...(id ? { id } : {})}>
@@ -60,7 +67,14 @@ export function ChartSection({
         </HStack>
         <MDNotes notes={notes ?? section.notes} instrumentName={labels.bar.instrument} />
         {section.rows.map((row, index) => (
-          <BarRow key={index} row={row} formatter={formatter} labels={labels.bar} />
+          <BarRow
+            key={index}
+            row={row}
+            formatter={formatter}
+            labels={labels.bar}
+            size={size}
+            {...(meter ? { meter } : {})}
+          />
         ))}
       </VStack>
     </section>
@@ -133,6 +147,7 @@ export function ChartPreview({
           labels={labels}
           id={`section-${index + 1}`}
           isFramed={isFramed}
+          meter={chart.meter}
           {...(notes ? { notes: notes[index] ?? [] } : {})}
         />
       ))}

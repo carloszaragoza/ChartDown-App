@@ -13,6 +13,10 @@ export interface BarLabels {
   tie: string;
   /** The instrument's name in the interface language, for instrument cues. */
   instrument: (id: string) => string;
+  /** The line above a row after `@key`, for example "Key change: A". */
+  keyChange: (key: string) => string;
+  /** A beat slash's title, for example "Beat 3: semi-strong". */
+  beat: (beat: number, strength: "strong" | "semi" | "weak") => string;
 }
 
 export const DEFAULT_BAR_LABELS: BarLabels = {
@@ -24,6 +28,9 @@ export const DEFAULT_BAR_LABELS: BarLabels = {
   repeatBar: "repeat the previous bar",
   tie: "tied over",
   instrument: (id) => id.charAt(0).toUpperCase() + id.slice(1),
+  keyChange: (key) => `Key change: ${key}`,
+  beat: (beat, strength) =>
+    `Beat ${beat}: ${{ strong: "strong", semi: "semi-strong", weak: "weak" }[strength]}`,
 };
 
 const DYNAMIC_TEXT: Record<string, string> = { cresc: "cresc.", decresc: "decresc." };

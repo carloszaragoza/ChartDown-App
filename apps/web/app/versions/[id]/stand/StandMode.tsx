@@ -338,6 +338,8 @@ export function StandMode({
                   notes={notes ? (notes[current] ?? []) : now.notes}
                   id="current-section"
                   isFramed
+                  meter={chart.meter}
+                  size="lg"
                 />
               )}
             </main>
@@ -354,6 +356,7 @@ export function StandMode({
                       row={next.rows[0]}
                       formatter={formatter}
                       labels={labels.bar}
+                      meter={chart.meter}
                       size="sm"
                     />
                   )}

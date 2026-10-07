@@ -1,6 +1,7 @@
 // @chartdown/ui: shared components (Design Handoff 3). Import "@chartdown/ui/tokens.css",
 // "@chartdown/ui/fonts.css" and "@chartdown/ui/components.css" once in the app.
 export { BarRow, type BarRowProps } from "./BarRow";
+export { barSpans, beatStrength, COLUMNS_PER_BEAT, type BeatStrength, type Span } from "./beats";
 export { Button, type ButtonProps, type ButtonVariant } from "./Button";
 export { ChartDownLogo } from "./ChartDownLogo";
 export { Icon, type IconProps } from "./Icon";

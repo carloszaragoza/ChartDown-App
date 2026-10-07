@@ -23,6 +23,9 @@ export function useChartLabels(): SectionLabels {
       repeatBar: t("repeatBar"),
       tie: t("tie"),
       instrument,
+      keyChange: (key: string) => t("keyChange", { key }),
+      beat: (beat: number, strength: "strong" | "semi" | "weak") =>
+        t("beat", { beat, strength: t(`beatStrength.${strength}`) }),
     },
   };
 }

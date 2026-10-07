@@ -8,7 +8,8 @@
     ".": "./src/index.ts",
     "./tokens.css": "./src/tokens.css",
     "./fonts.css": "./src/fonts.css",
-    "./components.css": "./src/components.css"
+    "./components.css": "./src/components.css",
+    "./chart.css": "./src/chart.css"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

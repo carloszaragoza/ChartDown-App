@@ -194,7 +194,14 @@
     "tempo": "Tempo",
     "example": "Example: Atril, viewed as Keys",
     "writtenIn": "(written in {key})",
-    "nthTime": "{time, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} time"
+    "nthTime": "{time, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} time",
+    "keyChange": "Key change: {key}",
+    "beat": "Beat {beat}: {strength}",
+    "beatStrength": {
+      "strong": "strong",
+      "semi": "semi-strong",
+      "weak": "weak"
+    }
   },
   "auth": {
     "email": "Email",

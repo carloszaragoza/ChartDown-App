@@ -1,0 +1,249 @@
+/* The chart viewer (T-1309, design/chart-viewer/CHART-VIEWER.md): how a ChartDown row is drawn in
+   the viewer, the editors and stand mode. The tokens are design/chart-viewer/chart-tokens.css, each
+   one an Astryx theme token. They are declared on the chart itself, not on :root, because the
+   Astryx tokens live on each theme scope ([data-astryx-theme]); declared here, they resolve in the
+   scope around the chart, so stand mode's own theme gives its own sizes. */
+
+.cd-chart {
+  /* Type */
+  --chart-font-numbers: "Barlow Condensed", var(--font-family-heading);
+  --chart-font-text: var(--font-family-body);
+  --chart-chord-size: var(--font-size-3xl);
+  --chart-chord-weight: var(--font-weight-semibold);
+  --chart-quality-scale: 0.5;
+  --chart-bass-scale: 0.75;
+
+  /* Ink */
+  --chart-ink: var(--color-text-primary);
+  --chart-ink-muted: var(--color-text-secondary);
+  --chart-surface: var(--color-background-card);
+
+  /* Bar lines and splits */
+  --chart-bar-line: calc(var(--border-width) * 3) solid var(--chart-ink);
+  --chart-repeat-line: calc(var(--border-width) * 5) double var(--chart-ink);
+  --chart-split-line: calc(var(--border-width) * 1.5) dashed var(--color-border-emphasized);
+  --chart-bar-min-width: calc(var(--spacing-12) * 3.5);
+  --chart-cell-padding: var(--spacing-2);
+
+  /* Beat slashes: color, size and weight together, never color alone */
+  --chart-beat-strong-color: var(--color-text-primary);
+  --chart-beat-strong-size: var(--font-size-lg);
+  --chart-beat-strong-weight: var(--font-weight-bold);
+  --chart-beat-semi-color: var(--color-text-secondary);
+  --chart-beat-semi-size: var(--font-size-base);
+  --chart-beat-semi-weight: var(--font-weight-bold);
+  --chart-beat-weak-color: var(--color-border-emphasized);
+  --chart-beat-weak-size: var(--font-size-sm);
+  --chart-beat-weak-weight: var(--font-weight-normal);
+
+  /* Meaning colors */
+  --chart-md: var(--color-text-red);
+  --chart-md-border: var(--color-border-red);
+  /* Blue = dynamics (CLAUDE.md, Handoff 1). chart-tokens.css maps this to --color-text-accent,
+     but the neutral theme's accent is the ink, so the theme's blue text token is used instead. */
+  --chart-dynamic: var(--color-text-blue);
+
+  /* Hold (diamond) */
+  --chart-hold-box: 1.5em;
+  --chart-hold-diamond: 1.06em;
+  --chart-hold-stroke: calc(var(--border-width) * 2) solid var(--chart-ink);
+
+  display: grid;
+  gap: var(--spacing-1);
+  min-width: 0;
+}
+/* Stand mode: the largest chords. */
+.cd-chart--lg {
+  --chart-chord-size: var(--font-size-4xl);
+}
+/* The next-section preview: smaller, in the secondary color. */
+.cd-chart--sm {
+  --chart-chord-size: var(--font-size-2xl);
+  --chart-ink: var(--color-text-secondary);
+  --chart-bar-line: calc(var(--border-width) * 2) solid var(--color-border-emphasized);
+  --chart-bar-min-width: calc(var(--spacing-12) * 2.5);
+}
+
+.cd-chart__key-change {
+  color: var(--chart-dynamic);
+  font-family: var(--chart-font-numbers);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* A row that doesn't fit scrolls sideways inside itself; the page never does. */
+.cd-chart__scroll {
+  overflow-x: auto;
+  min-width: 0;
+}
+.cd-chart__bars {
+  display: grid;
+  grid-template-columns: repeat(var(--chart-bars), minmax(var(--chart-bar-min-width), 1fr));
+  /* Four lines shared by every bar of the row: tags, chords, beats, lyric. */
+  grid-template-rows: auto auto auto auto;
+}
+
+.cd-chart__bar {
+  display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
+  row-gap: var(--spacing-1);
+  padding: var(--spacing-1) var(--chart-cell-padding);
+  border-inline-end: var(--chart-bar-line);
+  color: var(--chart-ink);
+}
+.cd-chart__bar--first {
+  border-inline-start: var(--chart-bar-line);
+}
+.cd-chart__bar--repeat-start {
+  border-inline-start: var(--chart-repeat-line);
+}
+.cd-chart__bar--repeat-end {
+  border-inline-end: var(--chart-repeat-line);
+}
+.cd-chart__bar--ending {
+  border-block-start: calc(var(--border-width) * 1.5) solid var(--chart-ink);
+}
+
+/* 1 · Tags: ending, dynamic, cues, ×N. */
+.cd-chart__tags {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-2);
+  min-height: var(--font-size-base);
+  font-family: var(--chart-font-text);
+  font-size: var(--font-size-sm);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.cd-chart__ending {
+  font-weight: var(--font-weight-bold);
+}
+.cd-chart__dynamic {
+  color: var(--chart-dynamic);
+  font-style: italic;
+  font-weight: var(--font-weight-bold);
+}
+.cd-chart__cue {
+  color: var(--chart-ink-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cd-chart__cue-role {
+  color: var(--chart-md);
+  font-weight: var(--font-weight-bold);
+}
+.cd-chart__times {
+  margin-inline-start: auto;
+  font-weight: var(--font-weight-bold);
+}
+
+/* 2 · Chords, and 3 · beats: the same grid of 12 columns per beat. */
+.cd-chart__grid {
+  display: grid;
+  grid-template-columns: repeat(var(--chart-cols), minmax(0, 1fr));
+  align-items: end;
+}
+.cd-chart__cell {
+  display: flex;
+  align-items: flex-end;
+  min-width: 0;
+}
+.cd-chart__cell--split {
+  border-inline-start: var(--chart-split-line);
+  padding-inline-start: var(--spacing-1);
+}
+.cd-chart__chord {
+  position: relative;
+  font-family: var(--chart-font-numbers);
+  font-size: var(--chart-chord-size);
+  font-weight: var(--chart-chord-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+.cd-chart__quality {
+  margin-inline-start: 0.04em;
+  font-size: calc(var(--chart-quality-scale) * 1em);
+  vertical-align: super;
+  line-height: 0;
+}
+.cd-chart__bass {
+  font-size: calc(var(--chart-bass-scale) * 1em);
+}
+.cd-chart__push {
+  margin-inline-end: 0.06em;
+  color: var(--chart-dynamic);
+  font-size: 0.6em;
+}
+.cd-chart__marks {
+  position: absolute;
+  inset-block-end: 100%;
+  inset-inline-start: 0;
+  display: flex;
+  gap: var(--spacing-1);
+  color: var(--chart-dynamic);
+  font-family: var(--chart-font-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+}
+.cd-chart__muted {
+  color: var(--chart-ink-muted);
+}
+.cd-chart__no-chord {
+  font-size: 0.55em;
+}
+/* Hold: the chord centered in a square box, a square rotated 45° behind it. */
+.cd-chart__hold {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--chart-hold-box);
+  height: var(--chart-hold-box);
+  margin-block: -0.25em;
+}
+.cd-chart__hold::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  width: var(--chart-hold-diamond);
+  height: var(--chart-hold-diamond);
+  border: var(--chart-hold-stroke);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.cd-chart__beat {
+  font-family: var(--chart-font-text);
+  line-height: 1;
+}
+.cd-chart__beat--strong {
+  color: var(--chart-beat-strong-color);
+  font-size: var(--chart-beat-strong-size);
+  font-weight: var(--chart-beat-strong-weight);
+}
+.cd-chart__beat--semi {
+  color: var(--chart-beat-semi-color);
+  font-size: var(--chart-beat-semi-size);
+  font-weight: var(--chart-beat-semi-weight);
+}
+.cd-chart__beat--weak {
+  color: var(--chart-beat-weak-color);
+  font-size: var(--chart-beat-weak-size);
+  font-weight: var(--chart-beat-weak-weight);
+}
+
+/* 4 · The lyric landmark. */
+.cd-chart__lyric {
+  min-width: 0;
+  color: var(--chart-ink-muted);
+  font-family: var(--chart-font-text);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
