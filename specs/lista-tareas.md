@@ -166,7 +166,7 @@ The redesign of Design Handoff 2.0, one block per pull request. Until a block is
 |---|---|---|---|---|---|
 | T-1301 | Foundation: Astryx and its theme (light and dark), self-hosted Figtree, the app shell with the side navigation, and the BarRow and MDNotes components on the `chartdown` tree | Handoff 2, 3 and the app shell | T-203, T-706 | L | Every page has the side navigation in both modes; the example chart renders with BarRow |
 | T-1302 | Play: Notices, Set, Stand mode and the offline reader | SPEC-05, 06, 08, 09 | T-1301 | L | Screens 01 to 03 match the design |
-| T-1303 | Create: Catalog, New version, Chart editor and MD notes; Version, History, Revision and Make private | SPEC-02, 03, 06 | T-1301 | L | Screens 04 to 07 match the design; the others follow the handoff's screens table |
+| T-1303 | Create: Catalog, New version, Chart editor and MD notes; Version, Song, History, Revision and Make private | SPEC-02, 03, 06 | T-1301 | L | Screens 04 to 07 match the design; the others follow the handoff's screens table |
 | T-1304 | People: Bands, Band detail and Personal space; Sets, Edit set and Song in a set | SPEC-04, 05, 06 | T-1301 | L | Screens 08 to 10 match the design; the others follow the handoff's screens table |
 | T-1305 | Administration: Overview, Instruments, Invite codes and Reports | SPEC-07, R-01.7 | T-1301 | M | Screens 11 to 14 match the design |
 | T-1306 | Profile, the sign-in pages, Terms and Privacy, and the offline page | SPEC-01, 08, 09 | T-1301 | M | Screen 15 matches the design; the others use the same components |
