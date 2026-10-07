@@ -112,7 +112,8 @@ export async function createSet(
   await form.getByLabel("Set name").fill(set.name);
   if (set.date) {
     const [year, month, day] = set.date.split("-");
-    const field = form.getByRole("textbox", { name: /^Date/ });
+    // The date field types or picks a date: a combobox that reads MM/DD/YYYY.
+    const field = form.getByRole("combobox", { name: /^Date/ });
     await field.fill(`${month}/${day}/${year}`);
     await field.press("Tab");
   }
