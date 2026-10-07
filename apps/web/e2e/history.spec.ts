@@ -24,7 +24,7 @@ test("R-02.8 restoring revision 3 creates a new revision", async ({ page, reques
 
   await page.goto(address);
   await expect(page.getByRole("heading", { name: "Take 5" })).toBeVisible();
-  await page.getByRole("link", { name: "History" }).click();
+  await page.getByRole("main").getByRole("link", { name: "History" }).click();
   await expect(page.getByRole("listitem")).toHaveCount(5);
 
   await page.getByRole("link", { name: "Revision 3", exact: true }).click();
@@ -54,7 +54,7 @@ test("R-02.8 restoring revision 3 creates a new revision", async ({ page, reques
   await signOut(page);
   await page.goto(address);
   await expect(page.getByRole("heading", { name: "Take 3" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "History" })).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("link", { name: "History" })).toHaveCount(0);
   expect((await page.goto(`${address}/history`))?.status()).toBe(404);
   expect((await page.goto(`${address}/revisions/3`))?.status()).toBe(404);
 });
