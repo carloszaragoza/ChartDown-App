@@ -229,7 +229,7 @@
     "chart": "Cifrado (ChartDown)",
     "author": "Arreglo de",
     "source": "Fuente",
-    "sourceHint": "Qué grabación sigue este cifrado. Obligatoria.",
+    "sourceHint": "Qué grabación sigue este cifrado.",
     "album": "Álbum",
     "year": "Año",
     "youtube": "Enlace de YouTube",

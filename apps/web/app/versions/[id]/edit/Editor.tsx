@@ -182,7 +182,7 @@ export function Editor({
         </LayoutPanel>
       }
       content={
-        <LayoutContent role="region" label={t("preview")}>
+        <LayoutContent padding={8} role="region" label={t("preview")}>
           <ChartPreview chart={chart} />
         </LayoutContent>
       }

@@ -197,7 +197,7 @@ export function VersionForm({ song, defaultTitle, defaultAuthor }: VersionFormPr
           </LayoutPanel>
         }
         content={
-          <LayoutContent>
+          <LayoutContent padding={8}>
             <VStack gap={6}>
               <VStack gap={2}>
                 <HStack gap={2} vAlign="center" hAlign="between">

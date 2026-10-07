@@ -229,7 +229,7 @@
     "chart": "Chart (ChartDown)",
     "author": "Arrangement by",
     "source": "Source",
-    "sourceHint": "Which recording this chart follows. Required.",
+    "sourceHint": "Which recording this chart follows.",
     "album": "Album",
     "year": "Year",
     "youtube": "YouTube link",
