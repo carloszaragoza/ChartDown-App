@@ -371,13 +371,7 @@ export function OfflineReader() {
             <VStack gap={5}>
               {banner}
               <OfflineChanges setId={bundle.set.id} />
-              <ChartPreview
-                chart={chart}
-                homeKey={homeKey}
-                isFramed
-                hasForm
-                notes={(index) => notes[index] ?? []}
-              />
+              <ChartPreview chart={chart} homeKey={homeKey} isFramed hasForm notes={notes} />
             </VStack>
           </LayoutContent>
         }

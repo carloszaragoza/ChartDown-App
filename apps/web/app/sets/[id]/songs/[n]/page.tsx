@@ -220,13 +220,13 @@ export default async function SetSongPage({
               homeKey={homeKey}
               isFramed
               hasForm
-              notes={(index) =>
+              notes={chart.sections.map((_, index) =>
                 (shown.sections[index] ?? []).map((note) => ({
                   md: note.md,
                   roles: note.roles,
                   text: note.bar ? `${barLabel(note.bar)} · ${note.text}` : note.text,
-                }))
-              }
+                })),
+              )}
             />
           </VStack>
         </LayoutContent>
