@@ -179,7 +179,7 @@ The redesign of Design Handoff 2.0, one block per pull request. Until a block is
 
 ## Phase 2
 
-The three phase 2 features start after the MVP beta (T-1203). Their requirements (SPEC-10, SPEC-11 and SPEC-12, ids R-10.x, R-11.x and R-12.x) must be in the SDD Plan before their first task starts. Their task ids follow their epic number (T-14xx, T-15xx, T-16xx), since T-13xx belongs to E13.
+The three phase 2 features start after the MVP beta (T-1203). Their requirements are SPEC-10, SPEC-11 and SPEC-12 in the SDD Plan (ids R-10.x, R-11.x and R-12.x). Their task ids follow their epic number (T-14xx, T-15xx, T-16xx), since T-13xx belongs to E13.
 
 ## E14 · Import from PDF (SPEC-10, phase 2)
 
@@ -199,7 +199,7 @@ The three phase 2 features start after the MVP beta (T-1203). Their requirements
 | ID | Task | Requirements | Depends on | Size | Tests / evidence |
 |---|---|---|---|---|---|
 | T-1501 | Play-order timeline in `chartdown`: expand sections, `@use`, repeats and endings into the sequence of bars and beats, using `meter` and `:beats` | R-11.4, R-11.5 | T-102 | M | Repeat with two endings and a 6/8 chart produce the right sequence |
-| T-1502 | Metronome engine on the Web Audio clock: tempo, start bar, count-in, accented beat 1, drift test | R-11.1, R-11.8, R-11.12 | T-1501 | M | The last beat of a 4-minute song lands within 20 ms |
+| T-1502 | Metronome engine on the Web Audio clock: tempo, start bar, count-in, accented beat 1, drift test; it runs on the musician's own device | R-11.1, R-11.8, R-11.12, R-11.14 | T-1501 | M | The last beat of a 4-minute song lands within 20 ms |
 | T-1503 | Visual pulse and current-bar highlight in the viewer and stand mode, with the “beat / beats” counter; auto-advance sections in stand mode | R-11.3, R-11.4 | T-1502, T-604 | M | Tapping bar 2 of the Chorus and pressing play highlights it, then bar 3 |
 | T-1504 | Start from a tapped bar; fermata waits for a tap | R-11.2, R-11.6 | T-1503 | S | Playback stops on a fermata bar until tapped |
 | T-1505 | Click sound (off by default), volume, silent mode respected | R-11.7 | T-1502 | S | With sound off, no audio plays and the pulse still runs |

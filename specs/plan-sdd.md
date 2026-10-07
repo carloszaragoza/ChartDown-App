@@ -295,6 +295,103 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - Given a set with a date, when the MD adds Luis as bassist, then Luis receives a notice with the set's name and date.
 - Given a key change on a song in the set, when a musician opens their notice, then they see the song, the old key and the new one.
 
+### SPEC-10 · Import from PDF
+
+**Goal:** turn an existing chord sheet in PDF (chords written above the lyrics) into a ChartDown draft in minutes, so MDs don't retype their library. The import keeps the structure and the chords and discards the lyrics.
+
+**Phase:** 2 (after the MVP).
+
+**Requirements**
+
+- R-10.1 A user uploads one PDF with a text layer containing one song. Files up to 5 pages and 5 MB.
+- R-10.2 The importer reads the title, writers, key, tempo and meter when present. It never imports license numbers, copyright lines or publisher footers.
+- R-10.3 The importer detects sections from their headings (Intro, Verse, Pre-chorus, Chorus, Bridge, Instrumental, Tag, Ending, Outro, with numbers and letters such as “Verse 2” or “Bridge 1a”) and maps first and second endings and “go to” instructions to ChartDown repeats and endings. Anything it cannot map is flagged for review.
+- R-10.4 The importer reads chords by their position above each lyric line, including slash chords, sus, extensions and chords outside the key. Chord-only lines that already use bar lines (`|`), such as instrumentals, keep their bars exactly.
+- R-10.5 Chords are converted to numbers relative to the detected key, using the tonic-based system for minor keys (`1m`, `b3`, `b6`, `b7`). The user can choose to keep letters instead.
+- R-10.6 **Bar proposal:** when the sheet has no bar lines, the importer proposes bars (by default one chord per bar, following the order of chord changes in each line) and marks every proposed row as “needs review”.
+- R-10.7 **Lyrics are discarded.** The importer keeps only an optional landmark per section: its first words, 4 by default and never more than 8. The user can turn landmarks off before importing.
+- R-10.8 The result opens in the chart editor as an unsaved draft with a review panel that lists every assumption: proposed bars, unknown chords, unmapped sections and the detected key. Nothing is saved until the user confirms, and the source is required before saving (R-02.2).
+- R-10.9 The PDF is processed in the user's browser whenever possible. It is never stored on our servers, never kept after the import and never sent to third parties.
+- R-10.10 Before the first import, the user confirms they have the right to use the files they import.
+- R-10.11 A PDF without a text layer (a scan or a photo) is rejected with a clear message. Reading scanned sheets is a later phase.
+- R-10.12 If a public version with the same title and source already exists, the importer suggests using it or forking it instead of creating a duplicate.
+
+**Acceptance criteria**
+
+- Given a text PDF of an original test song with a key, three sections and chords over lyrics, when it is imported, then the draft has the right title, key, sections and chord numbers, and contains no lyric line longer than the landmark limit.
+- Given a sheet with no bar lines, when it is imported, then every row with proposed bars is marked “needs review” in the editor.
+- Given an instrumental line written with bar lines, when it is imported, then its bars match the sheet exactly.
+- Given a sheet in E minor, when it is imported in numbers, then Em reads `1m`, G reads `b3`, C reads `b6` and D reads `b7`.
+- Given a scanned PDF, when the user uploads it, then the importer explains it can't read scans yet and nothing is created.
+- Given any import, when it finishes, then the PDF is not stored anywhere on our servers.
+- Given landmarks turned off, when the import finishes, then the draft contains no lyric text at all.
+
+**Test data:** all test PDFs are made from original songs written for the project. Never commit chord sheets of published songs to the repository.
+
+### SPEC-11 · Visual metronome and bar follow
+
+**Goal:** while a musician practices or plays, the chart shows exactly where they are. A visual metronome pulses on every beat, highlights the current bar and moves to the next bar in time, with an optional click sound.
+
+**Phase:** 2 (after the MVP).
+
+**Requirements**
+
+- R-11.1 **Play and stop** from the viewer and from stand mode. The tempo comes from the chart's `tempo:` header (or the set, if it overrides it); without a tempo, the app asks for one.
+- R-11.2 **Start anywhere:** the user taps a bar (for example bar 2 of the Chorus) and presses play; playback starts on that bar.
+- R-11.3 **Visual pulse:** on every beat the current bar is highlighted and the beat is shown (for example "2 / 4"), so position never depends on color alone. Beat 1 is accented.
+- R-11.4 **Follow the form:** playback moves bar by bar in **play order**: sections in order, `@use` sections, repeats (`|: :|`, `xN`) and first and second endings. In stand mode, the view moves to the next section on its own.
+- R-11.5 **Meter aware:** the number of beats per bar comes from `meter:` (4/4, 3/4, 6/8, 12/8). Uneven splits (`:beats`) highlight the chord that sounds on each beat.
+- R-11.6 **Holds and fermatas:** a bar with a fermata (`~`) waits until the user taps to continue.
+- R-11.7 **Click sound (optional):** off by default. When on, an accented click on beat 1 and a softer click on the others, with a volume control. Silent mode on the device is respected.
+- R-11.8 **Count-in (optional):** one bar of clicks or pulses before the first bar.
+- R-11.9 **Tempo adjust:** the user can change the tempo for practice (for example 80% speed) without changing the chart. Tap tempo sets a tempo by tapping.
+- R-11.10 **Hands-free control:** space bar and Bluetooth page-turn pedals (which send arrow or page keys) start, stop and move between bars.
+- R-11.11 **Works offline** in a downloaded set, and keeps the screen awake while playing.
+- R-11.12 **Accurate timing:** clicks are scheduled with the Web Audio clock, not timers, so the beat doesn't drift over a whole song.
+- R-11.13 **Reduced motion:** with the system's reduced-motion setting, the pulse becomes a steady highlight and a beat counter, with no flashing.
+- R-11.14 **Personal:** each musician's metronome runs on their own device. Following the MD's metronome across the band is part of live mode (SPEC-12).
+
+**Acceptance criteria**
+
+- Given a chart at 76 bpm in 4/4, when the user taps bar 2 of the Chorus and presses play, then bar 2 is highlighted, the pulse shows beats 1 to 4 at 76 bpm, and bar 3 is highlighted on the next beat 1.
+- Given a section with `|: ... :| x2` and two endings, when playback reaches the repeat, then it goes back to the start of the repeat and plays the second ending on the second pass.
+- Given the click sound turned off, when the metronome plays, then no sound plays and the visual pulse still runs.
+- Given a 6/8 chart, when the metronome plays, then each bar shows six beats.
+- Given a fermata bar, when playback reaches it, then it stops there until the user taps.
+- Given reduced motion turned on, when the metronome plays, then nothing flashes and the beat counter still advances.
+- Given a downloaded set in airplane mode, when the user plays the metronome, then it works the same.
+- Given a 4-minute song, when it plays to the end, then the last beat lands within 20 ms of the expected time.
+
+### SPEC-12 · Live mode (the band follows the MD)
+
+**Goal:** during a rehearsal or a service, the music director runs the set and every musician's screen follows. When the MD moves from the Verse to the Chorus, or to the next song, every connected device moves too.
+
+**Phase:** 2 (after SPEC-11).
+
+**Requirements**
+
+- R-12.1 **Start live:** the MD (or the set's temporary MD) starts a live session for a set. Only one leader per session.
+- R-12.2 **Join:** musicians in the set's lineup see "Live now" on Home, in Notices and on the set, and join with one tap. The leader sees who is connected.
+- R-12.3 **Follow:** when the leader moves to another section or song, every connected device shows the same section within half a second on the venue network. Each musician still sees only the notes for everyone and for their instruments (R-06.4).
+- R-12.4 **Cue next:** the leader can mark the next section ahead of time (for example "Chorus next" or "Repeat the Bridge"). Followers see the cue on screen before the change happens.
+- R-12.5 **Look ahead and come back:** a musician can scroll away to look at another part; a "Back to live" button returns them to where the leader is. Their device never changes the leader's position.
+- R-12.6 **Changes on the fly:** if the leader skips a section, repeats one or changes the song order, followers follow; nobody needs to edit the set.
+- R-12.7 **Shared tempo (with SPEC-11):** when the leader plays the metronome, followers see the same beat and current bar in sync. The click sound stays a personal choice on each device.
+- R-12.8 **Hands-free for the leader:** the leader controls the session with the space bar or a Bluetooth pedal.
+- R-12.9 **Bad connection:** if a follower loses the connection, their device keeps working on its own with the downloaded set and shows "Offline – following paused". When the connection comes back, it jumps to the leader's position.
+- R-12.10 **End:** the leader ends the session; followers stay on the last position and get a notice that live mode ended. A session also ends if the leader is disconnected for more than 5 minutes.
+- R-12.11 **Hand over:** the leader can pass control to the temporary MD or another member during the session.
+- R-12.12 **Privacy:** only members of the band in the set's lineup can join. The session shares positions and cues, never personal data.
+
+**Acceptance criteria**
+
+- Given the MD in live mode with three musicians connected, when the MD moves from Verse 1 to the Chorus, then all three devices show the Chorus within half a second.
+- Given the MD marks "Bridge next", when followers look at their screen, then they see the cue before the MD moves.
+- Given a keys player who scrolled to the Outro, when they tap "Back to live", then they return to the MD's current section.
+- Given a follower whose connection drops, when it comes back, then their device jumps to the MD's current position and the "following paused" message disappears.
+- Given a musician who is not in the band, when they try to join the session, then they can't.
+- Given the MD ends the session, when followers look at their screen, then they stay where they were and see that live mode ended.
+
 ## 7. Phases
 
 | Phase | Includes | Outcome |
@@ -339,7 +436,7 @@ These came out of the decisions above and were all resolved. The specs cite them
 
 - Architecture, database and stack (they belong to the Technical Plan).
 - Phone app.
-- Audio playback or YouTube sync.
+- Audio playback of songs or YouTube sync (the metronome's click, SPEC-11, is not song playback).
 - Payments or subscriptions.
 
 ## 11. Next step
