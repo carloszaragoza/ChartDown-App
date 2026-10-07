@@ -51,7 +51,7 @@ test("R-07.2 a reported version the Admin hides leaves the catalog and its owner
   await signUpAndConfirm(page, unique("admin"), adminName);
   await makeAdmin(request, adminName);
   await page.goto("/admin/reports");
-  await expect(page.getByText(/^Open reports \(\d+\)$/)).toBeVisible();
+  await expect(page.getByText(/^Open reports \(\d+\)$/).first()).toBeVisible();
   const reported = page.getByRole("listitem").filter({ hasText: title });
   await expect(reported).toContainText("Reported by Ben Reporter");
   await expect(reported).toContainText("Full song lyrics");
