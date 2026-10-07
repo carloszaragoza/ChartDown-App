@@ -3,7 +3,7 @@
   gap: var(--space-4);
   max-width: 1280px;
   margin: 0 auto;
-  padding: var(--space-10);
+  padding: var(--space-8);
 }
 .header {
   display: flex;

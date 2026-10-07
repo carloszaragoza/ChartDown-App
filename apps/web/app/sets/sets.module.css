@@ -3,7 +3,7 @@
   gap: var(--space-6);
   max-width: 48rem;
   margin: 0 auto;
-  padding: var(--space-10) var(--space-4);
+  padding: var(--space-8);
 }
 .title {
   margin: 0;
@@ -176,7 +176,7 @@
   gap: var(--space-4);
   max-width: 1280px;
   margin: 0 auto;
-  padding: var(--space-10);
+  padding: var(--space-8);
 }
 .choice {
   display: inline-flex;

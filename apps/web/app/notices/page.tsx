@@ -55,6 +55,8 @@ export default async function NoticesPage() {
   return (
     <Layout
       height="auto"
+      // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
+      padding={8}
       contentWidth={760}
       header={
         <LayoutHeader hasDivider>

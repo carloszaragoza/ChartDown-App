@@ -15,6 +15,7 @@ import {
   SideNavItem,
   SideNavSection,
 } from "@astryxdesign/core/SideNav";
+import { StackItem } from "@astryxdesign/core/Stack";
 import { VStack } from "@astryxdesign/core/VStack";
 import { ChartDownLogo } from "@chartdown/ui";
 import {
@@ -271,16 +272,23 @@ function Footer({ account }: { account: ShellProps["account"] }) {
         ))}
       </SegmentedControl>
       {account ? (
+        // The person takes the room left and truncates, so Sign out always sits inside the bar.
         <HStack gap={1} vAlign="center">
-          <Item
-            href="/profile"
-            label={account.name}
-            description={[
-              account.admin ? t("roleAdmin") : t("roleMember"),
-              account.instruments.length > 0 ? account.instruments.join(", ") : t("noInstruments"),
-            ].join(" · ")}
-            startContent={<Avatar name={account.name} size="sm" tooltip={false} />}
-          />
+          <StackItem size="fill">
+            <Item
+              href="/profile"
+              label={account.name}
+              labelLines={1}
+              descriptionLines={1}
+              description={[
+                account.admin ? t("roleAdmin") : t("roleMember"),
+                account.instruments.length > 0
+                  ? account.instruments.join(", ")
+                  : t("noInstruments"),
+              ].join(" · ")}
+              startContent={<Avatar name={account.name} size="sm" tooltip={false} />}
+            />
+          </StackItem>
           <form action={signOut}>
             <Button
               type="submit"

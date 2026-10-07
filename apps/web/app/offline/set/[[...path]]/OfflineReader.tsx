@@ -108,6 +108,8 @@ export function OfflineReader() {
       <main>
         <Layout
           height="auto"
+          // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
+          padding={8}
           contentWidth={760}
           header={
             <LayoutHeader hasDivider>
@@ -184,6 +186,8 @@ export function OfflineReader() {
       <main>
         <Layout
           height="auto"
+          // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
+          padding={8}
           header={
             <LayoutHeader hasDivider>
               <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
@@ -209,7 +213,7 @@ export function OfflineReader() {
             </LayoutHeader>
           }
           end={
-            <LayoutPanel width={340} hasDivider padding={4} role="region" label={s("lineup")}>
+            <LayoutPanel width={340} hasDivider role="region" label={s("lineup")}>
               <VStack gap={3}>
                 <Heading level={2}>{s("lineup")}</Heading>
                 <List>
@@ -229,7 +233,7 @@ export function OfflineReader() {
             </LayoutPanel>
           }
           content={
-            <LayoutContent padding={4} role="region" label={s("songsTitle")}>
+            <LayoutContent role="region" label={s("songsTitle")}>
               <VStack gap={3}>
                 {banner}
                 <OfflineChanges setId={bundle.set.id} />

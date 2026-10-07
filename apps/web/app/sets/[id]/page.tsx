@@ -170,6 +170,8 @@ export default async function SetPage({
   return (
     <Layout
       height="auto"
+      // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
+      padding={8}
       header={
         <LayoutHeader hasDivider>
           <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
@@ -201,7 +203,7 @@ export default async function SetPage({
         </LayoutHeader>
       }
       end={
-        <LayoutPanel width={340} hasDivider padding={4} role="region" label={t("lineup")}>
+        <LayoutPanel width={340} hasDivider role="region" label={t("lineup")}>
           <VStack gap={3}>
             <Heading level={2}>{t("lineup")}</Heading>
             <List>
@@ -232,7 +234,7 @@ export default async function SetPage({
         </LayoutPanel>
       }
       content={
-        <LayoutContent padding={4} role="region" label={t("songsTitle")}>
+        <LayoutContent role="region" label={t("songsTitle")}>
           <VStack gap={3}>
             <OfflineChanges setId={set.id} />
             {status && (
