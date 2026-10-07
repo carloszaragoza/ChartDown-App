@@ -23,7 +23,7 @@ export async function signUpAndConfirm(page: Page, email: string, name: string) 
   await page.getByLabel("Password").fill(PASSWORD);
   const sentAfter = Date.now();
   await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Check your email");
+  await expectStatus(page, "Check your email");
   await page.goto(await latestLink(page.request, email, sentAfter));
   await expectSignedIn(page, name);
 }
