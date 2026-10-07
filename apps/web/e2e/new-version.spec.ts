@@ -11,22 +11,27 @@ async function startNewSong(page: Page, title: string) {
   await page.getByRole("link", { name: "Create a new song" }).click();
 }
 
-test("R-02.2 saving without a source shows a clear error", async ({ page }) => {
+test("R-02.2 a version can't be published without a source, and the page says so", async ({
+  page,
+}) => {
   const title = `Lantern Bay ${Date.now()}`;
   await signUpAndConfirm(page, unique("nosource"), "Ana Source");
   await startNewSong(page, title);
   await expect(page.getByLabel("Song title")).toHaveValue(title);
   await expect(page.getByLabel("Arrangement by")).toHaveValue("Ana Source");
-  await page.getByRole("button", { name: "Publish version" }).click();
+  // The title follows what is typed (Design Handoff 2.0 screen 05).
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
 
-  const main = page.getByRole("main");
-  await expect(main.getByRole("alert")).toContainText("Choose a source");
-  await expect(page.getByRole("group", { name: "Source" })).toBeFocused();
-  // Nothing typed is lost.
-  await expect(page.getByLabel("Song title")).toHaveValue(title);
+  // Publish waits for the source and says what is missing.
+  const publish = page.getByRole("button", { name: "Publish version" });
+  await expect(publish).toBeDisabled();
+  await publish.hover();
+  await expect(page.getByRole("tooltip")).toContainText("Choose a source");
+  await expect(page).toHaveURL(/song=new/);
 
   await page.getByLabel("Live").check();
-  await page.getByRole("button", { name: "Publish version" }).click();
+  await expect(publish).toBeEnabled();
+  await publish.click();
   await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
 });
@@ -37,7 +42,7 @@ test("R-02.3 a new version is public: a visitor reads it", async ({ page }) => {
   await startNewSong(page, title);
   await page.getByLabel("Artists").fill("ChartDown examples");
   await page.getByLabel("Studio recording").check();
-  await page.getByLabel("Year (optional)").fill("2026");
+  await page.getByLabel("Year").fill("2026");
   await expect(page.getByText("shared under CC0")).toBeVisible();
   await page.getByRole("button", { name: "Publish version" }).click();
   await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
@@ -59,7 +64,7 @@ test("R-02.1 a version of a song already in the catalog", async ({ page, request
   await page.getByLabel("Find the song by title").fill(title);
   await page.getByRole("button", { name: "Search" }).click();
   await page.getByRole("link", { name: `Use ${title}` }).click();
-  await expect(page.getByText(title)).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
   await expect(page.getByLabel("Song title")).toHaveCount(0);
   await page.getByLabel("Acoustic").check();
   await page.getByRole("button", { name: "Publish version" }).click();

@@ -63,7 +63,9 @@ test("R-05.2 a new revision from the author doesn't change the set until accepte
   await page.goto(`${version}/edit`);
   await page.getByLabel("Chart (ChartDown)").fill("## Verse\n1 | 5\n");
   await page.getByRole("button", { name: "Save" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Saved as revision 2.");
+  await expect(
+    page.getByRole("main").getByRole("status").filter({ hasText: "Saved as revision 2." }).first(),
+  ).toBeVisible();
   await page.goto(setAddress);
   await expect(
     page.getByText("The author has a newer revision: 2 (this set plays 1)."),

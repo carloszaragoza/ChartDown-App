@@ -29,45 +29,39 @@ test("R-02.10 a visitor searches the catalog and opens a version", async ({ page
   await page.getByRole("link", { name: "Catalog" }).click();
   await page.getByLabel("Search by title, artist or album").fill(title);
   await page.getByRole("button", { name: "Search" }).click();
-  // Each song is a card; its versions are listed inside it once it is open.
-  const results = page.getByRole("list", { name: "Songs" }).locator(":scope > li");
+  // The only result is the open song: a card with its versions (Design Handoff 2.0 screen 04).
+  const results = page.getByRole("main").getByRole("heading", { level: 2 });
   await expect(results).toHaveCount(1);
-  await expect(results).toContainText(title);
-  await expect(results).toContainText("2 versions");
+  await expect(results).toHaveText(title);
+  const card = page.getByRole("main").filter({ hasText: title });
+  await expect(card).toContainText("2 versions");
 
   // Search by album, then narrow by source.
   await page.getByLabel("Search by title, artist or album").fill("Night Sessions");
   await page.getByRole("button", { name: "Search" }).click();
   // The album finds the song; only the source type narrows how many versions are counted.
   await expect(page).toHaveURL(/q=Night\+Sessions/);
-  await expect(results.filter({ hasText: title })).toContainText("2 versions");
+  await expect(results).toHaveText(title);
+  await expect(card).toContainText("2 versions");
   await page.getByLabel("Search by title, artist or album").fill(title);
   await page.getByRole("button", { name: "Search" }).click();
   await expect(page).not.toHaveURL(/Night/);
-  await page
-    .getByRole("navigation", { name: "Source" })
-    .getByRole("link", { name: "Live" })
-    .click();
+  const source = page.getByRole("radiogroup", { name: "Source" });
+  await source.getByRole("radio", { name: "Live" }).click();
   await expect(page).toHaveURL(/source=live/);
-  await expect(results).toContainText("1 version");
-  await page
-    .getByRole("navigation", { name: "Source" })
-    .getByRole("link", { name: "Acoustic" })
-    .click();
+  await expect(card).toContainText("1 version");
+  await source.getByRole("radio", { name: "Acoustic" }).click();
   await expect(page.getByText("No songs match.")).toBeVisible();
 
   // The song lists its two public versions; the private one never appears.
-  await page
-    .getByRole("navigation", { name: "Source" })
-    .getByRole("link", { name: "All sources" })
-    .click();
+  await source.getByRole("radio", { name: "All sources" }).click();
   await expect(page).not.toHaveURL(/source=/);
   // The only result opens in place, with its versions to open or fork.
   const versions = page.getByRole("list", { name: `Versions of ${title}` }).getByRole("listitem");
   await expect(versions).toHaveCount(2);
   await expect(versions.filter({ hasText: "Live" })).toContainText("Key C · 4/4");
   await expect(versions.filter({ hasText: "Live" })).toContainText("Album: Night Sessions");
-  await expect(versions.first().getByRole("link", { name: "Fork" })).toBeVisible();
+  await expect(versions.first().getByRole("link", { name: `Fork ${title} by` })).toBeVisible();
   await expect(page.locator(`a[href="/versions/${hidden}"]`)).toHaveCount(0);
   await versions
     .filter({ hasText: "Live" })
