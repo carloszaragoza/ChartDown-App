@@ -65,3 +65,23 @@ test("T-1301 a signed-in person gets every section; only admins get Administrati
   await nav.getByRole("link", { name: "Stand mode", exact: true }).click();
   await expect(page).toHaveURL(/\/sets$/);
 });
+
+test.describe("on an iPad", () => {
+  test.use({ viewport: { width: 1180, height: 820 }, hasTouch: true });
+
+  test("T-1302 every control in the side navigation is at least 44 px to tap", async ({ page }) => {
+    await signUpAndConfirm(page, unique("touch"), `Touch Test ${Date.now()}`);
+    await page.goto("/sets");
+    const nav = page.getByRole("navigation", { name: "Side navigation" });
+    await expect(nav.getByRole("link", { name: "Sets", exact: true })).toBeVisible();
+    const controls = nav.locator("a, button, [role=radio]");
+    expect(await controls.count()).toBeGreaterThan(10);
+    for (const control of await controls.all()) {
+      const box = await control.boundingBox();
+      if (!box) continue;
+      const name = (await control.getAttribute("aria-label")) ?? (await control.innerText());
+      expect(Math.round(box.height), name).toBeGreaterThanOrEqual(44);
+      expect(Math.round(box.width), name).toBeGreaterThanOrEqual(44);
+    }
+  });
+});

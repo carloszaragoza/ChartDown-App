@@ -12,7 +12,7 @@ import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
-import { neutralTheme } from "@astryxdesign/theme-neutral/built";
+import { chartdownTheme } from "../../../../theme/chartdown";
 import { chordFormatter, keyName, parse, sectionLength, type Key } from "chartdown";
 import {
   BarRow,
@@ -196,10 +196,11 @@ export function StandMode({
 
   return (
     <div ref={root} onClickCapture={onClickCapture}>
-      <Theme theme={neutralTheme} mode={theme === "stage" ? "dark" : "light"}>
+      <Theme theme={chartdownTheme} mode={theme === "stage" ? "dark" : "light"}>
         {/* Stand mode fills the screen in its own mode (light or stage), so it paints its own
             background from that mode's tokens. */}
         <div
+          data-stand={theme}
           style={{ background: "var(--color-background-body)", color: "var(--color-text-primary)" }}
         >
           <VStack height="100dvh" gap={3} padding={4}>

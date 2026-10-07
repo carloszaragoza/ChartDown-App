@@ -8,7 +8,13 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Item } from "@astryxdesign/core/Item";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
-import { SideNav, SideNavHeading, SideNavItem, SideNavSection } from "@astryxdesign/core/SideNav";
+import {
+  SideNav,
+  SideNavCollapseButton,
+  SideNavHeading,
+  SideNavItem,
+  SideNavSection,
+} from "@astryxdesign/core/SideNav";
 import { VStack } from "@astryxdesign/core/VStack";
 import { ChartDownLogo } from "@chartdown/ui";
 import {
@@ -101,6 +107,8 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
       label={label}
       href={href}
       as={Link}
+      // Large rows: at least 44 px to tap with confidence on an iPad (Design Handoff 2.0, 1.5).
+      size="lg"
       icon={icon}
       selectedIcon={selectedIcon}
       isSelected={current === id}
@@ -145,7 +153,12 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
   );
 
   const nav = account ? (
-    <SideNav header={heading} footer={<Footer account={account} />} collapsible>
+    <SideNav
+      header={heading}
+      footer={<Footer account={account} />}
+      collapsible={{ hasButton: false }}
+      footerIcons={<SideNavCollapseButton size="lg" />}
+    >
       <SideNavSection title={t("home")} isHeaderHidden>
         {item(
           "notices",
@@ -208,7 +221,12 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
       )}
     </SideNav>
   ) : (
-    <SideNav header={heading} footer={<Footer account={null} />} collapsible>
+    <SideNav
+      header={heading}
+      footer={<Footer account={null} />}
+      collapsible={{ hasButton: false }}
+      footerIcons={<SideNavCollapseButton size="lg" />}
+    >
       <SideNavSection title={t("create")} isHeaderHidden>
         {item("catalog", t("catalog"), "/catalog", BookOpenIcon, BookOpenSolid)}
       </SideNavSection>
@@ -243,7 +261,7 @@ function Footer({ account }: { account: ShellProps["account"] }) {
         label={t("language")}
         value={locale}
         onChange={chooseLanguage}
-        size="sm"
+        size="lg"
         layout="fill"
       >
         {LOCALES.map((option) => (
@@ -267,14 +285,21 @@ function Footer({ account }: { account: ShellProps["account"] }) {
               label={t("signOut")}
               isIconOnly
               variant="ghost"
-              size="sm"
+              size="lg"
               tooltip={t("signOut")}
               icon={<Icon icon={ArrowRightStartOnRectangleIcon} />}
             />
           </form>
         </HStack>
       ) : (
-        <Button label={t("signIn")} variant="primary" href="/auth/sign-in" as={Link} width="100%" />
+        <Button
+          label={t("signIn")}
+          variant="primary"
+          size="lg"
+          href="/auth/sign-in"
+          as={Link}
+          width="100%"
+        />
       )}
     </VStack>
   );

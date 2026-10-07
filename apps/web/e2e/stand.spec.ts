@@ -65,10 +65,7 @@ test("R-03.3 every section reads without zooming on an iPad in landscape", async
       return chord ? getComputedStyle(chord).fontSize : "";
     });
   const background = () =>
-    page
-      .locator("[data-theme]")
-      .first()
-      .evaluate((stand) => getComputedStyle(stand).backgroundColor);
+    page.locator("[data-stand]").evaluate((stand) => getComputedStyle(stand).backgroundColor);
   const lightSize = await size();
   const lightBackground = await background();
   await page.getByRole("link", { name: "Stage" }).click();
