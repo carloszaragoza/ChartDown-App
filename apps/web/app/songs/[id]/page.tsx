@@ -38,7 +38,7 @@ export default async function SongPage({ params }: { params: Promise<{ id: strin
   const v = await getTranslations("version");
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <div>
         <h1 className={styles.title}>{song.title}</h1>
         {song.artists.length > 0 && <p className={styles.meta}>{song.artists.join(", ")}</p>}
@@ -66,6 +66,6 @@ export default async function SongPage({ params }: { params: Promise<{ id: strin
       <Link href="/catalog" className={styles.back}>
         {t("back")}
       </Link>
-    </main>
+    </div>
   );
 }

@@ -24,7 +24,7 @@ export function Home({
   const t = useTranslations("home");
   const a = useTranslations("auth.account");
   return (
-    <main style={{ padding: "var(--space-10)", display: "grid", gap: "var(--space-6)" }}>
+    <div style={{ padding: "var(--space-10)", display: "grid", gap: "var(--space-6)" }}>
       {/* With sign-in, the top bar holds the language, catalog, bands and account. */}
       {!signInEnabled && <LanguageSwitcher />}
       {signInEnabled && account && (
@@ -56,6 +56,6 @@ export function Home({
       {children}
       <h1 style={{ font: "var(--type-song-title)", margin: 0 }}>{t("title")}</h1>
       <p style={{ margin: 0, color: "var(--ink-muted)" }}>{t("tagline")}</p>
-    </main>
+    </div>
   );
 }

@@ -3,6 +3,9 @@ packages:
   - "packages/*"
   - "tools/*"
 allowBuilds:
+  # Their postinstall only suggests running "astryx init", which would write into CLAUDE.md.
+  "@astryxdesign/cli": false
+  "@astryxdesign/core": false
   "@parcel/watcher": false
   "@swc/core": false
   unrs-resolver: false

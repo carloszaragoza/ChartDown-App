@@ -12,16 +12,21 @@
     "e2e": "playwright test"
   },
   "dependencies": {
-    "chartdown": "workspace:*",
+    "@astryxdesign/core": "0.6.5",
+    "@astryxdesign/theme-neutral": "0.6.5",
     "@chartdown/ui": "workspace:*",
+    "@heroicons/react": "2.2.0",
+    "@stylexjs/stylex": "0.19.1",
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.117.2",
+    "chartdown": "workspace:*",
     "next": "16.3.8",
     "next-intl": "4.14.9",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@astryxdesign/cli": "0.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0"
   }

@@ -44,7 +44,7 @@ export default async function BandsPage({ searchParams }: { searchParams: Search
   const t = await getTranslations("bands");
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <h1 className={styles.title}>{t("title")}</h1>
       {(search.left || search.declined) && (
         <p role="status" className={styles.message}>
@@ -99,6 +99,6 @@ export default async function BandsPage({ searchParams }: { searchParams: Search
       <Link href="/" className={styles.back}>
         {t("home")}
       </Link>
-    </main>
+    </div>
   );
 }

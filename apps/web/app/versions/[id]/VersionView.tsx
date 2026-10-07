@@ -86,7 +86,7 @@ export function VersionView({
   ].filter(Boolean);
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       {notice}
       <header className={styles.header}>
         <div className={styles.heading}>
@@ -272,6 +272,6 @@ export function VersionView({
         style={display?.style ?? "numbers"}
         homeKey={display?.key ?? chart.key}
       />
-    </main>
+    </div>
   );
 }

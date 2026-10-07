@@ -89,7 +89,7 @@ export default async function BandPage({
     (Array.isArray(member.profile) ? member.profile[0]?.name : member.profile?.name) ?? "";
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <div>
         <h1 className={styles.title}>{band.name}</h1>
         <p className={styles.hint}>{isMd ? t("youAreMd") : t("youAreMusician")}</p>
@@ -241,6 +241,6 @@ export default async function BandPage({
       <Link href="/bands" className={styles.back}>
         {t("back")}
       </Link>
-    </main>
+    </div>
   );
 }

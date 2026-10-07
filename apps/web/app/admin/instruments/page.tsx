@@ -81,7 +81,7 @@ export default async function AdminInstrumentsPage({ searchParams }: { searchPar
   );
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <Link href="/admin" className={styles.link}>
         {admin("title")}
       </Link>
@@ -155,6 +155,6 @@ export default async function AdminInstrumentsPage({ searchParams }: { searchPar
           </li>
         ))}
       </ul>
-    </main>
+    </div>
   );
 }

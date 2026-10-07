@@ -171,7 +171,7 @@ export default async function NotesPage({
     : (chosenAnchor?.value ?? "");
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <div className={styles.header}>
         <div>
           <p className={styles.meta}>
@@ -403,6 +403,6 @@ export default async function NotesPage({
           )}
         </SectionView>
       </div>
-    </main>
+    </div>
   );
 }

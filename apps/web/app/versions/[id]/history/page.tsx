@@ -44,7 +44,7 @@ export default async function HistoryPage({
   const format = await getFormatter();
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <div>
         <h1 className={styles.title}>{t("title")}</h1>
         <p className={styles.meta}>{version.title}</p>
@@ -85,6 +85,6 @@ export default async function HistoryPage({
       <Link href={`/versions/${version.id}`} className={styles.back}>
         {t("back")}
       </Link>
-    </main>
+    </div>
   );
 }

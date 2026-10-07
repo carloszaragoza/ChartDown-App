@@ -33,7 +33,7 @@ export default async function AdminInvitesPage({ searchParams }: { searchParams:
   const { created, revoked, error } = await searchParams;
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <Link href="/admin" className={styles.link}>
         {admin("title")}
       </Link>
@@ -113,6 +113,6 @@ export default async function AdminInvitesPage({ searchParams }: { searchParams:
           ))}
         </ul>
       )}
-    </main>
+    </div>
   );
 }

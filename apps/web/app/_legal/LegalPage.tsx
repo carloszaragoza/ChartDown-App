@@ -13,7 +13,7 @@ export async function LegalPage({ document }: { document: LegalDocument }) {
   const t = await getTranslations("legal");
   const other: LegalDocument = document === "terms" ? "privacy" : "terms";
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <Link href="/" className={styles.link}>
         {t("home")}
       </Link>
@@ -24,6 +24,6 @@ export async function LegalPage({ document }: { document: LegalDocument }) {
       <Link href={`/${other}`} className={styles.link}>
         {t("other", { name: t(other) })}
       </Link>
-    </main>
+    </div>
   );
 }

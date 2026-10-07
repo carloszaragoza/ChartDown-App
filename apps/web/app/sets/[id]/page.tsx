@@ -156,7 +156,7 @@ export default async function SetPage({
   const status = search.created ? t("status.created") : search.updated ? t("status.updated") : null;
 
   return (
-    <main className={styles.wide}>
+    <div className={styles.wide}>
       <div className={styles.setHeader}>
         <div>
           <p className={styles.hint}>
@@ -311,6 +311,6 @@ export default async function SetPage({
           <p className={styles.hint}>{t("lineupNote")}</p>
         </section>
       </div>
-    </main>
+    </div>
   );
 }

@@ -198,7 +198,7 @@ export default async function SetPage({
   );
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page}>
       <div>
         <h1 className={styles.title}>{set.name}</h1>
         <p className={styles.hint}>
@@ -548,6 +548,6 @@ export default async function SetPage({
       <Link href={`/bands/${set.band_id}/sets`} className={styles.back}>
         {band?.is_personal ? t("backToMySets") : t("backToSets", { band: band?.name ?? "" })}
       </Link>
-    </main>
+    </div>
   );
 }
