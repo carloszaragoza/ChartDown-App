@@ -139,3 +139,9 @@ export async function writeChart(page: Page, text: string) {
     await expect(save).toBeEnabled({ timeout: 1_000 });
   }).toPass({ timeout: 15_000 });
 }
+
+/** On Edit set, chooses the key a song is played in; choosing saves it (R-05.4). */
+export async function setKey(page: Page, title: string, key: string) {
+  await page.getByRole("combobox", { name: `Key of ${title}` }).click();
+  await page.getByRole("option", { name: key, exact: true }).click();
+}

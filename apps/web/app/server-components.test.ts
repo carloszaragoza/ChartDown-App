@@ -8,6 +8,8 @@ import { describe, expect, it } from "vitest";
 const FORBIDDEN = [
   { pattern: /\bas=\{Link\}/, why: "a link component (as={Link})" },
   { pattern: /<Icon icon=\{/, why: "an icon component (<Icon icon={…} />)" },
+  // An arrow function as a prop, like notes={(index) => …} (T-1304).
+  { pattern: /\s[a-zA-Z]+=\{\s*\([^()]*\)\s*=>/, why: "a function as a prop" },
 ];
 
 function files(folder: string): string[] {
