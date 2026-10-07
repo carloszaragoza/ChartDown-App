@@ -26,7 +26,7 @@ test("R-04.2 the MD invites, the musician accepts, and whoever leaves loses acce
 
   // Ana creates a band (R-04.1) and invites Ben and Cleo, who have no account yet.
   await signUpAndConfirm(page, ana, "Ana Lead");
-  await page.getByRole("link", { name: "Bands" }).click();
+  await page.getByRole("link", { name: "Bands", exact: true }).click();
   await page.getByLabel("Band name").fill(band);
   await page.getByRole("button", { name: "Create band" }).click();
   await expect(page.getByRole("heading", { level: 1, name: band })).toBeVisible();
