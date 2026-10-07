@@ -22,7 +22,9 @@ import {
   type MDNoteData,
   type SectionLabels,
 } from "@chartdown/ui";
-import { Button } from "@astryxdesign/core/Button";
+import { Theme } from "@astryxdesign/core";
+import { chartdownStandTheme } from "../../theme/chartdown-stand";
+import { SongForm } from "./SongForm";
 import { useTranslations } from "next-intl";
 import { useChartLabels } from "./chartLabels";
 
@@ -92,20 +94,30 @@ export function ChartPreview({
   return (
     <VStack gap={6}>
       {hasForm && (
-        <nav aria-label={c("songForm")}>
-          <HStack gap={1} wrap="wrap">
-            {formStripItems(chart, -1, () => false).map((item, index) => (
-              <Button
-                key={index}
-                label={describe(item)}
-                href={`#section-${index + 1}`}
-                variant="ghost"
-              >
-                {item.abbreviation}
-              </Button>
-            ))}
-          </HStack>
-        </nav>
+        // The song form stays pinned at the top while the chart scrolls, at stand mode's size,
+        // so any section is one tap away (Design Handoff 2.0, 1.5).
+        <div
+          style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 1,
+            // The page's own surface, so the chart passes under it unseen.
+            background: "var(--color-background-surface)",
+            paddingBlock: "var(--spacing-2)",
+          }}
+        >
+          <Theme theme={chartdownStandTheme} mode="system">
+            <SongForm
+              label={c("songForm")}
+              size="lg"
+              items={formStripItems(chart, -1, () => false).map((item, index) => ({
+                abbreviation: item.abbreviation,
+                description: describe(item),
+                href: `#section-${index + 1}`,
+              }))}
+            />
+          </Theme>
+        </div>
       )}
       {chart.sections.map((section, index) => (
         <ChartSection

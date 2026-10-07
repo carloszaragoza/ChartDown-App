@@ -214,7 +214,8 @@ export function VersionView({
         </LayoutHeader>
       }
       content={
-        <LayoutContent>
+        // The app's own area scrolls the chart, so the song form can stay pinned at its top.
+        <LayoutContent isScrollable={false}>
           <VStack gap={5}>
             {forkFailed && <Banner status="error" title={t("forkFailed")} />}
             {setFailed && <Banner status="error" title={s("addFailed")} />}

@@ -76,7 +76,8 @@
     "time": "Time",
     "tempo": "Tempo",
     "example": "Example: Atril, viewed as Keys",
-    "writtenIn": "(written in {key})"
+    "writtenIn": "(written in {key})",
+    "nthTime": "{time, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} time"
   },
   "auth": {
     "email": "Email",
