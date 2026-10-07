@@ -197,7 +197,7 @@ The second barrier is row-level security: even if someone queries the database d
 - Rate limits on server functions.
 - Daily database backups.
 - **Lyric landmarks:** the parser warns when a quoted landmark is longer than 8 words, enforcing constitution principle 6 without relying only on reports.
-- **Deleted accounts:** resolved in 12.5. Terms of use and the chart license should be reviewed by a lawyer before launch.
+- **Deleted accounts:** resolved in 12.5. The beta is closed: friends and family, non-commercial, with nothing sold and no subscriptions, while the catalog of public versions stays open to anyone (owner's decision, October 7, 2026). Its plain-language terms say so; the terms of use and the chart license are reviewed by a lawyer before the app opens to the public.
 - **Terms of Use and Privacy Notice (T-1202):** private-beta texts at `/terms` and `/privacy`, in English and Spanish (the Spanish is a translation), with contact@chartdown.app. Creating an account requires accepting both at the first step; the version accepted is kept on the profile. A new version of the texts gets a new version id.
 
 ### 8.1 Row-level security (T-304)

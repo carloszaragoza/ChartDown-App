@@ -159,7 +159,7 @@ Bugs found while reviewing; each is fixed with a test that would have caught it.
 | ID | Task | Requirements | Depends on | Size | Tests / evidence |
 |---|---|---|---|---|---|
 | T-1201 | Landing page at chartdown.app with waitlist and invite-code sign-in | R-01.7, R-01.8 | T-402, T-201 | M | Matches the approved design and works on a phone |
-| T-1202 | Terms of use (CC0 on publish, authorship on account deletion) and privacy notice, reviewed by a lawyer | Technical Plan 8 and 12.5 | – | S | Texts published and accepted at sign-up |
+| T-1202 | Terms of use (CC0 on publish, authorship on account deletion) and privacy notice for a closed beta of friends and family: non-commercial, nothing sold and no subscriptions, with a public catalog; a lawyer reviews them before the app opens to the public | Technical Plan 8 and 12.5 | – | S | Texts published and accepted at sign-up |
 | T-1203 | Beta with a real band: prepare a set, play from an offline iPad and collect feedback | The whole MVP | E1 to E11 | M | Findings turned into new tasks or spec changes |
 
 ## E13 · Version 2 of the interface (Astryx)
