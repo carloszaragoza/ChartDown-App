@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { signUpAndConfirm, unique } from "./flows";
+import { TERMS_VERSION } from "../lib/legal/texts";
 
 const url = () => process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54321";
 
@@ -45,6 +46,6 @@ test("T-1202 creating an account needs the terms accepted, and the profile keeps
     terms_version: string;
     terms_accepted_at: string;
   }[];
-  expect(profile?.terms_version).toBe("2026-10-beta-2");
+  expect(profile?.terms_version).toBe(TERMS_VERSION);
   expect(profile?.terms_accepted_at).toBeTruthy();
 });
