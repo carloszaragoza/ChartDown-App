@@ -48,7 +48,7 @@ test("R-06.4 the keyboardist's device never receives the bass notes", async ({ p
   await page.getByRole("button", { name: "Create band" }).click();
   await page.getByLabel("Their email").fill(ben);
   await page.getByRole("button", { name: "Send invitation" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Invitation sent.");
+  await expectStatus(page, "Invitation sent.");
   await page.goto("/");
   await signOut(page);
   await signUpAndConfirm(page, ben, "Ben Keys");
@@ -56,7 +56,7 @@ test("R-06.4 the keyboardist's device never receives the bass notes", async ({ p
     .getByRole("region", { name: "Invitations" })
     .getByRole("button", { name: `Accept the invitation to ${band}` })
     .click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Welcome to the band.");
+  await expectStatus(page, "Welcome to the band.");
 
   await switchTo(page, ana, "Ana View");
   await page.goto("/bands");
@@ -65,9 +65,7 @@ test("R-06.4 the keyboardist's device never receives the bass notes", async ({ p
   await benRow.getByText("Default instruments of Ben Keys").click();
   await benRow.getByLabel("Keys", { exact: true }).check();
   await benRow.getByRole("button", { name: "Save instruments" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText(
-    "The instruments were saved.",
-  );
+  await expectStatus(page, "The instruments were saved.");
 
   // A set with the song, and the band's notes for keys and for bass.
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
@@ -78,7 +76,7 @@ test("R-06.4 the keyboardist's device never receives the bass notes", async ({ p
   const setAddress = new URL(page.url()).pathname;
   await page.goto(`/versions/${version}`);
   await addToSet(page, `${band} · ${set}`);
-  await expect(page.getByRole("main").getByRole("status")).toContainText("added at the end");
+  await expectStatus(page, "added at the end");
   await page.goto(`/versions/${version}/notes`);
   await page.getByRole("radiogroup", { name: "Bands" }).getByRole("radio", { name: band }).click();
   await expect(page.getByText(`Notes of ${band}`)).toBeVisible();

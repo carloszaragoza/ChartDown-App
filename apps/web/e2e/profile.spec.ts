@@ -1,5 +1,13 @@
 import { expect, test } from "@playwright/test";
-import { PASSWORD, openProfile, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import {
+  PASSWORD,
+  openProfile,
+  signIn,
+  signOut,
+  signUpAndConfirm,
+  unique,
+  expectStatus,
+} from "./flows";
 
 test("R-01.2 a person saves their name and the instruments they play", async ({ page }) => {
   await signUpAndConfirm(page, unique("profile"), "Ana Test");
@@ -8,7 +16,7 @@ test("R-01.2 a person saves their name and the instruments they play", async ({ 
   await page.getByLabel("Keys", { exact: true }).check();
   await page.getByLabel("Vocals", { exact: true }).check();
   await page.getByRole("button", { name: "Save", exact: true }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Your profile was saved");
+  await expectStatus(page, "Your profile was saved");
 
   await page.reload();
   await expect(page.getByLabel("Name")).toHaveValue("Ana Keys");
@@ -21,7 +29,7 @@ test("R-01.2 a person saves their name and the instruments they play", async ({ 
   await expect(page.getByRole("main").getByRole("status")).toHaveCount(0);
   await page.getByLabel("Vocals", { exact: true }).uncheck();
   await page.getByRole("button", { name: "Save", exact: true }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Your profile was saved");
+  await expectStatus(page, "Your profile was saved");
   await page.reload();
   await expect(page.getByLabel("Vocals", { exact: true })).not.toBeChecked();
   await page.goto("/");
@@ -34,7 +42,7 @@ test("R-01.5 the chosen language persists across sessions", async ({ page, conte
   await openProfile(page);
   await page.getByLabel("Español").check();
   await page.getByRole("button", { name: "Save", exact: true }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Tu perfil se guardó");
+  await expectStatus(page, "Tu perfil se guardó");
 
   // A new session in a browser that remembers nothing.
   await page.goto("/");
@@ -78,9 +86,7 @@ test("R-01.6 a person deletes their account, and it no longer signs in", async (
 
   await page.getByLabel("Type your email to confirm").fill(email);
   await page.getByRole("button", { name: "Delete my account" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText(
-    "Your account was deleted",
-  );
+  await expectStatus(page, "Your account was deleted");
   await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
 
   await signIn(page, email, PASSWORD);

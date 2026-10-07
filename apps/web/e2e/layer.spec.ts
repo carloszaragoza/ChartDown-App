@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { createVersion } from "./admin";
-import { chooseSection, signOut, signUpAndConfirm, unique, expectStatus } from "./flows";
+import {
+  chooseSection,
+  signOut,
+  signUpAndConfirm,
+  unique,
+  expectStatus,
+  sectionRow,
+} from "./flows";
 
 const CHART = "## Verse\n1 | 4\n\n## Chorus\n4 | 5\n\n## Chorus\n4 | 1\n";
 const url = () => process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54321";
@@ -40,9 +47,8 @@ test("R-03.5 a new note is saved in the layer and the public version doesn't cha
   const secondChorus = page.locator("#section-3");
   await expect(secondChorus).toContainText("Bar 2 · Pad swell into the last bar.");
   await expect(secondChorus).toContainText("Keys");
-  const sections = page.getByRole("navigation", { name: "Sections" });
-  await expect(sections.getByRole("link", { name: "Chorus (2nd) 1 note" })).toBeVisible();
-  await expect(sections.getByRole("link", { name: "Chorus (1st) 0 notes" })).toBeVisible();
+  await expect(sectionRow(page, "Chorus (2nd)")).toContainText("1 note");
+  await expect(sectionRow(page, "Chorus (1st)")).toContainText("0 notes");
 
   // Editing: a note for everyone in the Verse.
   await page.getByRole("link", { name: "Edit the note: Pad swell into the last bar." }).click();
@@ -55,8 +61,8 @@ test("R-03.5 a new note is saved in the layer and the public version doesn't cha
   await page.getByRole("button", { name: "Save note" }).click();
   await expectStatus(page, "The note was saved.");
   await expect(page.locator("#section-1")).toContainText("Everyone soft until the chorus.");
-  await expect(sections.getByRole("link", { name: "Verse 1 note" })).toBeVisible();
-  await expect(sections.getByRole("link", { name: "Chorus (2nd) 0 notes" })).toBeVisible();
+  await expect(sectionRow(page, "Verse")).toContainText("1 note");
+  await expect(sectionRow(page, "Chorus (2nd)")).toContainText("0 notes");
 
   // The public version is untouched, and outside a set it shows no layer (R-06.5).
   expect(await saved()).toEqual(before);
@@ -70,7 +76,7 @@ test("R-03.5 a new note is saved in the layer and the public version doesn't cha
     .getByRole("button", { name: "Delete the note: Everyone soft until the chorus." })
     .click();
   await expectStatus(page, "The note was deleted.");
-  await expect(sections.getByRole("link", { name: "Verse 0 notes" })).toBeVisible();
+  await expect(sectionRow(page, "Verse")).toContainText("0 notes");
 
   // Nobody else reaches the notes page.
   await page.goto("/");
@@ -118,11 +124,7 @@ test("R-00.2 a note whose section is gone is marked unplaced, not lost, and anch
   const unplaced = page.getByRole("region", { name: "1 note needs a new place" });
   await expect(unplaced).toContainText("No longer finds the section “Chorus”");
   await expect(unplaced).toContainText("Big finish, everyone.");
-  await expect(
-    page
-      .getByRole("navigation", { name: "Sections" })
-      .getByRole("link", { name: "Refrain 0 notes" }),
-  ).toBeVisible();
+  await expect(sectionRow(page, "Refrain")).toContainText("0 notes");
   await unplaced.getByRole("link", { name: "Anchor again: Big finish, everyone." }).click();
   await expect(page.getByRole("heading", { name: "Edit the note" })).toBeVisible();
   await page.getByRole("combobox", { name: "Section" }).click();

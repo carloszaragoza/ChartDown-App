@@ -51,9 +51,8 @@ export async function openProfile(page: Page) {
 
 /** In the layer editor, chooses a section from the list on the left (T-707). */
 export async function chooseSection(page: Page, label: string) {
-  const name = new RegExp(`^${label.replace(/[()]/g, "\\$&")} \\d+ notes?$`);
   const sections = page.getByRole("navigation", { name: "Sections" });
-  await sections.getByRole("link", { name }).click();
+  await sections.getByRole("link", { name: label, exact: true }).click();
   // The chosen section is the selected row of the list (Design Handoff 2.0 screen 07).
   await expect(sections.locator('[aria-current="true"]')).toContainText(label);
 }
@@ -83,4 +82,12 @@ export async function addToSet(page: Page, label: string) {
   await page.getByRole("combobox", { name: "Add to a set" }).click();
   await page.getByRole("option", { name: label, exact: true }).click();
   await page.getByRole("button", { name: "Add", exact: true }).click();
+}
+
+/** In the layer editor, the row of a section in the list on the left, with its note count. */
+export function sectionRow(page: Page, label: string) {
+  return page
+    .getByRole("navigation", { name: "Sections" })
+    .getByRole("listitem")
+    .filter({ has: page.getByRole("link", { name: label, exact: true }) });
 }

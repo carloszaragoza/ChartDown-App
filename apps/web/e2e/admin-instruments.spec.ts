@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { makeAdmin } from "./admin";
-import { signUpAndConfirm, unique } from "./flows";
+import { signUpAndConfirm, unique, expectStatus } from "./flows";
 
 test("R-07.3 the Admin adds, renames and deactivates an instrument, never deleting it", async ({
   page,
@@ -28,7 +28,7 @@ test("R-07.3 the Admin adds, renames and deactivates an instrument, never deleti
   await add.getByLabel("Name in Spanish").fill(`Violonchelo ${stamp}`);
   await add.getByLabel("Other names in charts, separated by commas").fill("VC");
   await add.getByRole("button", { name: "Add instrument" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText(`${slug} was saved.`);
+  await expectStatus(page, `${slug} was saved.`);
 
   // The same id twice is refused.
   await add.getByLabel("Id in charts").fill(slug);
@@ -40,13 +40,13 @@ test("R-07.3 the Admin adds, renames and deactivates an instrument, never deleti
   const edit = page.getByRole("form", { name: `Edit Cello ${stamp}` });
   await edit.getByLabel("Name in Spanish").fill(`Chelo ${stamp}`);
   await edit.getByRole("button", { name: "Save" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText(`${slug} was saved.`);
+  await expectStatus(page, `${slug} was saved.`);
   await expect(
     page.getByRole("form", { name: `Edit Cello ${stamp}` }).getByLabel("Name in Spanish"),
   ).toHaveValue(`Chelo ${stamp}`);
 
   await page.getByRole("button", { name: `Deactivate Cello ${stamp}` }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("no longer offered");
+  await expectStatus(page, "no longer offered");
   await expect(page.getByRole("button", { name: `Reactivate Cello ${stamp}` })).toBeVisible();
   await expect(page.getByRole("button", { name: /^Delete/ })).toHaveCount(0);
 

@@ -8,6 +8,7 @@ import {
   signUpAndConfirm,
   unique,
   addToSet,
+  expectStatus,
 } from "./flows";
 
 const CHART = "## Verse\n1 | 4\n\n## Chorus\n4 | 5 | 6m | 1\n";
@@ -45,7 +46,7 @@ test("R-08.2 R-08.4 in airplane mode every song opens with its notes, read-only"
   await page.getByRole("button", { name: "Create band" }).click();
   await page.getByLabel("Their email").fill(ben);
   await page.getByRole("button", { name: "Send invitation" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Invitation sent.");
+  await expectStatus(page, "Invitation sent.");
   await page.goto("/");
   await signOut(page);
   await signUpAndConfirm(page, ben, "Ben Offline");
@@ -53,7 +54,7 @@ test("R-08.2 R-08.4 in airplane mode every song opens with its notes, read-only"
     .getByRole("region", { name: "Invitations" })
     .getByRole("button", { name: `Accept the invitation to ${band}` })
     .click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Welcome to the band.");
+  await expectStatus(page, "Welcome to the band.");
   await switchTo(page, ana, "Ana Offline");
   await page.goto("/bands");
   await page.getByRole("link", { name: band }).click();
@@ -61,9 +62,7 @@ test("R-08.2 R-08.4 in airplane mode every song opens with its notes, read-only"
   await benRow.getByText("Default instruments of Ben Offline").click();
   await benRow.getByLabel("Keys", { exact: true }).check();
   await benRow.getByRole("button", { name: "Save instruments" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText(
-    "The instruments were saved.",
-  );
+  await expectStatus(page, "The instruments were saved.");
 
   // A set with both songs; the first has notes for keys and for bass.
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
@@ -75,7 +74,7 @@ test("R-08.2 R-08.4 in airplane mode every song opens with its notes, read-only"
   for (const version of versions) {
     await page.goto(`/versions/${version}`);
     await addToSet(page, `${band} · ${set}`);
-    await expect(page.getByRole("main").getByRole("status")).toContainText("added at the end");
+    await expectStatus(page, "added at the end");
   }
   await page.goto(`/versions/${versions[0]}/notes`);
   await page.getByRole("radiogroup", { name: "Bands" }).getByRole("radio", { name: band }).click();
@@ -88,7 +87,7 @@ test("R-08.2 R-08.4 in airplane mode every song opens with its notes, read-only"
     await page.getByLabel(instrument, { exact: true }).check();
     await page.getByLabel("Note", { exact: true }).fill(text);
     await page.getByRole("button", { name: "Add note" }).click();
-    await expect(page.getByRole("main").getByRole("status")).toContainText("The note was saved.");
+    await expectStatus(page, "The note was saved.");
   }
 
   // Ben downloads the set, with the service worker in charge of the page.

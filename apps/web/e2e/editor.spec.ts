@@ -49,7 +49,9 @@ test("R-03.1 the preview updates without reloading", async ({ page }) => {
   await page.getByRole("link", { name: "View version" }).click();
   await expect(page.getByRole("heading", { name: "Coda" })).toBeVisible();
   await page.getByRole("main").getByRole("link", { name: "History" }).click();
-  await expect(page.getByRole("listitem").first()).toContainText("Revision 2");
+  await expect(
+    page.getByRole("list", { name: "History" }).getByRole("listitem").first(),
+  ).toContainText("Revision 2");
 
   // R-02.4 choosing Private in the editor opens its own confirmation; nothing changes yet.
   await page.goto(`${address}/edit`);

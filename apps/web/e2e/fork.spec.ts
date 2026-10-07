@@ -36,8 +36,10 @@ test("R-02.7 the fork shows “Based on the version by…”", async ({ page }) 
 
   // The copy is Ben's, with its own history.
   await page.getByRole("main").getByRole("link", { name: "History" }).click();
-  await expect(page.getByRole("listitem")).toHaveCount(1);
-  await expect(page.getByRole("listitem")).toContainText("Revision 1");
+  await expect(page.getByRole("list", { name: "History" }).getByRole("listitem")).toHaveCount(1);
+  await expect(page.getByRole("list", { name: "History" }).getByRole("listitem")).toContainText(
+    "Revision 1",
+  );
 
   await page.goBack();
   await page.getByRole("link", { name: "Based on the version by Ana Original" }).click();

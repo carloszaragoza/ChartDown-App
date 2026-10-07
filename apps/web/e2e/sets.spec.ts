@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
-import { signOut, signUpAndConfirm, unique, addToSet } from "./flows";
+import { signOut, signUpAndConfirm, unique, addToSet, expectStatus } from "./flows";
 
 // The set's songs: "3 songs" on its edit page, "Songs" on the set screen.
 const songs = (page: Page) => page.getByRole("region", { name: /songs?$/i }).getByRole("listitem");
@@ -26,7 +26,7 @@ test("R-05.1 a set's name is unique in the band; songs are added, ordered and du
   await page.getByRole("button", { name: "Create band" }).click();
   await page.getByLabel("Their email").fill(ben);
   await page.getByRole("button", { name: "Send invitation" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Invitation sent.");
+  await expectStatus(page, "Invitation sent.");
 
   // A set, and the same name again is refused (R-05.1).
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
@@ -52,7 +52,7 @@ test("R-05.1 a set's name is unique in the band; songs are added, ordered and du
   for (const version of versions) {
     await page.goto(`/versions/${version}`);
     await addToSet(page, `${band} · ${sunday}`);
-    await expect(page.getByRole("main").getByRole("status")).toContainText("added at the end");
+    await expectStatus(page, "added at the end");
   }
   await expect(songs(page)).toHaveText(
     titles.map((title, index) => new RegExp(`^${index + 1}${title}`)),
@@ -60,7 +60,7 @@ test("R-05.1 a set's name is unique in the band; songs are added, ordered and du
 
   // Cedar Lane moves up to second.
   await page.getByRole("button", { name: `Move ${titles[2]} up` }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("The order was saved.");
+  await expectStatus(page, "The order was saved.");
   await expect(songs(page)).toHaveText([
     new RegExp(`^1${titles[0]}`),
     new RegExp(`^2${titles[2]}`),
@@ -70,7 +70,7 @@ test("R-05.1 a set's name is unique in the band; songs are added, ordered and du
   // Duplicating keeps the songs, without the date (R-05.6).
   await expect(page.getByLabel("Name of the copy")).toHaveValue(`${sunday} (copy)`);
   await page.getByRole("button", { name: "Duplicate", exact: true }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("This is the copy.");
+  await expectStatus(page, "This is the copy.");
   await expect(page.getByRole("heading", { level: 1, name: `${sunday} (copy)` })).toBeVisible();
   await expect(page.getByText("No date")).toBeVisible();
   await expect(songs(page)).toHaveCount(3);
@@ -83,7 +83,7 @@ test("R-05.1 a set's name is unique in the band; songs are added, ordered and du
     .getByRole("region", { name: "Invitations" })
     .getByRole("button", { name: `Accept the invitation to ${band}` })
     .click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Welcome to the band.");
+  await expectStatus(page, "Welcome to the band.");
   await page.goto(setAddress);
   await expect(songs(page)).toHaveCount(3);
   await expect(page.getByRole("button", { name: /^Move / })).toHaveCount(0);

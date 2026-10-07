@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { addRevisions } from "./admin";
-import { signOut, signUpAndConfirm, unique } from "./flows";
+import { signOut, signUpAndConfirm, unique, expectStatus } from "./flows";
 
 // Each revision's chart names its own section, so the page shows which one it is.
 const chart = (number: number) => `## Take ${number}\n1 | 4 | 5 | 1\n`;
@@ -25,21 +25,19 @@ test("R-02.8 restoring revision 3 creates a new revision", async ({ page, reques
   await page.goto(address);
   await expect(page.getByRole("heading", { name: "Take 5" })).toBeVisible();
   await page.getByRole("main").getByRole("link", { name: "History" }).click();
-  await expect(page.getByRole("listitem")).toHaveCount(5);
+  await expect(page.getByRole("list", { name: "History" }).getByRole("listitem")).toHaveCount(5);
 
   await page.getByRole("link", { name: "Revision 3", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Take 3" })).toBeVisible();
   await expect(page.getByText("an earlier revision, read-only")).toBeVisible();
   await page.getByRole("button", { name: "Restore this revision" }).click();
 
-  await expect(page.getByRole("main").getByRole("status")).toContainText(
-    "Revision 3 was restored. It is now revision 6",
-  );
-  const newest = page.getByRole("listitem").first();
+  await expectStatus(page, "Revision 3 was restored. It is now revision 6");
+  const newest = page.getByRole("list", { name: "History" }).getByRole("listitem").first();
   await expect(newest).toContainText("Revision 6");
   await expect(newest).toContainText("Current");
   await expect(newest).toContainText("restored from revision 3");
-  await expect(page.getByRole("listitem")).toHaveCount(6);
+  await expect(page.getByRole("list", { name: "History" }).getByRole("listitem")).toHaveCount(6);
 
   await page.goto(address);
   await expect(page.getByRole("heading", { name: "Take 3" })).toBeVisible();
