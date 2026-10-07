@@ -1,131 +1,90 @@
 # ChartDown App – Design Handoff
 
-**Version:** 1.0 · **Date:** October 3, 2026 · **Status:** design approved
+**Version:** 2.0 · **Date:** October 6, 2026 · **Status:** design approved
 
-This sheet turns the approved design into exact rules for building the app. It is the reference for every UI task; anything not covered here is in the **ChartDown – Papel y tinta** design system and the **ChartDown App – Screens** canvas, both exported to `design/` in the repository (added October 5, 2026):
+Version 2 moves the app to the **Astryx** design system. It replaces version 1, "Papel y tinta" (October 3, 2026), whose files stay in `design/` as history. This sheet turns the approved design into exact rules for building the app; anything not covered here is in `design/astryx/`:
 
-- `design/screens/` – the 7 approved screens as static HTML (`index.html` opens them). A visual reference: build them with the real components and tokens, never with their inline styles.
-- `design/design-system/` – `tokens.json` (the same values as `packages/ui/src/tokens.css`), the brand book and each component's rules with a preview.
-- `design/logo/` – logos, app icons and favicons; the app takes its icons from here (T-901).
+- `design/astryx/screens/light/` and `screens/dark/` – a screenshot of every screen and tab, 1280 px wide, in both modes.
+- `design/astryx/SCREENS.md` – one section per screen: purpose, specs, Astryx components, states and interactions.
+- `design/astryx/prototype.html` – the clickable prototype; `reference-code/` – its source and pinned dependencies.
+- `design/logo/` – the logo kit (section 7).
+
+The redesign is built in the blocks of E13 (`lista-tareas.md`); until a screen's block is merged, that screen keeps its version 1 look.
 
 ## 1. Principles the code must respect
 
-1. **The numbers win.** Only chords and bar lines are drawn in full-strength `ink`. Everything else uses `ink-muted`.
-2. **Color means something.** Red (`md`) = music director and instruments. Blue (`dynamic`) = dynamics, links and focus. There is no other accent color.
-3. **Never color alone.** Every MD note carries the word MD or the instrument's name; every dynamic is text.
-4. **Two themes, one layout.** Light (*Papel*) and dark (*Escenario*) change only colors, never sizes or positions.
-5. **Everything tappable is at least 44 px.**
+1. **Color means something.** Red (Astryx `color="red"` tokens, the error color) = music director and instruments, never decoration. Accent (blue) = dynamics, links and selection.
+2. **Never color alone.** Every music director's note says "MD" or the instrument's name; every status dot has a visible text label beside it.
+3. **The numbers win.** In a chart only chord numbers and bar lines are drawn in the primary text color; everything else is secondary.
+4. **Two modes, one layout.** Light and dark follow the system; they change colors, never sizes or positions.
+5. **Touch targets:** Astryx default sizes on iPad; interactive controls are never shrunk below their default.
 
-## 2. Tokens
+## 2. Design system: Astryx
 
-Implemented as CSS variables on `:root` (light theme) and `[data-theme="dark"]` (dark theme). The theme follows the system preference and the user can pin it.
+- **Library:** `@astryxdesign/core` with the `@astryxdesign/theme-neutral` theme (version 0.6.5, MIT), icons from `@heroicons/react`. `@stylexjs/stylex` is its peer; `@astryxdesign/cli` is a development tool.
+- **Theme:** the root layout wraps the app in `<Theme theme={neutralTheme} mode="system">`, after `reset.css`, `astryx.css` and the theme's `theme.css`.
+- **Use Astryx components for everything they cover:** `AppShell`, `SideNav`, `Layout` (`LayoutHeader`, `LayoutContent`, `LayoutPanel`), `List`/`Item`, `Table`, `TabList`/`Tab`, `Card`, `Section`, `Button`, `TextInput`, `TextArea`, `Selector`, `RadioList`, `CheckboxList`, `Switch`, `SegmentedControl`, `DateInput`, `TimeInput`, `Token`, `Badge`, `StatusDot`, `Avatar`, `Banner`, `EmptyState`, `Breadcrumbs`, `Heading`, `Text`, `Icon`, and the layout stacks (`VStack`, `HStack`, `Grid`). Dense data goes in rows (`Table`, `List`), never in a card per item; a status is a `StatusDot` or `Token`; a `Badge` is only for counts.
+- **Check a component's API before using it** with the Astryx CLI (`npx astryx component <Name> --dense`); never guess props.
+- **No raw colors, pixel sizes or custom CSS.** Use component props and theme tokens (`var(--color-*)`, `var(--spacing-*)`, `var(--radius-*)`, `var(--border-width)`). The only custom visuals are the chart components and the logo (section 3).
+- **Fonts:** the theme's Figtree for the interface and its monospace stack for code. Figtree is served by the app (SIL Open Font License), never from the internet, so a downloaded set opens with no connection.
 
-### 2.1 Color
+## 3. Custom components (`packages/ui`)
 
-| Token | Light | Dark | Use |
-|---|---|---|---|
-| `ground` | #EEF1F4 | #0F161D | Page background |
-| `paper` | #FBFCFD | #17212B | Cards, top bar, chart sheet |
-| `ink` | #16212C | #E6EDF3 | Chords, bar lines, main text |
-| `ink-muted` | #566574 | #98A8B8 | Secondary text, next-section preview |
-| `ink-inverse` | #FBFCFD | #0F161D | Text on an `ink` fill |
-| `rule` | #B4BEC8 | #3A4857 | Decorative lines and card borders (never control borders) |
-| `control-border` | #7D8A97 | #64748A | Borders of buttons, chips and inputs |
-| `md` | #B8322A | #FF8478 | MD, instrument tags, song-map dots |
-| `dynamic` | #1F4FA8 | #86AAFF | Dynamics, links |
-| `focus` | = `dynamic` | = `dynamic` | 2 px focus ring with a 2 px offset |
-
-Verified contrast (WCAG AA): all text ≥ 4.5:1 on `paper` in both themes; `control-border` 3.4:1.
-
-### 2.2 Typography
-
-| Style | Family | Size / line height | Weight | Use |
-|---|---|---|---|---|
-| `chord-xl` | Barlow Condensed | 58 / 1 | 600 | Chords in stand mode |
-| `chord-md` | Barlow Condensed | 44 / 1 | 600 | Chords in the editor and on desktop |
-| `chord-sm` | Barlow Condensed | 34 / 1 | 600 | Next-section preview |
-| `song-title` | Barlow Condensed | 52 / 1 | 600 | Song title |
-| `section-title` | Barlow Condensed | 36 / 1 | 600 | Section name |
-| `note` | Source Sans 3 | 18 / 1.4 | 400 | MD notes, reading text |
-| `label` | Source Sans 3 | 16 / 1.25 | 600 | Buttons, emphasized text |
-| `meta` | Source Sans 3 | 15 / 1.4 | 400 | Key, meter, tempo, chips |
-| `dynamic-mark` | Source Sans 3 | 18 / 1 | 700 italic | Dynamics inside a bar |
-| `caption` | Source Sans 3 | 14 / 1.3 | 400 | Small text; never smaller on iPad |
-| `tag` | Source Sans 3 | 15 / 1.5 | 700 | Instrument name inside an InstrumentTag |
-| `form-chip` | Barlow Condensed | 22 / 1 | 600 | Section abbreviation in the FormStrip |
-| code | JetBrains Mono | 15 / 1.6 | 400 | ChartDown editor |
-
-All three families are open-license Google Fonts. They are served by the app (not from Google) so they work offline.
-
-### 2.3 Spacing, radii, strokes and sizes
-
-| Group | Tokens |
+| Component | Rules |
 |---|---|
-| Spacing | `space-1` 4 · `space-2` 8 · `space-3` 12 · `space-4` 16 · `space-6` 24 · `space-8` 32 · `space-10` 40 |
-| Radii | `radius-none` 0 (bars) · `radius-sm` 4 (chips, tags, cards) · `radius-md` 6 (buttons, inputs) |
-| Stroke | `bar-line` 3 · `bar-line-light` 2 · `emphasis` 1.5 (red outlines: InstrumentTag and the View as button) · `hairline` 1 |
-| Size | `target-min` 44 · `bar-height` 128 · `bar-height-sm` 64 |
-
-## 3. Components
-
-| Component | Props | States and rules |
-|---|---|---|
-| **Bar** | chords (root, quality, bass, beats), marks (hold, push, stab, fermata), dynamic, cues, ending, repeat start/end, lyric landmark | Square (`radius-none`); chords share the bar by beats; dynamic top-left; marks in `dynamic` (hold = diamond, push = `‹` before, stab = `^` above, fermata = `⌒` above); in number style the minor minus is raised at half size; slash bass inline (`5/7`); cues in `caption` at the top (a cue for everyone in `ink-muted`, an instrument cue led by its name in `md`); lyric landmark in `caption`, `ink-muted`, in quotes at the bottom; repeats as double bar lines with `×N`; endings with their label and a top line. Next-section preview: `bar-height-sm`, `chord-sm`, chords and lines in `ink-muted` |
-| **Section** | name, bar count, visible notes, rows | `paper` card; notes come before the bars |
-| **MDNote** | text, roles | For everyone: the word MD in `md`. For instruments: InstrumentTag. Plain notes in `ink-muted` |
-| **InstrumentTag** | role, variant (default or compact) | Icon + name in `md`; compact = 44 px square with icon only and an `aria-label` |
-| **Button** | variant (primary, secondary, view-as), icon, icon position | Minimum height 44; visible focus; a disabled button says why |
-| **FormStrip** | sections (abbreviation, bar count, state, has notes) | States: played, current (inverted), upcoming; red dot = notes for you; announced in text |
-| **Icon** | name, size | 24 px grid, 1.75 stroke; 20 px inside buttons; always with text |
-
-**FormStrip abbreviations:** Intro I · Verse V1, V2 · Pre-chorus PC · Chorus C, C2 · Bridge B · Instrumental Inst · Tag T · Last Chorus LC · Outro O. Custom names: their initials.
-
-**Icons from the approved screens** (`design/screens/`, same rules as the set): search, fork, public, private, history and check. The Icon component draws them exactly as the screens do.
-
-**Instrument icons:** drums, bass, keys, guitar, vocals, saxophone, trumpet, trombone, violin. An instrument without an icon shows its name only.
+| **BarRow** | A row of bars of a chart, rendered from the `chartdown` tree (never a simplified parser). Square bar lines (three times the border width, primary text color; twice, emphasized border color, in the small size); chord numbers in large tabular figures; minor and quality marks as superscripts at half size; dynamics in italics in the accent color, top left of the bar. `size="sm"` is the next-section preview: smaller and in the secondary color. Four bars per row. |
+| **MDNotes** | A music director's notes: a red `Token` with "MD" (for everyone) or the instrument's name and icon, followed by the note's text. |
+| **Instrument icons** | Drums, bass, keys, guitar, vocals, saxophone, trumpet, trombone, violin: stroke icons on a 24 px grid, the same drawings as version 1. Red only inside instrument contexts. An instrument without an icon shows its name only. |
+| **ChartDownLogo** | Section 7. |
 
 ## 4. Screens
 
-| Screen | Specs covered | Implementation notes |
+Every screen uses `AppShell` with the side navigation and a `Layout` with a page header (breadcrumbs or an overline, a level-1 `Heading`, an optional description, actions on the right). `design/astryx/SCREENS.md` describes each one; these are the decisions ChartDown adds to it.
+
+| Screen | Specs | Decisions |
 |---|---|---|
-| Set (musician) | SPEC-05, 06, 08, 09 | Ordered list, set key, notes-for-you per song, lineup with compact InstrumentTag, offline status |
-| Stand mode (light and stage) | SPEC-03, 06, 08 | Full screen; Previous/Next; navigable FormStrip; current section in `chord-xl`; next one in `chord-sm` |
-| Catalog | SPEC-02 | Search; filter by source; song with its versions; open and fork |
-| Chart editor | SPEC-00, 02, 03 | Text on the left, live preview on the right; public/private; history; parser warnings with line numbers |
-| MD layer editor | SPEC-03 (R-03.5), 06 | Sections, tagged notes, per-instrument form, hide author's notes |
-| Notices (T-1002) | SPEC-09 | Not in the Screens canvas yet; built from these tokens and components. Top bar: a "Notices" link with the unread count beside it (a `paper` badge (`radius-md`) with a `control-border` outline, `ink` text), announced in text ("Notices, 3 unread"); no bell until the design system adds one (section 7). The `/notices` page: newest first; each notice is one sentence saying what changed, in the reader's language, with its set or song and when; unread ones carry the word "New" in `md`; opening one marks it read and goes to what it is about; "Mark all as read". A new notice arrives without reloading |
-| Profile, notices (T-1003) | SPEC-09 (R-09.5) | A "Notices" section of the profile, with its own Save: one checkbox per kind of notice (added to a set, taken off a set, temporary music director, key change, order change, new note for your instruments, new revision for music directors), all on until the person turns one off; under them, "In the app. Email comes later." Turning one off stops new notices of that kind; ones already received stay |
-| Administration (E11) | SPEC-07, R-01.7 | Not in the Screens canvas yet; built from these tokens and components. `/admin`, for admins only (anyone else gets a page not found), reached from an "Administration" link in the top bar that only admins see. Three parts, each a `paper` card list: **Instruments** (T-1101): slug, English and Spanish names, aliases; add, rename, deactivate and reactivate, never delete; inactive ones say so in `ink-muted`. **Invite codes** (T-1102): create a single-use or band code (a number of uses or no limit) with a note; the code in large `ink` type to copy; uses as "3 of 10"; revoke, after which the code says "Revoked". **Reports** (T-1103): open reports first, each with the version, its reason and note and how many people reported it; "Hide version" and "Dismiss"; hidden versions listed with "Show again". On a public version, signed-in people other than its owner get "Report" (a reason and an optional note); its owner sees "Hidden by the administrators" on a hidden version |
-| Terms and Privacy (T-1202) | Technical Plan 8 and 12.5 | `/terms` and `/privacy`: the text on `paper`, at most 48rem wide, headings in `type-section-title`, body in `type-note`, in the reader's language. Sign-up's first step adds a required checkbox, "I accept the Terms of Use and the Privacy Notice", each a link that opens in a new tab |
-| Landing (chartdown.app) | SPEC-01 (invites) | `design/screens/07-landing.html`, at `/` for visitors (signed-in people get their home): top bar, hero, how it works, built for the stage, the open language, join the beta, footer. Waitlist, sign-in with invite code, link to the language on GitHub (github.com/ChartDown/Language). T-1201 decisions: the hero's example chart is drawn with Bar, MDNote and InstrumentTag from the same ChartDown text the language section shows, and its view-as is a static label ("Viewing as Drums"), never a control that does nothing; "Try the notation" goes to the language section; "Built for the stage" has the design's four cards (offline sets, stand mode, your part only, every change saved), its text without the abbreviation MD; the top bar adds "Catalog" where sign-in is enabled, so visitors still browse it (R-01.4); the footer links to Terms and Privacy (T-1202); the headline uses `type-song-title`. The app's top bar is not shown over it. Works on a phone with no sideways scrolling |
+| **App shell** | SPEC-01, 09 | Collapsible `SideNav`; a drawer on a phone. Header: the logo and the current band, whose menu switches between the person's bands, Personal space and "All bands"; the choice is remembered in a cookie. Notices first, with a red `Badge` for the unread count, live (T-1002). Sections: Play (Sets; Stand mode, which opens the next upcoming set), Create (Catalog, New version, Chart editor, MD notes), People (Bands, Personal space), Administration for admins only (Overview, Instruments, Invite codes, Reports, with a warning `Badge` for open reports). Footer: the language `SegmentedControl` and the person's `Item` (avatar, name, role and instrument) that opens the profile, with a Sign out icon button. Stand mode has no shell: it fills the screen. |
+| **01 Notices** | SPEC-09 | As designed; a notice says exactly what changed (T-1001) and opening it marks it read. |
+| **02 Set (musician)** | SPEC-05, 06, 08 | As designed; "Offline ready" when the set is downloaded on this device (T-902). |
+| **03 Stand mode** | SPEC-03, 06, 08 | As designed, for a version and in a set, and in the offline reader. "View as" only for the music director (R-06.3); musicians only receive notes for everyone and their instruments, filtered on the server (R-06.4). |
+| **04 Catalog** | SPEC-02 | As designed. |
+| **05 New version · 06 Chart editor** | SPEC-02, 03 | As designed; the preview renders the real `chartdown` tree with `BarRow`. |
+| **07 MD notes** | SPEC-03, 06 | "Who it's for" keeps **several instruments** per note (a multiple choice, not a `SegmentedControl`), since a note can be for more than one instrument. |
+| **08 Bands · 09 Band detail · 10 Personal space** | SPEC-04, 05 | As designed. Set types stay Rehearsal, Service and Concert (no "Practice"). |
+| **11–14 Administration** | SPEC-07, R-01.7 | As designed, for admins only (anyone else gets a page not found). The instruments table's "N musicians" comes from a counting function, since admins don't read other people's instruments. |
+| **15 Profile** | SPEC-01, 09 | Instruments grouped as in the design: Rhythm (drums, bass), Harmony (keys, guitar, violin), Voice and horns (vocals, saxophone, trumpet, trombone), and Other for the Admin's custom instruments. Notice preferences save on change (T-1003). |
+| **Sign-in pages** | SPEC-01 | Not in the design: built with the same Astryx components (sign in, sign up with the terms checkbox, waitlist, password recovery). |
+| **Terms and Privacy** | Technical Plan 8, 12.5 | `/terms` and `/privacy` in the reader's language (T-1202), with Astryx typography. |
+| **Landing (chartdown.app)** | SPEC-01 | Keeps its version 1 design until its own block (T-1307), which redesigns it with the `impeccable` skill so it doesn't look generic. The waitlist, the sign-in links and the Terms and Privacy links stay. |
 
 ## 5. Responsive
 
-- **iPad landscape (1180 px) and desktop:** reference layout; content max width 1280 px with 40 px margins.
-- **iPad portrait and narrower screens:** rows of 4 bars stay; side panels move below; toolbars wrap.
-- **Phone:** out of MVP scope; even so, no screen may break or scroll sideways.
+- **iPad landscape (1180 px) and desktop:** the reference layout, with the side navigation open.
+- **iPad portrait and narrower screens:** side panels move below the content; rows of four bars stay.
+- **Phone:** out of MVP scope; even so, no screen may break or scroll sideways, and the side navigation becomes a drawer.
 
 ## 6. Accessibility
 
-- AA contrast in both themes (already verified in the tokens).
+- AA contrast in both modes (the Astryx theme's).
 - Real buttons, links and inputs; never clickable elements without a role.
-- Every icon-only control has an `aria-label`; the song map announces state and notes.
-- Visible keyboard focus everywhere; tab order top to bottom, left to right.
-- Respect reduced-motion preferences: no auto-scrolling animations.
+- Every icon-only control has an `aria-label`; the song form announces its state and notes.
+- Visible keyboard focus everywhere; tab order top to bottom, start to end.
+- Respect reduced-motion preferences.
 
 ## 7. Logo and icons
 
 The logo is **concept 3C, "One bar"**: one bar of a chart, two bar lines and four rhythm slashes; the first slash, in red pencil, is the music director's cue that starts the band. The kit lives in `design/logo/` (its guide: `design/logo/guide.pdf`).
 
 - **Versions:** horizontal (symbol + name, the default), stacked (symbol above the name, for square and narrow spaces), symbol alone (app icon, avatar, favicon), and the two-beat **small symbol** for 24 px and below. "App" versions add "App", always secondary to the name.
-- **Colors:** ink `#16212C` on light, `#E6EDF3` on dark, for the bar lines, the slashes and the name; red pencil `#B8322A` on light, `#FF8478` on dark, **for the first slash only**. In the app the logo takes them from the `ink` and `md` tokens, so it follows the theme. Black and white versions for one-color uses.
+- **Colors:** ink `#16212C` on light, `#E6EDF3` on dark, for the bar lines, the slashes and the name; red pencil `#B8322A` on light, `#FF8478` on dark, **for the first slash only**. In the app the logo takes them from the theme (the primary text color and the red), so it follows light and dark. Black and white versions for one-color uses.
 - **Rules:** clear space of at least half the symbol's height on every side; symbol at least 16 px, horizontal logo at least 96 px wide; never stretched, rotated, all red, shadowed or with slashes added or removed. Red is an accent, never the meaning: the logo reads the same in one color.
-- **Where:** the top bar and the landing page show the horizontal logo, with the accessible name "ChartDown"; the favicon (an SVG that follows the browser's light or dark theme, plus ICO), the iPad and Apple touch icons, the web app manifest (192, 512 and maskable 512 px) and the Open Graph image for link previews come from the kit.
+- **Where:** the side navigation's header and the landing page show the horizontal logo, with the accessible name "ChartDown"; the favicon (an SVG that follows the browser's light or dark theme, plus ICO), the iPad and Apple touch icons, the web app manifest (192, 512 and maskable 512 px) and the Open Graph image for link previews come from the kit.
 - The text in every logo file is converted to outlines (Barlow Condensed Bold, "App" in Medium).
 
 ## 8. Sources of truth
 
-- **Design system:** ChartDown – Papel y tinta (tokens, components, brand book, Logos group).
-- **Screens:** ChartDown App – Screens canvas.
+- **Design system:** Astryx (`github.com/facebook/astryx`), theme neutral; its CLI for component APIs.
+- **Screens:** `design/astryx/` (screens, `SCREENS.md`, prototype).
+- **Logo:** `design/logo/`.
 - **Language:** ChartDown/Language repository, spec 0.4.
-- If code and design disagree, fix the code or update the design system first, never just one of them.
+- If code and design disagree, fix the code or update the design first, never just one of them.

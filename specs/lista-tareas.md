@@ -157,3 +157,17 @@ Bugs found while reviewing; each is fixed with a test that would have caught it.
 | T-1201 | Landing page at chartdown.app with waitlist and invite-code sign-in | R-01.7, R-01.8 | T-402, T-201 | M | Matches the approved design and works on a phone |
 | T-1202 | Terms of use (CC0 on publish, authorship on account deletion) and privacy notice, reviewed by a lawyer | Technical Plan 8 and 12.5 | – | S | Texts published and accepted at sign-up |
 | T-1203 | Beta with a real band: prepare a set, play from an offline iPad and collect feedback | The whole MVP | E1 to E11 | M | Findings turned into new tasks or spec changes |
+
+## E13 · Version 2 of the interface (Astryx)
+
+The redesign of Design Handoff 2.0, one block per pull request. Until a block is merged, its screens keep the version 1 look.
+
+| ID | Task | Requirements | Depends on | Size | Tests / evidence |
+|---|---|---|---|---|---|
+| T-1301 | Foundation: Astryx and its theme (light and dark), self-hosted Figtree, the app shell with the side navigation, and the BarRow and MDNotes components on the `chartdown` tree | Handoff 2, 3 and the app shell | T-203, T-706 | L | Every page has the side navigation in both modes; the example chart renders with BarRow |
+| T-1302 | Play: Notices, Set, Stand mode and the offline reader | SPEC-05, 06, 08, 09 | T-1301 | L | Screens 01 to 03 match the design |
+| T-1303 | Create: Catalog, New version, Chart editor and MD notes | SPEC-02, 03, 06 | T-1301 | L | Screens 04 to 07 match the design |
+| T-1304 | People: Bands, Band detail and Personal space | SPEC-04, 05 | T-1301 | M | Screens 08 to 10 match the design |
+| T-1305 | Administration: Overview, Instruments, Invite codes and Reports | SPEC-07, R-01.7 | T-1301 | M | Screens 11 to 14 match the design |
+| T-1306 | Profile and the sign-in pages | SPEC-01, 09 | T-1301 | M | Screen 15 matches the design; sign-in uses the same components |
+| T-1307 | Landing page redesigned with the `impeccable` skill | SPEC-01 | T-1301 | M | Not generic: the owner approves the proposal; waitlist and sign-in keep working |
