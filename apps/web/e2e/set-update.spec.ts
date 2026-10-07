@@ -93,7 +93,7 @@ test("R-05.2 a new revision from the author doesn't change the set until accepte
   await page.goto(setAddress);
   await page.getByRole("button", { name: `Update ${title} to the new revision` }).click();
   await expect(
-    page.getByRole("main").getByRole("status").filter({ hasText: "newest revision" }),
+    page.getByRole("main").getByRole("status").filter({ hasText: "newest revision" }).first(),
   ).toBeVisible();
   await expect(page.getByText("The author has a newer revision")).toHaveCount(0);
   await page.goto(`${setAddress}/edit`);

@@ -120,7 +120,9 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
     <SideNavHeading
       heading="ChartDown"
       icon={<ChartDownLogo variant="symbol" size={28} />}
-      headingHref="/"
+      // Signed in, the whole heading opens the band menu, one 44 px target on an iPad; a link
+      // inside it would be a small one (Design Handoff 2.0, 1.5).
+      {...(account ? {} : { headingHref: "/" })}
       {...(band ? { subheading: band.personal ? t("personal") : band.name } : {})}
       {...(account
         ? {
