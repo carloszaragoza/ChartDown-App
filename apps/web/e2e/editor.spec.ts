@@ -41,13 +41,23 @@ test("R-03.1 the preview updates without reloading", async ({ page }) => {
   // Warnings never block a save.
   await expect(save).toBeEnabled();
   await save.click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Saved as revision 2.");
+  await expect(
+    page.getByRole("main").getByRole("status").filter({ hasText: "Saved as revision 2." }).first(),
+  ).toBeVisible();
   await expect(save).toBeDisabled();
 
   await page.getByRole("link", { name: "View version" }).click();
   await expect(page.getByRole("heading", { name: "Coda" })).toBeVisible();
   await page.getByRole("main").getByRole("link", { name: "History" }).click();
   await expect(page.getByRole("listitem").first()).toContainText("Revision 2");
+
+  // R-02.4 choosing Private in the editor opens its own confirmation; nothing changes yet.
+  await page.goto(`${address}/edit`);
+  await page
+    .getByRole("radiogroup", { name: "Visibility" })
+    .getByRole("radio", { name: "Private" })
+    .click();
+  await expect(page).toHaveURL(new RegExp(`${address}/make-private$`));
 
   // Only the owner edits (R-02.6).
   await page.goto("/");
@@ -82,13 +92,19 @@ test("R-03.1 saving refuses a version that changed elsewhere and keeps the text"
   await other.goto(edit);
   await other.getByLabel("Chart (ChartDown)").fill("## Verse\n1 | 5\n");
   await other.getByRole("button", { name: "Save" }).click();
-  await expect(other.getByRole("main").getByRole("status")).toContainText("Saved as revision 2.");
+  await expect(
+    other.getByRole("main").getByRole("status").filter({ hasText: "Saved as revision 2." }).first(),
+  ).toBeVisible();
 
   await page.getByLabel("Chart (ChartDown)").fill("## Verse\n1 | 6m\n");
   await page.getByRole("button", { name: "Save" }).click();
-  await expect(page.getByRole("main").getByRole("alert")).toContainText(
-    "This version changed since you opened it",
-  );
+  await expect(
+    page
+      .getByRole("main")
+      .getByRole("alert")
+      .filter({ hasText: "This version changed since you opened it" })
+      .first(),
+  ).toBeVisible();
   await expect(page.getByLabel("Chart (ChartDown)")).toHaveValue("## Verse\n1 | 6m\n");
   await context.close();
 });

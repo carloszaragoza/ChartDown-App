@@ -108,7 +108,9 @@ test("R-00.2 a note whose section is gone is marked unplaced, not lost, and anch
     .getByLabel("Chart (ChartDown)")
     .fill("## Verse\n> MD: Start soft, the author's way.\n1 | 4\n\n## Refrain\n4 | 5\n");
   await page.getByRole("button", { name: "Save" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Saved as revision 2.");
+  await expect(
+    page.getByRole("main").getByRole("status").filter({ hasText: "Saved as revision 2." }).first(),
+  ).toBeVisible();
 
   // The note is unplaced but kept, and can be anchored again.
   await page.goto(`${address}/notes`);

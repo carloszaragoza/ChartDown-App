@@ -1,15 +1,25 @@
 import { keyName, parse } from "chartdown";
-import { Button, Icon } from "@chartdown/ui";
-import Link from "next/link";
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { EmptyState } from "@astryxdesign/core/EmptyState";
+import { Heading } from "@astryxdesign/core/Heading";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Item } from "@astryxdesign/core/Item";
+import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
+import { List } from "@astryxdesign/core/List";
+import { Text } from "@astryxdesign/core/Text";
+import { Token } from "@astryxdesign/core/Token";
+import { VStack } from "@astryxdesign/core/VStack";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../lib/auth/enabled";
 import { createClient } from "../../lib/supabase/server";
 import { SOURCE_TYPES, type SourceType } from "../../lib/versions/validate";
+import { AddIcon, ForkIcon, PublicIcon } from "../_components/ActionIcons";
 import { forkVersion } from "../versions/[id]/actions";
-import styles from "./catalog.module.css";
+import { CatalogSearch } from "./CatalogSearch";
 
-type Search = Promise<{ q?: string; source?: string; page?: string }>;
+type Search = Promise<{ q?: string; source?: string; page?: string; song?: string }>;
 interface Row {
   song_id: string;
   title: string;
@@ -32,14 +42,14 @@ interface Listed {
 const PAGE_SIZE = 30;
 
 /**
- * The public catalog (R-02.9, R-02.10), as `design/screens/04-catalog.html` draws it (T-707):
- * songs with how many public versions each has, searched by title, artist or album and filtered
- * by source; each song opens in place to list its versions, to open or fork. Anyone may browse
+ * The public catalog (R-02.9, R-02.10; Design Handoff 2.0 screen 04): songs with how many public
+ * versions each has, searched by title, artist or album and filtered by source. One song is open
+ * in a card with its versions, to open or fork; the others are rows that open in its place. Anyone may browse
  * it (R-01.4). Which versions count is decided in the database, never here (R-02.5).
  */
 export default async function CatalogPage({ searchParams }: { searchParams: Search }) {
   if (!authEnabled()) notFound();
-  const { q = "", source: chosen, page: pageText } = await searchParams;
+  const { q = "", source: chosen, page: pageText, song: openSong } = await searchParams;
   const query = q.trim().slice(0, 200);
   const source = (SOURCE_TYPES as readonly string[]).includes(chosen ?? "")
     ? (chosen as SourceType)
@@ -92,183 +102,208 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
   const t = await getTranslations("catalog");
   const sources = await getTranslations("version.source");
   const v = await getTranslations("version");
-  const href = (changes: { source?: SourceType | null; page?: number }) => {
+  const href = (changes: { page?: number; song?: string }) => {
     const params = new URLSearchParams();
     if (query) params.set("q", query);
-    const nextSource = changes.source === undefined ? source : changes.source;
-    if (nextSource) params.set("source", nextSource);
-    const nextPage = changes.page ?? 1;
+    if (source) params.set("source", source);
+    const nextPage = changes.page ?? page;
     if (nextPage > 1) params.set("page", String(nextPage));
+    if (changes.song) params.set("song", changes.song);
     const text = params.toString();
     return text ? `/catalog?${text}` : "/catalog";
   };
+  // The open song: the one chosen, or the first.
+  const open = songs.find((song) => song.song_id === openSong) ?? songs[0];
+  const others = songs.filter((song) => song !== open);
+  const signedIn = Boolean(auth.user);
 
   return (
-    <div className={styles.page}>
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>{t("title")}</h1>
-          <p className={styles.meta}>{t("intro")}</p>
-        </div>
-        <Link href="/versions/new" className="cd-button cd-button--primary">
-          <Icon name="add" size={20} />
-          {t("newVersion")}
-        </Link>
-      </div>
-      <form className={styles.search} role="search">
-        <label className={styles.searchField}>
-          <Icon name="search" size={20} />
-          <input
-            className={styles.searchInput}
-            name="q"
-            type="search"
-            defaultValue={query}
-            placeholder={t("placeholder")}
-            aria-label={t("search")}
-          />
-        </label>
-        {source && <input type="hidden" name="source" value={source} />}
-        {/* Enter searches; the button is for those who prefer it. */}
-        <Button type="submit" className={styles.searchButton}>
-          {t("submit")}
-        </Button>
-      </form>
-      <nav aria-label={t("sources")} className={styles.filters}>
-        {[null, ...SOURCE_TYPES].map((type) => (
-          <Link
-            key={type ?? "all"}
-            href={href({ source: type })}
-            className={styles.filter}
-            aria-current={type === source ? "page" : undefined}
-          >
-            {type ? sources(type) : t("all")}
-          </Link>
-        ))}
-      </nav>
-
-      {error ? (
-        <p role="alert" className={styles.message}>
-          {t("error")}
-        </p>
-      ) : songs.length === 0 ? (
-        <p className={styles.message}>{t("none")}</p>
-      ) : (
-        <ul className={styles.list} aria-label={t("results")}>
-          {songs.map((song) => {
-            const own = versions.filter((version) => version.song_id === song.song_id);
-            return (
-              <li key={song.song_id} className={styles.card}>
-                <details open={songs.length === 1}>
-                  <summary className={styles.summary}>
-                    <span className={styles.songText}>
-                      <span className={styles.songTitle}>{song.title}</span>
-                      {song.artists.length > 0 && (
-                        <span className={styles.meta}>{song.artists.join(", ")}</span>
-                      )}
-                    </span>
-                    <span className={styles.count}>{t("versions", { count: song.versions })}</span>
-                  </summary>
-                  <ul
-                    className={styles.versions}
-                    aria-label={t("versionsOf", { title: song.title })}
-                  >
-                    {own.map((version) => {
-                      const chart = version.current_revision_id
-                        ? charts.get(version.current_revision_id)
-                        : undefined;
-                      const signedIn = Boolean(auth.user);
-                      const mine = signedIn && auth.user?.id === version.owner_id;
-                      return (
-                        <li key={version.id} className={styles.version}>
-                          <span className={styles.tag}>
-                            {[sources(version.source_type), version.source_year]
-                              .filter(Boolean)
-                              .join(" ")}
-                          </span>
-                          <span className={styles.songText}>
-                            <span className={styles.versionTitle}>
-                              {version.source_album
-                                ? v("album", { album: version.source_album })
-                                : version.source_youtube_url
-                                  ? v("youtube")
-                                  : sources(version.source_type)}
-                            </span>
-                            <span className={styles.meta}>
-                              {[
+    <Layout
+      height="auto"
+      // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
+      padding={8}
+      contentWidth={960}
+      header={
+        <LayoutHeader hasDivider>
+          <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
+            <VStack gap={1}>
+              <Text type="supporting">{t("overline")}</Text>
+              <Heading level={1}>{t("title")}</Heading>
+              <Text color="secondary">{t("intro")}</Text>
+            </VStack>
+            <Button
+              label={t("newVersion")}
+              variant="primary"
+              href="/versions/new"
+              icon={<AddIcon />}
+            />
+          </HStack>
+        </LayoutHeader>
+      }
+      content={
+        <LayoutContent>
+          <VStack gap={4}>
+            <CatalogSearch
+              query={query}
+              source={source}
+              sources={[
+                { value: "all", label: t("all") },
+                ...SOURCE_TYPES.map((type) => ({ value: type, label: sources(type) })),
+              ]}
+              words={{
+                search: t("search"),
+                placeholder: t("placeholder"),
+                submit: t("submit"),
+                sources: t("sources"),
+              }}
+            />
+            {error ? (
+              <div role="alert">
+                <EmptyState title={t("error")} />
+              </div>
+            ) : !open ? (
+              <EmptyState title={t("none")} />
+            ) : (
+              <>
+                <Card>
+                  <VStack gap={2}>
+                    <HStack gap={2} vAlign="center" hAlign="between">
+                      <VStack gap={0.5}>
+                        <Heading level={2}>{open.title}</Heading>
+                        {open.artists.length > 0 && (
+                          <Text type="supporting">{open.artists.join(", ")}</Text>
+                        )}
+                      </VStack>
+                      <Text type="supporting">{t("versions", { count: open.versions })}</Text>
+                    </HStack>
+                    <List
+                      hasDividers
+                      edgeCompensation="inline"
+                      header={
+                        <Text className="cd-visually-hidden">
+                          {t("versionsOf", { title: open.title })}
+                        </Text>
+                      }
+                    >
+                      {versions
+                        .filter((version) => version.song_id === open.song_id)
+                        .map((version) => {
+                          const chart = version.current_revision_id
+                            ? charts.get(version.current_revision_id)
+                            : undefined;
+                          const mine = signedIn && auth.user?.id === version.owner_id;
+                          const names = { title: open.title, author: version.author_name };
+                          return (
+                            <Item
+                              key={version.id}
+                              as="li"
+                              startContent={
+                                <Token
+                                  label={[sources(version.source_type), version.source_year]
+                                    .filter(Boolean)
+                                    .join(" ")}
+                                  size="sm"
+                                />
+                              }
+                              label={
+                                version.source_album
+                                  ? v("album", { album: version.source_album })
+                                  : version.source_youtube_url
+                                    ? v("youtube")
+                                    : sources(version.source_type)
+                              }
+                              description={[
                                 t("by", { author: version.author_name }),
                                 chart && `${t("key")} ${chart.key}`,
                                 chart?.meter,
                               ]
                                 .filter(Boolean)
                                 .join(" · ")}
-                            </span>
-                          </span>
-                          <span className={styles.public}>
-                            <Icon name="public" size={16} />
-                            {version.status === "frozen" ? v("frozen") : t("public")}
-                          </span>
-                          <Link
-                            href={`/versions/${version.id}`}
-                            className="cd-button cd-button--secondary"
-                            aria-label={t("openName", {
-                              title: song.title,
-                              author: version.author_name,
-                            })}
-                          >
-                            {t("open")}
-                          </Link>
-                          {!mine &&
-                            (signedIn ? (
-                              <form action={forkVersion}>
-                                <input type="hidden" name="versionId" value={version.id} />
-                                <Button
-                                  type="submit"
-                                  icon="fork"
-                                  aria-label={t("forkName", {
-                                    title: song.title,
-                                    author: version.author_name,
-                                  })}
-                                >
-                                  {t("fork")}
-                                </Button>
-                              </form>
-                            ) : (
-                              <Link
-                                href={`/auth/sign-in?next=${encodeURIComponent(`/versions/${version.id}`)}`}
-                                className="cd-button cd-button--secondary"
-                              >
-                                <Icon name="fork" size={20} />
-                                {t("fork")}
-                              </Link>
-                            ))}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                  <Link href={`/songs/${song.song_id}`} className={styles.songLink}>
-                    {t("songPage", { title: song.title })}
-                  </Link>
-                </details>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-
-      {(page > 1 || hasNext) && (
-        <nav aria-label={t("pages")} className={styles.pages}>
-          {page > 1 && (
-            <Link href={href({ page: page - 1 })} className="cd-button cd-button--secondary">
-              {t("previous")}
-            </Link>
-          )}
-          {hasNext && (
-            <Link href={href({ page: page + 1 })} className="cd-button cd-button--secondary">
-              {t("next")}
-            </Link>
-          )}
-        </nav>
-      )}
-    </div>
+                              endContent={
+                                <HStack gap={2} vAlign="center">
+                                  <HStack gap={1} vAlign="center">
+                                    <PublicIcon />
+                                    <Text type="supporting">
+                                      {version.status === "frozen" ? v("frozen") : t("public")}
+                                    </Text>
+                                  </HStack>
+                                  <Button
+                                    label={t("openName", names)}
+                                    href={`/versions/${version.id}`}
+                                  >
+                                    {t("open")}
+                                  </Button>
+                                  {!mine &&
+                                    (signedIn ? (
+                                      <form action={forkVersion}>
+                                        <input type="hidden" name="versionId" value={version.id} />
+                                        <Button
+                                          type="submit"
+                                          label={t("forkName", names)}
+                                          icon={<ForkIcon />}
+                                        >
+                                          {t("fork")}
+                                        </Button>
+                                      </form>
+                                    ) : (
+                                      <Button
+                                        label={t("forkName", names)}
+                                        href={`/auth/sign-in?next=${encodeURIComponent(`/versions/${version.id}`)}`}
+                                        icon={<ForkIcon />}
+                                      >
+                                        {t("fork")}
+                                      </Button>
+                                    ))}
+                                </HStack>
+                              }
+                            />
+                          );
+                        })}
+                    </List>
+                    <HStack>
+                      <Button
+                        label={t("songPage", { title: open.title })}
+                        variant="ghost"
+                        href={`/songs/${open.song_id}`}
+                      />
+                    </HStack>
+                  </VStack>
+                </Card>
+                {others.length > 0 && (
+                  <List
+                    hasDividers
+                    edgeCompensation="inline"
+                    header={<Text className="cd-visually-hidden">{t("otherSongs")}</Text>}
+                  >
+                    {others.map((song) => (
+                      <Item
+                        key={song.song_id}
+                        as="li"
+                        href={href({ song: song.song_id })}
+                        label={song.title}
+                        {...(song.artists.length > 0
+                          ? { description: song.artists.join(", ") }
+                          : {})}
+                        endContent={
+                          <Text type="supporting">{t("versions", { count: song.versions })}</Text>
+                        }
+                      />
+                    ))}
+                  </List>
+                )}
+              </>
+            )}
+            {(page > 1 || hasNext) && (
+              <nav aria-label={t("pages")}>
+                <HStack gap={2}>
+                  {page > 1 && <Button label={t("previous")} href={href({ page: page - 1 })} />}
+                  {hasNext && <Button label={t("next")} href={href({ page: page + 1 })} />}
+                </HStack>
+              </nav>
+            )}
+          </VStack>
+        </LayoutContent>
+      }
+    />
   );
 }

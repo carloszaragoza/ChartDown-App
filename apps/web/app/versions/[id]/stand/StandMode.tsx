@@ -2,7 +2,6 @@
 
 import { Theme } from "@astryxdesign/core";
 import { Button } from "@astryxdesign/core/Button";
-import { Card } from "@astryxdesign/core/Card";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
@@ -14,13 +13,7 @@ import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
 import { chartdownTheme } from "../../../../theme/chartdown";
 import { chordFormatter, keyName, parse, sectionLength, type Key } from "chartdown";
-import {
-  BarRow,
-  formStripItems,
-  MDNotes,
-  type FormStripItem,
-  type MDNoteData,
-} from "@chartdown/ui";
+import { BarRow, formStripItems, type FormStripItem, type MDNoteData } from "@chartdown/ui";
 import { ArrowUturnLeftIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -33,6 +26,7 @@ import {
   useSyncExternalStore,
   type MouseEvent,
 } from "react";
+import { ChartSection } from "../../../_components/ChartPreview";
 import { useChartLabels } from "../../../_components/chartLabels";
 import type { Display } from "../display";
 import { readSection, standHref, type StandTheme } from "./standHref";
@@ -346,23 +340,15 @@ export function StandMode({
               it; when it is taller than the screen it scrolls inside its own area (F-001). */}
             <main aria-live="polite" style={{ flex: "0 1 auto", minHeight: 0, overflowY: "auto" }}>
               {now && (
-                <Card key={current}>
-                  <section aria-label={now.name} id="current-section">
-                    <VStack gap={3}>
-                      <HStack gap={2} vAlign="center">
-                        <Heading level={2}>{now.name}</Heading>
-                        <Text type="supporting">{labels.length(sectionLength(now))}</Text>
-                      </HStack>
-                      <MDNotes
-                        notes={notes ? (notes[current] ?? []) : now.notes}
-                        instrumentName={labels.bar.instrument}
-                      />
-                      {now.rows.map((row, index) => (
-                        <BarRow key={index} row={row} formatter={formatter} labels={labels.bar} />
-                      ))}
-                    </VStack>
-                  </section>
-                </Card>
+                <ChartSection
+                  key={current}
+                  section={now}
+                  formatter={formatter}
+                  labels={labels}
+                  notes={notes ? (notes[current] ?? []) : now.notes}
+                  id="current-section"
+                  isFramed
+                />
               )}
             </main>
 

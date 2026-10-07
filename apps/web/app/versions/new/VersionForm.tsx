@@ -1,11 +1,24 @@
 "use client";
 
-import { Button } from "@chartdown/ui";
+import { Banner } from "@astryxdesign/core/Banner";
+import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
+import { Button } from "@astryxdesign/core/Button";
+import { FormLayout } from "@astryxdesign/core/FormLayout";
+import { Heading } from "@astryxdesign/core/Heading";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
+import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
+import { Text } from "@astryxdesign/core/Text";
+import { TextArea } from "@astryxdesign/core/TextArea";
+import { TextInput } from "@astryxdesign/core/TextInput";
+import { VStack } from "@astryxdesign/core/VStack";
+import { parse, SUPPORTED_VERSION } from "chartdown";
 import { useTranslations } from "next-intl";
-import { useActionState, useEffect, useRef } from "react";
-import { SOURCE_TYPES } from "../../../lib/versions/validate";
+import { useActionState, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { SOURCE_TYPES, type VersionError } from "../../../lib/versions/validate";
+import { ChartPreview } from "../../_components/ChartPreview";
+import { Warnings } from "../[id]/edit/Editor";
 import { createVersion, type VersionFormState } from "./actions";
-import styles from "./new.module.css";
 
 // A place to start: two sections the person replaces with their own chart.
 const STARTER = "## Verse\n1 | 4 | 6m | 5\n\n## Chorus\n4 | 1 | 5 | 1\n";
@@ -17,156 +30,200 @@ export interface VersionFormProps {
   defaultAuthor: string;
 }
 
-/** The chart, its author and its source (R-02.1, R-02.2). Always published as public (R-02.3). */
+/** What is still missing before publishing, in the order the form asks for it. */
+export function missing(fields: {
+  title: string | null;
+  author: string;
+  content: string;
+  source: string;
+}): VersionError | null {
+  if (fields.title !== null && !fields.title.trim()) return "title_required";
+  if (!fields.author.trim()) return "author_required";
+  if (!fields.content.trim()) return "chart_required";
+  if (!fields.source) return "source_required";
+  return null;
+}
+
+/**
+ * The chart, its author and its source (R-02.1, R-02.2; Design Handoff 2.0 screen 05): the song's
+ * details in a panel, the chart with a live preview beside them. Always published as public
+ * (R-02.3). Publish waits for what is required and says what is missing.
+ */
 export function VersionForm({ song, defaultTitle, defaultAuthor }: VersionFormProps) {
   const t = useTranslations("newVersion");
+  const c = useTranslations("catalog");
   const sources = useTranslations("version.source");
   const [state, action, pending] = useActionState<VersionFormState, FormData>(createVersion, {
     error: null,
     values: null,
   });
   const values = state.values;
-  const sourceRef = useRef<HTMLFieldSetElement>(null);
-  const alertRef = useRef<HTMLParagraphElement>(null);
+  const [title, setTitle] = useState(values?.title ?? defaultTitle);
+  const [artists, setArtists] = useState(values?.artists ?? "");
+  const [author, setAuthor] = useState(values?.author ?? defaultAuthor);
+  const [source, setSource] = useState<string>(values?.sourceType ?? "");
+  const [album, setAlbum] = useState(values?.album ?? "");
+  const [year, setYear] = useState(values?.year ?? "");
+  const [youtube, setYoutube] = useState(values?.youtube ?? "");
+  const [content, setContent] = useState(values?.content ?? STARTER);
+  const shown = useDeferredValue(content);
+  const chart = useMemo(() => parse(shown), [shown]);
+  const alertRef = useRef<HTMLDivElement>(null);
+  const lacking = missing({ title: song ? null : title, author, content, source });
+  const error = (code: VersionError) =>
+    state.error === code
+      ? { status: { type: "error" as const, message: t(`errors.${code}`) } }
+      : {};
 
-  // A missing source moves focus to the choice; any other error to the message.
+  // An error from the server moves focus to its message.
   useEffect(() => {
-    if (state.error === "source_required") sourceRef.current?.focus();
-    else if (state.error) alertRef.current?.focus();
+    if (state.error) alertRef.current?.focus();
   }, [state]);
 
   return (
-    <form action={action} className={styles.form} noValidate>
-      {state.error && (
-        <p role="alert" ref={alertRef} tabIndex={-1} className={styles.alert} id="version-error">
-          {t(`errors.${state.error}`)}
-        </p>
-      )}
-      {song ? (
-        <div className={styles.field}>
-          <input type="hidden" name="songId" value={song.id} />
-          <span>{t("song")}</span>
-          <span className={styles.songTitle}>
-            {song.title}
-            {song.artists.length > 0 && (
-              <span className={styles.hint}> · {song.artists.join(", ")}</span>
-            )}
-          </span>
-        </div>
-      ) : (
-        <>
-          <label className={styles.field}>
-            {t("songTitle")}
-            <input
-              className={styles.input}
-              name="title"
-              required
-              maxLength={200}
-              defaultValue={values?.title ?? defaultTitle}
-              aria-invalid={state.error === "title_required" || undefined}
-            />
-          </label>
-          <label className={styles.field}>
-            {t("artists")}
-            <input
-              className={styles.input}
-              name="artists"
-              defaultValue={values?.artists ?? ""}
-              aria-describedby="artists-hint"
-            />
-            <span id="artists-hint" className={styles.hint}>
-              {t("artistsHint")}
-            </span>
-          </label>
-        </>
-      )}
-
-      <label className={styles.field}>
-        {t("chart")}
-        <textarea
-          className={styles.chart}
-          name="content"
-          required
-          rows={14}
-          spellCheck={false}
-          defaultValue={values?.content ?? STARTER}
-          aria-invalid={state.error === "chart_required" || undefined}
-        />
-      </label>
-
-      <label className={styles.field}>
-        {t("author")}
-        <input
-          className={styles.input}
-          name="author"
-          required
-          maxLength={80}
-          defaultValue={values?.author ?? defaultAuthor}
-          aria-invalid={state.error === "author_required" || undefined}
-        />
-      </label>
-
-      <fieldset
-        ref={sourceRef}
-        tabIndex={-1}
-        className={styles.group}
-        aria-invalid={state.error === "source_required" || undefined}
-        aria-describedby={state.error === "source_required" ? "version-error" : undefined}
-      >
-        <legend className={styles.legend}>{t("source")}</legend>
-        <p className={styles.hint}>{t("sourceHint")}</p>
-        <div className={styles.choices}>
-          {SOURCE_TYPES.map((type) => (
-            <label key={type} className={styles.choice}>
-              <input
-                type="radio"
-                name="sourceType"
-                value={type}
-                defaultChecked={values?.sourceType === type}
-              />
-              {sources(type)}
-            </label>
-          ))}
-        </div>
-        <label className={styles.field}>
-          {t("album")}
-          <input
-            className={styles.input}
-            name="album"
-            maxLength={200}
-            defaultValue={values?.album ?? ""}
-          />
-        </label>
-        <label className={styles.field}>
-          {t("year")}
-          <input
-            className={styles.input}
-            name="year"
-            inputMode="numeric"
-            defaultValue={values?.year ?? ""}
-            aria-invalid={state.error === "year_invalid" || undefined}
-          />
-        </label>
-        <label className={styles.field}>
-          {t("youtube")}
-          <input
-            className={styles.input}
-            name="youtube"
-            type="url"
-            defaultValue={values?.youtube ?? ""}
-            aria-invalid={state.error === "youtube_invalid" || undefined}
-          />
-        </label>
-      </fieldset>
-
-      <p className={styles.notice}>{t("cc0")}</p>
-      <Button
-        type="submit"
-        variant="primary"
-        {...(pending ? { disabledReason: t("publishing") } : {})}
-      >
-        {t("publish")}
-      </Button>
+    <form action={action} noValidate>
+      {song && <input type="hidden" name="songId" value={song.id} />}
+      <Layout
+        height="auto"
+        // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
+        padding={8}
+        header={
+          <LayoutHeader hasDivider>
+            <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
+              <VStack gap={1}>
+                <Breadcrumbs variant="supporting">
+                  <BreadcrumbItem href="/catalog">{c("title")}</BreadcrumbItem>
+                  <BreadcrumbItem>{t("title")}</BreadcrumbItem>
+                </Breadcrumbs>
+                <Heading level={1}>{(song ? song.title : title.trim()) || t("title")}</Heading>
+              </VStack>
+              <HStack gap={2} vAlign="center">
+                <Button label={t("changeSong")} variant="ghost" href="/versions/new" />
+                <Button
+                  type="submit"
+                  variant="primary"
+                  label={t("publish")}
+                  isLoading={pending}
+                  isDisabled={lacking !== null}
+                  {...(lacking ? { tooltip: t(`errors.${lacking}`) } : {})}
+                />
+              </HStack>
+            </HStack>
+          </LayoutHeader>
+        }
+        start={
+          <LayoutPanel width={400} hasDivider label={t("details")}>
+            <VStack gap={5}>
+              {state.error && (
+                <div role="alert" ref={alertRef} tabIndex={-1}>
+                  <Banner status="error" title={t(`errors.${state.error}`)} />
+                </div>
+              )}
+              <FormLayout>
+                {song ? (
+                  <VStack gap={0.5}>
+                    <Text type="supporting">{t("song")}</Text>
+                    <Text weight="semibold">
+                      {song.title}
+                      {song.artists.length > 0 && ` · ${song.artists.join(", ")}`}
+                    </Text>
+                  </VStack>
+                ) : (
+                  <>
+                    <TextInput
+                      label={t("songTitle")}
+                      htmlName="title"
+                      value={title}
+                      onChange={setTitle}
+                      isRequired
+                      {...error("title_required")}
+                    />
+                    <TextInput
+                      label={t("artists")}
+                      htmlName="artists"
+                      value={artists}
+                      onChange={setArtists}
+                      description={t("artistsHint")}
+                    />
+                  </>
+                )}
+                <TextInput
+                  label={t("author")}
+                  htmlName="author"
+                  value={author}
+                  onChange={setAuthor}
+                  isRequired
+                  {...error("author_required")}
+                />
+                <RadioList
+                  label={t("source")}
+                  description={t("sourceHint")}
+                  htmlName="sourceType"
+                  value={source}
+                  onChange={setSource}
+                  isRequired
+                  {...error("source_required")}
+                >
+                  {SOURCE_TYPES.map((type) => (
+                    <RadioListItem key={type} value={type} label={sources(type)} />
+                  ))}
+                </RadioList>
+                <TextInput
+                  label={t("album")}
+                  htmlName="album"
+                  value={album}
+                  onChange={setAlbum}
+                  isOptional
+                />
+                <TextInput
+                  label={t("year")}
+                  htmlName="year"
+                  value={year}
+                  onChange={setYear}
+                  isOptional
+                  {...error("year_invalid")}
+                />
+                <TextInput
+                  label={t("youtube")}
+                  htmlName="youtube"
+                  value={youtube}
+                  onChange={setYoutube}
+                  isOptional
+                  {...error("youtube_invalid")}
+                />
+              </FormLayout>
+              <Banner status="info" title={t("cc0Title")} description={t("cc0")} />
+            </VStack>
+          </LayoutPanel>
+        }
+        content={
+          <LayoutContent padding={8}>
+            <VStack gap={6}>
+              <VStack gap={2}>
+                <HStack gap={2} vAlign="center" hAlign="between">
+                  <Heading level={2}>{t("chartTitle")}</Heading>
+                  <Text type="supporting">ChartDown {chart.version ?? SUPPORTED_VERSION}</Text>
+                </HStack>
+                <TextArea
+                  label={t("chart")}
+                  isLabelHidden
+                  htmlName="content"
+                  value={content}
+                  onChange={setContent}
+                  rows={10}
+                  hasSpellCheck={false}
+                  isRequired
+                  {...error("chart_required")}
+                />
+                <Warnings warnings={chart.warnings} />
+              </VStack>
+              <section aria-label={t("preview")}>
+                <ChartPreview chart={chart} />
+              </section>
+            </VStack>
+          </LayoutContent>
+        }
+      />
     </form>
   );
 }

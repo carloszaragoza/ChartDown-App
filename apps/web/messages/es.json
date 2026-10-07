@@ -229,11 +229,11 @@
     "chart": "Cifrado (ChartDown)",
     "author": "Arreglo de",
     "source": "Fuente",
-    "sourceHint": "Qué grabación sigue este cifrado. Obligatoria.",
-    "album": "Álbum (opcional)",
-    "year": "Año (opcional)",
-    "youtube": "Enlace de YouTube (opcional)",
-    "cc0": "Las versiones públicas se comparten bajo CC0: cualquiera puede usarlas, y se quedan con la comunidad aunque borres tu cuenta.",
+    "sourceHint": "Qué grabación sigue este cifrado.",
+    "album": "Álbum",
+    "year": "Año",
+    "youtube": "Enlace de YouTube",
+    "cc0": "Cualquiera puede usarlas, y se quedan con la comunidad aunque borres tu cuenta.",
     "publish": "Publicar versión",
     "errors": {
       "source_required": "Elige una fuente: grabación de estudio, en vivo, acústica o arreglo propio.",
@@ -244,7 +244,12 @@
       "youtube_invalid": "El enlace debe ser una dirección de YouTube que empiece por https://.",
       "unknown": "No se pudo publicar la versión. Inténtalo de nuevo."
     },
-    "publishing": "Publicando…"
+    "publishing": "Publicando…",
+    "cc0Title": "Las versiones públicas se comparten bajo CC0",
+    "details": "Datos de la canción",
+    "chartTitle": "Cifrado",
+    "preview": "Vista previa",
+    "intro": "Busca la canción en el catálogo, o empieza una nueva."
   },
   "history": {
     "title": "Historial",
@@ -294,7 +299,9 @@
     "openName": "Abrir {title} de {author}",
     "fork": "Copiar",
     "forkName": "Copiar {title} de {author}",
-    "songPage": "Todo sobre {title}"
+    "songPage": "Todo sobre {title}",
+    "overline": "Comunidad",
+    "otherSongs": "Otras canciones"
   },
   "editor": {
     "public": "Pública",
@@ -311,7 +318,9 @@
     "line": "Línea {line}:",
     "savedLine": "{source} · Revisión {number} · guardada {when}",
     "visibility": "Visibilidad",
-    "numbers": "Números"
+    "numbers": "Números",
+    "privateForGood": "Esta versión es privada; una versión privada no vuelve a ser pública.",
+    "textPanel": "Texto en ChartDown"
   },
   "viewer": {
     "label": "Visualización",

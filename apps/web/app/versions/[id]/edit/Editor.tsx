@@ -1,14 +1,27 @@
 "use client";
 
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Heading } from "@astryxdesign/core/Heading";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Icon } from "@astryxdesign/core/Icon";
+import { Item } from "@astryxdesign/core/Item";
+import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
+import { List } from "@astryxdesign/core/List";
+import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
+import { StatusDot } from "@astryxdesign/core/StatusDot";
+import { Text } from "@astryxdesign/core/Text";
+import { TextArea } from "@astryxdesign/core/TextArea";
+import { VStack } from "@astryxdesign/core/VStack";
 import { parse, SUPPORTED_VERSION, type Warning } from "chartdown";
-import { Button, Icon } from "@chartdown/ui";
+import { ClockIcon, GlobeAltIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useActionState, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { lineRange } from "../../../../lib/versions/lines";
-import { ChartBody } from "../ChartBody";
+import { ChartPreview } from "../../../_components/ChartPreview";
 import { saveChart, type SaveState } from "./actions";
-import styles from "./editor.module.css";
 
 export interface EditorProps {
   versionId: string;
@@ -24,9 +37,9 @@ export interface EditorProps {
 }
 
 /**
- * The chart editor (R-03.1): text on the left, a live preview on the right that follows the
- * typing without reloading, and the parser's warnings with their lines. Warnings never block a
- * save.
+ * The chart editor (R-03.1; Design Handoff 2.0 screen 06): the text in a panel on the left, a
+ * live preview beside it that follows the typing without reloading, and the parser's warnings
+ * with their lines. Warnings never block a save.
  */
 export function Editor({
   versionId,
@@ -42,6 +55,7 @@ export function Editor({
   const v = useTranslations("version");
   const format = useFormatter();
   const now = useNow({ updateInterval: 30_000 });
+  const router = useRouter();
   const [text, setText] = useState(content);
   const [state, action, pending] = useActionState<SaveState, FormData>(saveChart, {
     status: "idle",
@@ -76,93 +90,103 @@ export function Editor({
   };
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.heading}>
-          <h1 className={styles.title}>{title}</h1>
-          <p className={styles.meta}>
-            {t("savedLine", {
-              source,
-              number: saved.number,
-              when: format.relativeTime(new Date(saved.at), now),
-            })}{" "}
-            ·{" "}
-            <Link href={`/versions/${versionId}`} className={styles.metaLink}>
-              {t("view")}
-            </Link>
-          </p>
-        </div>
-        <form action={action} className={styles.actions}>
-          <input type="hidden" name="versionId" value={versionId} />
-          <input type="hidden" name="content" value={text} />
-          {/* Public or private; going private is its own flow (R-02.4) and has no way back. */}
-          <div className={styles.segmented} role="group" aria-label={t("visibility")}>
-            {visibility === "public" ? (
-              <>
-                <span className={styles.segment} aria-current="true">
-                  <Icon name="public" size={18} />
-                  {t("public")}
-                </span>
-                <Link href={`/versions/${versionId}/make-private`} className={styles.segment}>
-                  <Icon name="private" size={18} />
-                  {v("private")}
-                </Link>
-              </>
-            ) : (
-              <span className={styles.segment} aria-current="true">
-                <Icon name="private" size={18} />
-                {v("private")}
-              </span>
+    <Layout
+      height="auto"
+      // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
+      padding={8}
+      header={
+        <LayoutHeader hasDivider>
+          <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
+            <VStack gap={1}>
+              <Text type="supporting">
+                {t("savedLine", {
+                  source,
+                  number: saved.number,
+                  when: format.relativeTime(new Date(saved.at), now),
+                })}{" "}
+                · <Link href={`/versions/${versionId}`}>{t("view")}</Link>
+              </Text>
+              <Heading level={1}>{title}</Heading>
+            </VStack>
+            <form action={action}>
+              <input type="hidden" name="versionId" value={versionId} />
+              <input type="hidden" name="content" value={text} />
+              <HStack gap={2} vAlign="center" wrap="wrap">
+                {/* Going private is its own flow (R-02.4), with no way back. */}
+                <SegmentedControl
+                  label={t("visibility")}
+                  value={visibility}
+                  isDisabled={visibility === "private"}
+                  disabledMessage={t("privateForGood")}
+                  onChange={(value) => {
+                    if (value === "private") router.push(`/versions/${versionId}/make-private`);
+                  }}
+                >
+                  <SegmentedControlItem
+                    value="public"
+                    label={t("public")}
+                    icon={<Icon icon={GlobeAltIcon} />}
+                  />
+                  <SegmentedControlItem
+                    value="private"
+                    label={v("private")}
+                    icon={<Icon icon={LockClosedIcon} />}
+                  />
+                </SegmentedControl>
+                <Button
+                  label={v("history")}
+                  href={`/versions/${versionId}/history`}
+                  icon={<Icon icon={ClockIcon} />}
+                />
+                <Button
+                  type="submit"
+                  variant="primary"
+                  label={t("save")}
+                  isLoading={pending}
+                  isDisabled={!dirty}
+                  {...(!dirty ? { tooltip: t("noChanges") } : {})}
+                />
+              </HStack>
+            </form>
+          </HStack>
+        </LayoutHeader>
+      }
+      start={
+        <LayoutPanel width={460} hasDivider label={t("textPanel")}>
+          <VStack gap={3}>
+            <div role="status">
+              {state.status === "saved" && !dirty && (
+                <Banner status="success" title={t("saved", { number: state.number ?? "" })} />
+              )}
+            </div>
+            {(state.status === "changed" || state.status === "error") && (
+              <div role="alert">
+                <Banner
+                  status="error"
+                  title={state.status === "changed" ? t("changed") : t("error")}
+                />
+              </div>
             )}
-          </div>
-          <Link href={`/versions/${versionId}/history`} className="cd-button cd-button--secondary">
-            <Icon name="history" size={20} />
-            {v("history")}
-          </Link>
-          <Button
-            type="submit"
-            variant="primary"
-            {...(!dirty ? { disabledReason: t("noChanges") } : {})}
-            {...(pending ? { disabledReason: t("saving") } : {})}
-          >
-            {t("save")}
-          </Button>
-        </form>
-      </header>
-      <p role="status" className={styles.status}>
-        {state.status === "saved" && !dirty && t("saved", { number: state.number ?? "" })}
-      </p>
-      {(state.status === "changed" || state.status === "error") && (
-        <p role="alert" className={styles.alert}>
-          {state.status === "changed" ? t("changed") : t("error")}
-        </p>
-      )}
-
-      <div className={styles.panes}>
-        <div className={styles.source}>
-          <div className={styles.sourceBar}>
-            <span>ChartDown {chart.version ?? SUPPORTED_VERSION}</span>
-            <span>{t("numbers")}</span>
-          </div>
-          <textarea
-            id="chart-source"
-            aria-label={t("text")}
-            ref={area}
-            className={styles.text}
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-            spellCheck={false}
-            autoCapitalize="off"
-            autoCorrect="off"
-            aria-describedby="chart-warnings"
-          />
-          <Warnings warnings={chart.warnings} onSelect={goTo} />
-        </div>
-        <section className={styles.preview} aria-label={t("preview")}>
-          <ChartBody chart={chart} />
-        </section>
-      </div>
-    </div>
+            <Text type="supporting">ChartDown {chart.version ?? SUPPORTED_VERSION}</Text>
+            <TextArea
+              ref={area}
+              label={t("text")}
+              isLabelHidden
+              value={text}
+              onChange={setText}
+              rows={18}
+              hasSpellCheck={false}
+            />
+            <Warnings warnings={chart.warnings} onSelect={goTo} />
+          </VStack>
+        </LayoutPanel>
+      }
+      content={
+        <LayoutContent padding={8} role="region" label={t("preview")}>
+          <ChartPreview chart={chart} />
+        </LayoutContent>
+      }
+    />
   );
 }
 
@@ -183,28 +207,29 @@ export function Warnings({
           code: (chunks) => <code>{chunks}</code>,
         })
       : warning.message;
+  const summary = t("warnings", { count: warnings.length });
   return (
-    <div id="chart-warnings" className={styles.warnings}>
-      <h2 className={styles.label}>
-        {warnings.length === 0 && <Icon name="check" size={16} />}
-        {t("warnings", { count: warnings.length })}
-      </h2>
+    <VStack gap={1}>
+      <HStack gap={1} vAlign="center">
+        <StatusDot variant={warnings.length === 0 ? "success" : "warning"} label={summary} />
+        <Text type="supporting">{summary}</Text>
+      </HStack>
       {warnings.length > 0 && (
-        <ul className={styles.warningList}>
+        <List density="compact" header={<Text className="cd-visually-hidden">{summary}</Text>}>
           {warnings.map((warning, index) => (
-            <li key={index}>
-              <button
-                type="button"
-                className={styles.warning}
-                onClick={() => onSelect?.(warning.line)}
-              >
-                <span className={styles.line}>{t("line", { line: warning.line })}</span>{" "}
-                {message(warning)}
-              </button>
-            </li>
+            <Item
+              key={index}
+              as="li"
+              onClick={() => onSelect?.(warning.line)}
+              label={
+                <Text>
+                  <b>{t("line", { line: warning.line })}</b> {message(warning)}
+                </Text>
+              }
+            />
           ))}
-        </ul>
+        </List>
       )}
-    </div>
+    </VStack>
   );
 }
