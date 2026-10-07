@@ -126,3 +126,16 @@ export async function createSet(
   await page.getByRole("option", { name: set.type, exact: true }).click();
   await form.getByRole("button", { name: "Create set" }).click();
 }
+
+/**
+ * Writes a chart in the editor and waits until Save takes it. Right after a page opens, React
+ * may not have taken over the text area yet, and typing then is lost; this types again.
+ */
+export async function writeChart(page: Page, text: string) {
+  const field = page.getByLabel("Chart (ChartDown)");
+  const save = page.getByRole("button", { name: "Save" });
+  await expect(async () => {
+    await field.fill(text);
+    await expect(save).toBeEnabled({ timeout: 1_000 });
+  }).toPass({ timeout: 15_000 });
+}

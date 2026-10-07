@@ -38,9 +38,13 @@ test("R-05.1 a set's name is unique in the band; songs are added, ordered and du
   await page.getByRole("main").getByRole("link", { name: band, exact: true }).click();
   await expect(page.getByRole("region", { name: "Upcoming" })).toContainText(sunday);
   await createSet(page, { name: `  ${sunday.toLowerCase()} `, type: "Rehearsal" });
-  await expect(page.getByRole("main").getByRole("alert")).toContainText(
-    "Your band already has a set with that name.",
-  );
+  await expect(
+    page
+      .getByRole("main")
+      .getByRole("alert")
+      .filter({ hasText: "Your band already has a set with that name." })
+      .first(),
+  ).toBeVisible();
 
   // Songs are added from their versions, at the end (R-05.2).
   for (const version of versions) {
