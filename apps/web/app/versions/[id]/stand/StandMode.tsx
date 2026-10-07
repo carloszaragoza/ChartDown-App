@@ -6,12 +6,10 @@ import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
-import { StatusDot } from "@astryxdesign/core/StatusDot";
-import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
-import { chartdownTheme } from "../../../../theme/chartdown";
+import { chartdownStandTheme } from "../../../../theme/chartdown-stand";
 import { chordFormatter, keyName, parse, sectionLength, type Key } from "chartdown";
 import { BarRow, formStripItems, type FormStripItem, type MDNoteData } from "@chartdown/ui";
 import { ArrowUturnLeftIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
@@ -27,6 +25,7 @@ import {
   type MouseEvent,
 } from "react";
 import { ChartSection } from "../../../_components/ChartPreview";
+import { SongForm } from "../../../_components/SongForm";
 import { useChartLabels } from "../../../_components/chartLabels";
 import type { Display } from "../display";
 import { readSection, standHref, type StandTheme } from "./standHref";
@@ -190,7 +189,7 @@ export function StandMode({
 
   return (
     <div ref={root} onClickCapture={onClickCapture}>
-      <Theme theme={chartdownTheme} mode={theme === "stage" ? "dark" : "light"}>
+      <Theme theme={chartdownStandTheme} mode={theme === "stage" ? "dark" : "light"}>
         {/* Stand mode fills the screen in its own mode (light or stage), so it paints its own
             background from that mode's tokens. */}
         <div
@@ -225,7 +224,6 @@ export function StandMode({
                       label={t("viewAs")}
                       value={viewAs.options.find((option) => option.current)?.label ?? ""}
                       onChange={chooseView}
-                      size="sm"
                     >
                       {viewAs.options.map((option) => (
                         <SegmentedControlItem
@@ -239,6 +237,7 @@ export function StandMode({
                   {current > 0 ? (
                     <Button
                       label={t("previous")}
+                      size="lg"
                       href={href(current - 1)}
                       icon={<Icon icon={ChevronLeftIcon} />}
                     />
@@ -246,6 +245,7 @@ export function StandMode({
                     set?.previousSong && (
                       <Button
                         label={t("previousSong")}
+                        size="lg"
                         href={set.previousSong}
                         icon={<Icon icon={ChevronLeftIcon} />}
                       />
@@ -254,6 +254,7 @@ export function StandMode({
                   {current < last ? (
                     <Button
                       label={t("next")}
+                      size="lg"
                       href={href(current + 1)}
                       variant="primary"
                       endContent={<Icon icon={ChevronRightIcon} />}
@@ -262,6 +263,7 @@ export function StandMode({
                     set?.nextSong && (
                       <Button
                         label={t("nextSong")}
+                        size="lg"
                         href={set.nextSong}
                         variant="primary"
                         endContent={<Icon icon={ChevronRightIcon} />}
@@ -288,21 +290,18 @@ export function StandMode({
                       display: { ...display, style: style === "letters" ? "numbers" : "letters" },
                     })}
                     as={Link}
-                    variant="ghost"
-                    size="sm"
+                    variant="secondary"
                   />
                   <Button
                     label={theme === "stage" ? t("light") : t("stage")}
                     href={href(current, { theme: theme === "stage" ? "light" : "stage" })}
                     as={Link}
-                    variant="ghost"
-                    size="sm"
+                    variant="secondary"
                   />
                   {canFullscreen && (
                     <Button
                       label={t("fullscreen")}
-                      variant="ghost"
-                      size="sm"
+                      variant="secondary"
                       onClick={() =>
                         document.fullscreenElement
                           ? void document.exitFullscreen()
@@ -314,27 +313,18 @@ export function StandMode({
               </nav>
             </HStack>
 
-            <nav aria-label={c("songForm")}>
-              <TabList
-                value={String(current)}
-                onChange={(value) => move(() => Number(value))}
-                hasDivider
-              >
-                {items.map((item, index) => (
-                  <Tab
-                    key={index}
-                    value={String(index)}
-                    href={item.href}
-                    label={describe(item)}
-                    isLabelHidden
-                    icon={<span aria-hidden="true">{item.abbreviation}</span>}
-                    {...(item.hasNotes
-                      ? { endContent: <StatusDot variant="error" label={labels.notesForYou} /> }
-                      : {})}
-                  />
-                ))}
-              </TabList>
-            </nav>
+            <SongForm
+              label={c("songForm")}
+              size="lg"
+              current={current}
+              notesLabel={labels.notesForYou}
+              items={items.map((item) => ({
+                abbreviation: item.abbreviation,
+                description: describe(item),
+                href: item.href,
+                hasNotes: item.hasNotes,
+              }))}
+            />
 
             {/* The current section sits right under the song form, with the next one right after
               it; when it is taller than the screen it scrolls inside its own area (F-001). */}

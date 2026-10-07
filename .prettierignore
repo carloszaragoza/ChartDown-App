@@ -17,3 +17,7 @@ apps/web/theme/chartdown.css
 apps/web/theme/chartdown.js
 apps/web/theme/chartdown.d.ts
 apps/web/theme/chartdown.variants.d.ts
+apps/web/theme/chartdown-stand.css
+apps/web/theme/chartdown-stand.js
+apps/web/theme/chartdown-stand.d.ts
+apps/web/theme/chartdown-stand.variants.d.ts
