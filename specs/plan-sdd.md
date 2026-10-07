@@ -301,7 +301,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 |---|---|---|
 | 0 | Constitution, specs and decisions | Specs approved (done) |
 | 1 (MVP) | SPEC-00 (R-00.1 to R-00.5), 01, 02, 03 with layer editor, 04, 05 with key per set and temporary MD, 06, 08 offline reading, 09 in-app notices | A real band prepares a set, each musician reads their notes and plays without depending on the internet |
-| 2 | Advanced stand mode, PDF, invite links, email notices, revision comparison, advanced search | Comfortable use in rehearsal and on stage |
+| 2 | Advanced stand mode, print and export to PDF (R-03.4), invite links, email notices, revision comparison, advanced search; import from PDF (SPEC-10), visual metronome and bar follow (SPEC-11), live mode where the band follows the MD (SPEC-12) | Comfortable use in rehearsal and on stage |
 | 3 | Full administration and reports, WhatsApp notices, offline editing, phone app | Platform open to the public |
 
 ## 8. Decisions from the Clarify phase

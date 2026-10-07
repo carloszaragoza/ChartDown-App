@@ -1,6 +1,6 @@
 # ChartDown App – Task List (MVP)
 
-**Version:** 1.1 · **Date:** October 3, 2026 · **Based on:** SDD Plan v0.2, Technical Plan 1.0, Design Handoff 1.0, ChartDown 0.4
+**Version:** 1.2 · **Date:** October 7, 2026 · **Based on:** SDD Plan v0.2, Technical Plan 1.0, Design Handoff 1.0, ChartDown 0.4
 
 Every task is small, has its requirements (R-xx) and is done only when its tests pass. The order follows dependencies: a task does not start until the tasks it depends on are done.
 
@@ -26,6 +26,10 @@ Every task is small, has its requirements (R-xx) and is done only when its tests
 | M4 | E7, E8 | Bands, sets and per-instrument view |
 | M5 | E9, E10, E11 | Offline, notices and minimal administration |
 | M6 | E12 | Landing page, terms and a beta with a real band |
+| M7 | E13 | Version 2 of the interface (Astryx) |
+| M8 (phase 2) | E14 | Import from PDF |
+| M9 (phase 2) | E15 | Visual metronome and bar follow |
+| M10 (phase 2) | E16 | Live mode: the band follows the MD |
 
 ## E0 · Repository and foundation
 
@@ -172,3 +176,47 @@ The redesign of Design Handoff 2.0, one block per pull request. Until a block is
 | T-1306 | Profile, the sign-in pages, Terms and Privacy, and the offline page | SPEC-01, 08, 09 | T-1301 | M | Screen 15 matches the design; the others use the same components |
 | T-1308 | Home after sign-in: music director, musician and new user; usage of public versions | SPEC-02 (R-02.11), 04, 05, 06, 09 | T-1301 | L | Screen 00 matches the design in its three variants; `version_usage` returns totals only, and nothing to anyone but the author (SQL test) |
 | T-1307 | Landing page redesigned with the `impeccable` skill | SPEC-01 | T-1301 | M | Not generic: the owner approves the proposal; waitlist and sign-in keep working |
+
+## Phase 2
+
+The three phase 2 features start after the MVP beta (T-1203). Their requirements (SPEC-10, SPEC-11 and SPEC-12, ids R-10.x, R-11.x and R-12.x) must be in the SDD Plan before their first task starts. Their task ids follow their epic number (T-14xx, T-15xx, T-16xx), since T-13xx belongs to E13.
+
+## E14 · Import from PDF (SPEC-10, phase 2)
+
+| ID | Task | Requirements | Depends on | Size | Tests / evidence |
+|---|---|---|---|---|---|
+| T-1401 | Original test fixtures: text PDFs of original songs (major, minor, with and without bar lines, with endings) and one scanned PDF | SPEC-10 test data | T-102 | S | Fixtures in the repository; no published songs |
+| T-1402 | Extract text with positions from a PDF in the browser; reject files without a text layer | R-10.1, R-10.9, R-10.11 | T-1401 | M | The scanned fixture is rejected; nothing is uploaded to the server |
+| T-1403 | Detect metadata and sections; map endings and “go to” instructions; skip license and copyright lines | R-10.2, R-10.3 | T-1402 | M | Every fixture gets the right title, key and sections |
+| T-1404 | Align chords to lyric lines and parse chord names; keep bars on chord-only lines with bar lines | R-10.4 | T-1402 | M | The instrumental fixture keeps its bars exactly |
+| T-1405 | Convert to numbers (tonic-based for minor keys) or keep letters | R-10.5 | T-1404, T-103 | S | The E minor fixture reads 1m, b3, b6, b7 |
+| T-1406 | Propose bars when there are none and flag them “needs review” | R-10.6 | T-1404 | M | Every proposed row is flagged |
+| T-1407 | Discard lyrics; optional landmarks (4 words by default, 8 maximum) | R-10.7 | T-1403 | S | With landmarks off, the draft contains no lyric text |
+| T-1408 | Import screen: rights confirmation, review panel in the editor, duplicate suggestion, required source before saving | R-10.8, R-10.10, R-10.12 | T-1405, T-1406, T-1407, T-601 | M | Nothing is saved until the user confirms |
+
+## E15 · Visual metronome and bar follow (SPEC-11, phase 2)
+
+| ID | Task | Requirements | Depends on | Size | Tests / evidence |
+|---|---|---|---|---|---|
+| T-1501 | Play-order timeline in `chartdown`: expand sections, `@use`, repeats and endings into the sequence of bars and beats, using `meter` and `:beats` | R-11.4, R-11.5 | T-102 | M | Repeat with two endings and a 6/8 chart produce the right sequence |
+| T-1502 | Metronome engine on the Web Audio clock: tempo, start bar, count-in, accented beat 1, drift test | R-11.1, R-11.8, R-11.12 | T-1501 | M | The last beat of a 4-minute song lands within 20 ms |
+| T-1503 | Visual pulse and current-bar highlight in the viewer and stand mode, with the “beat / beats” counter; auto-advance sections in stand mode | R-11.3, R-11.4 | T-1502, T-604 | M | Tapping bar 2 of the Chorus and pressing play highlights it, then bar 3 |
+| T-1504 | Start from a tapped bar; fermata waits for a tap | R-11.2, R-11.6 | T-1503 | S | Playback stops on a fermata bar until tapped |
+| T-1505 | Click sound (off by default), volume, silent mode respected | R-11.7 | T-1502 | S | With sound off, no audio plays and the pulse still runs |
+| T-1506 | Practice tempo and tap tempo, without changing the chart | R-11.9 | T-1502 | S | 80% speed plays at 80% of the chart tempo; the saved chart is unchanged |
+| T-1507 | Space bar and Bluetooth page-turn pedal control; keep the screen awake while playing | R-11.10, R-11.11 | T-1503 | S | A pedal starts and stops playback |
+| T-1508 | Reduced-motion mode and offline check in a downloaded set | R-11.11, R-11.13 | T-1503, T-902 | S | Reduced motion shows no flashing; works in airplane mode |
+
+## E16 · Live mode (SPEC-12, phase 2)
+
+These tasks start after E15.
+
+| ID | Task | Requirements | Depends on | Size | Tests / evidence |
+|---|---|---|---|---|---|
+| T-1601 | Live session model: start, join, leader, connected members, end and timeout; only lineup members can join | R-12.1, R-12.2, R-12.10, R-12.12 | T-304, T-703 | M | A non-member cannot join; a session ends 5 minutes after the leader drops |
+| T-1602 | Realtime position channel (Supabase Realtime): leader broadcasts song, section, bar and cue; followers apply it | R-12.3, R-12.6 | T-1601, T-1501 | M | Followers show the leader's section within 0.5 s on a local network |
+| T-1603 | Leader controls in stand mode: next and previous section and song, jump to any section, “next” cue, pedal and space bar | R-12.4, R-12.8 | T-1602, T-1507 | M | A “Bridge next” cue appears on followers before the move |
+| T-1604 | Follower view: “Live now” join, cue banner, look ahead and “Back to live” | R-12.2, R-12.4, R-12.5 | T-1602 | M | Scrolling away and tapping “Back to live” returns to the leader |
+| T-1605 | Shared metronome: followers see the leader's beat and bar; click sound stays personal | R-12.7 | T-1602, T-1503 | M | Leader and followers show the same beat |
+| T-1606 | Connection loss and recovery with the downloaded set; hand over control | R-12.9, R-12.11 | T-1602, T-902 | M | After reconnecting, followers jump to the leader's position |
+| T-1607 | “Live now” on Home, Notices and the set; live-ended notice | R-12.2, R-12.10 | T-1604, T-1002 | S | Lineup members see “Live now” when the session starts |
