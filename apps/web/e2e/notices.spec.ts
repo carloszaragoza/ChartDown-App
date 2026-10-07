@@ -10,6 +10,7 @@ import {
   expectStatus,
   createSet,
   setKey,
+  expectSignedIn,
 } from "./flows";
 
 const CHART = "---\nkey: G\n---\n## Verse\n1 | 4 | 5 | 1\n";
@@ -51,7 +52,7 @@ async function bandWithSet(
   await signOut(page);
 
   await signIn(page, ana, PASSWORD);
-  await expect(page.getByText("Signed in as Ana Notices")).toBeVisible();
+  await expectSignedIn(page, "Ana Notices");
   await page.goto("/bands");
   await page.getByRole("link", { name: band, exact: true }).click();
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
@@ -74,7 +75,7 @@ test("R-09.1 R-09.3 adding Luis to the set reaches him instantly, saying what ch
   const luisDevice = await browser.newContext();
   const luisPage = await luisDevice.newPage();
   await signIn(luisPage, luis, PASSWORD);
-  await expect(luisPage.getByText("Signed in as Luis Bass")).toBeVisible();
+  await expectSignedIn(luisPage, "Luis Bass");
   await luisPage.goto("/notices");
   await expect(luisPage.getByRole("heading", { level: 1, name: "Notices" })).toBeVisible();
   await expect(luisPage.getByText(`You were added to ${set}`)).toHaveCount(0);
@@ -124,7 +125,7 @@ test("R-09.5 a notice Luis turned off is not delivered; the others still are", a
   await signOut(page);
 
   await signIn(page, luis, PASSWORD);
-  await expect(page.getByText("Signed in as Luis Bass")).toBeVisible();
+  await expectSignedIn(page, "Luis Bass");
   await page.goto("/notices");
   const notices = page.getByRole("list", { name: "Your notices" });
   await expect(notices).toContainText(

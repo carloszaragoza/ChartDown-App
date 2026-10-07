@@ -170,4 +170,5 @@ The redesign of Design Handoff 2.0, one block per pull request. Until a block is
 | T-1304 | People: Bands, Band detail and Personal space; Sets, Edit set and Song in a set | SPEC-04, 05, 06 | T-1301 | L | Screens 08 to 10 match the design; the others follow the handoff's screens table |
 | T-1305 | Administration: Overview, Instruments, Invite codes and Reports | SPEC-07, R-01.7 | T-1301 | M | Screens 11 to 14 match the design |
 | T-1306 | Profile, the sign-in pages, Terms and Privacy, and the offline page | SPEC-01, 08, 09 | T-1301 | M | Screen 15 matches the design; the others use the same components |
+| T-1308 | Home after sign-in: music director, musician and new user; usage of public versions | SPEC-02 (R-02.11), 04, 05, 06, 09 | T-1301 | L | Screen 00 matches the design in its three variants; `version_usage` returns totals only, and nothing to anyone but the author (SQL test) |
 | T-1307 | Landing page redesigned with the `impeccable` skill | SPEC-01 | T-1301 | M | Not generic: the owner approves the proposal; waitlist and sign-in keep working |

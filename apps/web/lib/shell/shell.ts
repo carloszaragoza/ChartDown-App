@@ -25,6 +25,7 @@ export function shellHidden(pathname: string, signedIn: boolean): boolean {
 }
 
 export type NavItem =
+  | "home"
   | "notices"
   | "sets"
   | "stand"
@@ -42,6 +43,7 @@ export type NavItem =
 /** The side navigation's current item for a page, if any. */
 export function currentItem(pathname: string, personalBand: string | null): NavItem | null {
   const starts = (prefix: string) => pathname === prefix || pathname.startsWith(`${prefix}/`);
+  if (pathname === "/") return "home";
   if (starts("/notices")) return "notices";
   if (pathname === "/admin") return "overview";
   if (starts("/admin/instruments")) return "instruments";

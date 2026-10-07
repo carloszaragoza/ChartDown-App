@@ -4,7 +4,124 @@
     "tagline": "Cifrados en números para toda la banda, con las notas de cada músico.",
     "newVersion": "Nueva versión",
     "catalog": "Catálogo",
-    "bands": "Bandas"
+    "bands": "Bandas",
+    "personal": "Espacio personal",
+    "newSubtitle": "Cuatro pasos y tu banda puede tocar con los mismos cifrados.",
+    "personalSubtitle": "Tu espacio personal",
+    "mdOf": "Director musical de {band}",
+    "playsIn": "{instruments} en {band}",
+    "musicianIn": "Músico en {band}",
+    "undated": "sin fecha aún",
+    "welcome": "Te damos la bienvenida a ChartDown, {name}",
+    "hello": "Hola, {name}",
+    "morning": "Buenos días, {name}",
+    "afternoon": "Buenas tardes, {name}",
+    "evening": "Buenas noches, {name}",
+    "createSet": "Crear set",
+    "nextUp": "Lo próximo",
+    "youPlay": "tocas {instruments}",
+    "notesForYou": "{count, plural, one {# nota para ti} other {# notas para ti}}",
+    "songIn": "{title} en {key}",
+    "more": "+{count} más",
+    "openSet": "Abrir set",
+    "noUpcoming": "No hay sets próximos",
+    "noUpcomingNew": "Cuando tu director musical te agregue a un set, aparecerá aquí.",
+    "noUpcomingHint": "Crea uno en tu banda o en tu espacio personal.",
+    "getStarted": "Primeros pasos",
+    "done": "{count} de 4 listos",
+    "stepDone": "Listo",
+    "steps": {
+      "instruments": {
+        "title": "Elige tus instrumentos",
+        "hint": "Para que te lleguen las notas de tu director musical.",
+        "action": "Elegir"
+      },
+      "band": {
+        "title": "Únete a una banda o crea una",
+        "hint": "Acepta la invitación de tu director musical, o empieza tu propia banda.",
+        "action": "Ir a bandas"
+      },
+      "version": {
+        "title": "Publica tu primera versión",
+        "hint": "Escribe un cifrado en ChartDown o parte del catálogo.",
+        "action": "Nueva versión"
+      },
+      "set": {
+        "title": "Crea tu primer set",
+        "hint": "Practica por tu cuenta en tu espacio personal.",
+        "action": "Crear set"
+      }
+    },
+    "stats": {
+      "bands": "Bandas",
+      "withPersonal": "Incluye el espacio personal",
+      "upcoming": "Sets próximos",
+      "next": "Próximo: {when}",
+      "none": "Ninguno aún",
+      "versions": "Mis versiones",
+      "publicPrivate": "{public} públicas · {private} privadas",
+      "noneYet": "Ninguna aún",
+      "musicians": "Músicos",
+      "inBand": "en tu banda"
+    },
+    "usage": {
+      "title": "Cómo se usan tus versiones",
+      "summary": "{musicians, plural, one {# músico} other {# músicos}} en {bands, plural, one {# banda} other {# bandas}} tocaron tus versiones públicas · {period}",
+      "noneYet": "Ninguna banda ha tocado tus versiones públicas en este periodo todavía.",
+      "period": "Periodo",
+      "7": "últimos 7 días",
+      "30": "últimos 30 días",
+      "all": "desde siempre",
+      "choice": {
+        "7": "7 días",
+        "30": "30 días",
+        "all": "Siempre"
+      },
+      "version": "Versión",
+      "bands": "Bandas",
+      "musicians": "Músicos",
+      "relative": "Cómo se compara {title} con tu versión más tocada",
+      "privacy": "Solo totales: nunca ves qué bandas o músicos son."
+    },
+    "share": {
+      "title": "Comparte tus propios arreglos",
+      "hint": "Publica una versión y ve cuántos músicos la tocan.",
+      "action": "Publicar una versión"
+    },
+    "recent": "Actividad reciente",
+    "allNotices": "Todos los avisos",
+    "read": "Leído",
+    "unread": "Nuevo",
+    "help": {
+      "label": "Ayuda",
+      "joinTitle": "¿Te vas a unir a una banda?",
+      "join": "Pide a tu director musical que invite este correo. La invitación aparece aquí y en Avisos.",
+      "guideTitle": "¿Nuevo en los cifrados con números?",
+      "guide": "Lee la guía rápida de ChartDown, la notación de texto con la que se escriben tus cifrados.",
+      "openGuide": "Abrir la guía"
+    },
+    "attention": {
+      "title": "Necesita tu atención",
+      "newer": "{count, plural, one {# canción tiene una revisión nueva} other {# canciones tienen revisiones nuevas}}",
+      "newerHint": "{set} · revisa y actualiza",
+      "pending": "{count, plural, one {# invitación pendiente} other {# invitaciones pendientes}}",
+      "reports": "{count, plural, one {# reporte abierto} other {# reportes abiertos}}",
+      "admin": "Administración",
+      "notes": "{count, plural, one {# nota nueva para ti} other {# notas nuevas para ti}}",
+      "notesHint": "Léelas antes del ensayo",
+      "keys": "{count, plural, one {# tono cambió} other {# tonos cambiaron}}",
+      "keysHint": "En tus sets"
+    },
+    "forYou": "Para ti",
+    "yourBand": "Tu banda",
+    "manage": "Administrar",
+    "bandLine": "{band} · {count, plural, one {# músico} other {# músicos}}",
+    "you": "{name} (tú)",
+    "md": "Director musical",
+    "yourInstruments": "Tus instrumentos",
+    "edit": "Editar",
+    "noInstruments": "Aún no hay instrumentos.",
+    "instrumentsHint": "Las notas de tu director siguen estos instrumentos."
   },
   "language": {
     "label": "Idioma",
@@ -889,7 +1006,8 @@
     "roleAdmin": "Admin",
     "roleMember": "Miembro",
     "noInstruments": "Aún sin instrumentos",
-    "collapse": "Contraer el menú"
+    "collapse": "Contraer el menú",
+    "homeLink": "Inicio"
   },
   "mine": {
     "title": "Tus versiones",

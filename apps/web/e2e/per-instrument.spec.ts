@@ -11,6 +11,7 @@ import {
   addToSet,
   setInstruments,
   createSet,
+  expectSignedIn,
 } from "./flows";
 
 const CHART = "## Verse\n1 | 4\n\n## Chorus\n4 | 5 | 6m | 1\n";
@@ -19,7 +20,7 @@ async function switchTo(page: Page, email: string, name: string) {
   await page.goto("/");
   await signOut(page);
   await signIn(page, email, PASSWORD);
-  await expect(page.getByText(`Signed in as ${name}`)).toBeVisible();
+  await expectSignedIn(page, name);
 }
 
 async function addNote(page: Page, instrument: string, text: string) {

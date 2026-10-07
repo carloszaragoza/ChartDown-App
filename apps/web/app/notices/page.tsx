@@ -11,10 +11,10 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { notFound, redirect } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../lib/auth/enabled";
-import { noticeMessage, type Notice, type NoticeWords } from "../../lib/notices/notice";
-import { setWhen } from "../../lib/sets/when";
+import { type Notice } from "../../lib/notices/notice";
 import { createClient } from "../../lib/supabase/server";
 import { markAllRead } from "./actions";
+import { noticeTexts } from "./text";
 
 const LIMIT = 100;
 
@@ -34,21 +34,8 @@ export default async function NoticesPage() {
     .order("id")
     .limit(LIMIT);
   const t = await getTranslations("notices");
-  const instruments = await getTranslations("instruments");
   const format = await getFormatter();
-  const words: NoticeWords = {
-    instrument: (slug) => (instruments.has(slug) ? instruments(slug) : slug),
-    when: (date, time) => setWhen(format, date, time) ?? t("noDate"),
-    day: (date) => format.dateTime(new Date(`${date}T00:00:00`), { dateStyle: "medium" }),
-    writtenKey: t("writtenKey"),
-    everyone: t("everyone"),
-    place: (section, bar) => (bar ? t("place", { section, bar }) : section),
-    reason: (reason) => t(reason === "lyrics" ? "reasons.lyrics" : "reasons.other"),
-  };
-  const notices = ((data ?? []) as Notice[]).flatMap((notice) => {
-    const message = noticeMessage(notice, words);
-    return message ? [{ ...notice, text: t(`types.${message.key}`, message.values) }] : [];
-  });
+  const notices = await noticeTexts((data ?? []) as Notice[]);
   const unread = notices.some((notice) => !notice.read_at);
   const now = new Date();
 

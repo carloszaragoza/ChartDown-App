@@ -1,6 +1,15 @@
 import { expect, test } from "@playwright/test";
 import { createInvite, waitlistEntries } from "./admin";
-import { claim, PASSWORD, signIn, signOut, signUpAndConfirm, unique, expectStatus } from "./flows";
+import {
+  claim,
+  PASSWORD,
+  signIn,
+  signOut,
+  signUpAndConfirm,
+  unique,
+  expectStatus,
+  expectSignedIn,
+} from "./flows";
 import { latestLink } from "./mail";
 
 test("R-01.1 a person signs up, confirms their email, signs out and signs in again", async ({
@@ -12,7 +21,7 @@ test("R-01.1 a person signs up, confirms their email, signs out and signs in aga
   await signOut(page);
 
   await signIn(page, email, PASSWORD);
-  await expect(page.getByText("Signed in as Ana Test")).toBeVisible();
+  await expectSignedIn(page, "Ana Test");
 });
 
 test("R-01.1 an account cannot be used before its email is confirmed", async ({ page }) => {
@@ -59,7 +68,7 @@ test("R-01.1 a person recovers their account with a reset email", async ({ page 
   await signIn(page, email, PASSWORD);
   await expect(page.getByRole("main").getByRole("alert")).toBeVisible();
   await signIn(page, email, "new-road-2026");
-  await expect(page.getByText("Signed in as Carl Test")).toBeVisible();
+  await expectSignedIn(page, "Carl Test");
 });
 
 test("R-01.1 the reset form asks for the same password twice", async ({ page }) => {

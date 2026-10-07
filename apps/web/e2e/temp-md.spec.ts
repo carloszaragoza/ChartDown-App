@@ -10,13 +10,14 @@ import {
   expectStatus,
   createSet as fillSet,
   setKey,
+  expectSignedIn,
 } from "./flows";
 
 async function switchTo(page: Page, email: string, name: string) {
   await page.goto("/");
   await signOut(page);
   await signIn(page, email, PASSWORD);
-  await expect(page.getByText(`Signed in as ${name}`)).toBeVisible();
+  await expectSignedIn(page, name);
 }
 
 async function newSet(page: Page, band: string, name: string, date: string) {

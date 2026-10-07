@@ -7,6 +7,7 @@ import {
   signUpAndConfirm,
   unique,
   expectStatus,
+  expectSignedIn,
 } from "./flows";
 
 test("R-01.2 a person saves their name and the instruments they play", async ({ page }) => {
@@ -33,7 +34,7 @@ test("R-01.2 a person saves their name and the instruments they play", async ({ 
   await page.reload();
   await expect(page.getByLabel("Vocals", { exact: true })).not.toBeChecked();
   await page.goto("/");
-  await expect(page.getByText("Signed in as Ana Keys")).toBeVisible();
+  await expectSignedIn(page, "Ana Keys");
 });
 
 test("R-01.5 the chosen language persists across sessions", async ({ page, context }) => {
@@ -53,7 +54,7 @@ test("R-01.5 the chosen language persists across sessions", async ({ page, conte
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
 
   await signIn(page, email, PASSWORD);
-  await expect(page.getByText("Sesión iniciada como Lucía Test")).toBeVisible();
+  await expectSignedIn(page, "Lucía Test");
   await expect(page.locator("html")).toHaveAttribute("lang", "es");
 });
 
@@ -70,7 +71,8 @@ test("R-01.5 the language switcher saves to the profile when signed in", async (
   await expect(page.getByRole("link", { name: "Iniciar sesión" })).toBeVisible();
   await context.clearCookies();
   await signIn(page, email, PASSWORD);
-  await expect(page.getByText("Sesión iniciada como Mateo Test")).toBeVisible();
+  await expectSignedIn(page, "Mateo Test");
+  await expect(page.getByRole("button", { name: "Cerrar sesión" })).toBeVisible();
 });
 
 test("R-01.6 a person deletes their account, and it no longer signs in", async ({ page }) => {
