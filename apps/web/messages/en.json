@@ -471,7 +471,21 @@
       "unknown": "That did not work. Try again."
     },
     "sets": "Sets",
-    "mySets": "My sets"
+    "mySets": "My sets",
+    "description": "The bands you play in or direct, and your personal space.",
+    "setsOf": "Sets of {band}",
+    "personal": "Personal space",
+    "personalHint": "Your own sets, private to you",
+    "onlyYou": "Only you",
+    "membersTab": "Members",
+    "invitationsTab": "Invitations",
+    "settingsTab": "Settings",
+    "musicianColumn": "Musician",
+    "roleColumn": "Role",
+    "instrumentsColumn": "Default instruments",
+    "actionsColumn": "Actions",
+    "editInstruments": "Edit instruments",
+    "noPending": "No pending invitations."
   },
   "sets": {
     "mySets": "My sets",
@@ -602,7 +616,12 @@
     "lineupNote": "Each musician sees the music director's notes for their own instrument.",
     "allSets": "Sets",
     "allSetsHint": "Sets of every band you are in, and of your personal space. To create one, open the band.",
-    "notesDot": "Notes for you"
+    "notesDot": "Notes for you",
+    "nextSet": "Next: {name}, {when}",
+    "dateLabel": "Date",
+    "timeLabel": "Time",
+    "createMissing": "Write a name and choose a type first.",
+    "personalHint": "Your own sets: nobody else sees them."
   },
   "offline": {
     "title": "You are offline",

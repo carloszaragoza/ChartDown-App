@@ -8,6 +8,7 @@ import {
   unique,
   addToSet,
   expectStatus,
+  createSet,
 } from "./flows";
 
 const CHART = "---\nkey: G\n---\n## Verse\n1 | 4 | 5 | 1\n";
@@ -53,11 +54,9 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
   await signIn(page, ana, PASSWORD);
   await expect(page.getByText("Signed in as Ana Keys")).toBeVisible();
   await page.goto("/bands");
-  await page.getByRole("link", { name: band }).click();
+  await page.getByRole("link", { name: band, exact: true }).click();
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
-  await page.getByLabel("Set name").fill(set);
-  await page.getByLabel("Type").selectOption({ label: "Rehearsal" });
-  await page.getByRole("button", { name: "Create set" }).click();
+  await createSet(page, { name: set, type: "Rehearsal" });
   // Wait for the new set's page before keeping its address.
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   const setAddress = new URL(page.url()).pathname;

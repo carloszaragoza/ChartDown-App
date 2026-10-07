@@ -9,6 +9,7 @@ import {
   unique,
   addToSet,
   expectStatus,
+  createSet,
 } from "./flows";
 
 test("R-08.3 a change made while offline appears as a notice", async ({
@@ -38,9 +39,7 @@ test("R-08.3 a change made while offline appears as a notice", async ({
   await page.getByRole("button", { name: "Send invitation" }).click();
   await expectStatus(page, "Invitation sent.");
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
-  await page.getByLabel("Set name").fill(set);
-  await page.getByLabel("Type").selectOption({ label: "Service" });
-  await page.getByRole("button", { name: "Create set" }).click();
+  await createSet(page, { name: set, type: "Service" });
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   const setId = new URL(page.url()).pathname.split("/")[2] ?? "";
   await page.goto(`/versions/${version}`);

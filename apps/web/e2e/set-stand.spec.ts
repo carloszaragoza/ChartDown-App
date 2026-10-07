@@ -10,6 +10,8 @@ import {
   unique,
   expectStatus,
   addToSet,
+  setInstruments,
+  createSet,
 } from "./flows";
 
 const CHART = "## Verse\n1 | 4\n\n## Chorus\n4 | 5 | 6m | 1\n";
@@ -64,18 +66,13 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   await expectStatus(page, "Welcome to the band.");
   await switchTo(page, ana, "Ana Stand");
   await page.goto("/bands");
-  await page.getByRole("link", { name: band }).click();
-  const benRow = page.getByRole("listitem").filter({ hasText: "Ben Stand" });
-  await benRow.getByText("Default instruments of Ben Stand").click();
-  await benRow.getByLabel("Keys", { exact: true }).check();
-  await benRow.getByRole("button", { name: "Save instruments" }).click();
+  await page.getByRole("link", { name: band, exact: true }).click();
+  await setInstruments(page, "Ben Stand", ["Keys"]);
   await expectStatus(page, "The instruments were saved.");
 
   // A set with two songs; the first has a note for everyone, one for keys and one for bass.
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
-  await page.getByLabel("Set name").fill(set);
-  await page.getByLabel("Type").selectOption({ label: "Concert" });
-  await page.getByRole("button", { name: "Create set" }).click();
+  await createSet(page, { name: set, type: "Concert" });
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   const setAddress = new URL(page.url()).pathname;
   for (const version of [v1, v2]) {

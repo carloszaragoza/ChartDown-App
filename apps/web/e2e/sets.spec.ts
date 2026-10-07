@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
-import { signOut, signUpAndConfirm, unique, addToSet, expectStatus } from "./flows";
+import { signOut, signUpAndConfirm, unique, addToSet, expectStatus, createSet } from "./flows";
 
 // The set's songs: "3 songs" on its edit page, "Songs" on the set screen.
 const songs = (page: Page) => page.getByRole("region", { name: /songs?$/i }).getByRole("listitem");
@@ -30,20 +30,14 @@ test("R-05.1 a set's name is unique in the band; songs are added, ordered and du
 
   // A set, and the same name again is refused (R-05.1).
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
-  await page.getByLabel("Set name").fill(sunday);
-  await page.getByLabel("Date (optional)").fill("2030-06-02");
-  await page.getByLabel("Time (optional)").fill("09:00");
-  await page.getByLabel("Type").selectOption({ label: "Service" });
-  await page.getByRole("button", { name: "Create set" }).click();
+  await createSet(page, { name: sunday, type: "Service", date: "2030-06-02", time: "09:00" });
   await expect(page.getByRole("heading", { level: 1, name: sunday })).toBeVisible();
   // R-05.1 (T-708): a set at 9:00 shows 9:00 AM with its date.
   await expect(page.getByText("Sunday, June 2, 2030 · 9:00 AM")).toBeVisible();
   const setAddress = new URL(page.url()).pathname;
-  await page.getByRole("main").getByRole("link", { name: band }).click();
+  await page.getByRole("main").getByRole("link", { name: band, exact: true }).click();
   await expect(page.getByRole("region", { name: "Upcoming" })).toContainText(sunday);
-  await page.getByLabel("Set name").fill(`  ${sunday.toLowerCase()} `);
-  await page.getByLabel("Type").selectOption({ label: "Rehearsal" });
-  await page.getByRole("button", { name: "Create set" }).click();
+  await createSet(page, { name: `  ${sunday.toLowerCase()} `, type: "Rehearsal" });
   await expect(page.getByRole("main").getByRole("alert")).toContainText(
     "Your band already has a set with that name.",
   );

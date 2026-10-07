@@ -8,6 +8,7 @@ import {
   unique,
   addToSet,
   expectStatus,
+  createSet as fillSet,
 } from "./flows";
 
 async function switchTo(page: Page, email: string, name: string) {
@@ -17,14 +18,11 @@ async function switchTo(page: Page, email: string, name: string) {
   await expect(page.getByText(`Signed in as ${name}`)).toBeVisible();
 }
 
-async function createSet(page: Page, band: string, name: string, date: string) {
+async function newSet(page: Page, band: string, name: string, date: string) {
   await page.goto("/bands");
-  await page.getByRole("link", { name: band }).click();
+  await page.getByRole("link", { name: band, exact: true }).click();
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
-  await page.getByLabel("Set name").fill(name);
-  await page.getByLabel("Date (optional)").fill(date);
-  await page.getByLabel("Type").selectOption({ label: "Service" });
-  await page.getByRole("button", { name: "Create set" }).click();
+  await fillSet(page, { name, type: "Service", date });
   await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
   return new URL(page.url()).pathname;
 }
@@ -64,8 +62,8 @@ test("R-05.5 the temporary MD cannot edit other sets or the layer", async ({ pag
 
   // Ana's two sets; she appoints Ben for Sunday only.
   await switchTo(page, ana, "Ana Lead");
-  const fridayAddress = await createSet(page, band, friday, "2030-06-07");
-  const sundayAddress = await createSet(page, band, sunday, "2030-06-09");
+  const fridayAddress = await newSet(page, band, friday, "2030-06-07");
+  const sundayAddress = await newSet(page, band, sunday, "2030-06-09");
   await addSong(page, v1, `${band} · ${sunday}`);
   await addSong(page, v2, `${band} · ${sunday}`);
   await addSong(page, v1, `${band} · ${friday}`);
