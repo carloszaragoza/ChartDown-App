@@ -1,6 +1,14 @@
 import { expect, test } from "@playwright/test";
 import { createVersion } from "./admin";
-import { PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import {
+  PASSWORD,
+  signIn,
+  signOut,
+  signUpAndConfirm,
+  unique,
+  addToSet,
+  expectStatus,
+} from "./flows";
 
 const CHART = "---\nkey: G\n---\n## Verse\n1 | 4 | 5 | 1\n";
 const url = () => process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54321";
@@ -30,7 +38,7 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
   await page.getByRole("button", { name: "Create band" }).click();
   await page.getByLabel("Their email").fill(ben);
   await page.getByRole("button", { name: "Send invitation" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Invitation sent.");
+  await expectStatus(page, "Invitation sent.");
   await page.goto("/");
   await signOut(page);
   await signUpAndConfirm(page, ben, "Ben Bass");
@@ -38,7 +46,7 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
     .getByRole("region", { name: "Invitations" })
     .getByRole("button", { name: `Accept the invitation to ${band}` })
     .click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Welcome to the band.");
+  await expectStatus(page, "Welcome to the band.");
   await page.goto("/");
   await signOut(page);
 
@@ -54,19 +62,18 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   const setAddress = new URL(page.url()).pathname;
   await page.goto(`/versions/${id}`);
-  await page.getByLabel("Add to a set").selectOption({ label: `${band} · ${set}` });
-  await page.getByRole("button", { name: "Add", exact: true }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("added at the end");
+  await addToSet(page, `${band} · ${set}`);
+  await expectStatus(page, "added at the end");
 
   // The key for this set, and the set's own lineup (R-05.3, R-05.4).
   await expect(page.getByText("This set uses the band's default instruments.")).toBeVisible();
   await page.getByLabel(`Key of ${title}`).selectOption("A");
   await page.getByRole("button", { name: "Save key" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("The key was saved.");
+  await expectStatus(page, "The key was saved.");
   await expect(page.getByText("in A (written in G)")).toBeVisible();
   await page.getByRole("group", { name: "Ben Bass" }).getByLabel("Bass", { exact: true }).check();
   await page.getByRole("button", { name: "Save lineup" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("The lineup was saved.");
+  await expectStatus(page, "The lineup was saved.");
   await expect(page.getByText("This set has its own lineup.")).toBeVisible();
   await page.goto("/");
   await signOut(page);
@@ -87,7 +94,11 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
   // Everyone else still sees the version as written, and it never changed.
   await page.goto(`/versions/${id}`);
   await expect(page.getByText("(written in")).toHaveCount(0);
-  await page.getByRole("link", { name: "Letters" }).click();
-  await expect(page.locator(".cd-chord").first()).toHaveText("G");
+  await page
+    .getByRole("radiogroup", { name: "Numbers or letters" })
+    .getByRole("radio", { name: "Letters" })
+    .click();
+  await expect(page).toHaveURL(/view=letters/);
+  await expect(page.locator("#section-1").getByRole("group").first()).toHaveText("G");
   expect(await saved()).toEqual(before);
 });

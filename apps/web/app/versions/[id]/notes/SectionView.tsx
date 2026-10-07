@@ -1,10 +1,17 @@
+import { Button } from "@astryxdesign/core/Button";
+import { Divider } from "@astryxdesign/core/Divider";
+import { Heading } from "@astryxdesign/core/Heading";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Item } from "@astryxdesign/core/Item";
+import { List } from "@astryxdesign/core/List";
+import { Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
 import { chordFormatter, sectionLength, type Chart } from "chartdown";
-import { Icon, LegacyBarRow, MDNote, type MDNoteData } from "@chartdown/ui";
-import Link from "next/link";
+import { BarRow, MDNotes, type MDNoteData } from "@chartdown/ui";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
+import { EditIcon } from "../../../_components/ActionIcons";
 import { useChartLabels } from "../../../_components/chartLabels";
-import styles from "./notes.module.css";
 
 export interface SectionNote extends MDNoteData {
   /** Set for the band's notes, which the MD edits; the author's are not editable here. */
@@ -13,8 +20,8 @@ export interface SectionNote extends MDNoteData {
 }
 
 /**
- * The chosen section in the layer editor (`design/screens/06-md-layer-editor.html`): its name and
- * length, its notes (the band's with an edit button), its bars, and the note form below.
+ * The chosen section in the layer editor (Design Handoff 2.0 screen 07): its name and length,
+ * its notes (the band's with an edit button), its bars, and the note form below.
  */
 export function SectionView({
   chart,
@@ -33,38 +40,54 @@ export function SectionView({
   if (!section) return null;
   const formatter = chordFormatter(chart, { style: "numbers" });
   return (
-    <section
-      className={styles.sectionCard}
-      aria-labelledby="chosen-section"
-      id={`section-${index + 1}`}
-    >
-      <h2 id="chosen-section" className={styles.sectionTitle}>
-        {section.name}{" "}
-        <span className={styles.sectionLength}>{labels.length(sectionLength(section))}</span>
-      </h2>
-      <ul className={styles.noteList} aria-label={t("sectionNotes", { section: section.name })}>
-        {notes.map((note, position) => (
-          <li key={position} className={styles.noteRow}>
-            <MDNote note={note} instrumentName={labels.bar.instrument} />
-            {note.editHref && (
-              <Link href={note.editHref} className={styles.iconButton} aria-label={note.editLabel}>
-                <Icon name="edit" size={20} />
-              </Link>
-            )}
-          </li>
-        ))}
-      </ul>
-      {section.rows.map((row, position) => (
-        <LegacyBarRow
-          key={position}
-          row={row}
-          formatter={formatter}
-          size="md"
-          labels={labels.bar}
-        />
-      ))}
-      <hr className={styles.rule} />
-      {children}
+    <section aria-labelledby="chosen-section" id={`section-${index + 1}`}>
+      <VStack gap={5}>
+        <HStack gap={2} vAlign="center">
+          <Heading level={2} id="chosen-section">
+            {section.name}
+          </Heading>
+          <Text type="supporting">{labels.length(sectionLength(section))}</Text>
+        </HStack>
+        {notes.length > 0 && (
+          <List
+            hasDividers
+            edgeCompensation="inline"
+            header={
+              <Text className="cd-visually-hidden">
+                {t("sectionNotes", { section: section.name })}
+              </Text>
+            }
+          >
+            {notes.map((note, position) => (
+              <Item
+                key={position}
+                as="li"
+                label={<MDNotes notes={[note]} instrumentName={labels.bar.instrument} />}
+                {...(note.editHref
+                  ? {
+                      endContent: (
+                        <Button
+                          label={note.editLabel ?? ""}
+                          isIconOnly
+                          variant="ghost"
+                          href={note.editHref}
+                          icon={<EditIcon />}
+                        />
+                      ),
+                    }
+                  : {})}
+              />
+            ))}
+          </List>
+        )}
+        <VStack gap={3}>
+          {section.rows.map((row, position) => (
+            <BarRow key={position} row={row} formatter={formatter} labels={labels.bar} />
+          ))}
+        </VStack>
+        <Divider />
+        {children}
+      </VStack>
     </section>
   );
 }

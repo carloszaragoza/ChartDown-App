@@ -1,6 +1,15 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
-import { chooseSection, PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import {
+  chooseSection,
+  PASSWORD,
+  signIn,
+  signOut,
+  signUpAndConfirm,
+  unique,
+  expectStatus,
+  addToSet,
+} from "./flows";
 
 const CHART = "## Verse\n1 | 4\n\n## Chorus\n4 | 5 | 6m | 1\n";
 
@@ -18,7 +27,7 @@ async function addNote(page: Page, instrument: string, text: string) {
   await page.getByRole("button", { name: "Add note" }).click();
   // Wait for this note (in the list and on the chart): the status is still there from the previous one.
   await expect(page.getByRole("main").getByText(text, { exact: true }).first()).toBeVisible();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("The note was saved.");
+  await expectStatus(page, "The note was saved.");
 }
 
 test("R-06.4 the keyboardist's device never receives the bass notes", async ({ page, request }) => {
@@ -39,7 +48,7 @@ test("R-06.4 the keyboardist's device never receives the bass notes", async ({ p
   await page.getByRole("button", { name: "Create band" }).click();
   await page.getByLabel("Their email").fill(ben);
   await page.getByRole("button", { name: "Send invitation" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Invitation sent.");
+  await expectStatus(page, "Invitation sent.");
   await page.goto("/");
   await signOut(page);
   await signUpAndConfirm(page, ben, "Ben Keys");
@@ -47,7 +56,7 @@ test("R-06.4 the keyboardist's device never receives the bass notes", async ({ p
     .getByRole("region", { name: "Invitations" })
     .getByRole("button", { name: `Accept the invitation to ${band}` })
     .click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Welcome to the band.");
+  await expectStatus(page, "Welcome to the band.");
 
   await switchTo(page, ana, "Ana View");
   await page.goto("/bands");
@@ -56,9 +65,7 @@ test("R-06.4 the keyboardist's device never receives the bass notes", async ({ p
   await benRow.getByText("Default instruments of Ben Keys").click();
   await benRow.getByLabel("Keys", { exact: true }).check();
   await benRow.getByRole("button", { name: "Save instruments" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText(
-    "The instruments were saved.",
-  );
+  await expectStatus(page, "The instruments were saved.");
 
   // A set with the song, and the band's notes for keys and for bass.
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
@@ -68,11 +75,10 @@ test("R-06.4 the keyboardist's device never receives the bass notes", async ({ p
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   const setAddress = new URL(page.url()).pathname;
   await page.goto(`/versions/${version}`);
-  await page.getByLabel("Add to a set").selectOption({ label: `${band} · ${set}` });
-  await page.getByRole("button", { name: "Add", exact: true }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("added at the end");
+  await addToSet(page, `${band} · ${set}`);
+  await expectStatus(page, "added at the end");
   await page.goto(`/versions/${version}/notes`);
-  await page.getByRole("navigation", { name: "Bands" }).getByRole("link", { name: band }).click();
+  await page.getByRole("radiogroup", { name: "Bands" }).getByRole("radio", { name: band }).click();
   await expect(page.getByText(`Notes of ${band}`)).toBeVisible();
   await addNote(page, "Keys", keysNote);
   await addNote(page, "Bass", bassNote);

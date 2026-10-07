@@ -1,5 +1,13 @@
 import { expect, test, type Page } from "@playwright/test";
-import { PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import {
+  PASSWORD,
+  signIn,
+  signOut,
+  signUpAndConfirm,
+  unique,
+  addToSet,
+  expectStatus,
+} from "./flows";
 
 async function switchTo(page: Page, email: string, name: string) {
   await page.goto("/");
@@ -25,7 +33,7 @@ test("R-05.2 a new revision from the author doesn't change the set until accepte
   await page.getByRole("button", { name: "Create band" }).click();
   await page.getByLabel("Their email").fill(ben);
   await page.getByRole("button", { name: "Send invitation" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Invitation sent.");
+  await expectStatus(page, "Invitation sent.");
   await page.goto("/");
   await signOut(page);
   await signUpAndConfirm(page, ben, "Ben Pin");
@@ -33,7 +41,7 @@ test("R-05.2 a new revision from the author doesn't change the set until accepte
     .getByRole("region", { name: "Invitations" })
     .getByRole("button", { name: `Accept the invitation to ${band}` })
     .click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Welcome to the band.");
+  await expectStatus(page, "Welcome to the band.");
 
   // Ana publishes a version and puts it in a set.
   await switchTo(page, ana, "Ana Pin");
@@ -55,8 +63,7 @@ test("R-05.2 a new revision from the author doesn't change the set until accepte
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   const setAddress = new URL(page.url()).pathname;
   await page.goto(version);
-  await page.getByLabel("Add to a set").selectOption({ label: `${band} · ${set}` });
-  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await addToSet(page, `${band} · ${set}`);
   await expect(page.getByText("revision 1")).toBeVisible();
 
   // As the author, she saves revision 2: the set stays on revision 1.

@@ -14,7 +14,16 @@ import {
   type Key,
   type Section,
 } from "chartdown";
-import { BarRow, MDNotes, type MDNoteData, type SectionLabels } from "@chartdown/ui";
+import {
+  BarRow,
+  formStripItems,
+  MDNotes,
+  type FormStripItem,
+  type MDNoteData,
+  type SectionLabels,
+} from "@chartdown/ui";
+import { Button } from "@astryxdesign/core/Button";
+import { useTranslations } from "next-intl";
 import { useChartLabels } from "./chartLabels";
 
 export interface ChartSectionProps {
@@ -59,21 +68,45 @@ export function ChartSection({
 
 /**
  * Every section of a chart, as numbers or letters and in its written key unless another is given
- * (R-03.2), with no band's layer (R-06.5). The editors' live preview (R-03.1).
+ * (R-03.2), with no band's layer (R-06.5). The editors' live preview (R-03.1) and, with its song
+ * form and framed sections, the version page.
  */
 export function ChartPreview({
   chart,
   style = "numbers",
   homeKey,
+  isFramed = false,
+  hasForm = false,
 }: {
   chart: Chart;
   style?: ChordStyle;
   homeKey?: Key;
+  isFramed?: boolean;
+  /** The song form above the sections, each abbreviation a link to its section. */
+  hasForm?: boolean;
 }) {
   const labels = useChartLabels();
+  const c = useTranslations("chart");
   const formatter = chordFormatter(chart, homeKey ? { style, key: homeKey } : { style });
+  const describe = (item: FormStripItem) => `${item.name}, ${labels.length(item.length)}`;
   return (
     <VStack gap={6}>
+      {hasForm && (
+        <nav aria-label={c("songForm")}>
+          <HStack gap={1} wrap="wrap">
+            {formStripItems(chart, -1, () => false).map((item, index) => (
+              <Button
+                key={index}
+                label={describe(item)}
+                href={`#section-${index + 1}`}
+                variant="ghost"
+              >
+                {item.abbreviation}
+              </Button>
+            ))}
+          </HStack>
+        </nav>
+      )}
       {chart.sections.map((section, index) => (
         <ChartSection
           key={index}
@@ -81,6 +114,7 @@ export function ChartPreview({
           formatter={formatter}
           labels={labels}
           id={`section-${index + 1}`}
+          isFramed={isFramed}
         />
       ))}
     </VStack>

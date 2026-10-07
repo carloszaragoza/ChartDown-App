@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import { PASSWORD, signIn, signOut, signUpAndConfirm, unique, expectStatus } from "./flows";
 
 async function openBand(page: Page, name: string) {
   await page.goto("/bands");
@@ -25,7 +25,7 @@ test("R-04.2 the MD invites, the musician accepts, and whoever leaves loses acce
   for (const email of [ben, cleo]) {
     await page.getByLabel("Their email").fill(email.toUpperCase());
     await page.getByRole("button", { name: "Send invitation" }).click();
-    await expect(page.getByRole("main").getByRole("status")).toContainText("Invitation sent.");
+    await expectStatus(page, "Invitation sent.");
   }
   const pending = page.getByRole("region", { name: "Pending invitations" });
   await expect(pending.getByRole("listitem")).toHaveCount(2);
@@ -37,7 +37,7 @@ test("R-04.2 the MD invites, the musician accepts, and whoever leaves loses acce
   const invitations = page.getByRole("region", { name: "Invitations" });
   await expect(invitations).toContainText(`Ana Lead invites you to ${band}.`);
   await invitations.getByRole("button", { name: `Accept the invitation to ${band}` }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Welcome to the band.");
+  await expectStatus(page, "Welcome to the band.");
   await expect(page.getByText("You play in this band.")).toBeVisible();
   const address = new URL(page.url()).pathname;
   await page.goto("/");
@@ -52,9 +52,7 @@ test("R-04.2 the MD invites, the musician accepts, and whoever leaves loses acce
   await benRow.getByText("Default instruments of Ben Keys").click();
   await benRow.getByLabel("Bass", { exact: true }).check();
   await benRow.getByRole("button", { name: "Save instruments" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText(
-    "The instruments were saved.",
-  );
+  await expectStatus(page, "The instruments were saved.");
   await expect(page.getByRole("listitem").filter({ hasText: "Ben Keys" })).toContainText("Bass");
   await expect(page.getByRole("button", { name: "Leave the band" })).toHaveCount(0);
   await page.goto("/");
@@ -65,7 +63,7 @@ test("R-04.2 the MD invites, the musician accepts, and whoever leaves loses acce
   await expect(page.getByText("Signed in as Ben Keys")).toBeVisible();
   await openBand(page, band);
   await page.getByRole("button", { name: "Leave the band" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("You left the band.");
+  await expectStatus(page, "You left the band.");
   await expect(page.getByRole("link", { name: band })).toHaveCount(0);
   expect((await page.goto(address))?.status()).toBe(404);
   await page.goto("/");
@@ -77,9 +75,7 @@ test("R-04.2 the MD invites, the musician accepts, and whoever leaves loses acce
     .getByRole("region", { name: "Invitations" })
     .getByRole("button", { name: `Decline the invitation to ${band}` })
     .click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText(
-    "You declined the invitation.",
-  );
+  await expectStatus(page, "You declined the invitation.");
   await expect(page.getByRole("region", { name: "Invitations" })).toHaveCount(0);
   expect((await page.goto(address))?.status()).toBe(404);
 });

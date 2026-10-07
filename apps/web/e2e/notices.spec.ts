@@ -1,6 +1,14 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
-import { PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import {
+  PASSWORD,
+  signIn,
+  signOut,
+  signUpAndConfirm,
+  unique,
+  addToSet,
+  expectStatus,
+} from "./flows";
 
 const CHART = "---\nkey: G\n---\n## Verse\n1 | 4 | 5 | 1\n";
 
@@ -27,7 +35,7 @@ async function bandWithSet(
   await page.getByRole("button", { name: "Create band" }).click();
   await page.getByLabel("Their email").fill(luis);
   await page.getByRole("button", { name: "Send invitation" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Invitation sent.");
+  await expectStatus(page, "Invitation sent.");
   await page.goto("/");
   await signOut(page);
   await signUpAndConfirm(page, luis, "Luis Bass");
@@ -35,7 +43,7 @@ async function bandWithSet(
     .getByRole("region", { name: "Invitations" })
     .getByRole("button", { name: `Accept the invitation to ${band}` })
     .click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Welcome to the band.");
+  await expectStatus(page, "Welcome to the band.");
   await asLuis(page);
   await page.goto("/");
   await signOut(page);
@@ -50,9 +58,8 @@ async function bandWithSet(
   await page.getByRole("button", { name: "Create set" }).click();
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   await page.goto(`/versions/${id}`);
-  await page.getByLabel("Add to a set").selectOption({ label: `${band} · ${set}` });
-  await page.getByRole("button", { name: "Add", exact: true }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("added at the end");
+  await addToSet(page, `${band} · ${set}`);
+  await expectStatus(page, "added at the end");
   return { set, title, luis };
 }
 
@@ -75,7 +82,7 @@ test("R-09.1 R-09.3 adding Luis to the set reaches him instantly, saying what ch
   // Ana puts him on bass; the notice reaches him without reloading.
   await page.getByRole("group", { name: "Luis Bass" }).getByLabel("Bass", { exact: true }).check();
   await page.getByRole("button", { name: "Save lineup" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("The lineup was saved.");
+  await expectStatus(page, "The lineup was saved.");
   // Each notice is a link: its dot ("New"), what changed, and when.
   const notice = luisPage.getByRole("list", { name: "Your notices" }).getByRole("link", {
     name: new RegExp(`You were added to ${set} \\(no date\\) on Bass\\.`),
@@ -102,9 +109,7 @@ test("R-09.5 a notice Luis turned off is not delivered; the others still are", a
     await luisPage.goto("/profile");
     await luisPage.getByLabel("When I am added to a set").uncheck();
     await luisPage.getByRole("button", { name: "Save notices" }).click();
-    await expect(luisPage.getByRole("main").getByRole("status")).toContainText(
-      "Your notice choices were saved.",
-    );
+    await expectStatus(luisPage, "Your notice choices were saved.");
     await expect(luisPage.getByLabel("When I am added to a set")).not.toBeChecked();
     await expect(luisPage.getByLabel("When a song in my sets changes key")).toBeChecked();
   });
@@ -112,10 +117,10 @@ test("R-09.5 a notice Luis turned off is not delivered; the others still are", a
   // Ana puts Luis on bass and changes the song's key.
   await page.getByRole("group", { name: "Luis Bass" }).getByLabel("Bass", { exact: true }).check();
   await page.getByRole("button", { name: "Save lineup" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("The lineup was saved.");
+  await expectStatus(page, "The lineup was saved.");
   await page.getByLabel(`Key of ${title}`).selectOption("A");
   await page.getByRole("button", { name: "Save key" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("The key was saved.");
+  await expectStatus(page, "The key was saved.");
   await page.goto("/");
   await signOut(page);
 

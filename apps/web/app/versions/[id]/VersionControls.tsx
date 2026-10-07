@@ -1,0 +1,149 @@
+"use client";
+
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { Heading } from "@astryxdesign/core/Heading";
+import { HStack } from "@astryxdesign/core/HStack";
+import { MoreMenu } from "@astryxdesign/core/MoreMenu";
+import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
+import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
+import { Selector } from "@astryxdesign/core/Selector";
+import { TextArea } from "@astryxdesign/core/TextArea";
+import { VStack } from "@astryxdesign/core/VStack";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { addToSet } from "../../sets/actions";
+import { reportVersion } from "./actions";
+
+/**
+ * Numbers or letters, and the key (R-03.2). The choice lives in the address and nothing is
+ * saved; each choice opens the page for its address.
+ */
+export function DisplayControls({
+  styles,
+  style,
+  keys,
+  shown,
+  words,
+}: {
+  /** The address for numbers and for letters, in the key shown. */
+  styles: { numbers: string; letters: string };
+  style: "numbers" | "letters";
+  /** Every key to show, with its address. */
+  keys: { value: string; label: string; href: string }[];
+  shown: string;
+  words: { label: string; style: string; numbers: string; letters: string; key: string };
+}) {
+  const router = useRouter();
+  return (
+    <HStack gap={3} vAlign="center" wrap="wrap" role="group" aria-label={words.label}>
+      <SegmentedControl
+        label={words.style}
+        value={style}
+        onChange={(value) => router.push(value === "letters" ? styles.letters : styles.numbers)}
+      >
+        <SegmentedControlItem value="numbers" label={words.numbers} />
+        <SegmentedControlItem value="letters" label={words.letters} />
+      </SegmentedControl>
+      <Selector
+        label={words.key}
+        options={keys.map(({ value, label }) => ({ value, label }))}
+        value={shown}
+        onChange={(value) => {
+          const key = keys.find((item) => item.value === value);
+          if (key) router.push(key.href);
+        }}
+      />
+    </HStack>
+  );
+}
+
+/** Adds the version to one of the MD's sets (R-05.2). */
+export function AddToSet({
+  versionId,
+  choices,
+  words,
+}: {
+  versionId: string;
+  choices: { value: string; label: string }[];
+  words: { label: string; placeholder: string; submit: string };
+}) {
+  const [set, setSet] = useState("");
+  return (
+    <form action={addToSet}>
+      <input type="hidden" name="versionId" value={versionId} />
+      <HStack gap={2} vAlign="end">
+        <Selector
+          label={words.label}
+          htmlName="setId"
+          options={choices}
+          value={set}
+          onChange={setSet}
+          placeholder={words.placeholder}
+        />
+        <Button type="submit" label={words.submit} isDisabled={!set} />
+      </HStack>
+    </form>
+  );
+}
+
+/** Secondary actions on a version: reporting it to the administrators (R-07.2). */
+export function VersionMenu({
+  label,
+  report,
+  reportHref,
+}: {
+  label: string;
+  report: string;
+  /** The version's page with the report form open. */
+  reportHref: string;
+}) {
+  const router = useRouter();
+  return (
+    <MoreMenu label={label} items={[{ label: report, onClick: () => router.push(reportHref) }]} />
+  );
+}
+
+/** Why a version should be looked at, and an optional note (R-07.2). */
+export function ReportForm({
+  versionId,
+  words,
+}: {
+  versionId: string;
+  words: {
+    title: string;
+    reason: string;
+    lyrics: string;
+    other: string;
+    note: string;
+    submit: string;
+  };
+}) {
+  const [reason, setReason] = useState("lyrics");
+  const [note, setNote] = useState("");
+  return (
+    <Card>
+      <form action={reportVersion} id="report">
+        <input type="hidden" name="versionId" value={versionId} />
+        <VStack gap={4}>
+          <Heading level={2}>{words.title}</Heading>
+          <RadioList label={words.reason} htmlName="reason" value={reason} onChange={setReason}>
+            <RadioListItem value="lyrics" label={words.lyrics} />
+            <RadioListItem value="other" label={words.other} />
+          </RadioList>
+          <TextArea
+            label={words.note}
+            htmlName="note"
+            value={note}
+            onChange={setNote}
+            maxLength={500}
+            rows={3}
+          />
+          <HStack>
+            <Button type="submit" variant="primary" label={words.submit} />
+          </HStack>
+        </VStack>
+      </form>
+    </Card>
+  );
+}

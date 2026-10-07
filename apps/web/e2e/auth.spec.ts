@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { createInvite, waitlistEntries } from "./admin";
-import { claim, PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import { claim, PASSWORD, signIn, signOut, signUpAndConfirm, unique, expectStatus } from "./flows";
 import { latestLink } from "./mail";
 
 test("R-01.1 a person signs up, confirms their email, signs out and signs in again", async ({
@@ -21,7 +21,7 @@ test("R-01.1 an account cannot be used before its email is confirmed", async ({ 
   await page.getByLabel("Your name").fill("Not Yet");
   await page.getByLabel("Password").fill(PASSWORD);
   await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Check your email");
+  await expectStatus(page, "Check your email");
 
   await signIn(page, email, PASSWORD);
   await expect(page.getByRole("main").getByRole("alert")).toContainText("Confirm your email first");
@@ -46,16 +46,14 @@ test("R-01.1 a person recovers their account with a reset email", async ({ page 
   await page.getByLabel("Email").fill(email);
   const sentAfter = Date.now();
   await page.getByRole("button", { name: "Send me a link" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("we sent it a link");
+  await expectStatus(page, "we sent it a link");
 
   await page.goto(await latestLink(page.request, email, sentAfter));
   await expect(page.getByRole("heading", { name: "Choose a new password" })).toBeVisible();
   await page.getByLabel("New password").fill("new-road-2026");
   await page.getByLabel("Repeat the password").fill("new-road-2026");
   await page.getByRole("button", { name: "Save the new password" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText(
-    "Your password was updated",
-  );
+  await expectStatus(page, "Your password was updated");
 
   await signOut(page);
   await signIn(page, email, PASSWORD);
@@ -90,7 +88,7 @@ test("R-01.7 a single-use code creates one account only", async ({ page }) => {
   await page.getByLabel("Your name").fill("First");
   await page.getByLabel("Password").fill(PASSWORD);
   await page.getByRole("button", { name: "Create account" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Check your email");
+  await expectStatus(page, "Check your email");
 
   await claim(page, code, unique("second"));
   await expect(page.getByRole("main").getByRole("alert")).toContainText(
@@ -106,6 +104,6 @@ test("R-01.8 without a code, the waitlist stores the email", async ({ page }) =>
   await expect(page).toHaveURL(/\/auth\/waitlist/);
   await page.getByLabel("Email").fill(email.toUpperCase());
   await page.getByRole("button", { name: "Join the waitlist" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("We’ll write to you");
+  await expectStatus(page, "We’ll write to you");
   expect(await waitlistEntries(page.request, email)).toEqual([{ email, language: "en" }]);
 });

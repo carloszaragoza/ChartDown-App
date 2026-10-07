@@ -51,11 +51,10 @@ export async function openProfile(page: Page) {
 
 /** In the layer editor, chooses a section from the list on the left (T-707). */
 export async function chooseSection(page: Page, label: string) {
-  const name = new RegExp(`^${label.replace(/[()]/g, "\\$&")} \\d+ notes?$`);
-  await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name }).click();
-  await expect(
-    page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name }),
-  ).toHaveAttribute("aria-current", "true");
+  const sections = page.getByRole("navigation", { name: "Sections" });
+  await sections.getByRole("link", { name: label, exact: true }).click();
+  // The chosen section is the selected row of the list (Design Handoff 2.0 screen 07).
+  await expect(sections.locator('[aria-current="true"]')).toContainText(label);
 }
 
 /** How far below the song map the current section starts, in stand mode (F-001). */
@@ -69,4 +68,26 @@ export async function gapUnderSongMap(page: Page): Promise<number> {
     if (!map || !section) return Number.POSITIVE_INFINITY;
     return section.getBoundingClientRect().top - map.getBoundingClientRect().bottom;
   });
+}
+
+/** Waits for a status message on the page; Astryx banners carry their own live region. */
+export async function expectStatus(page: Page, text: string) {
+  await expect(
+    page.getByRole("main").getByRole("status").filter({ hasText: text }).first(),
+  ).toBeVisible();
+}
+
+/** On a version's page, adds it to one of the MD's sets, chosen by its label (R-05.2). */
+export async function addToSet(page: Page, label: string) {
+  await page.getByRole("combobox", { name: "Add to a set" }).click();
+  await page.getByRole("option", { name: label, exact: true }).click();
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+}
+
+/** In the layer editor, the row of a section in the list on the left, with its note count. */
+export function sectionRow(page: Page, label: string) {
+  return page
+    .getByRole("navigation", { name: "Sections" })
+    .getByRole("listitem")
+    .filter({ has: page.getByRole("link", { name: label, exact: true }) });
 }

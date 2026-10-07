@@ -1,6 +1,15 @@
 import { expect, test } from "@playwright/test";
 import { createVersion } from "./admin";
-import { chooseSection, PASSWORD, signIn, signOut, signUpAndConfirm, unique } from "./flows";
+import {
+  chooseSection,
+  PASSWORD,
+  signIn,
+  signOut,
+  signUpAndConfirm,
+  unique,
+  addToSet,
+  expectStatus,
+} from "./flows";
 
 test("R-08.3 a change made while offline appears as a notice", async ({
   page,
@@ -27,7 +36,7 @@ test("R-08.3 a change made while offline appears as a notice", async ({
   await page.getByRole("button", { name: "Create band" }).click();
   await page.getByLabel("Their email").fill(ben);
   await page.getByRole("button", { name: "Send invitation" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Invitation sent.");
+  await expectStatus(page, "Invitation sent.");
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
   await page.getByLabel("Set name").fill(set);
   await page.getByLabel("Type").selectOption({ label: "Service" });
@@ -35,9 +44,8 @@ test("R-08.3 a change made while offline appears as a notice", async ({
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   const setId = new URL(page.url()).pathname.split("/")[2] ?? "";
   await page.goto(`/versions/${version}`);
-  await page.getByLabel("Add to a set").selectOption({ label: `${band} · ${set}` });
-  await page.getByRole("button", { name: "Add", exact: true }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("added at the end");
+  await addToSet(page, `${band} · ${set}`);
+  await expectStatus(page, "added at the end");
   await page.goto("/");
   await signOut(page);
   await signUpAndConfirm(page, ben, "Ben Sync");
@@ -45,7 +53,7 @@ test("R-08.3 a change made while offline appears as a notice", async ({
     .getByRole("region", { name: "Invitations" })
     .getByRole("button", { name: `Accept the invitation to ${band}` })
     .click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("Welcome to the band.");
+  await expectStatus(page, "Welcome to the band.");
 
   // Ben downloads the set, then goes offline.
   await page.goto(`/sets/${setId}`);
@@ -62,17 +70,17 @@ test("R-08.3 a change made while offline appears as a notice", async ({
   await anaPage.goto(`/sets/${setId}/edit`);
   await anaPage.getByLabel(`Key of ${title}`).selectOption("A");
   await anaPage.getByRole("button", { name: "Save key" }).click();
-  await expect(anaPage.getByRole("main").getByRole("status")).toContainText("The key was saved.");
+  await expectStatus(anaPage, "The key was saved.");
   await anaPage.goto(`/versions/${version}/notes`);
   await anaPage
-    .getByRole("navigation", { name: "Bands" })
-    .getByRole("link", { name: band })
+    .getByRole("radiogroup", { name: "Bands" })
+    .getByRole("radio", { name: band })
     .click();
   await expect(anaPage.getByText(`Notes of ${band}`)).toBeVisible();
   await chooseSection(anaPage, "Chorus");
   await anaPage.getByLabel("Note", { exact: true }).fill(newNote);
   await anaPage.getByRole("button", { name: "Add note" }).click();
-  await expect(anaPage.getByRole("main").getByRole("status")).toContainText("The note was saved.");
+  await expectStatus(anaPage, "The note was saved.");
   await other.close();
 
   // Ben's connection comes back: the set is brought up to date and says what changed.

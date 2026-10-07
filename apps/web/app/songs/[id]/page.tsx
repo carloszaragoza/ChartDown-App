@@ -1,10 +1,16 @@
-import Link from "next/link";
+import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
+import { Heading } from "@astryxdesign/core/Heading";
+import { Item } from "@astryxdesign/core/Item";
+import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
+import { List } from "@astryxdesign/core/List";
+import { Text } from "@astryxdesign/core/Text";
+import { Token } from "@astryxdesign/core/Token";
+import { VStack } from "@astryxdesign/core/VStack";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";
 import { createClient } from "../../../lib/supabase/server";
 import { UUID } from "../../versions/[id]/load";
-import styles from "../../catalog/catalog.module.css";
 
 interface Listed {
   id: string;
@@ -15,7 +21,10 @@ interface Listed {
   source_year: number | null;
 }
 
-/** A song and its public versions, to open one (R-02.9). Private versions never appear (R-02.5). */
+/**
+ * A song and its public versions, to open one (R-02.9; Design Handoff 2.0, the screens table:
+ * Song). Private versions never appear (R-02.5).
+ */
 export default async function SongPage({ params }: { params: Promise<{ id: string }> }) {
   if (!authEnabled()) notFound();
   const { id } = await params;
@@ -38,34 +47,61 @@ export default async function SongPage({ params }: { params: Promise<{ id: strin
   const v = await getTranslations("version");
 
   return (
-    <div className={styles.page}>
-      <div>
-        <h1 className={styles.title}>{song.title}</h1>
-        {song.artists.length > 0 && <p className={styles.meta}>{song.artists.join(", ")}</p>}
-        <p className={styles.meta}>{t("versions", { count: versions.length })}</p>
-      </div>
-      <ul className={styles.list} aria-label={t("versionsOf", { title: song.title })}>
-        {versions.map((version) => (
-          <li key={version.id} className={styles.song}>
-            <Link href={`/versions/${version.id}`} className={styles.songLink}>
-              {v("by", { author: version.author_name })}
-            </Link>
-            <span className={styles.meta}>
-              {[
-                v(`source.${version.source_type}`),
-                version.source_album && v("album", { album: version.source_album }),
-                version.source_year && String(version.source_year),
-              ]
+    <Layout
+      height="auto"
+      // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
+      padding={8}
+      contentWidth={760}
+      header={
+        <LayoutHeader hasDivider>
+          <VStack gap={1}>
+            <Breadcrumbs variant="supporting">
+              <BreadcrumbItem href="/catalog">{t("title")}</BreadcrumbItem>
+              <BreadcrumbItem>{song.title}</BreadcrumbItem>
+            </Breadcrumbs>
+            <Heading level={1}>{song.title}</Heading>
+            <Text color="secondary">
+              {[song.artists.join(", "), t("versions", { count: versions.length })]
                 .filter(Boolean)
                 .join(" · ")}
-            </span>
-            {version.status === "frozen" && <span className={styles.badge}>{v("frozen")}</span>}
-          </li>
-        ))}
-      </ul>
-      <Link href="/catalog" className={styles.back}>
-        {t("back")}
-      </Link>
-    </div>
+            </Text>
+          </VStack>
+        </LayoutHeader>
+      }
+      content={
+        <LayoutContent>
+          <List
+            hasDividers
+            edgeCompensation="inline"
+            header={
+              <Text className="cd-visually-hidden">{t("versionsOf", { title: song.title })}</Text>
+            }
+          >
+            {versions.map((version) => (
+              <Item
+                key={version.id}
+                as="li"
+                href={`/versions/${version.id}`}
+                startContent={
+                  <Token
+                    label={[v(`source.${version.source_type}`), version.source_year]
+                      .filter(Boolean)
+                      .join(" ")}
+                    size="sm"
+                  />
+                }
+                label={v("by", { author: version.author_name })}
+                {...(version.source_album
+                  ? { description: v("album", { album: version.source_album }) }
+                  : {})}
+                {...(version.status === "frozen"
+                  ? { endContent: <Token label={v("frozen")} size="sm" /> }
+                  : {})}
+              />
+            ))}
+          </List>
+        </LayoutContent>
+      }
+    />
   );
 }

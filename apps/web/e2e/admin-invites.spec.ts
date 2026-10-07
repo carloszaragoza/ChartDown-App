@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { makeAdmin } from "./admin";
-import { claim, signOut, signUpAndConfirm, unique } from "./flows";
+import { claim, signOut, signUpAndConfirm, unique, expectStatus } from "./flows";
 
 test("R-01.7 the Admin creates and revokes invite codes; a revoked code stops working", async ({
   page,
@@ -20,7 +20,7 @@ test("R-01.7 the Admin creates and revokes invite codes; a revoked code stops wo
   await create.getByLabel("Uses (band codes)").fill("10");
   await create.getByLabel("Note (who it is for)").fill(`Cedar Band ${stamp}`);
   await create.getByRole("button", { name: "Create code" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toContainText("was created");
+  await expectStatus(page, "was created");
   const band = page.getByRole("listitem").filter({ hasText: `Cedar Band ${stamp}` });
   await expect(band).toContainText("Band code · 0 of 10 used");
 
