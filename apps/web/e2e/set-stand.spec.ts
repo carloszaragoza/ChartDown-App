@@ -111,9 +111,14 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   await expect(current).toContainText(notes.bass);
 
   const viewAs = async (label: string) => {
-    await page.getByText("View as").click();
-    await page.getByRole("link", { name: label, exact: true }).click();
-    await expect(page.getByText("View as")).toContainText(label);
+    // View as is a segmented choice in the stand bar (Design Handoff 2.0 screen 03).
+    await page
+      .getByRole("radiogroup", { name: "View as" })
+      .getByRole("radio", { name: label })
+      .click();
+    await expect(
+      page.getByRole("radiogroup", { name: "View as" }).getByRole("radio", { name: label }),
+    ).toBeChecked();
   };
   await viewAs("Bass");
   await expect(current.getByRole("heading", { name: "Chorus" })).toBeVisible();
@@ -134,7 +139,7 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   // Ben has no View as, and the bass note never reaches him, even asking for it.
   await switchTo(page, ben, "Ben Stand");
   const response = await page.goto(`${setAddress}/songs/1/stand?s=2&as=bass`);
-  await expect(page.getByText("View as")).toHaveCount(0);
+  await expect(page.getByRole("radiogroup", { name: "View as" })).toHaveCount(0);
   await expect(page.getByRole("main")).toContainText(notes.keys);
   expect(await response?.text()).not.toContain(notes.bass);
 });

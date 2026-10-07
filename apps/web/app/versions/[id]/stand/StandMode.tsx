@@ -1,14 +1,27 @@
 "use client";
 
-import { chordFormatter, keyName, parse, type Key } from "chartdown";
+import { Theme } from "@astryxdesign/core";
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { Heading } from "@astryxdesign/core/Heading";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Icon } from "@astryxdesign/core/Icon";
+import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
+import { StatusDot } from "@astryxdesign/core/StatusDot";
+import { Tab, TabList } from "@astryxdesign/core/TabList";
+import { Text } from "@astryxdesign/core/Text";
+import { Token } from "@astryxdesign/core/Token";
+import { VStack } from "@astryxdesign/core/VStack";
+import { chartdownTheme } from "../../../../theme/chartdown";
+import { chordFormatter, keyName, parse, sectionLength, type Key } from "chartdown";
 import {
-  FormStrip,
+  BarRow,
   formStripItems,
-  NextSection,
-  Section,
+  MDNotes,
   type FormStripItem,
   type MDNoteData,
 } from "@chartdown/ui";
+import { ArrowUturnLeftIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
@@ -23,7 +36,6 @@ import {
 import { useChartLabels } from "../../../_components/chartLabels";
 import type { Display } from "../display";
 import { readSection, standHref, type StandTheme } from "./standHref";
-import styles from "./stand.module.css";
 
 export interface StandModeProps {
   versionId: string;
@@ -176,149 +188,207 @@ export function StandMode({
   const written = keyName(chart.key);
   const shown = keyName(homeKey);
 
+  const viewAs = set?.viewAs;
+  const chooseView = (label: string) => {
+    const option = viewAs?.options.find((item) => item.label === label);
+    if (option && !option.current) window.location.assign(atSection(option.href, current));
+  };
+
   return (
-    <div
-      ref={root}
-      className={styles.stand}
-      data-theme={theme === "stage" ? "dark" : "light"}
-      onClickCapture={onClickCapture}
-    >
-      {/* The top bar of design/screens/02: back to the set or the version, where we are, View as
-          in a set, and Previous and Next (T-707). */}
-      <nav className={styles.setBar} aria-label={set ? t("setBar") : t("turn")}>
-        <div className={styles.setPlace}>
-          <Link href={set ? set.href : `/versions/${versionId}`} className={styles.tool}>
-            {set ? t("set") : t("close")}
-          </Link>
-          <span>
-            {set && <b className={styles.setName}>{set.name}</b>}
-            <span className={styles.meta}>
-              {set
-                ? set.songOf
-                : t("position", { current: current + 1, total: chart.sections.length })}
-            </span>
-          </span>
-        </div>
-        <div className={styles.tools}>
-          {set?.viewAs && (
-            <details className={styles.viewAs}>
-              <summary className={styles.viewAsButton}>
-                {t("viewAs")} <b>{set.viewAs.label}</b>
-              </summary>
-              <ul className={styles.viewAsList}>
-                {set.viewAs.options.map((option) => (
-                  <li key={option.href}>
-                    <a
-                      href={atSection(option.href, current)}
-                      className={styles.tool}
-                      aria-current={option.current ? "true" : undefined}
+    <div ref={root} onClickCapture={onClickCapture}>
+      <Theme theme={chartdownTheme} mode={theme === "stage" ? "dark" : "light"}>
+        {/* Stand mode fills the screen in its own mode (light or stage), so it paints its own
+            background from that mode's tokens. */}
+        <div
+          data-stand={theme}
+          style={{ background: "var(--color-background-body)", color: "var(--color-text-primary)" }}
+        >
+          <VStack height="100dvh" gap={3} padding={4}>
+            {/* Back to the set or the version, where we are, View as in a set, and Previous and
+              Next (Design Handoff 2.0 screen 03). */}
+            <nav aria-label={set ? t("setBar") : t("turn")}>
+              <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
+                <HStack gap={2} vAlign="center">
+                  <Button
+                    label={set ? t("set") : t("close")}
+                    href={set ? set.href : `/versions/${versionId}`}
+                    as={Link}
+                    variant="ghost"
+                    icon={<Icon icon={ArrowUturnLeftIcon} />}
+                  />
+                  <VStack gap={0}>
+                    {set && <Text weight="semibold">{set.name}</Text>}
+                    <Text type="supporting">
+                      {set
+                        ? set.songOf
+                        : t("position", { current: current + 1, total: chart.sections.length })}
+                    </Text>
+                  </VStack>
+                </HStack>
+                <HStack gap={2} vAlign="center" wrap="wrap">
+                  {viewAs && (
+                    <SegmentedControl
+                      label={t("viewAs")}
+                      value={viewAs.options.find((option) => option.current)?.label ?? ""}
+                      onChange={chooseView}
+                      size="sm"
                     >
-                      {option.label}
-                    </a>
-                  </li>
+                      {viewAs.options.map((option) => (
+                        <SegmentedControlItem
+                          key={option.href}
+                          value={option.label}
+                          label={option.label}
+                        />
+                      ))}
+                    </SegmentedControl>
+                  )}
+                  {current > 0 ? (
+                    <Button
+                      label={t("previous")}
+                      href={href(current - 1)}
+                      icon={<Icon icon={ChevronLeftIcon} />}
+                    />
+                  ) : (
+                    set?.previousSong && (
+                      <Button
+                        label={t("previousSong")}
+                        href={set.previousSong}
+                        icon={<Icon icon={ChevronLeftIcon} />}
+                      />
+                    )
+                  )}
+                  {current < last ? (
+                    <Button
+                      label={t("next")}
+                      href={href(current + 1)}
+                      variant="primary"
+                      endContent={<Icon icon={ChevronRightIcon} />}
+                    />
+                  ) : (
+                    set?.nextSong && (
+                      <Button
+                        label={t("nextSong")}
+                        href={set.nextSong}
+                        variant="primary"
+                        endContent={<Icon icon={ChevronRightIcon} />}
+                      />
+                    )
+                  )}
+                </HStack>
+              </HStack>
+            </nav>
+
+            <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
+              <HStack gap={2} vAlign="center" wrap="wrap">
+                <Heading level={1}>{title}</Heading>
+                <Token label={`${c("key")} ${shown}`} size="sm" />
+                {shown !== written && <Token label={c("writtenIn", { key: written })} size="sm" />}
+                {chart.header.meter && <Token label={chart.header.meter} size="sm" />}
+                {chart.header.tempo && <Token label={`${chart.header.tempo} bpm`} size="sm" />}
+              </HStack>
+              <nav aria-label={t("tools")}>
+                <HStack gap={2} wrap="wrap">
+                  <Button
+                    label={style === "letters" ? v("numbers") : v("letters")}
+                    href={href(current, {
+                      display: { ...display, style: style === "letters" ? "numbers" : "letters" },
+                    })}
+                    as={Link}
+                    variant="ghost"
+                    size="sm"
+                  />
+                  <Button
+                    label={theme === "stage" ? t("light") : t("stage")}
+                    href={href(current, { theme: theme === "stage" ? "light" : "stage" })}
+                    as={Link}
+                    variant="ghost"
+                    size="sm"
+                  />
+                  {canFullscreen && (
+                    <Button
+                      label={t("fullscreen")}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        document.fullscreenElement
+                          ? void document.exitFullscreen()
+                          : void root.current?.requestFullscreen()
+                      }
+                    />
+                  )}
+                </HStack>
+              </nav>
+            </HStack>
+
+            <nav aria-label={c("songForm")}>
+              <TabList
+                value={String(current)}
+                onChange={(value) => move(() => Number(value))}
+                hasDivider
+              >
+                {items.map((item, index) => (
+                  <Tab
+                    key={index}
+                    value={String(index)}
+                    href={item.href}
+                    label={describe(item)}
+                    isLabelHidden
+                    icon={<span aria-hidden="true">{item.abbreviation}</span>}
+                    {...(item.hasNotes
+                      ? { endContent: <StatusDot variant="error" label={labels.notesForYou} /> }
+                      : {})}
+                  />
                 ))}
-              </ul>
-            </details>
-          )}
-          {current > 0 ? (
-            <a href={href(current - 1)} className={styles.tool}>
-              {t("previous")}
-            </a>
-          ) : (
-            set?.previousSong && (
-              <a href={set.previousSong} className={styles.tool}>
-                {t("previousSong")}
-              </a>
-            )
-          )}
-          {current < last ? (
-            <a href={href(current + 1)} className={`${styles.tool} ${styles.primary}`}>
-              {t("next")}
-            </a>
-          ) : (
-            set?.nextSong && (
-              <a href={set.nextSong} className={`${styles.tool} ${styles.primary}`}>
-                {t("nextSong")}
-              </a>
-            )
-          )}
+              </TabList>
+            </nav>
+
+            {/* The current section sits right under the song form, with the next one right after
+              it; when it is taller than the screen it scrolls inside its own area (F-001). */}
+            <main aria-live="polite" style={{ flex: "0 1 auto", minHeight: 0, overflowY: "auto" }}>
+              {now && (
+                <Card key={current}>
+                  <section aria-label={now.name} id="current-section">
+                    <VStack gap={3}>
+                      <HStack gap={2} vAlign="center">
+                        <Heading level={2}>{now.name}</Heading>
+                        <Text type="supporting">{labels.length(sectionLength(now))}</Text>
+                      </HStack>
+                      <MDNotes
+                        notes={notes ? (notes[current] ?? []) : now.notes}
+                        instrumentName={labels.bar.instrument}
+                      />
+                      {now.rows.map((row, index) => (
+                        <BarRow key={index} row={row} formatter={formatter} labels={labels.bar} />
+                      ))}
+                    </VStack>
+                  </section>
+                </Card>
+              )}
+            </main>
+
+            <VStack gap={2}>
+              {next ? (
+                <>
+                  <Text type="supporting">
+                    {labels.next}: <b>{next.name}</b> · {labels.length(sectionLength(next))}
+                    {forYou[current + 1] && ` · ${labels.notesForYou}`}
+                  </Text>
+                  {next.rows[0] && (
+                    <BarRow
+                      row={next.rows[0]}
+                      formatter={formatter}
+                      labels={labels.bar}
+                      size="sm"
+                    />
+                  )}
+                </>
+              ) : (
+                <Text type="supporting">{t("end")}</Text>
+              )}
+            </VStack>
+          </VStack>
         </div>
-      </nav>
-      <header className={styles.top}>
-        <div className={styles.heading}>
-          <h1 className={styles.title}>{title}</h1>
-          <p className={styles.meta}>
-            {c("key")} <b>{shown}</b>
-            {shown !== written && <> {c("writtenIn", { key: written })}</>}
-            {chart.header.tempo && (
-              <>
-                {" · "}
-                {c("tempo")} <b>{chart.header.tempo}</b>
-              </>
-            )}
-          </p>
-        </div>
-        <nav className={styles.tools} aria-label={t("tools")}>
-          <Link
-            href={href(current, {
-              display: { ...display, style: style === "letters" ? "numbers" : "letters" },
-            })}
-            className={styles.tool}
-          >
-            {style === "letters" ? v("numbers") : v("letters")}
-          </Link>
-          <Link
-            href={href(current, { theme: theme === "stage" ? "light" : "stage" })}
-            className={styles.tool}
-          >
-            {theme === "stage" ? t("light") : t("stage")}
-          </Link>
-          {canFullscreen && (
-            <button
-              type="button"
-              className={styles.tool}
-              onClick={() =>
-                document.fullscreenElement
-                  ? void document.exitFullscreen()
-                  : void root.current?.requestFullscreen()
-              }
-            >
-              {t("fullscreen")}
-            </button>
-          )}
-        </nav>
-      </header>
-
-      <div className={styles.strip}>
-        <FormStrip items={items} labels={{ nav: c("songForm"), describe }} />
-      </div>
-
-      <main className={styles.current} aria-live="polite">
-        {now && (
-          <Section
-            key={current}
-            section={now}
-            formatter={formatter}
-            labels={labels}
-            size="xl"
-            id="current-section"
-            {...(notes ? { notes: notes[current] ?? [] } : {})}
-          />
-        )}
-      </main>
-
-      <div className={styles.next}>
-        {next ? (
-          <NextSection
-            section={next}
-            formatter={formatter}
-            labels={labels}
-            hasNotesForYou={Boolean(forYou[current + 1])}
-          />
-        ) : (
-          <p className={styles.end}>{t("end")}</p>
-        )}
-      </div>
+      </Theme>
     </div>
   );
 }

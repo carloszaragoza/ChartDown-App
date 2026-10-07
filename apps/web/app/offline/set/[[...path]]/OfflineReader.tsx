@@ -1,7 +1,19 @@
 "use client";
 
 import { keyName, parse, type Chart } from "chartdown";
-import { InstrumentTag } from "@chartdown/ui";
+import { Avatar } from "@astryxdesign/core/Avatar";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { EmptyState } from "@astryxdesign/core/EmptyState";
+import { Heading } from "@astryxdesign/core/Heading";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Item } from "@astryxdesign/core/Item";
+import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
+import { List } from "@astryxdesign/core/List";
+import { StatusDot } from "@astryxdesign/core/StatusDot";
+import { Text } from "@astryxdesign/core/Text";
+import { Token } from "@astryxdesign/core/Token";
+import { VStack } from "@astryxdesign/core/VStack";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import {
@@ -86,49 +98,68 @@ export function OfflineReader() {
 
   if (!place) return null;
   const banner = (
-    <p className={styles.hint} role="note">
-      {t("readOnly")}
-    </p>
+    <div role="note">
+      <Banner status="info" title={t("readOnly")} />
+    </div>
   );
 
   if (place.kind === "list") {
     return (
-      <main className={styles.page}>
-        <h1 className={styles.title}>{t("listTitle")}</h1>
-        {banner}
-        {removed.map((item) => (
-          <p key={item.id} role="status" className={styles.message}>
-            {t("removed", { name: item.name })}{" "}
-            <button
-              type="button"
-              className={styles.link}
-              onClick={() =>
-                void dismissRemoved(item.id).then(() =>
-                  setRemoved((now) => now.filter((other) => other.id !== item.id)),
-                )
-              }
-            >
-              {t("gotIt")}
-            </button>
-          </p>
-        ))}
-        {all.length === 0 ? (
-          <p className={styles.hint}>{t("noneDownloaded")}</p>
-        ) : (
-          <ul className={styles.items}>
-            {all.map((item) => (
-              <li key={item.set.id} className={styles.row}>
-                <a href={`${READER}/${item.set.id}`} className={styles.link}>
-                  {item.set.name}
-                </a>
-                <span className={styles.hint}>
-                  {item.set.personal ? s("mySets") : item.set.band} ·{" "}
-                  {setWhen(format, item.set.date, item.set.time) ?? s("noDate")}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
+      <main>
+        <Layout
+          height="auto"
+          // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
+          padding={8}
+          contentWidth={760}
+          header={
+            <LayoutHeader hasDivider>
+              <Heading level={1}>{t("listTitle")}</Heading>
+            </LayoutHeader>
+          }
+          content={
+            <LayoutContent>
+              <VStack gap={3}>
+                {banner}
+                {removed.map((item) => (
+                  <div key={item.id} role="status">
+                    <Banner
+                      status="warning"
+                      title={t("removed", { name: item.name })}
+                      endContent={
+                        <Button
+                          label={t("gotIt")}
+                          size="sm"
+                          onClick={() =>
+                            void dismissRemoved(item.id).then(() =>
+                              setRemoved((now) => now.filter((other) => other.id !== item.id)),
+                            )
+                          }
+                        />
+                      }
+                    />
+                  </div>
+                ))}
+                {all.length === 0 ? (
+                  <EmptyState title={t("noneDownloaded")} />
+                ) : (
+                  <List hasDividers>
+                    {all.map((item) => (
+                      <Item
+                        key={item.set.id}
+                        as="li"
+                        href={`${READER}/${item.set.id}`}
+                        label={item.set.name}
+                        description={`${item.set.personal ? s("mySets") : item.set.band} · ${
+                          setWhen(format, item.set.date, item.set.time) ?? s("noDate")
+                        }`}
+                      />
+                    ))}
+                  </List>
+                )}
+              </VStack>
+            </LayoutContent>
+          }
+        />
       </main>
     );
   }
@@ -136,12 +167,13 @@ export function OfflineReader() {
   if (bundle === undefined) return null;
   if (!bundle) {
     return (
-      <main className={styles.page}>
-        <h1 className={styles.title}>{t("notDownloadedTitle")}</h1>
-        <p className={styles.hint}>{t("notDownloaded")}</p>
-        <a href={READER} className={styles.link}>
-          {t("allDownloaded")}
-        </a>
+      <main>
+        <EmptyState
+          title={t("notDownloadedTitle")}
+          description={t("notDownloaded")}
+          headingLevel={1}
+          actions={<Button label={t("allDownloaded")} href={READER} />}
+        />
       </main>
     );
   }
@@ -151,79 +183,97 @@ export function OfflineReader() {
 
   if (place.kind === "set") {
     return (
-      <main className={styles.wide}>
-        <div>
-          <p className={styles.hint}>
-            {bundle.set.personal ? s("mySets") : bundle.set.band} · {s(`types.${bundle.set.type}`)}
-          </p>
-          <h1 className={styles.title}>{bundle.set.name}</h1>
-          <p className={styles.meta}>
-            {[
-              setWhen(format, bundle.set.date, bundle.set.time, "full"),
-              s("songs", { count: total }),
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-        </div>
-        {banner}
-        <OfflineChanges setId={bundle.set.id} />
-        <div className={styles.columns}>
-          <section aria-labelledby="songs" className={styles.card}>
-            <h2 id="songs" className={styles.cardTitle}>
-              {s("songsTitle")}
-            </h2>
-            <ol className={styles.songList}>
-              {bundle.songs.map((song) => {
-                const { chart, view } = songNotes(song, bundle);
-                return (
-                  <li key={song.position} className={styles.songRow}>
-                    <span className={styles.position}>{song.position}</span>
-                    <a href={`${base}/${song.position}`} className={styles.songTitle}>
-                      {song.title}
-                    </a>
-                    <span className={styles.songKey}>
-                      {s("key")} <b>{keyName(setSongKey(chart, song.set_key))}</b>
-                    </span>
-                    <span className={view.forYou > 0 ? styles.forYou : styles.noNotes}>
-                      {view.forYou > 0
-                        ? song.role === "musician"
-                          ? s("forYouCount", { count: view.forYou })
-                          : s("notesCount", { count: view.forYou })
-                        : s("noNotes")}
-                    </span>
-                  </li>
-                );
-              })}
-            </ol>
-          </section>
-          <section aria-labelledby="lineup" className={styles.card}>
-            <h2 id="lineup" className={styles.cardTitle}>
-              {s("lineup")}
-            </h2>
-            <ul className={styles.lineupList}>
-              {bundle.lineup.map((member, index) => (
-                <li key={index} className={styles.lineupRow}>
-                  <span className={styles.lineupIcon}>
-                    {member.instruments[0] && (
-                      <InstrumentTag
-                        instrument={member.instruments[0]}
-                        label={member.instruments[0]}
-                        variant="compact"
+      <main>
+        <Layout
+          height="auto"
+          // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
+          padding={8}
+          header={
+            <LayoutHeader hasDivider>
+              <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
+                <VStack gap={1}>
+                  <Text type="supporting">
+                    {bundle.set.personal ? s("mySets") : bundle.set.band} ·{" "}
+                    {s(`types.${bundle.set.type}`)}
+                  </Text>
+                  <Heading level={1}>{bundle.set.name}</Heading>
+                  <Text color="secondary">
+                    {[
+                      setWhen(format, bundle.set.date, bundle.set.time, "full"),
+                      s("songs", { count: total }),
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </Text>
+                </VStack>
+                {total > 0 && (
+                  <Button label={s("startStand")} variant="primary" href={`${base}/1/stand`} />
+                )}
+              </HStack>
+            </LayoutHeader>
+          }
+          end={
+            <LayoutPanel width={340} hasDivider role="region" label={s("lineup")}>
+              <VStack gap={3}>
+                <Heading level={2}>{s("lineup")}</Heading>
+                <List>
+                  {bundle.lineup.map((member, index) => (
+                    <Item
+                      key={index}
+                      as="li"
+                      label={member.name}
+                      description={
+                        member.instruments.length > 0 ? member.instruments.join(", ") : s("sitsOut")
+                      }
+                      startContent={<Avatar name={member.name} tooltip={false} />}
+                    />
+                  ))}
+                </List>
+              </VStack>
+            </LayoutPanel>
+          }
+          content={
+            <LayoutContent role="region" label={s("songsTitle")}>
+              <VStack gap={3}>
+                {banner}
+                <OfflineChanges setId={bundle.set.id} />
+                <Heading level={2}>{s("songsTitle")}</Heading>
+                <List listStyle="decimal">
+                  {bundle.songs.map((song) => {
+                    const { chart, view } = songNotes(song, bundle);
+                    return (
+                      <Item
+                        key={song.position}
+                        as="li"
+                        label={<a href={`${base}/${song.position}`}>{song.title}</a>}
+                        endContent={
+                          <HStack gap={2} vAlign="center">
+                            <Token
+                              label={`${s("key")} ${keyName(setSongKey(chart, song.set_key))}`}
+                              size="sm"
+                            />
+                            {view.forYou > 0 ? (
+                              <HStack gap={1} vAlign="center">
+                                <StatusDot variant="error" label={s("notesDot")} />
+                                <Text type="supporting">
+                                  {song.role === "musician"
+                                    ? s("forYouCount", { count: view.forYou })
+                                    : s("notesCount", { count: view.forYou })}
+                                </Text>
+                              </HStack>
+                            ) : (
+                              <Text type="supporting">{s("noNotes")}</Text>
+                            )}
+                          </HStack>
+                        }
                       />
-                    )}
-                  </span>
-                  <span className={styles.songText}>
-                    <b>{member.name}</b>
-                    <span className={styles.hint}>
-                      {member.instruments.length > 0 ? member.instruments.join(", ") : s("sitsOut")}
-                    </span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </div>
+                    );
+                  })}
+                </List>
+              </VStack>
+            </LayoutContent>
+          }
+        />
       </main>
     );
   }

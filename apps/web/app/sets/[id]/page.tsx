@@ -1,5 +1,17 @@
 import { keyName, parse } from "chartdown";
-import { Button, InstrumentTag } from "@chartdown/ui";
+import { Avatar } from "@astryxdesign/core/Avatar";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { EmptyState } from "@astryxdesign/core/EmptyState";
+import { Heading } from "@astryxdesign/core/Heading";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Item } from "@astryxdesign/core/Item";
+import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
+import { List } from "@astryxdesign/core/List";
+import { StatusDot } from "@astryxdesign/core/StatusDot";
+import { Text } from "@astryxdesign/core/Text";
+import { Token } from "@astryxdesign/core/Token";
+import { VStack } from "@astryxdesign/core/VStack";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
@@ -10,9 +22,9 @@ import { setWhen } from "../../../lib/sets/when";
 import { createClient } from "../../../lib/supabase/server";
 import { UUID } from "../../versions/[id]/load";
 import { updatePinned } from "../actions";
+import { EditIcon, StandIcon } from "../../_components/ActionIcons";
 import { OfflineChanges } from "../../_components/OfflineChanges";
 import { OfflineButton } from "./OfflineButton";
-import styles from "../sets.module.css";
 
 type One<T> = T | T[] | null;
 const one = <T,>(value: One<T>): T | null => (Array.isArray(value) ? (value[0] ?? null) : value);
@@ -44,7 +56,7 @@ interface CatalogInstrument {
 }
 
 /**
- * A set as a musician reads it (T-706, `design/screens/01-set.html`): its songs in order with
+ * A set as a musician reads it (T-706; Design Handoff 2.0 screen 02): its songs in order with
  * their source, key and the notes for this person, counted by `set_song` so no other note is
  * counted (R-06.2), and the lineup. Those who arrange it go to “Edit set”.
  */
@@ -156,161 +168,174 @@ export default async function SetPage({
   const status = search.created ? t("status.created") : search.updated ? t("status.updated") : null;
 
   return (
-    <div className={styles.wide}>
-      <div className={styles.setHeader}>
-        <div>
-          <p className={styles.hint}>
-            <Link href={`/bands/${set.band_id}/sets`} className={styles.crumb}>
-              {band?.is_personal ? t("mySets") : band?.name}
-            </Link>{" "}
-            · {t(`types.${set.type}`)}
-          </p>
-          <h1 className={styles.title}>{set.name}</h1>
-          <p className={styles.meta}>{facts}</p>
-        </div>
-        <div className={styles.buttons}>
-          {canArrange && (
-            <Link href={`/sets/${set.id}/edit`} className="cd-button cd-button--secondary">
-              {t("editSet")}
-            </Link>
-          )}
-          {items.length > 0 && <OfflineButton setId={set.id} />}
-          {items.length > 0 && (
-            <Link href={`/sets/${set.id}/songs/1/stand`} className="cd-button cd-button--primary">
-              {t("startStand")}
-            </Link>
-          )}
-        </div>
-      </div>
-      <OfflineChanges setId={set.id} />
-      {status && (
-        <p role="status" className={styles.message}>
-          {status}
-        </p>
-      )}
-      {search.error && (
-        <p role="alert" className={`${styles.message} ${styles.alert}`}>
-          {t("errors.unknown")}
-        </p>
-      )}
-
-      <div className={styles.columns}>
-        <section aria-labelledby="songs" className={styles.card}>
-          <h2 id="songs" className={styles.cardTitle}>
-            {t("songsTitle")}
-          </h2>
-          {items.length === 0 ? (
-            <p className={styles.hint}>{canArrange ? t("emptyMd") : t("empty")}</p>
-          ) : (
-            <ol className={styles.songList}>
-              {items.map((item, index) => {
-                const version = one(item.version);
-                const title = one(version?.song ?? null)?.title ?? "";
-                const shown = songs[index];
-                const newer = version?.current_revision_id
-                  ? newerNumber.get(version.current_revision_id)
-                  : undefined;
+    <Layout
+      height="auto"
+      // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
+      padding={8}
+      header={
+        <LayoutHeader hasDivider>
+          <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
+            <VStack gap={1}>
+              <Text type="supporting">
+                <Link href={`/bands/${set.band_id}/sets`}>
+                  {band?.is_personal ? t("mySets") : band?.name}
+                </Link>{" "}
+                · {t(`types.${set.type}`)}
+              </Text>
+              <Heading level={1}>{set.name}</Heading>
+              <Text color="secondary">{facts}</Text>
+            </VStack>
+            <HStack gap={2} vAlign="center" wrap="wrap">
+              {items.length > 0 && <OfflineButton setId={set.id} />}
+              {canArrange && (
+                <Button label={t("editSet")} href={`/sets/${set.id}/edit`} icon={<EditIcon />} />
+              )}
+              {items.length > 0 && (
+                <Button
+                  label={t("startStand")}
+                  variant="primary"
+                  href={`/sets/${set.id}/songs/1/stand`}
+                  icon={<StandIcon />}
+                />
+              )}
+            </HStack>
+          </HStack>
+        </LayoutHeader>
+      }
+      end={
+        <LayoutPanel width={340} hasDivider role="region" label={t("lineup")}>
+          <VStack gap={3}>
+            <Heading level={2}>{t("lineup")}</Heading>
+            <List>
+              {members.map((member) => {
+                const plays = (lineup.get(member.id) ?? []).map((instrumentId) =>
+                  byId.get(instrumentId),
+                );
+                const name = one(member.profile)?.name ?? "";
+                const role = [
+                  member.role === "md" ? t("mdShort") : null,
+                  plays.length > 0 ? plays.map(nameOf).join(", ") : t("sitsOut"),
+                ]
+                  .filter(Boolean)
+                  .join(" · ");
                 return (
-                  <li key={item.id} className={styles.songRow}>
-                    <span className={styles.position}>{item.position}</span>
-                    <div className={styles.songText}>
-                      <Link
-                        href={`/sets/${set.id}/songs/${item.position}`}
-                        className={styles.songTitle}
-                      >
-                        {title}
-                      </Link>
-                      <span className={styles.hint}>
-                        {[version && sources(version.source_type), version?.source_year]
-                          .filter(Boolean)
-                          .join(" ")}
-                      </span>
-                      {newer !== undefined && (
-                        <div className={styles.update}>
-                          <p className={styles.text}>
-                            {t("newer", { number: newer, pinned: one(item.revision)?.number ?? 0 })}
-                          </p>
-                          {isMd && (
-                            <div className={styles.buttons}>
-                              <Link
-                                href={`/sets/${set.id}/songs/${item.position}?preview=new`}
-                                className="cd-button cd-button--secondary"
-                                aria-label={t("seeNewerName", { title })}
-                              >
-                                {t("seeNewer")}
-                              </Link>
-                              <form action={updatePinned}>
-                                <input type="hidden" name="setId" value={set.id} />
-                                <input type="hidden" name="itemId" value={item.id} />
-                                <Button
-                                  type="submit"
-                                  variant="primary"
-                                  aria-label={t("updateName", { title })}
-                                >
-                                  {t("update")}
-                                </Button>
-                              </form>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    <span className={styles.songKey}>
-                      {t("key")} <b>{shown?.key ?? ""}</b>
-                    </span>
-                    <span className={shown && shown.notes > 0 ? styles.forYou : styles.noNotes}>
-                      {shown && shown.notes > 0
-                        ? shown.leads
-                          ? t("notesCount", { count: shown.notes })
-                          : t("forYouCount", { count: shown.notes })
-                        : t("noNotes")}
-                    </span>
-                  </li>
+                  <Item
+                    key={member.id}
+                    as="li"
+                    label={member.user_id === auth.user.id ? t("you", { name }) : name}
+                    description={role}
+                    startContent={<Avatar name={name} tooltip={false} />}
+                  />
                 );
               })}
-            </ol>
-          )}
-        </section>
-
-        <section aria-labelledby="lineup" className={styles.card}>
-          <h2 id="lineup" className={styles.cardTitle}>
-            {t("lineup")}
-          </h2>
-          <ul className={styles.lineupList}>
-            {members.map((member) => {
-              const plays = (lineup.get(member.id) ?? []).map((instrumentId) =>
-                byId.get(instrumentId),
-              );
-              const first = plays[0];
-              const name = one(member.profile)?.name ?? "";
-              const role = [
-                member.role === "md" ? t("mdShort") : null,
-                plays.length > 0 ? plays.map(nameOf).join(", ") : t("sitsOut"),
-              ]
-                .filter(Boolean)
-                .join(" · ");
-              return (
-                <li key={member.id} className={styles.lineupRow}>
-                  <span className={styles.lineupIcon}>
-                    {first && (
-                      <InstrumentTag
-                        instrument={first.slug}
-                        label={nameOf(first)}
-                        variant="compact"
-                      />
-                    )}
-                  </span>
-                  <span className={styles.songText}>
-                    <b>{member.user_id === auth.user.id ? t("you", { name }) : name}</b>
-                    <span className={styles.hint}>{role}</span>
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-          <p className={styles.hint}>{t("lineupNote")}</p>
-        </section>
-      </div>
-    </div>
+            </List>
+            <Text type="supporting">{t("lineupNote")}</Text>
+          </VStack>
+        </LayoutPanel>
+      }
+      content={
+        <LayoutContent role="region" label={t("songsTitle")}>
+          <VStack gap={3}>
+            <OfflineChanges setId={set.id} />
+            {status && (
+              <div role="status">
+                <Banner status="success" title={status} />
+              </div>
+            )}
+            {search.error && (
+              <div role="alert">
+                <Banner status="error" title={t("errors.unknown")} />
+              </div>
+            )}
+            <Heading level={2}>{t("songsTitle")}</Heading>
+            {items.length === 0 ? (
+              <EmptyState title={canArrange ? t("emptyMd") : t("empty")} />
+            ) : (
+              <List
+                listStyle="decimal"
+                header={<Text className="cd-visually-hidden">{t("songsTitle")}</Text>}
+              >
+                {items.map((item, index) => {
+                  const version = one(item.version);
+                  const title = one(version?.song ?? null)?.title ?? "";
+                  const shown = songs[index];
+                  const newer = version?.current_revision_id
+                    ? newerNumber.get(version.current_revision_id)
+                    : undefined;
+                  const forYou = shown && shown.notes > 0;
+                  return (
+                    <Item
+                      key={item.id}
+                      as="li"
+                      align="start"
+                      label={<Link href={`/sets/${set.id}/songs/${item.position}`}>{title}</Link>}
+                      description={
+                        <VStack gap={2}>
+                          <Text type="supporting">
+                            {[version && sources(version.source_type), version?.source_year]
+                              .filter(Boolean)
+                              .join(" ")}
+                          </Text>
+                          {newer !== undefined && (
+                            <VStack gap={2}>
+                              <Text>
+                                {t("newer", {
+                                  number: newer,
+                                  pinned: one(item.revision)?.number ?? 0,
+                                })}
+                              </Text>
+                              {isMd && (
+                                <HStack gap={2} wrap="wrap">
+                                  <Button
+                                    label={t("seeNewerName", { title })}
+                                    href={`/sets/${set.id}/songs/${item.position}?preview=new`}
+                                    size="sm"
+                                  >
+                                    {t("seeNewer")}
+                                  </Button>
+                                  <form action={updatePinned}>
+                                    <input type="hidden" name="setId" value={set.id} />
+                                    <input type="hidden" name="itemId" value={item.id} />
+                                    <Button
+                                      type="submit"
+                                      variant="primary"
+                                      size="sm"
+                                      label={t("updateName", { title })}
+                                    >
+                                      {t("update")}
+                                    </Button>
+                                  </form>
+                                </HStack>
+                              )}
+                            </VStack>
+                          )}
+                        </VStack>
+                      }
+                      endContent={
+                        <HStack gap={2} vAlign="center">
+                          <Token label={`${t("key")} ${shown?.key ?? ""}`} size="sm" />
+                          {forYou ? (
+                            <HStack gap={1} vAlign="center">
+                              <StatusDot variant="error" label={t("notesDot")} />
+                              <Text type="supporting">
+                                {shown.leads
+                                  ? t("notesCount", { count: shown.notes })
+                                  : t("forYouCount", { count: shown.notes })}
+                              </Text>
+                            </HStack>
+                          ) : (
+                            <Text type="supporting">{t("noNotes")}</Text>
+                          )}
+                        </HStack>
+                      }
+                    />
+                  );
+                })}
+              </List>
+            )}
+          </VStack>
+        </LayoutContent>
+      }
+    />
   );
 }

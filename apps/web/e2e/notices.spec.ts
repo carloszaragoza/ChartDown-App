@@ -76,8 +76,9 @@ test("R-09.1 R-09.3 adding Luis to the set reaches him instantly, saying what ch
   await page.getByRole("group", { name: "Luis Bass" }).getByLabel("Bass", { exact: true }).check();
   await page.getByRole("button", { name: "Save lineup" }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("The lineup was saved.");
-  const notice = luisPage.getByRole("list", { name: "Your notices" }).getByRole("button", {
-    name: new RegExp(`^New\\s*You were added to ${set} \\(no date\\) on Bass\\.$`),
+  // Each notice is a link: its dot ("New"), what changed, and when.
+  const notice = luisPage.getByRole("list", { name: "Your notices" }).getByRole("link", {
+    name: new RegExp(`You were added to ${set} \\(no date\\) on Bass\\.`),
   });
   await expect(notice).toBeVisible({ timeout: 15_000 });
   await expect(luisPage.getByRole("link", { name: /^Notices\s*1$/ })).toBeVisible();

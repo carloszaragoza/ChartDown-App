@@ -589,7 +589,8 @@
     "you": "{name} (tú)",
     "lineupNote": "Cada músico ve las notas del director musical para su propio instrumento.",
     "allSets": "Sets",
-    "allSetsHint": "Los sets de todas tus bandas y de tu espacio personal. Para crear uno, abre la banda."
+    "allSetsHint": "Los sets de todas tus bandas y de tu espacio personal. Para crear uno, abre la banda.",
+    "notesDot": "Notas para ti"
   },
   "offline": {
     "title": "Sin conexión",
@@ -661,7 +662,11 @@
     "reasons": {
       "lyrics": "porque tiene la letra completa",
       "other": "después de un reporte"
-    }
+    },
+    "description": "Lo que cambió en tus bandas y sets.",
+    "caughtUp": "Estás al día",
+    "nothingUnread": "Ya leíste todos los avisos.",
+    "read": "Leído"
   },
   "admin": {
     "title": "Administración",

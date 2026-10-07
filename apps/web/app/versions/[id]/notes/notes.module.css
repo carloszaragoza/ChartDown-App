@@ -3,7 +3,7 @@
   gap: var(--space-4);
   max-width: 1280px;
   margin: 0 auto;
-  padding: var(--space-10);
+  padding: var(--space-8);
 }
 .header {
   display: flex;
@@ -90,6 +90,9 @@
 }
 .input {
   min-height: var(--target-min);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 0 var(--space-3);
   border: var(--stroke-hairline) solid var(--control-border);
   border-radius: var(--radius-md);
