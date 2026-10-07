@@ -9,6 +9,7 @@ import {
   addToSet,
   expectStatus,
   createSet as fillSet,
+  setKey,
 } from "./flows";
 
 async function switchTo(page: Page, email: string, name: string) {
@@ -69,8 +70,9 @@ test("R-05.5 the temporary MD cannot edit other sets or the layer", async ({ pag
   await addSong(page, v1, `${band} · ${friday}`);
   await page.goto(`${sundayAddress}/edit`);
   await expect(page.getByText("Nobody. The music director arranges this set.")).toBeVisible();
-  await page.getByLabel("Musician").selectOption({ label: "Ben Temp" });
-  await expect(page.getByLabel("Until")).toHaveValue("2030-06-09");
+  await page.getByRole("combobox", { name: "Musician" }).click();
+  await page.getByRole("option", { name: "Ben Temp", exact: true }).click();
+  await expect(page.getByRole("combobox", { name: "Until" })).toHaveValue("2030-06-09");
   await page.getByRole("button", { name: "Appoint" }).click();
   await expectStatus(page, "was appointed");
   await expect(page.getByText("Ben Temp arranges this set until")).toBeVisible();
@@ -82,8 +84,7 @@ test("R-05.5 the temporary MD cannot edit other sets or the layer", async ({ pag
   await expect(page.getByText("You are this set's temporary music director until")).toBeVisible();
   await page.getByRole("button", { name: `Move ${second} up` }).click();
   await expectStatus(page, "The order was saved.");
-  await page.getByLabel(`Key of ${first}`).selectOption("D");
-  await page.getByRole("button", { name: "Save key" }).first().click();
+  await setKey(page, first, "D");
   await expectStatus(page, "The key was saved.");
   await expect(page.getByRole("button", { name: `Remove ${first} from the set` })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Name, date and type" })).toHaveCount(0);
