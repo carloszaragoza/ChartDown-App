@@ -28,12 +28,12 @@ import {
 import { setSongKey } from "../../../../lib/sets/lineup";
 import { songView, type SetSong } from "../../../../lib/sets/song";
 import { setWhen } from "../../../../lib/sets/when";
-import { ChartBody } from "../../../versions/[id]/ChartBody";
+import { ChartPreview } from "../../../_components/ChartPreview";
 import { readDisplay } from "../../../versions/[id]/display";
 import { readSection } from "../../../versions/[id]/stand/standHref";
 import { StandMode } from "../../../versions/[id]/stand/StandMode";
 import { OfflineChanges } from "../../../_components/OfflineChanges";
-import styles from "../../../sets/sets.module.css";
+import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
 
 const noChanges = () => () => {};
 
@@ -319,49 +319,69 @@ export function OfflineReader() {
   }
 
   return (
-    <main className={styles.wide}>
-      <p className={styles.hint}>
-        <a href={base} className={styles.link}>
-          {bundle.set.name}
-        </a>{" "}
-        · {s("songOf", { position: song.position, total })}
-      </p>
-      <div>
-        <h1 className={styles.title}>{song.title}</h1>
-        <p className={styles.hint}>
-          {c("key")} <b>{keyName(homeKey)}</b>
-          {keyName(homeKey) !== keyName(chart.key) && (
-            <> {c("writtenIn", { key: keyName(chart.key) })}</>
-          )}
-        </p>
-        <p className={styles.hint}>
-          {song.role === "musician" ? s("notesForYou", { count: view.forYou }) : s("allNotesMd")}
-        </p>
-      </div>
-      {banner}
-      <OfflineChanges setId={bundle.set.id} />
-      <div className={styles.buttons}>
-        <a href={`${base}/${song.position}/stand`} className="cd-button cd-button--primary">
-          {s("startStand")}
-        </a>
-      </div>
-      <ChartBody chart={chart} homeKey={homeKey} notes={(index) => notes[index] ?? []} />
-      <nav aria-label={s("songs", { count: total })} className={styles.turn}>
-        {song.position > 1 ? (
-          <a href={`${base}/${song.position - 1}`} className={styles.link}>
-            {s("previousSong")}
-          </a>
-        ) : (
-          <span />
-        )}
-        {song.position < total ? (
-          <a href={`${base}/${song.position + 1}`} className={styles.link}>
-            {s("nextSong")}
-          </a>
-        ) : (
-          <span />
-        )}
-      </nav>
+    <main>
+      <Layout
+        height="auto"
+        padding={8}
+        contentWidth={1040}
+        header={
+          <LayoutHeader hasDivider>
+            <HStack gap={4} vAlign="start" hAlign="between" wrap="wrap">
+              <VStack gap={1}>
+                <Breadcrumbs variant="supporting">
+                  <BreadcrumbItem href={base}>{bundle.set.name}</BreadcrumbItem>
+                  <BreadcrumbItem>{s("songOf", { position: song.position, total })}</BreadcrumbItem>
+                </Breadcrumbs>
+                <Heading level={1}>{song.title}</Heading>
+                <HStack gap={2} vAlign="center" wrap="wrap">
+                  <Token label={`${c("key")} ${keyName(homeKey)}`} size="sm" />
+                  {keyName(homeKey) !== keyName(chart.key) && (
+                    <Text type="supporting">{c("writtenIn", { key: keyName(chart.key) })}</Text>
+                  )}
+                </HStack>
+                <Text color="secondary">
+                  {song.role === "musician"
+                    ? s("notesForYou", { count: view.forYou })
+                    : s("allNotesMd")}
+                </Text>
+              </VStack>
+              {/* Plain links: the reader works with no internet, from this device. */}
+              <HStack gap={2} vAlign="center" wrap="wrap">
+                <Button
+                  label={s("previousSong")}
+                  href={`${base}/${song.position - 1}`}
+                  isDisabled={song.position <= 1}
+                />
+                <Button
+                  label={s("nextSong")}
+                  href={`${base}/${song.position + 1}`}
+                  isDisabled={song.position >= total}
+                />
+                <Button
+                  label={s("startStand")}
+                  variant="primary"
+                  href={`${base}/${song.position}/stand`}
+                />
+              </HStack>
+            </HStack>
+          </LayoutHeader>
+        }
+        content={
+          <LayoutContent>
+            <VStack gap={5}>
+              {banner}
+              <OfflineChanges setId={bundle.set.id} />
+              <ChartPreview
+                chart={chart}
+                homeKey={homeKey}
+                isFramed
+                hasForm
+                notes={(index) => notes[index] ?? []}
+              />
+            </VStack>
+          </LayoutContent>
+        }
+      />
     </main>
   );
 }

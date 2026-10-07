@@ -3,7 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import en from "../../../messages/en.json";
-import { ChartBody } from "./ChartBody";
+import { ChartPreview } from "../../_components/ChartPreview";
 import { displayHref, keysInMode, readDisplay } from "./display";
 
 // An original example in G: 6m 5 4 1.
@@ -11,14 +11,12 @@ const chart = parse("---\nkey: G\n---\n## Intro\n6m | 5 | 4 | 1\n");
 const body = (style: "numbers" | "letters", key?: string) =>
   renderToString(
     <NextIntlClientProvider locale="en" messages={en} timeZone="UTC">
-      <ChartBody chart={chart} style={style} homeKey={readDisplay(chart, { key }).key} />
+      <ChartPreview chart={chart} style={style} homeKey={readDisplay(chart, { key }).key} />
     </NextIntlClientProvider>,
   );
-// The root of each chord (its quality, such as m, is drawn apart).
+// The root of each chord, drawn large in its bar (its quality, such as m, is drawn apart).
 const chords = (html: string) =>
-  [...html.matchAll(/class="cd-chord(?: cd-chord--[^"]*)?"[^>]*>([^<]+)/g)].map(
-    (match) => match[1],
-  );
+  [...html.matchAll(/data-size="4xl"[^>]*>([^<]+)/g)].map((match) => match[1]);
 
 describe("R-03.2 numbers or letters, and transposition", () => {
   it("R-03.2 letters show the chords in the written key", () => {

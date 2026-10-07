@@ -9,6 +9,7 @@ import {
   addToSet,
   expectStatus,
   createSet,
+  setKey,
 } from "./flows";
 
 const CHART = "---\nkey: G\n---\n## Verse\n1 | 4 | 5 | 1\n";
@@ -66,8 +67,7 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
 
   // The key for this set, and the set's own lineup (R-05.3, R-05.4).
   await expect(page.getByText("This set uses the band's default instruments.")).toBeVisible();
-  await page.getByLabel(`Key of ${title}`).selectOption("A");
-  await page.getByRole("button", { name: "Save key" }).click();
+  await setKey(page, title, "A");
   await expectStatus(page, "The key was saved.");
   await expect(page.getByText("in A (written in G)")).toBeVisible();
   await page.getByRole("group", { name: "Ben Bass" }).getByLabel("Bass", { exact: true }).check();
@@ -87,8 +87,12 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
   await page.getByRole("link", { name: title }).click();
   await expect(page.getByText("Song 1 of 1")).toBeVisible();
   await expect(page.getByText("(written in G)")).toBeVisible();
-  await page.getByRole("link", { name: "Letters" }).click();
-  await expect(page.locator(".cd-chord").first()).toHaveText("A");
+  await page
+    .getByRole("radiogroup", { name: "Numbers or letters" })
+    .getByRole("radio", { name: "Letters" })
+    .click();
+  await expect(page).toHaveURL(/view=letters/);
+  await expect(page.locator("#section-1").getByRole("group").first()).toHaveText("A");
 
   // Everyone else still sees the version as written, and it never changed.
   await page.goto(`/versions/${id}`);

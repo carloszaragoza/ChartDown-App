@@ -19,6 +19,7 @@ export function NameForm({
   variant = "primary",
   htmlName = "name",
   type = "text",
+  isReadyAsIs = false,
 }: {
   action: (form: FormData) => Promise<void>;
   label: string;
@@ -31,9 +32,11 @@ export function NameForm({
   /** The field's name in the form; "name" by default. */
   htmlName?: string;
   type?: "text" | "email";
+  /** The written value may be sent as it is (a copy's suggested name). */
+  isReadyAsIs?: boolean;
 }) {
   const [name, setName] = useState(defaultValue);
-  const ready = name.trim().length > 0 && name.trim() !== defaultValue.trim();
+  const ready = name.trim().length > 0 && (isReadyAsIs || name.trim() !== defaultValue.trim());
   return (
     <form action={action}>
       {Object.entries(hidden).map(([key, value]) => (
