@@ -471,7 +471,21 @@
       "unknown": "No funcionó. Inténtalo de nuevo."
     },
     "sets": "Sets",
-    "mySets": "Mis sets"
+    "mySets": "Mis sets",
+    "description": "Las bandas en las que tocas o diriges, y tu espacio personal.",
+    "setsOf": "Sets de {band}",
+    "personal": "Espacio personal",
+    "personalHint": "Tus propios sets, privados",
+    "onlyYou": "Solo tú",
+    "membersTab": "Miembros",
+    "invitationsTab": "Invitaciones",
+    "settingsTab": "Ajustes",
+    "musicianColumn": "Músico",
+    "roleColumn": "Rol",
+    "instrumentsColumn": "Instrumentos por defecto",
+    "actionsColumn": "Acciones",
+    "editInstruments": "Editar instrumentos",
+    "noPending": "No hay invitaciones pendientes."
   },
   "sets": {
     "mySets": "Mis sets",
@@ -602,7 +616,12 @@
     "lineupNote": "Cada músico ve las notas del director musical para su propio instrumento.",
     "allSets": "Sets",
     "allSetsHint": "Los sets de todas tus bandas y de tu espacio personal. Para crear uno, abre la banda.",
-    "notesDot": "Notas para ti"
+    "notesDot": "Notas para ti",
+    "nextSet": "Próximo: {name}, {when}",
+    "dateLabel": "Fecha",
+    "timeLabel": "Hora",
+    "createMissing": "Escribe un nombre y elige un tipo primero.",
+    "personalHint": "Tus propios sets: nadie más los ve."
   },
   "offline": {
     "title": "Sin conexión",

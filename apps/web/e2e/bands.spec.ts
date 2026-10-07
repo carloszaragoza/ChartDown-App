@@ -1,9 +1,17 @@
 import { expect, test, type Page } from "@playwright/test";
-import { PASSWORD, signIn, signOut, signUpAndConfirm, unique, expectStatus } from "./flows";
+import {
+  PASSWORD,
+  signIn,
+  signOut,
+  signUpAndConfirm,
+  unique,
+  expectStatus,
+  setInstruments,
+} from "./flows";
 
 async function openBand(page: Page, name: string) {
   await page.goto("/bands");
-  await page.getByRole("link", { name }).click();
+  await page.getByRole("link", { name, exact: true }).click();
   await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
 }
 
@@ -47,13 +55,9 @@ test("R-04.2 the MD invites, the musician accepts, and whoever leaves loses acce
   await signIn(page, ana, PASSWORD);
   await expect(page.getByText("Signed in as Ana Lead")).toBeVisible();
   await openBand(page, band);
-  // Each member has their own form: use Ben's.
-  const benRow = page.getByRole("listitem").filter({ hasText: "Ben Keys" });
-  await benRow.getByText("Default instruments of Ben Keys").click();
-  await benRow.getByLabel("Bass", { exact: true }).check();
-  await benRow.getByRole("button", { name: "Save instruments" }).click();
+  await setInstruments(page, "Ben Keys", ["Bass"]);
   await expectStatus(page, "The instruments were saved.");
-  await expect(page.getByRole("listitem").filter({ hasText: "Ben Keys" })).toContainText("Bass");
+  await expect(page.getByRole("row").filter({ hasText: "Ben Keys" })).toContainText("Bass");
   await expect(page.getByRole("button", { name: "Leave the band" })).toHaveCount(0);
   await page.goto("/");
   await signOut(page);
@@ -62,9 +66,11 @@ test("R-04.2 the MD invites, the musician accepts, and whoever leaves loses acce
   await signIn(page, ben, PASSWORD);
   await expect(page.getByText("Signed in as Ben Keys")).toBeVisible();
   await openBand(page, band);
+  // Leaving is in the band's Settings tab (Design Handoff 2.0, the screens table).
+  await page.getByRole("link", { name: "Settings" }).click();
   await page.getByRole("button", { name: "Leave the band" }).click();
   await expectStatus(page, "You left the band.");
-  await expect(page.getByRole("link", { name: band })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: band, exact: true })).toHaveCount(0);
   expect((await page.goto(address))?.status()).toBe(404);
   await page.goto("/");
   await signOut(page);

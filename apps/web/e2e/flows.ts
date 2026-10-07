@@ -91,3 +91,51 @@ export function sectionRow(page: Page, label: string) {
     .getByRole("listitem")
     .filter({ has: page.getByRole("link", { name: label, exact: true }) });
 }
+
+/** On a band's page, the MD sets a member's default instruments (R-04.3). */
+export async function setInstruments(page: Page, name: string, instruments: string[]) {
+  await page.getByRole("link", { name: `Default instruments of ${name}` }).click();
+  const form = page.getByRole("region", { name: `Default instruments of ${name}` });
+  for (const instrument of instruments) await form.getByLabel(instrument, { exact: true }).check();
+  await form.getByRole("button", { name: "Save instruments" }).click();
+}
+
+/**
+ * Fills the "Create a set" form and creates it (R-05.1). The date is given as YYYY-MM-DD and
+ * typed the way the date field reads it.
+ */
+export async function createSet(
+  page: Page,
+  set: { name: string; type: string; date?: string; time?: string },
+) {
+  const form = page.getByRole("region", { name: "Create a set" });
+  await form.getByLabel("Set name").fill(set.name);
+  if (set.date) {
+    const [year, month, day] = set.date.split("-");
+    // The date field types or picks a date: a combobox that reads MM/DD/YYYY.
+    const field = form.getByRole("combobox", { name: /^Date/ });
+    await field.fill(`${month}/${day}/${year}`);
+    await field.press("Tab");
+  }
+  if (set.time) {
+    const field = form.getByRole("textbox", { name: /^Time/ });
+    await field.fill(set.time);
+    await field.press("Tab");
+  }
+  await form.getByRole("combobox", { name: /^Type/ }).click();
+  await page.getByRole("option", { name: set.type, exact: true }).click();
+  await form.getByRole("button", { name: "Create set" }).click();
+}
+
+/**
+ * Writes a chart in the editor and waits until Save takes it. Right after a page opens, React
+ * may not have taken over the text area yet, and typing then is lost; this types again.
+ */
+export async function writeChart(page: Page, text: string) {
+  const field = page.getByLabel("Chart (ChartDown)");
+  const save = page.getByRole("button", { name: "Save" });
+  await expect(async () => {
+    await field.fill(text);
+    await expect(save).toBeEnabled({ timeout: 1_000 });
+  }).toPass({ timeout: 15_000 });
+}

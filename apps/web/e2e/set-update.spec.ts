@@ -7,6 +7,7 @@ import {
   unique,
   addToSet,
   expectStatus,
+  createSet,
 } from "./flows";
 
 async function switchTo(page: Page, email: string, name: string) {
@@ -55,11 +56,9 @@ test("R-05.2 a new revision from the author doesn't change the set until accepte
   await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
   const version = new URL(page.url()).pathname;
   await page.goto("/bands");
-  await page.getByRole("link", { name: band }).click();
+  await page.getByRole("link", { name: band, exact: true }).click();
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
-  await page.getByLabel("Set name").fill(set);
-  await page.getByLabel("Type").selectOption({ label: "Service" });
-  await page.getByRole("button", { name: "Create set" }).click();
+  await createSet(page, { name: set, type: "Service" });
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   const setAddress = new URL(page.url()).pathname;
   await page.goto(version);

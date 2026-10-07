@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { signOut, signUpAndConfirm, unique } from "./flows";
+import { signOut, signUpAndConfirm, unique, writeChart } from "./flows";
 
 test("R-03.1 the preview updates without reloading", async ({ page }) => {
   const title = `Ember Hill ${Date.now()}`;
@@ -92,13 +92,13 @@ test("R-03.1 saving refuses a version that changed elsewhere and keeps the text"
   await page.goto(edit);
   const other = await context.newPage();
   await other.goto(edit);
-  await other.getByLabel("Chart (ChartDown)").fill("## Verse\n1 | 5\n");
+  await writeChart(other, "## Verse\n1 | 5\n");
   await other.getByRole("button", { name: "Save" }).click();
   await expect(
     other.getByRole("main").getByRole("status").filter({ hasText: "Saved as revision 2." }).first(),
   ).toBeVisible();
 
-  await page.getByLabel("Chart (ChartDown)").fill("## Verse\n1 | 6m\n");
+  await writeChart(page, "## Verse\n1 | 6m\n");
   await page.getByRole("button", { name: "Save" }).click();
   await expect(
     page
