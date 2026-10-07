@@ -30,4 +30,18 @@ describe("T-1301 server components and Astryx", () => {
     });
     expect(problems).toEqual([]);
   });
+
+  it("T-1304 a client file exports no plain values, which a server component can't read", () => {
+    // A server component that imports a list or a constant from a "use client" file gets a
+    // reference to it, not the value (SET_TYPES.map is not a function).
+    const root = new URL(".", import.meta.url).pathname;
+    const problems = files(root).flatMap((path) => {
+      const source = readFileSync(path, "utf8");
+      if (!/^["']use client["'];/m.test(source)) return [];
+      return [...source.matchAll(/^export const (\w+) = (?!\(|async\b|function\b)/gm)].map(
+        (match) => `${path.slice(root.length)} exports ${match[1]}`,
+      );
+    });
+    expect(problems).toEqual([]);
+  });
 });

@@ -8,11 +8,10 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { TimeInput } from "@astryxdesign/core/TimeInput";
 import { VStack } from "@astryxdesign/core/VStack";
 import { useState } from "react";
+import { SET_TYPES, type SetType } from "../../lib/sets/types";
 
 type ISODateString = Exclude<Parameters<typeof DateInput>[0]["value"], undefined>;
 type ISOTimeString = Exclude<Parameters<typeof TimeInput>[0]["value"], undefined>;
-
-export const SET_TYPES = ["rehearsal", "service", "concert"] as const;
 
 export interface SetFormProps {
   action: (form: FormData) => Promise<void>;
@@ -25,7 +24,7 @@ export interface SetFormProps {
     time: string;
     type: string;
     chooseType: string;
-    types: Record<(typeof SET_TYPES)[number], string>;
+    types: Record<SetType, string>;
     submit: string;
     missing: string;
   };

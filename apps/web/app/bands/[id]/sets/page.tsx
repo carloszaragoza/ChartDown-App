@@ -12,7 +12,8 @@ import { authEnabled } from "../../../../lib/auth/enabled";
 import { createClient } from "../../../../lib/supabase/server";
 import { UUID } from "../../../versions/[id]/load";
 import { createSet } from "../../../sets/actions";
-import { SetForm, SET_TYPES } from "../../../sets/SetForm";
+import { SET_TYPES, type SetType } from "../../../../lib/sets/types";
+import { SetForm } from "../../../sets/SetForm";
 import { SetList } from "../../../sets/SetList";
 
 type Search = Promise<{ error?: string; deleted?: string; when?: string }>;
@@ -104,7 +105,7 @@ export default async function BandSetsPage({
                       chooseType: t("chooseType"),
                       types: Object.fromEntries(
                         SET_TYPES.map((type) => [type, t(`types.${type}`)]),
-                      ) as Record<(typeof SET_TYPES)[number], string>,
+                      ) as Record<SetType, string>,
                       submit: t("createButton"),
                       missing: t("createMissing"),
                     }}
