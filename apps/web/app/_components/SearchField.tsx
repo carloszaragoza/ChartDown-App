@@ -5,8 +5,7 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { StackItem } from "@astryxdesign/core/Stack";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 
 export interface SearchFieldProps {
   /** The page the search goes to; the text travels as `q`, with `params` beside it. */
@@ -28,8 +27,8 @@ export function searchHref(path: string, query: string, params: Record<string, s
 }
 
 /**
- * A search box with its button (Astryx TextInput). The results stay on the server: searching
- * changes the address, which the page reads.
+ * A search box with its button (Astryx TextInput). A plain GET form, so searching loads the page
+ * for the new address and its results come from the server.
  */
 export function SearchField({
   path,
@@ -40,19 +39,18 @@ export function SearchField({
   placeholder,
   isLabelHidden = false,
 }: SearchFieldProps) {
-  const router = useRouter();
   const [text, setText] = useState(query);
-  const search = (event: FormEvent) => {
-    event.preventDefault();
-    router.push(searchHref(path, text, params));
-  };
   return (
-    <form role="search" onSubmit={search}>
+    <form role="search" action={path} method="get">
+      {Object.entries(params ?? {}).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
       <HStack gap={2} vAlign="end">
         <StackItem size="fill">
           <TextInput
             label={label}
             isLabelHidden={isLabelHidden}
+            htmlName="q"
             value={text}
             onChange={setText}
             startIcon={MagnifyingGlassIcon}

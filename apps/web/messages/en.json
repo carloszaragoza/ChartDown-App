@@ -319,7 +319,8 @@
     "savedLine": "{source} · Revision {number} · saved {when}",
     "visibility": "Visibility",
     "numbers": "Numbers",
-    "privateForGood": "This version is private; a private version doesn't go back to public."
+    "privateForGood": "This version is private; a private version doesn't go back to public.",
+    "textPanel": "ChartDown text"
   },
   "viewer": {
     "label": "Display",

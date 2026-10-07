@@ -152,7 +152,7 @@ export function Editor({
         </LayoutHeader>
       }
       start={
-        <LayoutPanel width={460} hasDivider label={t("text")}>
+        <LayoutPanel width={460} hasDivider label={t("textPanel")}>
           <VStack gap={3}>
             <div role="status">
               {state.status === "saved" && !dirty && (
