@@ -193,7 +193,8 @@
     "time": "Compás",
     "tempo": "Tempo",
     "example": "Ejemplo: Atril, vista de Teclados",
-    "writtenIn": "(escrito en {key})"
+    "writtenIn": "(escrito en {key})",
+    "nthTime": "{time, selectordinal, other {#.ª}} vez"
   },
   "auth": {
     "email": "Correo electrónico",

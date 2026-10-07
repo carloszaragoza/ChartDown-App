@@ -1,6 +1,7 @@
 import "@astryxdesign/core/reset.css";
 import "@astryxdesign/core/astryx.css";
 import "../theme/chartdown.css";
+import "../theme/chartdown-stand.css";
 import "@chartdown/ui/fonts.css";
 import "@chartdown/ui/tokens.css";
 import "@chartdown/ui/components.css";

@@ -45,9 +45,11 @@ export function DisplayControls({
         <SegmentedControlItem value="numbers" label={words.numbers} />
         <SegmentedControlItem value="letters" label={words.letters} />
       </SegmentedControl>
+      {/* The key says what it is in its own text ("Key G (written)"), on the same line. */}
       <Selector
         label={words.key}
-        options={keys.map(({ value, label }) => ({ value, label }))}
+        isLabelHidden
+        options={keys.map(({ value, label }) => ({ value, label: `${words.key} ${label}` }))}
         value={shown}
         onChange={(value) => {
           const key = keys.find((item) => item.value === value);

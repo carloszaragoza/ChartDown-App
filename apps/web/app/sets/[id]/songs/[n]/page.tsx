@@ -163,7 +163,8 @@ export default async function SetSongPage({
         </LayoutHeader>
       }
       content={
-        <LayoutContent>
+        // The app's own area scrolls the chart, so the song form can stay pinned at its top.
+        <LayoutContent isScrollable={false}>
           <VStack gap={5}>
             {newer && (
               <Banner
