@@ -54,6 +54,8 @@ jobs:
 
   database:
     name: Database
+    # Editing a pull request's title or description changes no code: only Checks runs again.
+    if: github.event_name == 'push' || github.event.action != 'edited'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -77,6 +79,7 @@ jobs:
 
   e2e:
     name: End to end
+    if: github.event_name == 'push' || github.event.action != 'edited'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -112,11 +115,34 @@ jobs:
           [ -n "$service" ] || { echo "Could not read the local service key"; exit 1; }
           echo "SUPABASE_SERVICE_ROLE_KEY=$service" >> "$GITHUB_ENV"
 
+      # Next keeps what it compiled between runs, so a build redoes only what changed.
+      - uses: actions/cache@v6
+        with:
+          path: apps/web/.next/cache
+          key: next-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('apps/web/**/*.ts', 'apps/web/**/*.tsx', 'packages/**/*.ts', 'packages/**/*.tsx') }}
+          restore-keys: next-${{ hashFiles('pnpm-lock.yaml') }}-
+
       - name: Build
         run: pnpm build
 
+      # Chromium is downloaded once per Playwright version; its system libraries still install.
+      - name: Playwright version
+        id: playwright
+        run: echo "version=$(pnpm --filter @chartdown/web exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v6
+        id: browsers
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ steps.playwright.outputs.version }}
+
       - name: Install the browser
+        if: steps.browsers.outputs.cache-hit != 'true'
         run: pnpm --filter @chartdown/web exec playwright install --with-deps chromium
+
+      - name: Install the browser's system libraries
+        if: steps.browsers.outputs.cache-hit == 'true'
+        run: pnpm --filter @chartdown/web exec playwright install-deps chromium
 
       - name: End-to-end tests
         run: pnpm --filter @chartdown/web e2e
