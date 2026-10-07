@@ -18,6 +18,7 @@ The redesign is built in the blocks of E13 (`lista-tareas.md`); until a screen's
 3. **The numbers win.** In a chart only chord numbers and bar lines are drawn in the primary text color; everything else is secondary.
 4. **Two modes, one layout.** Light and dark follow the system; they change colors, never sizes or positions.
 5. **Touch targets:** at least 44 × 44 px on iPad, to tap with confidence. Astryx's default sizes are smaller (side navigation items 32 px, the language control 20 px, the collapse button 28 px, measured October 7, 2026). The app's Astryx theme (`apps/web/theme/chartdown.theme.ts`, built from neutral) raises the element sizes on touch screens (`pointer: coarse`): small 36, medium 44, large 52 px; the side navigation uses the large size. Desktop with a mouse keeps Astryx's sizes. A control is never shrunk below 44 px on touch.
+6. **One gutter.** Every page in the app shell keeps 32 px (`--spacing-8`) between its content and the side navigation, the top and the other edges: Astryx pages with `Layout padding={8}`, version 1 pages with the same padding until they are redesigned. Fields and buttons never run past that edge. Stand mode and the landing page set their own (owner's review, October 7, 2026).
 
 ## 2. Design system: Astryx
 
