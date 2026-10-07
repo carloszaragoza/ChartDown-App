@@ -17,7 +17,7 @@ The redesign is built in the blocks of E13 (`lista-tareas.md`); until a screen's
 2. **Never color alone.** Every music director's note says "MD" or the instrument's name; every status dot has a visible text label beside it.
 3. **The numbers win.** In a chart only chord numbers and bar lines are drawn in the primary text color; everything else is secondary.
 4. **Two modes, one layout.** Light and dark follow the system; they change colors, never sizes or positions.
-5. **Touch targets:** at least 44 × 44 px on iPad, to tap with confidence. Astryx's default sizes are smaller in places (side navigation items 32 px, the language control 20 px, the collapse button 28 px, measured October 7, 2026), so those use Astryx's larger sizes; a control is never shrunk below 44 px.
+5. **Touch targets:** at least 44 × 44 px on iPad, to tap with confidence. Astryx's default sizes are smaller (side navigation items 32 px, the language control 20 px, the collapse button 28 px, measured October 7, 2026). The app's Astryx theme (`apps/web/theme/chartdown.theme.ts`, built from neutral) raises the element sizes on touch screens (`pointer: coarse`): small 36, medium 44, large 52 px; the side navigation uses the large size. Desktop with a mouse keeps Astryx's sizes. A control is never shrunk below 44 px on touch.
 
 ## 2. Design system: Astryx
 
