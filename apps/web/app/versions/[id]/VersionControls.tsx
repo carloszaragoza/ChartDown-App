@@ -88,13 +88,19 @@ export function AddToSet({
 }
 
 /** Secondary actions on a version: reporting it to the administrators (R-07.2). */
-export function VersionMenu({ label, report }: { label: string; report?: string }) {
+export function VersionMenu({
+  label,
+  report,
+  reportHref,
+}: {
+  label: string;
+  report: string;
+  /** The version's page with the report form open. */
+  reportHref: string;
+}) {
   const router = useRouter();
   return (
-    <MoreMenu
-      label={label}
-      items={report ? [{ label: report, onClick: () => router.push("?report=open#report") }] : []}
-    />
+    <MoreMenu label={label} items={[{ label: report, onClick: () => router.push(reportHref) }]} />
   );
 }
 

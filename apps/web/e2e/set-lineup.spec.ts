@@ -94,7 +94,11 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
   // Everyone else still sees the version as written, and it never changed.
   await page.goto(`/versions/${id}`);
   await expect(page.getByText("(written in")).toHaveCount(0);
-  await page.getByRole("link", { name: "Letters" }).click();
-  await expect(page.locator(".cd-chord").first()).toHaveText("G");
+  await page
+    .getByRole("radiogroup", { name: "Numbers or letters" })
+    .getByRole("radio", { name: "Letters" })
+    .click();
+  await expect(page).toHaveURL(/view=letters/);
+  await expect(page.locator("#section-1").getByRole("group").first()).toHaveText("G");
   expect(await saved()).toEqual(before);
 });

@@ -198,7 +198,13 @@ export function VersionView({
                       icon={<ForkIcon />}
                     />
                   )}
-                  {canReport && <VersionMenu label={t("more")} report={t("report.open")} />}
+                  {canReport && (
+                    <VersionMenu
+                      label={t("more")}
+                      report={t("report.open")}
+                      reportHref={`/versions/${id}?report=open#report`}
+                    />
+                  )}
                 </HStack>
                 {canFork && <Text type="supporting">{t("forkCc0")}</Text>}
                 {!signedIn && <Text type="supporting">{t("forkHint")}</Text>}
