@@ -19,6 +19,7 @@ import { StackItem } from "@astryxdesign/core/Stack";
 import { VStack } from "@astryxdesign/core/VStack";
 import { ChartDownLogo } from "@chartdown/ui";
 import {
+  ArrowRightEndOnRectangleIcon,
   ArrowRightStartOnRectangleIcon,
   ArrowsPointingOutIcon,
   BellIcon,
@@ -53,7 +54,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useTransition, type ReactNode } from "react";
+import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { LOCALES } from "../../i18n/locales";
 import { forgetSets } from "../../lib/offline/store";
 import {
@@ -87,6 +88,8 @@ export interface ShellProps {
 export function Shell({ account, bands, chosenBand, unread, openReports, children }: ShellProps) {
   const t = useTranslations("nav");
   const pathname = usePathname() ?? "/";
+  // Held here so the footer can show only what fits a collapsed side navigation.
+  const [collapsed, setCollapsed] = useState(false);
   // Signed out, this device forgets the sets downloaded to read offline (T-902), so nobody else
   // using it reads someone's notes.
   useEffect(() => {
@@ -160,8 +163,8 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
   const nav = account ? (
     <SideNav
       header={heading}
-      footer={<Footer account={account} />}
-      collapsible={{ hasButton: false }}
+      footer={<Footer account={account} collapsed={collapsed} />}
+      collapsible={{ hasButton: false, isCollapsed: collapsed, onCollapsedChange: setCollapsed }}
       footerIcons={<SideNavCollapseButton size="lg" />}
     >
       <SideNavSection title={t("home")} isHeaderHidden>
@@ -229,8 +232,8 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
   ) : (
     <SideNav
       header={heading}
-      footer={<Footer account={null} />}
-      collapsible={{ hasButton: false }}
+      footer={<Footer account={null} collapsed={collapsed} />}
+      collapsible={{ hasButton: false, isCollapsed: collapsed, onCollapsedChange: setCollapsed }}
       footerIcons={<SideNavCollapseButton size="lg" />}
     >
       <SideNavSection title={t("create")} isHeaderHidden>
@@ -246,8 +249,11 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
   );
 }
 
-/** The side navigation's footer: the language, and the person with Sign out (or Sign in). */
-function Footer({ account }: { account: ShellProps["account"] }) {
+/**
+ * The side navigation's footer: the language, and the person with Sign out (or Sign in). Collapsed,
+ * only two icon buttons remain: the profile and Sign out (Sign in for a visitor).
+ */
+function Footer({ account, collapsed }: { account: ShellProps["account"]; collapsed: boolean }) {
   const t = useTranslations("nav");
   const language = useTranslations("language");
   const locale = useLocale();
@@ -260,6 +266,49 @@ function Footer({ account }: { account: ShellProps["account"] }) {
       await setLocale(form);
       router.refresh();
     });
+
+  if (collapsed) {
+    return (
+      <VStack gap={2} hAlign="center">
+        {account ? (
+          <>
+            <Button
+              label={t("profile")}
+              isIconOnly
+              variant="ghost"
+              size="lg"
+              tooltip={account.name}
+              href="/profile"
+              as={Link}
+              icon={<Avatar name={account.name} size="sm" tooltip={false} />}
+            />
+            <form action={signOut}>
+              <Button
+                type="submit"
+                label={t("signOut")}
+                isIconOnly
+                variant="ghost"
+                size="lg"
+                tooltip={t("signOut")}
+                icon={<Icon icon={ArrowRightStartOnRectangleIcon} />}
+              />
+            </form>
+          </>
+        ) : (
+          <Button
+            label={t("signIn")}
+            isIconOnly
+            variant="ghost"
+            size="lg"
+            tooltip={t("signIn")}
+            href="/auth/sign-in"
+            as={Link}
+            icon={<Icon icon={ArrowRightEndOnRectangleIcon} />}
+          />
+        )}
+      </VStack>
+    );
+  }
 
   return (
     <VStack gap={2}>
