@@ -113,3 +113,37 @@
 ```json
 { "warnings": [{ "line": 2, "code": "landmark-too-long" }] }
 ```
+
+### 9 {rit}, {accel} and {a tempo} are tempo marks
+
+```chartdown
+## Outro
+1 {rit} | 4 {accel} | 5 {a tempo}
+```
+
+```json
+{
+  "sections": [
+    {
+      "rows": [
+        { "bars": [{ "tempoMark": "rit" }, { "tempoMark": "accel" }, { "tempoMark": "atempo" }] }
+      ]
+    }
+  ],
+  "warnings": []
+}
+```
+
+### 9 Reserved words ignore case, dots and spaces
+
+```chartdown
+## Outro
+{MF} 1 | {R.i.t.} 4
+```
+
+```json
+{
+  "sections": [{ "rows": [{ "bars": [{ "dynamic": "mf" }, { "tempoMark": "rit" }] }] }],
+  "warnings": []
+}
+```

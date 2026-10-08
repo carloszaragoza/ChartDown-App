@@ -1,6 +1,6 @@
 # ChartDown App – Task List (MVP)
 
-**Version:** 1.2 · **Date:** October 7, 2026 · **Based on:** SDD Plan v0.2, Technical Plan 1.0, Design Handoff 1.0, ChartDown 0.4
+**Version:** 1.3 · **Date:** October 8, 2026 · **Based on:** SDD Plan v0.2, Technical Plan 1.0, Design Handoff 1.0, ChartDown 0.6
 
 Every task is small, has its requirements (R-xx) and is done only when its tests pass. The order follows dependencies: a task does not start until the tasks it depends on are done.
 
@@ -27,6 +27,7 @@ Every task is small, has its requirements (R-xx) and is done only when its tests
 | M5 | E9, E10, E11 | Offline, notices and minimal administration |
 | M6 | E12 | Landing page, terms and a beta with a real band |
 | M7 | E13 | Version 2 of the interface (Astryx) |
+| M7b | E17 | ChartDown 0.6 in the parser, the app and npm, before the beta opens |
 | M8 (phase 2) | E14 | Import from PDF |
 | M9 (phase 2) | E15 | Visual metronome and bar follow |
 | M10 (phase 2) | E16 | Live mode: the band follows the MD |
@@ -177,6 +178,21 @@ The redesign of Design Handoff 2.0, one block per pull request. Until a block is
 | T-1308 | Home after sign-in: music director, musician and new user; usage of public versions | SPEC-02 (R-02.11), 04, 05, 06, 09 | T-1301 | L | Screen 00 matches the design in its three variants; `version_usage` returns totals only, and nothing to anyone but the author (SQL test) |
 | T-1309 | Chart viewer: every ChartDown 0.4 element drawn by `design/chart-viewer` (beat grid and slashes, splits, marks, repeats, endings, key changes) in the viewer, editors and stand mode | SPEC-03, Handoff 3 | T-1301 | M | Each screenshot in `design/chart-viewer/screens` matches the app's rendering of the same source; light and dark |
 | T-1307 | Landing page redesigned with the `impeccable` skill | SPEC-01 | T-1301 | M | Not generic: the owner approves the proposal; waitlist and sign-in keep working |
+
+## E17 · ChartDown 0.6
+
+The Language repository (github.com/ChartDown/Language) is at 0.6; `chartdown` here reads 0.4. This epic brings the parser, the JSON form, the chart components and the npm package to 0.6, so the beta runs the latest published version. The playground of the Language repository is the reference parser: the port is checked against it on every example.
+
+| ID | Task | Requirements | Depends on | Size | Tests / evidence |
+|---|---|---|---|---|---|
+| T-1701 | Plan the move to 0.6: requirements R-00.6 to R-00.11, these tasks, and the 0.6 examples and reference parser as test fixtures | – | – | S | Specs reviewed by the owner |
+| T-1702 | Parser 0.5: pickup bars, partial rests and shared beats, sixteenth push and unison riffs | R-00.6, R-00.7 | T-1701 | M | One conformance case per rule (5.1, 5.3, 7, 7.1, 8); the port matches the reference parser on the 0.5 syntax |
+| T-1703 | Parser 0.6: meter and tempo changes, tempo marks, cues and MD notes for one pass, repeat counts `3x`, navigation marks and their warnings; charts of 0.3 to 0.6 read without a version warning | R-00.4, R-00.6, R-00.8 | T-1702 | M | One conformance case per rule (9, 9.1, 10, 11.2, 11.3); a one-pass MD note reaches only its instruments |
+| T-1704 | Play order and the JSON form (Appendix A) exported by the package; layers count a pickup as bar 0 | R-00.9, R-00.10 | T-1703 | M | The play order of Northbound (D.S. al Coda) matches the reference parser; the JSON of the spec's example is produced |
+| T-1705 | Riff notes in numbers and letters and transposition (spec 12.3), and section length without the pickup bar (spec 5.3) | R-00.6, R-00.7 | T-1704 | S | A riff in G transposed to A shows A's notes; a pickup is not counted in a section's bars |
+| T-1706 | Draw every 0.6 element in the chart components, the viewer, the editors and stand mode, after the owner approves the drawing in `design/chart-viewer` | R-00.11 | T-1704, T-1309 | L | Pickup, riff, partial rest, meter and tempo changes, passes and navigation render in numbers and letters, light and dark |
+| T-1707 | App: translated warnings, 0.6 written on every save, 0.6 example charts, and the in-app language reference | R-00.4, R-00.11 | T-1703 | S | Every new warning code has an English and a Spanish message |
+| T-1708 | Publish `chartdown` 0.2.0 to npm: README, changelog, a packed install test | – | T-1704 | S | The packed package installs in a new project and parses Northbound |
 
 ## Phase 2
 

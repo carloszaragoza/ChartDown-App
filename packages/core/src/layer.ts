@@ -36,7 +36,7 @@ export function parseLayer(source: string, options: ParseOptions = {}): ParsedLa
   const lines = source.replace(/\r/g, "").split("\n");
   const { fields, version, instruments, roles, bodyStart } = readHeader(
     lines,
-    LAYER_VERSION,
+    [LAYER_VERSION],
     options,
     warn,
   );
@@ -80,6 +80,7 @@ export function parseLayer(source: string, options: ParseOptions = {}): ParsedLa
         roles: note.roles,
         text: note.text,
       };
+      if (note.passes.length > 0) layerNote.passes = note.passes;
       if (anchor.bar !== undefined) layerNote.bar = anchor.bar;
       notes.push(layerNote);
       continue;
@@ -140,7 +141,9 @@ export function formatLayer(layer: Layer, options: ParseOptions = {}): string {
   const noteLine = (note: LayerNote) => {
     const text = note.text.replace(/\s*\n\s*/g, " ");
     const forEveryone = note.roles.length === 0 || note.roles.includes(EVERYONE);
-    return forEveryone ? `> MD: ${text}` : `> MD ${note.roles.join(", ")}: ${text}`;
+    const passes = note.passes?.length ? `${note.passes.map((pass) => `${pass}x`).join(",")}` : "";
+    const who = [passes, forEveryone ? "" : note.roles.join(", ")].filter(Boolean).join(" ");
+    return who ? `> MD ${who}: ${text}` : `> MD: ${text}`;
   };
 
   let first = true;
@@ -199,7 +202,11 @@ export function placeLayer(chart: Chart, layer: Layer, options: PlaceOptions = {
       sections[index]?.push({ note });
       continue;
     }
-    const bars = section.rows.reduce((total, row) => total + row.bars.length, 0);
+    // A layer counts bars as the chart does: a pickup is bar 0, the first full bar is bar 1 (spec 5.3).
+    const bars = section.rows.reduce(
+      (total, row) => total + row.bars.filter((bar) => bar.pickup === undefined).length,
+      0,
+    );
     if (!Number.isInteger(note.bar) || note.bar < 1 || note.bar > bars) {
       unplaced.push({ note, reason: "bar" });
       continue;

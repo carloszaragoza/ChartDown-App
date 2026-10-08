@@ -17,7 +17,8 @@ const plays = (bar: Bar, pass: number) => bar.ending === undefined || bar.ending
  * is 4 bars, twice.
  */
 export function sectionLength(section: Section): SectionLength {
-  const bars = section.rows.flatMap((row) => row.bars);
+  // A pickup is bar 0 and is not counted in a section's bar count (spec 5.3).
+  const bars = section.rows.flatMap((row) => row.bars).filter((bar) => bar.pickup === undefined);
   const passLengths: number[][] = [];
   let total = 0;
   let outside = 0;

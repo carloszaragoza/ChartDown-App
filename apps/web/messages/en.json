@@ -145,7 +145,22 @@
     "use-with-rows": "<code>@use</code> must be the only content line of a section; its own rows are kept",
     "layer-no-section": "Notes need a section first, like <code>## Chorus</code>",
     "layer-line": "A layer holds only sections, bar headings and notes",
-    "bad-bar-heading": "Bar headings look like <code>### Bar 3</code>"
+    "bad-bar-heading": "Bar headings look like <code>### Bar 3</code>",
+    "bad-meter-directive": "Write a meter change like <code>@meter 3/4</code>",
+    "bad-tempo-directive": "Write a tempo change like <code>@tempo 96</code>",
+    "pickup-and-meter": "A bar can’t have both a pickup and a one-bar meter",
+    "pickup-length": "A pickup needs more than 0 and fewer than {beats} beats",
+    "pickup-not-first": "A pickup must be the first bar of a section",
+    "pickup-beats-mismatch": "Beats add up to {sum}, but the pickup has {beats}",
+    "riff-note": "Can’t read “{token}” in a riff (notes are scale degrees or letters)",
+    "riff-beats-mismatch": "Riff beats add up to {sum}, but its space in the bar is {beats}",
+    "pass-without-repeat": "A cue for one pass (like <code>2x</code>) needs a repeat",
+    "note-pass-without-repeat": "An <code>MD</code> note for one pass (like <code>2x</code>) needs a repeat in its section",
+    "nav-duplicate": "There is more than one {mark} mark",
+    "nav-second-jump": "A song can have only one D.S. or D.C. jump",
+    "nav-needs-segno": "D.S. needs a segno mark",
+    "nav-needs-coda": "{mark} needs a to-coda mark and a coda mark",
+    "nav-needs-fine": "{mark} needs a fine mark"
   },
   "instruments": {
     "drums": "Drums",

@@ -1,0 +1,41 @@
+---
+chartdown: 0.6
+title: Northbound (example song)
+artists: ChartDown examples
+key: A
+tempo: 84
+meter: 4/4
+feel: Driving eighths
+---
+
+// An original example song written for this repository.
+// A D.S. al Coda, a 6/8 bridge, a 2/4 bar and cues for one pass.
+
+## Intro
+> MD gtr, bass: Pickup on beat 4, then the riff in unison.
+[p:1] 5 | R[ 1 5 b7 1 ] | 4 | R[ 1 5 b7 1 ] | 4
+
+## Verse
+> MD: Tight and low. I'll bring us back here from the bridge.
+> MD 2x drums: Ride cymbal on the second pass.
+|: {segno} {p} 1 "Headlights on the northbound" | 4 | 6m | 5 {2x bass: walk up}
+1 | 4 | 6m 5 | [1] 4 :| 2x
+[2] 4 | 4 {cresc}
+
+## Chorus
+> MD: Full band. Big and open.
+{mf} 4 "Keep driving north" | 1 | 5 | 6m
+4 | 1 | 5 {to coda} | 5
+
+## Bridge
+> MD: Half-time in 6/8. Watch me for the way back.
+@meter 6/8
+@tempo 72
+{p} 6m | 4 | 1 | 5 {rit}
+@meter 4/4
+@tempo 84
+4 | [m:2/4] 5 | 5 {D.S. al coda}
+
+## Outro
+> MD: Last time. Hold the end on my cue.
+{coda} {f} 4 | 5 | 6m 5 | <1>~
