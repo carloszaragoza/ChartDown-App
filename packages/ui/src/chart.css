@@ -26,6 +26,7 @@
   /* More room than chart-tokens.css's spacing-2: a number right against the bar line is hard to
      read (owner, October 7, 2026). */
   --chart-cell-padding: var(--spacing-4);
+  --chart-bar-padding-end: var(--spacing-4);
 
   /* Beat slashes: color, size and weight together, never color alone */
   --chart-beat-strong-color: var(--color-text-primary);
@@ -90,7 +91,8 @@
   grid-row: span 4;
   grid-template-rows: subgrid;
   row-gap: var(--spacing-1);
-  padding: var(--spacing-1) var(--chart-cell-padding);
+  /* Room under the beats, as in the prototype (20px below the slashes), so rows breathe. */
+  padding: var(--spacing-1) var(--chart-cell-padding) var(--chart-bar-padding-end);
   border-inline-end: var(--chart-bar-line);
   color: var(--chart-ink);
 }
