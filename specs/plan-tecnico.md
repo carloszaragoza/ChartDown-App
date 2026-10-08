@@ -102,7 +102,7 @@ Tool versions and prices change; confirm them when starting.
 | band_invitations | band, invitee's email (lowercase), invited by, created at, responded at, accepted | R-04.2, T-701: one pending invitation per band and email; no expiry, the MD cancels it |
 | member_instruments | member, instrument | Default instruments (R-04.3) |
 | layers | band, version, hide author notes | One per band and version (decisions 9.1, 9.3) |
-| layer_notes | layer, section, occurrence, optional bar, text, revision it was anchored to (a revision of the layer's version) | Anchors follow `specs/chartdown-layers-0.5.md`; detects “unplaced” notes when a section changes |
+| layer_notes | layer, section, occurrence, optional bar, text, the passes of a repeat it is for (none: every pass), revision it was anchored to (a revision of the layer's version) | Anchors follow `specs/chartdown-layers-0.5.md`; detects “unplaced” notes when a section changes |
 | layer_note_instruments | note, instrument | No rows = the note is for everyone; one or more instruments otherwise, as in `> MD bass, keys:` |
 | sets | band, name, optional date, optional time (the band's local time, without a time zone; only with a date), type | Name unique per band, ignoring case (decision 8) |
 | set_items | set, position, version, pinned revision (a revision of that version), set key (a key name such as `A` or `Bbm`; empty = the version's key) | Decisions 9 and 9.2 |

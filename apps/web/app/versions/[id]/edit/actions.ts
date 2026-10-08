@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { authEnabled } from "../../../../lib/auth/enabled";
+import { withChartVersion } from "../../../../lib/chart/version";
 import { createClient } from "../../../../lib/supabase/server";
 import { normalizeLineBreaks } from "../../../../lib/versions/lines";
 import { UUID } from "../load";
@@ -41,9 +42,10 @@ export async function saveChart(previous: SaveState, form: FormData): Promise<Sa
     return { ...previous, status: "changed" };
   if (content === previous.savedContent) return { ...previous, status: "unchanged" };
 
+  // The chart is saved with the format version it was written for (R-00.4).
   const { data: created, error } = await supabase.rpc("save_revision", {
     version_id: versionId,
-    content,
+    content: withChartVersion(content),
   });
   if (error || typeof created !== "string") return { ...previous, status: "error" };
   const { data: revision } = await supabase

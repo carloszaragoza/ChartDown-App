@@ -9,13 +9,13 @@ A **layer** is a separate set of music director (MD) notes that sits on top of a
 Every layer note is anchored to:
 
 - **a section**, by its **name** and its **occurrence**: occurrence 1 is the first section with that name in the chart, occurrence 2 the second, and so on (R-00.2, "by name and position");
-- optionally, **a bar** of that section, counted from 1 across the section's rows in the order they are written. Repeats are not expanded.
+- optionally, **a bar** of that section, counted from 1 across the section's rows in the order they are written. Repeats are not expanded. A pickup bar is bar 0 of its section and cannot be anchored; the first full bar is bar 1, as in the chart (ChartDown 0.6, spec 5.3).
 
 Names match ignoring case and leading or trailing spaces, and nothing looser.
 
 In the app, a note also records the **revision it was anchored to** (Technical Plan 4, `layer_notes`). The text form does not carry it.
 
-A note also has its **roles**: everyone, or one or more instruments, resolved like chart notes (ChartDown 0.4, section 4.1, with the Admin's catalog, R-00.1). And it has its **text**, a single line.
+A note also has its **roles**: everyone, or one or more instruments, resolved like chart notes (ChartDown 0.4, section 4.1, with the Admin's catalog, R-00.1). It may be **for one pass** of a repeat, or several (`passes`, for example 2, or 1 and 3), as chart notes are (ChartDown 0.6, spec 9.1): the pass says when, the roles say who, and a note for one pass is as private to its instruments as any other (R-06.4). And it has its **text**, a single line.
 
 ## 2. Placing a layer on a chart
 
@@ -54,7 +54,7 @@ layer: Open Road
 - **Header** (optional): `chartdown: 0.5` declares the format version, `layer:` gives a title, and `instruments:` declares custom instruments as in charts. Unknown fields are kept.
 - `## Name` anchors the notes under it to a section. **A repeated heading means the next occurrence:** the second `## Chorus` in the file is the second Chorus of the chart. To reach only a later occurrence, write the earlier headings empty.
 - `### Bar N` anchors the notes under it to bar N (a whole number from 1) of the current section, until the next heading. Notes before any `### Bar` belong to the section itself.
-- **Notes:** `> MD: text` and `> text` are for everyone; `> MD bass, keys: text` is for those instruments. All layer notes are MD notes.
+- **Notes:** `> MD: text` and `> text` are for everyone; `> MD bass, keys: text` is for those instruments; `> MD 2x: text` and `> MD 2x bass: text` are for the second pass of a repeat, and `> MD 1x,3x bass: text` for the first and third. All layer notes are MD notes.
 - Blank lines and lines starting with `//` are ignored.
 
 ### Errors
