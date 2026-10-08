@@ -1,12 +1,12 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
-import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE } from "./locales";
+import { isLocale, LOCALE_COOKIE, pickLocale } from "./locales";
 
-// English unless the person chose Spanish. No detection from the browser language: R-01.5
-// makes English the default.
+// What the person chose (cookie, or the profile once signed in); with no choice yet, the browser's
+// language when it is Spanish, and English otherwise (R-01.5).
 export default getRequestConfig(async () => {
   const chosen = (await cookies()).get(LOCALE_COOKIE)?.value;
-  const locale = isLocale(chosen) ? chosen : DEFAULT_LOCALE;
+  const locale = isLocale(chosen) ? chosen : pickLocale((await headers()).get("accept-language"));
   return {
     locale,
     messages: (await import(`../messages/${locale}.json`)).default,

@@ -146,7 +146,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-01.2 Profile with name, language and instruments played (from the catalog).
 - R-01.3 Platform roles: Visitor, User and Administrator.
 - R-01.4 A visitor browses and reads the public catalog. Creating, forking or saving asks them to sign in (decision 3).
-- R-01.5 Interface in English by default, with an option to switch to Spanish. The preference is stored in the profile (decision 11).
+- R-01.5 Interface in English by default, with an option to switch to Spanish. A first-time visitor sees the language of their browser when it is Spanish, and English otherwise (owner's review, October 8, 2026). The preference is stored in the profile (decision 11); a signed-in person changes it only there, and a visitor with the small EN | ES at the foot of the landing page.
 - R-01.6 A person can delete their account. Their public versions stay with the community and are credited to “ChartDown”, and their personal data is deleted (decision 9.5, updated in Technical Plan 12.5).
 - R-01.7 During the beta, creating an account requires a valid invite code. The Admin creates and revokes single-use or whole-band codes.
 - R-01.8 Without a code, a person can leave their email on a waitlist. The public catalog stays visible to visitors.

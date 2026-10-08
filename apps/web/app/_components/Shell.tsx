@@ -7,7 +7,6 @@ import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Item } from "@astryxdesign/core/Item";
-import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import {
   SideNav,
   SideNavCollapseButton,
@@ -52,10 +51,9 @@ import {
   UserIcon as UserSolid,
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState, useTransition, type ReactNode } from "react";
-import { LOCALES } from "../../i18n/locales";
+import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useEffect, useState, type ReactNode } from "react";
 import { forgetSets } from "../../lib/offline/store";
 import {
   currentBand,
@@ -65,7 +63,6 @@ import {
   type NavItem,
   type ShellBand,
 } from "../../lib/shell/shell";
-import { setLocale } from "../actions";
 import { signOut } from "../auth/actions";
 
 export interface ShellProps {
@@ -250,22 +247,12 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
 }
 
 /**
- * The side navigation's footer: the language, and the person with Sign out (or Sign in). Collapsed,
- * only two icon buttons remain: the profile and Sign out (Sign in for a visitor).
+ * The side navigation's footer: the person with Sign out, or Sign in for a visitor. No language
+ * control: the language is changed in the profile, or at the foot of the landing page. Collapsed,
+ * only the profile and Sign out remain, as icon buttons (Sign in for a visitor).
  */
 function Footer({ account, collapsed }: { account: ShellProps["account"]; collapsed: boolean }) {
   const t = useTranslations("nav");
-  const language = useTranslations("language");
-  const locale = useLocale();
-  const router = useRouter();
-  const [, startTransition] = useTransition();
-  const chooseLanguage = (value: string) =>
-    startTransition(async () => {
-      const form = new FormData();
-      form.set("locale", value);
-      await setLocale(form);
-      router.refresh();
-    });
 
   if (collapsed) {
     return (
@@ -312,17 +299,6 @@ function Footer({ account, collapsed }: { account: ShellProps["account"]; collap
 
   return (
     <VStack gap={2}>
-      <SegmentedControl
-        label={t("language")}
-        value={locale}
-        onChange={chooseLanguage}
-        size="lg"
-        layout="fill"
-      >
-        {LOCALES.map((option) => (
-          <SegmentedControlItem key={option} value={option} label={language(option)} />
-        ))}
-      </SegmentedControl>
       {account ? (
         // The person takes the room left and truncates, so Sign out always sits inside the bar.
         <HStack gap={1} vAlign="center">
