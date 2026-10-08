@@ -24,6 +24,17 @@ function Item({
   formatter: ChordFormatter;
   labels: BarLabels;
 }) {
+  if (item.type === "riff") {
+    // Provisional plain text: the drawing is T-1706, after the owner approves it (R-00.11).
+    const notes = item.notes.map((note) =>
+      note.type === "rest" ? "x" : formatter.root(note.root, row),
+    );
+    return (
+      <span className="cd-chart__chord">
+        <span>{`R[ ${notes.join(" ")} ]`}</span>
+      </span>
+    );
+  }
   if (item.type !== "chord") {
     const [glyph, words, extra] = {
       "no-chord": ["N.C.", labels.noChord, " cd-chart__no-chord"],

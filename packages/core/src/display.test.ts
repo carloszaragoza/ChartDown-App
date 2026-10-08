@@ -22,7 +22,9 @@ function rows(source: string, options: DisplayOptions): string[] {
             .map((item) =>
               item.type === "chord"
                 ? fmt.chord(item, row).text
-                : { "no-chord": "x", "repeat-bar": "%", tie: "=" }[item.type],
+                : item.type === "riff"
+                  ? `R[ ${item.notes.map((note) => (note.type === "rest" ? "x" : fmt.root(note.root, row))).join(" ")} ]`
+                  : { "no-chord": "x", "repeat-bar": "%", tie: "=" }[item.type],
             )
             .join(" "),
         )

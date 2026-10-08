@@ -21,6 +21,8 @@ export interface ChordFormatter {
   /** The key a row is shown in: key changes move with the transposition (spec 12.2). */
   rowKey(row: Row): Key;
   chord(chord: Chord, row: Row): ChordLabel;
+  /** A root alone, as a riff note is shown (spec 7.1 and 12.3): a number or a letter. */
+  root(root: string, row: Row): string;
 }
 
 // Degree to semitone in the major scale (spec 12). In a minor key, 1 is the tonic (spec 3).
@@ -45,7 +47,7 @@ function letterSemitone(letter: string): number {
 }
 
 /** Semitones from the key's tonic to a root written as a number or a letter (spec 12.1). */
-function degree(root: string, key: Key): number {
+export function degree(root: string, key: Key): number {
   const number = /^([b#]?)([1-7])$/.exec(root);
   if (number) return mod12((SCALE[Number(number[2]) - 1] as number) + accidental(number[1]));
   return mod12(letterSemitone(root) - letterSemitone(key.root));
@@ -111,6 +113,7 @@ export function chordFormatter(chart: Chart, options: DisplayOptions): ChordForm
   return {
     homeKey,
     rowKey,
+    root: (root, row) => formatRoot(root, row.key, rowKey(row)),
     chord(chord, row) {
       const shown = rowKey(row);
       const root = formatRoot(chord.root, row.key, shown);

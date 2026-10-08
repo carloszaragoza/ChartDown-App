@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parse, SUPPORTED_VERSION } from "./parse.js";
-import { EXAMPLES, fixture } from "./test-helpers.js";
+import { EXAMPLES, EXAMPLES_06, fixture, fixture06 } from "./test-helpers.js";
 import type { Chart } from "./types.js";
 
 const count = (chart: Chart) => ({
@@ -90,15 +90,22 @@ describe("R-00.4 the header declares the format version", () => {
   });
 
   it("R-00.4 warns when a chart declares a version the parser does not support", () => {
-    expect(parse("---\nchartdown: 0.5\n---\n## A\n1").warnings).toEqual([
+    expect(parse("---\nchartdown: 0.7\n---\n## A\n1").warnings).toEqual([
       {
         line: 2,
         code: "unsupported-version",
-        message: "This chart says ChartDown 0.5; this parser reads 0.4",
-        values: { version: "0.5", supported: "0.4" },
+        message: "This chart says ChartDown 0.7; this parser reads 0.3–0.6",
+        values: { version: "0.7", supported: "0.3–0.6" },
       },
     ]);
   });
+
+  it.each(["0.3", "0.4", "0.5", "0.6"])(
+    "R-00.4 a chart written for %s is read without a warning",
+    (version) => {
+      expect(parse(`---\nchartdown: ${version}\n---\n## A\n1`).warnings).toEqual([]);
+    },
+  );
 
   it("R-00.4 a missing version is not a warning", () => {
     const chart = parse("---\ntitle: Open Road\n---\n## A\n1");
@@ -106,8 +113,14 @@ describe("R-00.4 the header declares the format version", () => {
     expect(chart.warnings).toEqual([]);
   });
 
-  it.each(EXAMPLES)("R-00.4 the Language example %s declares the supported version", (name) => {
-    expect(parse(fixture(name)).version).toBe(SUPPORTED_VERSION);
+  it.each(EXAMPLES)("R-00.4 the 0.4 example %s is read without a warning", (name) => {
+    const chart = parse(fixture(name));
+    expect(chart.version).toBe("0.4");
+    expect(chart.warnings).toEqual([]);
+  });
+
+  it.each(EXAMPLES_06)("R-00.4 the Language example %s declares the supported version", (name) => {
+    expect(parse(fixture06(name)).version).toBe(SUPPORTED_VERSION);
   });
 });
 
@@ -128,9 +141,9 @@ describe("parse", () => {
       "## Chorus\n> Watch the stops.\n> MD: Open it up.\n> MD bass, keys: Roots only.",
     ).sections;
     expect(section?.notes).toEqual([
-      { md: false, roles: ["everyone"], text: "Watch the stops.", line: 2 },
-      { md: true, roles: ["everyone"], text: "Open it up.", line: 3 },
-      { md: true, roles: ["bass", "keys"], text: "Roots only.", line: 4 },
+      { md: false, roles: ["everyone"], passes: [], text: "Watch the stops.", line: 2 },
+      { md: true, roles: ["everyone"], passes: [], text: "Open it up.", line: 3 },
+      { md: true, roles: ["bass", "keys"], passes: [], text: "Roots only.", line: 4 },
     ]);
   });
 

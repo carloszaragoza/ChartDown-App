@@ -21,7 +21,7 @@ this line is not a header
 {mf} {cello: in} {watch me} 1 "one two three four five six seven eight nine"
 1 ? 4
 {p}
-@tempo 80
+@capo 2
 @key C
 1 | 4
 

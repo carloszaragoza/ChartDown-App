@@ -38,15 +38,15 @@ describe("parseRow", () => {
     const [bar] = row("{p} 1 {drums: in} {watch me} {cello: swell}").bars ?? [];
     expect(bar?.dynamic).toBe("p");
     expect(bar?.cues).toEqual([
-      { roles: ["drums"], text: "in" },
-      { roles: ["everyone"], text: "watch me" },
-      { roles: ["cello"], text: "swell" },
+      { roles: ["drums"], passes: [], text: "in" },
+      { roles: ["everyone"], passes: [], text: "watch me" },
+      { roles: ["cello"], passes: [], text: "swell" },
     ]);
   });
 
   it("keeps a cue with an unknown name whole, for everyone, with a warning", () => {
     const { bars, warnings } = row("1 {intro: soft}");
-    expect(bars?.[0]?.cues).toEqual([{ roles: ["everyone"], text: "intro: soft" }]);
+    expect(bars?.[0]?.cues).toEqual([{ roles: ["everyone"], passes: [], text: "intro: soft" }]);
     expect(warnings).toEqual(["unknown-cue-instrument"]);
   });
 
