@@ -32,6 +32,11 @@ describe("T-1201 the landing page", () => {
     );
   });
 
+  it("T-1307 the landing follows the system color scheme: it pins no theme", () => {
+    const html = render({ signInEnabled: true, waitlistReady: true });
+    expect(html).not.toContain("data-theme=");
+  });
+
   it("R-01.7 sign-in and the invite code show only where sign-in is open", () => {
     const open = render({ signInEnabled: true, waitlistReady: true });
     expect(open).toContain('href="/auth/sign-in"');
