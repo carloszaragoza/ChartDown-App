@@ -97,7 +97,7 @@ export default async function NotesPage({
     ? await supabase
         .from("layer_notes")
         .select(
-          "id, section, occurrence, bar, text, anchored_revision_id, instruments:layer_note_instruments(instrument_id)",
+          "id, section, occurrence, bar, text, passes, anchored_revision_id, instruments:layer_note_instruments(instrument_id)",
         )
         .eq("layer_id", layer.id)
         .order("created_at")
@@ -169,6 +169,7 @@ export default async function NotesPage({
     ...(placement.sections[index] ?? []).map(({ note }) => ({
       md: true,
       roles: note.roles,
+      ...(note.passes ? { passes: note.passes } : {}),
       text: note.bar ? `${barLabel(note.bar)} · ${note.text}` : note.text,
       editHref: pageHref(`&edit=${note.id}#note-form`),
       editLabel: t("editNote", { text: note.text }),
@@ -336,6 +337,7 @@ export default async function NotesPage({
                         text: editing.text,
                         bar: editing.bar,
                         instrumentIds: [...editingIds],
+                        passes: (editing.passes ?? []).join(","),
                       }
                     : null
                 }
@@ -359,6 +361,8 @@ export default async function NotesPage({
                   textPlaceholder: t("textPlaceholder"),
                   textHint: t("textHint", { max: NOTE_MAX }),
                   bar: t("barField"),
+                  passes: t("passesField"),
+                  passesHint: t("passesHint"),
                   submit: editing ? t("saveEdit") : t("add"),
                   cancel: t("cancel"),
                 }}

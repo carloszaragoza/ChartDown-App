@@ -38,6 +38,7 @@ export async function saveNote(form: FormData): Promise<void> {
     bar: input.bar,
     note_text: input.text,
     instrument_ids: input.instrumentIds,
+    passes: input.passes,
   });
   if (error)
     redirect(back(versionId, bandId, `error=unknown${editing ? `&edit=${editing}` : ""}`, form));

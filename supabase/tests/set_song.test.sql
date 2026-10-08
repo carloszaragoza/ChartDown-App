@@ -2,7 +2,7 @@
 -- Run with: supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(13);
+select plan(15);
 
 create function pg_temp.login(person uuid) returns void language plpgsql as $$
 begin
@@ -53,7 +53,7 @@ begin
   end loop;
   perform pg_temp.login('00000000-0000-0000-0000-0000000000a1');
   perform public.save_layer_note(current_setting('test.band')::uuid, current_setting('test.version')::uuid, null, 'Verse', 1, null, 'Everyone soft.', null);
-  perform public.save_layer_note(current_setting('test.band')::uuid, current_setting('test.version')::uuid, null, 'Chorus', 1, 2, 'Keys pad.', array[pg_temp.instrument('keys')]);
+  perform public.save_layer_note(current_setting('test.band')::uuid, current_setting('test.version')::uuid, null, 'Chorus', 1, 2, 'Keys pad.', array[pg_temp.instrument('keys')], array[2]);
   perform public.save_layer_note(current_setting('test.band')::uuid, current_setting('test.version')::uuid, null, 'Chorus', 1, null, 'Bass walks up.', array[pg_temp.instrument('bass')]);
   perform public.save_layer_note(current_setting('test.band')::uuid, current_setting('test.version')::uuid, null, 'Verse', 1, null, 'Vocals harmony.', array[pg_temp.instrument('vocals')]);
 end $$;
@@ -104,6 +104,19 @@ select results_eq(
     where n ->> 'text' = 'Keys pad.'$$,
   $$values ('["keys"]'::jsonb, 2, 'Chorus')$$,
   'R-06.2 each note comes with its anchor and instruments'
+);
+
+-- The pass a note is for travels with it (R-03.6): the keys note is for pass 2, the rest for every pass.
+select results_eq(
+  $$select n ->> 'text', n -> 'passes'
+    from jsonb_array_elements(public.set_song('00000000-0000-0000-0000-00000000c501', 1) -> 'notes') n
+    order by n ->> 'text'$$,
+  $$values ('Everyone soft.', '[]'::jsonb), ('Keys pad.', '[2]'::jsonb)$$,
+  'R-03.6 each note comes with the passes it is for, none meaning every pass'
+);
+select is(
+  pg_temp.notes('00000000-0000-0000-0000-00000000c501'), array['Everyone soft.', 'Keys pad.'],
+  'R-06.4 a note for one pass reaches the same players as a note for every pass'
 );
 
 -- Cleo, on bass in Sunday, out of Friday.

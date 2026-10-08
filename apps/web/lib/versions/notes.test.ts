@@ -1,6 +1,6 @@
 import { parse, placeLayer } from "chartdown";
 import { describe, expect, it } from "vitest";
-import { readNoteForm, sectionAnchors, toLayer, type NoteRow } from "./notes";
+import { readNoteForm, readPasses, sectionAnchors, toLayer, type NoteRow } from "./notes";
 
 const chart = parse("## Verse\n1 | 4\n## Chorus\n4 | 5\n## Chorus\n4 | 1 | 5 | 1\n");
 const form = (fields: Record<string, string | string[]>) => {
@@ -36,6 +36,7 @@ describe("R-03.5 the note form", () => {
         bar: 3,
         text: "Pad swell into the end",
         instrumentIds: ["k", "b"],
+        passes: [],
       },
     });
     expect(readNoteForm(form({ anchor: "Verse|1", text: "Soft." }))).toMatchObject({
@@ -83,5 +84,63 @@ describe("R-03.5 the note form", () => {
     expect(placed.sections[2]?.map((item) => item.note.id)).toEqual(["n1"]);
     expect(placed.sections[0]?.map((item) => item.note.id)).toEqual(["n2"]);
     expect(placed.unplaced).toEqual([]);
+  });
+});
+
+describe("R-03.6 a note for one pass of a repeat", () => {
+  it.each([
+    ["", []],
+    ["2", [2]],
+    ["1,3", [1, 3]],
+    ["3 1", [1, 3]],
+    ["1x, 3x", [1, 3]],
+    ["2,2", [2]],
+  ])("R-03.6 the passes %j are read as %j", (written, passes) => {
+    expect(readPasses(written)).toEqual(passes);
+  });
+
+  it.each(["0", "two", "1.5", "100", "1,2,3,4,5,6,7,8,9", "-1"])(
+    "R-03.6 the passes %j are refused",
+    (written) => {
+      expect(readPasses(written)).toBeUndefined();
+    },
+  );
+
+  it("R-03.6 the note form sends the passes, and refuses ones it cannot read", () => {
+    expect(readNoteForm(form({ anchor: "Verse|1", text: "Ride.", passes: "2" }))).toMatchObject({
+      input: { passes: [2] },
+    });
+    expect(readNoteForm(form({ anchor: "Verse|1", text: "Ride.", passes: "soon" }))).toEqual({
+      error: "passes_invalid",
+    });
+  });
+
+  it("R-03.6 the band's notes keep their passes when they land on the chart", () => {
+    const rows: NoteRow[] = [
+      {
+        id: "n1",
+        section: "Verse",
+        occurrence: 1,
+        bar: null,
+        text: "Ride cymbal.",
+        passes: [2],
+        anchored_revision_id: "r1",
+        instruments: [{ instrument_id: "i-drums" }],
+      },
+      {
+        id: "n2",
+        section: "Verse",
+        occurrence: 1,
+        bar: null,
+        text: "Always.",
+        passes: [],
+        anchored_revision_id: "r1",
+        instruments: [],
+      },
+    ];
+    const layer = toLayer(rows, () => "drums");
+    expect(layer.notes.map((note) => note.passes)).toEqual([[2], undefined]);
+    const placed = placeLayer(chart, layer);
+    expect(placed.sections[0]?.map((item) => item.note.passes)).toEqual([[2], undefined]);
   });
 });

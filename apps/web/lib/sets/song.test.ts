@@ -98,3 +98,36 @@ describe("R-06.3 View as, for the MD", () => {
     expect(viewAsOptions(all, ["drums", "keys"])).toEqual(["bass", "drums", "keys"]);
   });
 });
+
+describe("R-03.6 a note for one pass reaches the same players", () => {
+  it("R-03.6 a band note keeps the pass it is for, and the author's notes keep theirs", () => {
+    const withPass = parse(
+      "## Verse\n> MD 2x keys: Author: pad on the second pass.\n|: 1 | 4 :| 2x\n",
+    );
+    const view = songView(
+      withPass,
+      song({
+        notes: [{ ...note("n4", "Verse", "Swell.", ["keys"], 2), passes: [1, 3] }],
+      }),
+    );
+    expect(view.sections[0]?.map((shown) => [shown.text, shown.passes])).toEqual([
+      ["Author: pad on the second pass.", [2]],
+      ["Swell.", [1, 3]],
+    ]);
+    // Who sees it is decided by the instruments alone: a bass player gets neither.
+    const bass = songView(withPass, song({ instruments: ["bass"], notes: [] }));
+    expect(bass.sections[0]).toEqual([]);
+  });
+
+  it("R-06.4 a note for one pass is not shown to a player of another instrument", () => {
+    const view = songView(
+      chart,
+      song({
+        instruments: ["drums"],
+        notes: [{ ...note("n5", "Chorus", "Keys only.", ["keys"]), passes: [2] }],
+      }),
+    );
+    // The server sends a musician only their notes; one that slipped through is still not theirs.
+    expect(texts(view, 1)).toEqual([]);
+  });
+});
