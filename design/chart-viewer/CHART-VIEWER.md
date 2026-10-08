@@ -22,11 +22,23 @@ This is the approved way to draw a ChartDown chart in ChartDown App: in the view
 
 - Chord numbers use **Barlow Condensed** (self-hosted, OFL license) through `--chart-font-numbers`. It is the only font outside Astryx, kept because condensed numbers fit four chords in one bar on an iPad. Everything else uses Astryx text components.
 - Sizes: `--chart-chord-size` in stand mode, one Astryx step smaller in the viewer and editor, `--chart-chord-size-preview` in the next-section preview.
-- Quality (`m`, `7`, `sus`, `add9`) is a superscript at `--chart-quality-scale`. Minor shows as `-` in numbers mode and `m` in letters mode. A slash bass is at `--chart-bass-scale`.
+- Quality (`7`, `sus`, `maj7`, `add9`) is a superscript at `--chart-quality-scale`, **in the chord's own face and weight** (Barlow Condensed semibold, never the text face), with **its top on the number's top**, set tight to the number (`0.03em`). It never floats above the number.
+- **Minor is always `-` in numbers mode** (Nashville): `2-`, `6-`, `2-7`. Letters mode keeps `m` (`Em7`). Qualities starting with `maj` stay as written.
+- A slash bass (`1/3`) is at `--chart-bass-scale`, also in the chord's face.
 
 ## 3. The bar
 
-Each bar is a box with a right bar line (`--chart-bar-line`); the first bar of a row also has a left bar line. A row of the source is a row on screen.
+Each bar is a box with a right bar line (`--chart-bar-line`); the first bar of a row also has a left bar line. A row of the source is a row on screen, with as many columns as it has bars.
+
+**Spacing inside a bar** (so a row breathes and a number never touches a line):
+
+| Where | Token | Size |
+|---|---|---|
+| Bar line to the chords, both sides | `--chart-cell-padding` | `--spacing-4` (16px) |
+| A split's dashed line to the next chord | – | `--spacing-2` (8px) |
+| Top of the bar to the chord (tags line included) | – | about 22px |
+| Chord to its beat slashes | – | `--spacing-1` + `--spacing-0-5` (6px) |
+| Beat slashes to the bottom of the bar | `--chart-bar-padding-end` | `--spacing-4` (20px with the line gap) |
 
 Inside, a bar has three layers, top to bottom:
 

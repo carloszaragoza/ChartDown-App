@@ -14,3 +14,6 @@ npm-debug.log*
 pnpm-debug.log*
 playwright-report/
 test-results/
+
+# Impeccable design tool state
+.impeccable/

@@ -11,7 +11,7 @@
   --chart-chord-size: var(--font-size-4xl);        /* stand mode; viewer and editor may use --font-size-3xl */
   --chart-chord-size-preview: var(--font-size-2xl);
   --chart-chord-weight: var(--font-weight-semibold);
-  --chart-quality-scale: 0.5;                       /* superscript: m, 7, sus, add9 ... (em) */
+  --chart-quality-scale: 0.5;                       /* superscript: 7, sus, maj7, add9 ... (em); chord face, top-aligned to the number */
   --chart-bass-scale: 0.75;                         /* slash bass: /3 (em) */
 
   /* Ink */
@@ -24,7 +24,8 @@
   --chart-repeat-line: calc(var(--border-width) * 5) double var(--chart-ink);
   --chart-split-line: calc(var(--border-width) * 1.5) dashed var(--color-border-emphasized);
   --chart-bar-min-width: calc(var(--spacing-12) * 3.5);
-  --chart-cell-padding: var(--spacing-2);
+  --chart-cell-padding: var(--spacing-4);           /* bar line to chords; a number never touches a line */
+  --chart-bar-padding-end: var(--spacing-4);       /* room under the beat slashes */
 
   /* Beat slashes: strong, semi-strong, weak (color + size + weight, never color alone) */
   --chart-beat-strong-color: var(--color-text-primary);
@@ -40,7 +41,7 @@
   /* Meaning colors */
   --chart-md: var(--color-text-red);                /* MD label, instrument tags, instrument cues */
   --chart-md-border: var(--color-border-red);
-  --chart-dynamic: var(--color-text-accent);        /* p, mf, cresc., push, stab, fermata marks */
+  --chart-dynamic: var(--color-text-blue);          /* p, mf, cresc., push, stab, fermata marks; blue = dynamics (the neutral theme's accent is the ink) */
 
   /* Hold (diamond) */
   --chart-hold-box: 1.5em;                          /* square that contains the chord, centered */
