@@ -250,7 +250,7 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
 }
 
 /**
- * The side navigation's footer: the language, and the person with Sign out (or Sign in). Collapsed,
+ * The side navigation's footer: the person with Sign out, or a visitor's language and Sign in. Collapsed,
  * only two icon buttons remain: the profile and Sign out (Sign in for a visitor).
  */
 function Footer({ account, collapsed }: { account: ShellProps["account"]; collapsed: boolean }) {
@@ -312,17 +312,20 @@ function Footer({ account, collapsed }: { account: ShellProps["account"]; collap
 
   return (
     <VStack gap={2}>
-      <SegmentedControl
-        label={t("language")}
-        value={locale}
-        onChange={chooseLanguage}
-        size="lg"
-        layout="fill"
-      >
-        {LOCALES.map((option) => (
-          <SegmentedControlItem key={option} value={option} label={language(option)} />
-        ))}
-      </SegmentedControl>
+      {/* A signed-in person changes the language in their profile; a visitor has none. */}
+      {!account && (
+        <SegmentedControl
+          label={t("language")}
+          value={locale}
+          onChange={chooseLanguage}
+          size="lg"
+          layout="fill"
+        >
+          {LOCALES.map((option) => (
+            <SegmentedControlItem key={option} value={option} label={language(option)} />
+          ))}
+        </SegmentedControl>
+      )}
       {account ? (
         // The person takes the room left and truncates, so Sign out always sits inside the bar.
         <HStack gap={1} vAlign="center">
