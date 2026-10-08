@@ -286,6 +286,7 @@ export function OfflineReader() {
     section.map((note) => ({
       md: note.md,
       roles: note.roles,
+      passes: note.passes,
       text: note.bar ? `${s("bar", { bar: note.bar })} · ${note.text}` : note.text,
     })),
   );

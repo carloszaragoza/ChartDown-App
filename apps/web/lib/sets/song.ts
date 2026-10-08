@@ -24,6 +24,8 @@ export interface SetSong {
     bar: number | null;
     text: string;
     anchored_revision_id: string;
+    /** The passes the note is for; missing or empty means every pass. */
+    passes?: number[];
     instruments: string[];
   }[];
 }
@@ -31,6 +33,8 @@ export interface SetSong {
 export interface ShownNote {
   md: boolean;
   roles: string[];
+  /** The passes of a repeat the note is for; empty for every pass. */
+  passes: number[];
   text: string;
   bar?: number;
   /** For this person's instruments, rather than for everyone. */
@@ -69,16 +73,17 @@ export function songView(
       occurrence: note.occurrence,
       ...(note.bar ? { bar: note.bar } : {}),
       roles: note.instruments.length > 0 ? note.instruments : [EVERYONE],
+      ...(note.passes && note.passes.length > 0 ? { passes: note.passes } : {}),
       text: note.text,
     })),
   };
   const placement = placeLayer(chart, layer, anchoredChart ? { anchoredChart } : {});
   let forYou = 0;
-  const shown = (roles: string[], text: string, bar?: number): ShownNote => {
+  const shown = (roles: string[], text: string, passes: number[], bar?: number): ShownNote => {
     // Seeing every note, the ones "for you" are those for any instrument rather than everyone.
     const forMe = seesAll ? !roles.includes(EVERYONE) : isForMe(roles);
     if (forMe) forYou += 1;
-    return { md: true, roles, text, ...(bar ? { bar } : {}), forYou: forMe };
+    return { md: true, roles, passes, text, ...(bar ? { bar } : {}), forYou: forMe };
   };
 
   const sections = chart.sections.map((section, index) => [
@@ -86,10 +91,10 @@ export function songView(
       ? []
       : section.notes
           .filter((note) => visible(note.roles))
-          .map((note) => ({ ...shown(note.roles, note.text), md: note.md }))),
+          .map((note) => ({ ...shown(note.roles, note.text, note.passes), md: note.md }))),
     ...(placement.sections[index] ?? [])
       .filter(({ note }) => visible(note.roles))
-      .map(({ note }) => shown(note.roles, note.text, note.bar)),
+      .map(({ note }) => shown(note.roles, note.text, note.passes ?? [], note.bar)),
   ]);
   return { sections, unplaced: placement.unplaced, forYou };
 }

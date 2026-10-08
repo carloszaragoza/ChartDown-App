@@ -27,7 +27,14 @@ export interface NoteFormProps {
   /** The instruments a note may be for, in the reader's language. */
   instruments: { id: string; name: string }[];
   /** The note being edited, or null to add one. */
-  editing: { id: string; text: string; bar: number | null; instrumentIds: string[] } | null;
+  editing: {
+    id: string;
+    text: string;
+    bar: number | null;
+    instrumentIds: string[];
+    /** The passes the note is for, as written: "2", "1,3", or "" for every pass. */
+    passes: string;
+  } | null;
   cancelHref: string;
   words: {
     title: string;
@@ -38,6 +45,8 @@ export interface NoteFormProps {
     textPlaceholder: string;
     textHint: string;
     bar: string;
+    passes: string;
+    passesHint: string;
     submit: string;
     cancel: string;
   };
@@ -63,6 +72,7 @@ export function NoteForm({
   const [chosen, setChosen] = useState<string[]>(editing?.instrumentIds ?? []);
   const [text, setText] = useState(editing?.text ?? "");
   const [bar, setBar] = useState(editing?.bar ? String(editing.bar) : "");
+  const [passes, setPasses] = useState(editing?.passes ?? "");
   const toggle = (id: string, on: boolean) =>
     setChosen((current) => (on ? [...current, id] : current.filter((item) => item !== id)));
 
@@ -119,6 +129,14 @@ export function NoteForm({
             />
           </StackItem>
           <TextInput label={words.bar} htmlName="bar" value={bar} onChange={setBar} width={140} />
+          <TextInput
+            label={words.passes}
+            htmlName="passes"
+            value={passes}
+            onChange={setPasses}
+            description={words.passesHint}
+            width={200}
+          />
         </HStack>
         <HStack gap={2}>
           <Button

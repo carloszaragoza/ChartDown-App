@@ -225,6 +225,7 @@ export default async function SetSongPage({
                 (shown.sections[index] ?? []).map((note) => ({
                   md: note.md,
                   roles: note.roles,
+                  passes: note.passes,
                   text: note.bar ? `${barLabel(note.bar)} · ${note.text}` : note.text,
                 })),
               )}
