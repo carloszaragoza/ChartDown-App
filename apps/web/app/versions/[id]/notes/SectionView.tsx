@@ -7,7 +7,7 @@ import { List } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import { chordFormatter, sectionLength, type Chart } from "chartdown";
-import { BarRow, MDNotes, type MDNoteData } from "@chartdown/ui";
+import { BarRow, hasPickup, MDNotes, type MDNoteData } from "@chartdown/ui";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { EditIcon } from "../../../_components/ActionIcons";
@@ -46,7 +46,9 @@ export function SectionView({
           <Heading level={2} id="chosen-section">
             {section.name}
           </Heading>
-          <Text type="supporting">{labels.length(sectionLength(section))}</Text>
+          <Text type="supporting">
+            {labels.length(sectionLength(section), { pickup: hasPickup(section) })}
+          </Text>
         </HStack>
         {notes.length > 0 && (
           <List

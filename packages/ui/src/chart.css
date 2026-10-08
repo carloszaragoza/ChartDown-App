@@ -46,6 +46,10 @@
      but the neutral theme's accent is the ink, so the theme's blue text token is used instead. */
   --chart-dynamic: var(--color-text-blue);
 
+  /* ChartDown 0.5 and 0.6 (design/chart-viewer section 10). */
+  --chart-riff-line: calc(var(--border-width) * 2) solid var(--chart-dynamic);
+  --chart-nav-border: var(--border-width) solid var(--chart-ink);
+
   /* Hold (diamond) */
   --chart-hold-box: 1.5em;
   --chart-hold-diamond: 1.06em;
@@ -81,7 +85,11 @@
 }
 .cd-chart__bars {
   display: grid;
-  grid-template-columns: repeat(var(--chart-bars), minmax(var(--chart-bar-min-width), 1fr));
+  /* One column per bar; a pickup is narrower, so BarRow sets --chart-bar-columns for it. */
+  grid-template-columns: var(
+    --chart-bar-columns,
+    repeat(var(--chart-bars), minmax(var(--chart-bar-min-width), 1fr))
+  );
   /* Four lines shared by every bar of the row: tags, chords, beats, lyric. */
   grid-template-rows: auto auto auto auto;
 }
@@ -104,6 +112,10 @@
 }
 .cd-chart__bar--repeat-end {
   border-inline-end: var(--chart-repeat-line);
+}
+/* A pickup is a narrow bar: less room at its sides. */
+.cd-chart__bar--pickup {
+  padding-inline: var(--spacing-2);
 }
 .cd-chart__bar--ending {
   border-block-start: calc(var(--border-width) * 1.5) solid var(--chart-ink);
@@ -128,6 +140,21 @@
   color: var(--chart-dynamic);
   font-style: italic;
   font-weight: var(--font-weight-bold);
+}
+/* A meter for one bar, and the tempo marks: small, italic, blue. */
+.cd-chart__mark {
+  color: var(--chart-dynamic);
+  font-style: italic;
+  font-weight: var(--font-weight-bold);
+}
+/* Segno, Coda, To Coda, Fine, D.S., D.C.: the musical term in a thin frame. */
+.cd-chart__nav {
+  padding-inline: var(--spacing-1);
+  border: var(--chart-nav-border);
+  border-radius: var(--radius-inner);
+  color: var(--chart-ink);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
 }
 .cd-chart__cue {
   color: var(--chart-ink-muted);
@@ -186,6 +213,29 @@
   margin-inline-end: 0.06em;
   color: var(--chart-dynamic);
   font-size: 0.6em;
+}
+/* A unison riff: single notes on one line under all of them (section 10). */
+.cd-chart__riff {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-1);
+  width: 100%;
+  min-width: 0;
+  padding-block-end: var(--spacing-0-5);
+  border-block-end: var(--chart-riff-line);
+  font-family: var(--chart-font-numbers);
+  font-size: calc(var(--chart-chord-size) * 0.85);
+  font-weight: var(--chart-chord-weight);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.cd-chart__riff-note {
+  min-width: 0;
+  white-space: nowrap;
+}
+.cd-chart__riff-rest {
+  color: var(--chart-ink-muted);
+  font-size: 0.7em;
 }
 .cd-chart__marks {
   position: absolute;

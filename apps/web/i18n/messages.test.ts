@@ -32,6 +32,7 @@ const SAME_IN_BOTH = new Set([
   "language.es",
   "design.newInstrument",
   "chart.tempo",
+  "chart.tempoChange",
   "bands.sets",
   "landing.footer.copyright",
   "stand.setBar",

@@ -18,6 +18,7 @@ import {
 import {
   BarRow,
   formStripItems,
+  hasPickup,
   MDNotes,
   type FormStripItem,
   type MDNoteData,
@@ -28,6 +29,7 @@ import { chartdownStandTheme } from "../../theme/chartdown-stand";
 import { SongForm } from "./SongForm";
 import { useTranslations } from "next-intl";
 import { useChartLabels } from "./chartLabels";
+import { hasJump, playRuns } from "../../lib/chart/playRuns";
 
 export interface ChartSectionProps {
   section: Section;
@@ -63,7 +65,9 @@ export function ChartSection({
       <VStack gap={3}>
         <HStack gap={2} vAlign="center">
           <Heading level={2}>{section.name}</Heading>
-          <Text type="supporting">{labels.length(sectionLength(section))}</Text>
+          <Text type="supporting">
+            {labels.length(sectionLength(section), { pickup: hasPickup(section) })}
+          </Text>
         </HStack>
         <MDNotes notes={notes ?? section.notes} instrumentName={labels.bar.instrument} />
         {section.rows.map((row, index) => (
@@ -138,6 +142,20 @@ export function ChartPreview({
             />
           </Theme>
         </div>
+      )}
+      {hasForm && hasJump(chart) && (
+        // Only a song that jumps (D.S., D.C.) needs its order spelled out (spec 10.1).
+        <Text type="supporting">
+          <b>{c("playOrder")}</b>{" "}
+          {playRuns(chart)
+            .map((run) => {
+              const name = chart.sections[run.section]?.name ?? "";
+              return run.full
+                ? name
+                : c("playOrderBars", { section: name, from: run.from, to: run.to });
+            })
+            .join(" → ")}
+        </Text>
       )}
       {chart.sections.map((section, index) => (
         <ChartSection

@@ -115,7 +115,36 @@ Follow ChartDown spec section 12 (`@chartdown/core`): numbers by default, letter
 - Bars never shrink below `--chart-bar-min-width`. If a row doesn't fit, the **row scrolls sideways inside its own container**; the page never does.
 - In stand mode on iPad landscape, rows of 4 bars fit without scrolling.
 
-## 10. Acceptance checks
+## 10. ChartDown 0.5 and 0.6 elements
+
+Drawn after the reference playground of the Language repository (its "Syntax tour" and "Northbound"), in this system's tokens. Proposed October 8, 2026 (T-1706) for the owner's review. Every element says what it is in words; none relies on color alone.
+
+| Source | Drawing |
+|---|---|
+| `[p:N]` pickup | A **narrower bar**: its width is `N` over the meter's top number of a full bar, never under `--chart-pickup-min` (0.3). Same bar lines; `N` beat slashes; chords on the same baseline. It is bar 0 and is not counted: the section's count reads "pickup + 4 bars". |
+| `x:3` | "N.C." in `--chart-ink-muted`, spanning its beats on the grid like a chord (section 4). |
+| `R[ 1 3 4 #4 5 ]` | The **notes** in the chord face and weight, side by side and sharing the riff's beats (or their own `:beats`), in numbers or letters like the chords. One **line under the whole riff** (`--chart-riff-line`, `--chart-dynamic`). A rest is "x" in `--chart-ink-muted`. Read out as "Unison riff". |
+| `''4` | `‹‹` before the chord, `--chart-dynamic`; `'4` stays `‹`. Read out as "short push". |
+| `[m:2/4]` | The meter in the tags line, small italic, `--chart-dynamic`; the bar's slashes follow its own meter. |
+| `@meter 6/8`, `@tempo 72` | A line above the row, like a key change, in `--chart-dynamic`: "Meter: 6/8 · Tempo: 72 bpm". |
+| `{rit}` `{accel}` `{a tempo}` | In the tags line, small italic, `--chart-dynamic`: "rit.", "accel.", "a tempo". |
+| `{segno}` `{coda}` `{to coda}` `{fine}` `{D.S.}` `{D.C.}` and "al coda" and "al fine" | A **chip in the tags line**: the word (Segno, Coda, To Coda, Fine, D.S. al Coda...) in bold, `--chart-ink`, in a thin border (`--chart-nav-border`) with a small radius. The words are the musical terms, the same in every language. |
+| `{2x drums: in}`, `{1x,3x: stop}` | The cue with a bold prefix in `--chart-md`: "2x Drums", "1x,3x" when it is for everyone. |
+| `> MD 2x drums: ...` | A red `Token` "2x" before the instrument `Token`s of the note. |
+| A song with a D.S. or D.C. jump | Under the song form, a line "Play order" with the sections in the order they are played, with the bars when only part of a section plays: "Intro → Verse → Chorus → Bridge → Verse → Chorus (bars 1–7) → Outro". |
+
+Screenshots for review, from `/design/chart-0-6` (development and preview builds): `screens/light` and `screens/dark`, `chart-0-6-northbound-1.png`, `chart-0-6-northbound-2.png` and `chart-0-6-syntax-tour.png`.
+
+**Acceptance checks**
+
+- `[p:2] 5 | 1 | 4 | 5 | 1` in 4/4: the first bar is about half as wide as the others, with two slashes, and the section reads "pickup + 4 bars".
+- `1! x:3`: the 1 on the first slash and "N.C." across the other three.
+- `R[ 5:1 b7:1 x:2 ]`: three marks on one underline, the rest muted, the 5 and the b7 one beat each.
+- `[m:2/4]` in a 4/4 row: the tag "2/4" and two slashes in that bar.
+- Northbound's Bridge: a "Meter: 6/8 · Tempo: 72 bpm" line, then "rit." on its last bar, then "Meter: 4/4 · Tempo: 84 bpm"; the Verse's last bar, "D.S. al Coda"; the Outro's first bar, "Coda".
+- Light and dark change every color with no code change.
+
+## 11. Acceptance checks
 
 - `4:2 4:1 5:1` in 4/4: the second 4 starts at the third slash; there's no "beats" text.
 - A 3/4 bar shows one strong slash and two weak ones; a 4/4 bar shows strong, weak, semi-strong, weak.

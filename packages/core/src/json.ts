@@ -74,7 +74,7 @@ export interface ChartJson {
   key: string;
   minor: boolean;
   sections: SectionJson[];
-  playOrder: PlayStep[];
+  playOrder: Pick<PlayStep, "section" | "bar" | "pass">[];
   warnings: { line: number; code: string; message: string }[];
 }
 
@@ -186,7 +186,8 @@ export function toJSON(chart: Chart): ChartJson {
     key: chart.key.root,
     minor: chart.key.minor,
     sections: chart.sections.map(sectionJson),
-    playOrder: playOrder(chart),
+    // Appendix A has three fields per step; `jump` is for renderers.
+    playOrder: playOrder(chart).map(({ section, bar, pass }) => ({ section, bar, pass })),
     warnings: chart.warnings.map(({ line, code, message }) => ({ line, code, message })),
   };
 }

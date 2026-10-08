@@ -11,7 +11,13 @@ import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
 import { chartdownStandTheme } from "../../../../theme/chartdown-stand";
 import { chordFormatter, keyName, parse, sectionLength, type Key } from "chartdown";
-import { BarRow, formStripItems, type FormStripItem, type MDNoteData } from "@chartdown/ui";
+import {
+  BarRow,
+  formStripItems,
+  hasPickup,
+  type FormStripItem,
+  type MDNoteData,
+} from "@chartdown/ui";
 import { ArrowUturnLeftIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -348,7 +354,8 @@ export function StandMode({
               {next ? (
                 <>
                   <Text type="supporting">
-                    {labels.next}: <b>{next.name}</b> · {labels.length(sectionLength(next))}
+                    {labels.next}: <b>{next.name}</b> ·{" "}
+                    {labels.length(sectionLength(next), { pickup: hasPickup(next) })}
                     {forYou[current + 1] && ` · ${labels.notesForYou}`}
                   </Text>
                   {next.rows[0] && (
