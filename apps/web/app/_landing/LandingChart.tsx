@@ -65,7 +65,11 @@ export function LandingChart({
   };
 
   return (
-    <figure className={styles.sheetFigure} aria-label={words.example} data-intro={intro || undefined}>
+    <figure
+      className={styles.sheetFigure}
+      aria-label={words.example}
+      data-intro={intro || undefined}
+    >
       <div className={styles.sectionLine}>
         <span className={styles.sectionName}>
           <span aria-hidden="true" className={styles.hashes}>

@@ -192,7 +192,11 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(to right, transparent calc(100% - 3px), var(--dynamic) calc(100% - 3px));
+  background: linear-gradient(
+    to right,
+    transparent calc(100% - 3px),
+    var(--dynamic) calc(100% - 3px)
+  );
   animation: playhead calc(var(--beat) * 4) linear var(--count-in) both;
 }
 .bar {
