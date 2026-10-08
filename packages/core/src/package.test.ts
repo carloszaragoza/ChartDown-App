@@ -1,8 +1,15 @@
-import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const manifest = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as {
   name: string;
+  version: string;
+  description: string;
   license: string;
   files: string[];
   exports: Record<string, { import: string; types: string }>;
@@ -25,4 +32,68 @@ describe("T-107 the chartdown package on npm", () => {
     // A workspace dependency would not install in a new project.
     expect(Object.keys(manifest.dependencies ?? {})).toEqual([]);
   });
+});
+
+describe("T-1708 the chartdown package on npm, version 0.2.0 for ChartDown 0.6", () => {
+  it("T-1708 is version 0.2.0 of the parser for spec 0.6, with its changelog in the package", () => {
+    expect(manifest.version).toBe("0.2.0");
+    expect(manifest.description).toContain("spec 0.6");
+    expect(manifest.files).toContain("CHANGELOG.md");
+    const changelog = readFileSync(new URL("../CHANGELOG.md", import.meta.url), "utf8");
+    expect(changelog).toMatch(/^# Changelog\n\n## 0\.2\.0\n/);
+    expect(changelog).toContain("## 0.1.0");
+    const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
+    expect(readme).toContain("spec 0.6");
+    expect(readme).toContain("toJSON");
+  });
+
+  it(
+    "T-1708 a packed copy installs in a new project and parses Northbound",
+    { timeout: 180_000 },
+    () => {
+      const root = fileURLToPath(new URL("..", import.meta.url));
+      const tsc = createRequire(import.meta.url).resolve("typescript/bin/tsc");
+      execFileSync(process.execPath, [tsc, "-p", "tsconfig.build.json"], { cwd: root });
+
+      const work = mkdtempSync(join(tmpdir(), "chartdown-pack-"));
+      execFileSync("npm", ["pack", "--pack-destination", work, "--silent"], { cwd: root });
+      const tarball = readdirSync(work).find((name) => name.endsWith(".tgz")) as string;
+      expect(tarball).toBe("chartdown-0.2.0.tgz");
+
+      const project = join(work, "project");
+      execFileSync("mkdir", [project]);
+      writeFileSync(
+        join(project, "package.json"),
+        JSON.stringify({ name: "new-project", type: "module" }),
+      );
+      execFileSync(
+        "npm",
+        [
+          "install",
+          join(work, tarball),
+          "--no-audit",
+          "--no-fund",
+          "--ignore-scripts",
+          "--offline",
+        ],
+        { cwd: project },
+      );
+      const northbound = join(root, "fixtures", "0.6", "northbound.chartdown");
+      writeFileSync(
+        join(project, "check.mjs"),
+        `import { readFileSync } from "node:fs";
+import { parse, playOrder, SUPPORTED_VERSION, toJSON } from "chartdown";
+const chart = parse(readFileSync(${JSON.stringify(northbound)}, "utf8"));
+console.log(JSON.stringify({ version: SUPPORTED_VERSION, sections: chart.sections.length, warnings: chart.warnings.length, steps: playOrder(chart).length, json: toJSON(chart).chartdown }));`,
+      );
+      const out = execFileSync(process.execPath, ["check.mjs"], { cwd: project }).toString();
+      expect(JSON.parse(out)).toEqual({
+        version: "0.6",
+        sections: 5,
+        warnings: 0,
+        steps: 57,
+        json: "0.6",
+      });
+    },
+  );
 });
