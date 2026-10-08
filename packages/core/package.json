@@ -1,7 +1,7 @@
 {
   "name": "chartdown",
-  "version": "0.1.0",
-  "description": "Parser for ChartDown (spec 0.4), a plain-text notation for Nashville Number System charts: sections, bars, numbers, keys and notes for each instrument.",
+  "version": "0.2.0",
+  "description": "Parser for ChartDown (spec 0.6), a plain-text notation for Nashville Number System charts: sections, bars, numbers, keys and notes for each instrument. Reads charts written for 0.3 to 0.6 and gives the JSON form and the play order.",
   "keywords": [
     "chartdown",
     "nashville-number-system",
@@ -30,6 +30,7 @@
     "!src/**/*.test.ts",
     "!src/test-helpers.ts",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "sideEffects": false,
