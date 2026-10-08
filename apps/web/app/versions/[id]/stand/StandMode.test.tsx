@@ -2,10 +2,14 @@ import { parse } from "chartdown";
 import { NextIntlClientProvider } from "next-intl";
 import { readFileSync } from "node:fs";
 import { renderToString } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import en from "../../../../messages/en.json";
 import { readSection, standHref } from "./standHref";
 import { StandMode, type StandModeProps } from "./StandMode";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: () => undefined, replace: () => undefined }),
+}));
 
 const OPEN_ROAD = readFileSync(
   new URL("../../../../../../packages/core/fixtures/open-road.chartdown", import.meta.url),
@@ -63,7 +67,11 @@ describe("R-03.3 stand mode", () => {
   it("R-03.3 the address keeps the section, the view, the key and the theme", () => {
     const place = {
       section: 3,
-      display: { style: "letters" as const, key: { root: "A", minor: false } },
+      display: {
+        style: "letters" as const,
+        key: { root: "A", minor: false },
+        beats: "auto" as const,
+      },
       theme: "stage" as const,
     };
     expect(standHref(`/versions/${ID}/stand`, place, chart)).toBe(
@@ -72,7 +80,11 @@ describe("R-03.3 stand mode", () => {
     expect(
       standHref(
         "/x",
-        { section: 0, display: { style: "numbers", key: chart.key }, theme: "light" },
+        {
+          section: 0,
+          display: { style: "numbers", key: chart.key, beats: "auto" },
+          theme: "light",
+        },
         chart,
       ),
     ).toBe("/x");

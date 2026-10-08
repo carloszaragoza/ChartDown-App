@@ -28,6 +28,8 @@ import {
 import { setSongKey } from "../../../../lib/sets/lineup";
 import { songView, type SetSong } from "../../../../lib/sets/song";
 import { setWhen } from "../../../../lib/sets/when";
+import { readBeatsMode } from "@chartdown/ui";
+import { BeatsMemory } from "../../../_components/BeatsControl";
 import { ChartPreview } from "../../../_components/ChartPreview";
 import { readDisplay } from "../../../versions/[id]/display";
 import { readSection } from "../../../versions/[id]/stand/standHref";
@@ -291,9 +293,13 @@ export function OfflineReader() {
     })),
   );
   const search = new URLSearchParams(window.location.search);
+  const beats = readBeatsMode(search.get("beats"));
 
   if (place.stand) {
-    const display = readDisplay(chart, { view: search.get("view") ?? undefined });
+    const display = readDisplay(chart, {
+      view: search.get("view") ?? undefined,
+      beats: search.get("beats") ?? undefined,
+    });
     return (
       <StandMode
         versionId={song.version_id}
@@ -302,6 +308,7 @@ export function OfflineReader() {
         section={readSection(chart, search.get("s") ?? undefined)}
         style={display.style}
         homeKey={homeKey}
+        beats={display.beats}
         theme={search.get("theme") === "stage" ? "stage" : "light"}
         path={`${base}/${song.position}/stand`}
         notes={notes}
@@ -372,7 +379,17 @@ export function OfflineReader() {
             <VStack gap={5}>
               {banner}
               <OfflineChanges setId={bundle.set.id} />
-              <ChartPreview chart={chart} homeKey={homeKey} isFramed hasForm notes={notes} />
+              <>
+                <BeatsMemory current={beats} />
+                <ChartPreview
+                  chart={chart}
+                  homeKey={homeKey}
+                  isFramed
+                  hasForm
+                  notes={notes}
+                  beats={beats}
+                />
+              </>
             </VStack>
           </LayoutContent>
         }

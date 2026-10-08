@@ -20,6 +20,7 @@ export default async function VersionPage({
     fork?: string;
     view?: string;
     key?: string;
+    beats?: string;
     set?: string;
     report?: string;
   }>;

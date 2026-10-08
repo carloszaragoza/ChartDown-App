@@ -20,6 +20,7 @@ import {
   formStripItems,
   hasPickup,
   MDNotes,
+  type BeatsMode,
   type FormStripItem,
   type MDNoteData,
   type SectionLabels,
@@ -44,6 +45,8 @@ export interface ChartSectionProps {
   meter?: Meter;
   /** "lg" in stand mode; "md" in the viewer and the editors (CHART-VIEWER.md 2). */
   size?: "lg" | "md";
+  /** How many bars show beat marks (R-03.7); Auto, the default, where they tell something. */
+  beats?: BeatsMode;
 }
 
 /**
@@ -59,6 +62,7 @@ export function ChartSection({
   isFramed = false,
   meter,
   size = "md",
+  beats = "auto",
 }: ChartSectionProps) {
   const body = (
     <section aria-label={section.name} {...(id ? { id } : {})}>
@@ -77,6 +81,7 @@ export function ChartSection({
             formatter={formatter}
             labels={labels.bar}
             size={size}
+            beats={beats}
             {...(meter ? { meter } : {})}
           />
         ))}
@@ -98,6 +103,7 @@ export function ChartPreview({
   isFramed = false,
   hasForm = false,
   notes,
+  beats = "auto",
 }: {
   chart: Chart;
   style?: ChordStyle;
@@ -110,6 +116,8 @@ export function ChartPreview({
    * function, so a server component can pass it.
    */
   notes?: readonly (readonly MDNoteData[])[];
+  /** How many bars show beat marks (R-03.7); Auto by default. */
+  beats?: BeatsMode;
 }) {
   const labels = useChartLabels();
   const c = useTranslations("chart");
@@ -166,6 +174,7 @@ export function ChartPreview({
           id={`section-${index + 1}`}
           isFramed={isFramed}
           meter={chart.meter}
+          beats={beats}
           {...(notes ? { notes: notes[index] ?? [] } : {})}
         />
       ))}

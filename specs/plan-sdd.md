@@ -194,6 +194,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-03.4 Print or export to PDF.
 - R-03.5 **MD layer editor:** the MD writes notes per section and instrument on top of the version, without being able to change the chart.
 - R-03.6 **A note for one pass:** in the MD layer editor the MD can say that a note is only for some passes of a repeat (for example the second), and the note says so wherever it is shown (owner's approval, October 8, 2026). It is private to its instruments like any other note (R-06.4).
+- R-03.7 **Beat marks, shown as the reader chooses:** the viewer, stand mode and a set's song have a Beats control with Off, Auto and Always (Auto by default: marks only in the bars where they tell something). It is a way of viewing the chart, like numbers or letters, and changes nothing in the chart text, its beat checks or its JSON form (owner's request, October 8, 2026).
 
 **Acceptance criteria**
 

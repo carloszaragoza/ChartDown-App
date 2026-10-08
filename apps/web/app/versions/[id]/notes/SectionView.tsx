@@ -90,6 +90,7 @@ export function SectionView({
               formatter={formatter}
               labels={labels.bar}
               meter={chart.meter}
+              beats="auto"
               size="md"
             />
           ))}

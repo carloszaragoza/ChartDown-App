@@ -40,11 +40,11 @@ Each bar is a box with a right bar line (`--chart-bar-line`); the first bar of a
 | Chord to its beat slashes | – | `--spacing-1` + `--spacing-0-5` (6px) |
 | Beat slashes to the bottom of the bar | `--chart-bar-padding-end` | `--spacing-4` (20px with the line gap) |
 
-Inside, a bar has three layers, top to bottom:
+Inside, a bar has up to three layers, top to bottom:
 
 1. **Tags line:** ending label (`1.`), dynamic (`mf`, italic, `--chart-dynamic`), cues (instrument name in `--chart-md`), and `×N` on the last bar of a repeat.
 2. **Chord line:** the chords, laid out on the beat grid (section 4).
-3. **Beat line:** one slash `/` per beat (section 5).
+3. **Beat line:** the beat marks (section 5), only in a bar that shows them. A bar without marks has no beat line, and neither has a row where no bar shows them.
 
 A lyric landmark sits under the beat line, italic, `--chart-ink-muted`, truncated with an ellipsis.
 
@@ -61,9 +61,65 @@ The bar is a CSS grid of `beats × 12` columns (12 columns per beat handles halv
 
 Example: `4:2 4:1 5:1` in 4/4 → the first 4 spans slashes 1–2, the second 4 starts at slash 3, the 5 at slash 4.
 
-## 5. Beat strength
+## 5. Beat marks
 
-One slash per beat, aligned to the grid. Each slash has one of three levels, drawn with color, size and weight from `chart-tokens.css`:
+The slashes under the chords are a way of **viewing** a chart, like numbers or letters (R-03.7): they change nothing in the source, the parser, the beat checks, the warnings or the JSON form.
+
+**The control "Beats"** has three options and sits with Key and View in the viewer, stand mode and a set's song:
+
+- **Off:** no bar shows marks.
+- **Auto** (the default): a bar shows marks only where they tell something (below).
+- **Always:** every bar shows marks, except one that is only `%`, which already says "as the one before".
+
+The choice is in the address (`?beats=off` or `?beats=always`; Auto is left out, like the other defaults) and the browser remembers the last one it was given (`localStorage`, always inside a `try`/`catch`; with nothing stored it is Auto). A view with no bar grid, such as "MD cues only", disables it, as Key is disabled in numbers mode. A printed chart follows the mode that is on. The control's accessible name is "Beat slashes".
+
+### When Auto shows marks
+
+A bar shows marks if it meets at least one of these:
+
+| Condition | Example |
+|---|---|
+| A token has an explicit `:beats` | `1:3 4:1` |
+| A chord does not start on a beat (in 6/8, 9/8 and 12/8 a beat is a group of three eighths) | `1 4 5` in 4/4, `1 4` in 3/4 |
+| It has a push | `'4`, `''1` |
+| It has a partial rest (an `x` beside other tokens, or `x:beats`) | `1! x:3` |
+| It has a riff | `R[ 1 3 4 5 ]` |
+| It is a pickup | `[p:2] 5` |
+| It has a meter of its own | `[m:2/4] 5` |
+| It is the first bar after an `@meter`, so the new count is seen | the first bar of a row with a meter change |
+
+A bar does **not** show marks in Auto when it is:
+
+- one chord for the whole bar: `1`, `<1>`, `1~`;
+- an even split whose chords all start on a beat: `1 4` in 4/4, `6m 5 4 1` in 4/4, `1 4` in 6/8 (two big beats);
+- only `%`, `=` or `x`.
+
+### A bar with marks
+
+- **One slash per mark**, placed in proportion to the bar's width: the mark at position `p` of a bar of `L` beats sits at `p / L` of its width. Strong marks are bolder: the 1 always, and the 3 in 4/4; the others are finer and in a quieter color (section "Strength").
+- **Chords start at their beat**, not centered: at the sum of the beats of the tokens before them. A chord with fractional beats (`1:1.5 4:2.5`) starts between two slashes, at its exact place; the slashes stay on the beats.
+- **A thin dotted line** where each chord starts, except the first, so it is never taken for a bar line.
+- **A push** draws the chord slightly ahead of its slash, with `‹` or `‹‹`; the slash stays on the beat, so the chord is seen to come early.
+- **A rest** (`x`, `x:3`) dims the slashes of the beats it covers, so they can still be counted.
+- **A riff** puts each note on its own beat.
+
+### A bar without marks
+
+It has no beat line and no dotted lines: its chords are spread evenly across the bar, centered, as they are on a printed chart. A row where no bar shows marks has no beat line at all, so its bars stay compact. In a row where some bars show marks and others do not, the beat line is shared by the row, so every chord stays on one baseline.
+
+### Marks by meter
+
+| Meter | Marks |
+|---|---|
+| Simple: 2/4, 3/4, 4/4, 5/4, 6/4, 3/2 | One slash per beat of the top number |
+| Compound: 6/8, 9/8, 12/8 (a top number that is a multiple of 3 above 3, over 8) | One slash per **big beat**: 2, 3 or 4. The eighths inside get no mark; six equal slashes are never drawn |
+| Irregular: 3/8, 5/8, 7/8 | One slash per eighth, the 1 strong |
+| A pickup `[p:N]` | Only the marks that fall in its last `N` beats, in the narrow bar |
+| `[m:N/D]` and `@meter` | The meter in force for that bar |
+
+### Strength
+
+Each slash has one of three levels, drawn with color, size and weight from `chart-tokens.css`:
 
 | Meter | Strong | Semi-strong | Weak |
 |---|---|---|---|
@@ -71,27 +127,17 @@ One slash per beat, aligned to the grid. Each slash has one of three levels, dra
 | 3/4 | 1 | – | 2, 3 |
 | 4/4 | 1 | 3 | 2, 4 |
 | 6/4 | 1 | 4 | the rest |
-| 6/8, 9/8, 12/8 | 1 | first of every other group of three (4; 4 and 7; 4, 7 and 10) | the rest |
+| 6/8, 9/8, 12/8 | the first big beat | every other big beat | – |
 | Any other | 1 | – | the rest |
 
-```ts
-function beatStrength(i: number, beats: number, unit: number): 'strong' | 'semi' | 'weak' {
-  if (i === 0) return 'strong';
-  if (unit === 8 && beats % 3 === 0 && beats > 3) return i % 3 === 0 ? 'semi' : 'weak';
-  if (beats === 4 && i === 2) return 'semi';
-  if (beats === 6 && unit !== 8 && i === 3) return 'semi';
-  return 'weak';
-}
-```
-
-Each slash gets an accessible title, for example "Beat 3: semi-strong". Slashes are decorative for screen readers (`aria-hidden`) because the chord list is read in order.
+Each slash gets an accessible title, for example "Beat 3: semi-strong". Slashes, dotted lines and dimmed slashes are decorative for screen readers (`aria-hidden`) because the chord list is read in order. Strong and weak slashes keep their contrast in light and dark.
 
 ## 6. Marks on a chord
 
 | Source | Meaning | Drawing |
 |---|---|---|
 | `<5>` | **Hold:** play once and let it ring for its whole length. Optional. | The chord sits **centered inside a square box** of `--chart-hold-box`; behind it, a square of `--chart-hold-diamond` rotated 45° with `--chart-hold-stroke`, centered on the same box. The box keeps the chord on the same baseline as the other chords. |
-| `'4` | Push (play early) | Small `‹` before the chord, `--chart-dynamic` |
+| `'4` | Push (play early) | Small `‹` before the chord, `--chart-dynamic`; in a bar with marks the chord also sits slightly ahead of its slash (section 5) |
 | `1!` | Stab | `^` above the chord, `--chart-dynamic` |
 | `1~` | Fermata | `𝄐` above the chord, `--chart-dynamic` |
 | `x` | No chord | "N.C." in `--chart-ink-muted` |
@@ -133,7 +179,7 @@ Drawn after the reference playground of the Language repository (its "Syntax tou
 | `> MD 2x drums: ...` | A red `Token` "2x" before the instrument `Token`s of the note. |
 | A song with a D.S. or D.C. jump | Under the song form, a line "Play order" with the sections in the order they are played, with the bars when only part of a section plays: "Intro → Verse → Chorus → Bridge → Verse → Chorus (bars 1–7) → Outro". |
 
-Screenshots for review, from `/design/chart-0-6` (development and preview builds): `screens/light` and `screens/dark`, `chart-0-6-northbound-1.png`, `chart-0-6-northbound-2.png` and `chart-0-6-syntax-tour.png`.
+Screenshots for review, from `/design/chart-0-6` (development and preview builds): `screens/light` and `screens/dark`, `chart-0-6-northbound-1.png`, `chart-0-6-northbound-2.png` and `chart-0-6-syntax-tour.png`. They show Beats on Auto, the default; `beats-always.png` and `beats-off.png` show the other two. The numbered screenshots (`00` to `15`) are from the approved prototype and show **Always**, which is how every bar was drawn before the Beats control (R-03.7).
 
 **Acceptance checks**
 
@@ -146,9 +192,23 @@ Screenshots for review, from `/design/chart-0-6` (development and preview builds
 
 ## 11. Acceptance checks
 
+**Beats (R-03.7)**
+
+- With Off, no bar has a beat line, and the chart reads like a printed one.
+- With Auto, a bar of one chord, `1 | 4 | 5`, and `6m 5 4 1` in one bar of 4/4 show no marks.
+- With Auto, `1:3 4:1` shows four slashes and the 4 starts at the fourth.
+- With Auto, `1! x:3` shows the first slash as usual and the other three dimmed.
+- With Always, a bar of Lantern Bay (6/8) shows two big-beat slashes, not six; a `%` bar shows none.
+- A pickup `[p:2]` shows two slashes in its narrow bar.
+- With `'4`, the chord sits slightly ahead of its slash.
+- The Beats control is disabled in a view with no bar grid; changing it changes no beat check, warning or JSON.
+- Light and dark keep the contrast of strong and weak slashes.
+
+**The rest**
+
 - `4:2 4:1 5:1` in 4/4: the second 4 starts at the third slash; there's no "beats" text.
 - A 3/4 bar shows one strong slash and two weak ones; a 4/4 bar shows strong, weak, semi-strong, weak.
-- A 6/8 bar shows six slashes with strong on 1 and semi-strong on 4.
+- A 6/8 bar with marks shows two slashes, the first strong and the second semi-strong; 9/8 shows three and 12/8 four.
 - `<5>` is centered inside its diamond, on the same baseline as the chords around it.
 - Switching the app to dark mode changes every chart color with no code change.
 - Each screenshot in `screens/` matches the app's rendering of the same source text.

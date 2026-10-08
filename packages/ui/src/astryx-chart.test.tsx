@@ -118,15 +118,8 @@ describe("T-1309 the chart viewer", () => {
     ]);
   });
 
-  it("T-1309 a 6/8 bar shows six slashes, strong on 1 and semi-strong on 4", () => {
-    expect(slashes(draw("---\nmeter: 6/8\n---\n## A\n1\n")[0]!)).toEqual([
-      "strong",
-      "weak",
-      "weak",
-      "semi",
-      "weak",
-      "weak",
-    ]);
+  it("T-1309 a 6/8 bar shows its two big beats, strong on 1 and semi-strong on 4 (R-03.7)", () => {
+    expect(slashes(draw("---\nmeter: 6/8\n---\n## A\n1\n")[0]!)).toEqual(["strong", "semi"]);
   });
 
   it("T-1309 the beat slashes are hidden from screen readers and each has a title", () => {

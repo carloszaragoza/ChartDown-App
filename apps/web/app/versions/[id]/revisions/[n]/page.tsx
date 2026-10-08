@@ -17,7 +17,7 @@ export default async function RevisionPage({
   searchParams,
 }: {
   params: Promise<{ id: string; n: string }>;
-  searchParams: Promise<{ error?: string; view?: string; key?: string }>;
+  searchParams: Promise<{ error?: string; view?: string; key?: string; beats?: string }>;
 }) {
   if (!authEnabled()) notFound();
   const { id, n } = await params;

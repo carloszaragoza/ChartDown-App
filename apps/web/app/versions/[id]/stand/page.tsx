@@ -7,7 +7,13 @@ import { loadVersion } from "../load";
 import { readSection } from "./standHref";
 import { StandMode } from "./StandMode";
 
-type Search = Promise<{ s?: string; view?: string; key?: string; theme?: string }>;
+type Search = Promise<{
+  s?: string;
+  view?: string;
+  key?: string;
+  beats?: string;
+  theme?: string;
+}>;
 
 /**
  * Stand mode for a version (R-03.3), for anyone who can read it. Outside a set it shows no
@@ -43,6 +49,7 @@ export default async function StandPage({
       section={readSection(chart, search.s)}
       style={display.style}
       homeKey={display.key}
+      beats={display.beats}
       theme={search.theme === "stage" ? "stage" : "light"}
     />
   );
