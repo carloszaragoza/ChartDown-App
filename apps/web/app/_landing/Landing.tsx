@@ -96,8 +96,8 @@ export function Landing({
     ) : null;
 
   return (
-    // A printed sheet in both color schemes: the landing pins the light tokens (handoff 2.0).
-    <div className={styles.landing} data-theme="light">
+    // Follows the system color scheme with the rest of the app: no pinned theme (handoff 2.0, Oct 8).
+    <div className={styles.landing}>
       <header className={styles.top}>
         <Link href="/" className={styles.brand} aria-label="ChartDown">
           <ChartDownLogo size={34} />
@@ -285,7 +285,7 @@ export function Landing({
 
         <section className={styles.ending} aria-labelledby="ending-title">
           <svg className={styles.fermata} viewBox="0 0 64 36" aria-hidden="true">
-            <path d="M4 32C6 12 20 4 32 4s26 8 28 28" />
+            <path pathLength={100} d="M4 32C6 12 20 4 32 4s26 8 28 28" />
             <circle cx="32" cy="27" r="4" />
           </svg>
           <h2 id="ending-title" className={styles.endingTitle}>

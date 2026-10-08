@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type KeyboardEvent } from "react";
+import { useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import styles from "./landing.module.css";
 
 export interface SheetBar {
@@ -40,6 +40,12 @@ export function LandingChart({
   words: { viewAs: string; viewing: string; example: string; bar: string };
 }) {
   const [view, setView] = useState(views.find((item) => item.id === "drums")?.id ?? "everyone");
+  // The first sweep of the chart plays once, in order; after the first choice the pen answers at once.
+  const [intro, setIntro] = useState(true);
+  const choose = (id: string) => {
+    setIntro(false);
+    setView(id);
+  };
   const shown = notes.filter(
     (note) => note.for === "everyone" || view === "everyone" || note.for === view,
   );
@@ -54,12 +60,16 @@ export function LandingChart({
     const index = views.findIndex((item) => item.id === view);
     const next = views[(index + step + views.length) % views.length];
     if (!next) return;
-    setView(next.id);
+    choose(next.id);
     group.current?.querySelector<HTMLButtonElement>(`[data-view="${next.id}"]`)?.focus();
   };
 
   return (
-    <figure className={styles.sheetFigure} aria-label={words.example}>
+    <figure
+      className={styles.sheetFigure}
+      aria-label={words.example}
+      data-intro={intro || undefined}
+    >
       <div className={styles.sectionLine}>
         <span className={styles.sectionName}>
           <span aria-hidden="true" className={styles.hashes}>
@@ -75,6 +85,7 @@ export function LandingChart({
             key={index}
             className={styles.bar}
             data-circled={circled.has(index + 1) || undefined}
+            style={{ "--i": index } as CSSProperties}
           >
             {bar.dynamic && <span className={styles.dynamic}>{bar.dynamic}</span>}
             <span className={styles.chords}>
@@ -121,7 +132,7 @@ export function LandingChart({
               tabIndex={option.id === view ? 0 : -1}
               data-view={option.id}
               className={styles.viewOption}
-              onClick={() => setView(option.id)}
+              onClick={() => choose(option.id)}
             >
               {option.label}
             </button>
