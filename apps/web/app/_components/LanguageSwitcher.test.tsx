@@ -16,14 +16,14 @@ const render = (locale: "en" | "es") =>
 
 describe("R-01.5 the language switcher", () => {
   it("R-01.5 English is pressed in English, and Español in Spanish", () => {
-    expect(render("en")).toMatch(/aria-pressed="true"[^>]*>English</);
-    expect(render("en")).toMatch(/aria-pressed="false"[^>]*>Español</);
+    expect(render("en")).toMatch(/aria-pressed="true"[^>]*>EN</);
+    expect(render("en")).toMatch(/aria-pressed="false"[^>]*>ES</);
     expect(render("es")).toContain('aria-label="Idioma"');
-    expect(render("es")).toMatch(/aria-pressed="true"[^>]*>Español</);
+    expect(render("es")).toMatch(/aria-pressed="true"[^>]*>ES</);
   });
 
   it("R-01.5 each language button is labelled in its own language", () => {
-    expect(render("es")).toMatch(/lang="en"[^>]*>English</);
-    expect(render("en")).toMatch(/lang="es"[^>]*>Español</);
+    expect(render("es")).toContain('aria-label="English"');
+    expect(render("en")).toContain('aria-label="Español"');
   });
 });

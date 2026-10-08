@@ -116,7 +116,6 @@ export function Landing({
           )}
         </nav>
         <div className={styles.end}>
-          <LanguageSwitcher />
           {signInEnabled && (
             <Link href="/auth/sign-in" className={styles.secondary}>
               {t("signIn")}
@@ -309,6 +308,7 @@ export function Landing({
           <Link href="/privacy" className={styles.footerLink}>
             {t("footer.privacy")}
           </Link>
+          <LanguageSwitcher />
         </div>
       </footer>
     </div>

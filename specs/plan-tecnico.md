@@ -75,7 +75,7 @@ flowchart LR
 |---|---|---|
 | Notation | `chartdown` package in TypeScript: parser, JSON output, numbers and letters, MD layer | Evolves the playground and runs the same in the browser and on the server (SPEC-00) |
 | UI | Next.js (React) with TypeScript, as an installable web app; components from the Astryx design system (`@astryxdesign/core`, theme neutral, MIT; icons from `@heroicons/react`), plus the chart components and the logo in `packages/ui` (Design Handoff 2 and 3) | Fast, discoverable public catalog for visitors (R-01.4); one codebase for desktop and iPad; an open-source component library that covers every screen in light and dark |
-| Languages | next-intl or i18next, English and Spanish strings | R-01.5. The language is stored in the profile: signing in applies it, saving the profile updates it (a signed-in person has no other language switcher), and visitors, who have no profile, use the switcher in the side navigation or on the landing and keep it in a cookie |
+| Languages | next-intl or i18next, English and Spanish strings | R-01.5. The language is stored in the profile: signing in applies it, saving the profile updates it (a signed-in person has no other language switcher), and visitors, who have no profile, use the small EN | ES at the foot of the landing page and keep it in a cookie. With no cookie and no profile the language comes from the browser's `Accept-Language`: the supported language it ranks highest, English when none |
 | Offline | Service worker (Workbox) + IndexedDB | SPEC-08 |
 | Backend | Supabase: Postgres, auth, row-level security, realtime, storage and functions | Option A |
 | Background | Event table + scheduled job that dispatches it | SPEC-09 |
