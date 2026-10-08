@@ -58,13 +58,19 @@ test("R-01.5 the chosen language persists across sessions", async ({ page, conte
   await expect(page.locator("html")).toHaveAttribute("lang", "es");
 });
 
-test("R-01.5 the language switcher saves to the profile when signed in", async ({
+test("R-01.5 a signed-in person changes the language only in their profile", async ({
   page,
   context,
 }) => {
   const email = unique("switch");
   await signUpAndConfirm(page, email, "Mateo Test");
-  await page.getByRole("radio", { name: "Español" }).click();
+  // Not twice: the side navigation has no language control.
+  await expect(page.getByRole("radio", { name: "Español" })).toHaveCount(0);
+
+  await openProfile(page);
+  await page.getByRole("main").getByRole("radio", { name: "Español" }).click();
+  await page.getByRole("button", { name: "Save profile" }).click();
+  await expectStatus(page, "Tu perfil se guardó");
   await expect(page.getByRole("button", { name: "Cerrar sesión" })).toBeVisible();
 
   await signOut(page);
@@ -73,6 +79,30 @@ test("R-01.5 the language switcher saves to the profile when signed in", async (
   await signIn(page, email, PASSWORD);
   await expectSignedIn(page, "Mateo Test");
   await expect(page.getByRole("button", { name: "Cerrar sesión" })).toBeVisible();
+});
+
+test.describe("R-01.5 a first-time visitor's language", () => {
+  test.describe("with a Spanish browser", () => {
+    test.use({ locale: "es-ES" });
+
+    test("R-01.5 a Spanish browser opens in Spanish, and EN | ES at the foot of the landing changes it", async ({
+      page,
+    }) => {
+      await page.goto("/");
+      await expect(page.locator("html")).toHaveAttribute("lang", "es");
+      await page.getByRole("button", { name: "English" }).click();
+      await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    });
+  });
+
+  test.describe("with a browser in another language", () => {
+    test.use({ locale: "fr-FR" });
+
+    test("R-01.5 a browser with no supported language opens in English", async ({ page }) => {
+      await page.goto("/");
+      await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    });
+  });
 });
 
 test("R-01.6 a person deletes their account, and it no longer signs in", async ({ page }) => {
