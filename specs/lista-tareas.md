@@ -194,6 +194,7 @@ The Language repository (github.com/ChartDown/Language) is at 0.6; `chartdown` h
 | T-1707 | App: 0.6 written on every save (the chart keeps its own header; a chart with none gets one) | R-00.4 | T-1703 | S | A saved chart declares 0.6; a chart that declares a later version keeps it |
 | T-1708 | Publish `chartdown` 0.2.0 to npm: README, changelog, a packed install test | – | T-1704 | S | The packed package installs in a new project and parses Northbound |
 | T-1709 | Notes for one pass in the MD layer: a `passes` column on `layer_notes` (with its update grant, a rollback and a pgTAP test), `save_layer_note` and `set_song` carrying it, the note form, and the pass shown with the note | R-03.6, R-06.4 | T-1704, T-603 | M | A note for pass 2 is saved, reaches only its instrument's musicians, and shows "2x"; the existing tests of notes still pass |
+| T-1710 | The Beats control (Off, Auto, Always): `showBeats` and the marks of each meter, bars without marks compact and centered, the push ahead of its slash, dimmed slashes under rests, the control in the viewer, stand mode and a set's song, in the address and remembered by the browser | R-03.7 | T-1706 | M | Each rule of the Auto table and each acceptance check of `design/chart-viewer` section 11; Off leaves the JSON and the warnings as they are |
 
 ## Phase 2
 
