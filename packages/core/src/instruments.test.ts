@@ -21,7 +21,9 @@ describe("R-00.1 instruments come from the Admin's catalog", () => {
     const [cajon, guitar] = chart.sections[0]?.notes ?? [];
     expect(cajon?.roles).toEqual(["cajon", "drums"]);
     expect(guitar?.roles).toEqual(["everyone"]);
-    expect(chart.sections[0]?.rows[0]?.bars[0]?.cues).toEqual([{ roles: ["keys"], text: "out" }]);
+    expect(chart.sections[0]?.rows[0]?.bars[0]?.cues).toEqual([
+      { roles: ["keys"], passes: [], text: "out" },
+    ]);
     expect(chart.warnings.map((w) => [w.code, w.values?.name])).toEqual([
       ["unknown-instrument", "gtr"],
     ]);
@@ -31,7 +33,9 @@ describe("R-00.1 instruments come from the Admin's catalog", () => {
     const chart = parse(song("> MD kazoo: Loud.\n1 {kazoo: in} | 4"), { instruments: catalog });
     const section = chart.sections[0];
     expect(section?.notes[0]).toMatchObject({ md: true, roles: ["everyone"], text: "Loud." });
-    expect(section?.rows[0]?.bars[0]?.cues).toEqual([{ roles: ["everyone"], text: "kazoo: in" }]);
+    expect(section?.rows[0]?.bars[0]?.cues).toEqual([
+      { roles: ["everyone"], passes: [], text: "kazoo: in" },
+    ]);
     expect(chart.warnings).toEqual([
       {
         line: 4,

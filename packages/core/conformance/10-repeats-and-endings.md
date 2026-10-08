@@ -82,3 +82,25 @@
   "warnings": []
 }
 ```
+
+### 10 :| 3x plays the repeated bars three times in total, as :| x3 does
+
+```chartdown
+## Bridge
+|: 1 | 4 :| 3x
+|: 5 | 6m :| x4
+```
+
+```json
+{
+  "sections": [
+    {
+      "rows": [
+        { "bars": [{ "repeatStart": true }, { "repeatEnd": { "times": 3 } }] },
+        { "bars": [{ "repeatStart": true }, { "repeatEnd": { "times": 4 } }] }
+      ]
+    }
+  ],
+  "warnings": []
+}
+```

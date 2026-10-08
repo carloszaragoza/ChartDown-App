@@ -27,8 +27,13 @@ export interface Span {
  */
 export function barSpans(items: readonly BarItem[], meter: Meter): Span[] {
   const total = meter.beats;
+  // Chords, partial rests (`x:3`) and riffs (`R[ ... ]:2`) can carry `:beats` (spec 5.1).
   const explicit = items.map((item) =>
-    item.type === "chord" && item.explicitBeats ? item.beats : null,
+    (item.type === "chord" || item.type === "no-chord" || item.type === "riff") &&
+    item.explicitBeats &&
+    item.beats !== undefined
+      ? item.beats
+      : null,
   );
   const given = explicit.reduce<number>((sum, beats) => sum + (beats ?? 0), 0);
   const open = explicit.filter((beats) => beats === null).length;

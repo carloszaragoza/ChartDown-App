@@ -137,7 +137,7 @@ chartdown: 0.4
 ```chartdown
 ---
 title: Open Road
-chartdown: 0.5
+chartdown: 0.7
 ---
 ## A
 1
@@ -145,9 +145,13 @@ chartdown: 0.5
 
 ```json
 {
-  "version": "0.5",
+  "version": "0.7",
   "warnings": [
-    { "line": 3, "code": "unsupported-version", "values": { "version": "0.5", "supported": "0.4" } }
+    {
+      "line": 3,
+      "code": "unsupported-version",
+      "values": { "version": "0.7", "supported": "0.3–0.6" }
+    }
   ]
 }
 ```

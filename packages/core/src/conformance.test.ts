@@ -13,12 +13,18 @@ const REQUIRED = [
   "5",
   "5.1",
   "5.2",
+  "5.3",
   "6",
   "7",
+  "7.1",
   "8",
   "9",
+  "9.1",
   "10",
-  "11",
+  "10.1",
+  "11.1",
+  "11.2",
+  "11.3",
   "12",
   "13",
   "14",
@@ -87,7 +93,13 @@ function shown(chart: Chart, display: string) {
       row.bars
         .map((bar) =>
           bar.items
-            .map((item) => (item.type === "chord" ? fmt.chord(item, row).text : special[item.type]))
+            .map((item) =>
+              item.type === "chord"
+                ? fmt.chord(item, row).text
+                : item.type === "riff"
+                  ? `R[ ${item.notes.map((note) => (note.type === "rest" ? "x" : fmt.root(note.root, row))).join(" ")} ]`
+                  : special[item.type],
+            )
             .join(" "),
         )
         .join(" | "),
@@ -98,7 +110,7 @@ function shown(chart: Chart, display: string) {
 const cases = readCases();
 const passing = cases.filter((c) => c.todo === undefined);
 
-describe("R-00.3 conformance with ChartDown 0.4", () => {
+describe("R-00.3 conformance with ChartDown 0.6", () => {
   it.each(passing)("R-00.3 spec $section $title", ({ source, expected, display }) => {
     const chart = parse(source);
     expect(display === undefined ? chart : shown(chart, display)).toMatchObject(

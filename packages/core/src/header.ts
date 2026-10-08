@@ -21,13 +21,13 @@ export interface Header {
 }
 
 /**
- * Reads the `---` header shared by charts and layers (ChartDown 0.4 section 3), warns about
- * a version other than `supportedVersion` (R-00.4), and builds the instrument names
+ * Reads the `---` header shared by charts and layers (ChartDown section 3), warns about
+ * a version outside `supportedVersions` (R-00.4), and builds the instrument names
  * from the catalog plus the declared custom ids (R-00.1).
  */
 export function readHeader(
   lines: readonly string[],
-  supportedVersion: string,
+  supportedVersions: readonly string[],
   options: ParseOptions,
   warn: Warn,
 ): Header {
@@ -58,10 +58,12 @@ export function readHeader(
   }
 
   const version = fields.chartdown;
-  if (version !== undefined && version !== supportedVersion) {
+  if (version !== undefined && !supportedVersions.includes(version)) {
+    const first = supportedVersions[0];
+    const last = supportedVersions[supportedVersions.length - 1];
     warn(fieldLines.chartdown ?? 1, "unsupported-version", {
       version,
-      supported: supportedVersion,
+      supported: first === last ? String(first) : `${first}–${last}`,
     });
   }
   const instruments = parseInstrumentsHeader(
@@ -76,16 +78,31 @@ export function readHeader(
   return header;
 }
 
-/** `> text`, `> MD: text` or `> MD <instruments>: text` (ChartDown 0.4 section 4). */
+/** The passes in `2x` or `1x,3x`, before the instruments (spec 9.1). */
+export const PASS_PREFIX = /^(\d+x(?:\s*,\s*\d+x)*)\s*(.*)$/i;
+export const parsePasses = (text: string): number[] =>
+  text.split(",").map((pass) => Number.parseInt(pass, 10));
+
+/**
+ * `> text`, `> MD: text`, `> MD <instruments>: text` or `> MD 2x <instruments>: text`, a note
+ * for one pass of the section's repeat (ChartDown spec 4 and 9.1).
+ */
 export function parseNote(text: string, line: number, roles: RoleResolver, warn: Warn): Note {
   const match = /^MD(?:\s+([^:]+?))?\s*:\s*(.*)$/i.exec(text);
-  if (!match) return { md: false, roles: [EVERYONE], text, line };
-  const [, names, noteText = ""] = match;
+  if (!match) return { md: false, roles: [EVERYONE], passes: [], text, line };
+  const [, written, noteText = ""] = match;
+  let names = written ?? "";
+  let passes: number[] = [];
+  const pass = PASS_PREFIX.exec(names);
+  if (pass) {
+    passes = parsePasses(pass[1] as string);
+    names = (pass[2] as string).trim();
+  }
   let noteRoles = [EVERYONE];
-  if (names !== undefined) {
+  if (names) {
     const resolved = roles(names);
     if (resolved) noteRoles = resolved;
     else warn(line, "unknown-instrument", { name: names });
   }
-  return { md: true, roles: noteRoles, text: noteText, line };
+  return { md: true, roles: noteRoles, passes, text: noteText, line };
 }

@@ -101,3 +101,33 @@
   "warnings": []
 }
 ```
+
+### 8 '' before a chord is a short push, a sixteenth note ahead
+
+```chartdown
+## Intro
+''4:2 5:2 | '1
+```
+
+```json
+{
+  "sections": [
+    {
+      "rows": [
+        {
+          "bars": [
+            {
+              "items": [
+                { "root": "4", "push": true, "shortPush": true },
+                { "root": "5", "push": false }
+              ]
+            },
+            { "items": [{ "root": "1", "push": true }] }
+          ]
+        }
+      ]
+    }
+  ],
+  "warnings": []
+}
+```

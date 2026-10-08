@@ -33,14 +33,14 @@
 
 ```chartdown
 ## A
-@tempo 80
+@capo 2
 1
 ```
 
 ```json
 {
   "sections": [{ "rows": [{ "line": 3 }] }],
-  "warnings": [{ "line": 2, "code": "unknown-directive", "values": { "directive": "@tempo" } }]
+  "warnings": [{ "line": 2, "code": "unknown-directive", "values": { "directive": "@capo" } }]
 }
 ```
 
