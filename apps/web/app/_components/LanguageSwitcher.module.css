@@ -1,22 +1,45 @@
+/* One toggle, two options: the thumb slides under the language in use. */
 .switcher {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.button {
-  min-height: var(--target-min);
-  min-width: var(--target-min);
-  padding: 0 var(--space-4);
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--count), 1fr);
   border: var(--stroke-hairline) solid var(--control-border);
   border-radius: var(--radius-md);
   background: var(--paper);
+}
+
+.switcher::before {
+  content: "";
+  position: absolute;
+  inset-block: var(--space-1);
+  inset-inline-start: var(--space-1);
+  width: calc(100% / var(--count) - var(--space-2));
+  border-radius: var(--radius-sm);
+  background: var(--ink);
+  transform: translateX(calc(var(--index) * (100% + var(--space-2))));
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.button {
+  position: relative;
+  min-height: var(--target-min);
+  min-width: var(--target-min);
+  padding: 0 var(--space-4);
+  border: 0;
+  background: transparent;
   color: var(--ink);
   font: var(--type-label);
   cursor: pointer;
+  transition: color 240ms;
 }
 
 .button[aria-pressed="true"] {
-  background: var(--ink);
-  border-color: var(--ink);
   color: var(--ink-inverse);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switcher::before,
+  .button {
+    transition: none;
+  }
 }
