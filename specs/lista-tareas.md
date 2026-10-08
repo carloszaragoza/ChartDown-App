@@ -191,8 +191,9 @@ The Language repository (github.com/ChartDown/Language) is at 0.6; `chartdown` h
 | T-1704 | Play order and the JSON form (Appendix A) exported by the package; layers count a pickup as bar 0 | R-00.9, R-00.10 | T-1703 | M | The play order of Northbound (D.S. al Coda) matches the reference parser; the JSON of the spec's example is produced |
 | T-1705 | Riff notes in numbers and letters and transposition (spec 12.3), and section length without the pickup bar (spec 5.3) | R-00.6, R-00.7 | T-1704 | S | A riff in G transposed to A shows A's notes; a pickup is not counted in a section's bars |
 | T-1706 | Draw every 0.6 element in the chart components, the viewer, the editors and stand mode, after the owner approves the drawing in `design/chart-viewer` | R-00.11 | T-1704, T-1309 | L | Pickup, riff, partial rest, meter and tempo changes, passes and navigation render in numbers and letters, light and dark |
-| T-1707 | App: translated warnings, 0.6 written on every save, 0.6 example charts, and the in-app language reference | R-00.4, R-00.11 | T-1703 | S | Every new warning code has an English and a Spanish message |
+| T-1707 | App: 0.6 written on every save (the chart keeps its own header; a chart with none gets one) | R-00.4 | T-1703 | S | A saved chart declares 0.6; a chart that declares a later version keeps it |
 | T-1708 | Publish `chartdown` 0.2.0 to npm: README, changelog, a packed install test | – | T-1704 | S | The packed package installs in a new project and parses Northbound |
+| T-1709 | Notes for one pass in the MD layer: a `passes` column on `layer_notes` (with its update grant, a rollback and a pgTAP test), `save_layer_note` and `set_song` carrying it, the note form, and the pass shown with the note | R-03.6, R-06.4 | T-1704, T-603 | M | A note for pass 2 is saved, reaches only its instrument's musicians, and shows "2x"; the existing tests of notes still pass |
 
 ## Phase 2
 

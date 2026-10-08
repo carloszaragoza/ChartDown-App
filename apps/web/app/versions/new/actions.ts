@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { authEnabled } from "../../../lib/auth/enabled";
+import { withChartVersion } from "../../../lib/chart/version";
 import { createClient } from "../../../lib/supabase/server";
 import {
   readVersionForm,
@@ -32,7 +33,10 @@ export async function createVersion(
   const checked = validateVersion(values);
   if ("error" in checked) return { error: checked.error, values };
 
-  const { data: id, error } = await supabase.rpc("create_version", checked.input);
+  const { data: id, error } = await supabase.rpc("create_version", {
+    ...checked.input,
+    content: withChartVersion(checked.input.content),
+  });
   if (error || typeof id !== "string") {
     return { error: error?.message === "source_required" ? "source_required" : "unknown", values };
   }
