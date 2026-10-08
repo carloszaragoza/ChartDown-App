@@ -10,7 +10,13 @@ import { UUID } from "../../../../../versions/[id]/load";
 import { readSection } from "../../../../../versions/[id]/stand/standHref";
 import { StandMode } from "../../../../../versions/[id]/stand/StandMode";
 
-type Search = Promise<{ s?: string; view?: string; theme?: string; as?: string }>;
+type Search = Promise<{
+  s?: string;
+  view?: string;
+  beats?: string;
+  theme?: string;
+  as?: string;
+}>;
 
 /**
  * Stand mode for a set's song (R-03.3, R-06.1 to R-06.6, T-802): the person's notes from
@@ -86,7 +92,7 @@ export default async function SetStandPage({
       })
       .filter(Boolean);
   }
-  const display = readDisplay(chart, { view: search.view });
+  const display = readDisplay(chart, { view: search.view, beats: search.beats });
   const homeKey = setSongKey(chart, song.set_key);
   const theme = search.theme === "stage" ? "stage" : "light";
   const keep: Record<string, string> = as ? { as } : {};
@@ -95,6 +101,7 @@ export default async function SetStandPage({
   const carry = (extra: Record<string, string>, viewing: Record<string, string> = keep) => {
     const query = new URLSearchParams({
       ...(display.style === "letters" ? { view: "letters" } : {}),
+      ...(display.beats !== "auto" ? { beats: display.beats } : {}),
       ...(theme === "stage" ? { theme: "stage" } : {}),
       ...viewing,
       ...extra,
@@ -110,6 +117,7 @@ export default async function SetStandPage({
       section={readSection(chart, search.s)}
       style={display.style}
       homeKey={homeKey}
+      beats={display.beats}
       theme={theme}
       path={base(position)}
       keep={keep}

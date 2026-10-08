@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { EditIcon, ForkIcon, StandIcon } from "../../_components/ActionIcons";
+import { BeatsControl } from "../../_components/BeatsControl";
 import { ChartPreview } from "../../_components/ChartPreview";
 import { forkVersion } from "./actions";
 import { displayHref, keysInMode, type Display } from "./display";
@@ -263,6 +264,23 @@ export function VersionView({
                         key: v("key"),
                       }}
                     />
+                    {display && (
+                      <BeatsControl
+                        value={display.beats}
+                        hrefs={{
+                          off: displayHref(path, { ...display, beats: "off" }, chart),
+                          auto: displayHref(path, { ...display, beats: "auto" }, chart),
+                          always: displayHref(path, { ...display, beats: "always" }, chart),
+                        }}
+                        words={{
+                          label: c("beatsLabel"),
+                          name: c("beatsName"),
+                          off: c("beatsOff"),
+                          auto: c("beatsAuto"),
+                          always: c("beatsAlways"),
+                        }}
+                      />
+                    )}
                     {keyName(shownKey) !== written && (
                       <Button
                         label={v("written", { key: written })}
@@ -296,6 +314,7 @@ export function VersionView({
               homeKey={shownKey}
               isFramed
               hasForm
+              beats={display?.beats ?? "auto"}
             />
           </VStack>
         </LayoutContent>

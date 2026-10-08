@@ -46,6 +46,10 @@
      but the neutral theme's accent is the ink, so the theme's blue text token is used instead. */
   --chart-dynamic: var(--color-text-blue);
 
+  /* Beat marks (section 5): how far a push draws a chord ahead of its slash. */
+  --chart-push-shift: 0.3em;
+  --chart-push-shift-short: 0.16em;
+
   /* ChartDown 0.5 and 0.6 (design/chart-viewer section 10). */
   --chart-riff-line: calc(var(--border-width) * 2) solid var(--chart-dynamic);
   --chart-nav-border: var(--border-width) solid var(--chart-ink);
@@ -113,6 +117,14 @@
 .cd-chart__bar--repeat-end {
   border-inline-end: var(--chart-repeat-line);
 }
+/* No bar of the row shows beat marks: three lines, and no beat line at all. */
+.cd-chart__bars--plain {
+  grid-template-rows: auto auto auto;
+}
+.cd-chart__bar--plain {
+  grid-row: span 3;
+}
+
 /* A pickup is a narrow bar: less room at its sides. */
 .cd-chart__bar--pickup {
   padding-inline: var(--spacing-2);
@@ -180,6 +192,20 @@
   display: flex;
   align-items: flex-end;
   min-width: 0;
+}
+/* A bar without marks: its chords spread evenly across it, centered. */
+.cd-chart__spread {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  min-width: 0;
+}
+/* A push in a bar with marks: the chord sits a little ahead of its slash. */
+.cd-chart__chord--early {
+  inset-inline-start: calc(var(--chart-push-shift) * -1);
+}
+.cd-chart__chord--early-short {
+  inset-inline-start: calc(var(--chart-push-shift-short) * -1);
 }
 .cd-chart__cell--split {
   border-inline-start: var(--chart-split-line);
@@ -289,6 +315,10 @@
   color: var(--chart-beat-semi-color);
   font-size: var(--chart-beat-semi-size);
   font-weight: var(--chart-beat-semi-weight);
+}
+/* Under a rest: still there to be counted, but quieter. */
+.cd-chart__beat--rest {
+  opacity: 0.4;
 }
 .cd-chart__beat--weak {
   color: var(--chart-beat-weak-color);

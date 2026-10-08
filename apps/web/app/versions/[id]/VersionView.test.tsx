@@ -139,7 +139,7 @@ describe("R-02.6 only the owner edits", () => {
 describe("R-03.2 the display bar", () => {
   it("R-03.2 the header shows the key being viewed and the written key", () => {
     const html = render("en", {
-      display: { style: "letters", key: { root: "A", minor: false } },
+      display: { style: "letters", key: { root: "A", minor: false }, beats: "auto" },
       path: "/versions/00000000-0000-0000-0000-0000000000f1",
     });
     expect(html).toContain("Key A");

@@ -1,4 +1,5 @@
 import { keyName, parse, type Chart } from "chartdown";
+import { readBeatsMode, type BeatsMode } from "@chartdown/ui";
 import { Banner } from "@astryxdesign/core/Banner";
 import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
 import { Button } from "@astryxdesign/core/Button";
@@ -17,6 +18,7 @@ import { setSongKey } from "../../../../../lib/sets/lineup";
 import { songView, viewAs, viewAsOptions, type SetSong } from "../../../../../lib/sets/song";
 import { createClient } from "../../../../../lib/supabase/server";
 import { StandIcon } from "../../../../_components/ActionIcons";
+import { BeatsControl } from "../../../../_components/BeatsControl";
 import { ChartPreview } from "../../../../_components/ChartPreview";
 import { LinkChoice } from "../../../../_components/LinkChoice";
 import { UUID } from "../../../../versions/[id]/load";
@@ -39,7 +41,7 @@ export default async function SetSongPage({
   searchParams,
 }: {
   params: Promise<{ id: string; n: string }>;
-  searchParams: Promise<{ view?: string; preview?: string; as?: string }>;
+  searchParams: Promise<{ view?: string; beats?: string; preview?: string; as?: string }>;
 }) {
   if (!authEnabled()) notFound();
   const { id, n } = await params;
@@ -52,7 +54,7 @@ export default async function SetSongPage({
   ]);
   if (error || !data) notFound();
   const song = data as SetSong;
-  const { view, preview, as: asked } = await searchParams;
+  const { view, beats: askedBeats, preview, as: asked } = await searchParams;
   // View as, for the MD and the set's temporary MD (R-06.3); nothing changes for a musician.
   const leads = song.role !== "musician";
   const as = leads && asked && /^[a-z0-9-]+$/.test(asked) ? asked : null;
@@ -89,12 +91,18 @@ export default async function SetSongPage({
 
   const homeKey = setSongKey(chart, song.set_key);
   const style = view === "letters" ? "letters" : "numbers";
+  const beats = readBeatsMode(askedBeats);
   const t = await getTranslations("sets");
   const v = await getTranslations("viewer");
   const c = await getTranslations("chart");
   const path = `/sets/${song.set_id}/songs/${position}`;
   const total = count ?? position;
   const keep = style === "letters" ? "?view=letters" : "";
+  // What the address says about the view: letters, and the Beats mode when it is not Auto.
+  const viewing = (mode: BeatsMode, letters = style === "letters") =>
+    [letters ? "view=letters" : "", mode === "auto" ? "" : `beats=${mode}`]
+      .filter(Boolean)
+      .join("&");
   const withPreview = (query: string) =>
     newer
       ? `${path}?${[query, "preview=new"].filter(Boolean).join("&")}`
@@ -107,7 +115,7 @@ export default async function SetSongPage({
     return text ? `?${text}` : "";
   };
 
-  const standHref = `${path}/stand${query({ view: style === "letters" ? "letters" : "", as: as ?? "" })}`;
+  const standHref = `${path}/stand${query({ view: style === "letters" ? "letters" : "", beats: beats === "auto" ? "" : beats, as: as ?? "" })}`;
 
   return (
     <Layout
@@ -186,8 +194,23 @@ export default async function SetSongPage({
                 options={(["numbers", "letters"] as const).map((option) => ({
                   value: option,
                   label: v(option),
-                  href: withPreview(option === "letters" ? "view=letters" : ""),
+                  href: withPreview(viewing(beats, option === "letters")),
                 }))}
+              />
+              <BeatsControl
+                value={beats}
+                hrefs={{
+                  off: withPreview(viewing("off")),
+                  auto: withPreview(viewing("auto")),
+                  always: withPreview(viewing("always")),
+                }}
+                words={{
+                  label: c("beatsLabel"),
+                  name: c("beatsName"),
+                  off: c("beatsOff"),
+                  auto: c("beatsAuto"),
+                  always: c("beatsAlways"),
+                }}
               />
               {leads && (
                 <LinkChoice
@@ -196,7 +219,7 @@ export default async function SetSongPage({
                   options={[null, ...viewAsOptions(song, song.instruments)].map((option) => ({
                     value: option ?? "all",
                     label: option ? nameOf(option) : s("allNotes"),
-                    href: `${path}${query({ view: style === "letters" ? "letters" : "", as: option ?? "" })}`,
+                    href: `${path}${query({ view: style === "letters" ? "letters" : "", beats: beats === "auto" ? "" : beats, as: option ?? "" })}`,
                   }))}
                 />
               )}
@@ -221,6 +244,7 @@ export default async function SetSongPage({
               homeKey={homeKey}
               isFramed
               hasForm
+              beats={beats}
               notes={chart.sections.map((_, index) =>
                 (shown.sections[index] ?? []).map((note) => ({
                   md: note.md,

@@ -87,8 +87,8 @@ describe("R-00.11 the viewer draws ChartDown 0.5 and 0.6", () => {
     const chart = parse("---\nmeter: 4/4\n---\n## A\n1 | 4\n@meter 6/8\n@tempo 72\n5 | 1");
     expect(words(render(chart, 0))).not.toContain("Meter");
     expect(words(render(chart, 1))).toContain("Meter: 6/8 · Tempo: 72 bpm");
-    // The row is drawn in its own meter: six slashes.
-    expect(render(chart, 1).match(/cd-chart__beat--/g)).toHaveLength(12);
+    // The row is drawn in its own meter: two big beats a bar, so four slashes for two bars.
+    expect(render(chart, 1).match(/cd-chart__beat--/g)).toHaveLength(4);
   });
 
   it("R-00.11 a cue for one pass says which pass, before who it is for", () => {

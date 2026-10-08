@@ -32,6 +32,7 @@ import {
 } from "react";
 import { ChartSection } from "../../../_components/ChartPreview";
 import { SongForm } from "../../../_components/SongForm";
+import { BeatsControl } from "../../../_components/BeatsControl";
 import { useChartLabels } from "../../../_components/chartLabels";
 import type { Display } from "../display";
 import { readSection, standHref, type StandTheme } from "./standHref";
@@ -43,6 +44,8 @@ export interface StandModeProps {
   section: number;
   style: Display["style"];
   homeKey: Key;
+  /** How many bars show beat marks (R-03.7); Auto by default. */
+  beats?: Display["beats"];
   theme: StandTheme;
   /** Where this stand mode lives; the version's by default. */
   path?: string;
@@ -88,6 +91,7 @@ export function StandMode({
   section: initial,
   style,
   homeKey,
+  beats = "auto",
   theme,
   path = `/versions/${versionId}/stand`,
   keep = {},
@@ -109,7 +113,7 @@ export function StandMode({
   );
   const root = useRef<HTMLDivElement>(null);
   const atEdge = useRef({ first: true, last: false });
-  const display: Display = { style, key: homeKey };
+  const display: Display = { style, key: homeKey, beats };
   const formatter = chordFormatter(chart, { style, key: homeKey });
   const last = chart.sections.length - 1;
   const href = (section: number, changes: Partial<{ display: Display; theme: StandTheme }> = {}) =>
@@ -298,6 +302,21 @@ export function StandMode({
                     as={Link}
                     variant="secondary"
                   />
+                  <BeatsControl
+                    value={beats}
+                    hrefs={{
+                      off: href(current, { display: { ...display, beats: "off" } }),
+                      auto: href(current, { display: { ...display, beats: "auto" } }),
+                      always: href(current, { display: { ...display, beats: "always" } }),
+                    }}
+                    words={{
+                      label: c("beatsLabel"),
+                      name: c("beatsName"),
+                      off: c("beatsOff"),
+                      auto: c("beatsAuto"),
+                      always: c("beatsAlways"),
+                    }}
+                  />
                   <Button
                     label={theme === "stage" ? t("light") : t("stage")}
                     href={href(current, { theme: theme === "stage" ? "light" : "stage" })}
@@ -345,6 +364,7 @@ export function StandMode({
                   id="current-section"
                   isFramed
                   meter={chart.meter}
+                  beats={beats}
                   size="lg"
                 />
               )}
@@ -364,6 +384,7 @@ export function StandMode({
                       formatter={formatter}
                       labels={labels.bar}
                       meter={chart.meter}
+                      beats={beats}
                       size="sm"
                     />
                   )}

@@ -2,6 +2,16 @@
 // "@chartdown/ui/fonts.css" and "@chartdown/ui/components.css" once in the app.
 export { BarRow, passesText, type BarRowProps } from "./BarRow";
 export {
+  BEATS_MODES,
+  beatMarks,
+  isCompound,
+  readBeatsMode,
+  showBeats,
+  type BeatMark,
+  type BeatsContext,
+  type BeatsMode,
+} from "./beatMarks";
+export {
   barSpans,
   beatStrength,
   COLUMNS_PER_BEAT,

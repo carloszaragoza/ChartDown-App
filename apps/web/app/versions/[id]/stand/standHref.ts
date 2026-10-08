@@ -22,6 +22,7 @@ export function standHref(
   if (place.display.style === "letters") params.set("view", "letters");
   if (keyName(place.display.key) !== keyName(chart.key))
     params.set("key", keyName(place.display.key));
+  if (place.display.beats !== "auto") params.set("beats", place.display.beats);
   if (place.theme === "stage") params.set("theme", "stage");
   // Anything else the page keeps, such as View as (T-802).
   for (const [name, value] of Object.entries(keep)) params.set(name, value);

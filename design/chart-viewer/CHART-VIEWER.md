@@ -179,7 +179,7 @@ Drawn after the reference playground of the Language repository (its "Syntax tou
 | `> MD 2x drums: ...` | A red `Token` "2x" before the instrument `Token`s of the note. |
 | A song with a D.S. or D.C. jump | Under the song form, a line "Play order" with the sections in the order they are played, with the bars when only part of a section plays: "Intro → Verse → Chorus → Bridge → Verse → Chorus (bars 1–7) → Outro". |
 
-Screenshots for review, from `/design/chart-0-6` (development and preview builds): `screens/light` and `screens/dark`, `chart-0-6-northbound-1.png`, `chart-0-6-northbound-2.png` and `chart-0-6-syntax-tour.png`.
+Screenshots for review, from `/design/chart-0-6` (development and preview builds): `screens/light` and `screens/dark`, `chart-0-6-northbound-1.png`, `chart-0-6-northbound-2.png` and `chart-0-6-syntax-tour.png`. They show Beats on Auto, the default; `beats-always.png` and `beats-off.png` show the other two. The numbered screenshots (`00` to `15`) are from the approved prototype and show **Always**, which is how every bar was drawn before the Beats control (R-03.7).
 
 **Acceptance checks**
 

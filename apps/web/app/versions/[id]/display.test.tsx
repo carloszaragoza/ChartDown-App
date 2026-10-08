@@ -36,6 +36,7 @@ describe("R-03.2 numbers or letters, and transposition", () => {
     expect(readDisplay(chart, { view: "letters", key: "H#" })).toEqual({
       style: "letters",
       key: { root: "G", minor: false },
+      beats: "auto",
     });
     // A minor key is not offered for a major chart.
     expect(readDisplay(chart, { key: "Am" }).key).toEqual({ root: "G", minor: false });
