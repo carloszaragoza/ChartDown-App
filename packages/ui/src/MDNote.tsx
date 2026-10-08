@@ -4,6 +4,8 @@ import { InstrumentTag } from "./InstrumentTag";
 export interface MDNoteData {
   md: boolean;
   roles: string[];
+  /** The passes of a repeat the note is for, for example [2]; empty or missing for every pass. */
+  passes?: readonly number[];
   text: string;
 }
 

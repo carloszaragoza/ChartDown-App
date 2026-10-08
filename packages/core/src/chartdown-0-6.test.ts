@@ -9,7 +9,12 @@ import { fixture06 } from "./test-helpers.js";
 
 const bars = (source: string) =>
   parse(source).sections.flatMap((section) => section.rows.flatMap((row) => row.bars));
-const step = (section: number, bar: number, pass = 1) => ({ section, bar, pass });
+const step = (section: number, bar: number, pass = 1, jump = false) => ({
+  section,
+  bar,
+  pass,
+  ...(jump ? { jump: true } : {}),
+});
 
 describe("R-00.6 pickup bars, meter and tempo changes", () => {
   it("R-00.6 a pickup is bar 0 and the first full bar is bar 1", () => {
@@ -186,16 +191,22 @@ describe("R-00.9 navigation and the play order", () => {
       step(0, 1),
       step(0, 2),
       step(0, 3),
-      step(0, 1),
+      step(0, 1, 1, true),
       step(0, 2),
-      step(1, 1),
+      step(1, 1, 1, true),
       step(1, 2),
     ]);
   });
 
   it("R-00.9 D.C. al Fine goes back to the first bar and stops at the fine", () => {
     const chart = parse("## A\n1 | 4 {fine} | 5 {D.C. al fine} | 6m");
-    expect(playOrder(chart)).toEqual([step(0, 1), step(0, 2), step(0, 3), step(0, 1), step(0, 2)]);
+    expect(playOrder(chart)).toEqual([
+      step(0, 1),
+      step(0, 2),
+      step(0, 3),
+      step(0, 1, 1, true),
+      step(0, 2),
+    ]);
   });
 
   it("R-00.9 after the jump each repeat is played once, taking its last ending", () => {

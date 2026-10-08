@@ -3,6 +3,9 @@ import type { BarItem, Meter } from "chartdown";
 /** Columns per beat in a bar's grid: 12 holds halves, thirds and quarters (CHART-VIEWER.md 4). */
 export const COLUMNS_PER_BEAT = 12;
 
+/** A pickup is never narrower than this share of a full bar (`--chart-pickup-min`). */
+export const PICKUP_MIN = 0.3;
+
 export type BeatStrength = "strong" | "semi" | "weak";
 
 /** How strong beat `i` (from 0) of a bar is, by meter (CHART-VIEWER.md 5). */
@@ -47,4 +50,9 @@ export function barSpans(items: readonly BarItem[], meter: Meter): Span[] {
     const end = Math.min(Math.round(at * COLUMNS_PER_BEAT), columns);
     return { start: start + 1, span: Math.max(end - start, 1) };
   });
+}
+
+/** Whether a section starts with a pickup bar, which its bar count leaves out (spec 5.3). */
+export function hasPickup(section: { rows: readonly { bars: readonly { pickup?: number }[] }[] }) {
+  return section.rows.some((row) => row.bars.some((bar) => bar.pickup !== undefined));
 }

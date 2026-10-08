@@ -8,6 +8,8 @@ export interface PlayStep {
   /** The bar's number in its section: 0 for a pickup. */
   bar: number;
   pass: number;
+  /** Set on the first bar after a navigation jump (D.S., D.C. or to coda), where a new run starts. */
+  jump?: true;
 }
 
 const NAV_LABELS: Record<NavMark, string> = {
@@ -160,6 +162,7 @@ export function playOrder(chart: Pick<Chart, "sections">): PlayStep[] {
   let jumped = false;
   let back = false;
   let steps = 0;
+  let after = false;
 
   while (i < flat.length && steps++ < MAX_STEPS) {
     const item = flat[i] as Flat;
@@ -177,11 +180,18 @@ export function playOrder(chart: Pick<Chart, "sections">): PlayStep[] {
       continue;
     }
     if (!item.ending && !inSpan) pass = 1;
-    order.push({ section: item.section, bar: bar.number, pass });
+    order.push({
+      section: item.section,
+      bar: bar.number,
+      pass,
+      ...(after ? { jump: true } : {}),
+    } as PlayStep);
+    after = false;
     if (jumped && jump?.mark.endsWith("alcoda") && i === toCoda) {
       i = coda as number;
       inSpan = false;
       pass = 1;
+      after = true;
       continue;
     }
     if (jumped && jump?.mark.endsWith("alfine") && i === fine) break;
@@ -200,6 +210,7 @@ export function playOrder(chart: Pick<Chart, "sections">): PlayStep[] {
       i = jump.mark.startsWith("ds") ? (segno as number) : 0;
       pass = 1;
       inSpan = false;
+      after = true;
       continue;
     }
     i++;

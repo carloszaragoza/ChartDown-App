@@ -8,8 +8,8 @@ import { BarRow, type BarLabels } from "./Bar";
 import { MDNote, orderNotes, type MDNoteData } from "./MDNote";
 
 export interface SectionLabels {
-  /** The section's length, for example "8 bars" or "4 bars ×2". */
-  length: (length: SectionLength) => string;
+  /** The section's length, for example "8 bars", "4 bars ×2" or "pickup + 4 bars". */
+  length: (length: SectionLength, options?: { pickup?: boolean }) => string;
   /** Lead-in of the next-section preview, for example "Next". */
   next: string;
   /** Added to the preview when the next section has notes for this player. */

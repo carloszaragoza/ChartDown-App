@@ -4,6 +4,7 @@ import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
 import { Icon } from "./Icon";
 import { hasInstrumentIcon } from "./icons";
+import { passesText } from "./BarRow";
 import { orderNotes, type MDNoteData } from "./MDNote";
 
 export interface MDNotesProps {
@@ -26,6 +27,10 @@ export function MDNotes({ notes, instrumentName }: MDNotesProps) {
       {orderNotes(notes).map((note, index) =>
         note.md ? (
           <HStack key={index} gap={2} vAlign="center" wrap="wrap">
+            {/* A note for one pass says so in words: "2x" before who it is for (spec 9.1). */}
+            {note.passes && note.passes.length > 0 && (
+              <Token label={passesText(note.passes)} color="red" size="sm" />
+            )}
             {forEveryone(note) ? (
               <Token label="MD" color="red" size="sm" />
             ) : (

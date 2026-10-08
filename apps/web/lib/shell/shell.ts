@@ -20,7 +20,8 @@ export function shellHidden(pathname: string, signedIn: boolean): boolean {
     pathname.endsWith("/stand") ||
     pathname === "/offline" ||
     pathname.startsWith("/offline/") ||
-    pathname === "/design"
+    pathname === "/design" ||
+    pathname.startsWith("/design/")
   );
 }
 

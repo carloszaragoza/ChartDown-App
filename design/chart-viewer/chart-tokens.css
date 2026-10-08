@@ -43,6 +43,11 @@
   --chart-md-border: var(--color-border-red);
   --chart-dynamic: var(--color-text-blue);          /* p, mf, cresc., push, stab, fermata marks; blue = dynamics (the neutral theme's accent is the ink) */
 
+  /* ChartDown 0.5 and 0.6 (section 10) */
+  --chart-pickup-min: 0.3;                          /* a pickup is never under this share of a full bar */
+  --chart-riff-line: calc(var(--border-width) * 2) solid var(--chart-dynamic); /* under a unison riff */
+  --chart-nav-border: var(--border-width) solid var(--chart-ink); /* around Segno, Coda, D.S. ... */
+
   /* Hold (diamond) */
   --chart-hold-box: 1.5em;                          /* square that contains the chord, centered */
   --chart-hold-diamond: 1.06em;                     /* side of the square rotated 45deg; its diagonal fits the box */

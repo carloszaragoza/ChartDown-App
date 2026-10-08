@@ -15,11 +15,17 @@ export interface BarLabels {
   instrument: (id: string) => string;
   /** The line above a row after `@key`, for example "Key change: A". */
   keyChange: (key: string) => string;
+  /** The line above a row after `@meter` or `@tempo`, for example "Meter: 6/8 · Tempo: 72 bpm". */
+  meterTempoChange?: (change: { meter?: string; tempo?: number }) => string;
+  /** What a sixteenth push (`''`) is called, read out with the chord. */
+  shortPush?: string;
+  /** What a unison riff (`R[ ... ]`) is called, read out with its notes. */
+  riff?: string;
   /** A beat slash's title, for example "Beat 3: semi-strong". */
   beat: (beat: number, strength: "strong" | "semi" | "weak") => string;
 }
 
-export const DEFAULT_BAR_LABELS: BarLabels = {
+export const DEFAULT_BAR_LABELS: Required<BarLabels> = {
   push: "push",
   hold: "hold",
   stab: "stab",
@@ -29,6 +35,12 @@ export const DEFAULT_BAR_LABELS: BarLabels = {
   tie: "tied over",
   instrument: (id) => id.charAt(0).toUpperCase() + id.slice(1),
   keyChange: (key) => `Key change: ${key}`,
+  meterTempoChange: ({ meter, tempo }) =>
+    [meter && `Meter: ${meter}`, tempo !== undefined && `Tempo: ${tempo} bpm`]
+      .filter(Boolean)
+      .join(" · "),
+  shortPush: "short push",
+  riff: "unison riff",
   beat: (beat, strength) =>
     `Beat ${beat}: ${{ strong: "strong", semi: "semi-strong", weak: "weak" }[strength]}`,
 };
