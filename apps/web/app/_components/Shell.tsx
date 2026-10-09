@@ -51,6 +51,7 @@ import {
   UserIcon as UserSolid,
 } from "@heroicons/react/24/solid";
 import { IntentLink } from "./IntentLink";
+import { PendingPage } from "./PendingPage";
 import { ShellHiddenContext } from "./shellContext";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -94,7 +95,11 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
     if (!account) void forgetSets();
   }, [account]);
   if (shellHidden(pathname, Boolean(account)))
-    return <ShellHiddenContext.Provider value={true}>{children}</ShellHiddenContext.Provider>;
+    return (
+      <ShellHiddenContext.Provider value={true}>
+        <PendingPage>{children}</PendingPage>
+      </ShellHiddenContext.Provider>
+    );
 
   const personal = bands.find((band) => band.personal) ?? null;
   const band = currentBand(bands, chosenBand);
@@ -249,7 +254,7 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
 
   return (
     <AppShell sideNav={nav} contentPadding={0}>
-      {children}
+      <PendingPage>{children}</PendingPage>
     </AppShell>
   );
 }

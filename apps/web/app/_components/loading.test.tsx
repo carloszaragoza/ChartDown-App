@@ -4,11 +4,15 @@ import { describe, expect, it, vi } from "vitest";
 import en from "../../messages/en.json";
 import { IntentLink } from "./IntentLink";
 import { PageSkeleton } from "./PageSkeleton";
+import { PendingPage } from "./PendingPage";
 import { ShellHiddenContext } from "./shellContext";
 import { StandSkeleton } from "./StandSkeleton";
 
 const prefetch = vi.fn();
-vi.mock("next/navigation", () => ({ useRouter: () => ({ prefetch, push: () => undefined }) }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ prefetch, push: () => undefined }),
+  usePathname: () => "/catalog",
+}));
 
 const render = (node: React.ReactNode) =>
   renderToString(
@@ -64,5 +68,15 @@ describe("F-003 a tap answers at once, and the side navigation does not prefetch
     const html = render(<StandSkeleton />);
     expect(skeletons(html)).toBeGreaterThanOrEqual(7);
     expect(html).toContain('role="status"');
+  });
+
+  it("F-003 with no tap pending, the page is shown as it is", () => {
+    const html = render(
+      <PendingPage>
+        <p>The catalog</p>
+      </PendingPage>,
+    );
+    expect(html).toContain("The catalog");
+    expect(skeletons(html)).toBe(0);
   });
 });
