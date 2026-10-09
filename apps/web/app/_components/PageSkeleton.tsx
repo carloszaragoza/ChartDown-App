@@ -22,22 +22,6 @@ export function PageSkeleton() {
     <Layout padding={8}>
       <LayoutContent>
         {status}
-        <VStack gap={6} aria-hidden="true">
-          <HStack gap={4} vAlign="center" hAlign="between">
-            <Skeleton width={180} height={36} index={0} />
-            <Skeleton width={260} height={44} radius="rounded" index={1} />
-          </HStack>
-          <Skeleton width="70%" height={72} index={2} />
-          <Skeleton width="50%" height={24} index={3} />
-          <Skeleton height={160} index={4} />
-        </VStack>
-      </LayoutContent>
-    </Layout>
-  );
-  return (
-    <Layout padding={8}>
-      <LayoutContent>
-        {status}
         <VStack gap={4} aria-hidden="true">
           <Skeleton width="40%" height={36} index={0} />
           <Skeleton width="65%" height={20} index={1} />
