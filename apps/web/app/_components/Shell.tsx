@@ -50,7 +50,8 @@ import {
   UserGroupIcon as UserGroupSolid,
   UserIcon as UserSolid,
 } from "@heroicons/react/24/solid";
-import Link from "next/link";
+import { IntentLink } from "./IntentLink";
+import { ShellHiddenContext } from "./shellContext";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, type ReactNode } from "react";
@@ -92,7 +93,8 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
   useEffect(() => {
     if (!account) void forgetSets();
   }, [account]);
-  if (shellHidden(pathname, Boolean(account))) return <>{children}</>;
+  if (shellHidden(pathname, Boolean(account)))
+    return <ShellHiddenContext.Provider value={true}>{children}</ShellHiddenContext.Provider>;
 
   const personal = bands.find((band) => band.personal) ?? null;
   const band = currentBand(bands, chosenBand);
@@ -109,7 +111,7 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
     <SideNavItem
       label={label}
       href={href}
-      as={Link}
+      as={IntentLink}
       // Large rows: at least 44 px to tap with confidence on an iPad (Design Handoff 2.0, 1.5).
       size="lg"
       icon={icon}
@@ -149,7 +151,13 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
                       : {})}
                   />
                 ))}
-                <Button label={t("allBands")} variant="ghost" size="sm" href="/bands" as={Link} />
+                <Button
+                  label={t("allBands")}
+                  variant="ghost"
+                  size="sm"
+                  href="/bands"
+                  as={IntentLink}
+                />
               </VStack>
             ),
           }
@@ -266,7 +274,7 @@ function Footer({ account, collapsed }: { account: ShellProps["account"]; collap
               size="lg"
               tooltip={account.name}
               href="/profile"
-              as={Link}
+              as={IntentLink}
               icon={<Avatar name={account.name} size="sm" tooltip={false} />}
             />
             <form action={signOut}>
@@ -289,7 +297,7 @@ function Footer({ account, collapsed }: { account: ShellProps["account"]; collap
             size="lg"
             tooltip={t("signIn")}
             href="/auth/sign-in"
-            as={Link}
+            as={IntentLink}
             icon={<Icon icon={ArrowRightEndOnRectangleIcon} />}
           />
         )}
@@ -335,7 +343,7 @@ function Footer({ account, collapsed }: { account: ShellProps["account"]; collap
           variant="primary"
           size="lg"
           href="/auth/sign-in"
-          as={Link}
+          as={IntentLink}
           width="100%"
         />
       )}

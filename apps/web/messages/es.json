@@ -1107,6 +1107,7 @@
     "other": "Lee también: {name}"
   },
   "nav": {
+    "loading": "Cargando…",
     "label": "Principal",
     "home": "Inicio",
     "notices": "Avisos",
