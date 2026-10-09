@@ -13,7 +13,8 @@ const GIVE_UP_MS = 10000;
  * Skeletons the moment a link to another page is tapped, until that page arrives (F-003). The
  * client draws them, not a loading boundary, so the server's answer stays what it was (a 404
  * included) and the offline page is cached whole. Only taps the router takes over count (Next's
- * Link prevents the browser's own navigation); a full page load keeps the browser's.
+ * Link prevents the browser's own navigation); a full page load keeps the browser's. It lives in
+ * the app shell only: stand mode moves between sections at once and takes its own taps.
  */
 export function PendingPage({ children }: { children: ReactNode }) {
   const pathname = usePathname();

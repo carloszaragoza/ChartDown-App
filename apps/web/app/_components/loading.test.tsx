@@ -5,7 +5,6 @@ import en from "../../messages/en.json";
 import { IntentLink } from "./IntentLink";
 import { PageSkeleton } from "./PageSkeleton";
 import { PendingPage } from "./PendingPage";
-import { ShellHiddenContext } from "./shellContext";
 import { StandSkeleton } from "./StandSkeleton";
 
 const prefetch = vi.fn();
@@ -52,16 +51,6 @@ describe("F-003 a tap answers at once, and the side navigation does not prefetch
     expect(html).toContain("Loading…");
     // The skeletons are shapes, hidden from screen readers; the status is the word.
     expect(html).toMatch(/aria-hidden="true"/);
-  });
-
-  it("F-003 a page without the side navigation shows its own skeletons, not the app's", () => {
-    const html = render(
-      <ShellHiddenContext.Provider value={true}>
-        <PageSkeleton />
-      </ShellHiddenContext.Provider>,
-    );
-    expect(skeletons(html)).toBeGreaterThanOrEqual(4);
-    expect(html).toContain("Loading…");
   });
 
   it("F-003 stand mode shows its own full-screen skeletons while it loads", () => {

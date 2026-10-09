@@ -52,7 +52,6 @@ import {
 } from "@heroicons/react/24/solid";
 import { IntentLink } from "./IntentLink";
 import { PendingPage } from "./PendingPage";
-import { ShellHiddenContext } from "./shellContext";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, type ReactNode } from "react";
@@ -94,12 +93,7 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
   useEffect(() => {
     if (!account) void forgetSets();
   }, [account]);
-  if (shellHidden(pathname, Boolean(account)))
-    return (
-      <ShellHiddenContext.Provider value={true}>
-        <PendingPage>{children}</PendingPage>
-      </ShellHiddenContext.Provider>
-    );
+  if (shellHidden(pathname, Boolean(account))) return <>{children}</>;
 
   const personal = bands.find((band) => band.personal) ?? null;
   const band = currentBand(bands, chosenBand);
