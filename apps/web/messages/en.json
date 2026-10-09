@@ -1107,6 +1107,7 @@
     "other": "Also read: {name}"
   },
   "nav": {
+    "loading": "Loading…",
     "label": "Main",
     "home": "Home",
     "notices": "Notices",
