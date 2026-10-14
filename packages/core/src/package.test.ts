@@ -21,7 +21,9 @@ describe("T-107 the chartdown package on npm", () => {
   it("T-107 is published as chartdown under MIT, pointing to the public language repository", () => {
     expect(manifest.name).toBe("chartdown");
     expect(manifest.license).toBe("MIT");
-    expect(manifest.repository.url).toContain("github.com/ChartDown/Language");
+    // The language moved to github.com/ChartDown/spec; ChartDown/Language is private (F-007).
+    expect(manifest.repository.url).toContain("github.com/ChartDown/spec");
+    expect((manifest as { homepage?: string }).homepage).toBe("https://github.com/ChartDown/spec");
   });
 
   it("T-107 ships its build and sources, never its tests, and depends on nothing", () => {
@@ -40,7 +42,8 @@ describe("T-1708 the chartdown package on npm, version 0.2.0 for ChartDown 0.6",
     expect(manifest.description).toContain("spec 0.6");
     expect(manifest.files).toContain("CHANGELOG.md");
     const changelog = readFileSync(new URL("../CHANGELOG.md", import.meta.url), "utf8");
-    expect(changelog).toMatch(/^# Changelog\n\n## 0\.2\.0\n/);
+    // An unreleased section may come first, above the latest release.
+    expect(changelog).toMatch(/^# Changelog\n\n(## Unreleased[^\n]*\n[\s\S]*?\n)?## 0\.2\.0\n/);
     expect(changelog).toContain("## 0.1.0");
     const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
     expect(readme).toContain("spec 0.6");
@@ -95,6 +98,55 @@ console.log(JSON.stringify({ version: SUPPORTED_VERSION, sections: chart.section
         steps: 57,
         json: "0.6",
       });
+    },
+  );
+});
+
+describe("R-00.12 the package ships the adapter for the official conformance suite", () => {
+  it("R-00.12 exports chartdown/conformance with its types", () => {
+    expect(manifest.exports["./conformance"]).toEqual({
+      types: "./dist/conformance.d.ts",
+      import: "./dist/conformance.js",
+    });
+  });
+
+  it(
+    "R-00.12 a packed copy installs in a new project and passes the suite through its own adapter",
+    { timeout: 180_000 },
+    () => {
+      const root = fileURLToPath(new URL("..", import.meta.url));
+      const tsc = createRequire(import.meta.url).resolve("typescript/bin/tsc");
+      execFileSync(process.execPath, [tsc, "-p", "tsconfig.build.json"], { cwd: root });
+
+      const work = mkdtempSync(join(tmpdir(), "chartdown-suite-"));
+      execFileSync("npm", ["pack", "--pack-destination", work, "--silent"], { cwd: root });
+      const tarball = readdirSync(work).find((name) => name.endsWith(".tgz")) as string;
+      const project = join(work, "project");
+      execFileSync("mkdir", [project]);
+      writeFileSync(
+        join(project, "package.json"),
+        JSON.stringify({ name: "new-project", type: "module" }),
+      );
+      execFileSync(
+        "npm",
+        [
+          "install",
+          join(work, tarball),
+          "--no-audit",
+          "--no-fund",
+          "--ignore-scripts",
+          "--offline",
+        ],
+        { cwd: project },
+      );
+      // The one line the package's README gives.
+      writeFileSync(join(project, "adapter.mjs"), 'export * from "chartdown/conformance";\n');
+      const out = execFileSync(
+        process.execPath,
+        [join(root, "conformance", "run.mjs"), join(project, "adapter.mjs")],
+        { encoding: "utf8" },
+      );
+      expect(out).toMatch(/^\d+ passed, 0 failed$/m);
     },
   );
 });
