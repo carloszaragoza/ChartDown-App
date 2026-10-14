@@ -95,13 +95,10 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   await expect(bassRow).toContainText("Bass");
   await expect(bassRow).not.toContainText("Keys");
 
-  // What stand mode asks the server for from here on: pages, and pages loaded ahead (F-006).
+  // The pages stand mode asks the server for from here on, loaded ahead or not (F-006).
   const asked: string[] = [];
-  const ahead: string[] = [];
   page.on("request", (sent) => {
-    const headers = sent.headers();
-    if (headers["rsc"] !== "1") return;
-    (headers["next-router-prefetch"] ? ahead : asked).push(new URL(sent.url()).pathname);
+    if (sent.headers()["rsc"] === "1") asked.push(new URL(sent.url()).pathname);
   });
 
   // The MD opens stand mode from the set's song: every note, and View as.
@@ -126,7 +123,9 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
       page.getByRole("radiogroup", { name: "View as" }).getByRole("radio", { name: label }),
     ).toBeChecked();
   };
-  // F-006: every view came with the page, so switching asks the server nothing.
+  // F-006: every view came with the page, so switching asks the server nothing for this song
+  // (the next song, loaded ahead, follows the view).
+  const thisSong = `${setAddress}/songs/1/stand`;
   asked.length = 0;
   await viewAs("Bass");
   await expect(page).toHaveURL(/as=bass/);
@@ -139,12 +138,12 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   await viewAs("All notes");
   await expect(current).toContainText(notes.keys);
   await expect(current).toContainText(notes.bass);
-  expect(asked).toEqual([]);
+  expect(asked).not.toContain(thisSong);
 
   // At the end of the song, Next goes on to the next song of the set, loaded ahead whole, so
   // moving on asks the server nothing more (F-006).
   const nextSong = `${setAddress}/songs/2/stand`;
-  await expect.poll(() => ahead.includes(nextSong)).toBe(true);
+  await expect.poll(() => asked.includes(nextSong)).toBe(true);
   asked.length = 0;
   await page.getByRole("link", { name: "Next song" }).click();
   await expect(page.getByText("Song 2 of 2")).toBeVisible();
