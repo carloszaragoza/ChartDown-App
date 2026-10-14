@@ -13,6 +13,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../lib/auth/enabled";
+import { localToday } from "../../lib/sets/today";
 import { nextSet, setWhen } from "../../lib/sets/when";
 import { createClient } from "../../lib/supabase/server";
 import { Invitations, type Invitation } from "../_components/Invitations";
@@ -67,7 +68,7 @@ export default async function BandsPage({ searchParams }: { searchParams: Search
         supabase.from("sets").select("id, band_id, name, date, time").in("band_id", ids),
       ])
     : [{ data: [] }, { data: [] }];
-  const today = new Date().toISOString().slice(0, 10);
+  const today = await localToday();
   const membersOf = (bandId: string) =>
     (memberRows ?? []).filter((row) => row.band_id === bandId).length;
   const nextOf = (bandId: string) => {

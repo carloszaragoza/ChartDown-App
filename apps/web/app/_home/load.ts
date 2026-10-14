@@ -2,6 +2,7 @@ import { keyName, parse } from "chartdown";
 import type { createClient } from "../../lib/supabase/server";
 import { setSongKey } from "../../lib/sets/lineup";
 import { songView, type SetSong } from "../../lib/sets/song";
+import { localToday } from "../../lib/sets/today";
 import { compareSets, nextSet } from "../../lib/sets/when";
 import { currentBand } from "../../lib/shell/shell";
 
@@ -84,7 +85,7 @@ export async function loadHome(
   userId: string,
   options: { chosenBand: string | undefined; usage: UsagePeriod; locale: string },
 ): Promise<HomeData> {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = await localToday();
   const nameIn = (row: { name_en: string; name_es: string }) =>
     options.locale === "es" ? row.name_es : row.name_en;
   const [

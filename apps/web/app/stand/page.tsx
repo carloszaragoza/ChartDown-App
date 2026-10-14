@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { authEnabled } from "../../lib/auth/enabled";
+import { localToday } from "../../lib/sets/today";
 import { nextSet } from "../../lib/sets/when";
 import { createClient } from "../../lib/supabase/server";
 
@@ -21,7 +22,7 @@ export default async function StandEntry() {
     time: string | null;
     set_items: { count: number }[];
   };
-  const next = nextSet((data ?? []) as Row[], new Date().toISOString().slice(0, 10));
+  const next = nextSet((data ?? []) as Row[], await localToday());
   if (!next) redirect("/sets");
   redirect(
     (next.set_items[0]?.count ?? 0) > 0 ? `/sets/${next.id}/songs/1/stand` : `/sets/${next.id}`,

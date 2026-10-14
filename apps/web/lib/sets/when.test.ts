@@ -1,6 +1,6 @@
 import { createFormatter } from "next-intl";
 import { describe, expect, it } from "vitest";
-import { compareSets, nextSet, setWhen } from "./when";
+import { compareSets, nextSet, personTimeZone, setWhen, todayIn } from "./when";
 
 const en = createFormatter({ locale: "en", timeZone: "UTC" });
 const es = createFormatter({ locale: "es", timeZone: "UTC" });
@@ -46,5 +46,22 @@ describe("T-1301 Stand mode in the side navigation", () => {
     expect(nextSet(sets, "2026-10-07")?.id).toBe("today-morning");
     expect(nextSet(sets, "2026-10-21")?.id).toBe("undated");
     expect(nextSet([sets[0]!], "2026-10-07")).toBeNull();
+  });
+});
+
+describe("F-004 today is the person's own day", () => {
+  it("F-004 at 9 p.m. in Mexico City it is still the same day, though UTC is already tomorrow", () => {
+    const night = new Date("2026-10-14T03:01:00Z");
+    expect(todayIn("America/Mexico_City", night)).toBe("2026-10-13");
+    expect(todayIn("UTC", night)).toBe("2026-10-14");
+    const tonight = [{ id: "tonight", date: "2026-10-13", time: "21:30", name: "Tonight" }];
+    expect(nextSet(tonight, todayIn("America/Mexico_City", night))?.id).toBe("tonight");
+  });
+
+  it("F-004 the browser's time zone first, then the connection's, then UTC", () => {
+    expect(personTimeZone("America/Mexico_City", "Europe/Madrid")).toBe("America/Mexico_City");
+    expect(personTimeZone(undefined, "Europe/Madrid")).toBe("Europe/Madrid");
+    expect(personTimeZone("Not/AZone", null)).toBe("UTC");
+    expect(todayIn("Not/AZone", new Date("2026-10-14T03:01:00Z"))).toBe("2026-10-14");
   });
 });

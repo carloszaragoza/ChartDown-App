@@ -19,6 +19,7 @@ import { AstryxTheme } from "./_components/AstryxTheme";
 import { NoticesLive } from "./_components/NoticesLive";
 import { OfflineSync } from "./_components/OfflineSync";
 import { ServiceWorker } from "./_components/ServiceWorker";
+import { TimeZoneCookie } from "./_components/TimeZoneCookie";
 import { Shell, type ShellProps } from "./_components/Shell";
 
 export const metadata: Metadata = {
@@ -107,6 +108,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <NextIntlClientProvider>
           <AstryxTheme>
             <ServiceWorker />
+            <TimeZoneCookie />
             {shell?.account && <OfflineSync />}
             {shell?.userId && <NoticesLive userId={shell.userId} />}
             {shell ? (
