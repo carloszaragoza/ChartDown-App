@@ -1,6 +1,6 @@
 # ChartDown App
 
-A web app (desktop and iPad first) where bands write, share and play Nashville Number System charts written in [ChartDown](https://github.com/ChartDown/Language), an open plain-text notation.
+A web app (desktop and iPad first) where bands write, share and play Nashville Number System charts written in [ChartDown](https://github.com/ChartDown/spec), an open plain-text notation.
 
 The specs in `specs/` are the source of truth. Start with `specs/plan-sdd.md`.
 

@@ -43,7 +43,7 @@ import { noticeTexts } from "../notices/text";
 import { Greeting, OfflineDot } from "./HomeClient";
 import type { HomeData, UsagePeriod } from "./load";
 
-const GUIDE = "https://github.com/ChartDown/Language";
+const GUIDE = "https://github.com/ChartDown/spec";
 
 /**
  * Home, the first screen after sign-in (T-1308; Design Handoff 2.0 screen 00): what's next, what

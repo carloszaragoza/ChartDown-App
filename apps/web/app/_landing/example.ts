@@ -15,4 +15,4 @@ tempo: 76
 // Which bar each instrument's note points at on the sheet (the red pen's circle).
 export const NOTE_BARS: Record<string, number> = { drums: 2, keys: 1, bass: 4 };
 
-export const LANGUAGE_URL = "https://github.com/ChartDown/Language";
+export const LANGUAGE_URL = "https://github.com/ChartDown/spec";

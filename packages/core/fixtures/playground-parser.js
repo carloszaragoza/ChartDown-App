@@ -1,6 +1,6 @@
 // Reference copy of the ChartDown 0.6 playground parser, used only by
 // src/playground.test.ts to check that the TypeScript port matches it.
-// Source: github.com/ChartDown/Language, playground/index.html at bd10785 (ChartDown 0.6).
+// Source: github.com/ChartDown/spec, playground/index.html at bd10785 (ChartDown 0.6).
 // Copyright (c) 2026 ChartDown contributors. MIT License.
 // Extracted verbatim (music helpers, roles, parser, play order and JSON form); `export` added at the end.
 "use strict";
