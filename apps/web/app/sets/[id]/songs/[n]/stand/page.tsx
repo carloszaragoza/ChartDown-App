@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../../../lib/auth/enabled";
 import { setSongKey } from "../../../../../../lib/sets/lineup";
 import { songView, viewAs, viewsToSend, type SetSong } from "../../../../../../lib/sets/song";
+import { guessPhone } from "../../../../../../lib/shell/guessPhone";
 import { createClient } from "../../../../../../lib/supabase/server";
 import { readDisplay } from "../../../../../versions/[id]/display";
 import { UUID } from "../../../../../versions/[id]/load";
@@ -139,6 +140,7 @@ export default async function SetStandPage({
       keep={keep}
       notes={shown.notes}
       forYou={shown.forYou}
+      phone={await guessPhone()}
       set={{
         href: `/sets/${id}`,
         name: `${song.set_name} – ${types(set.type as "service")}`,

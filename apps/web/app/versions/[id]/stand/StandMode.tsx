@@ -1,11 +1,13 @@
 "use client";
 
 import { Theme } from "@astryxdesign/core";
+import { BottomSheet } from "@astryxdesign/core/BottomSheet";
 import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
+import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -18,9 +20,15 @@ import {
   type FormStripItem,
   type MDNoteData,
 } from "@chartdown/ui";
-import { ArrowUturnLeftIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import {
+  AdjustmentsHorizontalIcon,
+  ArrowUturnLeftIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { usePhone, useShortScreen } from "../../../../lib/shell/phone";
 import { prefetchWhole } from "../../../../lib/shell/prefetch";
 import { useTranslations } from "next-intl";
 import {
@@ -64,6 +72,8 @@ export interface StandModeProps {
   notes?: readonly (readonly MDNoteData[])[];
   forYou?: readonly boolean[];
   set?: StandSet;
+  /** The server's guess that this is a phone (R-03.8); the screen decides once it is drawn. */
+  phone?: boolean;
 }
 
 /** A set's stand mode: back to the set, which song this is, View as, and the next songs. */
@@ -126,6 +136,7 @@ function StandModeView({
   notes: notesGiven,
   forYou: forYouGiven = [],
   set,
+  phone: phoneGuess = false,
 }: StandModeProps) {
   const t = useTranslations("stand");
   const c = useTranslations("chart");
@@ -133,6 +144,11 @@ function StandModeView({
   const labels = useChartLabels();
   const router = useRouter();
   const chart = useMemo(() => parse(content), [content]);
+  // A phone gets one compact bar and a View sheet, so the chart comes first (R-03.8).
+  const isPhone = usePhone(phoneGuess);
+  // Held sideways, the song form joins the top bar, so the bars get the height (R-03.8).
+  const isSideways = useShortScreen() && isPhone;
+  const [isSheetOpen, setSheetOpen] = useState(false);
   const [current, setCurrent] = useState(() => readSection(chart, String(initial + 1)));
   // Numbers or letters, Beats and the theme change here at once, with no trip to the server
   // (F-005); the address follows, so a reload or a shared link shows the same.
@@ -264,6 +280,104 @@ function StandModeView({
     else router.push(atSection(withView(option.href, view), current));
   };
 
+  const songTokens = (
+    <>
+      <Token label={`${c("key")} ${shown}`} size="sm" />
+      {shown !== written && <Token label={c("writtenIn", { key: written })} size="sm" />}
+      {chart.header.meter && <Token label={chart.header.meter} size="sm" />}
+      {chart.header.tempo && <Token label={`${chart.header.tempo} bpm`} size="sm" />}
+    </>
+  );
+  const viewAsControl = viewAs && (
+    <SegmentedControl
+      label={t("viewAs")}
+      value={(chosenView ?? viewAs.options.find((option) => option.current))?.label ?? ""}
+      onChange={chooseView}
+    >
+      {viewAs.options.map((option) => (
+        <SegmentedControlItem key={option.href} value={option.label} label={option.label} />
+      ))}
+    </SegmentedControl>
+  );
+  const tools = (
+    <nav aria-label={t("tools")}>
+      <HStack gap={2} wrap="wrap">
+        <Button
+          label={style === "letters" ? v("numbers") : v("letters")}
+          href={styleHref}
+          as={Link}
+          variant="secondary"
+        />
+        <BeatsControl
+          value={beats}
+          hrefs={{
+            off: href(current, { display: { ...display, beats: "off" } }),
+            auto: href(current, { display: { ...display, beats: "auto" } }),
+            always: href(current, { display: { ...display, beats: "always" } }),
+          }}
+          onChoose={(mode) => changeView({ beats: mode })}
+          words={{
+            label: c("beatsLabel"),
+            name: c("beatsName"),
+            off: c("beatsOff"),
+            auto: c("beatsAuto"),
+            always: c("beatsAlways"),
+          }}
+        />
+        <Button
+          label={theme === "stage" ? t("light") : t("stage")}
+          href={themeHref}
+          as={Link}
+          variant="secondary"
+        />
+        {canFullscreen && (
+          <Button
+            label={t("fullscreen")}
+            variant="secondary"
+            onClick={() =>
+              document.fullscreenElement
+                ? void document.exitFullscreen()
+                : void root.current?.requestFullscreen()
+            }
+          />
+        )}
+      </HStack>
+    </nav>
+  );
+  const songForm = (
+    <SongForm
+      label={c("songForm")}
+      size="lg"
+      current={current}
+      notesLabel={labels.notesForYou}
+      isStrip={isPhone}
+      items={items.map((item) => ({
+        abbreviation: item.abbreviation,
+        description: describe(item),
+        href: item.href,
+        hasNotes: item.hasNotes,
+      }))}
+    />
+  );
+
+  const back = {
+    label: set ? t("set") : t("close"),
+    href: set ? set.href : `/versions/${versionId}`,
+  };
+  const position = t("position", { current: current + 1, total: chart.sections.length });
+  const previous =
+    current > 0
+      ? { label: t("previous"), href: href(current - 1) }
+      : previousSong
+        ? { label: t("previousSong"), href: previousSong }
+        : undefined;
+  const following =
+    current < last
+      ? { label: t("next"), href: href(current + 1) }
+      : nextSong
+        ? { label: t("nextSong"), href: nextSong }
+        : undefined;
+
   return (
     <div ref={root} onClickCapture={onClickCapture}>
       <Theme theme={chartdownStandTheme} mode={theme === "stage" ? "dark" : "light"}>
@@ -274,150 +388,118 @@ function StandModeView({
           style={{ background: "var(--color-background-body)", color: "var(--color-text-primary)" }}
         >
           <VStack height="100dvh" gap={3} padding={4}>
-            {/* Back to the set or the version, where we are, View as in a set, and Previous and
-              Next (Design Handoff 2.0 screen 03). */}
-            <nav aria-label={set ? t("setBar") : t("turn")}>
-              <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
+            {isPhone ? (
+              // One line on a phone: back, the song and where we are, View, Previous and Next
+              // (design handoff 5). The rest is in the View sheet.
+              <nav aria-label={set ? t("setBar") : t("turn")}>
                 <HStack gap={2} vAlign="center">
                   <Button
-                    label={set ? t("set") : t("close")}
-                    href={set ? set.href : `/versions/${versionId}`}
+                    label={back.label}
+                    href={back.href}
                     as={Link}
                     variant="ghost"
+                    size="lg"
+                    isIconOnly
                     icon={<Icon icon={ArrowUturnLeftIcon} />}
                   />
-                  <VStack gap={0}>
-                    {set && <Text weight="semibold">{set.name}</Text>}
-                    <Text type="supporting">
-                      {set
-                        ? set.songOf
-                        : t("position", { current: current + 1, total: chart.sections.length })}
-                    </Text>
-                  </VStack>
-                </HStack>
-                <HStack gap={2} vAlign="center" wrap="wrap">
-                  {viewAs && (
-                    <SegmentedControl
-                      label={t("viewAs")}
-                      value={
-                        (chosenView ?? viewAs.options.find((option) => option.current))?.label ?? ""
-                      }
-                      onChange={chooseView}
-                    >
-                      {viewAs.options.map((option) => (
-                        <SegmentedControlItem
-                          key={option.href}
-                          value={option.label}
-                          label={option.label}
-                        />
-                      ))}
-                    </SegmentedControl>
+                  {isSideways ? (
+                    // Sideways the song's name moves to the View sheet and the song form
+                    // takes its place.
+                    <StackItem size="fill">{songForm}</StackItem>
+                  ) : (
+                    <StackItem size="fill">
+                      <VStack gap={0}>
+                        <Heading level={4} accessibilityLevel={1} maxLines={1}>
+                          {title}
+                        </Heading>
+                        <Text type="supporting" maxLines={1}>
+                          {set ? `${set.songOf} · ${position}` : position}
+                        </Text>
+                      </VStack>
+                    </StackItem>
                   )}
-                  {current > 0 ? (
+                  <Button
+                    label={t("viewOptions")}
+                    variant="secondary"
+                    size="lg"
+                    isIconOnly
+                    icon={<Icon icon={AdjustmentsHorizontalIcon} />}
+                    onClick={() => setSheetOpen(true)}
+                  />
+                  {previous && (
                     <Button
-                      label={t("previous")}
+                      label={previous.label}
+                      href={previous.href}
                       size="lg"
-                      href={href(current - 1)}
+                      isIconOnly
                       icon={<Icon icon={ChevronLeftIcon} />}
                     />
-                  ) : (
-                    previousSong && (
-                      <Button
-                        label={t("previousSong")}
-                        size="lg"
-                        href={previousSong}
-                        icon={<Icon icon={ChevronLeftIcon} />}
-                      />
-                    )
                   )}
-                  {current < last ? (
+                  {following && (
                     <Button
-                      label={t("next")}
+                      label={following.label}
+                      href={following.href}
                       size="lg"
-                      href={href(current + 1)}
                       variant="primary"
-                      endContent={<Icon icon={ChevronRightIcon} />}
-                    />
-                  ) : (
-                    nextSong && (
-                      <Button
-                        label={t("nextSong")}
-                        size="lg"
-                        href={nextSong}
-                        variant="primary"
-                        endContent={<Icon icon={ChevronRightIcon} />}
-                      />
-                    )
-                  )}
-                </HStack>
-              </HStack>
-            </nav>
-
-            <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
-              <HStack gap={2} vAlign="center" wrap="wrap">
-                <Heading level={1}>{title}</Heading>
-                <Token label={`${c("key")} ${shown}`} size="sm" />
-                {shown !== written && <Token label={c("writtenIn", { key: written })} size="sm" />}
-                {chart.header.meter && <Token label={chart.header.meter} size="sm" />}
-                {chart.header.tempo && <Token label={`${chart.header.tempo} bpm`} size="sm" />}
-              </HStack>
-              <nav aria-label={t("tools")}>
-                <HStack gap={2} wrap="wrap">
-                  <Button
-                    label={style === "letters" ? v("numbers") : v("letters")}
-                    href={styleHref}
-                    as={Link}
-                    variant="secondary"
-                  />
-                  <BeatsControl
-                    value={beats}
-                    hrefs={{
-                      off: href(current, { display: { ...display, beats: "off" } }),
-                      auto: href(current, { display: { ...display, beats: "auto" } }),
-                      always: href(current, { display: { ...display, beats: "always" } }),
-                    }}
-                    onChoose={(mode) => changeView({ beats: mode })}
-                    words={{
-                      label: c("beatsLabel"),
-                      name: c("beatsName"),
-                      off: c("beatsOff"),
-                      auto: c("beatsAuto"),
-                      always: c("beatsAlways"),
-                    }}
-                  />
-                  <Button
-                    label={theme === "stage" ? t("light") : t("stage")}
-                    href={themeHref}
-                    as={Link}
-                    variant="secondary"
-                  />
-                  {canFullscreen && (
-                    <Button
-                      label={t("fullscreen")}
-                      variant="secondary"
-                      onClick={() =>
-                        document.fullscreenElement
-                          ? void document.exitFullscreen()
-                          : void root.current?.requestFullscreen()
-                      }
+                      isIconOnly
+                      icon={<Icon icon={ChevronRightIcon} />}
                     />
                   )}
                 </HStack>
               </nav>
-            </HStack>
+            ) : (
+              <>
+                {/* Back to the set or the version, where we are, View as in a set, and Previous
+                  and Next (Design Handoff 2.0 screen 03). */}
+                <nav aria-label={set ? t("setBar") : t("turn")}>
+                  <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
+                    <HStack gap={2} vAlign="center">
+                      <Button
+                        label={back.label}
+                        href={back.href}
+                        as={Link}
+                        variant="ghost"
+                        icon={<Icon icon={ArrowUturnLeftIcon} />}
+                      />
+                      <VStack gap={0}>
+                        {set && <Text weight="semibold">{set.name}</Text>}
+                        <Text type="supporting">{set ? set.songOf : position}</Text>
+                      </VStack>
+                    </HStack>
+                    <HStack gap={2} vAlign="center" wrap="wrap">
+                      {viewAsControl}
+                      {previous && (
+                        <Button
+                          label={previous.label}
+                          size="lg"
+                          href={previous.href}
+                          icon={<Icon icon={ChevronLeftIcon} />}
+                        />
+                      )}
+                      {following && (
+                        <Button
+                          label={following.label}
+                          size="lg"
+                          href={following.href}
+                          variant="primary"
+                          endContent={<Icon icon={ChevronRightIcon} />}
+                        />
+                      )}
+                    </HStack>
+                  </HStack>
+                </nav>
 
-            <SongForm
-              label={c("songForm")}
-              size="lg"
-              current={current}
-              notesLabel={labels.notesForYou}
-              items={items.map((item) => ({
-                abbreviation: item.abbreviation,
-                description: describe(item),
-                href: item.href,
-                hasNotes: item.hasNotes,
-              }))}
-            />
+                <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
+                  <HStack gap={2} vAlign="center" wrap="wrap">
+                    <Heading level={1}>{title}</Heading>
+                    {songTokens}
+                  </HStack>
+                  {tools}
+                </HStack>
+              </>
+            )}
+
+            {!isSideways && songForm}
 
             {/* The current section sits right under the song form, with the next one right after
               it; when it is taller than the screen it scrolls inside its own area (F-001). */}
@@ -446,7 +528,7 @@ function StandModeView({
                     {labels.length(sectionLength(next), { pickup: hasPickup(next) })}
                     {forYou[current + 1] && ` · ${labels.notesForYou}`}
                   </Text>
-                  {next.rows[0] && (
+                  {!isPhone && next.rows[0] && (
                     <BarRow
                       row={next.rows[0]}
                       formatter={formatter}
@@ -462,6 +544,26 @@ function StandModeView({
               )}
             </VStack>
           </VStack>
+          {isPhone && (
+            <BottomSheet
+              isOpen={isSheetOpen}
+              onOpenChange={setSheetOpen}
+              label={t("viewOptions")}
+              height="hug"
+            >
+              <VStack gap={4} padding={4}>
+                <VStack gap={2}>
+                  <Heading level={2}>{title}</Heading>
+                  {set && <Text type="supporting">{set.name}</Text>}
+                  <HStack gap={2} wrap="wrap">
+                    {songTokens}
+                  </HStack>
+                </VStack>
+                {viewAsControl}
+                {tools}
+              </VStack>
+            </BottomSheet>
+          )}
         </div>
       </Theme>
     </div>

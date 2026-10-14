@@ -1,6 +1,7 @@
 import { parse } from "chartdown";
 import { notFound } from "next/navigation";
 import { authEnabled } from "../../../../lib/auth/enabled";
+import { guessPhone } from "../../../../lib/shell/guessPhone";
 import { createClient } from "../../../../lib/supabase/server";
 import { readDisplay } from "../display";
 import { loadVersion } from "../load";
@@ -51,6 +52,7 @@ export default async function StandPage({
       homeKey={display.key}
       beats={display.beats}
       theme={search.theme === "stage" ? "stage" : "light"}
+      phone={await guessPhone()}
     />
   );
 }
