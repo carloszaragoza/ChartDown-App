@@ -15,7 +15,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../lib/auth/enabled";
 import { localToday } from "../../lib/sets/today";
 import { nextSet, setWhen } from "../../lib/sets/when";
-import { createClient } from "../../lib/supabase/server";
+import { createClient, readUser } from "../../lib/supabase/server";
 import { Invitations, type Invitation } from "../_components/Invitations";
 import { NameForm } from "../_components/NameForm";
 import { createBand } from "./actions";
@@ -36,7 +36,7 @@ interface Membership {
 export default async function BandsPage({ searchParams }: { searchParams: Search }) {
   if (!authEnabled()) notFound();
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
+  const { data: auth } = await readUser(supabase);
   if (!auth.user) redirect("/auth/sign-in?next=/bands");
 
   const [{ data: memberships }, { data: invitations }] = await Promise.all([

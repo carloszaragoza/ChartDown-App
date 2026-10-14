@@ -18,7 +18,7 @@ import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../lib/auth/enabled";
 import { effectiveLineup } from "../../../../lib/sets/lineup";
 import { setWhen } from "../../../../lib/sets/when";
-import { createClient } from "../../../../lib/supabase/server";
+import { createClient, readUser } from "../../../../lib/supabase/server";
 import { keysInMode } from "../../../versions/[id]/display";
 import { UUID } from "../../../versions/[id]/load";
 import { SET_TYPES, type SetType } from "../../../../lib/sets/types";
@@ -106,7 +106,7 @@ export default async function SetPage({
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
+  const { data: auth } = await readUser(supabase);
   if (!auth.user) notFound();
   const { data: set } = await supabase
     .from("sets")

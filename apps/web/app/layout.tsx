@@ -14,7 +14,7 @@ import type { ReactNode } from "react";
 import { cookies } from "next/headers";
 import { authEnabled } from "../lib/auth/enabled";
 import { BAND_COOKIE } from "../lib/shell/shell";
-import { createClient } from "../lib/supabase/server";
+import { createClient, readUser } from "../lib/supabase/server";
 import { AstryxTheme } from "./_components/AstryxTheme";
 import { NoticesLive } from "./_components/NoticesLive";
 import { OfflineSync } from "./_components/OfflineSync";
@@ -51,7 +51,7 @@ async function shellProps(
 ): Promise<(Omit<ShellProps, "children"> & { userId: string | null }) | null> {
   if (!authEnabled()) return null;
   const supabase = await createClient();
-  const [{ data }, store] = await Promise.all([supabase.auth.getUser(), cookies()]);
+  const [{ data }, store] = await Promise.all([readUser(supabase), cookies()]);
   const chosenBand = store.get(BAND_COOKIE)?.value;
   if (!data.user)
     return { account: null, bands: [], chosenBand, unread: 0, openReports: 0, userId: null };

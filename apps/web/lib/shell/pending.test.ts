@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pendingTarget } from "./pending";
+import { loadsWhole, pendingTarget } from "./pending";
 
 const tap = { button: 0, metaKey: false, ctrlKey: false, shiftKey: false, altKey: false };
 const link = (href: string, extra: Partial<{ target: string; hasDownload: boolean }> = {}) => ({
@@ -38,5 +38,33 @@ describe("F-003 which taps show skeletons while the next page loads", () => {
     expect(pendingTarget(link("/sets"), { ...tap, button: 1 }, here)).toBeNull();
     expect(pendingTarget(link("https://github.com/ChartDown/Language"), tap, here)).toBeNull();
     expect(pendingTarget(link("/sets", { target: "_self" }), tap, here)).toBe("/sets");
+  });
+});
+
+describe("F-005 links move inside the app", () => {
+  it("F-005 a page of the app moves inside the app, with its query and fragment", () => {
+    for (const href of [
+      "/sets",
+      "/sets?when=past",
+      "/sets/1/songs/2/stand?s=3",
+      "/#top",
+      "/notices",
+    ])
+      expect(loadsWhole(href), href).toBe(false);
+  });
+
+  it("F-005 the offline reader, route handlers and other sites load whole", () => {
+    for (const href of [
+      "/offline/set",
+      "/offline/set/1/songs/2",
+      "/notices/7",
+      "/bands/choose/1",
+      "/auth/callback?next=/",
+      "/api/sets/1/bundle",
+      "https://github.com/ChartDown/Language",
+      "mailto:hola@chartdown.app",
+      "//example.com",
+    ])
+      expect(loadsWhole(href), href).toBe(true);
   });
 });

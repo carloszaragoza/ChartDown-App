@@ -22,7 +22,7 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";
-import { createClient } from "../../../lib/supabase/server";
+import { createClient, readUser } from "../../../lib/supabase/server";
 import { UUID } from "../../versions/[id]/load";
 import { NameForm } from "../../_components/NameForm";
 import { PageTabs } from "../../_components/PageTabs";
@@ -74,7 +74,7 @@ export default async function BandPage({
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
+  const { data: auth } = await readUser(supabase);
   if (!auth.user) notFound();
 
   const [{ data: band }, { data: memberRows }, { data: catalog }] = await Promise.all([

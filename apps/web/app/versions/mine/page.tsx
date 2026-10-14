@@ -11,7 +11,7 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { notFound, redirect } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";
-import { createClient } from "../../../lib/supabase/server";
+import { createClient, readUser } from "../../../lib/supabase/server";
 
 type One<T> = T | T[] | null;
 interface Row {
@@ -29,7 +29,7 @@ interface Row {
 export default async function YourVersionsPage() {
   if (!authEnabled()) notFound();
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
+  const { data: auth } = await readUser(supabase);
   if (!auth.user) redirect("/auth/sign-in?next=/versions/mine");
   const { data } = await supabase
     .from("versions")

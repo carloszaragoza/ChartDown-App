@@ -1,6 +1,6 @@
 import { rootCallback } from "../lib/auth/callback";
 import { authEnabled, waitlistEnabled } from "../lib/auth/enabled";
-import { createClient } from "../lib/supabase/server";
+import { createClient, readUser } from "../lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Banner } from "@astryxdesign/core/Banner";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -38,7 +38,7 @@ export default async function HomePage({ searchParams }: { searchParams: Search 
   );
   if (!authEnabled()) return landing;
   const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
+  const { data } = await readUser(supabase);
   if (!data.user) return landing;
   // Signed in: their Home (T-1308).
   const usage: UsagePeriod = search.usage === "7" ? 7 : search.usage === "all" ? null : 30;

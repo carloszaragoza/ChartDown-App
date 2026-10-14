@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import en from "../../../../messages/en.json";
-import { readSection, standHref } from "./standHref";
+import { readSection, songsAhead, standHref, withView } from "./standHref";
 import { StandMode, type StandModeProps } from "./StandMode";
 
 vi.mock("next/navigation", () => ({
@@ -91,5 +91,40 @@ describe("R-03.3 stand mode", () => {
     expect(readSection(chart, "4")).toBe(3);
     expect(readSection(chart, "99")).toBe(6);
     expect(readSection(chart, "nope")).toBe(0);
+  });
+});
+
+describe("F-005 stand mode feels local", () => {
+  const view = { style: "numbers", beats: "auto", theme: "light" } as const;
+
+  it("F-005 the links to other songs and View as carry the view as it is now", () => {
+    const song = "/sets/1/songs/2/stand?view=letters&as=bass&s=999";
+    expect(withView(song, view)).toBe("/sets/1/songs/2/stand?as=bass&s=999");
+    expect(
+      withView("/sets/1/songs/2/stand", { style: "letters", beats: "always", theme: "stage" }),
+    ).toBe("/sets/1/songs/2/stand?view=letters&beats=always&theme=stage");
+  });
+
+  it("F-005 the song the pedal leads to next is loaded ahead at the edges only", () => {
+    const songs = { previousSong: "/sets/1/songs/1/stand", nextSong: "/sets/1/songs/3/stand" };
+    expect(songsAhead(6, 6, songs)).toEqual(["/sets/1/songs/3/stand"]);
+    expect(songsAhead(0, 6, songs)).toEqual(["/sets/1/songs/1/stand"]);
+    expect(songsAhead(3, 6, songs)).toEqual([]);
+    expect(songsAhead(0, 0, songs)).toEqual(["/sets/1/songs/3/stand", "/sets/1/songs/1/stand"]);
+    expect(songsAhead(6, 6, {})).toEqual([]);
+  });
+
+  it("F-005 Next song links to the next song with the current view, not a page reload", () => {
+    const html = render({
+      section: 6,
+      style: "letters",
+      set: {
+        href: "/sets/1",
+        name: "Sunday",
+        songOf: "Song 2 of 3",
+        nextSong: "/sets/1/songs/3/stand",
+      },
+    });
+    expect(html).toContain('href="/sets/1/songs/3/stand?view=letters"');
   });
 });

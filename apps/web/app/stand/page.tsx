@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { authEnabled } from "../../lib/auth/enabled";
 import { localToday } from "../../lib/sets/today";
 import { nextSet } from "../../lib/sets/when";
-import { createClient } from "../../lib/supabase/server";
+import { createClient, readUser } from "../../lib/supabase/server";
 
 /**
  * Stand mode in the side navigation (Design Handoff 2.0, section 4): opens the next set from
@@ -11,7 +11,7 @@ import { createClient } from "../../lib/supabase/server";
 export default async function StandEntry() {
   if (!authEnabled()) notFound();
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
+  const { data: auth } = await readUser(supabase);
   if (!auth.user) redirect("/auth/sign-in?next=/stand");
   // Row-level security returns the sets of the person's bands.
   const { data } = await supabase.from("sets").select("id, name, date, time, set_items(count)");
