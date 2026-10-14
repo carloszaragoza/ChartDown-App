@@ -56,9 +56,24 @@ test("R-05.1 a set's name is unique in the band; songs are added, ordered and du
     titles.map((title, index) => new RegExp(`^${index + 1}${title}`)),
   );
 
-  // Cedar Lane moves up to second.
+  // Cedar Lane moves up to second, and the list shows it before the server answers (F-006):
+  // the server's answer is held until the new order is on screen.
+  let release = () => {};
+  const held = new Promise<void>((done) => (release = done));
+  const saving = (url: URL) => url.pathname.endsWith("/edit");
+  await page.route(saving, async (route) => {
+    if (route.request().method() === "POST" && route.request().headers()["next-action"]) await held;
+    await route.continue();
+  });
   await page.getByRole("button", { name: `Move ${titles[2]} up` }).click();
+  await expect(songs(page)).toHaveText([
+    new RegExp(`^1${titles[0]}`),
+    new RegExp(`^2${titles[2]}`),
+    new RegExp(`^3${titles[1]}`),
+  ]);
+  release();
   await expectStatus(page, "The order was saved.");
+  await page.unroute(saving);
   await expect(songs(page)).toHaveText([
     new RegExp(`^1${titles[0]}`),
     new RegExp(`^2${titles[2]}`),
