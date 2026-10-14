@@ -103,7 +103,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 **Goal:** the notation is the single source of every chart.
 
-**Status:** the language is at version 0.6 (syntax, spec, playground and, since October 13, 2026, its official conformance suite, Appendix B) in the public repository github.com/ChartDown/spec (the older ChartDown/Language is private); 0.7 (chord quality vocabulary, `numbering: 6m`, formal grammar; 142 cases) is in review there (pull request 2), and the owner wants the app on 0.7 too (E20); the `chartdown` parser in this repository moves from 0.4 to 0.6 (owner's decision, October 8, 2026, so the beta runs the latest published version).
+**Status:** the language is at version 0.6 (syntax, spec, playground and, since October 13, 2026, its official conformance suite, Appendix B) in the public repository github.com/ChartDown/spec (the older ChartDown/Language is private); 0.7 (chord quality vocabulary, `numbering: 6m`, formal grammar; 142 cases) was merged there on October 13, 2026 (pull request 2, commit `1e103c9`), and the owner wants the app on 0.7 too (E20); the `chartdown` parser in this repository moves from 0.4 to 0.6 (owner's decision, October 8, 2026, so the beta runs the latest published version).
 
 **Remaining requirements for the app**
 
