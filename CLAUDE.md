@@ -17,7 +17,7 @@ ChartDown App is a web app (desktop and iPad first) where bands write, share and
 ## Stack
 
 - Monorepo: pnpm + Turborepo, TypeScript everywhere.
-- `packages/core`: `chartdown`, the ChartDown parser (spec 0.6, from github.com/ChartDown/Language). MIT.
+- `packages/core`: `chartdown`, the ChartDown parser (spec 0.6, from github.com/ChartDown/spec). MIT.
 - `packages/ui`: shared components: the ChartDown logo and the chart components (BarRow, MDNotes, instrument icons); during the redesign also the version 1 components (Bar, Section, MDNote, InstrumentTag, Button, FormStrip, Icon).
 - `apps/web`: Next.js (React), installable web app (PWA), English and Spanish.
 - `supabase/`: Postgres schema, row-level security policies, server functions.

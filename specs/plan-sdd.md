@@ -103,7 +103,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 **Goal:** the notation is the single source of every chart.
 
-**Status:** the language is at version 0.6 (syntax, spec and playground) in github.com/ChartDown/Language; the `chartdown` parser in this repository moves from 0.4 to 0.6 (owner's decision, October 8, 2026, so the beta runs the latest published version).
+**Status:** the language is at version 0.6 (syntax, spec, playground and, since October 13, 2026, its official conformance suite, Appendix B) in the public repository github.com/ChartDown/spec (the older ChartDown/Language is private); the `chartdown` parser in this repository moves from 0.4 to 0.6 (owner's decision, October 8, 2026, so the beta runs the latest published version).
 
 **Remaining requirements for the app**
 
@@ -118,17 +118,20 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-00.9 Navigation marks (`{segno}`, `{coda}`, `{to coda}`, `{fine}`, D.S. and D.C. jumps), warnings for an incomplete jump, and the play order of a chart after repeats, endings and navigation (ChartDown 0.6).
 - R-00.10 The JSON form of a parsed chart (ChartDown 0.6, Appendix A), with its play order and warnings, so other apps and tests agree on what a chart means. The `chartdown` npm package exports it.
 - R-00.11 The app draws every element of ChartDown 0.6 in the viewer, the editors and stand mode, in numbers and in letters; the per-instrument view hides the cues and notes meant for other instruments.
+- R-00.12 **Conformance:** `chartdown` passes the official ChartDown conformance suite (spec Appendix B, `conformance/` in github.com/ChartDown/spec) at a pinned commit, through the suite's own runner, and ships the adapter that lets anyone run the suite against it. The suite is the definition of compatible; matching the playground is no longer the test.
 
-**Interpretations of ChartDown 0.6** (where spec section 12 is silent; candidates for the Language repository)
+**Rules that were this app's interpretations and are now spec text** (ChartDown 0.6 clarifications, github.com/ChartDown/spec PR 1, October 13, 2026; the parser already met each one, checked against the suite that day)
 
-- Meter and tempo, like the key, stay in effect across sections until the next `@meter` or `@tempo`.
-- `@use` copies the rows of the earlier section as they were there, with their meter and tempo; only the key is the current one (spec 5.2 names the key alone).
+- Meter and tempo, like the key, stay in effect across sections until the next `@meter` or `@tempo` (spec 11.2, 11.3).
+- `@use` copies the rows of the earlier section with their meter and tempo; only the key is the current one. A section with `@use` and its own rows keeps its rows, with a warning; `@use` of a missing section is a warning (spec 5.2).
+- A header with no closing `---` ends at the first `##` line, with a warning on line 1; an unknown `chartdown` version is a warning on its line and the file is still read; a file with no `chartdown` line is read as the latest version the parser knows (spec 3, R-00.4).
+- An unknown name in a cue is a warning, and the whole text becomes a cue for everyone; the JSON form names roles by the spec's Role column (`everyone`, `guitar`, `vocals`, `saxophone`…), custom roles by their id (spec 4.1).
+- Number style shows `-` for every minor quality (`6m7` reads `6-7`); qualities starting with `maj` are not minor (spec 12.4). Minor keys spell chords like their relative major (spec 12.5). A transposed key takes its common name: C, Db, D, Eb, E, F, F#, G, Ab, A, Bb, B; in minor, Cm, C#m, Dm, Ebm, Em, Fm, F#m, Gm, G#m, Am, Bbm, Bm (spec 12.6).
+- A warning carries its line (0 only when none applies); their order and wording are each parser's (spec 13).
+
+**Still this app's interpretation**
+
 - A layer's bar numbers are the chart's: a pickup is bar 0 and the first full bar is bar 1 (spec 5.3).
-- The parser reads charts that declare 0.3 to 0.6 without a warning; any other version warns (R-00.4).
-
-- Minor keys spell chords like their relative major: Dm uses F's flats (its `b6` is Bb), Em uses G's sharps, Cm uses Eb's flats.
-- Number style shows `-` for every minor quality, not only plain minor: `6m7` reads `6-7`; qualities starting with `maj` are unchanged.
-- A transposed key takes its common name: C, Db, D, Eb, E, F, F#, G, Ab, A, Bb, B; in minor, Cm, C#m, Dm, Ebm, Em, Fm, F#m, Gm, G#m, Am, Bbm, Bm.
 
 **Acceptance criteria**
 
@@ -409,7 +412,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 | Phase | Includes | Outcome |
 |---|---|---|
 | 0 | Constitution, specs and decisions | Specs approved (done) |
-| 1 (MVP) | SPEC-00 (R-00.1 to R-00.11: ChartDown 0.6), 01, 02, 03 with layer editor, 04, 05 with key per set and temporary MD, 06, 08 offline reading, 09 in-app notices | A real band prepares a set, each musician reads their notes and plays without depending on the internet |
+| 1 (MVP) | SPEC-00 (R-00.1 to R-00.12: ChartDown 0.6 and its conformance suite), 01, 02, 03 with layer editor, 04, 05 with key per set and temporary MD, 06, 08 offline reading, 09 in-app notices | A real band prepares a set, each musician reads their notes and plays without depending on the internet |
 | 2 | Advanced stand mode, print and export to PDF (R-03.4), invite links, email notices, revision comparison, advanced search; import from PDF (SPEC-10), visual metronome and bar follow (SPEC-11), live mode where the band follows the MD (SPEC-12) | Comfortable use in rehearsal and on stage |
 | 3 | Full administration and reports, WhatsApp notices, offline editing, phone app | Platform open to the public |
 
