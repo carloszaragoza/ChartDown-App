@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ComponentProps } from "react";
+import { opensStand, prefetchWhole } from "../../lib/shell/prefetch";
 
 /**
  * A link that prefetches its page only when the person shows intent: the pointer over it, a touch
@@ -18,7 +19,10 @@ export function IntentLink({
 }: ComponentProps<typeof Link>) {
   const router = useRouter();
   const prefetch = () => {
-    if (typeof href === "string") router.prefetch(href);
+    if (typeof href !== "string") return;
+    // Stand mode opens at once: it is loaded whole (F-008).
+    if (opensStand(href)) prefetchWhole(router, href);
+    else router.prefetch(href);
   };
   return (
     <Link

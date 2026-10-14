@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import en from "../../messages/en.json";
+import { opensStand } from "../../lib/shell/prefetch";
 import { IntentLink } from "./IntentLink";
 import { PageSkeleton } from "./PageSkeleton";
 import { PendingPage } from "./PendingPage";
@@ -42,6 +43,24 @@ describe("F-003 a tap answers at once, and the side navigation does not prefetch
     expect(prefetch).toHaveBeenCalledWith("/stand");
     // A handler the caller gives still runs.
     expect(own).toHaveBeenCalledTimes(1);
+  });
+
+  it("F-008 a link to stand mode prefetches the whole page on intent, any other only partly", () => {
+    prefetch.mockClear();
+    const stand = "/sets/1/songs/1/stand";
+    const toStand = IntentLink({ href: stand, children: "Start in stand mode" });
+    (toStand.props as Record<string, (event: unknown) => void>).onPointerEnter?.({});
+    expect(prefetch).toHaveBeenLastCalledWith(stand, { kind: "full" });
+    const toSet = IntentLink({ href: "/sets/1", children: "Set" });
+    (toSet.props as Record<string, (event: unknown) => void>).onPointerEnter?.({});
+    expect(prefetch).toHaveBeenLastCalledWith("/sets/1");
+  });
+
+  it("F-008 only stand mode pages count as stand mode", () => {
+    for (const href of ["/sets/1/songs/2/stand", "/sets/1/songs/2/stand?s=3", "/versions/9/stand"])
+      expect(opensStand(href), href).toBe(true);
+    for (const href of ["/stand", "/sets/1", "/sets/1/songs/2", "/versions/9", "/standards"])
+      expect(opensStand(href), href).toBe(false);
   });
 
   it("F-003 a page shows skeletons of its layout while it loads, and says so to screen readers", () => {
