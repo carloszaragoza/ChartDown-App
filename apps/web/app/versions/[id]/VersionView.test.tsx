@@ -12,10 +12,7 @@ vi.mock("../../sets/actions", () => ({ addToSet: () => undefined }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: () => undefined }) }));
 
 const openRoad = parse(
-  readFileSync(
-    new URL("../../../../../packages/core/fixtures/open-road.chartdown", import.meta.url),
-    "utf8",
-  ),
+  readFileSync(new URL("../../../../../fixtures/open-road.chartdown", import.meta.url), "utf8"),
 );
 const props: VersionViewProps = {
   id: "00000000-0000-0000-0000-0000000000f1",

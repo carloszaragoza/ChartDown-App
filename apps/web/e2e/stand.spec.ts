@@ -4,7 +4,7 @@ import { createVersion } from "./admin";
 import { gapUnderSongMap } from "./flows";
 
 const OPEN_ROAD = readFileSync(
-  new URL("../../../packages/core/fixtures/open-road.chartdown", import.meta.url),
+  new URL("../../../fixtures/open-road.chartdown", import.meta.url),
   "utf8",
 );
 const SECTIONS = ["Intro", "Verse 1", "Chorus", "Verse 2", "Chorus 2", "Bridge", "Last Chorus"];

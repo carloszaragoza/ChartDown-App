@@ -6,14 +6,13 @@ The specs in `specs/` are the source of truth. Start with `specs/plan-sdd.md`.
 
 ## Layout
 
-| Path            | What it is                                               |
-| --------------- | -------------------------------------------------------- |
-| `packages/core` | `chartdown`, the ChartDown parser (MIT)                  |
-| `packages/ui`   | `@chartdown/ui`, shared components                       |
-| `apps/web`      | `@chartdown/web`, the Next.js app and landing page       |
-| `supabase/`     | Postgres schema, row-level security and server functions |
-| `specs/`        | SDD plan, technical plan, design handoff and task list   |
-| `assets/`       | Logo and app icons                                       |
+| Path          | What it is                                               |
+| ------------- | -------------------------------------------------------- |
+| `packages/ui` | `@chartdown/ui`, shared components                       |
+| `apps/web`    | `@chartdown/web`, the Next.js app and landing page       |
+| `supabase/`   | Postgres schema, row-level security and server functions |
+| `specs/`      | SDD plan, technical plan, design handoff and task list   |
+| `assets/`     | Logo and app icons                                       |
 
 ## Getting started
 

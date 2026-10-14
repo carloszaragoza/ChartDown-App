@@ -36,7 +36,7 @@ const describeChip = (item: FormStripItem) =>
     .join(", ");
 
 // The approved "Atril" screen: Open Road in A, Chorus 2 now, viewed as Keys, with a Keys layer note.
-const openRoad = parse(read("../../core/fixtures/open-road.chartdown"));
+const openRoad = parse(read("../../../fixtures/open-road.chartdown"));
 const layer = parseLayer(
   "## Chorus 2\n> MD keys: Move the pad up an octave. Right hand stays simple.",
 ).layer;

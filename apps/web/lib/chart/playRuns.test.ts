@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { hasJump, playRuns } from "./playRuns";
 
 const northbound = readFileSync(
-  new URL("../../../../packages/core/fixtures/0.6/northbound.chartdown", import.meta.url),
+  new URL("../../../../fixtures/northbound-0.6.chartdown", import.meta.url),
   "utf8",
 );
 
