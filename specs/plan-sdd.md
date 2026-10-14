@@ -25,7 +25,7 @@ Every module goes through the same cycle, in this order:
 4. **The author owns their version.** Only they edit it. Everyone else uses it or forks it.
 5. **Every version says where it comes from.** Two versions can share a name, but the source always tells them apart.
 6. **Respect for copyright.** No full lyrics are stored; only short, optional landmarks at the start of a section. No relationship with or data from CCLI (decision 10).
-7. **Ready for the stage.** Desktop and iPad first, and a downloaded set opens with no internet (decision 12).
+7. **Ready for the stage.** Desktop and iPad first; a song shared by link also reads well on a phone (R-03.8); a downloaded set opens with no internet (decision 12).
 8. **Communication and transparency.** Every musician knows when they are added to a set and when a song changes (decision 13).
 9. **English first, Spanish too.** The interface is bilingual (decision 11).
 10. **Simple first.** If a feature complicates a band's daily use, it waits.
@@ -191,7 +191,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 ### SPEC-03 · Chart editor and viewer
 
-**Goal:** write and read charts comfortably on desktop and iPad.
+**Goal:** write and read charts comfortably on desktop and iPad, and read them on a phone.
 
 **Requirements**
 
@@ -202,10 +202,14 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-03.5 **MD layer editor:** the MD writes notes per section and instrument on top of the version, without being able to change the chart.
 - R-03.6 **A note for one pass:** in the MD layer editor the MD can say that a note is only for some passes of a repeat (for example the second), and the note says so wherever it is shown (owner's approval, October 8, 2026). It is private to its instruments like any other note (R-06.4).
 - R-03.7 **Beat marks, shown as the reader chooses:** the viewer, stand mode and a set's song have a Beats control with Off, Auto and Always (Auto by default: marks only in the bars where they tell something). It is a way of viewing the chart, like numbers or letters, and changes nothing in the chart text, its beat checks or its JSON form (owner's request, October 8, 2026).
+- R-03.8 **Reading on a phone:** a song opened from a shared link (the version page, its stand mode and a set's song in stand mode, with the view, beats and theme the link carries) reads on a phone from 375 to 440 CSS px wide, in portrait and landscape. The chart comes first: the controls fit in one compact bar, the song form is one strip that scrolls inside itself, bar rows wrap to fit the width instead of scrolling sideways, and the page never scrolls sideways. Writing and editing stay on desktop and iPad (owner's request, October 14, 2026: people share links and always have a phone with them, not always an iPad).
 
 **Acceptance criteria**
 
 - Given a chart open on an iPad in landscape, when stand mode is on, then every section reads without zooming.
+- Given an iPhone 16 in portrait (393 × 852), when a shared stand mode link opens, then the current section's name and its first row of bars are on screen without scrolling, every chord reads without zooming, and the page does not scroll sideways.
+- Given an iPhone 16 in landscape (852 × 393), when stand mode is open, then the current section's bars fill most of the screen, not the controls.
+- Given a phone in stand mode, when the musician swipes the chart to the left or taps Next, then the next section shows.
 - Given an MD with someone else's public version, when they add a note for bass in the Chorus, then the note is saved in their band's layer and the public version does not change.
 
 ### SPEC-04 · Bands
@@ -318,7 +322,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 **Goal:** turn an existing chord sheet in PDF (chords written above the lyrics) into a ChartDown draft in minutes, so MDs don't retype their library. The import keeps the structure and the chords and discards the lyrics.
 
-**Phase:** 2 (after the MVP).
+**Phase:** 2 (during the beta, section 7).
 
 **Requirements**
 
@@ -351,7 +355,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 **Goal:** while a musician practices or plays, the chart shows exactly where they are. A visual metronome pulses on every beat, highlights the current bar and moves to the next bar in time, with an optional click sound.
 
-**Phase:** 2 (after the MVP).
+**Phase:** 2 (during the beta, section 7).
 
 **Requirements**
 
@@ -417,8 +421,8 @@ A platform where musicians and music directors write charts in ChartDown, share 
 |---|---|---|
 | 0 | Constitution, specs and decisions | Specs approved (done) |
 | 1 (MVP) | SPEC-00 (R-00.1 to R-00.16: ChartDown 0.7 and its conformance suite), 01, 02, 03 with layer editor, 04, 05 with key per set and temporary MD, 06, 08 offline reading, 09 in-app notices | A real band prepares a set, each musician reads their notes and plays without depending on the internet |
-| 2 | Advanced stand mode, print and export to PDF (R-03.4), invite links, email notices, revision comparison, advanced search; import from PDF (SPEC-10), visual metronome and bar follow (SPEC-11), live mode where the band follows the MD (SPEC-12) | Comfortable use in rehearsal and on stage |
-| 3 | Full administration and reports, WhatsApp notices, offline editing, phone app | Platform open to the public |
+| 2 (from October 14, 2026, during the beta) | Advanced stand mode, print and export to PDF (R-03.4), invite links, email notices, revision comparison, advanced search; import from PDF (SPEC-10), visual metronome and bar follow (SPEC-11), live mode where the band follows the MD (SPEC-12) | Comfortable use in rehearsal and on stage |
+| 3 | Full administration and reports, WhatsApp notices, offline editing, native phone app | Platform open to the public |
 
 ## 8. Decisions from the Clarify phase
 
@@ -454,7 +458,7 @@ These came out of the decisions above and were all resolved. The specs cite them
 ## 10. Out of scope for now
 
 - Architecture, database and stack (they belong to the Technical Plan).
-- Phone app.
+- A native phone app (the web app reads on phones, R-03.8).
 - Audio playback of songs or YouTube sync (the metronome's click, SPEC-11, is not song playback).
 - Payments or subscriptions.
 

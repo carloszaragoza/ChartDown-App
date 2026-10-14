@@ -237,7 +237,7 @@ The app sees one change in charts that already exist: a quality written with an 
 
 ## Phase 2
 
-The three phase 2 features start after the MVP beta (T-1203). Their requirements are SPEC-10, SPEC-11 and SPEC-12 in the SDD Plan (ids R-10.x, R-11.x and R-12.x). Their task ids follow their epic number (T-14xx, T-15xx, T-16xx), since T-13xx belongs to E13.
+Phase 2 starts during the beta (owner's decision, October 14, 2026, "Option B"): it no longer waits for T-1203, and fixes from the beta's reports come first. The three phase 2 features' requirements are SPEC-10, SPEC-11 and SPEC-12 in the SDD Plan (ids R-10.x, R-11.x and R-12.x). Their task ids follow their epic number (T-14xx, T-15xx, T-16xx), since T-13xx belongs to E13.
 
 ## E21 · The parser moves to the ChartDown organization
 
@@ -250,6 +250,18 @@ What moves with the parser: its sources, its history, its tests (SPEC-00, R-00.x
 | T-2101 | Plan the move: this epic, the technical plan (3, 9, 12.6) and CLAUDE.md | – | – | S | Specs reviewed by the owner |
 | T-2102 | github.com/ChartDown/parser: the history of `packages/core` (only that folder), a standalone build with no monorepo files, its own CI (type check, tests, the suite), MIT, and `homepage`, `repository` and `bugs` pointing to it; its README links to the spec | – | T-2101 | M | The repository's CI passes; the packed package passes the 0.7 suite through its adapter |
 | T-2103 | The app installs `chartdown` from npm (`^0.3.0`) in `apps/web` and `packages/ui`, and `packages/core` leaves the monorepo; the R-00.1 catalog test and the example charts the app's tests use move into the app; the root README and LICENSE no longer list `packages/core` | R-00.1 | T-2007 | S | CI passes with the package from npm; the R-00.1 test reads `supabase/migrations` |
+
+## E22 · Charts on a phone
+
+Owner's request, October 14, 2026: people share links to songs and always have a phone, not always an iPad. Measured that day on production with an iPhone 16 (393 × 852) and a Pro Max (440 × 956): stand mode's controls and its 14 section buttons fill more than half of the portrait screen, the current section shows two bars cut at the bottom, and in landscape (852 × 393) the current section is not on screen at all. Requirement R-03.8; the layout is in the design handoff, section 5.
+
+| ID | Task | Requirements | Depends on | Size | Tests / evidence |
+|---|---|---|---|---|---|
+| T-2201 | Plan: R-03.8, the phone layout (design handoff 5), these tasks | – | – | S | Specs reviewed by the owner |
+| T-2202 | Bar rows on a phone: in portrait a row wider than the screen wraps into lines of two bars at the viewer's size; landscape keeps rows of four; no page scrolls sideways | R-03.8 | T-2201 | M | At 393 × 852 a row of four reads 2 + 2 and the page is 393 px wide; unit tests of the wrap |
+| T-2203 | Stand mode on a phone, for a version and a set's song: the one-line top bar, the View sheet (display choices, View as), the scrolling song form strip, the next section as one line, swipe to move between sections, the 16 px gutter | R-03.8, R-03.3 | T-2202 | M | End to end at 393 × 852, 440 × 956 and 852 × 393: the section's name and first row are on screen, Next and a swipe move on, every control is reachable at 44 / 56 px |
+| T-2204 | The version page on a phone: the header's actions wrap, the display choices on one line, the pinned song form as the strip | R-03.8 | T-2202 | S | End to end at 393 × 852: no sideways scroll, the first section's first row on the first screen after the header |
+| T-2205 | The owner checks a shared link on a real iPhone 16 and Pro Max, in portrait and landscape, light and Stage | – | T-2203, T-2204 | S | The owner approves |
 
 ## E19 · Play from the device first (phase 2)
 
@@ -272,9 +284,9 @@ Owner's decision, October 13, 2026, after F-005 to F-008: Play (the sets, a set'
 
 | ID | Task | Requirements | Depends on | Size | Tests / evidence |
 |---|---|---|---|---|---|
-| T-1501 | Play-order timeline in `chartdown`: expand sections, `@use`, repeats and endings into the sequence of bars and beats, using `meter` and `:beats` | R-11.4, R-11.5 | T-102 | M | Repeat with two endings and a 6/8 chart produce the right sequence |
+| T-1501 | Play-order timeline in the app (`apps/web/lib/metronome`), built on `chartdown`'s `playOrder` and `layoutBeats`: the sequence of bars and beats with their meter (`meter`, `@meter`, `[m:N/D]`), tempo (`tempo`, `@tempo`) and the chord sounding on each beat (`:beats`). It lives in the app, not the parser, since the parser is released apart (E21) | R-11.4, R-11.5 | T-102 | M | Repeat with two endings and a 6/8 chart produce the right sequence |
 | T-1502 | Metronome engine on the Web Audio clock: tempo, start bar, count-in, accented beat 1, drift test; it runs on the musician's own device | R-11.1, R-11.8, R-11.12, R-11.14 | T-1501 | M | The last beat of a 4-minute song lands within 20 ms |
-| T-1503 | Visual pulse and current-bar highlight in the viewer and stand mode, with the “beat / beats” counter; auto-advance sections in stand mode | R-11.3, R-11.4 | T-1502, T-604 | M | Tapping bar 2 of the Chorus and pressing play highlights it, then bar 3 |
+| T-1503 | Visual pulse and current-bar highlight in the viewer and stand mode, with the “beat / beats” counter; auto-advance sections in stand mode. The Play control and the pulse are not in the approved design: proposed on the design review page, in stand mode's top bar on iPad and on a phone (E22), and approved by the owner | R-11.3, R-11.4 | T-1502, T-604 | M | Tapping bar 2 of the Chorus and pressing play highlights it, then bar 3; the owner approves the drawing |
 | T-1504 | Start from a tapped bar; fermata waits for a tap | R-11.2, R-11.6 | T-1503 | S | Playback stops on a fermata bar until tapped |
 | T-1505 | Click sound (off by default), volume, silent mode respected | R-11.7 | T-1502 | S | With sound off, no audio plays and the pulse still runs |
 | T-1506 | Practice tempo and tap tempo, without changing the chart | R-11.9 | T-1502 | S | 80% speed plays at 80% of the chart tempo; the saved chart is unchanged |

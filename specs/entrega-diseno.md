@@ -69,7 +69,11 @@ Every screen uses `AppShell` with the side navigation and a `Layout` with a page
 
 - **iPad landscape (1180 px) and desktop:** the reference layout, with the side navigation open.
 - **iPad portrait and narrower screens:** side panels move below the content; rows of four bars stay.
-- **Phone:** out of MVP scope; even so, no screen may break or scroll sideways, and the side navigation becomes a drawer.
+- **Phone (R-03.8, owner's request, October 14, 2026):** narrower than 600 CSS px, or shorter than 500 px in landscape. No screen may break or scroll sideways, and the side navigation becomes a drawer. The screens a shared link opens are designed for it; the rest only must not break:
+  - **Stand mode (version and set song):** one top bar on one line: Close as an icon button, the section's name with "1 of 14", a **View** icon button and Next (56 px). View opens a sheet with Numbers / Letters, Beats, Stage, Full screen and, for the MD, View as. The song form is one row of its 56 px buttons that scrolls sideways inside itself, with the current section kept in view. The next-section preview is its line alone ("Next: Verse · 8 bars"), with no bars. Swiping the chart left or right moves to the next or previous section, as Next and Previous do.
+  - **Bar rows:** in portrait, a row wider than the screen wraps into lines of two bars (a row of four reads as 2 + 2) and the chords are drawn at the viewer's size (`md`); in landscape rows of four stay. A bar never shrinks below its minimum width; a single bar wider than the screen still scrolls inside its row.
+  - **Version page:** the header's actions wrap under the title, the display choices sit on one line, and the pinned song form is the same scrolling strip.
+  - Touch targets keep their sizes (44 px, 56 px in stand mode); the 32 px gutter becomes 16 px (`--spacing-4`) on a phone.
 
 ## 6. Accessibility
 
