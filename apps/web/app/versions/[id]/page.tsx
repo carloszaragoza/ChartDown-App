@@ -1,6 +1,7 @@
 import { parse } from "chartdown";
 import { notFound } from "next/navigation";
 import { authEnabled } from "../../../lib/auth/enabled";
+import { guessPhone } from "../../../lib/shell/guessPhone";
 import { createClient, readUser } from "../../../lib/supabase/server";
 import { readDisplay } from "./display";
 import { loadBasedOn, loadVersion } from "./load";
@@ -67,6 +68,7 @@ export default async function VersionPage({
       }
       setChoices={setChoices}
       setFailed={search.set === "failed"}
+      phone={await guessPhone()}
     />
   );
 }

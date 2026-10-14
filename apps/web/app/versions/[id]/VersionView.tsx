@@ -60,6 +60,8 @@ export interface VersionViewProps {
   path?: string;
   /** Shown above the chart, e.g. when reading an earlier revision. */
   notice?: ReactNode;
+  /** The server's guess that this is a phone: a 16 px gutter and the song form as a strip (R-03.8). */
+  phone?: boolean;
 }
 
 /** How a set reads in the "Add to a set" choice: its band, or the person's own sets, and its name. */
@@ -91,6 +93,7 @@ export function VersionView({
   display,
   path,
   notice,
+  phone = false,
 }: VersionViewProps) {
   const t = useTranslations("version");
   const s = useTranslations("sets");
@@ -118,8 +121,9 @@ export function VersionView({
   return (
     <Layout
       height="auto"
-      // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
-      padding={8}
+      // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6), 16 px on a
+      // phone (design handoff 5).
+      padding={phone ? 4 : 8}
       contentWidth={1040}
       header={
         <LayoutHeader hasDivider>
@@ -315,6 +319,7 @@ export function VersionView({
               isFramed
               hasForm
               beats={display?.beats ?? "auto"}
+              phone={phone}
             />
           </VStack>
         </LayoutContent>
