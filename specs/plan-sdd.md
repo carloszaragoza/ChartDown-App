@@ -103,14 +103,14 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 **Goal:** the notation is the single source of every chart.
 
-**Status:** the language is at version 0.6 (syntax, spec, playground and, since October 13, 2026, its official conformance suite, Appendix B) in the public repository github.com/ChartDown/spec (the older ChartDown/Language is private); the `chartdown` parser in this repository moves from 0.4 to 0.6 (owner's decision, October 8, 2026, so the beta runs the latest published version).
+**Status:** the language is at version 0.6 (syntax, spec, playground and, since October 13, 2026, its official conformance suite, Appendix B) in the public repository github.com/ChartDown/spec (the older ChartDown/Language is private); 0.7 (chord quality vocabulary, `numbering: 6m`, formal grammar; 142 cases) was merged there on October 13, 2026 (pull request 2, commit `1e103c9`), and the owner wants the app on 0.7 too (E20); the `chartdown` parser in this repository moves from 0.4 to 0.6 (owner's decision, October 8, 2026, so the beta runs the latest published version).
 
 **Remaining requirements for the app**
 
 - R-00.1 Instruments in notes use identifiers from the Admin's catalog, not a fixed list inside the parser (decision 5).
 - R-00.2 **MD layer** format: notes anchored to a section of the version (by name and position) and, when needed, to a bar (decision 4).
 - R-00.3 The parser returns the chart as structured data (JSON) so the app never reads raw text.
-- R-00.4 The header declares the format version (`chartdown: 0.6`). The parser returns the declared version and warns when a file declares a version it does not support (it reads 0.3 to 0.6, and charts written for 0.4 and 0.5 parse the same); a missing version is not a warning, and the app writes the current version into every chart it saves.
+- R-00.4 The header declares the format version (`chartdown: 0.7`; 0.6 until E20). The parser returns the declared version and warns when a file declares a version it does not support (it reads 0.3 to 0.7, and charts written for earlier versions parse the same); a missing version is not a warning, and the app writes the current version into every chart it saves.
 - R-00.5 Remove the `ccli` header field and its examples (decision 10). (Done in ChartDown 0.3.)
 - R-00.6 Pickup bars (`[p:N]`), meter changes (`@meter`, `[m:N/D]`), tempo changes (`@tempo`) and tempo marks (`{rit}`, `{accel}`, `{a tempo}`) within a song (ChartDown 0.5 and 0.6).
 - R-00.7 Unison riffs (`R[ ... ]`), partial rests (`x:beats`) with the tokens of a bar sharing what is left of it, and the sixteenth-note push (`''`) (ChartDown 0.5).
@@ -118,6 +118,10 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-00.9 Navigation marks (`{segno}`, `{coda}`, `{to coda}`, `{fine}`, D.S. and D.C. jumps), warnings for an incomplete jump, and the play order of a chart after repeats, endings and navigation (ChartDown 0.6).
 - R-00.10 The JSON form of a parsed chart (ChartDown 0.6, Appendix A), with its play order and warnings, so other apps and tests agree on what a chart means. The `chartdown` npm package exports it.
 - R-00.11 The app draws every element of ChartDown 0.6 in the viewer, the editors and stand mode, in numbers and in letters; the per-instrument view hides the cues and notes meant for other instruments.
+- R-00.13 **Chord qualities (ChartDown 0.7, spec 6):** aliases take their canonical form (`min`, `mi` and a leading `-` are `m`; `ø` is `m7b5`; `°7` is `dim7`, `°` is `dim`; `+` is `aug`; `Δ` is `maj7`, and `Δ`, `M` or `ma` before a digit are `maj`; `sus4` is `sus`; parentheses are dropped), and a quality in the spec's vocabulary is kept in its canonical spelling, in the JSON form too; a quality outside it passes through as written, with no warning. Number style shows `-` for every canonical minor quality (`m7b5` reads `-7b5`).
+- R-00.14 **Numbering from the relative major (ChartDown 0.7, spec 3 and 12):** the `numbering` header field (`1m` by default, or `6m`; any other value is a warning on that line and `1m` is used). With `6m`, a number in a minor row (the home key or an `@key` in minor) counts from the relative major: in Em, `6m` is Em and `1` is G; major rows do not change, and letters shown as numbers in such a row count from the relative major too.
+- R-00.15 **JSON form 0.7 (Appendix A):** a top-level `numbering` (`1m` or `6m`), `minor` on every row, and `quality` in its canonical form; `degree` stays the semitones from the tonic whatever the numbering.
+- R-00.16 **Grammar (ChartDown 0.7, spec 15):** directive names are read in any case (`@KEY D` is `@key D`), and an `@key` value the parser cannot read is a warning on its line.
 - R-00.12 **Conformance:** `chartdown` passes the official ChartDown conformance suite (spec Appendix B, `conformance/` in github.com/ChartDown/spec) at a pinned commit, through the suite's own runner, and ships the adapter that lets anyone run the suite against it. The suite is the definition of compatible; matching the playground is no longer the test.
 
 **Rules that were this app's interpretations and are now spec text** (ChartDown 0.6 clarifications, github.com/ChartDown/spec PR 1, October 13, 2026; the parser already met each one, checked against the suite that day)
@@ -412,7 +416,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 | Phase | Includes | Outcome |
 |---|---|---|
 | 0 | Constitution, specs and decisions | Specs approved (done) |
-| 1 (MVP) | SPEC-00 (R-00.1 to R-00.12: ChartDown 0.6 and its conformance suite), 01, 02, 03 with layer editor, 04, 05 with key per set and temporary MD, 06, 08 offline reading, 09 in-app notices | A real band prepares a set, each musician reads their notes and plays without depending on the internet |
+| 1 (MVP) | SPEC-00 (R-00.1 to R-00.16: ChartDown 0.7 and its conformance suite), 01, 02, 03 with layer editor, 04, 05 with key per set and temporary MD, 06, 08 offline reading, 09 in-app notices | A real band prepares a set, each musician reads their notes and plays without depending on the internet |
 | 2 | Advanced stand mode, print and export to PDF (R-03.4), invite links, email notices, revision comparison, advanced search; import from PDF (SPEC-10), visual metronome and bar follow (SPEC-11), live mode where the band follows the MD (SPEC-12) | Comfortable use in rehearsal and on stage |
 | 3 | Full administration and reports, WhatsApp notices, offline editing, phone app | Platform open to the public |
 
