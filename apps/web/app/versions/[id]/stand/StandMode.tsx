@@ -157,6 +157,8 @@ function StandModeView({
   // section follows it.
   const {
     playButton,
+    soundButton,
+    soundControls,
     tempoDialog,
     counter,
     nowIn,
@@ -540,6 +542,7 @@ function StandModeView({
                           {counter}
                         </Text>
                       )}
+                      {soundButton}
                       {playButton}
                       {viewAsControl}
                       {previous && (
@@ -649,6 +652,7 @@ function StandModeView({
                 </VStack>
                 {viewAsControl}
                 {tools}
+                {soundControls}
               </VStack>
             </BottomSheet>
           )}

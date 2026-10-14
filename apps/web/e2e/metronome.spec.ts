@@ -123,3 +123,33 @@ test("R-11.6 playback stops on a fermata bar until the musician taps", async ({
   await bars.nth(1).click();
   await expect(bars.nth(2)).toHaveAttribute("aria-current", "step");
 });
+
+test("R-11.7 with the click off no audio plays and the pulse still runs; on, it clicks", async ({
+  page,
+  request,
+}) => {
+  // Count the tones the page asks the audio clock for.
+  await page.addInitScript(() => {
+    const create = AudioContext.prototype.createOscillator;
+    Object.assign(window, { tones: 0 });
+    AudioContext.prototype.createOscillator = function (this: AudioContext) {
+      (window as unknown as { tones: number }).tones++;
+      return create.call(this);
+    };
+  });
+  const id = await createVersion(request, { title: "Fast Song", content: FAST });
+  await page.goto(`/versions/${id}/stand`);
+  const tones = () => page.evaluate(() => (window as unknown as { tones: number }).tones);
+
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(page.getByRole("main").locator('[aria-current="step"]')).toHaveCount(1);
+  await page.waitForTimeout(1000);
+  expect(await tones()).toBe(0);
+  await page.getByRole("button", { name: "Stop" }).click();
+
+  await page.getByRole("button", { name: "Metronome sound" }).click();
+  await page.getByRole("dialog").getByRole("switch", { name: "Click" }).click();
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect.poll(tones, { timeout: 3000 }).toBeGreaterThan(0);
+});

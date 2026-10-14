@@ -6,9 +6,11 @@ import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { NumberInput } from "@astryxdesign/core/NumberInput";
+import { Slider } from "@astryxdesign/core/Slider";
+import { Switch } from "@astryxdesign/core/Switch";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
-import { PlayIcon, StopIcon } from "@heroicons/react/24/outline";
+import { PlayIcon, SpeakerWaveIcon, StopIcon } from "@heroicons/react/24/outline";
 import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -40,6 +42,7 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
   const metronome = useMetronome(chart);
   const { bars } = metronome;
   const [isTempoOpen, setTempoOpen] = useState(false);
+  const [isSoundOpen, setSoundOpen] = useState(false);
   const [askedTempo, setAskedTempo] = useState(100);
   // The tapped bar, by its place in the timeline; in stand mode only one of the section on screen.
   const [chosen, setChosen] = useState<number | null>(null);
@@ -100,6 +103,53 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
     </Dialog>
   );
 
+  // The click (off by default), its volume and the count-in, kept on this device (R-11.7, R-11.8).
+  const { sound, setSound } = metronome;
+  const soundControls = (
+    <VStack gap={4}>
+      <Switch
+        label={t("click")}
+        description={t("clickHint")}
+        value={sound.click}
+        onChange={(click) => setSound({ ...sound, click })}
+      />
+      <Slider
+        label={t("volume")}
+        value={sound.volume}
+        min={0}
+        max={100}
+        step={5}
+        valueDisplay="text"
+        formatValue={(volume) => `${volume}%`}
+        onChange={(volume: number) => setSound({ ...sound, volume })}
+      />
+      <Switch
+        label={t("countIn")}
+        description={t("countInHint")}
+        value={sound.countIn}
+        onChange={(countIn) => setSound({ ...sound, countIn })}
+      />
+    </VStack>
+  );
+  const soundButton = (
+    <Button
+      label={t("sound")}
+      size="lg"
+      variant="secondary"
+      isIconOnly
+      icon={<Icon icon={SpeakerWaveIcon} />}
+      onClick={() => setSoundOpen(true)}
+    />
+  );
+  const soundDialog = (
+    <Dialog isOpen={isSoundOpen} onOpenChange={setSoundOpen} padding={4}>
+      <VStack gap={4}>
+        <Heading level={2}>{t("sound")}</Heading>
+        {soundControls}
+      </VStack>
+    </Dialog>
+  );
+
   // "2 / 4", the beat and the beats of the bar, so the pulse never rests on the line (R-11.3).
   const click = metronome.position?.click;
   const startBar = start !== null ? bars[start] : undefined;
@@ -123,7 +173,14 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
   return {
     metronome,
     playButton,
-    tempoDialog,
+    soundButton,
+    soundControls,
+    tempoDialog: (
+      <>
+        {tempoDialog}
+        {soundDialog}
+      </>
+    ),
     counter,
     nowIn,
     playingSection: playing?.section,

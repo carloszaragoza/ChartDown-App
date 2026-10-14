@@ -1,6 +1,14 @@
 import type { Chart } from "chartdown";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { audioClock, clicks, continueWith, Metronome, sectionEnd, type Click } from "./engine";
+import {
+  DEFAULT_SOUND,
+  getSound,
+  playClick,
+  respectSilentMode,
+  saveSound,
+  subscribeSound,
+} from "./sound";
 import { timeline, type TimelineBar } from "./timeline";
 
 /** Where the metronome is: the click it reached and its bar in the timeline (none in count-in). */
@@ -24,6 +32,13 @@ export function useMetronome(chart: Chart) {
   const engine = useRef<Metronome | null>(null);
   const context = useRef<AudioContext | null>(null);
   const frame = useRef(0);
+  // The click, its volume and the count-in, kept on this device (R-11.7, R-11.8). The scheduler
+  // reads the latest, so turning the click on while playing is heard on the next beat.
+  const sound = useSyncExternalStore(subscribeSound, getSound, () => DEFAULT_SOUND);
+  const heard = useRef(sound);
+  useEffect(() => {
+    heard.current = sound;
+  }, [sound]);
   // The tempo asked of the person, kept for what is queued later.
   const asked = useRef<number | undefined>(undefined);
   // The section queued after the one that sounds (R-11.15), and the click it starts on.
@@ -45,10 +60,13 @@ export function useMetronome(chart: Chart) {
     (from: number, options: { tempo?: number; countIn?: boolean } = {}) => {
       stop();
       asked.current = options.tempo;
+      respectSilentMode();
       const audio = (context.current ??= new AudioContext());
       void audio.resume();
-      const list = clicks(bars, { from, ...options });
-      const metronome = new Metronome(list, audioClock(audio));
+      const list = clicks(bars, { from, countIn: heard.current.countIn, ...options });
+      const metronome = new Metronome(list, audioClock(audio), (click, at) => {
+        if (heard.current.click) playClick(audio, at, click.accent, heard.current.volume);
+      });
       engine.current = metronome;
       metronome.start();
       setPlaying(true);
@@ -135,5 +153,7 @@ export function useMetronome(chart: Chart) {
     firstBarOf,
     queue,
     queued,
+    sound,
+    setSound: saveSound,
   };
 }
