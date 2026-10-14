@@ -231,7 +231,8 @@
       "strong": "strong",
       "semi": "semi-strong",
       "weak": "weak"
-    }
+    },
+    "queued": "plays next"
   },
   "auth": {
     "email": "Email",
@@ -613,7 +614,8 @@
     "beatOf": "{beat} / {of}",
     "tempoTitle": "Tempo",
     "tempoAsk": "This chart has no tempo. How fast should the metronome count?",
-    "tempoLabel": "Beats per minute"
+    "tempoLabel": "Beats per minute",
+    "again": "{name}, again"
   },
   "bands": {
     "title": "Bands",

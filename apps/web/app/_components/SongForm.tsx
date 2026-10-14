@@ -2,7 +2,9 @@
 
 import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
+import { Icon } from "@astryxdesign/core/Icon";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
+import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { repeats } from "../../lib/chart/repeats";
@@ -14,6 +16,8 @@ export interface SongFormItem {
   href: string;
   /** Notes for this person in it (stand mode in a set). */
   hasNotes?: boolean;
+  /** Queued to play after the section that sounds (R-11.15). */
+  isQueued?: boolean;
 }
 
 /**
@@ -58,13 +62,19 @@ export function SongForm({
               href={item.href}
               size={size}
               variant={isCurrent ? "primary" : size === "lg" ? "secondary" : "ghost"}
-              label={[item.description, of > 1 ? c("nthTime", { time }) : ""]
+              label={[
+                item.description,
+                of > 1 ? c("nthTime", { time }) : "",
+                item.isQueued ? c("queued") : "",
+              ]
                 .filter(Boolean)
                 .join(", ")}
               {...(isCurrent ? { "aria-current": "true" as const } : {})}
-              {...(item.hasNotes && notesLabel
-                ? { endContent: <StatusDot variant="error" label={notesLabel} /> }
-                : {})}
+              {...(item.isQueued
+                ? { endContent: <Icon icon={ChevronDoubleRightIcon} /> }
+                : item.hasNotes && notesLabel
+                  ? { endContent: <StatusDot variant="error" label={notesLabel} /> }
+                  : {})}
             >
               <span aria-hidden="true">
                 {item.abbreviation}

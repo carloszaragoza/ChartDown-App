@@ -231,7 +231,8 @@
       "strong": "fuerte",
       "semi": "semifuerte",
       "weak": "débil"
-    }
+    },
+    "queued": "sigue a continuación"
   },
   "auth": {
     "email": "Correo electrónico",
@@ -613,7 +614,8 @@
     "beatOf": "{beat} / {of}",
     "tempoTitle": "Tempo",
     "tempoAsk": "Este chart no tiene tempo. ¿A qué velocidad debe contar el metrónomo?",
-    "tempoLabel": "Pulsos por minuto"
+    "tempoLabel": "Pulsos por minuto",
+    "again": "{name}, otra vez"
   },
   "bands": {
     "title": "Bandas",

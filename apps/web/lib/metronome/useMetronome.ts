@@ -1,6 +1,6 @@
 import type { Chart } from "chartdown";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { audioClock, clicks, Metronome, type Click } from "./engine";
+import { audioClock, clicks, continueWith, Metronome, sectionEnd, type Click } from "./engine";
 import { timeline, type TimelineBar } from "./timeline";
 
 /** Where the metronome is: the click it reached and its bar in the timeline (none in count-in). */
@@ -22,6 +22,11 @@ export function useMetronome(chart: Chart) {
   const engine = useRef<Metronome | null>(null);
   const context = useRef<AudioContext | null>(null);
   const frame = useRef(0);
+  // The tempo asked of the person, kept for what is queued later.
+  const asked = useRef<number | undefined>(undefined);
+  // The section queued after the one that sounds (R-11.15), and the click it starts on.
+  const [queued, setQueued] = useState<number | null>(null);
+  const queuedAt = useRef(-1);
 
   const stop = useCallback(() => {
     engine.current?.stop();
@@ -29,11 +34,14 @@ export function useMetronome(chart: Chart) {
     cancelAnimationFrame(frame.current);
     setPosition(null);
     setPlaying(false);
+    setQueued(null);
+    queuedAt.current = -1;
   }, []);
 
   const play = useCallback(
     (from: number, options: { tempo?: number; countIn?: boolean } = {}) => {
       stop();
+      asked.current = options.tempo;
       const audio = (context.current ??= new AudioContext());
       void audio.resume();
       const list = clicks(bars, { from, ...options });
@@ -46,6 +54,11 @@ export function useMetronome(chart: Chart) {
         if (engine.current !== metronome) return;
         if (!metronome.isPlaying) return stop();
         const click = metronome.position();
+        // The queued section has begun: nothing waits any more.
+        if (queuedAt.current >= 0 && metronome.index() >= queuedAt.current) {
+          queuedAt.current = -1;
+          setQueued(null);
+        }
         if (click && click !== shown) {
           shown = click;
           const bar = bars[click.bar];
@@ -78,5 +91,30 @@ export function useMetronome(chart: Chart) {
     [bars],
   );
 
-  return { bars, needsTempo, position, isPlaying, play, stop, firstBarOf };
+  /**
+   * Queues a section after the one that sounds (R-11.15): the same section repeats it, and the
+   * section already queued cancels the queue, so the song goes on as written.
+   */
+  const queue = useCallback(
+    (section: number) => {
+      const metronome = engine.current;
+      if (!metronome) return;
+      const playing = Math.max(metronome.index(), 0);
+      const tempo = asked.current !== undefined ? { tempo: asked.current } : {};
+      let tail: Click[];
+      if (queued === section) {
+        const end = sectionEnd(metronome.clicks, bars, playing);
+        const after = (metronome.clicks[end - 1]?.bar ?? -1) + 1;
+        tail = after < bars.length ? clicks(bars, { from: after, ...tempo }) : [];
+      } else tail = clicks(bars, { from: firstBarOf(section), ...tempo });
+      const next = continueWith(metronome.clicks, bars, playing, tail, metronome.scheduled);
+      metronome.replace(next.list);
+      const cancel = queued === section;
+      queuedAt.current = cancel ? -1 : next.at;
+      setQueued(cancel ? null : section);
+    },
+    [bars, firstBarOf, queued],
+  );
+
+  return { bars, needsTempo, position, isPlaying, play, stop, firstBarOf, queue, queued };
 }

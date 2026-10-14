@@ -292,6 +292,7 @@ Owner's decision, October 13, 2026, after F-005 to F-008: Play (the sets, a set'
 | T-1505 | Click sound (off by default), volume, silent mode respected | R-11.7 | T-1502 | S | With sound off, no audio plays and the pulse still runs |
 | T-1506 | Practice tempo and tap tempo, without changing the chart | R-11.9 | T-1502 | S | 80% speed plays at 80% of the chart tempo; the saved chart is unchanged |
 | T-1507 | Space bar and Bluetooth page-turn pedal control; keep the screen awake while playing | R-11.10, R-11.11 | T-1503 | S | A pedal starts and stops playback |
+| T-1509 | The musician leads the form: while playing, a chosen section is queued after the one that sounds (the same one repeats it), shown in the next line and the song form, and cancelled by choosing it again | R-11.15 | T-1503 | M | Tapping the Chorus while it plays repeats it from bar 1 on the beat; tapping the Bridge in Verse 2 plays the Bridge after Verse 2 |
 | T-1508 | Reduced-motion mode and offline check in a downloaded set | R-11.11, R-11.13 | T-1503, T-902 | S | Reduced motion shows no flashing; works in airplane mode |
 
 ## E16 · Live mode (SPEC-12, phase 2)
