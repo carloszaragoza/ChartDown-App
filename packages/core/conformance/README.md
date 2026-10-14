@@ -1,8 +1,43 @@
-# ChartDown 0.4 conformance cases
+# ChartDown conformance cases
 
-One file per section of the [ChartDown 0.4 spec](https://github.com/ChartDown/Language/blob/main/SPEC.md). Each case checks one rule. `src/conformance.test.ts` runs every case against `parse()` and fails if a spec section with parser rules has no passing case.
+The official test cases for the [ChartDown specification](../SPEC.md) (version
+0.6, see Appendix B). One file per spec section with parser rules, from
+`02-file-structure.md` to `15-grammar.md`. Each case checks one rule.
 
-## Writing a case
+## Run them
+
+You need Node.js 18 or later. Nothing to install.
+
+```
+node conformance/run.mjs
+```
+
+This checks the reference parser in `playground/index.html`. To check another
+implementation, write a small adapter module and pass its path:
+
+```js
+// my-adapter.mjs
+import * as chartdown from "my-chartdown-parser";
+
+// Required: the JSON form of the chart (spec Appendix A).
+export const toJSON = (source) => chartdown.toJSON(chartdown.parse(source));
+
+// Optional: the chords as shown, for the display cases of spec 12.
+// Without it, those cases are skipped. Returns, for example:
+// { homeKey: "A", keys: ["A"], rows: ["A | D | E | F#m"] }
+export function display(source, { style, key }) {
+  // ...
+}
+```
+
+```
+node conformance/run.mjs ./my-adapter.mjs
+```
+
+The runner exits with 1 when a case fails, or when a spec section with parser
+rules has no case.
+
+## Read a case
 
 ````md
 ### 5.1 Chords inside one bar share it evenly
@@ -14,31 +49,51 @@ One file per section of the [ChartDown 0.4 spec](https://github.com/ChartDown/La
 
 ```json
 {
-  "sections": [
-    {
-      "rows": [
-        {
-          "bars": [
-            {
-              "items": [
-                { "root": "1", "beats": 1 },
-                { "root": "4", "beats": 1 }
-              ]
-            }
-          ]
-        }
-      ]
-    }
-  ]
+  "chartdown": null,
+  "meta": {},
+  ...
 }
 ```
 ````
 
 - The heading starts with the spec section number, then the rule in plain words.
-- The `json` block is a partial match: objects only need the fields shown; arrays need every element, so use `{}` for elements you don't check. `"warnings": []` asserts there are none.
-- A `display` block (`{ "style": "letters", "key": "A" }`) checks the chords as shown instead of the parsed tree: the `json` block then has `homeKey`, `keys` (one per row) and `rows` (each row as `chord chord | chord`). See `12-numbers-and-letters.md`.
-- A line `todo: T-xxx reason` under the heading marks a rule the parser does not meet yet; the case is listed as a todo test until that task fixes it.
+- The `chartdown` block is the input.
+- The `json` block is the whole JSON form (Appendix A) a correct parser produces.
 
-Sections without parser rules: 1 (goals), 4.2 (views, handled by the per-instrument view), 16 (roadmap) and 17 (changelog).
+**How a result is compared**
 
-The cases use original example songs only. Lyric landmarks stay at 8 words or fewer, except in the cases that test the limit.
+- Every field in the `json` block must match. Fields the block does not have are
+  ignored, because Appendix A lets producers add their own.
+- Arrays must have the same elements in the same order.
+- Numbers match within 0.000000001 (a bar of 4 beats split 3 ways gives 1.333...).
+- Warnings match by line number only, in any order. Their wording is up to each
+  parser (spec 13).
+
+**Display cases (spec 12).** A case with a `display` block checks the chords
+as shown instead of the JSON form. The `display` block gives the style
+(`numbers` or `letters`) and, optionally, the display key. The `json` block
+then has:
+
+- `homeKey`: the key the chart is shown in, such as `A` or `Em`.
+- `keys`: the key each row is shown in, one per row.
+- `rows`: each row as text: tokens separated by spaces, bars by ` | `. A chord
+  is its root, quality and `/bass` as shown; `x`, `%` and `=` stay as written,
+  and a riff is `R[ 1 3 5 ]`.
+
+Display cases apply only to renderers. A parser that does not show charts can
+skip them.
+
+## Add a case
+
+Every syntax change to the spec adds or updates a case here (see
+[CONTRIBUTING.md](../CONTRIBUTING.md)). Put it in the file of its spec section,
+under a heading that starts with the section number. Sections without parser
+rules have no file: 1 (goals), 4.2 (views), 16 (roadmap) and 17 (changelog).
+
+Cases use original songs only. Lyric landmarks stay at 8 words or fewer, except
+in the cases that test that limit.
+
+## License
+
+The cases are released under [CC0 1.0](../LICENSE-SPEC), like the spec.
+`run.mjs` is under the [MIT License](../LICENSE), like the playground.

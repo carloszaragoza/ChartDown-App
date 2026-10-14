@@ -12,26 +12,69 @@ instruments: cello
 
 ```json
 {
+  "chartdown": null,
+  "meta": { "instruments": "cello" },
+  "key": "C",
+  "minor": false,
   "sections": [
     {
+      "name": "Bridge",
+      "use": null,
+      "notes": [],
       "rows": [
         {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
           "bars": [
             {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
               "repeatStart": true,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
               "dynamic": "p",
+              "tempoMark": null,
+              "nav": [],
+              "cues": [
+                { "roles": ["cello"], "passes": [], "text": "swell" }
+              ],
               "lyric": "Here we go",
-              "cues": [{ "roles": ["cello"], "text": "swell" }],
               "items": [
-                { "root": "1", "push": true, "beats": 2 },
-                { "root": "4", "hold": true, "beats": 2 }
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 2, "push": 1, "hold": false, "stab": false, "fermata": false },
+                { "type": "chord", "root": "4", "degree": 5, "quality": "", "bass": null, "bassDegree": null, "beats": 2, "push": 0, "hold": true, "stab": false, "fermata": false }
               ]
             },
-            { "ending": [1], "repeatEnd": { "times": 2 }, "items": [{ "root": "5", "stab": true }] }
+            {
+              "number": 2,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": true,
+              "times": 2,
+              "ending": [1],
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "5", "degree": 7, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": true, "fermata": false }
+              ]
+            }
           ]
         }
       ]
     }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 },
+    { "section": 0, "bar": 2, "pass": 1 },
+    { "section": 0, "bar": 1, "pass": 2 }
   ],
   "warnings": []
 }
@@ -46,7 +89,65 @@ instruments: cello
 
 ```json
 {
-  "sections": [{ "rows": [{ "bars": [{ "ending": [1, 2, 3] }, { "ending": [4] }] }] }],
+  "chartdown": null,
+  "meta": {},
+  "key": "C",
+  "minor": false,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": [1, 2, 3],
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "4", "degree": 5, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            },
+            {
+              "number": 2,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": [4],
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "5", "degree": 7, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
   "warnings": []
 }
 ```
@@ -63,5 +164,50 @@ instruments: cello
 ```
 
 ```json
-{ "sections": [{ "notes": [{ "roles": ["cello", "bass"] }] }], "warnings": [] }
+{
+  "chartdown": null,
+  "meta": { "instruments": "cello" },
+  "key": "C",
+  "minor": false,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [
+        { "md": true, "roles": ["cello", "bass"], "passes": [], "text": "Together." }
+      ],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
+  "warnings": []
+}
 ```

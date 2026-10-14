@@ -15,12 +15,47 @@ feel: Straight, building
 
 ```json
 {
-  "header": {
-    "title": "Open Road",
-    "artists": "ChartDown examples",
-    "tempo": "76",
-    "feel": "Straight, building"
-  },
+  "chartdown": null,
+  "meta": { "title": "Open Road", "artists": "ChartDown examples", "tempo": "76", "feel": "Straight, building" },
+  "key": "C",
+  "minor": false,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": 76,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
   "warnings": []
 }
 ```
@@ -37,7 +72,50 @@ KEY: D
 ```
 
 ```json
-{ "header": { "title": "Open Road", "key": "D" }, "key": { "root": "D", "minor": false } }
+{
+  "chartdown": null,
+  "meta": { "title": "Open Road", "key": "D" },
+  "key": "D",
+  "minor": false,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "D",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
+  "warnings": []
+}
 ```
 
 ### 3 Unknown header names are kept
@@ -51,7 +129,50 @@ capo: 2
 ```
 
 ```json
-{ "header": { "capo": "2" }, "warnings": [] }
+{
+  "chartdown": null,
+  "meta": { "capo": "2" },
+  "key": "C",
+  "minor": false,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
+  "warnings": []
+}
 ```
 
 ### 3 If key is missing, C is assumed
@@ -62,7 +183,50 @@ capo: 2
 ```
 
 ```json
-{ "key": { "root": "C", "minor": false } }
+{
+  "chartdown": null,
+  "meta": {},
+  "key": "C",
+  "minor": false,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
+  "warnings": []
+}
 ```
 
 ### 3 If meter is missing, 4/4 is assumed
@@ -73,7 +237,50 @@ capo: 2
 ```
 
 ```json
-{ "meter": { "beats": 4, "unit": 4 } }
+{
+  "chartdown": null,
+  "meta": {},
+  "key": "C",
+  "minor": false,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
+  "warnings": []
+}
 ```
 
 ### 3 The key can use sharps and flats
@@ -87,7 +294,50 @@ key: F#
 ```
 
 ```json
-{ "key": { "root": "F#", "minor": false } }
+{
+  "chartdown": null,
+  "meta": { "key": "F#" },
+  "key": "F#",
+  "minor": false,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "F#",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
+  "warnings": []
+}
 ```
 
 ### 3 Adding m to the key makes it minor
@@ -101,7 +351,50 @@ key: Bbm
 ```
 
 ```json
-{ "key": { "root": "Bb", "minor": true } }
+{
+  "chartdown": null,
+  "meta": { "key": "Bbm" },
+  "key": "Bb",
+  "minor": true,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "Bb",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "m", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
+  "warnings": []
+}
 ```
 
 ### 3 The meter is a time signature
@@ -115,7 +408,50 @@ meter: 12/8
 ```
 
 ```json
-{ "meter": { "beats": 12, "unit": 8 } }
+{
+  "chartdown": null,
+  "meta": { "meter": "12/8" },
+  "key": "C",
+  "minor": false,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "12/8",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 12,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 12, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
+  "warnings": []
+}
 ```
 
 ### 3 The chartdown field declares the spec version
@@ -129,7 +465,50 @@ chartdown: 0.4
 ```
 
 ```json
-{ "version": "0.4", "warnings": [] }
+{
+  "chartdown": "0.4",
+  "meta": { "chartdown": "0.4" },
+  "key": "C",
+  "minor": false,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
+  "warnings": []
+}
 ```
 
 ### 3 A version this parser does not read is a warning
@@ -145,13 +524,49 @@ chartdown: 0.7
 
 ```json
 {
-  "version": "0.7",
-  "warnings": [
+  "chartdown": "0.7",
+  "meta": { "title": "Open Road", "chartdown": "0.7" },
+  "key": "C",
+  "minor": false,
+  "sections": [
     {
-      "line": 3,
-      "code": "unsupported-version",
-      "values": { "version": "0.7", "supported": "0.3–0.6" }
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
     }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
+  "warnings": [
+    { "line": 3 }
   ]
 }
 ```
@@ -168,7 +583,52 @@ this is not a header line
 ```
 
 ```json
-{ "header": { "title": "Open Road" }, "warnings": [{ "line": 3, "code": "header-line" }] }
+{
+  "chartdown": null,
+  "meta": { "title": "Open Road" },
+  "key": "C",
+  "minor": false,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
+  "warnings": [
+    { "line": 3 }
+  ]
+}
 ```
 
 ### 3 A header without its closing line ends at the first section, with a warning
@@ -183,8 +643,68 @@ key: G
 
 ```json
 {
-  "header": { "title": "Open Road", "key": "G" },
-  "sections": [{ "name": "Verse", "rows": [{ "line": 5 }] }],
-  "warnings": [{ "line": 1, "code": "header-not-closed" }]
+  "chartdown": null,
+  "meta": { "title": "Open Road", "key": "G" },
+  "key": "G",
+  "minor": false,
+  "sections": [
+    {
+      "name": "Verse",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "G",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            },
+            {
+              "number": 2,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "4", "degree": 5, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 },
+    { "section": 0, "bar": 2, "pass": 1 }
+  ],
+  "warnings": [
+    { "line": 1 }
+  ]
 }
 ```

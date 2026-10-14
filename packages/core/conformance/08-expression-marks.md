@@ -9,8 +9,47 @@
 
 ```json
 {
+  "chartdown": null,
+  "meta": {},
+  "key": "C",
+  "minor": false,
   "sections": [
-    { "rows": [{ "bars": [{ "items": [{ "push": false }, { "root": "4", "push": true }] }] }] }
+    {
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 2, "push": 0, "hold": false, "stab": false, "fermata": false },
+                { "type": "chord", "root": "4", "degree": 5, "quality": "", "bass": null, "bassDegree": null, "beats": 2, "push": 1, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
   ],
   "warnings": []
 }
@@ -25,7 +64,47 @@
 
 ```json
 {
-  "sections": [{ "rows": [{ "bars": [{ "items": [{ "root": "1", "hold": true }] }] }] }],
+  "chartdown": null,
+  "meta": {},
+  "key": "C",
+  "minor": false,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": true, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
   "warnings": []
 }
 ```
@@ -39,7 +118,48 @@
 
 ```json
 {
-  "sections": [{ "rows": [{ "bars": [{ "items": [{ "stab": true }, { "stab": true }] }] }] }],
+  "chartdown": null,
+  "meta": {},
+  "key": "C",
+  "minor": false,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 2, "push": 0, "hold": false, "stab": true, "fermata": false },
+                { "type": "chord", "root": "5", "degree": 7, "quality": "", "bass": null, "bassDegree": null, "beats": 2, "push": 0, "hold": false, "stab": true, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
   "warnings": []
 }
 ```
@@ -53,7 +173,47 @@
 
 ```json
 {
-  "sections": [{ "rows": [{ "bars": [{ "items": [{ "hold": true, "fermata": true }] }] }] }],
+  "chartdown": null,
+  "meta": {},
+  "key": "C",
+  "minor": false,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": true, "stab": false, "fermata": true }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
   "warnings": []
 }
 ```
@@ -67,36 +227,47 @@
 
 ```json
 {
+  "chartdown": null,
+  "meta": {},
+  "key": "C",
+  "minor": false,
   "sections": [
     {
+      "name": "A",
+      "use": null,
+      "notes": [],
       "rows": [
         {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
           "bars": [
             {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
               "items": [
-                {
-                  "root": "4",
-                  "push": true,
-                  "beats": 2,
-                  "explicitBeats": true,
-                  "stab": true,
-                  "hold": false,
-                  "fermata": false
-                },
-                {
-                  "root": "5",
-                  "push": true,
-                  "hold": true,
-                  "beats": 2,
-                  "fermata": true,
-                  "stab": false
-                }
+                { "type": "chord", "root": "4", "degree": 5, "quality": "", "bass": null, "bassDegree": null, "beats": 2, "push": 1, "hold": false, "stab": true, "fermata": false },
+                { "type": "chord", "root": "5", "degree": 7, "quality": "", "bass": null, "bassDegree": null, "beats": 2, "push": 1, "hold": true, "stab": false, "fermata": true }
               ]
             }
           ]
         }
       ]
     }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
   ],
   "warnings": []
 }
@@ -111,22 +282,66 @@
 
 ```json
 {
+  "chartdown": null,
+  "meta": {},
+  "key": "C",
+  "minor": false,
   "sections": [
     {
+      "name": "Intro",
+      "use": null,
+      "notes": [],
       "rows": [
         {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
           "bars": [
             {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
               "items": [
-                { "root": "4", "push": true, "shortPush": true },
-                { "root": "5", "push": false }
+                { "type": "chord", "root": "4", "degree": 5, "quality": "", "bass": null, "bassDegree": null, "beats": 2, "push": 2, "hold": false, "stab": false, "fermata": false },
+                { "type": "chord", "root": "5", "degree": 7, "quality": "", "bass": null, "bassDegree": null, "beats": 2, "push": 0, "hold": false, "stab": false, "fermata": false }
               ]
             },
-            { "items": [{ "root": "1", "push": true }] }
+            {
+              "number": 2,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 1, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
           ]
         }
       ]
     }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 },
+    { "section": 0, "bar": 2, "pass": 1 }
   ],
   "warnings": []
 }
