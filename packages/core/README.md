@@ -2,7 +2,7 @@
 
 The parser for **ChartDown**, a plain-text notation for Nashville Number System charts: sections,
 bars, numbers, keys, dynamics and notes for each instrument. It implements the
-[ChartDown spec 0.6](https://github.com/ChartDown/Language), and reads charts written for 0.3 to
+[ChartDown spec 0.6](https://github.com/ChartDown/spec), and reads charts written for 0.3 to
 0.6 without a warning. It has no runtime dependencies and runs the same in the browser and in Node.
 
 ```sh
@@ -49,6 +49,19 @@ Also exported: `transposeKey`, `keyName` and `parseKeyName` for keys; `sectionLe
 for the share of a bar each token takes; and the music director's layer format (`parseLayer`,
 `formatLayer`, `placeLayer`), which keeps a band's notes apart from the chart. See the
 [changelog](CHANGELOG.md) for what changed from 0.1.
+
+## Conformance
+
+The spec defines a compatible parser as one that passes its conformance suite (`conformance/` in
+[github.com/ChartDown/spec](https://github.com/ChartDown/spec), Appendix B). This package passes it,
+and ships the adapter the suite's runner expects as `chartdown/conformance`: `toJSON(source)` for
+the JSON form and `display(source, { style, key })` for the chords as shown. In a clone of the spec
+repository, with `chartdown` installed:
+
+```sh
+echo 'export * from "chartdown/conformance";' > adapter.mjs
+node conformance/run.mjs ./adapter.mjs
+```
 
 ## License
 

@@ -9,10 +9,10 @@
     "music",
     "parser"
   ],
-  "homepage": "https://github.com/ChartDown/Language",
+  "homepage": "https://github.com/ChartDown/spec",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ChartDown/Language.git"
+    "url": "git+https://github.com/ChartDown/spec.git"
   },
   "license": "MIT",
   "type": "module",
@@ -22,6 +22,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./conformance": {
+      "types": "./dist/conformance.d.ts",
+      "import": "./dist/conformance.js"
     }
   },
   "files": [
