@@ -137,3 +137,41 @@ describe("T-1509 the musician leads the form", () => {
     expect(at).toBe(9);
   });
 });
+
+describe("T-1504 a fermata waits for a tap", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it("R-11.6 playback holds after a fermata bar until the tap, then goes on in time", () => {
+    const list = clicks(timeline(parse("---\ntempo: 60\n---\n## A\n1 | 4~ | 5\n")));
+    expect(list.filter((click) => click.waits).map((click) => [click.bar, click.count])).toEqual([
+      [1, 4],
+    ]);
+    const clock = fakeClock();
+    const sounded: number[] = [];
+    const metronome = new Metronome(list, clock, (click) => sounded.push(click.bar));
+    metronome.start();
+    // Twenty seconds go by: the first two bars play, then nothing.
+    for (let step = 0; step < 800; step++) {
+      clock.advance(0.025);
+      vi.advanceTimersByTime(25);
+    }
+    expect(sounded).toEqual([0, 0, 0, 0, 1, 1, 1, 1]);
+    expect(metronome.isWaiting).toBe(true);
+    expect(metronome.position()).toMatchObject({ bar: 1, count: 4 });
+    // The tap: bar 3 starts a moment later, and its beats keep the tempo.
+    metronome.resume();
+    const resumedAt = clock.now();
+    const times: number[] = [];
+    for (let step = 0; step < 200; step++) {
+      clock.advance(0.025);
+      vi.advanceTimersByTime(25);
+      const click = metronome.position();
+      if (click?.bar === 2 && times.length < click.count) times.push(clock.now() - resumedAt);
+    }
+    expect(sounded.slice(8)).toEqual([2, 2, 2, 2]);
+    expect(metronome.isWaiting).toBe(false);
+    expect(times[0]).toBeLessThan(0.2);
+    expect((times[3] ?? 0) - (times[0] ?? 0)).toBeCloseTo(3, 1);
+  });
+});

@@ -22,18 +22,43 @@ export interface NowPlaying {
   progress: number;
 }
 
+/** A bar chosen to start on, where ChartSection draws it (R-11.2). */
+export interface StartBar {
+  row: number;
+  index: number;
+}
+
 /**
  * The visual metronome's controls, the same in stand mode and on the version page (T-1503):
  * Play / Stop, the "2 / 4" counter, the question for a tempo when the chart has none (R-11.1),
- * and where the metronome is, section by section. Play starts at a section's first bar.
+ * and where the metronome is, section by section. Play starts on a tapped bar (R-11.2), or at
+ * the first bar of `section` (stand mode's own) or of the song (null). A fermata waits for a tap
+ * on the chart (R-11.6).
  */
-export function useMetronomeControls(chart: Chart, startSection: number) {
+export function useMetronomeControls(chart: Chart, section: number | null) {
   const t = useTranslations("stand");
   const metronome = useMetronome(chart);
+  const { bars } = metronome;
   const [isTempoOpen, setTempoOpen] = useState(false);
   const [askedTempo, setAskedTempo] = useState(100);
+  // The tapped bar, by its place in the timeline; in stand mode only one of the section on screen.
+  const [chosen, setChosen] = useState<number | null>(null);
+  const start =
+    chosen !== null && (section === null || bars[chosen]?.section === section) ? chosen : null;
   const playFrom = (tempo?: number) =>
-    metronome.play(metronome.firstBarOf(startSection), tempo !== undefined ? { tempo } : {});
+    metronome.play(
+      start ?? metronome.firstBarOf(section ?? 0),
+      tempo !== undefined ? { tempo } : {},
+    );
+  /** A tap on a bar: start there, or, tapped again, from the top as before (R-11.2). */
+  const chooseStart = (inSection: number, number: number) => {
+    const index = bars.findIndex((bar) => bar.section === inSection && bar.number === number);
+    if (index >= 0) setChosen((now) => (now === index ? null : index));
+  };
+  const startIn = (inSection: number): StartBar | undefined => {
+    const bar = start !== null ? bars[start] : undefined;
+    return bar && bar.section === inSection ? { row: bar.row, index: bar.index } : undefined;
+  };
 
   const playButton = (
     <Button
@@ -77,7 +102,14 @@ export function useMetronomeControls(chart: Chart, startSection: number) {
 
   // "2 / 4", the beat and the beats of the bar, so the pulse never rests on the line (R-11.3).
   const click = metronome.position?.click;
-  const counter = click ? t("beatOf", { beat: click.count, of: click.of }) : null;
+  const startBar = start !== null ? bars[start] : undefined;
+  const counter = metronome.isWaiting
+    ? t("fermata")
+    : click
+      ? t("beatOf", { beat: click.count, of: click.of })
+      : startBar && !metronome.isPlaying
+        ? t("startsAt", { bar: startBar.number })
+        : null;
   const playing = metronome.position?.bar;
   const nowIn = (section: number): NowPlaying | undefined =>
     playing && playing.section === section && click
@@ -98,5 +130,9 @@ export function useMetronomeControls(chart: Chart, startSection: number) {
     queued: metronome.queued,
     queue: metronome.queue,
     isPlaying: metronome.isPlaying,
+    isWaiting: metronome.isWaiting,
+    resume: metronome.resume,
+    chooseStart,
+    startIn,
   };
 }

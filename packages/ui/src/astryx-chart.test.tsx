@@ -245,6 +245,26 @@ describe("T-1503 the metronome's pulse in a row", () => {
   });
 });
 
+describe("T-1504 the bar to start on", () => {
+  it("R-11.2 a tapped bar is marked as where Play starts, and every bar says its number", () => {
+    const chart = parse("## A\n1 | 4 | 5\n");
+    const html = render(
+      <BarRow
+        row={chart.sections[0]!.rows[0]!}
+        formatter={chordFormatter(chart, { style: "numbers" })}
+        start={1}
+      />,
+    );
+    expect(html.match(/cd-chart__bar--start/g)).toHaveLength(1);
+    expect(html.match(/data-bar="(\d)"/g)).toEqual([
+      'data-bar="1"',
+      'data-bar="2"',
+      'data-bar="3"',
+    ]);
+    expect(html).toMatch(/data-bar="2"[^>]*>|cd-chart__bar--start"[^>]*data-bar="2"/);
+  });
+});
+
 describe("T-1301 MDNotes", () => {
   it("R-06.1 a note for everyone says MD; an instrument's note says the instrument; never color alone", () => {
     const html = render(

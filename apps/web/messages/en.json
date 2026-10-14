@@ -615,7 +615,9 @@
     "tempoTitle": "Tempo",
     "tempoAsk": "This chart has no tempo. How fast should the metronome count?",
     "tempoLabel": "Beats per minute",
-    "again": "{name}, again"
+    "again": "{name}, again",
+    "fermata": "Fermata · tap to go on",
+    "startsAt": "Starts at bar {bar}"
   },
   "bands": {
     "title": "Bands",

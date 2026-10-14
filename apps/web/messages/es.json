@@ -615,7 +615,9 @@
     "tempoTitle": "Tempo",
     "tempoAsk": "Este chart no tiene tempo. ¿A qué velocidad debe contar el metrónomo?",
     "tempoLabel": "Pulsos por minuto",
-    "again": "{name}, otra vez"
+    "again": "{name}, otra vez",
+    "fermata": "Calderón · toca para seguir",
+    "startsAt": "Empieza en el compás {bar}"
   },
   "bands": {
     "title": "Bandas",

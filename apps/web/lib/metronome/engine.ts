@@ -18,6 +18,8 @@ export interface Click {
   accent: boolean;
   /** Seconds until the next beat, at this bar's tempo. */
   duration: number;
+  /** The last beat of a bar with a fermata: playback waits after it for a tap (R-11.6). */
+  waits?: true;
 }
 
 export interface ClickOptions {
@@ -76,6 +78,7 @@ export function clicks(bars: readonly TimelineBar[], options: ClickOptions = {})
         strength: counted.strength,
         accent: counted.count === 1,
         duration: beat,
+        ...(bar.fermata && at === bar.beats.length - 1 ? { waits: true as const } : {}),
       });
       time += beat;
     }
@@ -147,6 +150,7 @@ export const FILL_EVERY_MS = 25;
 export class Metronome {
   private next = 0;
   private startedAt = 0;
+  private waiting = false;
   private timer: ReturnType<typeof setInterval> | null = null;
   private list: readonly Click[];
 
@@ -177,6 +181,7 @@ export class Metronome {
   start(): void {
     this.stop();
     this.next = 0;
+    this.waiting = false;
     this.startedAt = this.clock.now() + LOOKAHEAD;
     this.fill();
     this.timer = setInterval(() => this.fill(), FILL_EVERY_MS);
@@ -202,12 +207,26 @@ export class Metronome {
     return index < 0 ? undefined : this.list[index];
   }
 
-  /** The index of the click the clock has reached, or -1. */
+  /** Holding on a fermata: nothing more is scheduled until `resume` (R-11.6). */
+  get isWaiting(): boolean {
+    return this.waiting;
+  }
+
+  /** Goes on after a fermata: the rest of the song moves to start a moment from now. */
+  resume(): void {
+    if (!this.waiting) return;
+    this.waiting = false;
+    const next = this.list[this.next];
+    if (next) this.startedAt = this.clock.now() + LOOKAHEAD - next.time;
+    this.fill();
+  }
+
+  /** The index of the click the clock has reached, or -1; never past what is scheduled. */
   index(): number {
     const now = this.clock.now();
-    if (!this.isPlaying || now < this.startedAt || this.list.length === 0) return -1;
+    if (!this.isPlaying || now < this.startedAt || this.next === 0) return -1;
     let low = 0;
-    let high = this.list.length - 1;
+    let high = Math.min(this.next, this.list.length) - 1;
     while (low < high) {
       const middle = Math.ceil((low + high) / 2);
       if (this.at(this.list[middle] as Click) <= now) low = middle;
@@ -218,10 +237,16 @@ export class Metronome {
 
   private fill(): void {
     const until = this.clock.now() + LOOKAHEAD;
-    while (this.next < this.list.length && this.at(this.list[this.next] as Click) <= until) {
+    while (
+      !this.waiting &&
+      this.next < this.list.length &&
+      this.at(this.list[this.next] as Click) <= until
+    ) {
       const click = this.list[this.next] as Click;
       this.onSchedule(click, this.at(click));
       this.next++;
+      // A fermata: the bar plays out, then everything waits for a tap.
+      if (click.waits) this.waiting = true;
     }
     // The last click is handed over; stop once it has sounded.
     const last = this.list[this.list.length - 1];

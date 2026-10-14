@@ -143,6 +143,17 @@
   background: var(--color-icon-secondary);
   transition: inline-size var(--chart-beat-ease, 180ms) ease-out;
 }
+/* The bar the metronome will start on (R-11.2): the same quiet ink, dotted across its foot. */
+.cd-chart__bar--start {
+  position: relative;
+}
+.cd-chart__bar--start::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 0;
+  border-block-end: calc(var(--border-width) * 2) dotted var(--color-icon-secondary);
+}
 @media (prefers-reduced-motion: reduce) {
   .cd-chart__bar--now::after {
     transition: none;
