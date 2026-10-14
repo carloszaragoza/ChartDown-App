@@ -137,17 +137,21 @@ test.describe("on an iPhone 16 in landscape", () => {
     await page.goto(`/versions/${id}/stand?s=2`);
     const current = page.getByRole("main");
     await expect(current.getByRole("heading", { level: 2, name: "Verse 1" })).toBeVisible();
-    const form = await page
-      .getByRole("navigation", { name: "Song form" })
-      .evaluate((nav) => nav.getBoundingClientRect().top);
-    const next = await page
-      .getByRole("link", { name: "Next", exact: true })
-      .evaluate((link) => link.getBoundingClientRect().top);
-    expect(Math.abs(form - next)).toBeLessThan(8);
-    const top = await current
-      .locator(".cd-chart__bars")
-      .first()
-      .evaluate((row) => row.getBoundingClientRect().top);
-    expect(top).toBeLessThan(LANDSCAPE.height * 0.6);
+    // The server cannot tell the phone is sideways: the screen decides once the page is drawn.
+    const topOf = (locator: ReturnType<Page["locator"]>) =>
+      locator.evaluate((element) => element.getBoundingClientRect().top);
+    await expect
+      .poll(
+        async () =>
+          Math.abs(
+            (await topOf(page.getByRole("navigation", { name: "Song form" }))) -
+              (await topOf(page.getByRole("link", { name: "Next", exact: true }))),
+          ),
+        { timeout: 5000 },
+      )
+      .toBeLessThan(8);
+    expect(await topOf(current.locator(".cd-chart__bars").first())).toBeLessThan(
+      LANDSCAPE.height * 0.6,
+    );
   });
 });
