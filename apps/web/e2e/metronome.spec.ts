@@ -206,3 +206,23 @@ test("R-11.10 the space bar plays and stops; a pedal queues the next section whi
   await page.keyboard.press(" ");
   await expect(now).toHaveCount(0);
 });
+
+test.describe("with reduced motion", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("R-11.13 nothing flashes or slides: the line moves in steps and the counter still advances", async ({
+    page,
+    request,
+  }) => {
+    const id = await createVersion(request, { title: "Fast Song", content: FAST });
+    await page.goto(`/versions/${id}/stand`);
+    await page.getByRole("button", { name: "Play" }).click();
+    const now = page.getByRole("main").locator('[aria-current="step"]');
+    await expect(now).toHaveCount(1);
+    const line = await now.evaluate((bar) => getComputedStyle(bar, "::after").transitionDuration);
+    // None at all, or the design system's own near-zero for reduced motion.
+    expect(Number.parseFloat(line)).toBeLessThan(0.01);
+    const first = await page.getByText(/^[1-4] \/ 4$/).textContent();
+    await expect(page.getByText(/^[1-4] \/ 4$/)).not.toHaveText(first ?? "");
+  });
+});
