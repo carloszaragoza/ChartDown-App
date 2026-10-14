@@ -197,7 +197,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 - R-03.1 ChartDown text editor with live preview and error warnings.
 - R-03.2 Switch between numbers and letters, and transpose.
-- R-03.3 Stand mode: full screen, large type, advance by section with one tap.
+- R-03.3 Stand mode: full screen, large type, advance by section with one tap. On a touch screen (iPad or phone), swiping the chart left or right also moves to the next or previous section (owner's request, October 14, 2026).
 - R-03.4 Print or export to PDF.
 - R-03.5 **MD layer editor:** the MD writes notes per section and instrument on top of the version, without being able to change the chart.
 - R-03.6 **A note for one pass:** in the MD layer editor the MD can say that a note is only for some passes of a repeat (for example the second), and the note says so wherever it is shown (owner's approval, October 8, 2026). It is private to its instruments like any other note (R-06.4).
@@ -209,7 +209,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - Given a chart open on an iPad in landscape, when stand mode is on, then every section reads without zooming.
 - Given an iPhone 16 in portrait (393 × 852), when a shared stand mode link opens, then the current section's name and its first row of bars are on screen without scrolling, every chord reads without zooming, and the page does not scroll sideways.
 - Given an iPhone 16 in landscape (852 × 393), when stand mode is open, then the current section's bars fill most of the screen, not the controls.
-- Given a phone in stand mode, when the musician swipes the chart to the left or taps Next, then the next section shows.
+- Given an iPad or a phone in stand mode, when the musician swipes the chart to the left or taps Next, then the next section shows; swiping to the right shows the previous one.
 - Given an MD with someone else's public version, when they add a note for bass in the Chorus, then the note is saved in their band's layer and the public version does not change.
 
 ### SPEC-04 · Bands
