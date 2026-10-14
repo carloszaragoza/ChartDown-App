@@ -10,6 +10,7 @@ import {
   subscribeSound,
 } from "./sound";
 import { timeline, type TimelineBar } from "./timeline";
+import { keepAwake } from "./wakeLock";
 
 /** Where the metronome is: the click it reached and its bar in the timeline (none in count-in). */
 export interface MetronomePosition {
@@ -32,6 +33,8 @@ export function useMetronome(chart: Chart) {
   const engine = useRef<Metronome | null>(null);
   const context = useRef<AudioContext | null>(null);
   const frame = useRef(0);
+  // The screen stays on while it plays (R-11.11).
+  const awake = useRef<(() => void) | null>(null);
   // The click, its volume and the count-in, kept on this device (R-11.7, R-11.8). The scheduler
   // reads the latest, so turning the click on while playing is heard on the next beat.
   const sound = useSyncExternalStore(subscribeSound, getSound, () => DEFAULT_SOUND);
@@ -46,6 +49,8 @@ export function useMetronome(chart: Chart) {
   const queuedAt = useRef(-1);
 
   const stop = useCallback(() => {
+    awake.current?.();
+    awake.current = null;
     engine.current?.stop();
     engine.current = null;
     cancelAnimationFrame(frame.current);
@@ -72,6 +77,7 @@ export function useMetronome(chart: Chart) {
       });
       engine.current = metronome;
       metronome.start();
+      awake.current = keepAwake();
       setPlaying(true);
       let shown: Click | undefined;
       const tick = () => {
@@ -99,6 +105,7 @@ export function useMetronome(chart: Chart) {
   // Leaving the page stops it and lets the audio go.
   useEffect(
     () => () => {
+      awake.current?.();
       engine.current?.stop();
       cancelAnimationFrame(frame.current);
       void context.current?.close();

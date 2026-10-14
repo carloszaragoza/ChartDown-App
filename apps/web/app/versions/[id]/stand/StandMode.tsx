@@ -111,7 +111,7 @@ function atSection(href: string, section: number): string {
 }
 
 // Keys that page-turner pedals and keyboards send.
-const FORWARD = new Set(["ArrowRight", "ArrowDown", "PageDown", " "]);
+const FORWARD = new Set(["ArrowRight", "ArrowDown", "PageDown"]);
 const BACK = new Set(["ArrowLeft", "ArrowUp", "PageUp"]);
 
 /**
@@ -167,6 +167,7 @@ function StandModeView({
     queue,
     isPlaying,
     isWaiting,
+    toggle,
     resume,
     chooseStart,
     startIn,
@@ -269,7 +270,13 @@ function StandModeView({
     const onKey = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLElement && event.target.closest("input, select, textarea"))
         return;
-      if (FORWARD.has(event.key)) {
+      // The space bar plays and stops (R-11.10); on a focused button it presses that button.
+      if (event.key === " ") {
+        if (event.target instanceof HTMLElement && event.target.closest("button, a")) return;
+        event.preventDefault();
+        if (isWaiting) resume();
+        else toggle();
+      } else if (FORWARD.has(event.key)) {
         event.preventDefault();
         forward();
       } else if (BACK.has(event.key)) {
@@ -279,7 +286,7 @@ function StandModeView({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [forward, backward]);
+  }, [forward, backward, toggle, isWaiting, resume]);
 
   // A sideways swipe on the chart turns the section, on an iPad or a phone (R-03.3); a vertical
   // drag still scrolls it, and a row that scrolls sideways itself keeps its own swipe.

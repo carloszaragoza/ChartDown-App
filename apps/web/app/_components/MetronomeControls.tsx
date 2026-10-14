@@ -76,6 +76,12 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
     return bar && bar.section === inSection ? { row: bar.row, index: bar.index } : undefined;
   };
 
+  /** Play or Stop, from the button or the space bar (R-11.10). */
+  const toggle = () => {
+    if (metronome.isPlaying) metronome.stop();
+    else if (metronome.needsTempo && tapped === null) setTempoOpen(true);
+    else playFrom(tapped ?? undefined);
+  };
   const playButton = (
     <Button
       label={metronome.isPlaying ? t("stop") : t("play")}
@@ -83,11 +89,7 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
       variant={metronome.isPlaying ? "primary" : "secondary"}
       isIconOnly
       icon={<Icon icon={metronome.isPlaying ? StopIcon : PlayIcon} />}
-      onClick={() => {
-        if (metronome.isPlaying) metronome.stop();
-        else if (metronome.needsTempo && tapped === null) setTempoOpen(true);
-        else playFrom(tapped ?? undefined);
-      }}
+      onClick={toggle}
     />
   );
 
@@ -231,6 +233,7 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
     queue: metronome.queue,
     isPlaying: metronome.isPlaying,
     isWaiting: metronome.isWaiting,
+    toggle,
     resume: metronome.resume,
     chooseStart,
     startIn,

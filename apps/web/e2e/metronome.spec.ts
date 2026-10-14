@@ -169,3 +169,40 @@ test("R-11.9 the practice speed changes the tempo played, never the chart", asyn
   // The chart still says 240.
   await expect(page.getByText("240 bpm")).toBeVisible();
 });
+
+test("R-11.10 the space bar plays and stops; a pedal queues the next section while playing", async ({
+  page,
+  request,
+}) => {
+  await page.addInitScript(() => {
+    Object.assign(window, { screenLocks: 0 });
+    Object.defineProperty(navigator, "wakeLock", {
+      value: {
+        request: async () => {
+          (window as unknown as { screenLocks: number }).screenLocks++;
+          return { release: async () => {} };
+        },
+      },
+    });
+  });
+  const id = await createVersion(request, { title: "Fast Song", content: FAST });
+  await page.goto(`/versions/${id}/stand`);
+  const now = page.getByRole("main").locator('[aria-current="step"]');
+  await page.locator("body").click({ position: { x: 5, y: 400 } });
+  await page.keyboard.press(" ");
+  await expect(now).toHaveCount(1);
+  // The screen stays on while it plays (R-11.11).
+  expect(
+    await page.evaluate(() => (window as unknown as { screenLocks: number }).screenLocks),
+  ).toBe(1);
+  // A pedal's page-down queues the Chorus; the screen stays on the Verse.
+  await page.keyboard.press("PageDown");
+  await expect(
+    page.getByRole("navigation", { name: "Song form" }).getByRole("link", { name: /plays next/ }),
+  ).toHaveCount(1);
+  await expect(
+    page.getByRole("main").getByRole("heading", { level: 2, name: "Verse" }),
+  ).toBeVisible();
+  await page.keyboard.press(" ");
+  await expect(now).toHaveCount(0);
+});
