@@ -125,6 +125,32 @@
   grid-row: span 3;
 }
 
+/* A phone in portrait (design handoff 5, R-03.8): a row wraps into lines of two bars instead of
+   scrolling sideways, every line sharing the row's four lines; the chords are drawn at the viewer's
+   size and a bar may be narrower. Each line starts with a bar line, a repeat's where one starts.
+   Landscape and larger screens keep the whole row. Media queries take no tokens: 600 px is the
+   handoff's phone width. */
+@media (max-width: 599px) {
+  .cd-chart {
+    --chart-bar-min-width: calc(var(--spacing-12) * 2.5);
+  }
+  .cd-chart--lg {
+    --chart-chord-size: var(--font-size-3xl);
+  }
+  .cd-chart__bars {
+    grid-template-columns: repeat(var(--chart-bars-phone), minmax(var(--chart-bar-min-width), 1fr));
+    grid-auto-rows: auto;
+    /* Between the lines of a wrapped row; each bar keeps its own gaps (subgrid). */
+    row-gap: var(--spacing-3);
+  }
+  .cd-chart__bar:nth-child(odd) {
+    border-inline-start: var(--chart-bar-line);
+  }
+  .cd-chart__bar--repeat-start:nth-child(odd) {
+    border-inline-start: var(--chart-repeat-line);
+  }
+}
+
 /* A pickup is a narrow bar: less room at its sides. */
 .cd-chart__bar--pickup {
   padding-inline: var(--spacing-2);
