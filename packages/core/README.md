@@ -2,8 +2,8 @@
 
 The parser for **ChartDown**, a plain-text notation for Nashville Number System charts: sections,
 bars, numbers, keys, dynamics and notes for each instrument. It implements the
-[ChartDown spec 0.6](https://github.com/ChartDown/spec), and reads charts written for 0.3 to
-0.6 without a warning. It has no runtime dependencies and runs the same in the browser and in Node.
+[ChartDown spec 0.7](https://github.com/ChartDown/spec), and reads charts written for 0.3 to
+0.7 without a warning. It has no runtime dependencies and runs the same in the browser and in Node.
 
 ```sh
 npm install chartdown
