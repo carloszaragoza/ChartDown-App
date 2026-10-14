@@ -36,7 +36,7 @@ describe("F-003 which taps show skeletons while the next page loads", () => {
     expect(pendingTarget(link("/sets"), { ...tap, metaKey: true }, here)).toBeNull();
     expect(pendingTarget(link("/sets"), { ...tap, ctrlKey: true }, here)).toBeNull();
     expect(pendingTarget(link("/sets"), { ...tap, button: 1 }, here)).toBeNull();
-    expect(pendingTarget(link("https://github.com/ChartDown/Language"), tap, here)).toBeNull();
+    expect(pendingTarget(link("https://github.com/ChartDown/spec"), tap, here)).toBeNull();
     expect(pendingTarget(link("/sets", { target: "_self" }), tap, here)).toBe("/sets");
   });
 });
@@ -61,7 +61,7 @@ describe("F-005 links move inside the app", () => {
       "/bands/choose/1",
       "/auth/callback?next=/",
       "/api/sets/1/bundle",
-      "https://github.com/ChartDown/Language",
+      "https://github.com/ChartDown/spec",
       "mailto:hola@chartdown.app",
       "//example.com",
     ])

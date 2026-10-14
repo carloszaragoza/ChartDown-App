@@ -60,7 +60,7 @@ describe("T-1201 the landing page", () => {
     expect(html).toContain("Light groove, hi-hat.");
     expect(html).toContain("Viewing as Drums");
     expect(html).toContain("{mf} 4 | 1 | 5 | 6m");
-    expect(html).toContain('href="https://github.com/ChartDown/Language"');
+    expect(html).toContain('href="https://github.com/ChartDown/spec"');
     expect(html).not.toMatch(/<button[^>]*>[^<]*View as/);
   });
 

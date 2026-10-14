@@ -8,7 +8,7 @@ Exceptions, under their own licenses:
 
 - packages/core (the `chartdown` parser) is released under the MIT License; see
   packages/core/LICENSE.
-- The ChartDown language specification (github.com/ChartDown/Language) is released under CC0.
+- The ChartDown language specification (github.com/ChartDown/spec) is released under CC0.
 - Charts that users publish as public versions in ChartDown App are released by their authors
   under CC0, as the Terms of Use say.
 - Third-party packages and fonts keep their own licenses.
