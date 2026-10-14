@@ -25,7 +25,8 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { hasInstrumentIcon, Icon } from "@chartdown/ui";
 import { getFormatter, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
-import { setWhen } from "../../lib/sets/when";
+import { localTimeZone } from "../../lib/sets/today";
+import { setWhen, todayIn } from "../../lib/sets/when";
 import {
   AddIcon,
   GoIcon,
@@ -65,7 +66,8 @@ export async function HomeView({
   const o = await getTranslations("offline");
   const format = await getFormatter();
   const now = new Date();
-  const today = now.toISOString().slice(0, 10);
+  const zone = await localTimeZone();
+  const today = todayIn(zone, now);
   const first = data.name.trim().split(/\s+/)[0] ?? "";
   const isNew = data.variant === "new";
   const isMd = data.variant === "md";
@@ -151,7 +153,9 @@ export async function HomeView({
     <LayoutHeader hasDivider>
       <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
         <VStack gap={1}>
-          <Text type="supporting">{format.dateTime(now, { dateStyle: "full" })}</Text>
+          <Text type="supporting">
+            {format.dateTime(now, { dateStyle: "full", timeZone: zone })}
+          </Text>
           <Heading level={1}>
             {isNew ? (
               t("welcome", { name: first })
