@@ -73,20 +73,22 @@ export default async function SetPage({
   const supabase = await createClient();
   const { data: auth } = await readUser(supabase);
   if (!auth.user) notFound();
-  const { data: set } = await supabase
-    .from("sets")
-    .select("id, band_id, name, date, time, type, band:bands(name, is_personal)")
-    .eq("id", id)
-    .maybeSingle();
-  if (!set) notFound();
-
+  // Two rounds of queries, not four (F-006): first the set with its band's members, songs,
+  // lineup, temporary MD and the instruments, all at once; then each song and the newer revisions.
   const [
+    { data: set },
     { data: itemRows },
-    { data: memberRows },
     { data: lineupRows },
     { data: tempMd },
     { data: catalog },
   ] = await Promise.all([
+    supabase
+      .from("sets")
+      .select(
+        "id, band_id, name, date, time, type, band:bands(name, is_personal, members:band_members(id, user_id, role, joined_at, profile:profiles(name), instruments:member_instruments(instrument_id)))",
+      )
+      .eq("id", id)
+      .maybeSingle(),
     supabase
       .from("set_items")
       .select(
@@ -94,17 +96,14 @@ export default async function SetPage({
       )
       .eq("set_id", id)
       .order("position"),
-    supabase
-      .from("band_members")
-      .select(
-        "id, user_id, role, profile:profiles(name), instruments:member_instruments(instrument_id)",
-      )
-      .eq("band_id", set.band_id)
-      .order("joined_at"),
     supabase.from("set_lineup").select("member_id, instrument_id").eq("set_id", id),
     supabase.from("set_temp_md").select("member_id, until").eq("set_id", id).maybeSingle(),
     supabase.from("instruments").select("id, slug, name_en, name_es"),
   ]);
+  if (!set) notFound();
+  const memberRows = [
+    ...(one(set.band as One<{ members: (Member & { joined_at: string })[] }>)?.members ?? []),
+  ].sort((a, b) => a.joined_at.localeCompare(b.joined_at));
   const items = (itemRows ?? []) as Item[];
   const members = (memberRows ?? []) as Member[];
   const me = members.find((member) => member.user_id === auth.user.id);
@@ -115,32 +114,35 @@ export default async function SetPage({
   const isMd = me?.role === "md";
   const canArrange = isMd || isTempMd;
 
-  // Each song as this person may see it: the key it is played in and the notes for them.
-  const songs = await Promise.all(
-    items.map(async (item) => {
-      const { data } = await supabase.rpc("set_song", {
-        set_id: id,
-        song_position: item.position,
-      });
-      if (!data) return null;
-      const song = data as SetSong;
-      const chart = parse(song.content);
-      return {
-        key: keyName(setSongKey(chart, song.set_key)),
-        notes: songView(chart, song).forYou,
-        leads: song.role !== "musician",
-      };
-    }),
-  );
   // Songs whose author published a newer revision than the one pinned (decision 9.2).
   const newerIds = items
     .map((item) => one(item.version)?.current_revision_id)
     .filter((current, index): current is string =>
       Boolean(current && current !== items[index]?.pinned_revision_id),
     );
-  const { data: newerRows } = newerIds.length
-    ? await supabase.from("revisions").select("id, number").in("id", newerIds)
-    : { data: [] };
+  // Each song as this person may see it (the key it is played in and the notes for them), and
+  // the newer revisions, in one round (F-006).
+  const [songs, { data: newerRows }] = await Promise.all([
+    Promise.all(
+      items.map(async (item) => {
+        const { data } = await supabase.rpc("set_song", {
+          set_id: id,
+          song_position: item.position,
+        });
+        if (!data) return null;
+        const song = data as SetSong;
+        const chart = parse(song.content);
+        return {
+          key: keyName(setSongKey(chart, song.set_key)),
+          notes: songView(chart, song).forYou,
+          leads: song.role !== "musician",
+        };
+      }),
+    ),
+    newerIds.length
+      ? supabase.from("revisions").select("id, number").in("id", newerIds)
+      : Promise.resolve({ data: [] as { id: string; number: number }[] }),
+  ]);
   const newerNumber = new Map(
     (newerRows ?? []).map((row) => [row.id as string, row.number as number]),
   );

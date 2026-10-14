@@ -9,7 +9,6 @@ import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Item } from "@astryxdesign/core/Item";
 import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
-import { List } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import Link from "next/link";
@@ -23,16 +22,9 @@ import { keysInMode } from "../../../versions/[id]/display";
 import { UUID } from "../../../versions/[id]/load";
 import { SET_TYPES, type SetType } from "../../../../lib/sets/types";
 import { NameForm } from "../../../_components/NameForm";
-import {
-  duplicateSet,
-  moveItem,
-  removeItem,
-  removeTempMd,
-  resetLineup,
-  updatePinned,
-  updateSet,
-} from "../../actions";
+import { duplicateSet, removeTempMd, resetLineup, updatePinned, updateSet } from "../../actions";
 import { SetForm } from "../../SetForm";
+import { ArrangedSongs } from "./ArrangedSongs";
 import { DeleteSetForm, KeySelect, LineupForm, TempMdForm } from "./EditControls";
 
 type Search = Promise<Record<string, string | undefined>>;
@@ -335,122 +327,83 @@ export default async function SetPage({
                 {items.length === 0 ? (
                   <EmptyState title={isMd ? t("emptyMd") : t("empty")} />
                 ) : (
-                  <List hasDividers edgeCompensation="inline">
-                    {items.map((item, index) => {
+                  <ArrangedSongs
+                    setId={set.id}
+                    canRemove={isMd}
+                    words={{ up: t("up"), down: t("down"), remove: t("remove") }}
+                    songs={items.map((item) => {
                       const version = one(item.version);
                       const title = one(version?.song ?? null)?.title ?? "";
                       const newer = newerNumber(item);
-                      return (
-                        <Item
-                          key={item.id}
-                          as="li"
-                          align="start"
-                          startContent={<Text weight="semibold">{item.position}</Text>}
-                          label={
-                            <Link href={`/sets/${set.id}/songs/${item.position}`}>{title}</Link>
-                          }
-                          description={
-                            <VStack gap={2}>
-                              <Text type="supporting">
-                                {t("by", { author: version?.author_name ?? "" })} ·{" "}
-                                {t("revision", { number: one(item.revision)?.number ?? 0 })} ·{" "}
-                                {item.set_key
-                                  ? t("inKey", { key: item.set_key, written: written(item) })
-                                  : t("writtenKey", { key: written(item) })}
-                              </Text>
-                              {newer !== undefined && (
-                                <VStack gap={2}>
-                                  <Text>
-                                    {t("newer", {
-                                      number: newer,
-                                      pinned: one(item.revision)?.number ?? 0,
-                                    })}
-                                  </Text>
-                                  {isMd && (
-                                    <HStack gap={2} wrap="wrap">
+                      return {
+                        id: item.id,
+                        label: <Link href={`/sets/${set.id}/songs/${item.position}`}>{title}</Link>,
+                        description: (
+                          <VStack gap={2}>
+                            <Text type="supporting">
+                              {t("by", { author: version?.author_name ?? "" })} ·{" "}
+                              {t("revision", { number: one(item.revision)?.number ?? 0 })} ·{" "}
+                              {item.set_key
+                                ? t("inKey", { key: item.set_key, written: written(item) })
+                                : t("writtenKey", { key: written(item) })}
+                            </Text>
+                            {newer !== undefined && (
+                              <VStack gap={2}>
+                                <Text>
+                                  {t("newer", {
+                                    number: newer,
+                                    pinned: one(item.revision)?.number ?? 0,
+                                  })}
+                                </Text>
+                                {isMd && (
+                                  <HStack gap={2} wrap="wrap">
+                                    <Button
+                                      label={t("seeNewerName", { title })}
+                                      href={`/sets/${set.id}/songs/${item.position}?preview=new`}
+                                      size="sm"
+                                    >
+                                      {t("seeNewer")}
+                                    </Button>
+                                    <form action={updatePinned}>
+                                      {hidden(item.id)}
                                       <Button
-                                        label={t("seeNewerName", { title })}
-                                        href={`/sets/${set.id}/songs/${item.position}?preview=new`}
+                                        type="submit"
+                                        variant="primary"
                                         size="sm"
+                                        label={t("updateName", { title })}
                                       >
-                                        {t("seeNewer")}
+                                        {t("update")}
                                       </Button>
-                                      <form action={updatePinned}>
-                                        {hidden(item.id)}
-                                        <Button
-                                          type="submit"
-                                          variant="primary"
-                                          size="sm"
-                                          label={t("updateName", { title })}
-                                        >
-                                          {t("update")}
-                                        </Button>
-                                      </form>
-                                    </HStack>
-                                  )}
-                                </VStack>
-                              )}
-                            </VStack>
-                          }
-                          endContent={
-                            <HStack gap={1} vAlign="center" wrap="wrap">
-                              <KeySelect
-                                setId={set.id}
-                                itemId={item.id}
-                                label={t("keyFor", { title })}
-                                value={item.set_key ?? ""}
-                                options={[
-                                  { value: "", label: t("keyWritten", { key: written(item) }) },
-                                  ...keysInMode(minor(item)).map((key) => ({
-                                    value: keyName(key),
-                                    label: keyName(key),
-                                  })),
-                                ]}
-                              />
-                              {index > 0 && (
-                                <form action={moveItem}>
-                                  {hidden(item.id)}
-                                  <input type="hidden" name="position" value={item.position - 1} />
-                                  <Button
-                                    type="submit"
-                                    variant="ghost"
-                                    label={t("upName", { title })}
-                                  >
-                                    {t("up")}
-                                  </Button>
-                                </form>
-                              )}
-                              {index < items.length - 1 && (
-                                <form action={moveItem}>
-                                  {hidden(item.id)}
-                                  <input type="hidden" name="position" value={item.position + 1} />
-                                  <Button
-                                    type="submit"
-                                    variant="ghost"
-                                    label={t("downName", { title })}
-                                  >
-                                    {t("down")}
-                                  </Button>
-                                </form>
-                              )}
-                              {isMd && (
-                                <form action={removeItem}>
-                                  {hidden(item.id)}
-                                  <Button
-                                    type="submit"
-                                    variant="ghost"
-                                    label={t("removeName", { title })}
-                                  >
-                                    {t("remove")}
-                                  </Button>
-                                </form>
-                              )}
-                            </HStack>
-                          }
-                        />
-                      );
+                                    </form>
+                                  </HStack>
+                                )}
+                              </VStack>
+                            )}
+                          </VStack>
+                        ),
+                        keySelect: (
+                          <KeySelect
+                            setId={set.id}
+                            itemId={item.id}
+                            label={t("keyFor", { title })}
+                            value={item.set_key ?? ""}
+                            options={[
+                              { value: "", label: t("keyWritten", { key: written(item) }) },
+                              ...keysInMode(minor(item)).map((key) => ({
+                                value: keyName(key),
+                                label: keyName(key),
+                              })),
+                            ]}
+                          />
+                        ),
+                        names: {
+                          up: t("upName", { title }),
+                          down: t("downName", { title }),
+                          remove: t("removeName", { title }),
+                        },
+                      };
                     })}
-                  </List>
+                  />
                 )}
                 {isMd && (
                   <Text type="supporting">

@@ -42,6 +42,8 @@ export interface StandView {
   style: Display["style"];
   beats: Display["beats"];
   theme: StandTheme;
+  /** View as, for the MD in a set (T-802); left as it is when not given. */
+  as?: string | null;
 }
 
 /**
@@ -57,6 +59,8 @@ export function withView(href: string, view: StandView): string {
   else params.delete("beats");
   if (view.theme === "stage") params.set("theme", "stage");
   else params.delete("theme");
+  if (view.as) params.set("as", view.as);
+  else if (view.as === null) params.delete("as");
   const rest = params.toString();
   return rest ? `${path}?${rest}` : path;
 }

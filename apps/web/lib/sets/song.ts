@@ -116,3 +116,16 @@ export function viewAsOptions(song: Pick<SetSong, "notes">, playing: string[]): 
   const inNotes = song.notes.flatMap((note) => note.instruments);
   return [...new Set([...playing, ...inNotes])].sort();
 }
+
+/**
+ * The View as a page may carry (F-006): for the MD and the set's temporary MD, "All notes"
+ * (null) and each instrument, every one filtered on the server; for a musician none, so their
+ * page carries only their own notes (R-06.4).
+ */
+export function viewsToSend(
+  song: Pick<SetSong, "role" | "notes">,
+  playing: string[],
+): (string | null)[] {
+  if (song.role === "musician") return [];
+  return [null, ...viewAsOptions(song, playing)];
+}

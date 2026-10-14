@@ -1,6 +1,6 @@
 import { parse } from "chartdown";
 import { describe, expect, it } from "vitest";
-import { songView, viewAs, viewAsOptions, type SetSong } from "./song";
+import { songView, viewAs, viewAsOptions, viewsToSend, type SetSong } from "./song";
 
 const chart = parse(
   "## Verse\n> MD: Author: everyone soft.\n> MD bass: Author: bass out.\n> MD keys: Author: keys pad.\n1 | 4\n\n## Chorus\n4 | 5\n",
@@ -129,5 +129,21 @@ describe("R-03.6 a note for one pass reaches the same players", () => {
     );
     // The server sends a musician only their notes; one that slipped through is still not theirs.
     expect(texts(view, 1)).toEqual([]);
+  });
+});
+
+describe("F-006 View as switches in place, and a musician gets no other view", () => {
+  it("F-006 the MD gets All notes and every instrument's view at once", () => {
+    const md = song({
+      role: "md",
+      instruments: [],
+      notes: [note("n3", "Verse", "Bass out.", ["bass"])],
+    });
+    expect(viewsToSend(md, ["keys"])).toEqual([null, "bass", "keys"]);
+    expect(viewsToSend({ ...md, role: "temp_md" as SetSong["role"] }, [])).toEqual([null, "bass"]);
+  });
+
+  it("F-006 R-06.4 a musician's page carries no view but their own", () => {
+    expect(viewsToSend(song(), ["bass", "drums", "keys"])).toEqual([]);
   });
 });
