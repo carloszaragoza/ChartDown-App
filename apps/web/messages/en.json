@@ -618,12 +618,16 @@
     "again": "{name}, again",
     "fermata": "Fermata · tap to go on",
     "startsAt": "Starts at bar {bar}",
-    "sound": "Metronome sound",
+    "sound": "Metronome options",
     "click": "Click",
     "clickHint": "An accented click on beat 1. Off, only the pulse shows the beat.",
     "volume": "Volume",
     "countIn": "Count-in",
-    "countInHint": "One bar of clicks before the first bar."
+    "countInHint": "One bar of clicks before the first bar.",
+    "speed": "Practice speed",
+    "speedValue": "{speed}% · {bpm} bpm",
+    "tapTempo": "Tap tempo",
+    "chartTempo": "Back to the chart's tempo"
   },
   "bands": {
     "title": "Bands",

@@ -13,7 +13,8 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { PlayIcon, SpeakerWaveIcon, StopIcon } from "@heroicons/react/24/outline";
 import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { speedFor, tapTempo } from "../../lib/metronome/tapTempo";
 import { useMetronome } from "../../lib/metronome/useMetronome";
 
 /** Where the metronome is in one section, as ChartSection draws it (R-11.3). */
@@ -48,11 +49,23 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
   const [chosen, setChosen] = useState<number | null>(null);
   const start =
     chosen !== null && (section === null || bars[chosen]?.section === section) ? chosen : null;
+  // Practice (R-11.9): a share of the chart's tempo, or a tempo tapped in; the chart never changes.
+  const written = bars[0]?.tempo;
+  const [speed, setSpeed] = useState(100);
+  const [tapped, setTapped] = useState<number | null>(null);
+  const taps = useRef<number[]>([]);
+  const tap = () => {
+    taps.current = [...taps.current, performance.now()].slice(-12);
+    const bpm = tapTempo(taps.current);
+    if (bpm === null) return;
+    if (written) setSpeed(Math.min(200, Math.max(25, Math.round(speedFor(bpm, written) * 100))));
+    else setTapped(bpm);
+  };
   const playFrom = (tempo?: number) =>
-    metronome.play(
-      start ?? metronome.firstBarOf(section ?? 0),
-      tempo !== undefined ? { tempo } : {},
-    );
+    metronome.play(start ?? metronome.firstBarOf(section ?? 0), {
+      ...(tempo !== undefined ? { tempo } : {}),
+      speed: speed / 100,
+    });
   /** A tap on a bar: start there, or, tapped again, from the top as before (R-11.2). */
   const chooseStart = (inSection: number, number: number) => {
     const index = bars.findIndex((bar) => bar.section === inSection && bar.number === number);
@@ -72,8 +85,8 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
       icon={<Icon icon={metronome.isPlaying ? StopIcon : PlayIcon} />}
       onClick={() => {
         if (metronome.isPlaying) metronome.stop();
-        else if (metronome.needsTempo) setTempoOpen(true);
-        else playFrom();
+        else if (metronome.needsTempo && tapped === null) setTempoOpen(true);
+        else playFrom(tapped ?? undefined);
       }}
     />
   );
@@ -123,6 +136,36 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
         formatValue={(volume) => `${volume}%`}
         onChange={(volume: number) => setSound({ ...sound, volume })}
       />
+      <Slider
+        label={t("speed")}
+        value={speed}
+        min={25}
+        max={200}
+        step={5}
+        valueDisplay="text"
+        formatValue={(value) =>
+          t("speedValue", {
+            speed: value,
+            bpm: Math.round(((written ?? tapped ?? askedTempo) * value) / 100),
+          })
+        }
+        marks={[{ value: 100 }]}
+        onChange={(value: number) => setSpeed(value)}
+      />
+      <HStack gap={2} wrap="wrap">
+        <Button label={t("tapTempo")} variant="secondary" onClick={tap} />
+        {(speed !== 100 || tapped !== null) && (
+          <Button
+            label={t("chartTempo")}
+            variant="ghost"
+            onClick={() => {
+              setSpeed(100);
+              setTapped(null);
+              taps.current = [];
+            }}
+          />
+        )}
+      </HStack>
       <Switch
         label={t("countIn")}
         description={t("countInHint")}

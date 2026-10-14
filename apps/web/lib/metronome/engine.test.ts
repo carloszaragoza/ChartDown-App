@@ -26,6 +26,13 @@ describe("T-1502 the metronome engine", () => {
     expect(clicks(none, { tempo: 120 }).map((click) => click.time)).toEqual([0, 0.5, 1, 1.5]);
   });
 
+  it("R-11.9 at 80% speed a 60 bpm chart counts every 1.25 s, and the chart stays as written", () => {
+    const chart = parse("---\ntempo: 60\n---\n## A\n1\n");
+    const list = clicks(timeline(chart), { speed: 0.8 });
+    expect(list.map((click) => click.time)).toEqual([0, 1.25, 2.5, 3.75]);
+    expect(chart.tempo).toBe(60);
+  });
+
   it("R-11.1 starts on any bar of the song", () => {
     const list = clicks(timeline(parse("---\ntempo: 60\n---\n## A\n1 | 4 | 5\n")), { from: 2 });
     expect(list.map((click) => [click.bar, click.count])).toEqual([
