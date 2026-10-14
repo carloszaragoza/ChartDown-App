@@ -5,7 +5,7 @@ import {
 } from "../fixtures/playground-parser.js";
 import { toJSON } from "./json.js";
 import { parse } from "./parse.js";
-import { EXAMPLES, EXAMPLES_06, fixture, fixture06 } from "./test-helpers.js";
+import { EXAMPLES, EXAMPLES_07, fixture, fixture07 } from "./test-helpers.js";
 import type { ChartJson, CueJson } from "./json.js";
 import type { WarningCode } from "./types.js";
 
@@ -68,9 +68,9 @@ describe("R-00.3 the TypeScript port matches the playground parser", () => {
   );
 });
 
-describe("R-00.10 the JSON form matches the playground parser on the 0.6 examples", () => {
-  it.each(EXAMPLES_06)("R-00.10 the JSON form, play order and warnings match on %s", (name) => {
-    const source = fixture06(name);
+describe("R-00.10 the JSON form matches the playground parser on the 0.7 examples", () => {
+  it.each(EXAMPLES_07)("R-00.10 the JSON form, play order and warnings match on %s", (name) => {
+    const source = fixture07(name);
     expect(port(source)).toEqual(reference(source));
   });
 });

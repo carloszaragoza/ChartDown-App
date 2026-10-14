@@ -56,6 +56,6 @@ describe("R-03.1 the chart editor", () => {
       /role="radiogroup"[^>]*aria-label="Visibility"|aria-label="Visibility"[^>]*role="radiogroup"/,
     );
     expect(html).toContain('href="/versions/00000000-0000-0000-0000-0000000000f1/history"');
-    expect(html).toMatch(/ChartDown (<!-- -->)?0\.6/);
+    expect(html).toMatch(/ChartDown (<!-- -->)?0\.7/);
   });
 });

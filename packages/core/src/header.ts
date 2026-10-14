@@ -5,7 +5,7 @@ import {
   STANDARD_INSTRUMENTS,
   type RoleResolver,
 } from "./roles.js";
-import type { Note, ParseOptions } from "./types.js";
+import type { Note, Numbering, ParseOptions } from "./types.js";
 import type { Warn } from "./warnings.js";
 
 export interface Header {
@@ -15,6 +15,8 @@ export interface Header {
   version?: string;
   /** Custom instrument ids declared in the `instruments` field. */
   instruments: string[];
+  /** How numbers count in a minor key (spec 3, R-00.14). */
+  numbering: Numbering;
   roles: RoleResolver;
   /** Index of the first line after the header. */
   bodyStart: number;
@@ -73,7 +75,13 @@ export function readHeader(
   );
   const roles = createRoleResolver(options.instruments ?? STANDARD_INSTRUMENTS, instruments);
 
-  const header: Header = { fields, instruments, roles, bodyStart };
+  // `1m` or `6m`, in any case; anything else is a warning on its line and `1m` is used.
+  const written = fields.numbering?.toLowerCase();
+  if (written !== undefined && written !== "1m" && written !== "6m")
+    warn(fieldLines.numbering ?? 1, "bad-numbering");
+  const numbering: Numbering = written === "6m" ? "6m" : "1m";
+
+  const header: Header = { fields, instruments, numbering, roles, bodyStart };
   if (version !== undefined) header.version = version;
   return header;
 }

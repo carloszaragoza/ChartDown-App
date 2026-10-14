@@ -3,7 +3,8 @@ import { READABLE_VERSIONS, SUPPORTED_VERSION } from "chartdown";
 /**
  * The chart as the app saves it (R-00.4): it declares the ChartDown version of the app's parser.
  * A chart with no header gets one, a header with no `chartdown` field gets the field first, and a
- * chart written for 0.3 to 0.5 is brought to 0.6, which reads it the same. A version this parser
+ * chart written for an earlier version it reads (0.3 to 0.6) is brought to the current one (0.7),
+ * which reads it the same. A version this parser
  * does not read, such as a later one, stays as it was written, so nothing is lost.
  */
 export function withChartVersion(content: string): string {

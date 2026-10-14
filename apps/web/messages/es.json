@@ -160,7 +160,9 @@
     "nav-second-jump": "Una canción solo puede tener un salto D.S. o D.C.",
     "nav-needs-segno": "D.S. necesita una marca segno",
     "nav-needs-coda": "{mark} necesita una marca to coda y una marca coda",
-    "nav-needs-fine": "{mark} necesita una marca fine"
+    "nav-needs-fine": "{mark} necesita una marca fine",
+    "bad-numbering": "La numeración es <code>1m</code> o <code>6m</code>; se usa <code>1m</code>",
+    "bad-key-directive": "Escribe un cambio de tono así: <code>@key A</code> o <code>@key F#m</code>"
   },
   "instruments": {
     "drums": "Batería",

@@ -13,6 +13,7 @@
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "A",
@@ -21,6 +22,7 @@
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -109,6 +111,7 @@
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "Verse",
@@ -117,6 +120,7 @@
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -185,6 +189,7 @@
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "A",
@@ -193,6 +198,7 @@
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -241,6 +247,7 @@
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "A",
@@ -249,6 +256,7 @@
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -326,6 +334,7 @@ chartdown: 0.4
   "meta": { "chartdown": "0.4" },
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "A",
@@ -336,6 +345,7 @@ chartdown: 0.4
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [

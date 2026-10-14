@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { parse, SUPPORTED_VERSION } from "./parse.js";
-import { EXAMPLES, EXAMPLES_06, fixture, fixture06 } from "./test-helpers.js";
+import {
+  EXAMPLES,
+  EXAMPLES_06,
+  EXAMPLES_07,
+  fixture,
+  fixture06,
+  fixture07,
+} from "./test-helpers.js";
 import type { Chart } from "./types.js";
 
 const count = (chart: Chart) => ({
@@ -90,17 +97,17 @@ describe("R-00.4 the header declares the format version", () => {
   });
 
   it("R-00.4 warns when a chart declares a version the parser does not support", () => {
-    expect(parse("---\nchartdown: 0.7\n---\n## A\n1").warnings).toEqual([
+    expect(parse("---\nchartdown: 9.9\n---\n## A\n1").warnings).toEqual([
       {
         line: 2,
         code: "unsupported-version",
-        message: "This chart says ChartDown 0.7; this parser reads 0.3–0.6",
-        values: { version: "0.7", supported: "0.3–0.6" },
+        message: "This chart says ChartDown 9.9; this parser reads 0.3–0.7",
+        values: { version: "9.9", supported: "0.3–0.7" },
       },
     ]);
   });
 
-  it.each(["0.3", "0.4", "0.5", "0.6"])(
+  it.each(["0.3", "0.4", "0.5", "0.6", "0.7"])(
     "R-00.4 a chart written for %s is read without a warning",
     (version) => {
       expect(parse(`---\nchartdown: ${version}\n---\n## A\n1`).warnings).toEqual([]);
@@ -119,8 +126,15 @@ describe("R-00.4 the header declares the format version", () => {
     expect(chart.warnings).toEqual([]);
   });
 
-  it.each(EXAMPLES_06)("R-00.4 the Language example %s declares the supported version", (name) => {
-    expect(parse(fixture06(name)).version).toBe(SUPPORTED_VERSION);
+  it.each(EXAMPLES_07)(
+    "R-00.4 the spec's 0.7 example %s declares the supported version",
+    (name) => {
+      expect(parse(fixture07(name)).version).toBe(SUPPORTED_VERSION);
+    },
+  );
+
+  it.each(EXAMPLES_06)("R-00.4 the 0.6 example %s is still read without a warning", (name) => {
+    expect(parse(fixture06(name)).warnings).toEqual([]);
   });
 });
 

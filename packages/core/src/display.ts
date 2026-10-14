@@ -1,4 +1,4 @@
-import type { Chart, Chord, Key, Row } from "./types.js";
+import type { Chart, Chord, Key, Numbering, Row } from "./types.js";
 
 export type ChordStyle = "numbers" | "letters";
 
@@ -46,10 +46,26 @@ function letterSemitone(letter: string): number {
   return mod12((LETTER_SEMITONES[letter.charAt(0)] ?? 0) + accidental(letter.charAt(1)));
 }
 
-/** Semitones from the key's tonic to a root written as a number or a letter (spec 12.1). */
-export function degree(root: string, key: Key): number {
+/**
+ * How far numbers in a key are moved (spec 3, R-00.14): with `numbering: 6m`, numbers in a minor
+ * key count from its relative major, three semitones below the tonic, so 6m is the tonic.
+ */
+export function numberShift(key: Key, numbering: Numbering = "1m"): number {
+  return numbering === "6m" && key.minor ? 3 : 0;
+}
+
+/**
+ * Semitones from the key's tonic to a root written as a number or a letter (spec 12.1). The
+ * numbering moves numbers in a minor key (spec 3), never letters.
+ */
+export function degree(root: string, key: Key, numbering: Numbering = "1m"): number {
   const number = /^([b#]?)([1-7])$/.exec(root);
-  if (number) return mod12((SCALE[Number(number[2]) - 1] as number) + accidental(number[1]));
+  if (number)
+    return mod12(
+      (SCALE[Number(number[2]) - 1] as number) +
+        accidental(number[1]) +
+        numberShift(key, numbering),
+    );
   return mod12(letterSemitone(root) - letterSemitone(key.root));
 }
 
@@ -102,12 +118,17 @@ export function chordFormatter(chart: Chart, options: DisplayOptions): ChordForm
     return isHome ? homeKey : transposeKey(row.key, shift);
   };
 
+  const { numbering } = chart;
   const formatRoot = (root: string, written: Key, shown: Key): string => {
+    // Letters shown as numbers count as the chart's numbers do: from the relative major in a
+    // minor key under `numbering: 6m` (spec 12, R-00.14).
     if (options.style === "numbers")
-      return isNumberRoot(root) ? root : (NUMBERS[degree(root, written)] as string);
+      return isNumberRoot(root)
+        ? root
+        : (NUMBERS[mod12(degree(root, written) - numberShift(written, numbering))] as string);
     if (!isNumberRoot(root) && !transposed) return root;
     const names = usesFlats(shown) ? FLATS : SHARPS;
-    return names[mod12(letterSemitone(shown.root) + degree(root, written))] as string;
+    return names[mod12(letterSemitone(shown.root) + degree(root, written, numbering))] as string;
   };
 
   return {

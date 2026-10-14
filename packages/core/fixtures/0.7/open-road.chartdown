@@ -1,0 +1,50 @@
+---
+chartdown: 0.7
+title: Open Road (example song)
+artists: ChartDown examples
+key: G
+tempo: 76
+meter: 4/4
+feel: Straight, building
+---
+
+// An original example song written for this repository.
+
+## Intro
+> MD: Light and airy. I'll count us in slow.
+> MD keys: Pad swell, long notes.
+> MD drums: Sit out until the chorus.
+{pp} 6m 5 4 1 | 6m 5 4 1 | 6m 5 4 1 | 6m 5 4 1
+
+## Verse 1
+> MD: Intimate. Vocal front and center.
+> MD gtr: Clean, light picking. Leave space.
+{p} 1 "Morning on the" | 4 1 | 6m 5 | 4 1
+1 "Every mile" | 4 1 | 6m 5 | 4 1
+
+## Chorus
+> MD: Open it up a little. Don't go all out yet.
+> MD drums: Light groove, hi-hat or ride.
+> MD bass: Root notes, long and warm.
+{mf} 4 "Take the open road" {drums: in} | 1 | 5 | 6m
+4 | 1 | 5sus 5 | 1
+
+## Verse 2
+> MD: Back down, a little warmer than verse 1.
+@use Verse 1
+
+## Chorus 2
+> MD: A touch bigger. Harmonies on the second line.
+@use Chorus
+
+## Bridge
+> MD: Strip it back, then build every pass. I'll cue the repeats.
+> MD drums, bass: Out on the first pass, in on the second.
+|: {p} 6m | 4 | 1 | [1] 5 :| 2x
+[2] 5 4 5 5 |
+
+## Last Chorus
+> MD: Up a whole step. Full band.
+@key A
+{f} 4 | 1 | 5 | 6m
+4 | 1 | 5sus 5 | <1>~

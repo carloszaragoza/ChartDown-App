@@ -13,6 +13,7 @@ x | 1 x
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "A",
@@ -21,6 +22,7 @@ x | 1 x
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -87,6 +89,7 @@ x | 1 x
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "A",
@@ -95,6 +98,7 @@ x | 1 x
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -161,6 +165,7 @@ x | 1 x
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "A",
@@ -169,6 +174,7 @@ x | 1 x
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [

@@ -246,13 +246,24 @@ describe("R-00.10 the JSON form of a chart", () => {
 
   it("R-00.10 has the top-level fields of the specification's Appendix A", () => {
     expect(Object.keys(json).sort()).toEqual(
-      ["chartdown", "key", "meta", "minor", "playOrder", "sections", "warnings"].sort(),
+      // `numbering` is new in ChartDown 0.7 (R-00.15).
+      [
+        "chartdown",
+        "key",
+        "meta",
+        "minor",
+        "numbering",
+        "playOrder",
+        "sections",
+        "warnings",
+      ].sort(),
     );
     expect(json).toMatchObject({
       chartdown: "0.6",
       meta: { title: "Open Road", key: "G", tempo: "76" },
       key: "G",
       minor: false,
+      numbering: "1m",
     });
   });
 
@@ -264,7 +275,7 @@ describe("R-00.10 the JSON form of a chart", () => {
       notes: [{ md: true, roles: ["drums"], passes: [2], text: "Add the crash." }],
     });
     const row = section?.rows[0];
-    expect(row).toMatchObject({ key: "G", meter: "4/4", tempo: 76 });
+    expect(row).toMatchObject({ key: "G", minor: false, meter: "4/4", tempo: 76 });
     expect(row?.bars[0]).toEqual({
       number: 1,
       beats: 4,

@@ -88,7 +88,8 @@ console.log(JSON.stringify({ version: SUPPORTED_VERSION, sections: chart.section
       );
       const out = execFileSync(process.execPath, ["check.mjs"], { cwd: project }).toString();
       expect(JSON.parse(out)).toEqual({
-        version: "0.6",
+        // The parser reads ChartDown 0.7 since E20; Northbound still declares 0.6.
+        version: "0.7",
         sections: 5,
         warnings: 0,
         steps: 57,
