@@ -4,6 +4,7 @@ import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { useTranslations } from "next-intl";
+import { useEffect, useRef } from "react";
 import { repeats } from "../../lib/chart/repeats";
 
 export interface SongFormItem {
@@ -18,7 +19,8 @@ export interface SongFormItem {
 /**
  * A song's form: one button per section, each a link to it (Design Handoff 2.0, 1.5 and screen
  * 03). The current one is filled, never only underlined; a section played more than once says
- * which time it is (B1, B1², B1³). Stand mode uses the large size, 56 px on touch.
+ * which time it is (B1, B1², B1³). Stand mode uses the large size, 56 px on touch. On a phone it is
+ * one strip that scrolls sideways inside itself, the current section kept in view (R-03.8).
  */
 export function SongForm({
   label,
@@ -26,18 +28,27 @@ export function SongForm({
   current = -1,
   size = "md",
   notesLabel,
+  isStrip = false,
 }: {
   label: string;
   items: SongFormItem[];
   current?: number;
   size?: "md" | "lg";
   notesLabel?: string;
+  isStrip?: boolean;
 }) {
   const c = useTranslations("chart");
   const times = repeats(items.map((item) => item.abbreviation));
+  const strip = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!isStrip) return;
+    strip.current
+      ?.querySelector("[aria-current]")
+      ?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [isStrip, current]);
   return (
-    <nav aria-label={label}>
-      <HStack gap={2} wrap="wrap">
+    <nav aria-label={label} ref={strip}>
+      <HStack gap={2} wrap={isStrip ? "nowrap" : "wrap"} isScrollable={isStrip}>
         {items.map((item, index) => {
           const { time, of } = times[index] ?? { time: 1, of: 1 };
           const isCurrent = index === current;

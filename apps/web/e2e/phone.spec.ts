@@ -52,6 +52,40 @@ test.describe("on an iPhone 16 in portrait", () => {
     expect(third).toBeGreaterThan(first ?? 0);
     await expectNoSidewaysScroll(page);
   });
+
+  test("R-03.8 stand mode puts the chart first: one top bar, the View sheet, Next", async ({
+    page,
+    request,
+  }) => {
+    const id = await createVersion(request, { title: "Open Road", content: OPEN_ROAD });
+    await page.goto(`/versions/${id}/stand`);
+    const current = page.getByRole("main");
+    await expect(current.getByRole("heading", { level: 2, name: "Intro" })).toBeVisible();
+
+    // The section's first row is on the first screen, under one bar and the song form strip.
+    const firstRow = current.locator(".cd-chart__bars").first();
+    const top = await firstRow.evaluate((row) => row.getBoundingClientRect().top);
+    expect(top).toBeLessThan(PORTRAIT.height / 2);
+    await expect(page.getByText("Section 1 of 7")).toBeVisible();
+    // The display choices wait in the View sheet.
+    await expect(page.getByRole("link", { name: "Letters" })).toBeHidden();
+    await page.getByRole("button", { name: "View options" }).click();
+    const sheet = page.getByRole("dialog", { name: "View options" });
+    await expect(sheet.getByRole("link", { name: "Letters" })).toBeVisible();
+    await expect(sheet.getByRole("link", { name: "Stage" })).toBeVisible();
+    await sheet.getByRole("link", { name: "Letters" }).click();
+    await expect(page).toHaveURL(/view=letters/);
+    await page.keyboard.press("Escape");
+
+    // Next moves on; every control keeps its touch size.
+    const next = page.getByRole("link", { name: "Next", exact: true });
+    const size = await next.boundingBox();
+    expect(size?.height).toBeGreaterThanOrEqual(56);
+    await next.click();
+    await expect(current.getByRole("heading", { level: 2, name: "Verse 1" })).toBeVisible();
+    await expect(page.getByText("Section 2 of 7")).toBeVisible();
+    await expectNoSidewaysScroll(page);
+  });
 });
 
 test.describe("on an iPhone 16 in landscape", () => {
@@ -68,5 +102,27 @@ test.describe("on an iPhone 16 in landscape", () => {
     expect(tops).toHaveLength(4);
     expect(new Set(tops).size).toBe(1);
     await expectNoSidewaysScroll(page);
+  });
+
+  test("R-03.8 held sideways, the song form joins the top bar and the bars get the height", async ({
+    page,
+    request,
+  }) => {
+    const id = await createVersion(request, { title: "Open Road", content: OPEN_ROAD });
+    await page.goto(`/versions/${id}/stand?s=2`);
+    const current = page.getByRole("main");
+    await expect(current.getByRole("heading", { level: 2, name: "Verse 1" })).toBeVisible();
+    const form = await page
+      .getByRole("navigation", { name: "Song form" })
+      .evaluate((nav) => nav.getBoundingClientRect().top);
+    const next = await page
+      .getByRole("link", { name: "Next", exact: true })
+      .evaluate((link) => link.getBoundingClientRect().top);
+    expect(Math.abs(form - next)).toBeLessThan(8);
+    const top = await current
+      .locator(".cd-chart__bars")
+      .first()
+      .evaluate((row) => row.getBoundingClientRect().top);
+    expect(top).toBeLessThan(LANDSCAPE.height * 0.6);
   });
 });

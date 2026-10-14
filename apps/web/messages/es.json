@@ -606,7 +606,8 @@
     "viewAs": "Ver como",
     "previousSong": "Canción anterior",
     "nextSong": "Canción siguiente",
-    "allNotes": "Todas las notas"
+    "allNotes": "Todas las notas",
+    "viewOptions": "Opciones de vista"
   },
   "bands": {
     "title": "Bandas",
