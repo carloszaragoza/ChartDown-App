@@ -22,13 +22,7 @@ import { keysInMode } from "../../../versions/[id]/display";
 import { UUID } from "../../../versions/[id]/load";
 import { SET_TYPES, type SetType } from "../../../../lib/sets/types";
 import { NameForm } from "../../../_components/NameForm";
-import {
-  duplicateSet,
-  removeTempMd,
-  resetLineup,
-  updatePinned,
-  updateSet,
-} from "../../actions";
+import { duplicateSet, removeTempMd, resetLineup, updatePinned, updateSet } from "../../actions";
 import { SetForm } from "../../SetForm";
 import { ArrangedSongs } from "./ArrangedSongs";
 import { DeleteSetForm, KeySelect, LineupForm, TempMdForm } from "./EditControls";
