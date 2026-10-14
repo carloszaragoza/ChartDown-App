@@ -607,7 +607,13 @@
     "previousSong": "Canción anterior",
     "nextSong": "Canción siguiente",
     "allNotes": "Todas las notas",
-    "viewOptions": "Opciones de vista"
+    "viewOptions": "Opciones de vista",
+    "play": "Reproducir",
+    "stop": "Detener",
+    "beatOf": "{beat} / {of}",
+    "tempoTitle": "Tempo",
+    "tempoAsk": "Este chart no tiene tempo. ¿A qué velocidad debe contar el metrónomo?",
+    "tempoLabel": "Pulsos por minuto"
   },
   "bands": {
     "title": "Bandas",

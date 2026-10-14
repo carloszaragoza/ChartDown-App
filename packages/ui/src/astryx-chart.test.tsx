@@ -208,6 +208,41 @@ describe("T-2202 bar rows on a phone", () => {
   });
 });
 
+describe("T-1503 the metronome's pulse in a row", () => {
+  const split = parse("## A\n1 | 4:2 1:2 | 5\n");
+  const draw = (now: { index: number; downbeat: boolean; item?: number }) =>
+    render(
+      <BarRow
+        row={split.sections[0]!.rows[0]!}
+        formatter={chordFormatter(split, { style: "numbers" })}
+        beats="always"
+        now={now}
+      />,
+    );
+
+  it("R-11.3 the bar the metronome is on is marked, and beat 1 more strongly", () => {
+    const html = draw({ index: 1, downbeat: true, item: 0 });
+    expect(html.match(/aria-current="step"/g)).toHaveLength(1);
+    expect(html).toMatch(/cd-chart__bar--now cd-chart__bar--downbeat"[^>]*aria-current="step"/);
+    expect(draw({ index: 1, downbeat: false, item: 0 })).not.toContain("cd-chart__bar--downbeat");
+  });
+
+  it("R-11.5 in a split bar, the chord sounding on the beat is underlined", () => {
+    expect(draw({ index: 1, downbeat: false, item: 1 }).match(/cd-chart__cell--now/g)).toHaveLength(
+      1,
+    );
+    // A bar of one chord needs no underline: the bar says it.
+    expect(draw({ index: 0, downbeat: false, item: 0 })).not.toContain("cd-chart__cell--now");
+  });
+
+  it("R-11.13 with reduced motion beat 1 looks like every other beat: nothing flashes", () => {
+    const css = readFileSync(join(__dirname, "chart.css"), "utf8");
+    expect(css).toMatch(
+      /@media \(prefers-reduced-motion: reduce\) \{\s*\.cd-chart__bar--downbeat \{\s*box-shadow: inset 0 0 0 calc\(var\(--border-width\) \* 2\)/,
+    );
+  });
+});
+
 describe("T-1301 MDNotes", () => {
   it("R-06.1 a note for everyone says MD; an instrument's note says the instrument; never color alone", () => {
     const html = render(

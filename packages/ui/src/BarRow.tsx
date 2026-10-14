@@ -131,6 +131,8 @@ function OneBar({
   plain,
   formatter,
   labels,
+  now,
+  sounding,
 }: {
   bar: BarData;
   row: Row;
@@ -143,6 +145,10 @@ function OneBar({
   plain: boolean;
   formatter: ChordFormatter;
   labels: BarLabels;
+  /** The metronome is on this bar (R-11.3): on its beat 1 or another beat. */
+  now?: "downbeat" | "beat";
+  /** The item sounding on the metronome's beat, when the bar has more than one (R-11.5). */
+  sounding?: number;
 }) {
   // A pickup has only the beats it was written with (spec 5.3).
   const beats = bar.pickup ?? meter.beats;
@@ -157,9 +163,15 @@ function OneBar({
     bar.repeatStart && "cd-chart__bar--repeat-start",
     bar.repeatEnd && "cd-chart__bar--repeat-end",
     bar.ending && "cd-chart__bar--ending",
+    now && "cd-chart__bar--now",
+    now === "downbeat" && "cd-chart__bar--downbeat",
   ].filter(Boolean);
   return (
-    <div role="group" className={classes.join(" ")}>
+    <div
+      role="group"
+      className={classes.join(" ")}
+      {...(now ? { "aria-current": "step" as const } : {})}
+    >
       <div className="cd-chart__tags">
         {bar.ending && <span className="cd-chart__ending">{bar.ending.join(", ")}.</span>}
         {bar.dynamic && (
@@ -196,7 +208,7 @@ function OneBar({
             return (
               <span
                 key={index}
-                className={`cd-chart__cell${index > 0 ? " cd-chart__cell--split" : ""}`}
+                className={`cd-chart__cell${index > 0 ? " cd-chart__cell--split" : ""}${index === sounding ? " cd-chart__cell--now" : ""}`}
                 style={{ gridColumn: `${at.start} / span ${at.span}` }}
               >
                 <Item
@@ -215,14 +227,18 @@ function OneBar({
         // No marks: the chords are spread evenly across the bar, as on a printed chart.
         <div className="cd-chart__spread">
           {bar.items.map((item, index) => (
-            <Item
+            <span
               key={index}
-              item={item}
-              row={row}
-              formatter={formatter}
-              labels={labels}
-              beats={beats / Math.max(bar.items.length, 1)}
-            />
+              className={`cd-chart__token${index === sounding ? " cd-chart__token--now" : ""}`}
+            >
+              <Item
+                item={item}
+                row={row}
+                formatter={formatter}
+                labels={labels}
+                beats={beats / Math.max(bar.items.length, 1)}
+              />
+            </span>
           ))}
         </div>
       )}
@@ -272,6 +288,11 @@ export interface BarRowProps {
    * in the secondary color.
    */
   size?: "lg" | "md" | "sm";
+  /**
+   * The bar the metronome is on, by its place in the row, whether it is on beat 1 (R-11.3), and
+   * the item sounding on the beat (R-11.5).
+   */
+  now?: { index: number; downbeat: boolean; item?: number };
 }
 
 /**
@@ -290,6 +311,7 @@ export function BarRow({
   labels: given,
   beats = "always",
   size = "lg",
+  now,
 }: BarRowProps) {
   const labels: Required<BarLabels> = { ...DEFAULT_BAR_LABELS, ...given };
   // As many columns as the row has bars, as the approved prototype draws it; a pickup is narrower.
@@ -342,6 +364,15 @@ export function BarRow({
               plain={plain}
               formatter={formatter}
               labels={labels}
+              {...(now?.index === index
+                ? {
+                    now: now.downbeat ? "downbeat" : "beat",
+                    ...(now.item !== undefined &&
+                    bar.items.filter((item) => item.type !== "tie").length > 1
+                      ? { sounding: now.item }
+                      : {}),
+                  }
+                : {})}
             />
           ))}
         </div>
