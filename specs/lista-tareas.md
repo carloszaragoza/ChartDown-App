@@ -29,6 +29,7 @@ Every task is small, has its requirements (R-xx) and is done only when its tests
 | M7 | E13 | Version 2 of the interface (Astryx) |
 | M7b | E17 | ChartDown 0.6 in the parser, the app and npm, before the beta opens |
 | M7c | E18 | `chartdown` checked by the official conformance suite of github.com/ChartDown/spec |
+| M7d | E20 | ChartDown 0.7 in the parser, the app and npm |
 | M8 (phase 2) | E14 | Import from PDF |
 | M9 (phase 2) | E15 | Visual metronome and bar follow |
 | M10 (phase 2) | E16 | Live mode: the band follows the MD |
@@ -217,6 +218,22 @@ On October 13, 2026 the language repository published its conformance suite (spe
 | T-1712 | Run the official suite: the suite's folder (cases, `run.mjs`, README) pinned to a commit of github.com/ChartDown/spec, its commit recorded; the package's tests run it through the adapter; this repository's own cases and runner (`conformance/`, `src/conformance.test.ts`) retired. After the spec's pull request 1 is merged | R-00.12 | T-1711 | S | “R-00.12 chartdown passes the official conformance suite”: 123 of 123, the runner's check for spec sections without a case included |
 | T-1713 | Ship the adapter: `chartdown/conformance` exports `toJSON` and `display` as the suite expects; the README says how to run the suite against the package; `homepage` and `repository` point to github.com/ChartDown/spec (F-007); changelog for 0.2.1 | R-00.12 | T-1712 | S | The packed package installs in a new project and passes the suite through its own adapter |
 | T-1714 | Publish `chartdown` 0.2.1 to npm (the owner publishes from their account, as with 0.2.0) | – | T-1713 | S | npm shows 0.2.1 with links to github.com/ChartDown/spec |
+
+## E20 · ChartDown 0.7
+
+ChartDown 0.7 is in review in github.com/ChartDown/spec (pull request 2, October 13, 2026): a chord quality vocabulary with aliases (spec 6), the `numbering: 6m` header (spec 3 and 12), the formal grammar (spec 15) and three new things in the JSON form (Appendix A). Its suite has 142 cases. Checked that day with the suite's runner: `chartdown` fails every JSON case for the two new fields alone (`numbering`, `rows[].minor`); with them added, 132 pass and 10 fail: `numbering: 6m` (two header cases, one key-change case, two display cases), canonical qualities (three chord cases, one display case) and directive names in any case (one grammar case). Everything from 0.6 still matches. The tasks start once the spec's pull request 2 is merged; the suite is pinned to that merge.
+
+The app sees one change in charts that already exist: a quality written with an alias is drawn in its canonical spelling (`7ø` reads `7-7b5`, `1Δ7` reads `1maj7`). Nothing else is drawn differently; a chart that declares `numbering: 6m` shows its numbers as written.
+
+| ID | Task | Requirements | Depends on | Size | Tests / evidence |
+|---|---|---|---|---|---|
+| T-2001 | Plan the move to 0.7: R-00.13 to R-00.16, R-00.4 reading 0.7, these tasks | – | – | S | Specs reviewed by the owner |
+| T-2002 | Parser: the chord quality vocabulary, its aliases and pass-through (spec 6), the canonical `quality` in the JSON form, and `-` for every canonical minor quality in number style | R-00.13, R-00.15 | T-2001 | M | The suite's 6 and 12 cases on qualities; a unit test per alias |
+| T-2003 | Parser: `numbering` (1m or 6m, a warning otherwise), numbers in minor rows counted from the relative major under 6m, letters shown as numbers in such rows, and `numbering` and `rows[].minor` in the JSON form | R-00.14, R-00.15 | T-2001 | M | The suite's 3, 11.1 and 12 cases on numbering; every JSON case has the two fields |
+| T-2004 | Parser: directive names in any case, an unreadable `@key` value as a warning, reading 0.3 to 0.7 and 0.7 as the version written on save | R-00.16, R-00.4 | T-2001 | S | The suite's 15 case; a chart saved by the app declares 0.7 |
+| T-2005 | The suite pinned to the merge of 0.7 (replaces T-1712's 0.6 pin) | R-00.12 | T-1712, T-2002, T-2003, T-2004 | S | 142 of 142 |
+| T-2006 | App: qualities in their canonical spelling and `numbering: 6m` charts in the viewer, the editors and stand mode, numbers and letters, light and dark; the owner checks how the longer canonical qualities sit as superscripts (`design/chart-viewer`) | R-00.11, R-00.13, R-00.14 | T-2002, T-2003 | S | A chart in Em with 6m and aliases renders the same letters as its 1m version; the owner approves the drawing |
+| T-2007 | Publish `chartdown` 0.3.0 to npm for ChartDown 0.7 (README, changelog; the owner publishes) | – | T-2005, T-1713 | S | npm shows 0.3.0; the packed package passes the 0.7 suite through its adapter |
 
 ## Phase 2
 
