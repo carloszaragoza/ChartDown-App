@@ -37,15 +37,16 @@ describe("T-107 the chartdown package on npm", () => {
   });
 });
 
-describe("T-1708 the chartdown package on npm, version 0.2.0 for ChartDown 0.6", () => {
-  it("T-1708 is version 0.2.0 of the parser for spec 0.6, with its changelog in the package", () => {
-    expect(manifest.version).toBe("0.2.0");
-    // The description and README name the spec the parser implements (0.7 since E20).
+describe("T-2007 the chartdown package on npm, version 0.3.0 for ChartDown 0.7", () => {
+  it("T-2007 is version 0.3.0 of the parser for spec 0.7, with its changelog in the package", () => {
+    expect(manifest.version).toBe("0.3.0");
+    // The description and README name the spec the parser implements.
     expect(manifest.description).toContain(`spec ${SUPPORTED_VERSION}`);
     expect(manifest.files).toContain("CHANGELOG.md");
     const changelog = readFileSync(new URL("../CHANGELOG.md", import.meta.url), "utf8");
     // An unreleased section may come first, above the latest release.
-    expect(changelog).toMatch(/^# Changelog\n\n(## Unreleased[^\n]*\n[\s\S]*?\n)?## 0\.2\.0\n/);
+    expect(changelog).toMatch(/^# Changelog\n\n(## Unreleased[^\n]*\n[\s\S]*?\n)?## 0\.3\.0\n/);
+    expect(changelog).toContain("## 0.2.0");
     expect(changelog).toContain("## 0.1.0");
     const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
     expect(readme).toContain(`spec ${SUPPORTED_VERSION}`);
@@ -53,7 +54,7 @@ describe("T-1708 the chartdown package on npm, version 0.2.0 for ChartDown 0.6",
   });
 
   it(
-    "T-1708 a packed copy installs in a new project and parses Northbound",
+    "T-2007 a packed copy installs in a new project and parses Northbound",
     { timeout: 180_000 },
     () => {
       const root = fileURLToPath(new URL("..", import.meta.url));
@@ -63,7 +64,7 @@ describe("T-1708 the chartdown package on npm, version 0.2.0 for ChartDown 0.6",
       const work = mkdtempSync(join(tmpdir(), "chartdown-pack-"));
       execFileSync("npm", ["pack", "--pack-destination", work, "--silent"], { cwd: root });
       const tarball = readdirSync(work).find((name) => name.endsWith(".tgz")) as string;
-      expect(tarball).toBe("chartdown-0.2.0.tgz");
+      expect(tarball).toBe("chartdown-0.3.0.tgz");
 
       const project = join(work, "project");
       execFileSync("mkdir", [project]);
