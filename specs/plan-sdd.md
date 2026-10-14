@@ -373,6 +373,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-11.12 **Accurate timing:** clicks are scheduled with the Web Audio clock, not timers, so the beat doesn't drift over a whole song.
 - R-11.13 **Reduced motion:** with the system's reduced-motion setting, the pulse becomes a steady highlight and a beat counter, with no flashing.
 - R-11.14 **Personal:** each musician's metronome runs on their own device. Following the MD's metronome across the band is part of live mode (SPEC-12).
+- R-11.15 **The musician leads the form:** while the metronome plays in stand mode, choosing a section (the song form, Next or Previous, a swipe or a pedal) queues it: the metronome finishes the section it is playing and goes on to the chosen one with no pause, then follows the play order from there. Choosing the section that is playing queues it again, as when the band is told to repeat the chorus. The screen stays on the section that sounds; the next line names the queued one ("Next: Chorus, again") and the song form marks it. Choosing the queued section again cancels it. Without the metronome, choosing a section moves to it at once (owner's request, October 14, 2026).
 
 **Acceptance criteria**
 
@@ -381,6 +382,8 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - Given the click sound turned off, when the metronome plays, then no sound plays and the visual pulse still runs.
 - Given a 6/8 chart, when the metronome plays, then each bar shows six beats.
 - Given a fermata bar, when playback reaches it, then it stops there until the user taps.
+- Given the metronome playing the Chorus, when the musician taps the Chorus in the song form, then the Chorus plays to its end and starts again from its first bar, on the beat.
+- Given the metronome playing Verse 2, when the musician taps the Bridge, then the screen stays on Verse 2, the next line says "Next: Bridge", and the Bridge starts on the beat after Verse 2's last bar.
 - Given reduced motion turned on, when the metronome plays, then nothing flashes and the beat counter still advances.
 - Given a downloaded set in airplane mode, when the user plays the metronome, then it works the same.
 - Given a 4-minute song, when it plays to the end, then the last beat lands within 20 ms of the expected time.

@@ -63,3 +63,28 @@ test("R-11.3 the version page plays too, from the song's start, with the counter
   await page.getByRole("button", { name: "Stop" }).click();
   await expect(page.locator('[aria-current="step"]')).toHaveCount(0);
 });
+
+test("R-11.15 choosing the section that plays repeats it; the screen stays on what sounds", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, { title: "Fast Song", content: FAST });
+  await page.goto(`/versions/${id}/stand`);
+  const current = page.getByRole("main");
+  await page.getByRole("button", { name: "Play" }).click();
+  const form = page.getByRole("navigation", { name: "Song form" });
+  // The band is told to repeat the Verse.
+  await form.getByRole("link", { name: /^Verse,/ }).click();
+  await expect(page.getByText("Verse, again")).toBeVisible();
+  await expect(form.getByRole("link", { name: /plays next/ })).toHaveCount(1);
+  // The Verse ends and starts again; the Chorus is next once more.
+  await expect(page.getByText("Next: Chorus", { exact: false })).toBeVisible({ timeout: 5000 });
+  await expect(current.getByRole("heading", { level: 2, name: "Verse" })).toBeVisible();
+  await expect(current.getByRole("group").first()).toHaveAttribute("aria-current", "step");
+
+  // Queued, the Chorus is cancelled by choosing it again.
+  await form.getByRole("link", { name: /^Chorus,/ }).click();
+  await expect(form.getByRole("link", { name: /plays next/ })).toHaveCount(1);
+  await form.getByRole("link", { name: /^Chorus,/ }).click();
+  await expect(form.getByRole("link", { name: /plays next/ })).toHaveCount(0);
+});

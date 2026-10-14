@@ -155,10 +155,8 @@ function StandModeView({
   const [current, setCurrent] = useState(() => readSection(chart, String(initial + 1)));
   // The visual metronome (R-11.1 to R-11.5): it plays from the section being read, and the
   // section follows it.
-  const { playButton, tempoDialog, counter, nowIn, playingSection } = useMetronomeControls(
-    chart,
-    current,
-  );
+  const { playButton, tempoDialog, counter, nowIn, playingSection, queued, queue, isPlaying } =
+    useMetronomeControls(chart, current);
   // Numbers or letters, Beats and the theme change here at once, with no trip to the server
   // (F-005); the address follows, so a reload or a shared link shows the same.
   const [view, setView] = useState<StandView>({
@@ -231,15 +229,27 @@ function StandModeView({
     for (const song of ahead.split(" ").filter(Boolean)) prefetchWhole(router, song);
   }, [ahead, router]);
 
+  // Playing, a turn queues the section after (or before) the one already coming, so a pedal
+  // pressed twice skips two; the screen stays on what sounds (R-11.15).
+  const lead = useCallback(
+    (step: number) => {
+      const from = queued ?? playingSection ?? current;
+      const to = from + step;
+      if (to >= 0 && to <= last && to !== queued) queue(to);
+    },
+    [queued, playingSection, current, last, queue],
+  );
   // On, and back: at a song's edge, the pedal and a swipe go on to the set's next song.
   const forward = useCallback(() => {
-    if (atEdge.current.last && nextSong) router.push(nextSong);
+    if (isPlaying) lead(1);
+    else if (atEdge.current.last && nextSong) router.push(nextSong);
     else move((now) => now + 1);
-  }, [move, nextSong, router]);
+  }, [isPlaying, lead, move, nextSong, router]);
   const backward = useCallback(() => {
-    if (atEdge.current.first && previousSong) router.push(previousSong);
+    if (isPlaying) lead(-1);
+    else if (atEdge.current.first && previousSong) router.push(previousSong);
     else move((now) => now - 1);
-  }, [move, previousSong, router]);
+  }, [isPlaying, lead, move, previousSong, router]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -295,7 +305,12 @@ function StandModeView({
     if (!link || event.metaKey || event.ctrlKey || event.shiftKey) return;
     const to = link.getAttribute("href") ?? "";
     const section = sectionHrefs.indexOf(to);
-    if (section >= 0) move(() => section);
+    // Playing, the song form queues a section (the same one repeats it, the queued one cancels
+    // it), and Previous and Next queue the one before or after (R-11.15).
+    if (section >= 0 && isPlaying) {
+      if (link.closest(`nav[aria-label="${c("songForm")}"]`)) queue(section);
+      else lead(section > current ? 1 : -1);
+    } else if (section >= 0) move(() => section);
     else if (to === styleHref) changeView({ style: otherStyle });
     else if (to === themeHref) changeView({ theme: otherTheme });
     else return;
@@ -313,7 +328,10 @@ function StandModeView({
     atEdge.current = { first: current === 0, last: current === last };
   }, [current, last]);
   const now = chart.sections[current];
-  const next = chart.sections[current + 1];
+  // What comes next: the queued section while the metronome plays, the following one otherwise.
+  const nextIndex = queued ?? current + 1;
+  const next = chart.sections[nextIndex];
+  const again = queued !== null && queued === playingSection;
   const written = keyName(chart.key);
   const shown = keyName(homeKey);
 
@@ -395,11 +413,12 @@ function StandModeView({
       current={current}
       notesLabel={labels.notesForYou}
       isStrip={isPhone}
-      items={items.map((item) => ({
+      items={items.map((item, index) => ({
         abbreviation: item.abbreviation,
         description: describe(item),
         href: item.href,
         hasNotes: item.hasNotes,
+        isQueued: index === queued,
       }))}
     />
   );
@@ -573,9 +592,9 @@ function StandModeView({
               {next ? (
                 <>
                   <Text type="supporting">
-                    {labels.next}: <b>{next.name}</b> ·{" "}
+                    {labels.next}: <b>{again ? t("again", { name: next.name }) : next.name}</b> ·{" "}
                     {labels.length(sectionLength(next), { pickup: hasPickup(next) })}
-                    {forYou[current + 1] && ` · ${labels.notesForYou}`}
+                    {forYou[nextIndex] && ` · ${labels.notesForYou}`}
                   </Text>
                   {!isPhone && next.rows[0] && (
                     <BarRow

@@ -88,5 +88,15 @@ export function useMetronomeControls(chart: Chart, startSection: number) {
         }
       : undefined;
 
-  return { metronome, playButton, tempoDialog, counter, nowIn, playingSection: playing?.section };
+  return {
+    metronome,
+    playButton,
+    tempoDialog,
+    counter,
+    nowIn,
+    playingSection: playing?.section,
+    queued: metronome.queued,
+    queue: metronome.queue,
+    isPlaying: metronome.isPlaying,
+  };
 }
