@@ -23,7 +23,7 @@ async function switchTo(page: Page, email: string, name: string) {
   await expectSignedIn(page, name);
 }
 
-test("R-08.2 R-08.4 in airplane mode every song opens with its notes, read-only", async ({
+test("R-08.2 R-08.4 R-11.11 in airplane mode every song opens with its notes, read-only, and the metronome plays", async ({
   page,
   context,
   request,
@@ -125,6 +125,11 @@ test("R-08.2 R-08.4 in airplane mode every song opens with its notes, read-only"
   await page.goto(`/offline/set/${setId}/1/stand?s=2`);
   await expect(page.getByText("Song 1 of 2")).toBeVisible();
   await expect(page.getByRole("main")).toContainText(keysNote);
+  // The metronome works the same in airplane mode (R-11.11); the chart has no tempo, so it asks.
+  await page.getByRole("button", { name: "Play" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Play" }).click();
+  await expect(page.getByRole("main").locator('[aria-current="step"]')).toHaveCount(1);
+  await page.getByRole("button", { name: "Stop" }).click();
   await page.getByRole("link", { name: "Next song" }).click();
   await expect(page.getByText("Song 2 of 2")).toBeVisible();
   await context.setOffline(false);
