@@ -98,7 +98,10 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   // The pages stand mode asks the server for from here on, loaded ahead or not (F-006).
   const asked: string[] = [];
   page.on("request", (sent) => {
-    if (sent.headers()["rsc"] === "1") asked.push(new URL(sent.url()).pathname);
+    if (sent.headers()["rsc"] !== "1") return;
+    const address = new URL(sent.url());
+    address.searchParams.delete("_rsc");
+    asked.push(`${address.pathname}${address.search}`);
   });
 
   // The MD opens stand mode from the set's song: every note, and View as.
@@ -138,7 +141,7 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   await viewAs("All notes");
   await expect(current).toContainText(notes.keys);
   await expect(current).toContainText(notes.bass);
-  expect(asked).not.toContain(thisSong);
+  expect(asked.filter((address) => address.startsWith(thisSong))).toEqual([]);
 
   // At the end of the song, Next goes on to the next song of the set, loaded ahead whole, so
   // moving on asks the server nothing more (F-006).
