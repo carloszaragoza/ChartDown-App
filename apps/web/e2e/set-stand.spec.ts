@@ -95,6 +95,17 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   await expect(bassRow).toContainText("Bass");
   await expect(bassRow).not.toContainText("Keys");
 
+  // The pages stand mode asks the server for from here on, loaded ahead or not (F-006).
+  const asked: string[] = [];
+  const ever: string[] = [];
+  page.on("request", (sent) => {
+    if (sent.headers()["rsc"] !== "1") return;
+    const address = new URL(sent.url());
+    address.searchParams.delete("_rsc");
+    asked.push(`${address.pathname}${address.search}`);
+    ever.push(`${address.pathname}${address.search}`);
+  });
+
   // The MD opens stand mode from the set's song: every note, and View as.
   await page.goto(`${setAddress}/songs/1`);
   await page.getByRole("link", { name: "Start in stand mode" }).click();
@@ -117,7 +128,12 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
       page.getByRole("radiogroup", { name: "View as" }).getByRole("radio", { name: label }),
     ).toBeChecked();
   };
+  // F-006: every view came with the page, so switching asks the server nothing for this song
+  // (the next song, loaded ahead, follows the view).
+  const thisSong = `${setAddress}/songs/1/stand`;
+  asked.length = 0;
   await viewAs("Bass");
+  await expect(page).toHaveURL(/as=bass/);
   await expect(current.getByRole("heading", { name: "Chorus" })).toBeVisible();
   await expect(current).toContainText(notes.bass);
   await expect(current).not.toContainText(notes.keys);
@@ -127,11 +143,17 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   await viewAs("All notes");
   await expect(current).toContainText(notes.keys);
   await expect(current).toContainText(notes.bass);
+  expect(asked.filter((address) => address.startsWith(thisSong))).toEqual([]);
 
-  // At the end of the song, Next goes on to the next song of the set.
+  // At the end of the song, Next goes on to the next song of the set, loaded ahead whole, so
+  // moving on asks the server nothing more (F-006).
+  const nextSong = `${setAddress}/songs/2/stand`;
+  await expect.poll(() => ever.includes(nextSong)).toBe(true);
+  asked.length = 0;
   await page.getByRole("link", { name: "Next song" }).click();
   await expect(page.getByText("Song 2 of 2")).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: second })).toBeVisible();
+  expect(asked).not.toContain(nextSong);
 
   // Ben has no View as, and the bass note never reaches him, even asking for it.
   await switchTo(page, ben, "Ben Stand");

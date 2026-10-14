@@ -21,6 +21,7 @@ import {
 import { ArrowUturnLeftIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { prefetchWhole } from "../../../../lib/shell/prefetch";
 import { useTranslations } from "next-intl";
 import {
   useCallback,
@@ -72,7 +73,20 @@ export interface StandSet {
   songOf: string;
   previousSong?: string;
   nextSong?: string;
-  viewAs?: { label: string; options: { label: string; href: string; current: boolean }[] };
+  viewAs?: { label: string; options: ViewAsOption[] };
+}
+
+/**
+ * One View as, with its notes when the server sent them all at once (F-006): each one is
+ * filtered on the server as that instrument receives it, so switching needs no trip there.
+ */
+export interface ViewAsOption {
+  label: string;
+  href: string;
+  current: boolean;
+  as?: string | null;
+  notes?: readonly (readonly MDNoteData[])[];
+  forYou?: readonly boolean[];
 }
 
 const noChanges = () => () => {};
@@ -108,9 +122,9 @@ function StandModeView({
   beats: initialBeats = "auto",
   theme: initialTheme,
   path = `/versions/${versionId}/stand`,
-  keep = {},
-  notes,
-  forYou = [],
+  keep: keepGiven = {},
+  notes: notesGiven,
+  forYou: forYouGiven = [],
   set,
 }: StandModeProps) {
   const t = useTranslations("stand");
@@ -126,7 +140,15 @@ function StandModeView({
     style: initialStyle,
     beats: initialBeats,
     theme: initialTheme,
+    as: keepGiven.as ?? null,
   });
+  // View as switches here too when the server sent every view (F-006).
+  const viewAs = set?.viewAs;
+  const chosenView = viewAs?.options.find((option) => (option.as ?? null) === view.as);
+  const notes = chosenView?.notes ?? notesGiven;
+  const forYou = chosenView?.forYou ?? forYouGiven;
+  const kept = Object.fromEntries(Object.entries(keepGiven).filter(([name]) => name !== "as"));
+  const keep: Record<string, string> = view.as ? { ...kept, as: view.as } : kept;
   const { style, beats, theme } = view;
   const changeView = (changes: Partial<StandView>) => setView((now) => ({ ...now, ...changes }));
   // Whether the browser can go full screen; never on the server.
@@ -165,15 +187,15 @@ function StandModeView({
       window.history.replaceState(null, "", address);
     // keep is a new object on every render with the same values; path names them.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, style, beats, theme, homeKey, path, chart]);
+  }, [current, style, beats, theme, view.as, homeKey, path, chart]);
 
   // The songs at a set's edges carry the view as it is now, and the one the pedal leads to next
-  // is loaded ahead, so moving on is instant (F-005).
+  // is loaded ahead, whole, so moving on is instant (F-005, F-006).
   const previousSong = set?.previousSong && withView(set.previousSong, view);
   const nextSong = set?.nextSong && withView(set.nextSong, view);
   const ahead = songsAhead(current, last, { previousSong, nextSong }).join(" ");
   useEffect(() => {
-    for (const song of ahead.split(" ").filter(Boolean)) router.prefetch(song);
+    for (const song of ahead.split(" ").filter(Boolean)) prefetchWhole(router, song);
   }, [ahead, router]);
 
   useEffect(() => {
@@ -235,10 +257,11 @@ function StandModeView({
   const written = keyName(chart.key);
   const shown = keyName(homeKey);
 
-  const viewAs = set?.viewAs;
   const chooseView = (label: string) => {
     const option = viewAs?.options.find((item) => item.label === label);
-    if (option && !option.current) router.push(atSection(withView(option.href, view), current));
+    if (!option || option === chosenView) return;
+    if (option.notes) changeView({ as: option.as ?? null });
+    else router.push(atSection(withView(option.href, view), current));
   };
 
   return (
@@ -276,7 +299,9 @@ function StandModeView({
                   {viewAs && (
                     <SegmentedControl
                       label={t("viewAs")}
-                      value={viewAs.options.find((option) => option.current)?.label ?? ""}
+                      value={
+                        (chosenView ?? viewAs.options.find((option) => option.current))?.label ?? ""
+                      }
                       onChange={chooseView}
                     >
                       {viewAs.options.map((option) => (

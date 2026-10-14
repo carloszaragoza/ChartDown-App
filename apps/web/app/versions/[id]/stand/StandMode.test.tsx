@@ -128,3 +128,14 @@ describe("F-005 stand mode feels local", () => {
     expect(html).toContain('href="/sets/1/songs/3/stand?view=letters"');
   });
 });
+
+describe("F-006 View as follows the songs", () => {
+  const view = { style: "numbers", beats: "auto", theme: "light" } as const;
+
+  it("F-006 the links to other songs carry the View as chosen in place", () => {
+    const song = "/sets/1/songs/2/stand?as=bass";
+    expect(withView(song, { ...view, as: "keys" })).toBe("/sets/1/songs/2/stand?as=keys");
+    expect(withView(song, { ...view, as: null })).toBe("/sets/1/songs/2/stand");
+    expect(withView(song, view)).toBe("/sets/1/songs/2/stand?as=bass");
+  });
+});

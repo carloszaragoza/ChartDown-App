@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../../../lib/auth/enabled";
 import { setSongKey } from "../../../../../../lib/sets/lineup";
-import { songView, viewAs, viewAsOptions, type SetSong } from "../../../../../../lib/sets/song";
+import { songView, viewAs, viewsToSend, type SetSong } from "../../../../../../lib/sets/song";
 import { createClient } from "../../../../../../lib/supabase/server";
 import { readDisplay } from "../../../../../versions/[id]/display";
 import { UUID } from "../../../../../versions/[id]/load";
@@ -48,7 +48,6 @@ export default async function SetStandPage({
   // View as, for the MD and the temporary MD only.
   const leads = song.role !== "musician";
   const as = leads && search.as && /^[a-z0-9-]+$/.test(search.as) ? search.as : null;
-  const shownSong = viewAs(song, as);
 
   const chart = parse(song.content);
   const earlier = [...new Set(song.notes.map((note) => note.anchored_revision_id))].filter(
@@ -60,7 +59,6 @@ export default async function SetStandPage({
   const anchored = new Map<string, Chart>([[song.revision_id, chart]]);
   for (const row of anchoredRows ?? [])
     anchored.set(row.id as string, parse(row.content as string));
-  const view = songView(chart, shownSong, (revisionId) => anchored.get(revisionId));
 
   const t = await getTranslations("sets");
   const s = await getTranslations("stand");
@@ -109,6 +107,24 @@ export default async function SetStandPage({
     return query ? `?${query}` : "";
   };
 
+  // The notes of each section as one View as shows them, filtered here on the server. The MD
+  // gets every view at once, so switching is instant (F-006); a musician only their own.
+  const notesFor = (slug: string | null) => {
+    const view = songView(chart, viewAs(song, slug), (revisionId) => anchored.get(revisionId));
+    return {
+      notes: view.sections.map((notes) =>
+        notes.map((note) => ({
+          md: note.md,
+          roles: note.roles,
+          passes: note.passes,
+          text: note.bar ? `${barLabel(note.bar)} · ${note.text}` : note.text,
+        })),
+      ),
+      forYou: view.sections.map((notes) => notes.some((note) => note.forYou)),
+    };
+  };
+  const shown = notesFor(as);
+
   return (
     <StandMode
       versionId={song.version_id}
@@ -121,15 +137,8 @@ export default async function SetStandPage({
       theme={theme}
       path={base(position)}
       keep={keep}
-      notes={view.sections.map((notes) =>
-        notes.map((note) => ({
-          md: note.md,
-          roles: note.roles,
-          passes: note.passes,
-          text: note.bar ? `${barLabel(note.bar)} · ${note.text}` : note.text,
-        })),
-      )}
-      forYou={view.sections.map((notes) => notes.some((note) => note.forYou))}
+      notes={shown.notes}
+      forYou={shown.forYou}
       set={{
         href: `/sets/${id}`,
         name: `${song.set_name} – ${types(set.type as "service")}`,
@@ -140,14 +149,13 @@ export default async function SetStandPage({
           ? {
               viewAs: {
                 label: as ? nameOf(as) : s("allNotes"),
-                options: [
-                  { label: s("allNotes"), href: `${base(position)}${carry({}, {})}`, current: !as },
-                  ...viewAsOptions(song, playing).map((slug) => ({
-                    label: nameOf(slug),
-                    href: `${base(position)}${carry({}, { as: slug })}`,
-                    current: as === slug,
-                  })),
-                ],
+                options: viewsToSend(song, playing).map((slug) => ({
+                  label: slug ? nameOf(slug) : s("allNotes"),
+                  href: `${base(position)}${carry({}, slug ? { as: slug } : {})}`,
+                  current: (as ?? null) === slug,
+                  as: slug,
+                  ...notesFor(slug),
+                })),
               },
             }
           : {}),
