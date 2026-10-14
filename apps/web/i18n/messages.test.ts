@@ -37,6 +37,8 @@ const SAME_IN_BOTH = new Set([
   "bands.sets",
   "landing.footer.copyright",
   "stand.setBar",
+  "stand.beatOf",
+  "stand.tempoTitle",
   "stand.set",
   "sets.allSets",
   "nav.sets",

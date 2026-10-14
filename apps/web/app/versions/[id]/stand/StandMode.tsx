@@ -3,11 +3,9 @@
 import { Theme } from "@astryxdesign/core";
 import { BottomSheet } from "@astryxdesign/core/BottomSheet";
 import { Button } from "@astryxdesign/core/Button";
-import { Dialog } from "@astryxdesign/core/Dialog";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
-import { NumberInput } from "@astryxdesign/core/NumberInput";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
@@ -27,12 +25,9 @@ import {
   ArrowUturnLeftIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  PlayIcon,
-  StopIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMetronome } from "../../../../lib/metronome/useMetronome";
 import { usePhone, useShortScreen } from "../../../../lib/shell/phone";
 import { prefetchWhole } from "../../../../lib/shell/prefetch";
 import { useTranslations } from "next-intl";
@@ -47,6 +42,7 @@ import {
   type TouchEvent,
 } from "react";
 import { ChartSection } from "../../../_components/ChartPreview";
+import { useMetronomeControls } from "../../../_components/MetronomeControls";
 import { SongForm } from "../../../_components/SongForm";
 import { BeatsControl } from "../../../_components/BeatsControl";
 import { useChartLabels } from "../../../_components/chartLabels";
@@ -155,13 +151,14 @@ function StandModeView({
   const isPhone = usePhone(phoneGuess);
   // Held sideways, the song form joins the top bar, so the bars get the height (R-03.8).
   const isSideways = useShortScreen() && isPhone;
-  // The visual metronome (R-11.1 to R-11.5): it plays from the section being read, and the
-  // section follows it.
-  const metronome = useMetronome(chart);
-  const [isTempoOpen, setTempoOpen] = useState(false);
-  const [askedTempo, setAskedTempo] = useState(100);
   const [isSheetOpen, setSheetOpen] = useState(false);
   const [current, setCurrent] = useState(() => readSection(chart, String(initial + 1)));
+  // The visual metronome (R-11.1 to R-11.5): it plays from the section being read, and the
+  // section follows it.
+  const { playButton, tempoDialog, counter, nowIn, playingSection } = useMetronomeControls(
+    chart,
+    current,
+  );
   // Numbers or letters, Beats and the theme change here at once, with no trip to the server
   // (F-005); the address follows, so a reload or a shared link shows the same.
   const [view, setView] = useState<StandView>({
@@ -205,7 +202,6 @@ function StandModeView({
   );
   // Playing, the section follows the metronome (R-11.4): when it enters another section, stand
   // mode turns to it; in between, the musician may look ahead.
-  const playingSection = metronome.position?.bar?.section;
   const [followed, setFollowed] = useState(playingSection);
   if (playingSection !== followed) {
     setFollowed(playingSection);
@@ -408,35 +404,6 @@ function StandModeView({
     />
   );
 
-  const playFrom = (tempo?: number) =>
-    metronome.play(metronome.firstBarOf(current), tempo !== undefined ? { tempo } : {});
-  const playButton = (
-    <Button
-      label={metronome.isPlaying ? t("stop") : t("play")}
-      size="lg"
-      variant={metronome.isPlaying ? "primary" : "secondary"}
-      isIconOnly
-      icon={<Icon icon={metronome.isPlaying ? StopIcon : PlayIcon} />}
-      onClick={() => {
-        if (metronome.isPlaying) metronome.stop();
-        else if (metronome.needsTempo) setTempoOpen(true);
-        else playFrom();
-      }}
-    />
-  );
-  // "2 / 4", the beat and the beats of the bar, so the pulse never rests on color (R-11.3).
-  const click = metronome.position?.click;
-  const counter = click ? t("beatOf", { beat: click.count, of: click.of }) : null;
-  const playing = metronome.position?.bar;
-  const nowPlaying =
-    playing && playing.section === current && click
-      ? {
-          row: playing.row,
-          index: playing.index,
-          progress: (click.beat + 1) / Math.max(playing.beats.length, 1),
-        }
-      : undefined;
-
   const back = {
     label: set ? t("set") : t("close"),
     href: set ? set.href : `/versions/${versionId}`,
@@ -597,7 +564,7 @@ function StandModeView({
                   meter={chart.meter}
                   beats={beats}
                   size="lg"
-                  {...(nowPlaying ? { now: nowPlaying } : {})}
+                  now={nowIn(current)}
                 />
               )}
             </main>
@@ -626,29 +593,7 @@ function StandModeView({
               )}
             </VStack>
           </VStack>
-          {/* A chart with no tempo asks for one before it plays (R-11.1). */}
-          <Dialog isOpen={isTempoOpen} onOpenChange={setTempoOpen} padding={4}>
-            <VStack gap={4}>
-              <Heading level={2}>{t("tempoTitle")}</Heading>
-              <Text>{t("tempoAsk")}</Text>
-              <NumberInput
-                label={t("tempoLabel")}
-                value={askedTempo}
-                onChange={(value) => setAskedTempo(Math.min(300, Math.max(20, value)))}
-              />
-              <HStack gap={2} hAlign="end">
-                <Button
-                  label={t("play")}
-                  variant="primary"
-                  icon={<Icon icon={PlayIcon} />}
-                  onClick={() => {
-                    setTempoOpen(false);
-                    playFrom(askedTempo);
-                  }}
-                />
-              </HStack>
-            </VStack>
-          </Dialog>
+          {tempoDialog}
           {isPhone && (
             <BottomSheet
               isOpen={isSheetOpen}

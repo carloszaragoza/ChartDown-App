@@ -229,16 +229,19 @@ describe("T-1503 the metronome's pulse in a row", () => {
     expect(html).toMatch(/cd-chart__bar--now"[^>]*aria-current="step"[^>]*--chart-progress:0.5/);
   });
 
-  it("R-11.3 the mark is subtle: no fill and no color, a thin line in the secondary ink", () => {
+  it("R-11.3 the mark is subtle: no fill and no color, a thin line in a quiet ink", () => {
     expect(rule(".cd-chart__bar--now")).not.toMatch(/background|box-shadow|color/);
     const line = rule(".cd-chart__bar--now::after");
-    expect(line).toContain("background: var(--chart-ink-muted)");
+    expect(line).toContain("background: var(--color-icon-secondary)");
     expect(line).toContain("inline-size: calc(100% * var(--chart-progress, 0))");
-    expect(line).toContain("block-size: calc(var(--border-width) * 3)");
+    expect(line).toContain("block-size: calc(var(--border-width) * 2)");
   });
 
-  it("R-11.13 the line moves in steps, with no animation, so nothing flashes", () => {
-    expect(rule(".cd-chart__bar--now::after")).not.toMatch(/transition|animation/);
+  it("R-11.13 the line eases from beat to beat, and moves in steps with reduced motion", () => {
+    expect(rule(".cd-chart__bar--now::after")).toMatch(/transition: inline-size/);
+    expect(css).toMatch(
+      /@media \(prefers-reduced-motion: reduce\) \{\s*\.cd-chart__bar--now::after \{\s*transition: none;/,
+    );
   });
 });
 

@@ -3,6 +3,7 @@
 import { Card } from "@astryxdesign/core/Card";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
+import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import {
@@ -28,8 +29,10 @@ import {
 import { Theme } from "@astryxdesign/core";
 import { chartdownStandTheme } from "../../theme/chartdown-stand";
 import { usePhone } from "../../lib/shell/phone";
+import { useMetronomeControls } from "./MetronomeControls";
 import { SongForm } from "./SongForm";
 import { useTranslations } from "next-intl";
+import { useEffect, useRef } from "react";
 import { useChartLabels } from "./chartLabels";
 import { hasJump, playRuns } from "../../lib/chart/playRuns";
 
@@ -49,7 +52,7 @@ export interface ChartSectionProps {
   /** How many bars show beat marks (R-03.7); Auto, the default, where they tell something. */
   beats?: BeatsMode;
   /** The bar the metronome is on: its row, its place in the row, and how far into it (R-11.3). */
-  now?: { row: number; index: number; progress: number };
+  now?: { row: number; index: number; progress: number } | undefined;
 }
 
 /**
@@ -132,62 +135,92 @@ export function ChartPreview({
   const c = useTranslations("chart");
   const formatter = chordFormatter(chart, homeKey ? { style, key: homeKey } : { style });
   const describe = (item: FormStripItem) => `${item.name}, ${labels.length(item.length)}`;
+  // The visual metronome on the version page (T-1503): Play in the pinned bar, from the song's
+  // start, and the page keeps the bar being played in view.
+  const { playButton, tempoDialog, counter, nowIn, playingSection } = useMetronomeControls(
+    chart,
+    0,
+  );
+  const root = useRef<HTMLDivElement>(null);
+  const playingRow =
+    playingSection === undefined ? "" : `${playingSection}:${nowIn(playingSection)?.row}`;
+  useEffect(() => {
+    if (!playingRow) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    root.current
+      ?.querySelector('[aria-current="step"]')
+      ?.scrollIntoView({ block: "center", behavior: still ? "auto" : "smooth" });
+  }, [playingRow]);
   return (
-    <VStack gap={6}>
-      {hasForm && (
-        // The song form stays pinned at the top while the chart scrolls, at stand mode's size,
-        // so any section is one tap away (Design Handoff 2.0, 1.5).
-        <div
-          style={{
-            position: "sticky",
-            top: 0,
-            zIndex: 1,
-            // The page's own surface, so the chart passes under it unseen.
-            background: "var(--color-background-surface)",
-            paddingBlock: "var(--spacing-2)",
-          }}
-        >
-          <Theme theme={chartdownStandTheme} mode="system">
-            <SongForm
-              label={c("songForm")}
-              size="lg"
-              isStrip={isPhone}
-              items={formStripItems(chart, -1, () => false).map((item, index) => ({
-                abbreviation: item.abbreviation,
-                description: describe(item),
-                href: `#section-${index + 1}`,
-              }))}
-            />
-          </Theme>
-        </div>
-      )}
-      {hasForm && hasJump(chart) && (
-        // Only a song that jumps (D.S., D.C.) needs its order spelled out (spec 10.1).
-        <Text type="supporting">
-          <b>{c("playOrder")}</b>{" "}
-          {playRuns(chart)
-            .map((run) => {
-              const name = chart.sections[run.section]?.name ?? "";
-              return run.full
-                ? name
-                : c("playOrderBars", { section: name, from: run.from, to: run.to });
-            })
-            .join(" → ")}
-        </Text>
-      )}
-      {chart.sections.map((section, index) => (
-        <ChartSection
-          key={index}
-          section={section}
-          formatter={formatter}
-          labels={labels}
-          id={`section-${index + 1}`}
-          isFramed={isFramed}
-          meter={chart.meter}
-          beats={beats}
-          {...(notes ? { notes: notes[index] ?? [] } : {})}
-        />
-      ))}
-    </VStack>
+    <div ref={root}>
+      <VStack gap={6}>
+        {hasForm && (
+          // The song form stays pinned at the top while the chart scrolls, at stand mode's size,
+          // so any section is one tap away (Design Handoff 2.0, 1.5).
+          <div
+            style={{
+              position: "sticky",
+              top: 0,
+              zIndex: 1,
+              // The page's own surface, so the chart passes under it unseen.
+              background: "var(--color-background-surface)",
+              paddingBlock: "var(--spacing-2)",
+            }}
+          >
+            <Theme theme={chartdownStandTheme} mode="system">
+              <HStack gap={2} vAlign="center">
+                <StackItem size="fill">
+                  <SongForm
+                    label={c("songForm")}
+                    size="lg"
+                    isStrip={isPhone}
+                    items={formStripItems(chart, -1, () => false).map((item, index) => ({
+                      abbreviation: item.abbreviation,
+                      description: describe(item),
+                      href: `#section-${index + 1}`,
+                    }))}
+                  />
+                </StackItem>
+                {counter && (
+                  <Text type="large" weight="bold">
+                    {counter}
+                  </Text>
+                )}
+                {playButton}
+              </HStack>
+              {tempoDialog}
+            </Theme>
+          </div>
+        )}
+        {hasForm && hasJump(chart) && (
+          // Only a song that jumps (D.S., D.C.) needs its order spelled out (spec 10.1).
+          <Text type="supporting">
+            <b>{c("playOrder")}</b>{" "}
+            {playRuns(chart)
+              .map((run) => {
+                const name = chart.sections[run.section]?.name ?? "";
+                return run.full
+                  ? name
+                  : c("playOrderBars", { section: name, from: run.from, to: run.to });
+              })
+              .join(" → ")}
+          </Text>
+        )}
+        {chart.sections.map((section, index) => (
+          <ChartSection
+            key={index}
+            section={section}
+            formatter={formatter}
+            labels={labels}
+            id={`section-${index + 1}`}
+            isFramed={isFramed}
+            meter={chart.meter}
+            beats={beats}
+            {...(notes ? { notes: notes[index] ?? [] } : {})}
+            now={nowIn(index)}
+          />
+        ))}
+      </VStack>
+    </div>
   );
 }

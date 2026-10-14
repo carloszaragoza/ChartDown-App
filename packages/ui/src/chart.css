@@ -125,9 +125,11 @@
   grid-row: span 3;
 }
 
-/* The bar the metronome is on (R-11.3): no fill and no color, only a thin line in the secondary
-   ink along its foot that grows beat by beat, so it guides the eye without pulling it. The line
-   passes under the chord that sounds (R-11.5), and it moves in steps, never flashing (R-11.13). */
+/* The bar the metronome is on (R-11.3): no fill and no color, only a thin, quiet line along its
+   foot that grows beat by beat, so it guides the eye without pulling it (owner's review, October
+   14, 2026). Its ink keeps at least 3:1 against the card in both themes (5.4:1 light, 6.4:1
+   stage). The line passes under the chord that sounds (R-11.5) and eases from beat to beat; with
+   reduced motion it moves in steps, never animated (R-11.13). */
 .cd-chart__bar--now {
   position: relative;
 }
@@ -137,8 +139,14 @@
   inset-block-end: 0;
   inset-inline-start: 0;
   inline-size: calc(100% * var(--chart-progress, 0));
-  block-size: calc(var(--border-width) * 3);
-  background: var(--chart-ink-muted);
+  block-size: calc(var(--border-width) * 2);
+  background: var(--color-icon-secondary);
+  transition: inline-size var(--chart-beat-ease, 180ms) ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cd-chart__bar--now::after {
+    transition: none;
+  }
 }
 
 /* A phone in portrait (design handoff 5, R-03.8): a row wraps into lines of two bars instead of
