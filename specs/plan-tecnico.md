@@ -82,7 +82,7 @@ flowchart LR
 | Email (phase 2) | A transactional email provider | R-09.5 |
 | WhatsApp (phase 3) | WhatsApp Business Platform; requires user opt-in and approved templates | Decision 9.7 |
 | Hosting | Vercel (app and landing), Supabase (data and auth), Cloudflare (DNS for chartdown.app) | Decision 4 of this plan |
-| Repository | Monorepo with pnpm and Turborepo | One place for core, app and specs |
+| Repository | Monorepo with pnpm and Turborepo; the `chartdown` parser has its own repository in the ChartDown organization (E21) and the app installs it from npm | One place for the app's packages and specs; the parser is the language's, so it lives with the spec |
 | Tests | Vitest (core and UI), Playwright (end to end), SQL tests for permissions | Every acceptance criterion is a test |
 
 Tool versions and prices change; confirm them when starting.
@@ -224,7 +224,6 @@ Admins see no band, set or layer data (permission matrix); platform metrics come
 
 ```
 ChartDown-App/
-  packages/core          notation: parser, JSON, layer, numbers and letters
   packages/ui            shared components
   apps/web               installable Next.js app and landing page
   supabase/migrations    schema and row-level security
@@ -233,7 +232,7 @@ ChartDown-App/
   docs/
 ```
 
-**SDD rule:** every requirement R-xx has at least one test with its id in the name, for example “R-06.4 a musician never receives notes for another instrument”. A change that touches a spec without touching its tests is not merged.
+**SDD rule:** every requirement R-xx has at least one test with its id in the name, for example “R-06.4 a musician never receives notes for another instrument”. A change that touches a spec without touching its tests is not merged. The parser's requirements (SPEC-00) are tested in github.com/ChartDown/parser with the same naming; the app keeps the R-00.x tests that read its own files.
 
 ## 10. Build order
 
@@ -327,7 +326,7 @@ No personal data of a departed user remains, which removes the risk with privacy
 - In each band where they were the permanent MD and others remain, the longest-standing member becomes the MD, and an event lets the band know.
 - Everything else that is theirs is deleted: the account and its sign-in methods, the profile, their instruments, their personal space with its sets and layer, their memberships, lineups and temporary MD roles, notices and preferences, their waitlist entry and invite claims, and the events that name them.
 
-**License of the code:** the repository is public to read but not open source: all rights reserved (root `LICENSE`), except `packages/core` (`chartdown`, MIT) and third-party packages and fonts under their own licenses (decided October 7, 2026).
+**License of the code:** the repository is public to read but not open source: all rights reserved (root `LICENSE`), except third-party packages and fonts under their own licenses (decided October 7, 2026). The `chartdown` parser, MIT, was part of this repository until E21 and now lives in github.com/ChartDown/parser.
 
 **License of charts:** every public chart is published under **CC0**. The terms of use say so at publish time.
 
@@ -336,6 +335,6 @@ No personal data of a departed user remains, which removes the risk with privacy
 - **ChartDown** is the language: the notation, the `.chartdown` format, the spec, guides and reference playground. Open on GitHub (spec CC0, code MIT) at `github.com/ChartDown/spec`, so anyone can build their own app; its conformance suite (Appendix B) defines what a compatible parser is. The earlier `github.com/ChartDown/Language` is private since October 2026, so nothing links to it.
 - **ChartDown App** is the product we build: catalog, bands, sets, MD layer and per-instrument view. All its code, including the landing page, lives in the private repository `github.com/carloszaragoza/ChartDown-App` (moved from the ChartDown organization on October 3, 2026).
 - **Domain:** `chartdown.app`.
-- **npm package:** the parser in `packages/core` is published as `chartdown`, MIT, with the version of the ChartDown spec it implements in its description (T-107). The `@chartdown` scope on npm belongs to an unrelated project (maps for role-playing games), so the package has no scope. Its owner publishes it from their npm account; the repository it points to is the public language repository.
+- **npm package:** the parser is published as `chartdown`, MIT, with the version of the ChartDown spec it implements in its description (T-107). The `@chartdown` scope on npm belongs to an unrelated project (maps for role-playing games), so the package has no scope. Since E21 (October 14, 2026) its code lives in the public repository `github.com/ChartDown/parser`, owned by the ChartDown organization; the spec repository stays free of implementations. The owner publishes it from their npm account. A change to the parser is made there: a pull request, its CI, a release, then the app raises its `chartdown` version.
 - **Business model:** free at first, invite-only; later a subscription with a free tier. It does not change the architecture.
 - **Name policy:** anyone can say their app is “compatible with ChartDown”; nobody can name their product ChartDown or present it as the official one.
