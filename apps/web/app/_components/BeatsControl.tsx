@@ -29,18 +29,28 @@ function rememberBeats(mode: BeatsMode): void {
 
 /**
  * Brings back the mode this browser last chose when the address names none (R-03.7). A link that
- * names a mode is shown as it says and does not change what the browser remembers.
+ * names a mode is shown as it says and does not change what the browser remembers. A page that
+ * draws the mode itself (stand mode, F-005) takes it in place; any other asks the server.
  */
-export function BeatsMemory({ current }: { current: BeatsMode }) {
+export function BeatsMemory({
+  current,
+  onChoose,
+}: {
+  current: BeatsMode;
+  onChoose?: ((mode: BeatsMode) => void) | undefined;
+}) {
   const router = useRouter();
   useEffect(() => {
     const url = new URL(window.location.href);
     if (url.searchParams.has("beats")) return;
     const remembered = rememberedBeats();
     if (remembered === undefined || remembered === current) return;
+    if (onChoose) return onChoose(remembered);
     if (remembered === "auto") url.searchParams.delete("beats");
     else url.searchParams.set("beats", remembered);
     router.replace(`${url.pathname}${url.search}`);
+    // onChoose is a new function on every render and does the same each time.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, router]);
   return null;
 }
@@ -52,11 +62,14 @@ export function BeatsMemory({ current }: { current: BeatsMode }) {
 export function BeatsControl({
   value,
   hrefs,
+  onChoose,
   words,
 }: {
   value: BeatsMode;
   /** The address for each mode. */
   hrefs: Record<BeatsMode, string>;
+  /** Draws the chosen mode in place instead of asking the server for its address (F-005). */
+  onChoose?: (mode: BeatsMode) => void;
   words: { label: string; name: string; off: string; auto: string; always: string };
 }) {
   const router = useRouter();
@@ -67,7 +80,7 @@ export function BeatsControl({
   };
   return (
     <HStack gap={2} vAlign="center">
-      <BeatsMemory current={value} />
+      <BeatsMemory current={value} onChoose={onChoose} />
       <Text type="supporting" aria-hidden="true">
         {words.label}
       </Text>
@@ -77,7 +90,8 @@ export function BeatsControl({
         onChange={(mode) => {
           const chosen = readBeatsMode(mode);
           rememberBeats(chosen);
-          router.push(hrefs[chosen]);
+          if (onChoose) onChoose(chosen);
+          else router.push(hrefs[chosen]);
         }}
       >
         {BEATS_MODES.map((mode) => (

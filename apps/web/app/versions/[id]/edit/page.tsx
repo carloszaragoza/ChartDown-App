@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../lib/auth/enabled";
-import { createClient } from "../../../../lib/supabase/server";
+import { createClient, readUser } from "../../../../lib/supabase/server";
 import { loadVersion } from "../load";
 import { Editor } from "./Editor";
 
@@ -12,7 +12,7 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
   const supabase = await createClient();
   const [version, { data: auth }] = await Promise.all([
     loadVersion(supabase, id),
-    supabase.auth.getUser(),
+    readUser(supabase),
   ]);
   if (
     !version?.currentRevisionId ||

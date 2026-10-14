@@ -33,3 +33,24 @@ export function pendingTarget(link: LinkLike, tap: TapLike, current: string): st
   if (to.origin !== from.origin || to.pathname === from.pathname) return null;
   return to.pathname;
 }
+
+/** Paths that always load as a whole page (F-005): the offline reader and route handlers. */
+const WHOLE = [
+  /^\/offline(\/|$)/,
+  /^\/notices\/[^/]+\/?$/,
+  /^\/bands\/choose\//,
+  /^\/auth\//,
+  /^\/api\//,
+];
+
+/**
+ * Whether a link must keep the browser's own navigation (F-005): another site, or a page of the
+ * app that is not a React page (the offline reader, served by the service worker, and the
+ * addresses route handlers answer). Every other link moves inside the app.
+ */
+export function loadsWhole(href: string): boolean {
+  if (/^[a-z][a-z0-9+.-]*:/i.test(href) || href.startsWith("//")) return true;
+  if (!href.startsWith("/")) return false;
+  const path = href.split(/[?#]/)[0] ?? href;
+  return WHOLE.some((pattern) => pattern.test(path));
+}

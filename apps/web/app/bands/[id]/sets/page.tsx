@@ -9,7 +9,7 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../lib/auth/enabled";
-import { createClient } from "../../../../lib/supabase/server";
+import { createClient, readUser } from "../../../../lib/supabase/server";
 import { UUID } from "../../../versions/[id]/load";
 import { createSet } from "../../../sets/actions";
 import { SET_TYPES, type SetType } from "../../../../lib/sets/types";
@@ -41,7 +41,7 @@ export default async function BandSetsPage({
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
+  const { data: auth } = await readUser(supabase);
   if (!auth.user) notFound();
   const [{ data: band }, { data: me }, { data: rows }] = await Promise.all([
     supabase.from("bands").select("id, name, is_personal").eq("id", id).maybeSingle(),

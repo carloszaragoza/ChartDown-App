@@ -19,7 +19,7 @@ import { authEnabled } from "../../../lib/auth/enabled";
 import { effectiveLineup, setSongKey } from "../../../lib/sets/lineup";
 import { songView, type SetSong } from "../../../lib/sets/song";
 import { setWhen } from "../../../lib/sets/when";
-import { createClient } from "../../../lib/supabase/server";
+import { createClient, readUser } from "../../../lib/supabase/server";
 import { UUID } from "../../versions/[id]/load";
 import { updatePinned } from "../actions";
 import { EditIcon, StandIcon } from "../../_components/ActionIcons";
@@ -71,7 +71,7 @@ export default async function SetPage({
   const { id } = await params;
   if (!UUID.test(id)) notFound();
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
+  const { data: auth } = await readUser(supabase);
   if (!auth.user) notFound();
   const { data: set } = await supabase
     .from("sets")

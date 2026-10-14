@@ -1,7 +1,7 @@
 import { parse } from "chartdown";
 import { notFound } from "next/navigation";
 import { authEnabled } from "../../../lib/auth/enabled";
-import { createClient } from "../../../lib/supabase/server";
+import { createClient, readUser } from "../../../lib/supabase/server";
 import { readDisplay } from "./display";
 import { loadBasedOn, loadVersion } from "./load";
 import { VersionView, type SetChoice } from "./VersionView";
@@ -33,7 +33,7 @@ export default async function VersionPage({
 
   const [{ data: revision }, { data: auth }, basedOn] = await Promise.all([
     supabase.from("revisions").select("content").eq("id", version.currentRevisionId).maybeSingle(),
-    supabase.auth.getUser(),
+    readUser(supabase),
     loadBasedOn(supabase, version.forkedFromId),
   ]);
   if (!revision) notFound();

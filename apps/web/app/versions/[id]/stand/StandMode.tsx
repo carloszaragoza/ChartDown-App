@@ -20,6 +20,7 @@ import {
 } from "@chartdown/ui";
 import { ArrowUturnLeftIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   useCallback,
@@ -35,7 +36,14 @@ import { SongForm } from "../../../_components/SongForm";
 import { BeatsControl } from "../../../_components/BeatsControl";
 import { useChartLabels } from "../../../_components/chartLabels";
 import type { Display } from "../display";
-import { readSection, standHref, type StandTheme } from "./standHref";
+import {
+  readSection,
+  songsAhead,
+  standHref,
+  withView,
+  type StandTheme,
+  type StandView,
+} from "./standHref";
 
 export interface StandModeProps {
   versionId: string;
@@ -82,17 +90,23 @@ const BACK = new Set(["ArrowLeft", "ArrowUp", "PageUp"]);
 /**
  * Stand mode (R-03.3): the current section in chord-xl, the next in chord-sm, and one tap to
  * move on. Every control is a plain link, so it works without JavaScript; with it, moving is
- * instant and the address follows.
+ * instant and the address follows. Another song, or another View as, starts afresh: the router
+ * keeps the page, so its state would carry over.
  */
-export function StandMode({
+export function StandMode(props: StandModeProps) {
+  const place = new URLSearchParams(props.keep ?? {}).toString();
+  return <StandModeView key={`${props.path ?? props.versionId}?${place}`} {...props} />;
+}
+
+function StandModeView({
   versionId,
   title,
   content,
   section: initial,
-  style,
+  style: initialStyle,
   homeKey,
-  beats = "auto",
-  theme,
+  beats: initialBeats = "auto",
+  theme: initialTheme,
   path = `/versions/${versionId}/stand`,
   keep = {},
   notes,
@@ -103,8 +117,18 @@ export function StandMode({
   const c = useTranslations("chart");
   const v = useTranslations("viewer");
   const labels = useChartLabels();
+  const router = useRouter();
   const chart = useMemo(() => parse(content), [content]);
   const [current, setCurrent] = useState(() => readSection(chart, String(initial + 1)));
+  // Numbers or letters, Beats and the theme change here at once, with no trip to the server
+  // (F-005); the address follows, so a reload or a shared link shows the same.
+  const [view, setView] = useState<StandView>({
+    style: initialStyle,
+    beats: initialBeats,
+    theme: initialTheme,
+  });
+  const { style, beats, theme } = view;
+  const changeView = (changes: Partial<StandView>) => setView((now) => ({ ...now, ...changes }));
   // Whether the browser can go full screen; never on the server.
   const canFullscreen = useSyncExternalStore(
     noChanges,
@@ -124,22 +148,33 @@ export function StandMode({
       keep,
     );
 
-  // Moves to a section (or by a step from the current one) and keeps the address in step.
+  // Moves to a section, or by a step from the current one.
   const move = useCallback(
-    (to: (now: number) => number) =>
-      setCurrent((now) => {
-        const next = Math.min(Math.max(to(now), 0), last);
-        window.history.replaceState(
-          null,
-          "",
-          standHref(path, { section: next, display, theme }, chart, keep),
-        );
-        return next;
-      }),
-    // display and theme come from the address, so they only change with a new page.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [last, path, chart],
+    (to: (now: number) => number) => setCurrent((now) => Math.min(Math.max(to(now), 0), last)),
+    [last],
   );
+  // The address follows the section and the view.
+  useEffect(() => {
+    const address = standHref(
+      path,
+      { section: current, display: { style, key: homeKey, beats }, theme },
+      chart,
+      keep,
+    );
+    if (`${window.location.pathname}${window.location.search}` !== address)
+      window.history.replaceState(null, "", address);
+    // keep is a new object on every render with the same values; path names them.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, style, beats, theme, homeKey, path, chart]);
+
+  // The songs at a set's edges carry the view as it is now, and the one the pedal leads to next
+  // is loaded ahead, so moving on is instant (F-005).
+  const previousSong = set?.previousSong && withView(set.previousSong, view);
+  const nextSong = set?.nextSong && withView(set.nextSong, view);
+  const ahead = songsAhead(current, last, { previousSong, nextSong }).join(" ");
+  useEffect(() => {
+    for (const song of ahead.split(" ").filter(Boolean)) router.prefetch(song);
+  }, [ahead, router]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -148,17 +183,17 @@ export function StandMode({
       if (FORWARD.has(event.key)) {
         event.preventDefault();
         // At a song's edge, the pedal goes on to the next song of the set.
-        if (atEdge.current.last && set?.nextSong) window.location.assign(set.nextSong);
+        if (atEdge.current.last && nextSong) router.push(nextSong);
         else move((now) => now + 1);
       } else if (BACK.has(event.key)) {
         event.preventDefault();
-        if (atEdge.current.first && set?.previousSong) window.location.assign(set.previousSong);
+        if (atEdge.current.first && previousSong) router.push(previousSong);
         else move((now) => now - 1);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [move, set?.nextSong, set?.previousSong]);
+  }, [move, nextSong, previousSong, router]);
 
   const items = formStripItems(chart, current, (index) => Boolean(forYou[index])).map(
     (item, index) => ({
@@ -167,13 +202,22 @@ export function StandMode({
     }),
   );
   const sectionHrefs = items.map((item) => item.href);
-  // A link to another section of this song (FormStrip, Previous, Next) moves without a page load.
+  const otherStyle = style === "letters" ? "numbers" : "letters";
+  const otherTheme = theme === "stage" ? "light" : "stage";
+  const styleHref = href(current, { display: { ...display, style: otherStyle } });
+  const themeHref = href(current, { theme: otherTheme });
+  // A link to another section of this song (FormStrip, Previous, Next) moves without a page
+  // load, and numbers or letters and the theme change in place (F-005).
   const onClickCapture = (event: MouseEvent<HTMLDivElement>) => {
     const link = (event.target as HTMLElement).closest("a");
-    const section = link ? sectionHrefs.indexOf(link.getAttribute("href") ?? "") : -1;
-    if (section < 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
+    if (!link || event.metaKey || event.ctrlKey || event.shiftKey) return;
+    const to = link.getAttribute("href") ?? "";
+    const section = sectionHrefs.indexOf(to);
+    if (section >= 0) move(() => section);
+    else if (to === styleHref) changeView({ style: otherStyle });
+    else if (to === themeHref) changeView({ theme: otherTheme });
+    else return;
     event.preventDefault();
-    move(() => section);
   };
   const describe = (item: FormStripItem) =>
     [
@@ -194,7 +238,7 @@ export function StandMode({
   const viewAs = set?.viewAs;
   const chooseView = (label: string) => {
     const option = viewAs?.options.find((item) => item.label === label);
-    if (option && !option.current) window.location.assign(atSection(option.href, current));
+    if (option && !option.current) router.push(atSection(withView(option.href, view), current));
   };
 
   return (
@@ -252,11 +296,11 @@ export function StandMode({
                       icon={<Icon icon={ChevronLeftIcon} />}
                     />
                   ) : (
-                    set?.previousSong && (
+                    previousSong && (
                       <Button
                         label={t("previousSong")}
                         size="lg"
-                        href={set.previousSong}
+                        href={previousSong}
                         icon={<Icon icon={ChevronLeftIcon} />}
                       />
                     )
@@ -270,11 +314,11 @@ export function StandMode({
                       endContent={<Icon icon={ChevronRightIcon} />}
                     />
                   ) : (
-                    set?.nextSong && (
+                    nextSong && (
                       <Button
                         label={t("nextSong")}
                         size="lg"
-                        href={set.nextSong}
+                        href={nextSong}
                         variant="primary"
                         endContent={<Icon icon={ChevronRightIcon} />}
                       />
@@ -296,9 +340,7 @@ export function StandMode({
                 <HStack gap={2} wrap="wrap">
                   <Button
                     label={style === "letters" ? v("numbers") : v("letters")}
-                    href={href(current, {
-                      display: { ...display, style: style === "letters" ? "numbers" : "letters" },
-                    })}
+                    href={styleHref}
                     as={Link}
                     variant="secondary"
                   />
@@ -309,6 +351,7 @@ export function StandMode({
                       auto: href(current, { display: { ...display, beats: "auto" } }),
                       always: href(current, { display: { ...display, beats: "always" } }),
                     }}
+                    onChoose={(mode) => changeView({ beats: mode })}
                     words={{
                       label: c("beatsLabel"),
                       name: c("beatsName"),
@@ -319,7 +362,7 @@ export function StandMode({
                   />
                   <Button
                     label={theme === "stage" ? t("light") : t("stage")}
-                    href={href(current, { theme: theme === "stage" ? "light" : "stage" })}
+                    href={themeHref}
                     as={Link}
                     variant="secondary"
                   />

@@ -5,7 +5,7 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../lib/auth/enabled";
-import { createClient } from "../../lib/supabase/server";
+import { createClient, readUser } from "../../lib/supabase/server";
 import { SetList } from "./SetList";
 
 type One<T> = T | T[] | null;
@@ -30,7 +30,7 @@ export default async function AllSetsPage({
 }) {
   if (!authEnabled()) notFound();
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
+  const { data: auth } = await readUser(supabase);
   if (!auth.user) redirect("/auth/sign-in?next=/sets");
   const { data } = await supabase
     .from("sets")

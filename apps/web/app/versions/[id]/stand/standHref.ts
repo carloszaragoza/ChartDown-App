@@ -36,3 +36,42 @@ export function readSection(chart: Chart, value: string | undefined): number {
   if (!Number.isFinite(asked) || asked < 0) return 0;
   return Math.min(asked, Math.max(chart.sections.length - 1, 0));
 }
+
+/** How stand mode is being shown: numbers or letters, Beats and the theme. */
+export interface StandView {
+  style: Display["style"];
+  beats: Display["beats"];
+  theme: StandTheme;
+}
+
+/**
+ * A link that carries how stand mode is shown now (F-005): the view, Beats and the theme change
+ * in the browser, so the links to other songs and to View as follow them, not the server's.
+ */
+export function withView(href: string, view: StandView): string {
+  const [path = href, query = ""] = href.split("?");
+  const params = new URLSearchParams(query);
+  if (view.style === "letters") params.set("view", "letters");
+  else params.delete("view");
+  if (view.beats !== "auto") params.set("beats", view.beats);
+  else params.delete("beats");
+  if (view.theme === "stage") params.set("theme", "stage");
+  else params.delete("theme");
+  const rest = params.toString();
+  return rest ? `${path}?${rest}` : path;
+}
+
+/**
+ * The songs the pedal may lead to next (F-005): the next one at the last section, the previous
+ * one at the first. They are loaded ahead, so moving on is instant.
+ */
+export function songsAhead(
+  current: number,
+  last: number,
+  songs: { previousSong?: string | undefined; nextSong?: string | undefined },
+): string[] {
+  return [
+    ...(current === last && songs.nextSong ? [songs.nextSong] : []),
+    ...(current === 0 && songs.previousSong ? [songs.previousSong] : []),
+  ];
+}

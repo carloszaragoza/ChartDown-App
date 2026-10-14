@@ -13,7 +13,7 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../lib/auth/enabled";
-import { createClient } from "../../lib/supabase/server";
+import { createClient, readUser } from "../../lib/supabase/server";
 import { SOURCE_TYPES, type SourceType } from "../../lib/versions/validate";
 import { AddIcon, ForkIcon, PublicIcon } from "../_components/ActionIcons";
 import { forkVersion } from "../versions/[id]/actions";
@@ -59,7 +59,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
   const supabase = await createClient();
   const [{ data, error }, { data: auth }] = await Promise.all([
     supabase.rpc("catalog", { query, source, page }),
-    supabase.auth.getUser(),
+    readUser(supabase),
   ]);
   const rows = (data ?? []) as Row[];
   const songs = rows.slice(0, PAGE_SIZE);

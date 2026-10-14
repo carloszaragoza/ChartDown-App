@@ -5,7 +5,7 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../../lib/auth/enabled";
-import { createClient } from "../../../../../lib/supabase/server";
+import { createClient, readUser } from "../../../../../lib/supabase/server";
 import { readDisplay } from "../../display";
 import { loadVersion } from "../../load";
 import { VersionView } from "../../VersionView";
@@ -26,7 +26,7 @@ export default async function RevisionPage({
   const supabase = await createClient();
   const [version, { data: auth }] = await Promise.all([
     loadVersion(supabase, id),
-    supabase.auth.getUser(),
+    readUser(supabase),
   ]);
   if (!version || !auth.user || auth.user.id !== version.ownerId) notFound();
 

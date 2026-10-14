@@ -11,7 +11,7 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";
-import { createClient } from "../../../lib/supabase/server";
+import { createClient, readUser } from "../../../lib/supabase/server";
 import { AddIcon } from "../../_components/ActionIcons";
 import { SearchField } from "../../_components/SearchField";
 import { VersionForm } from "./VersionForm";
@@ -35,7 +35,7 @@ export default async function NewVersionPage({ searchParams }: { searchParams: S
   if (!authEnabled()) notFound();
   const { q = "", song: chosen } = await searchParams;
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
+  const { data: auth } = await readUser(supabase);
   if (!auth.user) redirect("/auth/sign-in?next=/versions/new");
   const t = await getTranslations("newVersion");
   const c = await getTranslations("catalog");

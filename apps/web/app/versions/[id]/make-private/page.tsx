@@ -11,7 +11,7 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../lib/auth/enabled";
-import { createClient } from "../../../../lib/supabase/server";
+import { createClient, readUser } from "../../../../lib/supabase/server";
 import { makePrivate } from "../actions";
 import { loadVersion } from "../load";
 
@@ -28,7 +28,7 @@ export default async function MakePrivatePage({
   const supabase = await createClient();
   const [version, { data: auth }] = await Promise.all([
     loadVersion(supabase, id),
-    supabase.auth.getUser(),
+    readUser(supabase),
   ]);
   if (
     !version ||

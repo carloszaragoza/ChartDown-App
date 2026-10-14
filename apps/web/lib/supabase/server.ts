@@ -21,3 +21,32 @@ export async function createClient() {
     },
   );
 }
+
+/** Who is signed in, as a page needs it: their id and email. */
+export interface SignedIn {
+  id: string;
+  email?: string;
+}
+
+/** The parts of a Supabase client that reading the session's claims needs. */
+interface ClaimsReader {
+  auth: {
+    getClaims(): Promise<{ data: { claims: { sub?: string; email?: string } } | null }>;
+  };
+}
+
+/**
+ * Who is signed in, for pages (F-005): read from the session token's claims, verified with the
+ * project's public signing key (ES256) without a call to Supabase Auth. Row-level security still
+ * decides what every query returns; server actions keep asking Supabase Auth (`getUser()`).
+ */
+export async function readUser(
+  supabase: ClaimsReader,
+): Promise<{ data: { user: SignedIn } } | { data: { user: null } }> {
+  const { data } = await supabase.auth.getClaims();
+  const claims = data?.claims;
+  if (!claims?.sub) return { data: { user: null } };
+  return {
+    data: { user: { id: claims.sub, ...(claims.email ? { email: claims.email } : {}) } },
+  };
+}

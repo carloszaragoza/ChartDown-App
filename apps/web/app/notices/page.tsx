@@ -12,7 +12,7 @@ import { notFound, redirect } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../lib/auth/enabled";
 import { type Notice } from "../../lib/notices/notice";
-import { createClient } from "../../lib/supabase/server";
+import { createClient, readUser } from "../../lib/supabase/server";
 import { markAllRead } from "./actions";
 import { noticeTexts } from "./text";
 
@@ -25,7 +25,7 @@ const LIMIT = 100;
 export default async function NoticesPage() {
   if (!authEnabled()) notFound();
   const supabase = await createClient();
-  const { data: auth } = await supabase.auth.getUser();
+  const { data: auth } = await readUser(supabase);
   if (!auth.user) redirect("/auth/sign-in?next=/notices");
   const { data } = await supabase
     .from("notifications")
