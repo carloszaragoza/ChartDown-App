@@ -8,7 +8,50 @@
 ```
 
 ```json
-{ "sections": [{ "name": "Verse 1 (half time)", "line": 1 }] }
+{
+  "chartdown": null,
+  "meta": {},
+  "key": "C",
+  "minor": false,
+  "sections": [
+    {
+      "name": "Verse 1 (half time)",
+      "use": null,
+      "notes": [],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
+  "warnings": []
+}
 ```
 
 ### 4 > adds a plain note for everyone
@@ -21,9 +64,50 @@
 
 ```json
 {
+  "chartdown": null,
+  "meta": {},
+  "key": "C",
+  "minor": false,
   "sections": [
-    { "notes": [{ "md": false, "roles": ["everyone"], "text": "Watch the stops.", "line": 2 }] }
-  ]
+    {
+      "name": "A",
+      "use": null,
+      "notes": [
+        { "md": false, "roles": ["everyone"], "passes": [], "text": "Watch the stops." }
+      ],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
+  "warnings": []
 }
 ```
 
@@ -37,13 +121,50 @@
 
 ```json
 {
+  "chartdown": null,
+  "meta": {},
+  "key": "C",
+  "minor": false,
   "sections": [
     {
+      "name": "Chorus",
+      "use": null,
       "notes": [
-        { "md": true, "roles": ["everyone"], "text": "Open it up a little. Don't go all out yet." }
+        { "md": true, "roles": ["everyone"], "passes": [], "text": "Open it up a little. Don't go all out yet." }
+      ],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
       ]
     }
-  ]
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
+  "warnings": []
 }
 ```
 
@@ -58,13 +179,49 @@
 
 ```json
 {
+  "chartdown": null,
+  "meta": {},
+  "key": "C",
+  "minor": false,
   "sections": [
     {
+      "name": "Chorus",
+      "use": null,
       "notes": [
-        { "md": true, "roles": ["drums"], "text": "Light groove. Hi-hat or ride, no crashes." },
-        { "md": true, "roles": ["bass", "keys"], "text": "Root notes only." }
+        { "md": true, "roles": ["drums"], "passes": [], "text": "Light groove. Hi-hat or ride, no crashes." },
+        { "md": true, "roles": ["bass", "keys"], "passes": [], "text": "Root notes only." }
+      ],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
       ]
     }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
   ],
   "warnings": []
 }
@@ -79,5 +236,50 @@
 ```
 
 ```json
-{ "sections": [{ "notes": [{ "md": true, "text": "Count: one, two, three." }] }] }
+{
+  "chartdown": null,
+  "meta": {},
+  "key": "C",
+  "minor": false,
+  "sections": [
+    {
+      "name": "A",
+      "use": null,
+      "notes": [
+        { "md": true, "roles": ["everyone"], "passes": [], "text": "Count: one, two, three." }
+      ],
+      "rows": [
+        {
+          "key": "C",
+          "meter": "4/4",
+          "tempo": null,
+          "bars": [
+            {
+              "number": 1,
+              "beats": 4,
+              "pickup": false,
+              "meter": null,
+              "repeatStart": false,
+              "repeatEnd": false,
+              "times": null,
+              "ending": null,
+              "dynamic": null,
+              "tempoMark": null,
+              "nav": [],
+              "cues": [],
+              "lyric": null,
+              "items": [
+                { "type": "chord", "root": "1", "degree": 0, "quality": "", "bass": null, "bassDegree": null, "beats": 4, "push": 0, "hold": false, "stab": false, "fermata": false }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "playOrder": [
+    { "section": 0, "bar": 1, "pass": 1 }
+  ],
+  "warnings": []
+}
 ```

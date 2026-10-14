@@ -1,138 +1,49 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { chordFormatter, keyName, parseKeyName } from "./display.js";
-import { parse } from "./parse.js";
-import type { Chart } from "./types.js";
+import { display, toJSON } from "./conformance.js";
 
-// Spec sections with parser rules: each needs at least one passing case.
-const REQUIRED = [
-  "2",
-  "3",
-  "4",
-  "4.1",
-  "5",
-  "5.1",
-  "5.2",
-  "5.3",
-  "6",
-  "7",
-  "7.1",
-  "8",
-  "9",
-  "9.1",
-  "10",
-  "10.1",
-  "11.1",
-  "11.2",
-  "11.3",
-  "12",
-  "13",
-  "14",
-  "15",
-];
-// Spec sections without parser rules, listed so nothing is skipped silently.
-const NOT_PARSER_RULES: Record<string, string> = {
-  "1": "goals",
-  "4.2": "views: the per-instrument view (T-203, T-802)",
-  "16": "roadmap",
-  "17": "changelog",
-};
+const root = fileURLToPath(new URL("..", import.meta.url));
 
-interface Case {
-  file: string;
-  section: string;
-  title: string;
-  source: string;
-  expected: string;
-  /** Display options: the case then checks the chords as shown, not the parsed tree. */
-  display?: string;
-  todo?: string;
-}
+describe("R-00.12 chartdown passes the official ChartDown conformance suite", () => {
+  it("R-00.12 the suite is a copy pinned to a commit of github.com/ChartDown/spec", () => {
+    const pinned = readFileSync(new URL("../conformance/PINNED.md", import.meta.url), "utf8");
+    expect(pinned).toMatch(/github\.com\/ChartDown\/spec/);
+    expect(pinned).toMatch(/`[0-9a-f]{40}`/);
+  });
 
-const DIR = new URL("../conformance/", import.meta.url);
-
-function readCases(): Case[] {
-  const cases: Case[] = [];
-  for (const file of readdirSync(DIR)
-    .filter((name) => /^\d{2}(\.\d+)?-.+\.md$/.test(name))
-    .sort()) {
-    const chunks = readFileSync(new URL(file, DIR), "utf8").split(/^### /m).slice(1);
-    for (const chunk of chunks) {
-      const heading = chunk.slice(0, chunk.indexOf("\n")).trim();
-      const [section = "", ...words] = heading.split(" ");
-      const source = /```chartdown\n([\s\S]*?)```/.exec(chunk)?.[1];
-      const expected = /```json\n([\s\S]*?)```/.exec(chunk)?.[1];
-      if (source === undefined || expected === undefined) {
-        throw new Error(`${file}: "${heading}" needs a chartdown block and a json block`);
+  it(
+    "R-00.12 every case passes through the suite's own runner, sections without a case included",
+    { timeout: 120_000 },
+    () => {
+      // The runner imports the adapter as JavaScript: the package is built first.
+      const tsc = createRequire(import.meta.url).resolve("typescript/bin/tsc");
+      execFileSync(process.execPath, [tsc, "-p", "tsconfig.build.json"], { cwd: root });
+      let out: string;
+      try {
+        out = execFileSync(process.execPath, ["conformance/run.mjs", "dist/conformance.js"], {
+          cwd: root,
+          encoding: "utf8",
+        });
+      } catch (error) {
+        // The runner exits with 1 and lists what failed.
+        throw new Error((error as { stdout?: string }).stdout ?? String(error));
       }
-      const todo = /^todo:\s*(.+)$/m.exec(chunk)?.[1];
-      const display = /```display\n([\s\S]*?)```/.exec(chunk)?.[1];
-      const item: Case = { file, section, title: words.join(" "), source, expected };
-      if (todo !== undefined) item.todo = todo;
-      if (display !== undefined) item.display = display;
-      cases.push(item);
-    }
-  }
-  return cases;
-}
-
-/** A chart as shown: its home key, each row's key, and each row as "chord chord | chord". */
-function shown(chart: Chart, display: string) {
-  const options = JSON.parse(display) as { style: "numbers" | "letters"; key?: string };
-  const key = options.key === undefined ? undefined : parseKeyName(options.key);
-  const fmt = chordFormatter(
-    chart,
-    key === undefined ? { style: options.style } : { style: options.style, key },
+      expect(out).toMatch(/^\d+ passed, 0 failed$/m);
+      expect(out).not.toMatch(/skipped|Spec sections with no case/);
+    },
   );
-  const rows = chart.sections.flatMap((section) => section.rows);
-  const special = { "no-chord": "x", "repeat-bar": "%", tie: "=" } as const;
-  return {
-    homeKey: keyName(fmt.homeKey),
-    keys: rows.map((row) => keyName(fmt.rowKey(row))),
-    rows: rows.map((row) =>
-      row.bars
-        .map((bar) =>
-          bar.items
-            .map((item) =>
-              item.type === "chord"
-                ? fmt.chord(item, row).text
-                : item.type === "riff"
-                  ? `R[ ${item.notes.map((note) => (note.type === "rest" ? "x" : fmt.root(note.root, row))).join(" ")} ]`
-                  : special[item.type],
-            )
-            .join(" "),
-        )
-        .join(" | "),
-    ),
-  };
-}
 
-const cases = readCases();
-const passing = cases.filter((c) => c.todo === undefined);
-
-describe("R-00.3 conformance with ChartDown 0.6", () => {
-  it.each(passing)("R-00.3 spec $section $title", ({ source, expected, display }) => {
-    const chart = parse(source);
-    expect(display === undefined ? chart : shown(chart, display)).toMatchObject(
-      JSON.parse(expected),
-    );
-  });
-
-  for (const c of cases.filter((c) => c.todo !== undefined)) {
-    it.todo(`spec ${c.section} ${c.title} (${c.todo})`);
-  }
-
-  it("R-00.3 every spec section with parser rules has passing cases", () => {
-    const covered = new Set(passing.map((c) => c.section));
-    expect(REQUIRED.filter((section) => !covered.has(section))).toEqual([]);
-  });
-
-  it("R-00.3 cases only name spec sections with parser rules", () => {
-    const misplaced = cases.filter((c) => !REQUIRED.includes(c.section));
+  it("R-00.12 the adapter gives the JSON form and the chords as shown", () => {
+    expect(toJSON("## Verse\n1 | 4\n").sections[0]?.name).toBe("Verse");
     expect(
-      misplaced.map(
-        (c) => `${c.file}: ${c.section} (${NOT_PARSER_RULES[c.section] ?? "unknown section"})`,
-      ),
-    ).toEqual([]);
+      display("---\nkey: G\n---\n## A\n1 | 4 | 5 | 6m\n", { style: "letters", key: "A" }),
+    ).toEqual({
+      homeKey: "A",
+      keys: ["A"],
+      rows: ["A | D | E | F#m"],
+    });
   });
 });
