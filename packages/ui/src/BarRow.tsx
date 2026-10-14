@@ -298,8 +298,11 @@ export function BarRow({
       ? 1
       : Math.max(bar.pickup / meterOf(bar, row, meter).beats, PICKUP_MIN),
   );
-  const bars = { "--chart-bars": Math.max(1, row.bars.length) } as CSSProperties &
-    Record<string, unknown>;
+  const bars = {
+    "--chart-bars": Math.max(1, row.bars.length),
+    // On a phone in portrait a row wraps into lines of two bars (R-03.8, chart.css).
+    "--chart-bars-phone": Math.min(2, Math.max(1, row.bars.length)),
+  } as CSSProperties & Record<string, unknown>;
   if (weights.some((weight) => weight !== 1)) {
     bars["--chart-bar-columns"] = weights
       .map((weight) => `minmax(calc(var(--chart-bar-min-width) * ${weight}), ${weight}fr)`)

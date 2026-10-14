@@ -173,6 +173,41 @@ describe("T-1309 the chart viewer", () => {
   });
 });
 
+describe("T-2202 bar rows on a phone", () => {
+  const css = readFileSync(join(__dirname, "chart.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const phone = /@media \(max-width: 599px\) \{([\s\S]*?)\n\}/.exec(css)?.[1] ?? "";
+  const columns = (written: string) =>
+    /--chart-bars-phone:(\d+)/.exec(
+      render(
+        <BarRow
+          row={parse(written).sections[0]!.rows[0]!}
+          formatter={chordFormatter(parse(written), { style: "numbers" })}
+        />,
+      ),
+    )?.[1];
+
+  it("R-03.8 a row of four wraps into lines of two bars on a phone; a shorter row keeps its bars", () => {
+    expect(columns("## A\n1 | 4 | 5 | 1\n")).toBe("2");
+    expect(columns("## A\n1 | 4 | 5\n")).toBe("2");
+    expect(columns("## A\n1 | 4\n")).toBe("2");
+    expect(columns("## A\n1\n")).toBe("1");
+    expect(phone).toMatch(/grid-template-columns: repeat\(\s*var\(--chart-bars-phone\)/);
+  });
+
+  it("R-03.8 on a phone every line starts with a bar line, a repeat's where one starts", () => {
+    expect(phone).toMatch(
+      /\.cd-chart__bar:nth-child\(odd\) \{\s*border-inline-start: var\(--chart-bar-line\)/,
+    );
+    expect(phone).toMatch(
+      /\.cd-chart__bar--repeat-start:nth-child\(odd\) \{\s*border-inline-start: var\(--chart-repeat-line\)/,
+    );
+  });
+
+  it("R-03.8 on a phone stand mode's chords are drawn at the viewer's size", () => {
+    expect(phone).toMatch(/\.cd-chart--lg \{\s*--chart-chord-size: var\(--font-size-3xl\)/);
+  });
+});
+
 describe("T-1301 MDNotes", () => {
   it("R-06.1 a note for everyone says MD; an instrument's note says the instrument; never color alone", () => {
     const html = render(
