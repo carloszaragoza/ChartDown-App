@@ -333,7 +333,7 @@ No personal data of a departed user remains, which removes the risk with privacy
 
 ### 12.6 Names, repositories and business model
 
-- **ChartDown** is the language: the notation, the `.chartdown` format, the spec, guides and reference playground. Open on GitHub (spec CC0, code MIT) at `github.com/ChartDown/Language`, so anyone can build their own app.
+- **ChartDown** is the language: the notation, the `.chartdown` format, the spec, guides and reference playground. Open on GitHub (spec CC0, code MIT) at `github.com/ChartDown/spec`, so anyone can build their own app; its conformance suite (Appendix B) defines what a compatible parser is. The earlier `github.com/ChartDown/Language` is private since October 2026, so nothing links to it.
 - **ChartDown App** is the product we build: catalog, bands, sets, MD layer and per-instrument view. All its code, including the landing page, lives in the private repository `github.com/carloszaragoza/ChartDown-App` (moved from the ChartDown organization on October 3, 2026).
 - **Domain:** `chartdown.app`.
 - **npm package:** the parser in `packages/core` is published as `chartdown`, MIT, with the version of the ChartDown spec it implements in its description (T-107). The `@chartdown` scope on npm belongs to an unrelated project (maps for role-playing games), so the package has no scope. Its owner publishes it from their npm account; the repository it points to is the public language repository.
