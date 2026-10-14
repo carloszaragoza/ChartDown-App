@@ -1,7 +1,7 @@
 import { layoutBeats } from "./beats.js";
 import { degree } from "./display.js";
 import { playOrder, type PlayStep } from "./navigation.js";
-import type { Bar, BarItem, Chart, Cue, Key, Row, Section } from "./types.js";
+import type { Bar, BarItem, Chart, Cue, Key, Numbering, Row, Section } from "./types.js";
 
 export interface RiffNoteJson {
   rest?: true;
@@ -55,6 +55,8 @@ export interface BarJson {
 
 export interface RowJson {
   key: string;
+  /** Whether the row is in a minor key (ChartDown 0.7). */
+  minor: boolean;
   meter: string;
   tempo: number | null;
   bars: BarJson[];
@@ -73,6 +75,8 @@ export interface ChartJson {
   meta: Record<string, string>;
   key: string;
   minor: boolean;
+  /** How numbers count in a minor key (ChartDown 0.7, spec 3). */
+  numbering: Numbering;
   sections: SectionJson[];
   playOrder: Pick<PlayStep, "section" | "bar" | "pass">[];
   warnings: { line: number; code: string; message: string }[];
@@ -80,7 +84,7 @@ export interface ChartJson {
 
 const meterText = (meter: { beats: number; unit: number }) => `${meter.beats}/${meter.unit}`;
 
-function itemJson(item: BarItem, share: number, key: Key): ItemJson {
+function itemJson(item: BarItem, share: number, key: Key, numbering: Numbering): ItemJson {
   switch (item.type) {
     case "repeat-bar":
       return { type: "repeat" };
@@ -98,7 +102,7 @@ function itemJson(item: BarItem, share: number, key: Key): ItemJson {
             ? { rest: true, beats: shares[index] as number }
             : {
                 root: note.root,
-                degree: degree(note.root, key),
+                degree: degree(note.root, key, numbering),
                 beats: shares[index] as number,
               },
         ),
@@ -108,10 +112,10 @@ function itemJson(item: BarItem, share: number, key: Key): ItemJson {
       return {
         type: "chord",
         root: item.root,
-        degree: degree(item.root, key),
+        degree: degree(item.root, key, numbering),
         quality: item.quality,
         bass: item.bass ?? null,
-        bassDegree: item.bass === undefined ? null : degree(item.bass, key),
+        bassDegree: item.bass === undefined ? null : degree(item.bass, key, numbering),
         beats: share,
         push: item.push ? (item.shortPush ? 2 : 1) : 0,
         hold: item.hold,
@@ -121,7 +125,7 @@ function itemJson(item: BarItem, share: number, key: Key): ItemJson {
   }
 }
 
-function barJson(bar: Bar, row: Row): BarJson {
+function barJson(bar: Bar, row: Row, numbering: Numbering): BarJson {
   const total = bar.pickup ?? bar.meter?.beats ?? row.meter.beats;
   const timed = bar.items.flatMap((item) =>
     item.type === "chord" || item.type === "no-chord" || item.type === "riff" ? [item] : [],
@@ -150,12 +154,13 @@ function barJson(bar: Bar, row: Row): BarJson {
           ? (shares[next++] as number)
           : 0,
         row.key,
+        numbering,
       ),
     ),
   };
 }
 
-function sectionJson(section: Section): SectionJson {
+function sectionJson(section: Section, numbering: Numbering): SectionJson {
   return {
     name: section.name,
     use: section.use?.name ?? null,
@@ -167,9 +172,10 @@ function sectionJson(section: Section): SectionJson {
     })),
     rows: section.rows.map((row) => ({
       key: row.key.root,
+      minor: row.key.minor,
       meter: meterText(row.meter),
       tempo: row.tempo ?? null,
-      bars: row.bars.map((bar) => barJson(bar, row)),
+      bars: row.bars.map((bar) => barJson(bar, row, numbering)),
     })),
   };
 }
@@ -185,7 +191,8 @@ export function toJSON(chart: Chart): ChartJson {
     meta: chart.header,
     key: chart.key.root,
     minor: chart.key.minor,
-    sections: chart.sections.map(sectionJson),
+    numbering: chart.numbering,
+    sections: chart.sections.map((section) => sectionJson(section, chart.numbering)),
     // Appendix A has three fields per step; `jump` is for renderers.
     playOrder: playOrder(chart).map(({ section, bar, pass }) => ({ section, bar, pass })),
     warnings: chart.warnings.map(({ line, code, message }) => ({ line, code, message })),

@@ -1,6 +1,6 @@
-// Reference copy of the ChartDown 0.6 playground parser, used only by
+// Reference copy of the ChartDown 0.7 playground parser, used only by
 // src/playground.test.ts to check that the TypeScript port matches it.
-// Source: github.com/ChartDown/spec, playground/index.html at bd10785 (ChartDown 0.6).
+// Source: github.com/ChartDown/spec, playground/index.html at 1e103c9 (ChartDown 0.7).
 // Copyright (c) 2026 ChartDown contributors. MIT License.
 // Extracted verbatim (music helpers, roles, parser, play order and JSON form); `export` added at the end.
 "use strict";
@@ -18,7 +18,9 @@ const NAV = {segno:'Segno', coda:'Coda', tocoda:'To Coda', fine:'Fine', ds:'D.S.
   dsalfine:'D.S. al Fine', dc:'D.C.', dcalcoda:'D.C. al Coda', dcalfine:'D.C. al Fine'};
 const JUMPS = ['ds','dsalcoda','dsalfine','dc','dcalcoda','dcalfine'];
 const normWord = t => t.toLowerCase().replace(/[.\s]/g, '');
+// Spec 12: the common name of each key, used when a display transposes it.
 const KEY_LIST = ['C','Db','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+const MINOR_KEYS = ['C','C#','D','Eb','E','F','F#','G','G#','A','Bb','B'];
 
 const isNum = s => /^[b#]?[1-7]$/.test(s);
 function keySemi(k){
@@ -26,11 +28,15 @@ function keySemi(k){
   if(!m) return 0;
   return (LET[m[1]] + (m[2]==='#'?1:m[2]==='b'?-1:0) + 12) % 12;
 }
-const useFlats = k => k === 'F' || /b/.test(k || '');
-function rel(str, srcKey){
+// Spec 12: flats in F, Bb, Eb, Ab, Db, Gb. A minor key spells like its relative major (Dm like F).
+const useFlats = (k, minor) => minor ? [1, 3, 5, 6, 8, 10].includes((keySemi(k) + 3) % 12) : k === 'F' || /b/.test(k || '');
+// Spec 3: with  numbering: 6m , numbers in a minor key count from its relative major (6m is the tonic).
+let SIX = false;
+const sixShift = minor => SIX && minor ? 3 : 0;
+function rel(str, srcKey, minor){
   const n = /^([b#]?)([1-7])$/.exec(str);
   if(n){
-    let s = SCALE[+n[2]-1];
+    let s = SCALE[+n[2]-1] + sixShift(minor);
     if(n[1]==='b') s--; else if(n[1]==='#') s++;
     return (s + 12) % 12;
   }
@@ -38,11 +44,13 @@ function rel(str, srcKey){
   const a = LET[l[1]] + (l[2]==='#'?1:l[2]==='b'?-1:0);
   return (((a - keySemi(srcKey)) % 12) + 12) % 12;
 }
-function showRoot(str, mode, srcKey, dispKey){
-  if(mode === 'numbers') return isNum(str) ? str : NUMS[rel(str, srcKey)];
+// Spec 12: number style shows every minor quality with - (6m7 reads 6-7); maj qualities are unchanged.
+const showQuality = (q, mode) => mode === 'numbers' && q.startsWith('m') && !q.startsWith('maj') ? '-' + q.slice(1) : q;
+function showRoot(str, mode, srcKey, dispKey, minor){
+  if(mode === 'numbers') return isNum(str) ? str : NUMS[(rel(str, srcKey) - sixShift(minor) + 12) % 12];
   if(!isNum(str) && dispKey === srcKey) return str;
-  const names = useFlats(dispKey) ? FLAT : SHARP;
-  return names[(keySemi(dispKey) + rel(str, srcKey)) % 12];
+  const names = useFlats(dispKey, minor) ? FLAT : SHARP;
+  return names[(keySemi(dispKey) + rel(str, srcKey, minor)) % 12];
 }
 
 /* ---------- Roles ---------- */
@@ -52,6 +60,8 @@ const ROLE_ALIAS = {all:'all',band:'all',everyone:'all',drums:'drums',drum:'drum
   sax:'sax',saxophone:'sax',tpt:'tpt',trumpet:'tpt',tbn:'tbn',trombone:'tbn',vln:'vln',violin:'vln'};
 const ROLE_LABEL = {drums:'Drums',bass:'Bass',keys:'Keys',gtr:'Guitar',vox:'Vocals',sax:'Saxophone',tpt:'Trumpet',tbn:'Trombone',vln:'Violin'};
 let CUSTOM = {};
+// Spec 3: versions this parser reads. Any other is a warning, and the file is still read.
+const READABLE = ['0.3', '0.4', '0.5', '0.6', '0.7'];
 const roleLabel = r => ROLE_LABEL[r] || CUSTOM[r] || (r.charAt(0).toUpperCase() + r.slice(1));
 function parseRoles(s){
   const parts = s.split(/[,\/&\s]+/).filter(Boolean).map(x => x.toLowerCase());
@@ -74,20 +84,35 @@ function parseNote(t, n, warn){
   }
   return {md:false, roles:['all'], passes:[], text:t, line:n};
 }
-function parseCue(t){
+function parseCue(t, n, warn){
+  const unknown = who => { warn(n, 'Unknown instrument \u201c' + who + '\u201d in a cue'); return {roles:['all'], passes:[], text:t}; };
   const pm = PASS_RE.exec(t);
   if(pm){
     const rest = pm[2];
     if(rest.startsWith(':')) return {roles:['all'], passes:parsePasses(pm[1]), text:rest.slice(1).trim()};
     const m = /^([A-Za-z][A-Za-z,\/& ]*?)\s*:\s*(.+)$/.exec(rest);
-    if(m){ const r = parseRoles(m[1]); if(r) return {roles:r, passes:parsePasses(pm[1]), text:m[2].trim()}; }
+    if(m){ const r = parseRoles(m[1]); if(r) return {roles:r, passes:parsePasses(pm[1]), text:m[2].trim()}; return unknown(m[1]); }
   }
   const m = /^([A-Za-z][A-Za-z,\/& ]*?)\s*:\s*(.+)$/.exec(t);
-  if(m){ const r = parseRoles(m[1]); if(r) return {roles:r, passes:[], text:m[2].trim()}; }
+  if(m){ const r = parseRoles(m[1]); if(r) return {roles:r, passes:[], text:m[2].trim()}; return unknown(m[1]); }
   return {roles:['all'], passes:[], text:t};
 }
 
 /* ---------- Parser ---------- */
+// Spec 6: a quality is rewritten from its aliases, then kept in its canonical form when it fits the
+// quality grammar. Anything else passes through as written.
+const QUALITY_RE = /^(?:5|(?:m|dim|aug)?(?:maj(?:7|9|11|13)|6|7|9|11|13|69)?(?:[b#](?:5|9|11|13))*(?:alt)?(?:sus2?)?(?:add(?:2|4|9|11|13))*)$/;
+function normQuality(written){
+  let q = written.replace(/[()]/g, '')
+    .replace(/^(?:min|mi|-)/, 'm')
+    .replace(/^\u00f8(?:7)?/, 'm7b5')
+    .replace(/^(?:\u00b0|o)7/, 'dim7').replace(/^(?:\u00b0|o)/, 'dim')
+    .replace(/^\+/, 'aug')
+    .replace(/\u0394(?!\d)/, 'maj7').replace(/\u0394|(?:M|ma)(?=\d)/, 'maj')
+    .replace(/sus4/, 'sus');
+  if(QUALITY_RE.test(q)) return q;
+  return written.startsWith('-') ? 'm' + written.slice(1) : written;
+}
 function parseToken(tok){
   if(tok === '%') return {t:'rep'};
   if(tok === '=') return {t:'tie'};
@@ -102,9 +127,7 @@ function parseToken(tok){
   if(s.startsWith('<') && s.endsWith('>')){ hold = true; s = s.slice(1,-1); }
   const cm = s.match(/^([b#]?[1-7]|[A-G][b#]?)([^\/]*)(?:\/([b#]?[1-7]|[A-G][b#]?))?$/);
   if(!cm) return null;
-  let q = cm[2];
-  if(q === '-') q = 'm'; else if(q.startsWith('-')) q = 'm' + q.slice(1);
-  return {t:'chord', root:cm[1], q, bass:cm[3]||null, beats, explicit, push, hold, stab, ferm};
+  return {t:'chord', root:cm[1], q:normQuality(cm[2]), bass:cm[3]||null, beats, explicit, push, hold, stab, ferm};
 }
 
 const ROOT_RE = /^(?:[b#]?[1-7]|[A-G][b#]?)$/;
@@ -145,7 +168,7 @@ function parseBar(seg, n, warn, bpb){
     if(DYN.has(w)) bar.dyn = w;
     else if(TEMPO_MARK[w]) bar.tempo = w;
     else if(NAV[w]) bar.nav.push(w);
-    else if(t) bar.cues.push(parseCue(t));
+    else if(t) bar.cues.push(parseCue(t, n, warn));
     return ' ';
   });
   seg = seg.replace(/^\s*\[p:(\d+(?:\.\d+)?)\]/, (_, p) => { bar.pickup = parseFloat(p); return ' '; });
@@ -199,20 +222,29 @@ function parse(src){
   const warn = (line, msg) => doc.warnings.push({line, msg});
   const lines = src.replace(/\r/g,'').split('\n');
   let i = 0;
+  const metaLine = {};
   if(lines[0] && lines[0].trim() === '---'){
     i = 1;
     while(i < lines.length && lines[i].trim() !== '---'){
+      // Spec 3: a header with no closing line ends at the first section.
+      if(lines[i].trim().startsWith('##')){ warn(1, 'The header needs a closing --- line'); i--; break; }
       const m = lines[i].match(/^\s*([A-Za-z_][\w-]*)\s*:\s*(.*)$/);
-      if(m) doc.meta[m[1].toLowerCase()] = m[2].trim();
+      if(m){ doc.meta[m[1].toLowerCase()] = m[2].trim(); metaLine[m[1].toLowerCase()] = i + 1; }
       else if(lines[i].trim()) warn(i+1, 'Header lines look like  name: value');
       i++;
     }
+    if(i === lines.length) warn(1, 'The header needs a closing --- line');
     i++;
   }
+  if(doc.meta.chartdown && !READABLE.includes(doc.meta.chartdown))
+    warn(metaLine.chartdown, 'This chart says ChartDown ' + doc.meta.chartdown + '; this parser reads ' + READABLE[0] + '\u2013' + READABLE.at(-1));
   CUSTOM = {};
   (doc.meta.instruments || '').split(',').map(x => x.trim().toLowerCase()).filter(Boolean).forEach(id => {
-    if(/^[a-z0-9-]+$/.test(id)) CUSTOM[id] = id.charAt(0).toUpperCase() + id.slice(1); else warn(0, 'Instrument ids use lowercase letters, digits and -: \u201c' + id + '\u201d');
+    if(/^[a-z0-9-]+$/.test(id)) CUSTOM[id] = id.charAt(0).toUpperCase() + id.slice(1); else warn(metaLine.instruments, 'Instrument ids use lowercase letters, digits and -: \u201c' + id + '\u201d');
   });
+  const numbering = (doc.meta.numbering || '1m').toLowerCase();
+  if(numbering !== '1m' && numbering !== '6m') warn(metaLine.numbering, 'Numbering is  1m  or  6m');
+  SIX = numbering === '6m';
   const km = /^([A-G][b#]?)(m?)/.exec(doc.meta.key || 'C');
   doc.keyRoot = km ? km[1] : 'C';
   doc.minor = !!(km && km[2]);
@@ -220,21 +252,24 @@ function parse(src){
   doc.meter = mm ? mm[1] + '/' + mm[2] : '4/4';
   doc.tempo = parseFloat(doc.meta.tempo) || null;
 
-  let cur = null, docKey = null, pendingLabel = null;
+  let cur = null, docKey = null, docMinor = doc.minor, pendingLabel = null;
   let meter = doc.meter, tempo = doc.tempo, pendingMeter = null, pendingTempo = null;
   for(; i < lines.length; i++){
     const line = lines[i].trim(), n = i + 1;
     if(!line || line.startsWith('//')) continue;
     if(line.startsWith('##')){
-      cur = {name: line.replace(/^#+\s*/,'') || 'Section', notes:[], rows:[], use:null, startKey:docKey};
+      cur = {name: line.replace(/^#+\s*/,'') || 'Section', notes:[], rows:[], use:null, startKey:docKey, startMinor:docMinor};
       doc.sections.push(cur); continue;
     }
     if(!cur){ warn(n, 'Bars need a section first, like  ## Verse 1'); continue; }
     if(line.startsWith('>')){ cur.notes.push(parseNote(line.replace(/^>\s?/,''), n, warn)); continue; }
     const u = line.match(/^@use\s+(.+)$/i);
-    if(u){ cur.use = u[1].trim(); continue; }
-    const kc = line.match(/^@key\s+([A-G][b#]?)(m?)\s*$/);
-    if(kc){ docKey = kc[1]; pendingLabel = kc[1] + kc[2]; continue; }
+    if(u){ cur.use = u[1].trim(); cur.useLine = n; continue; }
+    if(/^@key\b/i.test(line)){
+      const kc = line.replace(/^@key\s*/i, '').match(/^([A-G][b#]?)(m?)\s*$/);
+      if(kc){ docKey = kc[1]; docMinor = !!kc[2]; pendingLabel = kc[1] + kc[2]; } else warn(n, 'Write a key change like  @key A  or  @key F#m');
+      continue;
+    }
     if(/^@meter\b/i.test(line)){
       const mc = line.match(/^@meter\s+(\d+)\s*\/\s*(\d+)\s*$/i);
       if(mc){ meter = mc[1] + '/' + mc[2]; pendingMeter = meter; } else warn(n, 'Write a meter change like  @meter 3/4');
@@ -251,7 +286,7 @@ function parse(src){
       row.bars.forEach((b, bi) => {
         if(b.pickup !== null && (cur.rows.length || bi)){ warn(n, 'A pickup must be the first bar of a section'); b.pickup = null; b.total = b.top; }
       });
-      row.key = docKey;
+      row.key = docKey; row.minor = docMinor;
       row.meter = meter; row.tempo = tempo;
       if(pendingLabel){ row.keyLabel = pendingLabel; pendingLabel = null; }
       if(pendingMeter){ row.meterLabel = pendingMeter; pendingMeter = null; }
@@ -260,12 +295,13 @@ function parse(src){
     }
   }
   doc.sections.forEach((s, idx) => {
+    if(s.use && s.rows.length) warn(s.useLine, '@use must be the only content line of a section; its own rows are kept');
     if(s.use && !s.rows.length){
       const src2 = doc.sections.slice(0, idx).find(x => x.name.toLowerCase() === s.use.toLowerCase() && x.rows.length);
       if(src2){
         s.rows = JSON.parse(JSON.stringify(src2.rows));
-        s.rows.forEach(r => { r.key = s.startKey; delete r.keyLabel; });
-      } else warn(0, 'Can\u2019t find an earlier section named \u201c' + s.use + '\u201d');
+        s.rows.forEach(r => { r.key = s.startKey; r.minor = s.startMinor; delete r.keyLabel; });
+      } else warn(s.useLine, 'Can\u2019t find an earlier section named \u201c' + s.use + '\u201d');
     }
   });
   analyze(doc, warn);
@@ -357,30 +393,33 @@ function analyze(doc, warn){
 
 /* ---------- JSON form (spec Appendix A) ---------- */
 function toJSON(doc){
-  const deg = (root, key) => root ? rel(root, key) : null;
-  const item = (it, key) => {
+  const deg = (root, key, minor) => root ? rel(root, key, minor) : null;
+  const item = (it, key, minor) => {
     if(it.t === 'rep') return {type:'repeat'};
     if(it.t === 'tie') return {type:'tie'};
     if(it.t === 'nc') return {type:'rest', beats:it.beats};
-    if(it.t === 'riff') return {type:'riff', beats:it.beats, notes:it.notes.map(n => n.rest ? {rest:true, beats:n.beats} : {root:n.root, degree:deg(n.root, key), beats:n.beats})};
-    return {type:'chord', root:it.root, degree:deg(it.root, key), quality:it.q, bass:it.bass, bassDegree:deg(it.bass, key),
+    if(it.t === 'riff') return {type:'riff', beats:it.beats, notes:it.notes.map(n => n.rest ? {rest:true, beats:n.beats} : {root:n.root, degree:deg(n.root, key, minor), beats:n.beats})};
+    return {type:'chord', root:it.root, degree:deg(it.root, key, minor), quality:it.q, bass:it.bass, bassDegree:deg(it.bass, key, minor),
       beats:it.beats, push:it.push, hold:it.hold, stab:it.stab, fermata:it.ferm};
   };
-  const cue = c => ({roles:c.roles, passes:c.passes, text:c.text});
+  // Spec 4.1: the JSON form names standard roles by their role name, custom ids as declared.
+  const ROLE_NAME = {all:'everyone', gtr:'guitar', vox:'vocals', sax:'saxophone', tpt:'trumpet', tbn:'trombone', vln:'violin'};
+  const roles = rs => rs.map(r => ROLE_NAME[r] || r);
+  const cue = c => ({roles:roles(c.roles), passes:c.passes, text:c.text});
   return {
     chartdown: doc.meta.chartdown || null,
-    meta: doc.meta, key: doc.keyRoot, minor: doc.minor,
+    meta: doc.meta, key: doc.keyRoot, minor: doc.minor, numbering: SIX ? '6m' : '1m',
     sections: doc.sections.map(s => ({
       name: s.name, use: s.use,
-      notes: s.notes.map(t => ({md:t.md, roles:t.roles, passes:t.passes, text:t.text})),
+      notes: s.notes.map(t => ({md:t.md, roles:roles(t.roles), passes:t.passes, text:t.text})),
       rows: s.rows.map(r => {
         const key = r.key || doc.keyRoot;
-        return {key, meter:r.meter, tempo:r.tempo, bars: r.bars.map(b => ({
+        return {key, minor:r.minor, meter:r.meter, tempo:r.tempo, bars: r.bars.map(b => ({
           number:b.number, beats:b.total, pickup:!!b.pickup, meter:b.meter,
           repeatStart:!!b.rs, repeatEnd:!!b.re, times:b.re ? b.times : null,
           ending:b.ending ? endingList(b.ending) : null,
           dynamic:b.dyn, tempoMark:b.tempo, nav:b.nav, cues:b.cues.map(cue), lyric:b.lyric,
-          items:b.items.map(it => item(it, key))
+          items:b.items.map(it => item(it, key, r.minor))
         }))};
       })
     })),
@@ -388,5 +427,6 @@ function toJSON(doc){
     warnings: doc.warnings.map(w => ({line:w.line, message:w.msg}))
   };
 }
+
 
 export { parse, toJSON };

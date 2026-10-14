@@ -237,3 +237,56 @@ key: G
 ```json
 { "rows": ["1 | b7 | x | %"] }
 ```
+
+### 12 With numbering: 6m, a minor-key chart shows the same letters as its 1m version
+
+```chartdown
+---
+key: Em
+numbering: 6m
+---
+## A
+6m | 1 | 4 | 3
+```
+
+```display
+{ "style": "letters" }
+```
+
+```json
+{ "homeKey": "Em", "keys": ["Em"], "rows": ["Em | G | C | B"] }
+```
+
+### 12 With numbering: 6m, letters shown as numbers count from the relative major
+
+```chartdown
+---
+key: Em
+numbering: 6m
+---
+## A
+Em | G | C | B7
+```
+
+```display
+{ "style": "numbers" }
+```
+
+```json
+{ "homeKey": "Em", "rows": ["6- | 1 | 4 | 37"] }
+```
+
+### 12 Number display uses - for every canonical minor quality
+
+```chartdown
+## A
+2-7 | 7ø | 1m(maj7) | 6min
+```
+
+```display
+{ "style": "numbers" }
+```
+
+```json
+{ "rows": ["2-7 | 7-7b5 | 1-maj7 | 6-"] }
+```

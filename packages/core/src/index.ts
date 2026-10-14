@@ -1,4 +1,4 @@
-// chartdown: the ChartDown parser (spec 0.6).
+// chartdown: the ChartDown parser (spec 0.7).
 export { parse, READABLE_VERSIONS, SUPPORTED_VERSION } from "./parse.js";
 export { playOrder, type PlayStep } from "./navigation.js";
 export { layoutBeats, type Timed } from "./beats.js";
@@ -26,6 +26,7 @@ export type {
   Meter,
   NavMark,
   NoChord,
+  Numbering,
   Note,
   ParseOptions,
   Riff,

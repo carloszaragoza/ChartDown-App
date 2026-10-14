@@ -6,6 +6,33 @@ const CHORD = new RegExp(`^(${ROOT})([^/]*)(?:/(${ROOT}))?$`);
 const ROOT_ONLY = new RegExp(`^(?:${ROOT})$`);
 const BEATS = /(\d+(?:\.\d+)?)/;
 
+// The chord quality vocabulary (spec 6, ChartDown 0.7): a base, an extension, alterations, `sus`
+// and additions, in that order, each optional; `5` alone is a power chord.
+const QUALITY =
+  /^(?:5|(?:m|dim|aug)?(?:maj(?:7|9|11|13)|6|7|9|11|13|69)?(?:[b#](?:5|9|11|13))*(?:alt)?(?:sus2?)?(?:add(?:2|4|9|11|13))*)$/;
+
+/**
+ * A quality in its canonical form (spec 6, R-00.13): the aliases take their canonical spelling
+ * (`-`, `min` and `mi` are `m`; `ø` is `m7b5`; `°7` is `dim7`, `°` is `dim`; `+` is `aug`; `Δ`
+ * alone is `maj7`, and `Δ`, `M` or `ma` before a number are `maj`; `sus4` is `sus`; parentheses
+ * are dropped). A quality outside the vocabulary passes through as written, a leading `-` still
+ * read as `m`, with no warning. As `normQuality()` in the spec's playground.
+ */
+export function canonicalQuality(written: string): string {
+  const quality = written
+    .replace(/[()]/g, "")
+    .replace(/^(?:min|mi|-)/, "m")
+    .replace(/^\u00f8(?:7)?/, "m7b5")
+    .replace(/^(?:\u00b0|o)7/, "dim7")
+    .replace(/^(?:\u00b0|o)/, "dim")
+    .replace(/^\+/, "aug")
+    .replace(/\u0394(?!\d)/, "maj7")
+    .replace(/\u0394|(?:M|ma)(?=\d)/, "maj")
+    .replace(/sus4/, "sus");
+  if (QUALITY.test(quality)) return quality;
+  return written.startsWith("-") ? `m${written.slice(1)}` : written;
+}
+
 /**
  * Reads one token of a bar (spec 6 to 8): `x` or `x:beats`, `%`, `=`, or a chord with its
  * marks, in the order `'` or `''` · `<` `>` · chord · `:beats` · `!` `~`. A riff, `R[ ... ]`,
@@ -53,7 +80,7 @@ export function parseToken(token: string): BarItem | undefined {
   const match = CHORD.exec(text);
   if (!match) return undefined;
   const [, root, written = "", bass] = match;
-  const quality = written.startsWith("-") ? `m${written.slice(1)}` : written;
+  const quality = canonicalQuality(written);
 
   const chord: Chord = {
     type: "chord",

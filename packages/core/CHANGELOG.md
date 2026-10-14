@@ -2,6 +2,20 @@
 
 ## Unreleased (0.3.0)
 
+The parser now implements [ChartDown 0.7](https://github.com/ChartDown/spec). Charts written for 0.3 to 0.6 parse the same, with no version warning, except that a chord quality written with an alias now takes its canonical form.
+
+### New in the language (0.7)
+
+- **Chord qualities (spec 6).** Aliases take their canonical form: `-`, `min` and `mi` are `m`; `ø` is `m7b5`; `°7` is `dim7` and `°` is `dim`; `+` is `aug`; `Δ` alone is `maj7`, and `Δ`, `M` or `ma` before a number are `maj`; `sus4` is `sus`; parentheses are dropped. A quality outside the vocabulary passes through as written. Number style shows `-` for every minor quality (`m7b5` reads `-7b5`).
+- **`numbering: 6m` (spec 3 and 12).** Numbers in a minor key count from its relative major: in Em, `6m` is Em and `1` is G. Any value but `1m` or `6m` is a warning (`bad-numbering`).
+- **Grammar (spec 15).** Directive names are read in any case (`@KEY D`); an `@key` value the parser cannot read is a warning (`bad-key-directive`).
+
+### New in the package
+
+- `toJSON(chart)`: a top-level `numbering`, `minor` on every row, and `quality` in its canonical form.
+- `Chart.numbering` and the `Numbering` type; `degree()` takes the numbering.
+- `READABLE_VERSIONS` reads 0.3 to 0.7; `SUPPORTED_VERSION` is `"0.7"`.
+
 - `chartdown/conformance`: the adapter for the official ChartDown conformance suite (spec Appendix B), with `toJSON(source)` and `display(source, { style, key })`. The package's own tests run the suite, pinned to a commit of github.com/ChartDown/spec.
 - The package's homepage and repository point to github.com/ChartDown/spec, where the language now lives.
 

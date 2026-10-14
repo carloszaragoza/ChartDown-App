@@ -160,7 +160,9 @@
     "nav-second-jump": "A song can have only one D.S. or D.C. jump",
     "nav-needs-segno": "D.S. needs a segno mark",
     "nav-needs-coda": "{mark} needs a to-coda mark and a coda mark",
-    "nav-needs-fine": "{mark} needs a fine mark"
+    "nav-needs-fine": "{mark} needs a fine mark",
+    "bad-numbering": "Numbering is <code>1m</code> or <code>6m</code>; <code>1m</code> is used",
+    "bad-key-directive": "Write a key change like <code>@key A</code> or <code>@key F#m</code>"
   },
   "instruments": {
     "drums": "Drums",

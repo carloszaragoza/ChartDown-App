@@ -1,0 +1,30 @@
+---
+chartdown: 0.7
+title: Lantern Bay (example song)
+artists: ChartDown examples
+key: Em
+tempo: 60
+meter: 6/8
+feel: Slow 6/8 ballad
+---
+
+// An original example in a minor key and 6/8 time.
+// In a minor key, 1 is the tonic: 1m is Em, b3 is G, b7 is D.
+
+## Intro
+> MD keys: Solo piano, rubato on the last bar.
+1m | b6 | b3 | b7~
+
+## Verse
+> MD: Keep it soft. Feel two big beats per bar.
+{p} 1m "Lanterns on the water" | b6 | b3 | b7
+1m | b6 | 4m | 5
+
+## Chorus
+> MD: Lift here. Everyone in.
+{mf} b3 | b7 | 1m | b6
+b3 | b7 | 4m:3 5:3 | 1m
+
+## Tag
+> MD: Pull it down and hold the last chord on my cue.
+{p} b6 | b7 | <1m>~

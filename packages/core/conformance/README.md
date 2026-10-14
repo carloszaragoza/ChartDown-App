@@ -1,7 +1,7 @@
 # ChartDown conformance cases
 
 The official test cases for the [ChartDown specification](../SPEC.md) (version
-0.6, see Appendix B). One file per spec section with parser rules, from
+0.7, see Appendix B). One file per spec section with parser rules, from
 `02-file-structure.md` to `15-grammar.md`. Each case checks one rule.
 
 ## Run them

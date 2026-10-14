@@ -5,13 +5,13 @@ import type { Chart, Key, Meter, ParseOptions, Row, Section, Warning } from "./t
 import { createWarning, type Warn } from "./warnings.js";
 
 /** The ChartDown version this parser reads and writes (R-00.4). */
-export const SUPPORTED_VERSION = "0.6";
+export const SUPPORTED_VERSION = "0.7";
 
 /**
  * The versions a chart may declare without a warning (R-00.4). Charts written for 0.4 and 0.5
  * parse the same in 0.6; a mark that was free text in them now has its meaning (spec 17).
  */
-export const READABLE_VERSIONS: readonly string[] = ["0.3", "0.4", "0.5", "0.6"];
+export const READABLE_VERSIONS: readonly string[] = ["0.3", "0.4", "0.5", "0.6", "0.7"];
 
 function parseKey(text: string | undefined): Key {
   const match = /^([A-G][b#]?)(m?)/.exec(text ?? "C");
@@ -39,6 +39,7 @@ export function parse(source: string, options: ParseOptions = {}): Chart {
     fields: header,
     version,
     instruments,
+    numbering,
     roles,
     bodyStart,
   } = readHeader(lines, READABLE_VERSIONS, options, warn);
@@ -81,10 +82,14 @@ export function parse(source: string, options: ParseOptions = {}): Chart {
       section.use = { name: (use[1] as string).trim(), line };
       continue;
     }
-    const keyChange = /^@key\s+([A-G][b#]?)(m?)\s*$/.exec(text);
-    if (keyChange) {
-      currentKey = { root: keyChange[1] as string, minor: keyChange[2] === "m" };
-      pendingKeyChange = currentKey;
+    // Directive names are read in any case (spec 15); a key it cannot read is a warning.
+    if (/^@key\b/i.test(text)) {
+      // Only the name ignores case: the key keeps its spelling (`@key Bm`, never `@key bm`).
+      const keyChange = /^([A-G][b#]?)(m?)\s*$/.exec(text.replace(/^@key\s+/i, ""));
+      if (keyChange) {
+        currentKey = { root: keyChange[1] as string, minor: keyChange[2] === "m" };
+        pendingKeyChange = currentKey;
+      } else warn(line, "bad-key-directive");
       continue;
     }
     if (/^@meter\b/i.test(text)) {
@@ -171,7 +176,15 @@ export function parse(source: string, options: ParseOptions = {}): Chart {
 
   analyze(sections, warn);
   warnings.sort((a, b) => a.line - b.line);
-  const chart: Chart = { header, key, meter: startMeter, instruments, sections, warnings };
+  const chart: Chart = {
+    header,
+    key,
+    meter: startMeter,
+    instruments,
+    numbering,
+    sections,
+    warnings,
+  };
   if (startTempo !== undefined) chart.tempo = startTempo;
   if (version !== undefined) chart.version = version;
   return chart;

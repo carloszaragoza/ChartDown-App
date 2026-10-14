@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { SUPPORTED_VERSION } from "./parse.js";
 
 const manifest = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as {
   name: string;
@@ -39,14 +40,15 @@ describe("T-107 the chartdown package on npm", () => {
 describe("T-1708 the chartdown package on npm, version 0.2.0 for ChartDown 0.6", () => {
   it("T-1708 is version 0.2.0 of the parser for spec 0.6, with its changelog in the package", () => {
     expect(manifest.version).toBe("0.2.0");
-    expect(manifest.description).toContain("spec 0.6");
+    // The description and README name the spec the parser implements (0.7 since E20).
+    expect(manifest.description).toContain(`spec ${SUPPORTED_VERSION}`);
     expect(manifest.files).toContain("CHANGELOG.md");
     const changelog = readFileSync(new URL("../CHANGELOG.md", import.meta.url), "utf8");
     // An unreleased section may come first, above the latest release.
     expect(changelog).toMatch(/^# Changelog\n\n(## Unreleased[^\n]*\n[\s\S]*?\n)?## 0\.2\.0\n/);
     expect(changelog).toContain("## 0.1.0");
     const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
-    expect(readme).toContain("spec 0.6");
+    expect(readme).toContain(`spec ${SUPPORTED_VERSION}`);
     expect(readme).toContain("toJSON");
   });
 
@@ -91,7 +93,8 @@ console.log(JSON.stringify({ version: SUPPORTED_VERSION, sections: chart.section
       );
       const out = execFileSync(process.execPath, ["check.mjs"], { cwd: project }).toString();
       expect(JSON.parse(out)).toEqual({
-        version: "0.6",
+        // The parser reads ChartDown 0.7 since E20; Northbound still declares 0.6.
+        version: "0.7",
         sections: 5,
         warnings: 0,
         steps: 57,

@@ -24,6 +24,8 @@ const MESSAGES: Record<WarningCode, (values: Values) => string> = {
   "use-with-rows": () => "@use must be the only content line of a section; its own rows are kept",
   "bad-meter-directive": () => "Write a meter change like  @meter 3/4",
   "bad-tempo-directive": () => "Write a tempo change like  @tempo 96",
+  "bad-numbering": () => "Numbering is  1m  or  6m",
+  "bad-key-directive": () => "Write a key change like  @key A  or  @key F#m",
   "pickup-and-meter": () => "A bar can\u2019t have both a pickup and a one-bar meter",
   "pickup-length": (v) => `A pickup needs more than 0 and fewer than ${v.beats} beats`,
   "pickup-not-first": () => "A pickup must be the first bar of a section",

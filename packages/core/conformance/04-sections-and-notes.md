@@ -13,6 +13,7 @@
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "Verse 1 (half time)",
@@ -21,6 +22,7 @@
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -68,6 +70,7 @@
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "A",
@@ -78,6 +81,7 @@
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -125,6 +129,7 @@
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "Chorus",
@@ -135,6 +140,7 @@
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -183,6 +189,7 @@
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "Chorus",
@@ -194,6 +201,7 @@
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -241,6 +249,7 @@
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "A",
@@ -251,6 +260,7 @@
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [

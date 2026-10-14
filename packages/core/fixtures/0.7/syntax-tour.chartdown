@@ -1,0 +1,108 @@
+---
+chartdown: 0.7
+title: Syntax Tour
+key: D
+tempo: 90
+meter: 4/4
+feel: Straight
+instruments: cello
+---
+
+// Every feature of ChartDown 0.7, one section each.
+// Each section name starts with its section number in SPEC.md.
+// Lines that start with // are comments and are not shown.
+
+## 4 · Notes for each player
+> A plain note, for everyone.
+> MD: An MD note for the whole band.
+> MD drums, bass: Lock in together. Try the View menu to read just your part.
+> MD keys, gtr, vox: One note for several players.
+> MD sax, tpt, tbn, vln: Horn and string roles.
+> MD cello: A custom instrument, declared in the header.
+1 | 4 | 5 | 1
+
+## 5 · Bars and rows
+> Bars are separated by |. Each line is one row. Numbers or letters.
+1 | 4 | 5 | 1
+D | G | A | D
+
+## 5.1 · Splitting a bar
+> Chords share a bar evenly. Use :beats for uneven splits.
+1 4 | 6m 5 | 1:3 4:1 | 5:2 4 5
+
+## 5.2 · Reusing a section
+> MD: This section copies the rows of "5 · Bars and rows" with @use.
+@use 5 · Bars and rows
+
+## 5.3 · Pickup bar
+> MD gtr: Pickup on beat 3. A pickup is bar 0 and is drawn narrower.
+[p:2] 5 | 1 | 4 | 5 | 1
+
+## 6 · Chords
+> Major, minor, sevenths, suspended, other qualities, slash chords, outside the key.
+> Aliases take their canonical form: M7 is maj7, ø is m7b5, + is aug.
+1 | 6m 6- | 5sus 5 | 1maj7 4add9
+2m7 5/7 | 1/3 4 | b7 #4dim | Em C/E
+4M7 7ø | 37b9 6m | 5+ 4(add9) | 15 b75
+
+## 7 · Rests and repeat signs
+> x is no chord. x:3 rests three beats. % repeats the bar. = ties the chord over.
+x | 1! x:3 | 4 | % | <1> | =
+
+## 7.1 · Unison riff
+> MD gtr, tpt: Unison line in single notes. Notes take :beats, x is a rest.
+1 | R[ 1 3 4 #4 5 ] | 4 | R[ 5:1 b7:1 x:2 ]
+
+## 8 · Expression marks
+> ' pushes an eighth early, '' a sixteenth. <1> holds, ! stabs, ~ is a fermata.
+'4 | ''5 | <1> | 4! 5! | <1>~
+
+## 9 · Dynamics, cues and lyric landmarks
+> Dynamics: pp p mp mf f ff cresc decresc. Cues for everyone or one player.
+{pp} 1 | {p} 4 | {mp} 5 | {mf} 1
+{f} 4 {watch me} | {ff} 5 {drums: fill} | {cresc} 1 "Short words, where we are" | {decresc} 1
+
+## 9 · Tempo marks
+> rit. slows down, accel. speeds up, a tempo goes back.
+4 | 5 {rit} | {a tempo} 1 | {accel} 1
+
+## 9.1 · Cues for one pass
+> MD 2x keys: Pad comes in on the second pass.
+|: 1 {2x drums: in} | 4 | 5 {1x,3x: stop} | 1 :| 3x
+
+## 10 · Repeats and endings
+> |: and :| repeat, 2x or 3x counts the passes. [1] and [2] are endings.
+|: 1 | 4 | 1 | [1] 5 :| 2x
+[2] 5 4 5 1 |
+
+## 11.1 · Key changes
+> MD: Up a whole step, then a minor key. In a minor key 1m is the tonic.
+@key E
+1 | 4 | 5 | 1
+@key Bm
+1m | b6 | b3 | b7
+
+## 11.2 · Meter changes
+> @meter changes the meter from here on. [m:2/4] changes one bar.
+@key D
+@meter 3/4
+1 | 4 | 5 | 1
+@meter 4/4
+4 | [m:2/4] 5 | 1 | 1
+
+## 11.3 · Tempo changes
+> @tempo changes the tempo from here on.
+@tempo 72
+{p} 6m | 4 | 1 | 5
+
+## 10.1 · Navigation: segno
+> MD: The D.S. below jumps back here. "To coda" only counts after the jump.
+@tempo 90
+{segno} 1 | 4 | 5 {to coda} | 5
+
+## 10.1 · Navigation: D.S. al Coda
+> MD: Also {D.C.}, {fine}, {D.S. al fine}, {D.C. al coda}. One jump per song.
+6m | 4 | 1 | 5 {D.S. al coda}
+
+## 10.1 · Navigation: coda
+{coda} {f} 4 | 5 | <1>~

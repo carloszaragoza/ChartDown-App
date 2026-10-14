@@ -183,7 +183,9 @@ export type WarningCode =
   | "nav-second-jump"
   | "nav-needs-segno"
   | "nav-needs-coda"
-  | "nav-needs-fine";
+  | "nav-needs-fine"
+  | "bad-numbering"
+  | "bad-key-directive";
 
 export interface Warning {
   line: number;
@@ -204,9 +206,17 @@ export interface Chart {
   tempo?: number;
   /** Custom instrument ids declared in the `instruments` header. */
   instruments: string[];
+  /**
+   * How numbers count in a minor key (spec 3, ChartDown 0.7): from the minor tonic (`1m`, the
+   * default) or from the relative major (`6m`, where the tonic is 6m).
+   */
+  numbering: Numbering;
   sections: Section[];
   warnings: Warning[];
 }
+
+/** The `numbering` header field (spec 3, R-00.14). */
+export type Numbering = "1m" | "6m";
 
 /** An MD note of a layer, anchored to a section by name and occurrence and optionally to a bar (R-00.2). */
 export interface LayerNote {

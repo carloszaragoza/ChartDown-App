@@ -13,6 +13,7 @@
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "Verse",
@@ -21,6 +22,7 @@
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -92,6 +94,7 @@ title: Open Road
   "meta": { "title": "Open Road" },
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "Intro",
@@ -100,6 +103,7 @@ title: Open Road
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -132,6 +136,7 @@ title: Open Road
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -183,6 +188,7 @@ title: Open Road
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "Verse",
@@ -191,6 +197,7 @@ title: Open Road
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -223,6 +230,7 @@ title: Open Road
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -255,6 +263,7 @@ title: Open Road
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -308,6 +317,7 @@ title: Open Road
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "Verse",
@@ -316,6 +326,7 @@ title: Open Road
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -359,6 +370,7 @@ title: Open Road
         },
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
@@ -428,6 +440,7 @@ title: Open Road
   "meta": {},
   "key": "C",
   "minor": false,
+  "numbering": "1m",
   "sections": [
     {
       "name": "Verse",
@@ -436,6 +449,7 @@ title: Open Road
       "rows": [
         {
           "key": "C",
+          "minor": false,
           "meter": "4/4",
           "tempo": null,
           "bars": [
