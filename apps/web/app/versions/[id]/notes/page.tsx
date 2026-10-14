@@ -305,9 +305,10 @@ export default async function NotesPage({
 
             <SectionView chart={chart} index={chosen} notes={notesIn(chosen)}>
               <NoteForm
-                // A fresh form for each note, so no value carries over between adding and
-                // editing, nor from one added note to the next.
-                key={editing?.id ?? `new-${rows.length}`}
+                // A fresh form for each note and section, so no value carries over between
+                // adding and editing, from one added note to the next, nor from the section
+                // chosen before: choosing one moves inside the app (F-005).
+                key={`${editing?.id ?? `new-${rows.length}`}|${formAnchor}`}
                 versionId={version.id}
                 bandId={band.id}
                 section={chosen}
