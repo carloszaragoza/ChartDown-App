@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { createVersion } from "./admin";
 
 const OPEN_ROAD = readFileSync(
-  new URL("../../../packages/core/fixtures/open-road.chartdown", import.meta.url),
+  new URL("../../../fixtures/open-road.chartdown", import.meta.url),
   "utf8",
 );
 const url = () => process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54321";

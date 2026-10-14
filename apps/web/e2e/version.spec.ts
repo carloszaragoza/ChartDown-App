@@ -4,7 +4,7 @@ import { createVersion } from "./admin";
 import { PASSWORD, signOut, signUpAndConfirm, unique } from "./flows";
 
 const OPEN_ROAD = readFileSync(
-  new URL("../../../packages/core/fixtures/open-road.chartdown", import.meta.url),
+  new URL("../../../fixtures/open-road.chartdown", import.meta.url),
   "utf8",
 );
 

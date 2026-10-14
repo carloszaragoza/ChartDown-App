@@ -46,7 +46,7 @@ ChartDown App is where a band writes, shares and plays Nashville Number System c
 
 ## Evidence on Hand
 
-- Real chart rendering from the app (`BarRow`, `MDNotes`, `ChartPreview` in `apps/web/app/_components/`) and original example charts in `packages/core/fixtures/` (e.g. `open-road.chartdown`).
+- Real chart rendering from the app (`BarRow`, `MDNotes`, `ChartPreview` in `apps/web/app/_components/`) and original example charts in `fixtures/` at the repository root (e.g. `open-road.chartdown`).
 - Screenshots of stand mode taken from the real app (Design Handoff 2.0 screens in `design/astryx/screens/`).
 - **No testimonials, customers, usage numbers or press yet.** None may be invented.
 

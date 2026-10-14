@@ -6,8 +6,7 @@ coverage
 pnpm-lock.yaml
 specs
 CLAUDE.md
-packages/core/fixtures
-packages/core/conformance
+fixtures
 packages/ui/fixtures
 
 # The approved design, exported as is (a visual reference, not code).

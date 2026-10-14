@@ -12,7 +12,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 const OPEN_ROAD = readFileSync(
-  new URL("../../../../../../packages/core/fixtures/open-road.chartdown", import.meta.url),
+  new URL("../../../../../../fixtures/open-road.chartdown", import.meta.url),
   "utf8",
 );
 const chart = parse(OPEN_ROAD);
