@@ -53,6 +53,8 @@ export interface ChartSectionProps {
   beats?: BeatsMode;
   /** The bar the metronome is on: its row, its place in the row, and how far into it (R-11.3). */
   now?: { row: number; index: number; progress: number } | undefined;
+  /** The bar the metronome will start on: its row and its place in the row (R-11.2). */
+  start?: { row: number; index: number } | undefined;
 }
 
 /**
@@ -70,6 +72,7 @@ export function ChartSection({
   size = "md",
   beats = "auto",
   now,
+  start,
 }: ChartSectionProps) {
   const body = (
     <section aria-label={section.name} {...(id ? { id } : {})}>
@@ -91,6 +94,7 @@ export function ChartSection({
             beats={beats}
             {...(meter ? { meter } : {})}
             {...(now?.row === index ? { now: { index: now.index, progress: now.progress } } : {})}
+            {...(start?.row === index ? { start: start.index } : {})}
           />
         ))}
       </VStack>
@@ -137,10 +141,27 @@ export function ChartPreview({
   const describe = (item: FormStripItem) => `${item.name}, ${labels.length(item.length)}`;
   // The visual metronome on the version page (T-1503): Play in the pinned bar, from the song's
   // start, and the page keeps the bar being played in view.
-  const { playButton, tempoDialog, counter, nowIn, playingSection } = useMetronomeControls(
-    chart,
-    0,
-  );
+  const {
+    playButton,
+    tempoDialog,
+    counter,
+    nowIn,
+    playingSection,
+    isPlaying,
+    isWaiting,
+    resume,
+    chooseStart,
+    startIn,
+  } = useMetronomeControls(chart, null);
+  // A tap on the chart: on after a fermata (R-11.6), or, stopped, the bar to start on (R-11.2).
+  const onTap = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!hasForm) return;
+    if (isWaiting) return resume();
+    const bar = (event.target as HTMLElement).closest<HTMLElement>(".cd-chart__bar");
+    const section = bar?.closest("section[id^='section-']")?.id.replace("section-", "");
+    if (isPlaying || !bar || !section) return;
+    chooseStart(Number(section) - 1, Number(bar.dataset.bar));
+  };
   const root = useRef<HTMLDivElement>(null);
   const playingRow =
     playingSection === undefined ? "" : `${playingSection}:${nowIn(playingSection)?.row}`;
@@ -152,7 +173,7 @@ export function ChartPreview({
       ?.scrollIntoView({ block: "center", behavior: still ? "auto" : "smooth" });
   }, [playingRow]);
   return (
-    <div ref={root}>
+    <div ref={root} onClick={onTap}>
       <VStack gap={6}>
         {hasForm && (
           // The song form stays pinned at the top while the chart scrolls, at stand mode's size,
@@ -218,6 +239,7 @@ export function ChartPreview({
             beats={beats}
             {...(notes ? { notes: notes[index] ?? [] } : {})}
             now={nowIn(index)}
+            start={startIn(index)}
           />
         ))}
       </VStack>

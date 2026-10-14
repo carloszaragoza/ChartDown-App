@@ -132,6 +132,7 @@ function OneBar({
   formatter,
   labels,
   progress,
+  isStart = false,
 }: {
   bar: BarData;
   row: Row;
@@ -146,6 +147,8 @@ function OneBar({
   labels: BarLabels;
   /** The metronome is on this bar: the share of its beats counted so far (R-11.3). */
   progress?: number;
+  /** The metronome will start on this bar (R-11.2). */
+  isStart?: boolean;
 }) {
   // A pickup has only the beats it was written with (spec 5.3).
   const beats = bar.pickup ?? meter.beats;
@@ -161,11 +164,13 @@ function OneBar({
     bar.repeatEnd && "cd-chart__bar--repeat-end",
     bar.ending && "cd-chart__bar--ending",
     progress !== undefined && "cd-chart__bar--now",
+    isStart && progress === undefined && "cd-chart__bar--start",
   ].filter(Boolean);
   return (
     <div
       role="group"
       className={classes.join(" ")}
+      data-bar={bar.number}
       {...(progress !== undefined
         ? {
             "aria-current": "step" as const,
@@ -290,6 +295,8 @@ export interface BarRowProps {
    * far: a thin line grows under it beat by beat (R-11.3, R-11.5).
    */
   now?: { index: number; progress: number };
+  /** The bar the metronome will start on, by its place in the row (R-11.2). */
+  start?: number;
 }
 
 /**
@@ -309,6 +316,7 @@ export function BarRow({
   beats = "always",
   size = "lg",
   now,
+  start,
 }: BarRowProps) {
   const labels: Required<BarLabels> = { ...DEFAULT_BAR_LABELS, ...given };
   // As many columns as the row has bars, as the approved prototype draws it; a pickup is narrower.
@@ -362,6 +370,7 @@ export function BarRow({
               formatter={formatter}
               labels={labels}
               {...(now?.index === index ? { progress: now.progress } : {})}
+              isStart={start === index}
             />
           ))}
         </div>

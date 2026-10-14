@@ -155,8 +155,20 @@ function StandModeView({
   const [current, setCurrent] = useState(() => readSection(chart, String(initial + 1)));
   // The visual metronome (R-11.1 to R-11.5): it plays from the section being read, and the
   // section follows it.
-  const { playButton, tempoDialog, counter, nowIn, playingSection, queued, queue, isPlaying } =
-    useMetronomeControls(chart, current);
+  const {
+    playButton,
+    tempoDialog,
+    counter,
+    nowIn,
+    playingSection,
+    queued,
+    queue,
+    isPlaying,
+    isWaiting,
+    resume,
+    chooseStart,
+    startIn,
+  } = useMetronomeControls(chart, current);
   // Numbers or letters, Beats and the theme change here at once, with no trip to the server
   // (F-005); the address follows, so a reload or a shared link shows the same.
   const [view, setView] = useState<StandView>({
@@ -570,6 +582,12 @@ function StandModeView({
               style={{ flex: "0 1 auto", minHeight: 0, overflowY: "auto" }}
               onTouchStart={onTouchStart}
               onTouchEnd={onTouchEnd}
+              onClick={(event) => {
+                // On after a fermata (R-11.6); stopped, a tapped bar is where Play starts (R-11.2).
+                if (isWaiting) return resume();
+                const bar = (event.target as HTMLElement).closest<HTMLElement>(".cd-chart__bar");
+                if (!isPlaying && bar) chooseStart(current, Number(bar.dataset.bar));
+              }}
             >
               {now && (
                 <ChartSection
@@ -584,6 +602,7 @@ function StandModeView({
                   beats={beats}
                   size="lg"
                   now={nowIn(current)}
+                  start={startIn(current)}
                 />
               )}
             </main>

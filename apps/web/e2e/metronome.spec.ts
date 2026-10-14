@@ -88,3 +88,38 @@ test("R-11.15 choosing the section that plays repeats it; the screen stays on wh
   await form.getByRole("link", { name: /^Chorus,/ }).click();
   await expect(form.getByRole("link", { name: /plays next/ })).toHaveCount(0);
 });
+
+test("R-11.2 tapping a bar and pressing Play starts there, then the next bar follows", async ({
+  page,
+  request,
+}) => {
+  const song = "---\ntempo: 120\n---\n## Verse\n1 | 4\n## Chorus\n5 | 1 | 4 | 5\n";
+  const id = await createVersion(request, { title: "Start Anywhere", content: song });
+  await page.goto(`/versions/${id}/stand?s=2`);
+  const bars = page.getByRole("main").locator(".cd-chart__bar");
+  // Bar 2 of the Chorus.
+  await bars.nth(1).click();
+  await expect(page.getByText("Starts at bar 2")).toBeVisible();
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(bars.nth(1)).toHaveAttribute("aria-current", "step");
+  await expect(bars.nth(0)).not.toHaveAttribute("aria-current", "step");
+  await expect(bars.nth(2)).toHaveAttribute("aria-current", "step", { timeout: 4000 });
+});
+
+test("R-11.6 playback stops on a fermata bar until the musician taps", async ({
+  page,
+  request,
+}) => {
+  const song = "---\ntempo: 240\n---\n## Verse\n1 | 4~ | 5\n";
+  const id = await createVersion(request, { title: "Hold It", content: song });
+  await page.goto(`/versions/${id}/stand`);
+  const bars = page.getByRole("main").locator(".cd-chart__bar");
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(page.getByText("Fermata · tap to go on")).toBeVisible({ timeout: 4000 });
+  await expect(bars.nth(1)).toHaveAttribute("aria-current", "step");
+  // It holds: two seconds is eight beats at 240 bpm.
+  await page.waitForTimeout(2000);
+  await expect(bars.nth(1)).toHaveAttribute("aria-current", "step");
+  await bars.nth(1).click();
+  await expect(bars.nth(2)).toHaveAttribute("aria-current", "step");
+});

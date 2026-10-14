@@ -19,6 +19,8 @@ export function useMetronome(chart: Chart) {
   const needsTempo = bars.some((bar) => bar.tempo === undefined);
   const [position, setPosition] = useState<MetronomePosition | null>(null);
   const [isPlaying, setPlaying] = useState(false);
+  // Holding on a fermata until a tap (R-11.6).
+  const [isWaiting, setWaiting] = useState(false);
   const engine = useRef<Metronome | null>(null);
   const context = useRef<AudioContext | null>(null);
   const frame = useRef(0);
@@ -34,6 +36,7 @@ export function useMetronome(chart: Chart) {
     cancelAnimationFrame(frame.current);
     setPosition(null);
     setPlaying(false);
+    setWaiting(false);
     setQueued(null);
     queuedAt.current = -1;
   }, []);
@@ -54,6 +57,7 @@ export function useMetronome(chart: Chart) {
         if (engine.current !== metronome) return;
         if (!metronome.isPlaying) return stop();
         const click = metronome.position();
+        setWaiting(metronome.isWaiting);
         // The queued section has begun: nothing waits any more.
         if (queuedAt.current >= 0 && metronome.index() >= queuedAt.current) {
           queuedAt.current = -1;
@@ -116,5 +120,20 @@ export function useMetronome(chart: Chart) {
     [bars, firstBarOf, queued],
   );
 
-  return { bars, needsTempo, position, isPlaying, play, stop, firstBarOf, queue, queued };
+  /** Goes on after a fermata (R-11.6). */
+  const resume = useCallback(() => engine.current?.resume(), []);
+
+  return {
+    bars,
+    needsTempo,
+    position,
+    isPlaying,
+    isWaiting,
+    play,
+    stop,
+    resume,
+    firstBarOf,
+    queue,
+    queued,
+  };
 }
