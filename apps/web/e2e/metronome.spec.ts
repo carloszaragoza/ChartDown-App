@@ -57,8 +57,8 @@ test("R-11.3 the version page plays too, from the song's start, with the counter
   const id = await createVersion(request, { title: "Fast Song", content: FAST });
   await page.goto(`/versions/${id}`);
   await page.getByRole("button", { name: "Play" }).click();
-  const bars = page.getByRole("main").getByRole("group");
-  await expect(bars.first()).toHaveAttribute("aria-current", "step");
+  // The page's first bar; the display choices are a group too.
+  await expect(page.locator(".cd-chart__bar").first()).toHaveAttribute("aria-current", "step");
   await expect(page.getByText(/^[1-4] \/ 4$/)).toBeVisible();
   await page.getByRole("button", { name: "Stop" }).click();
   await expect(page.locator('[aria-current="step"]')).toHaveCount(0);
