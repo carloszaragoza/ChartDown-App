@@ -147,9 +147,25 @@ test("R-11.7 with the click off no audio plays and the pulse still runs; on, it 
   expect(await tones()).toBe(0);
   await page.getByRole("button", { name: "Stop" }).click();
 
-  await page.getByRole("button", { name: "Metronome sound" }).click();
+  await page.getByRole("button", { name: "Metronome options" }).click();
   await page.getByRole("dialog").getByRole("switch", { name: "Click" }).click();
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Play" }).click();
   await expect.poll(tones, { timeout: 3000 }).toBeGreaterThan(0);
+});
+
+test("R-11.9 the practice speed changes the tempo played, never the chart", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, { title: "Fast Song", content: FAST });
+  await page.goto(`/versions/${id}/stand`);
+  await page.getByRole("button", { name: "Metronome options" }).click();
+  const speed = page.getByRole("dialog").getByRole("slider", { name: "Practice speed" });
+  await speed.focus();
+  for (let step = 0; step < 4; step++) await page.keyboard.press("ArrowLeft");
+  await expect(page.getByRole("dialog").getByText("80% · 192 bpm")).toBeVisible();
+  await page.keyboard.press("Escape");
+  // The chart still says 240.
+  await expect(page.getByText("240 bpm")).toBeVisible();
 });

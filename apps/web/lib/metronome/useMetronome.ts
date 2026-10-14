@@ -39,8 +39,8 @@ export function useMetronome(chart: Chart) {
   useEffect(() => {
     heard.current = sound;
   }, [sound]);
-  // The tempo asked of the person, kept for what is queued later.
-  const asked = useRef<number | undefined>(undefined);
+  // The tempo asked of the person and the practice speed, kept for what is queued later.
+  const asked = useRef<{ tempo?: number; speed?: number }>({});
   // The section queued after the one that sounds (R-11.15), and the click it starts on.
   const [queued, setQueued] = useState<number | null>(null);
   const queuedAt = useRef(-1);
@@ -57,9 +57,12 @@ export function useMetronome(chart: Chart) {
   }, []);
 
   const play = useCallback(
-    (from: number, options: { tempo?: number; countIn?: boolean } = {}) => {
+    (from: number, options: { tempo?: number; speed?: number; countIn?: boolean } = {}) => {
       stop();
-      asked.current = options.tempo;
+      asked.current = {
+        ...(options.tempo !== undefined ? { tempo: options.tempo } : {}),
+        ...(options.speed !== undefined ? { speed: options.speed } : {}),
+      };
       respectSilentMode();
       const audio = (context.current ??= new AudioContext());
       void audio.resume();
@@ -122,7 +125,7 @@ export function useMetronome(chart: Chart) {
       const metronome = engine.current;
       if (!metronome) return;
       const playing = Math.max(metronome.index(), 0);
-      const tempo = asked.current !== undefined ? { tempo: asked.current } : {};
+      const tempo = asked.current;
       let tail: Click[];
       if (queued === section) {
         const end = sectionEnd(metronome.clicks, bars, playing);

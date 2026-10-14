@@ -39,6 +39,7 @@ const SAME_IN_BOTH = new Set([
   "stand.setBar",
   "stand.beatOf",
   "stand.tempoTitle",
+  "stand.speedValue",
   "stand.set",
   "sets.allSets",
   "nav.sets",
