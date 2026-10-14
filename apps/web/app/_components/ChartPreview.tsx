@@ -27,6 +27,7 @@ import {
 } from "@chartdown/ui";
 import { Theme } from "@astryxdesign/core";
 import { chartdownStandTheme } from "../../theme/chartdown-stand";
+import { usePhone } from "../../lib/shell/phone";
 import { SongForm } from "./SongForm";
 import { useTranslations } from "next-intl";
 import { useChartLabels } from "./chartLabels";
@@ -104,6 +105,7 @@ export function ChartPreview({
   hasForm = false,
   notes,
   beats = "auto",
+  phone = false,
 }: {
   chart: Chart;
   style?: ChordStyle;
@@ -118,7 +120,10 @@ export function ChartPreview({
   notes?: readonly (readonly MDNoteData[])[];
   /** How many bars show beat marks (R-03.7); Auto by default. */
   beats?: BeatsMode;
+  /** The server's guess that this is a phone, where the song form is one strip (R-03.8). */
+  phone?: boolean;
 }) {
+  const isPhone = usePhone(phone);
   const labels = useChartLabels();
   const c = useTranslations("chart");
   const formatter = chordFormatter(chart, homeKey ? { style, key: homeKey } : { style });
@@ -142,6 +147,7 @@ export function ChartPreview({
             <SongForm
               label={c("songForm")}
               size="lg"
+              isStrip={isPhone}
               items={formStripItems(chart, -1, () => false).map((item, index) => ({
                 abbreviation: item.abbreviation,
                 description: describe(item),

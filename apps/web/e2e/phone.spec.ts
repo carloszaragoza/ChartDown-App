@@ -88,6 +88,31 @@ test.describe("on an iPhone 16 in portrait", () => {
   });
 });
 
+test.describe("the version page on an iPhone 16", () => {
+  test.use({ viewport: PORTRAIT, hasTouch: true, isMobile: true });
+
+  test("R-03.8 the version page shows the first row on the first screen, with the song form as a strip", async ({
+    page,
+    request,
+  }) => {
+    const id = await createVersion(request, { title: "Open Road", content: OPEN_ROAD });
+    await page.goto(`/versions/${id}`);
+    const form = page.getByRole("navigation", { name: "Song form" });
+    await expect(form.getByRole("link")).toHaveCount(7);
+    // One strip: every section on the same line, scrolling inside itself.
+    const tops = await form
+      .getByRole("link")
+      .evaluateAll((links) => links.map((link) => Math.round(link.getBoundingClientRect().top)));
+    expect(new Set(tops).size).toBe(1);
+    const firstRow = await page
+      .locator(".cd-chart__bars")
+      .first()
+      .evaluate((row) => row.getBoundingClientRect().top);
+    expect(firstRow).toBeLessThan(PORTRAIT.height);
+    await expectNoSidewaysScroll(page);
+  });
+});
+
 test.describe("on an iPhone 16 in landscape", () => {
   test.use({ viewport: LANDSCAPE, hasTouch: true, isMobile: true });
 
