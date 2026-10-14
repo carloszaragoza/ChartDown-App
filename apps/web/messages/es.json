@@ -617,7 +617,13 @@
     "tempoLabel": "Pulsos por minuto",
     "again": "{name}, otra vez",
     "fermata": "Calderón · toca para seguir",
-    "startsAt": "Empieza en el compás {bar}"
+    "startsAt": "Empieza en el compás {bar}",
+    "sound": "Sonido del metrónomo",
+    "click": "Clic",
+    "clickHint": "Un clic acentuado en el tiempo 1. Apagado, solo el pulso marca el tiempo.",
+    "volume": "Volumen",
+    "countIn": "Cuenta previa",
+    "countInHint": "Un compás de clics antes del primer compás."
   },
   "bands": {
     "title": "Bandas",

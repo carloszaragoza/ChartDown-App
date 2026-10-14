@@ -617,7 +617,13 @@
     "tempoLabel": "Beats per minute",
     "again": "{name}, again",
     "fermata": "Fermata · tap to go on",
-    "startsAt": "Starts at bar {bar}"
+    "startsAt": "Starts at bar {bar}",
+    "sound": "Metronome sound",
+    "click": "Click",
+    "clickHint": "An accented click on beat 1. Off, only the pulse shows the beat.",
+    "volume": "Volume",
+    "countIn": "Count-in",
+    "countInHint": "One bar of clicks before the first bar."
   },
   "bands": {
     "title": "Bands",

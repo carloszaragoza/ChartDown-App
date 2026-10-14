@@ -143,6 +143,7 @@ export function ChartPreview({
   // start, and the page keeps the bar being played in view.
   const {
     playButton,
+    soundButton,
     tempoDialog,
     counter,
     nowIn,
@@ -207,6 +208,7 @@ export function ChartPreview({
                     {counter}
                   </Text>
                 )}
+                {soundButton}
                 {playButton}
               </HStack>
               {tempoDialog}
