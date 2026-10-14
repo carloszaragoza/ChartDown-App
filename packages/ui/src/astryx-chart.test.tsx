@@ -208,6 +208,43 @@ describe("T-2202 bar rows on a phone", () => {
   });
 });
 
+describe("T-1503 the metronome's pulse in a row", () => {
+  const split = parse("## A\n1 | 4:2 1:2 | 5\n");
+  const draw = (now: { index: number; progress: number }) =>
+    render(
+      <BarRow
+        row={split.sections[0]!.rows[0]!}
+        formatter={chordFormatter(split, { style: "numbers" })}
+        beats="always"
+        now={now}
+      />,
+    );
+  const css = readFileSync(join(__dirname, "chart.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const rule = (selector: string) =>
+    new RegExp(`${selector.replace(/[.:()-]/g, "\\$&")} \\{([^}]*)\\}`).exec(css)?.[1] ?? "";
+
+  it("R-11.3 the bar the metronome is on is marked, with the share of its beats counted", () => {
+    const html = draw({ index: 1, progress: 0.5 });
+    expect(html.match(/aria-current="step"/g)).toHaveLength(1);
+    expect(html).toMatch(/cd-chart__bar--now"[^>]*aria-current="step"[^>]*--chart-progress:0.5/);
+  });
+
+  it("R-11.3 the mark is subtle: no fill and no color, a thin line in a quiet ink", () => {
+    expect(rule(".cd-chart__bar--now")).not.toMatch(/background|box-shadow|color/);
+    const line = rule(".cd-chart__bar--now::after");
+    expect(line).toContain("background: var(--color-icon-secondary)");
+    expect(line).toContain("inline-size: calc(100% * var(--chart-progress, 0))");
+    expect(line).toContain("block-size: calc(var(--border-width) * 2)");
+  });
+
+  it("R-11.13 the line eases from beat to beat, and moves in steps with reduced motion", () => {
+    expect(rule(".cd-chart__bar--now::after")).toMatch(/transition: inline-size/);
+    expect(css).toMatch(
+      /@media \(prefers-reduced-motion: reduce\) \{\s*\.cd-chart__bar--now::after \{\s*transition: none;/,
+    );
+  });
+});
+
 describe("T-1301 MDNotes", () => {
   it("R-06.1 a note for everyone says MD; an instrument's note says the instrument; never color alone", () => {
     const html = render(

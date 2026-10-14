@@ -607,7 +607,13 @@
     "previousSong": "Previous song",
     "nextSong": "Next song",
     "allNotes": "All notes",
-    "viewOptions": "View options"
+    "viewOptions": "View options",
+    "play": "Play",
+    "stop": "Stop",
+    "beatOf": "{beat} / {of}",
+    "tempoTitle": "Tempo",
+    "tempoAsk": "This chart has no tempo. How fast should the metronome count?",
+    "tempoLabel": "Beats per minute"
   },
   "bands": {
     "title": "Bands",

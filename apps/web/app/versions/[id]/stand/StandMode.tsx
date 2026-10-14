@@ -42,6 +42,7 @@ import {
   type TouchEvent,
 } from "react";
 import { ChartSection } from "../../../_components/ChartPreview";
+import { useMetronomeControls } from "../../../_components/MetronomeControls";
 import { SongForm } from "../../../_components/SongForm";
 import { BeatsControl } from "../../../_components/BeatsControl";
 import { useChartLabels } from "../../../_components/chartLabels";
@@ -152,6 +153,12 @@ function StandModeView({
   const isSideways = useShortScreen() && isPhone;
   const [isSheetOpen, setSheetOpen] = useState(false);
   const [current, setCurrent] = useState(() => readSection(chart, String(initial + 1)));
+  // The visual metronome (R-11.1 to R-11.5): it plays from the section being read, and the
+  // section follows it.
+  const { playButton, tempoDialog, counter, nowIn, playingSection } = useMetronomeControls(
+    chart,
+    current,
+  );
   // Numbers or letters, Beats and the theme change here at once, with no trip to the server
   // (F-005); the address follows, so a reload or a shared link shows the same.
   const [view, setView] = useState<StandView>({
@@ -193,6 +200,14 @@ function StandModeView({
     (to: (now: number) => number) => setCurrent((now) => Math.min(Math.max(to(now), 0), last)),
     [last],
   );
+  // Playing, the section follows the metronome (R-11.4): when it enters another section, stand
+  // mode turns to it; in between, the musician may look ahead.
+  const [followed, setFollowed] = useState(playingSection);
+  if (playingSection !== followed) {
+    setFollowed(playingSection);
+    if (playingSection !== undefined) setCurrent(playingSection);
+  }
+
   // The address follows the section and the view.
   useEffect(() => {
     const address = standHref(
@@ -442,7 +457,7 @@ function StandModeView({
                           {title}
                         </Heading>
                         <Text type="supporting" maxLines={1}>
-                          {set ? `${set.songOf} · ${position}` : position}
+                          {counter ?? (set ? `${set.songOf} · ${position}` : position)}
                         </Text>
                       </VStack>
                     </StackItem>
@@ -455,15 +470,8 @@ function StandModeView({
                     icon={<Icon icon={AdjustmentsHorizontalIcon} />}
                     onClick={() => setSheetOpen(true)}
                   />
-                  {previous && (
-                    <Button
-                      label={previous.label}
-                      href={previous.href}
-                      size="lg"
-                      isIconOnly
-                      icon={<Icon icon={ChevronLeftIcon} />}
-                    />
-                  )}
+                  {/* Play takes Previous's place: a swipe to the right goes back (R-03.3). */}
+                  {playButton}
                   {following && (
                     <Button
                       label={following.label}
@@ -496,6 +504,12 @@ function StandModeView({
                       </VStack>
                     </HStack>
                     <HStack gap={2} vAlign="center" wrap="wrap">
+                      {counter && (
+                        <Text type="large" weight="bold">
+                          {counter}
+                        </Text>
+                      )}
+                      {playButton}
                       {viewAsControl}
                       {previous && (
                         <Button
@@ -550,6 +564,7 @@ function StandModeView({
                   meter={chart.meter}
                   beats={beats}
                   size="lg"
+                  now={nowIn(current)}
                 />
               )}
             </main>
@@ -578,6 +593,7 @@ function StandModeView({
               )}
             </VStack>
           </VStack>
+          {tempoDialog}
           {isPhone && (
             <BottomSheet
               isOpen={isSheetOpen}

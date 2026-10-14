@@ -131,6 +131,7 @@ function OneBar({
   plain,
   formatter,
   labels,
+  progress,
 }: {
   bar: BarData;
   row: Row;
@@ -143,6 +144,8 @@ function OneBar({
   plain: boolean;
   formatter: ChordFormatter;
   labels: BarLabels;
+  /** The metronome is on this bar: the share of its beats counted so far (R-11.3). */
+  progress?: number;
 }) {
   // A pickup has only the beats it was written with (spec 5.3).
   const beats = bar.pickup ?? meter.beats;
@@ -157,9 +160,19 @@ function OneBar({
     bar.repeatStart && "cd-chart__bar--repeat-start",
     bar.repeatEnd && "cd-chart__bar--repeat-end",
     bar.ending && "cd-chart__bar--ending",
+    progress !== undefined && "cd-chart__bar--now",
   ].filter(Boolean);
   return (
-    <div role="group" className={classes.join(" ")}>
+    <div
+      role="group"
+      className={classes.join(" ")}
+      {...(progress !== undefined
+        ? {
+            "aria-current": "step" as const,
+            style: { "--chart-progress": progress } as CSSProperties,
+          }
+        : {})}
+    >
       <div className="cd-chart__tags">
         {bar.ending && <span className="cd-chart__ending">{bar.ending.join(", ")}.</span>}
         {bar.dynamic && (
@@ -272,6 +285,11 @@ export interface BarRowProps {
    * in the secondary color.
    */
   size?: "lg" | "md" | "sm";
+  /**
+   * The bar the metronome is on, by its place in the row, and the share of its beats counted so
+   * far: a thin line grows under it beat by beat (R-11.3, R-11.5).
+   */
+  now?: { index: number; progress: number };
 }
 
 /**
@@ -290,6 +308,7 @@ export function BarRow({
   labels: given,
   beats = "always",
   size = "lg",
+  now,
 }: BarRowProps) {
   const labels: Required<BarLabels> = { ...DEFAULT_BAR_LABELS, ...given };
   // As many columns as the row has bars, as the approved prototype draws it; a pickup is narrower.
@@ -342,6 +361,7 @@ export function BarRow({
               plain={plain}
               formatter={formatter}
               labels={labels}
+              {...(now?.index === index ? { progress: now.progress } : {})}
             />
           ))}
         </div>
