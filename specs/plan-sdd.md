@@ -368,7 +368,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-11.7 **Click sound (optional):** off by default. When on, an accented click on beat 1 and a softer click on the others, with a volume control. Silent mode on the device is respected.
 - R-11.8 **Count-in (optional):** one bar of clicks or pulses before the first bar.
 - R-11.9 **Tempo adjust:** the user can change the tempo for practice (for example 80% speed) without changing the chart. Tap tempo sets a tempo by tapping.
-- R-11.10 **Hands-free control:** space bar and Bluetooth page-turn pedals (which send arrow or page keys) start, stop and move between bars.
+- R-11.10 **Hands-free control:** the space bar starts and stops the metronome; Bluetooth page-turn pedals (which send arrow or page keys) turn sections, and while it plays they queue them as R-11.15 says (owner's review, October 14, 2026: the band moves by sections, not bars).
 - R-11.11 **Works offline** in a downloaded set, and keeps the screen awake while playing.
 - R-11.12 **Accurate timing:** clicks are scheduled with the Web Audio clock, not timers, so the beat doesn't drift over a whole song.
 - R-11.13 **Reduced motion:** with the system's reduced-motion setting, the pulse becomes a steady highlight and a beat counter, with no flashing.
