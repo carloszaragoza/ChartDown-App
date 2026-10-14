@@ -1,8 +1,13 @@
 # Changelog
 
+## Unreleased (0.3.0)
+
+- `chartdown/conformance`: the adapter for the official ChartDown conformance suite (spec Appendix B), with `toJSON(source)` and `display(source, { style, key })`. The package's own tests run the suite, pinned to a commit of github.com/ChartDown/spec.
+- The package's homepage and repository point to github.com/ChartDown/spec, where the language now lives.
+
 ## 0.2.0
 
-The parser now implements [ChartDown 0.6](https://github.com/ChartDown/Language). Charts written for 0.3, 0.4 and 0.5 parse the same, with no version warning.
+The parser now implements [ChartDown 0.6](https://github.com/ChartDown/spec). Charts written for 0.3, 0.4 and 0.5 parse the same, with no version warning.
 
 ### New in the language
 
