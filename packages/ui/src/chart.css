@@ -125,25 +125,20 @@
   grid-row: span 3;
 }
 
-/* The bar the metronome is on (R-11.3): blue, the color of selection, with an outline so it
-   never rests on color alone; beat 1 draws the outline thicker. With reduced motion the outline
-   stays the same on every beat, so nothing flashes (R-11.13). */
+/* The bar the metronome is on (R-11.3): no fill and no color, only a thin line in the secondary
+   ink along its foot that grows beat by beat, so it guides the eye without pulling it. The line
+   passes under the chord that sounds (R-11.5), and it moves in steps, never flashing (R-11.13). */
 .cd-chart__bar--now {
-  background: var(--color-background-blue);
-  box-shadow: inset 0 0 0 calc(var(--border-width) * 2) var(--color-border-blue);
+  position: relative;
 }
-.cd-chart__bar--downbeat {
-  box-shadow: inset 0 0 0 calc(var(--border-width) * 5) var(--color-border-blue);
-}
-/* In a bar of several chords, the one sounding on the beat is underlined (R-11.5). */
-.cd-chart__cell--now,
-.cd-chart__token--now {
-  box-shadow: inset 0 calc(var(--border-width) * -3) 0 var(--color-border-blue);
-}
-@media (prefers-reduced-motion: reduce) {
-  .cd-chart__bar--downbeat {
-    box-shadow: inset 0 0 0 calc(var(--border-width) * 2) var(--color-border-blue);
-  }
+.cd-chart__bar--now::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  inline-size: calc(100% * var(--chart-progress, 0));
+  block-size: calc(var(--border-width) * 3);
+  background: var(--chart-ink-muted);
 }
 
 /* A phone in portrait (design handoff 5, R-03.8): a row wraps into lines of two bars instead of

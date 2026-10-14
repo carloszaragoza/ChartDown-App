@@ -433,8 +433,7 @@ function StandModeView({
       ? {
           row: playing.row,
           index: playing.index,
-          downbeat: click.count === 1,
-          item: playing.beats[click.beat]?.item ?? -1,
+          progress: (click.beat + 1) / Math.max(playing.beats.length, 1),
         }
       : undefined;
 

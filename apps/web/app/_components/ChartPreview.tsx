@@ -48,8 +48,8 @@ export interface ChartSectionProps {
   size?: "lg" | "md";
   /** How many bars show beat marks (R-03.7); Auto, the default, where they tell something. */
   beats?: BeatsMode;
-  /** The bar the metronome is on: its row, its place in the row, and beat 1 or not (R-11.3). */
-  now?: { row: number; index: number; downbeat: boolean; item: number };
+  /** The bar the metronome is on: its row, its place in the row, and how far into it (R-11.3). */
+  now?: { row: number; index: number; progress: number };
 }
 
 /**
@@ -87,9 +87,7 @@ export function ChartSection({
             size={size}
             beats={beats}
             {...(meter ? { meter } : {})}
-            {...(now?.row === index
-              ? { now: { index: now.index, downbeat: now.downbeat, item: now.item } }
-              : {})}
+            {...(now?.row === index ? { now: { index: now.index, progress: now.progress } } : {})}
           />
         ))}
       </VStack>
