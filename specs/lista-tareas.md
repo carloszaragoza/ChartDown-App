@@ -216,8 +216,8 @@ On October 13, 2026 the language repository published its conformance suite (spe
 |---|---|---|---|---|---|
 | T-1711 | Plan adopting the official suite: R-00.12, these tasks, F-007, and SPEC-00's interpretations now cited as spec sections | – | – | S | Specs reviewed by the owner |
 | T-1712 | Run the official suite: the suite's folder (cases, `run.mjs`, README) pinned to a commit of github.com/ChartDown/spec, its commit recorded; the package's tests run it through the adapter; this repository's own cases and runner (`conformance/`, `src/conformance.test.ts`) retired. After the spec's pull request 1 is merged | R-00.12 | T-1711 | S | “R-00.12 chartdown passes the official conformance suite”: 123 of 123, the runner's check for spec sections without a case included |
-| T-1713 | Ship the adapter: `chartdown/conformance` exports `toJSON` and `display` as the suite expects; the README says how to run the suite against the package; `homepage` and `repository` point to github.com/ChartDown/spec (F-007); changelog for 0.2.1 | R-00.12 | T-1712 | S | The packed package installs in a new project and passes the suite through its own adapter |
-| T-1714 | Publish `chartdown` 0.2.1 to npm (the owner publishes from their account, as with 0.2.0) | – | T-1713 | S | npm shows 0.2.1 with links to github.com/ChartDown/spec |
+| T-1713 | Ship the adapter: `chartdown/conformance` exports `toJSON` and `display` as the suite expects; the README says how to run the suite against the package; `homepage` and `repository` point to github.com/ChartDown/spec (F-007); released with 0.3.0 (T-2007) | R-00.12 | T-1712 | S | The packed package installs in a new project and passes the suite through its own adapter |
+| T-1714 | ~~Publish `chartdown` 0.2.1~~ Dropped (owner's decision, October 13, 2026): T-1713 is released with 0.7 in 0.3.0 (T-2007), one publish instead of two; until then the npm page links to the private repository | – | – | – | – |
 
 ## E20 · ChartDown 0.7
 
@@ -233,7 +233,7 @@ The app sees one change in charts that already exist: a quality written with an 
 | T-2004 | Parser: directive names in any case, an unreadable `@key` value as a warning, reading 0.3 to 0.7 and 0.7 as the version written on save | R-00.16, R-00.4 | T-2001 | S | The suite's 15 case; a chart saved by the app declares 0.7 |
 | T-2005 | The suite pinned to `1e103c9`, the merge of 0.7 (replaces T-1712's 0.6 pin) | R-00.12 | T-1712, T-2002, T-2003, T-2004 | S | 142 of 142 |
 | T-2006 | App: qualities in their canonical spelling and `numbering: 6m` charts in the viewer, the editors and stand mode, numbers and letters, light and dark; the owner checks how the longer canonical qualities sit as superscripts (`design/chart-viewer`) | R-00.11, R-00.13, R-00.14 | T-2002, T-2003 | S | A chart in Em with 6m and aliases renders the same letters as its 1m version; the owner approves the drawing |
-| T-2007 | Publish `chartdown` 0.3.0 to npm for ChartDown 0.7 (README, changelog; the owner publishes) | – | T-2005, T-1713 | S | npm shows 0.3.0; the packed package passes the 0.7 suite through its adapter |
+| T-2007 | Publish `chartdown` 0.3.0 to npm: ChartDown 0.7, the official suite and its adapter (T-1713), and links to github.com/ChartDown/spec, in one release (owner's decision, October 13, 2026; README, changelog; the owner publishes) | – | T-2005, T-1713 | S | npm shows 0.3.0 with links to github.com/ChartDown/spec; the packed package passes the 0.7 suite through its adapter |
 
 ## Phase 2
 
