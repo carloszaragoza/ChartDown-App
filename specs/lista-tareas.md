@@ -233,11 +233,23 @@ The app sees one change in charts that already exist: a quality written with an 
 | T-2004 | Parser: directive names in any case, an unreadable `@key` value as a warning, reading 0.3 to 0.7 and 0.7 as the version written on save | R-00.16, R-00.4 | T-2001 | S | The suite's 15 case; a chart saved by the app declares 0.7 |
 | T-2005 | The suite pinned to `1e103c9`, the merge of 0.7 (replaces T-1712's 0.6 pin) | R-00.12 | T-1712, T-2002, T-2003, T-2004 | S | 142 of 142 |
 | T-2006 | App: qualities in their canonical spelling and `numbering: 6m` charts in the viewer, the editors and stand mode, numbers and letters, light and dark; the owner checks how the longer canonical qualities sit as superscripts (`design/chart-viewer`) | R-00.11, R-00.13, R-00.14 | T-2002, T-2003 | S | A chart in Em with 6m and aliases renders the same letters as its 1m version; the owner approves the drawing |
-| T-2007 | Publish `chartdown` 0.3.0 to npm: ChartDown 0.7, the official suite and its adapter (T-1713), and links to github.com/ChartDown/spec, in one release (owner's decision, October 13, 2026; README, changelog; the owner publishes) | – | T-2005, T-1713 | S | npm shows 0.3.0 with links to github.com/ChartDown/spec; the packed package passes the 0.7 suite through its adapter |
+| T-2007 | Publish `chartdown` 0.3.0 to npm: ChartDown 0.7, the official suite and its adapter (T-1713), in one release (owner's decision, October 13, 2026; README, changelog; the owner publishes). Since E21 it is published from github.com/ChartDown/parser and its links point there, with the README linking to the spec | – | T-2005, T-1713, T-2102 | S | npm shows 0.3.0 with links to github.com/ChartDown/parser; the packed package passes the 0.7 suite through its adapter |
 
 ## Phase 2
 
 The three phase 2 features start after the MVP beta (T-1203). Their requirements are SPEC-10, SPEC-11 and SPEC-12 in the SDD Plan (ids R-10.x, R-11.x and R-12.x). Their task ids follow their epic number (T-14xx, T-15xx, T-16xx), since T-13xx belongs to E13.
+
+## E21 · The parser moves to the ChartDown organization
+
+Owner's decision, October 14, 2026: the `chartdown` parser leaves this repository for its own public repository, github.com/ChartDown/parser, owned by the ChartDown organization next to the spec. The spec stays neutral (it names no implementation as part of the language), the parser keeps its own versions and changelog, and the app installs it from npm like any other project. The cost: a change to the parser reaches the app only after it is published.
+
+What moves with the parser: its sources, its history, its tests (SPEC-00, R-00.x), the pinned conformance suite and the example charts. What stays in the app: the tests that read the app's own files (the starting instrument catalog in `supabase/migrations`, R-00.1) and copies of the example charts its own tests draw.
+
+| ID | Task | Requirements | Depends on | Size | Tests / evidence |
+|---|---|---|---|---|---|
+| T-2101 | Plan the move: this epic, the technical plan (3, 9, 12.6) and CLAUDE.md | – | – | S | Specs reviewed by the owner |
+| T-2102 | github.com/ChartDown/parser: the history of `packages/core` (only that folder), a standalone build with no monorepo files, its own CI (type check, tests, the suite), MIT, and `homepage`, `repository` and `bugs` pointing to it; its README links to the spec | – | T-2101 | M | The repository's CI passes; the packed package passes the 0.7 suite through its adapter |
+| T-2103 | The app installs `chartdown` from npm (`^0.3.0`) in `apps/web` and `packages/ui`, and `packages/core` leaves the monorepo; the R-00.1 catalog test and the example charts the app's tests use move into the app; the root README and LICENSE no longer list `packages/core` | R-00.1 | T-2007 | S | CI passes with the package from npm; the R-00.1 test reads `supabase/migrations` |
 
 ## E19 · Play from the device first (phase 2)
 
