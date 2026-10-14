@@ -39,12 +39,14 @@ import {
   useState,
   useSyncExternalStore,
   type MouseEvent,
+  type TouchEvent,
 } from "react";
 import { ChartSection } from "../../../_components/ChartPreview";
 import { SongForm } from "../../../_components/SongForm";
 import { BeatsControl } from "../../../_components/BeatsControl";
 import { useChartLabels } from "../../../_components/chartLabels";
 import type { Display } from "../display";
+import { inSidewaysScroll, swipeTurn } from "./swipe";
 import {
   readSection,
   songsAhead,
@@ -214,24 +216,51 @@ function StandModeView({
     for (const song of ahead.split(" ").filter(Boolean)) prefetchWhole(router, song);
   }, [ahead, router]);
 
+  // On, and back: at a song's edge, the pedal and a swipe go on to the set's next song.
+  const forward = useCallback(() => {
+    if (atEdge.current.last && nextSong) router.push(nextSong);
+    else move((now) => now + 1);
+  }, [move, nextSong, router]);
+  const backward = useCallback(() => {
+    if (atEdge.current.first && previousSong) router.push(previousSong);
+    else move((now) => now - 1);
+  }, [move, previousSong, router]);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLElement && event.target.closest("input, select, textarea"))
         return;
       if (FORWARD.has(event.key)) {
         event.preventDefault();
-        // At a song's edge, the pedal goes on to the next song of the set.
-        if (atEdge.current.last && nextSong) router.push(nextSong);
-        else move((now) => now + 1);
+        forward();
       } else if (BACK.has(event.key)) {
         event.preventDefault();
-        if (atEdge.current.first && previousSong) router.push(previousSong);
-        else move((now) => now - 1);
+        backward();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [move, nextSong, previousSong, router]);
+  }, [forward, backward]);
+
+  // A sideways swipe on the chart turns the section, on an iPad or a phone (R-03.3); a vertical
+  // drag still scrolls it, and a row that scrolls sideways itself keeps its own swipe.
+  const touch = useRef<{ x: number; y: number } | null>(null);
+  const onTouchStart = (event: TouchEvent<HTMLElement>) => {
+    const finger = event.touches[0];
+    touch.current =
+      event.touches.length === 1 && finger && !inSidewaysScroll(event.target, event.currentTarget)
+        ? { x: finger.clientX, y: finger.clientY }
+        : null;
+  };
+  const onTouchEnd = (event: TouchEvent<HTMLElement>) => {
+    const start = touch.current;
+    const finger = event.changedTouches[0];
+    touch.current = null;
+    if (!start || !finger) return;
+    const turn = swipeTurn(finger.clientX - start.x, finger.clientY - start.y);
+    if (turn === "next") forward();
+    else if (turn === "previous") backward();
+  };
 
   const items = formStripItems(chart, current, (index) => Boolean(forYou[index])).map(
     (item, index) => ({
@@ -503,7 +532,12 @@ function StandModeView({
 
             {/* The current section sits right under the song form, with the next one right after
               it; when it is taller than the screen it scrolls inside its own area (F-001). */}
-            <main aria-live="polite" style={{ flex: "0 1 auto", minHeight: 0, overflowY: "auto" }}>
+            <main
+              aria-live="polite"
+              style={{ flex: "0 1 auto", minHeight: 0, overflowY: "auto" }}
+              onTouchStart={onTouchStart}
+              onTouchEnd={onTouchEnd}
+            >
               {now && (
                 <ChartSection
                   key={current}
