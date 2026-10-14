@@ -38,58 +38,58 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 **Platform roles**
 
-| Role          | Description                                                                                |
-| ------------- | ------------------------------------------------------------------------------------------ |
-| Visitor       | No account. Can browse the public catalog but cannot create or save anything (decision 3). |
-| User          | Registered person. Creates songs, versions and bands.                                      |
-| Administrator | Manages users, content and the instrument catalog (decision 5).                            |
+| Role | Description |
+|---|---|
+| Visitor | No account. Can browse the public catalog but cannot create or save anything (decision 3). |
+| User | Registered person. Creates songs, versions and bands. |
+| Administrator | Manages users, content and the instrument catalog (decision 5). |
 
 **Roles within a band** (the role depends on the band: you can be MD in one band and keyboardist in another, decision 1)
 
-| Role         | Description                                                                                                                |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| MD           | Only one per band (decision 2). Manages musicians, sets and the notes layer.                                               |
+| Role | Description |
+|---|---|
+| MD | Only one per band (decision 2). Manages musicians, sets and the notes layer. |
 | Temporary MD | A member the MD appoints for one specific set when the MD can't be there. Their authority ends with that set (decision 2). |
-| Musician     | Member with one or more assigned instruments. Sees their band's sets.                                                      |
+| Musician | Member with one or more assigned instruments. Sees their band's sets. |
 
 **Permission matrix**
 
-| Action                                             | Visitor | User | Musician                     | Temporary MD      | MD  | Admin         |
-| -------------------------------------------------- | ------- | ---- | ---------------------------- | ----------------- | --- | ------------- |
-| Browse the public catalog                          | Yes     | Yes  | Yes                          | Yes               | Yes | Yes           |
-| Create a song, version or fork                     | No      | Yes  | Yes                          | Yes               | Yes | Yes           |
-| Edit their own version                             | No      | Yes  | Yes                          | Yes               | Yes | Yes           |
-| Edit someone else's version                        | No      | No   | No                           | No                | No  | Moderate only |
-| Make their version private (a public copy remains) | No      | Yes  | Yes                          | Yes               | Yes | Yes           |
-| Create a band (and be its MD)                      | No      | Yes  | Yes                          | Yes               | Yes | Yes           |
-| Invite musicians and assign instruments            | No      | No   | No                           | No                | Yes | No            |
-| Appoint a temporary MD                             | No      | No   | No                           | No                | Yes | No            |
-| Create sets                                        | No      | No   | No                           | No                | Yes | No            |
-| Edit a set (order, keys, lineup)                   | No      | No   | No                           | Their set only    | Yes | No            |
-| Write the MD notes layer                           | No      | No   | No                           | No (decision 9.6) | Yes | No            |
-| See their band's sets                              | No      | No   | Yes                          | Yes               | Yes | No            |
-| See layer notes                                    | No      | No   | General and their instrument | All, in their set | All | No            |
-| Manage the instrument catalog                      | No      | No   | No                           | No                | No  | Yes           |
-| Hide content, suspend users                        | No      | No   | No                           | No                | No  | Yes           |
+| Action | Visitor | User | Musician | Temporary MD | MD | Admin |
+|---|---|---|---|---|---|---|
+| Browse the public catalog | Yes | Yes | Yes | Yes | Yes | Yes |
+| Create a song, version or fork | No | Yes | Yes | Yes | Yes | Yes |
+| Edit their own version | No | Yes | Yes | Yes | Yes | Yes |
+| Edit someone else's version | No | No | No | No | No | Moderate only |
+| Make their version private (a public copy remains) | No | Yes | Yes | Yes | Yes | Yes |
+| Create a band (and be its MD) | No | Yes | Yes | Yes | Yes | Yes |
+| Invite musicians and assign instruments | No | No | No | No | Yes | No |
+| Appoint a temporary MD | No | No | No | No | Yes | No |
+| Create sets | No | No | No | No | Yes | No |
+| Edit a set (order, keys, lineup) | No | No | No | Their set only | Yes | No |
+| Write the MD notes layer | No | No | No | No (decision 9.6) | Yes | No |
+| See their band's sets | No | No | Yes | Yes | Yes | No |
+| See layer notes | No | No | General and their instrument | All, in their set | All | No |
+| Manage the instrument catalog | No | No | No | No | No | Yes |
+| Hide content, suspend users | No | No | No | No | No | Yes |
 
 ## 5. Domain model (conceptual)
 
-| Entity                | What it is                                                                                                     | Related to              |
-| --------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| User                  | Person with an account, preferred language and instruments they play                                           | Bands, versions, sets   |
-| Song                  | The work: title and writers (no CCLI data)                                                                     | Many versions           |
-| Version (arrangement) | A chart in ChartDown: owner, visibility, source; may come from a fork                                          | A song, its revisions   |
-| Revision              | Each saved change to a version; allows going back (decision 7)                                                 | A version               |
-| Source                | Studio, live, acoustic or own arrangement; album, year, YouTube link                                           | A version               |
-| Instrument            | Entry in the catalog managed by the Admin (decision 5)                                                         | Members, lineups, notes |
-| Band                  | Group of musicians with a single MD                                                                            | Members, sets, layers   |
-| Member                | User within a band, with a role and default instruments                                                        | Band, user              |
-| MD layer              | Notes per section and instrument that a band puts on top of a version, without touching the chart (decision 4) | Band, version           |
-| Set                   | Group of songs with a name unique within the band (decision 8), optional date and type                         | Band, items, lineup     |
-| Set item              | A version at a position, with its key for that set (decision 9)                                                | Set, version, layer     |
-| Set lineup            | Which musician plays which instrument, and who is temporary MD                                                 | Set, members            |
-| Notification          | Notice of a change to a person (decision 13)                                                                   | User, set, version      |
-| Offline download      | Copy of a set stored on the device (decision 12)                                                               | Set, user               |
+| Entity | What it is | Related to |
+|---|---|---|
+| User | Person with an account, preferred language and instruments they play | Bands, versions, sets |
+| Song | The work: title and writers (no CCLI data) | Many versions |
+| Version (arrangement) | A chart in ChartDown: owner, visibility, source; may come from a fork | A song, its revisions |
+| Revision | Each saved change to a version; allows going back (decision 7) | A version |
+| Source | Studio, live, acoustic or own arrangement; album, year, YouTube link | A version |
+| Instrument | Entry in the catalog managed by the Admin (decision 5) | Members, lineups, notes |
+| Band | Group of musicians with a single MD | Members, sets, layers |
+| Member | User within a band, with a role and default instruments | Band, user |
+| MD layer | Notes per section and instrument that a band puts on top of a version, without touching the chart (decision 4) | Band, version |
+| Set | Group of songs with a name unique within the band (decision 8), optional date and type | Band, items, lineup |
+| Set item | A version at a position, with its key for that set (decision 9) | Set, version, layer |
+| Set lineup | Which musician plays which instrument, and who is temporary MD | Set, members |
+| Notification | Notice of a change to a person (decision 13) | User, set, version |
+| Offline download | Copy of a set stored on the device (decision 12) | Set, user |
 
 **Design decisions**
 
@@ -417,12 +417,12 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 ## 7. Phases
 
-| Phase                                      | Includes                                                                                                                                                                                                                                          | Outcome                                                                                                 |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| 0                                          | Constitution, specs and decisions                                                                                                                                                                                                                 | Specs approved (done)                                                                                   |
-| 1 (MVP)                                    | SPEC-00 (R-00.1 to R-00.16: ChartDown 0.7 and its conformance suite), 01, 02, 03 with layer editor, 04, 05 with key per set and temporary MD, 06, 08 offline reading, 09 in-app notices                                                           | A real band prepares a set, each musician reads their notes and plays without depending on the internet |
-| 2 (from October 14, 2026, during the beta) | Advanced stand mode, print and export to PDF (R-03.4), invite links, email notices, revision comparison, advanced search; import from PDF (SPEC-10), visual metronome and bar follow (SPEC-11), live mode where the band follows the MD (SPEC-12) | Comfortable use in rehearsal and on stage                                                               |
-| 3                                          | Full administration and reports, WhatsApp notices, offline editing, native phone app                                                                                                                                                              | Platform open to the public                                                                             |
+| Phase | Includes | Outcome |
+|---|---|---|
+| 0 | Constitution, specs and decisions | Specs approved (done) |
+| 1 (MVP) | SPEC-00 (R-00.1 to R-00.16: ChartDown 0.7 and its conformance suite), 01, 02, 03 with layer editor, 04, 05 with key per set and temporary MD, 06, 08 offline reading, 09 in-app notices | A real band prepares a set, each musician reads their notes and plays without depending on the internet |
+| 2 (from October 14, 2026, during the beta) | Advanced stand mode, print and export to PDF (R-03.4), invite links, email notices, revision comparison, advanced search; import from PDF (SPEC-10), visual metronome and bar follow (SPEC-11), live mode where the band follows the MD (SPEC-12) | Comfortable use in rehearsal and on stage |
+| 3 | Full administration and reports, WhatsApp notices, offline editing, native phone app | Platform open to the public |
 
 ## 8. Decisions from the Clarify phase
 
