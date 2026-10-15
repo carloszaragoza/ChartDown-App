@@ -42,7 +42,7 @@ export const MAX_LANDMARK_WORDS = 8;
 export const DEFAULT_LANDMARK_WORDS = 4;
 
 const HEADING =
-  /^\s*\[?\s*(intro|verse|pre[\s-]?chorus|chorus|bridge|instrumental|interlude|turnaround|tag|ending|outro|vamp|refrain|breakdown|solo|coda|hook)(\s*\d+[a-z]?|\s+[a-z])?\s*(?:\(?\s*[x×]\s*(\d+)\s*\)?)?\s*\]?\s*:?\s*$/i;
+  /^\s*\[?\s*(intro|verse|pre[\s-]?chorus|chorus|bridge|instrumental|interlude|turnaround|tag|ending|outro|vamp|refrain|breakdown|solo|coda|hook|verso|estrofa|pre[\s-]?coro|coro|estribillo|puente|interludio|final)(\s*\d+[a-z]?|\s+[a-z])?\s*(?:\(?\s*[x×]\s*(\d+)\s*\)?)?\s*\]?\s*:?\s*$/i;
 const SKIP =
   /copyright|©|\(c\)\s*\d|ccli|licen[cs]e|all rights reserved|used by permission|www\.|https?:\/\//i;
 const WRITERS =
@@ -87,6 +87,7 @@ function sectionName(match: RegExpExecArray): string {
   const word = (match[1] ?? "")
     .toLowerCase()
     .replace(/^pre[\s-]?chorus$/, "pre-chorus")
+    .replace(/^pre[\s-]?coro$/, "precoro")
     .split("-")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join("-");

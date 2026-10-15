@@ -55,6 +55,19 @@ describe("T-1403 details and sections", () => {
     ]);
   });
 
+  it("R-10.3 Spanish sheets name their sections in Spanish, and keep those names", () => {
+    const result = importSheet(
+      "Verso 1\nG        C\nUna línea\nPrecoro\nAm   D\nCORO\nC   G   D   G\nPuente\nEm  C\n",
+      numbers,
+    );
+    expect(result.source.split("\n").filter((line) => line.startsWith("## "))).toEqual([
+      "## Verso 1",
+      "## Precoro",
+      "## Coro",
+      "## Puente",
+    ]);
+  });
+
   it("R-10.3 a repeat it cannot map is flagged for review, never dropped", () => {
     const result = importSheet(sheet("harbor-lights-bars"), numbers);
     expect(result.review).toContainEqual(
