@@ -157,12 +157,14 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-01.6 A person can delete their account. Their public versions stay with the community and are credited to “ChartDown”, and their personal data is deleted (decision 9.5, updated in Technical Plan 12.5).
 - R-01.7 During the beta, creating an account requires a valid invite code. The Admin creates and revokes single-use or whole-band codes.
 - R-01.8 Without a code, a person can leave their email on a waitlist. The public catalog stays visible to visitors.
+- R-01.9 A person whose confirmation email did not arrive asks for it again, from the screen that tells them to check their email and from Sign in when it refuses an unconfirmed account. The answer is the same whether or not the email has an account waiting, so nobody learns which emails exist; asking too often says to wait a moment (owner's beta, October 14, 2026: two people never saw their email).
 
 **Acceptance criteria**
 
 - Given a visitor, when they open a public version, then they read it in full; when they tap “Fork”, then they are asked to sign in.
 - Given a user who chooses Spanish, when they use the app, then the whole interface is in Spanish and the ChartDown syntax does not change.
 - Given a regular user, when they try to open the admin panel, then access is denied.
+- Given a person who signed up and did not get the confirmation email, when they ask for it again, then a new one is sent and the screen says to check their inbox and their spam folder.
 
 ### SPEC-02 · Catalog, versions and history
 
@@ -279,11 +281,13 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-07.2 Reports on public content (for example, a version with full lyrics) and the option to hide it.
 - R-07.3 **Instrument catalog:** a starting list the Admin extends, renames or deactivates. An instrument in use is never deleted, only deactivated (decision 5).
 - R-07.4 Basic metrics: users, versions, bands, sets.
+- R-07.5 **Waitlist:** the Admin sees the people waiting (email, language, date joined), oldest first, and those already invited apart. **Invite** creates a single-use code noted with the person's email and marks them invited with it; the Admin copies the code and sends it themselves. Once the app can send email of its own (phase 2, email notices), Invite also emails the code in the person's language. Only admins see the waitlist.
 
 **Acceptance criteria**
 
 - Given a reported version, when the Admin hides it, then it disappears from the catalog and its owner receives a notice.
 - Given a deactivated instrument, when an MD builds a new lineup, then it is not in the list, but earlier lineups keep it.
+- Given a person on the waitlist, when the Admin taps Invite, then a single-use code noted with their email exists, they move to Invited with that code, and the code can be copied.
 
 ### SPEC-08 · Offline
 
