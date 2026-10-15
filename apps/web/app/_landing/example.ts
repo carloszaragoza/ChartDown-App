@@ -27,3 +27,10 @@ export const DEMO_SET = [
 
 export const LANGUAGE_URL = "https://github.com/ChartDown/spec";
 export const CONTACT = "contact@chartdown.app";
+
+// ChartDown's social accounts (owner, October 15, 2026).
+export const SOCIAL = [
+  { key: "instagram", href: "https://www.instagram.com/chartdown.app" },
+  { key: "tiktok", href: "https://www.tiktok.com/@chartdown.app" },
+  { key: "youtube", href: "https://www.youtube.com/@chartdown" },
+] as const;
