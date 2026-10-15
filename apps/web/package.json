@@ -21,6 +21,7 @@
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.117.2",
     "chartdown": "^0.3.0",
+    "motion": "13.4.6",
     "next": "16.3.8",
     "next-intl": "4.14.9",
     "react": "19.3.0",

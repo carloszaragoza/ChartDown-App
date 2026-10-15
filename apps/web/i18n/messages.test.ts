@@ -35,7 +35,17 @@ const SAME_IN_BOTH = new Set([
   "chart.tempoChange",
   "chart.beatsAuto",
   "bands.sets",
-  "landing.footer.copyright",
+  // The landing's beta tag, chart words musicians say in English, a file name, a name, an
+  // address and a site name.
+  "landing.hero.tag",
+  "landing.window.tempo",
+  "landing.window.auto",
+  "landing.marquee.w5",
+  "landing.problem.messages.file1",
+  "landing.features.f4.title",
+  "landing.founder.name",
+  "landing.footer.contact",
+  "landing.footer.github",
   "stand.setBar",
   "stand.beatOf",
   "stand.tempoTitle",

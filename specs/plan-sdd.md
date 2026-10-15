@@ -156,7 +156,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-01.5 Interface in English by default, with an option to switch to Spanish. A first-time visitor sees the language of their browser when it is Spanish, and English otherwise (owner's review, October 8, 2026). The preference is stored in the profile (decision 11); a signed-in person changes it only there, and a visitor with the small EN | ES at the foot of the landing page.
 - R-01.6 A person can delete their account. Their public versions stay with the community and are credited to “ChartDown”, and their personal data is deleted (decision 9.5, updated in Technical Plan 12.5).
 - R-01.7 During the beta, creating an account requires a valid invite code. The Admin creates and revokes single-use or whole-band codes.
-- R-01.8 Without a code, a person can leave their email on a waitlist. The public catalog stays visible to visitors.
+- R-01.8 Without a code, a person can leave their email on a waitlist, with their role (music director, musician or teacher) when they give it. The public catalog stays visible to visitors.
 - R-01.9 A person whose confirmation email did not arrive asks for it again, from the screen that tells them to check their email and from Sign in when it refuses an unconfirmed account. The answer is the same whether or not the email has an account waiting, so nobody learns which emails exist; asking too often says to wait a moment (owner's beta, October 14, 2026: two people never saw their email).
 
 **Acceptance criteria**

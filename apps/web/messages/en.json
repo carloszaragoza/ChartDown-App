@@ -1075,83 +1075,164 @@
     "overview": "Overview"
   },
   "landing": {
-    "nav": "Main",
-    "signIn": "Sign in",
-    "requestInvite": "Request an invite",
-    "hero": {
-      "title": "One song for the whole band. Cues for every player.",
-      "lead": "ChartDown App turns plain-text Nashville Number charts into band charts on iPad and desktop, with music director notes for each instrument.",
-      "try": "Try the notation",
-      "free": "Free during the invite-only beta.",
-      "example": "An original example chart",
-      "viewing": "Viewing as {instrument}",
-      "everyone": "Everyone",
-      "viewAs": "View as",
-      "meta": "{title} · Key {key} · {tempo} bpm · {meter}",
-      "bar": "bar {bar}"
+    "title": "ChartDown: Your band, same page",
+    "description": "Write the chart once. Every musician opens it on their iPad, in numbers or letters, with the director's notes. Join the private beta.",
+    "nav": {
+      "label": "Main",
+      "home": "ChartDown home",
+      "why": "Why ChartDown",
+      "features": "Features",
+      "open": "Open standard",
+      "catalog": "Catalog",
+      "join": "Join the waitlist",
+      "signIn": "Sign in"
     },
-    "how": {
-      "title": "How it works",
-      "write": {
-        "title": "Write it in ChartDown",
-        "text": "Plain text that reads like a chart: sections, bars, numbers, and notes for each instrument."
-      },
-      "set": {
-        "title": "Build your set",
-        "text": "Pick the versions you play, set the key for each song and assign every musician an instrument."
-      },
-      "play": {
-        "title": "Play from your part",
-        "text": "Everyone sees the same song. Each player sees the cues meant for them."
+    "hero": {
+      "tag": "BETA",
+      "tagText": "Invite-only · free during the beta",
+      "line1": "Your band. Same page.",
+      "line2": "Every night.",
+      "lead": "Write the chart once. Every musician opens it on their iPad, in numbers or letters, with the director's notes for each section. No more PDFs in the group chat.",
+      "formLabel": "Get early access",
+      "hint": "We're letting bands in a few at a time. One email when you're in.",
+      "hasCode": "I have an invite code"
+    },
+    "window": {
+      "label": "ChartDown chart view preview",
+      "byline": "Original song · Live",
+      "arrangement": "Arrangement by Carlos Zaragoza",
+      "key": "Key {key}",
+      "time": "Time {meter}",
+      "tempo": "Tempo {tempo}",
+      "stand": "Stand mode",
+      "edit": "Edit",
+      "history": "History",
+      "myNotes": "My notes",
+      "numbers": "Numbers",
+      "letters": "Letters",
+      "beats": "Beats",
+      "off": "Off",
+      "auto": "Auto",
+      "always": "Always",
+      "bars": "{count, plural, one {# bar} other {# bars}}"
+    },
+    "marquee": {
+      "w1": "Numbers",
+      "w2": "Letters",
+      "w3": "Stand mode",
+      "w4": "Director's notes",
+      "w5": "Sets",
+      "w6": "Every key",
+      "w7": "Offline",
+      "w8": "One chart"
+    },
+    "problem": {
+      "tag": "SOUND FAMILIAR?",
+      "title": "We've all been in this group chat.",
+      "body": "It's 11:42 p.m. Soundcheck is at 8. Three PDFs, two keys, and nobody knows who has the bridge.",
+      "answer": "ChartDown gives the band one chart. Everyone reads the same one.",
+      "chat": "Band chat · 11:42 PM",
+      "chatLabel": "A band's group chat the night before a show",
+      "messages": {
+        "dani": "Dani · keys",
+        "sending": "sending the charts now",
+        "file1": "MorningLight_FINAL.pdf",
+        "old": "wait that's the OLD one",
+        "file2": "MorningLight_FINAL_v2_REAL.pdf",
+        "marco": "Marco · bass",
+        "which": "are we doing it in E or D??",
+        "lu": "Lu · drums",
+        "bridge": "who has the bridge"
       }
     },
-    "stage": {
-      "title": "Built for the stage",
-      "saved": {
-        "title": "Every change saved",
-        "text": "Go back to any revision. Sets stay on the version you chose."
+    "features": {
+      "label": "Features",
+      "f1": {
+        "title": "Numbers or letters. Everyone reads their way.",
+        "body": "Write it once in Nashville numbers. The guitarist who thinks in chords flips to letters. Change the key and the chart still works.",
+        "visual": "The same four bars in numbers and in letters",
+        "key": "Key {key}"
       },
-      "offline": {
-        "title": "Offline sets",
-        "text": "Download a set before you leave. Every chart opens in airplane mode."
+      "f2": {
+        "title": "The director's voice, right on the chart.",
+        "body": "Director's notes on every section, lyric cues and dynamics. Each musician can also keep their own notes. The plan lives where everyone is looking.",
+        "visual": "A chorus with the director's note and a musician's own note",
+        "myNotes": "My notes",
+        "myNote": "Watch Lu for the cut on bar 8"
       },
-      "stand": {
-        "title": "Stand mode",
-        "text": "Full screen, big numbers, one tap to the next section."
+      "f3": {
+        "title": "Stand mode. Built for the music stand.",
+        "body": "One tap and the chart fills your iPad. Big numbers, thick bar lines, jump to any section. Readable mid-song, under stage lights.",
+        "visual": "Stand mode on an iPad"
       },
-      "part": {
-        "title": "Your part only",
-        "text": "Each musician sees the music director's notes for their own instrument."
+      "f4": {
+        "title": "Sets",
+        "body": "Line up tonight's songs and share the set with the band.",
+        "visual": "Tonight's set, shared with the band",
+        "setName": "Saturday night",
+        "when": "3 songs · 9 PM",
+        "shared": "Shared",
+        "sharedWith": "The whole band sees it, in their own key"
       },
-      "frame": "The chorus in stand mode"
+      "f5": {
+        "title": "Versions & history",
+        "body": "Your arrangement, a live version, an acoustic one. Every change is kept, so you can go back anytime.",
+        "live": "Live",
+        "acoustic": "Acoustic",
+        "new": "+ New version",
+        "visual": "A song's versions and its history",
+        "history": "History",
+        "r3": {
+          "title": "Revision 3 · Bridge cut to 2 bars",
+          "when": "Today"
+        },
+        "r2": {
+          "title": "Revision 2 · Moved to E",
+          "when": "Yesterday"
+        },
+        "r1": {
+          "title": "Revision 1 · First chart",
+          "when": "Last week"
+        }
+      }
     },
-    "language": {
-      "nav": "The language",
-      "title": "ChartDown is an open language",
-      "text": "The notation is public domain (CC0) and lives on GitHub. Write your charts once, keep them as plain text forever, and use them in any app that supports ChartDown.",
-      "spec": "Read the spec on GitHub",
-      "example": "The same chorus, written in ChartDown"
+    "open": {
+      "title1": "Built on an open standard.",
+      "title2": "Your charts go where you go.",
+      "body": "ChartDown is built on ChartDown Spec, a public, open standard for writing charts. Because it's a standard and not a secret format, your charts are never locked inside one app. You can take them with you and use them anywhere the standard is supported.",
+      "cta": "See the open standard",
+      "codeLabel": "The demo song, written in ChartDown"
     },
-    "invite": {
-      "title": "Join the beta",
-      "text": "ChartDown App is invite-only while we test it with real bands.",
+    "founder": {
+      "quote": "Our charts were always a step behind. Wrong chords, old versions, and musicians on stage not knowing which one to play. I built ChartDown so the whole band always has the right chart.",
+      "name": "Carlos Zaragoza",
+      "role": "Music director & keys · founder"
+    },
+    "waitlist": {
+      "title": "Get your band on the same page.",
+      "body": "Seats open in small groups. Tell us who you are and we'll save yours. Free while you're in the beta.",
+      "role": "I'm a…",
+      "roles": {
+        "music_director": "Music director",
+        "musician": "Musician",
+        "teacher": "Teacher"
+      },
       "email": "Email",
-      "placeholder": "you@example.com",
-      "submit": "Join the waitlist",
-      "sent": "Thanks. If this email is not on the list yet, it is now; we will write when there is a place for you.",
-      "invalid": "Enter a valid email address.",
-      "unavailable": "The waitlist is not available yet. Come back soon.",
-      "haveCode": "I have an invite code"
+      "placeholder": "you@yourband.com",
+      "submit": "Save my spot",
+      "saving": "Saving…",
+      "hint": "One email when you're in. No spam.",
+      "sent": "You're on the list. We'll email you when your seat opens.",
+      "invalid": "Please enter a valid email.",
+      "error": "Something went wrong. Please try again.",
+      "unavailable": "The waitlist is not available yet."
     },
     "footer": {
-      "copyright": "© 2026 ChartDown · chartdown.app",
-      "language": "The language on GitHub",
-      "terms": "Terms",
-      "privacy": "Privacy"
-    },
-    "catalog": "Catalog",
-    "ending": {
-      "title": "Bring it to Sunday."
+      "label": "Footer",
+      "contact": "contact@chartdown.app",
+      "github": "GitHub",
+      "privacy": "Privacy",
+      "terms": "Terms"
     }
   },
   "legal": {
