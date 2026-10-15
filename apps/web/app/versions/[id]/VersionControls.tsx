@@ -10,37 +10,38 @@ import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/Segme
 import { Selector } from "@astryxdesign/core/Selector";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { VStack } from "@astryxdesign/core/VStack";
+import type { Key } from "chartdown";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { addToSet } from "../../sets/actions";
 import { reportVersion } from "./actions";
 
 /**
- * Numbers or letters, and the key (R-03.2). The choice lives in the address and nothing is
- * saved; each choice opens the page for its address.
+ * Numbers or letters, and the key (R-03.2). Nothing is saved: the page draws the choice in place
+ * and keeps it in the address (F-011).
  */
 export function DisplayControls({
-  styles,
   style,
+  onStyle,
   keys,
   shown,
+  onKey,
   words,
 }: {
-  /** The address for numbers and for letters, in the key shown. */
-  styles: { numbers: string; letters: string };
   style: "numbers" | "letters";
-  /** Every key to show, with its address. */
-  keys: { value: string; label: string; href: string }[];
+  onStyle: (style: "numbers" | "letters") => void;
+  /** Every key to show. */
+  keys: { value: string; label: string; key: Key }[];
   shown: string;
+  onKey: (key: Key) => void;
   words: { label: string; style: string; numbers: string; letters: string; key: string };
 }) {
-  const router = useRouter();
   return (
     <HStack gap={3} vAlign="center" wrap="wrap" role="group" aria-label={words.label}>
       <SegmentedControl
         label={words.style}
         value={style}
-        onChange={(value) => router.push(value === "letters" ? styles.letters : styles.numbers)}
+        onChange={(value) => onStyle(value === "letters" ? "letters" : "numbers")}
       >
         <SegmentedControlItem value="numbers" label={words.numbers} />
         <SegmentedControlItem value="letters" label={words.letters} />
@@ -53,7 +54,7 @@ export function DisplayControls({
         value={shown}
         onChange={(value) => {
           const key = keys.find((item) => item.value === value);
-          if (key) router.push(key.href);
+          if (key) onKey(key.key);
         }}
       />
     </HStack>

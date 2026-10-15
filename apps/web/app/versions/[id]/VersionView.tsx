@@ -11,12 +11,11 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { EditIcon, ForkIcon, StandIcon } from "../../_components/ActionIcons";
-import { BeatsControl } from "../../_components/BeatsControl";
-import { ChartPreview } from "../../_components/ChartPreview";
 import { forkVersion } from "./actions";
-import { displayHref, keysInMode, type Display } from "./display";
+import type { Display } from "./display";
 import type { BasedOn } from "./load";
-import { AddToSet, DisplayControls, ReportForm, VersionMenu } from "./VersionControls";
+import { AddToSet, ReportForm, VersionMenu } from "./VersionControls";
+import { DisplayBar, DisplayedChart, ShownKey, StandLink, VersionDisplay } from "./VersionDisplay";
 
 export interface VersionSource {
   type: "studio" | "live" | "acoustic" | "own_arrangement";
@@ -105,7 +104,6 @@ export function VersionView({
     source.year && String(source.year),
   ].filter(Boolean);
   const reading = notice === undefined;
-  const shownKey = display?.key ?? chart.key;
   const written = keyName(chart.key);
   const canFork = signedIn && !owner && visibility === "public" && reading;
   const canReport = canFork && status !== "hidden";
@@ -119,211 +117,172 @@ export function VersionView({
           : null;
 
   return (
-    <Layout
-      height="auto"
-      // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6), 16 px on a
-      // phone (design handoff 5).
-      padding={phone ? 4 : 8}
-      contentWidth={1040}
-      header={
-        <LayoutHeader hasDivider>
-          <VStack gap={3}>
-            {notice}
-            <HStack gap={4} vAlign="start" hAlign="between" wrap="wrap">
-              <VStack gap={1}>
-                <Text type="supporting">
-                  {[artists.join(", "), ...facts].filter(Boolean).join(" · ")}
-                </Text>
-                <Heading level={1}>{title}</Heading>
-                <HStack gap={2} vAlign="center" wrap="wrap">
-                  {state && <Token label={state} size="sm" />}
-                  <Token label={`${c("key")} ${keyName(shownKey)}`} size="sm" />
-                  {keyName(shownKey) !== written && (
-                    <Text type="supporting">{c("writtenIn", { key: written })}</Text>
-                  )}
-                  <Token label={`${c("time")} ${chart.header.meter ?? "4/4"}`} size="sm" />
-                  {chart.header.tempo && (
-                    <Token label={`${c("tempo")} ${chart.header.tempo}`} size="sm" />
-                  )}
-                </HStack>
-                <Text color="secondary">
-                  {t("by", { author })}
-                  {source.youtube && (
-                    <>
-                      {" · "}
-                      <a href={source.youtube} target="_blank" rel="noopener noreferrer">
-                        {t("youtube")}
-                      </a>
-                    </>
-                  )}
-                  {basedOn && (
-                    <>
-                      {" · "}
-                      {basedOn === "unknown" ? (
-                        t("basedOnUnknown")
-                      ) : (
-                        <Link href={`/versions/${basedOn.id}`}>
-                          {t("basedOn", { author: basedOn.author })}
-                        </Link>
-                      )}
-                    </>
-                  )}
-                </Text>
-              </VStack>
-              <VStack gap={2} hAlign="end">
-                <HStack gap={2} vAlign="center" wrap="wrap">
-                  {reading && display && (
-                    <Button
-                      label={t("stand")}
-                      variant="primary"
-                      href={`/versions/${id}/stand${displayHref("", display, chart)}`}
-                      icon={<StandIcon />}
+    <VersionDisplay chart={chart} initial={display} path={path}>
+      <Layout
+        height="auto"
+        // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6), 16 px on a
+        // phone (design handoff 5).
+        padding={phone ? 4 : 8}
+        contentWidth={1040}
+        header={
+          <LayoutHeader hasDivider>
+            <VStack gap={3}>
+              {notice}
+              <HStack gap={4} vAlign="start" hAlign="between" wrap="wrap">
+                <VStack gap={1}>
+                  <Text type="supporting">
+                    {[artists.join(", "), ...facts].filter(Boolean).join(" · ")}
+                  </Text>
+                  <Heading level={1}>{title}</Heading>
+                  <HStack gap={2} vAlign="center" wrap="wrap">
+                    {state && <Token label={state} size="sm" />}
+                    <ShownKey
+                      words={{ key: c("key"), writtenIn: c("writtenIn", { key: written }) }}
                     />
-                  )}
-                  {owner && status === "active" && (
-                    <Button label={t("edit")} href={`/versions/${id}/edit`} icon={<EditIcon />} />
-                  )}
-                  {owner && <Button label={t("history")} href={`/versions/${id}/history`} />}
-                  {owner && visibility === "public" && status === "active" && (
-                    <Button label={t("makePrivate")} href={`/versions/${id}/make-private`} />
-                  )}
-                  {signedIn && reading && (
-                    <Button label={t("myNotes")} href={`/versions/${id}/notes`} />
-                  )}
-                  {canFork && (
-                    <form action={forkVersion}>
-                      <input type="hidden" name="versionId" value={id} />
-                      <Button type="submit" label={t("fork")} icon={<ForkIcon />} />
-                    </form>
-                  )}
-                  {!signedIn && (
-                    <Button
-                      label={t("fork")}
-                      href={`/auth/sign-in?next=${encodeURIComponent(`/versions/${id}`)}`}
-                      icon={<ForkIcon />}
-                    />
-                  )}
-                  {canReport && (
-                    <VersionMenu
-                      label={t("more")}
-                      report={t("report.open")}
-                      reportHref={`/versions/${id}?report=open#report`}
-                    />
-                  )}
-                </HStack>
-                {canFork && <Text type="supporting">{t("forkCc0")}</Text>}
-                {!signedIn && <Text type="supporting">{t("forkHint")}</Text>}
-              </VStack>
-            </HStack>
-          </VStack>
-        </LayoutHeader>
-      }
-      content={
-        // The app's own area scrolls the chart, so the song form can stay pinned at its top.
-        <LayoutContent isScrollable={false}>
-          <VStack gap={5}>
-            {forkFailed && <Banner status="error" title={t("forkFailed")} />}
-            {setFailed && <Banner status="error" title={s("addFailed")} />}
-            {(report === "sent" || report === "already") && (
-              <Banner status="success" title={t(`report.${report}`)} />
-            )}
-            {report === "failed" && <Banner status="error" title={t("report.failed")} />}
-            {canReport && (report === "open" || report === "failed") && (
-              <ReportForm
-                versionId={id}
-                words={{
-                  title: t("report.title"),
-                  reason: t("report.reason"),
-                  lyrics: t("report.reasons.lyrics"),
-                  other: t("report.reasons.other"),
-                  note: t("report.note"),
-                  submit: t("report.submit"),
-                }}
-              />
-            )}
-            {(display || (setChoices.length > 0 && reading)) && (
-              <HStack gap={4} vAlign="end" hAlign="between" wrap="wrap">
-                {display && path ? (
-                  <HStack gap={3} vAlign="center" wrap="wrap">
-                    <DisplayControls
-                      style={display.style}
-                      styles={{
-                        numbers: displayHref(path, { ...display, style: "numbers" }, chart),
-                        letters: displayHref(path, { ...display, style: "letters" }, chart),
-                      }}
-                      shown={keyName(shownKey)}
-                      keys={keysInMode(chart.key.minor).map((key) => ({
-                        value: keyName(key),
-                        label:
-                          keyName(key) === written
-                            ? v("writtenOption", { key: keyName(key) })
-                            : keyName(key),
-                        href: displayHref(path, { ...display, key }, chart),
-                      }))}
+                    <Token label={`${c("time")} ${chart.header.meter ?? "4/4"}`} size="sm" />
+                    {chart.header.tempo && (
+                      <Token label={`${c("tempo")} ${chart.header.tempo}`} size="sm" />
+                    )}
+                  </HStack>
+                  <Text color="secondary">
+                    {t("by", { author })}
+                    {source.youtube && (
+                      <>
+                        {" · "}
+                        <a href={source.youtube} target="_blank" rel="noopener noreferrer">
+                          {t("youtube")}
+                        </a>
+                      </>
+                    )}
+                    {basedOn && (
+                      <>
+                        {" · "}
+                        {basedOn === "unknown" ? (
+                          t("basedOnUnknown")
+                        ) : (
+                          <Link href={`/versions/${basedOn.id}`}>
+                            {t("basedOn", { author: basedOn.author })}
+                          </Link>
+                        )}
+                      </>
+                    )}
+                  </Text>
+                </VStack>
+                <VStack gap={2} hAlign="end">
+                  <HStack gap={2} vAlign="center" wrap="wrap">
+                    {reading && (
+                      <StandLink
+                        base={`/versions/${id}/stand`}
+                        label={t("stand")}
+                        icon={<StandIcon />}
+                      />
+                    )}
+                    {owner && status === "active" && (
+                      <Button label={t("edit")} href={`/versions/${id}/edit`} icon={<EditIcon />} />
+                    )}
+                    {owner && <Button label={t("history")} href={`/versions/${id}/history`} />}
+                    {owner && visibility === "public" && status === "active" && (
+                      <Button label={t("makePrivate")} href={`/versions/${id}/make-private`} />
+                    )}
+                    {signedIn && reading && (
+                      <Button label={t("myNotes")} href={`/versions/${id}/notes`} />
+                    )}
+                    {canFork && (
+                      <form action={forkVersion}>
+                        <input type="hidden" name="versionId" value={id} />
+                        <Button type="submit" label={t("fork")} icon={<ForkIcon />} />
+                      </form>
+                    )}
+                    {!signedIn && (
+                      <Button
+                        label={t("fork")}
+                        href={`/auth/sign-in?next=${encodeURIComponent(`/versions/${id}`)}`}
+                        icon={<ForkIcon />}
+                      />
+                    )}
+                    {canReport && (
+                      <VersionMenu
+                        label={t("more")}
+                        report={t("report.open")}
+                        reportHref={`/versions/${id}?report=open#report`}
+                      />
+                    )}
+                  </HStack>
+                  {canFork && <Text type="supporting">{t("forkCc0")}</Text>}
+                  {!signedIn && <Text type="supporting">{t("forkHint")}</Text>}
+                </VStack>
+              </HStack>
+            </VStack>
+          </LayoutHeader>
+        }
+        content={
+          // The app's own area scrolls the chart, so the song form can stay pinned at its top.
+          <LayoutContent isScrollable={false}>
+            <VStack gap={5}>
+              {forkFailed && <Banner status="error" title={t("forkFailed")} />}
+              {setFailed && <Banner status="error" title={s("addFailed")} />}
+              {(report === "sent" || report === "already") && (
+                <Banner status="success" title={t(`report.${report}`)} />
+              )}
+              {report === "failed" && <Banner status="error" title={t("report.failed")} />}
+              {canReport && (report === "open" || report === "failed") && (
+                <ReportForm
+                  versionId={id}
+                  words={{
+                    title: t("report.title"),
+                    reason: t("report.reason"),
+                    lyrics: t("report.reasons.lyrics"),
+                    other: t("report.reasons.other"),
+                    note: t("report.note"),
+                    submit: t("report.submit"),
+                  }}
+                />
+              )}
+              {(display || (setChoices.length > 0 && reading)) && (
+                <HStack gap={4} vAlign="end" hAlign="between" wrap="wrap">
+                  {display && path ? (
+                    <DisplayBar
                       words={{
                         label: v("label"),
                         style: v("style"),
                         numbers: v("numbers"),
                         letters: v("letters"),
                         key: v("key"),
-                      }}
-                    />
-                    {display && (
-                      <BeatsControl
-                        value={display.beats}
-                        hrefs={{
-                          off: displayHref(path, { ...display, beats: "off" }, chart),
-                          auto: displayHref(path, { ...display, beats: "auto" }, chart),
-                          always: displayHref(path, { ...display, beats: "always" }, chart),
-                        }}
-                        words={{
+                        writtenOption: v("writtenOption", { key: written }),
+                        written: v("written", { key: written }),
+                        beats: {
                           label: c("beatsLabel"),
                           name: c("beatsName"),
                           off: c("beatsOff"),
                           auto: c("beatsAuto"),
                           always: c("beatsAlways"),
-                        }}
-                      />
-                    )}
-                    {keyName(shownKey) !== written && (
-                      <Button
-                        label={v("written", { key: written })}
-                        variant="ghost"
-                        href={displayHref(path, { ...display, key: chart.key }, chart)}
-                      />
-                    )}
-                  </HStack>
-                ) : (
-                  <span />
-                )}
-                {setChoices.length > 0 && reading && (
-                  <AddToSet
-                    versionId={id}
-                    choices={setChoices.map((choice) => ({
-                      value: choice.id,
-                      label: setChoiceLabel(choice, s("mySets")),
-                    }))}
-                    words={{
-                      label: s("addTo"),
-                      placeholder: s("chooseSet"),
-                      submit: s("addButton"),
-                    }}
-                  />
-                )}
-              </HStack>
-            )}
-            <ChartPreview
-              chart={chart}
-              style={display?.style ?? "numbers"}
-              homeKey={shownKey}
-              isFramed
-              hasForm
-              beats={display?.beats ?? "auto"}
-              phone={phone}
-            />
-          </VStack>
-        </LayoutContent>
-      }
-    />
+                        },
+                      }}
+                    />
+                  ) : (
+                    <span />
+                  )}
+                  {setChoices.length > 0 && reading && (
+                    <AddToSet
+                      versionId={id}
+                      choices={setChoices.map((choice) => ({
+                        value: choice.id,
+                        label: setChoiceLabel(choice, s("mySets")),
+                      }))}
+                      words={{
+                        label: s("addTo"),
+                        placeholder: s("chooseSet"),
+                        submit: s("addButton"),
+                      }}
+                    />
+                  )}
+                </HStack>
+              )}
+              <DisplayedChart phone={phone} />
+            </VStack>
+          </LayoutContent>
+        }
+      />
+    </VersionDisplay>
   );
 }
