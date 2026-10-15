@@ -114,6 +114,11 @@ export function Landing({ signInEnabled, waitlistReady, accountDeleted = false }
                 {t("nav.open")}
               </a>
               {signInEnabled && (
+                <Link href="/catalog" className={styles.navLink}>
+                  {t("nav.catalog")}
+                </Link>
+              )}
+              {signInEnabled && (
                 <Link href="/auth/sign-in" className={styles.navLink}>
                   {t("nav.signIn")}
                 </Link>

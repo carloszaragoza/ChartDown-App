@@ -69,6 +69,7 @@ describe("T-1310 the landing page, version 3", () => {
     const html = render(open);
     expect(html).toContain('href="/auth/sign-in"');
     expect(html).toContain('href="/auth/sign-up"');
+    expect(html).toContain('href="/catalog"');
     const production = render({ signInEnabled: false, waitlistReady: true });
     expect(production).not.toContain('href="/auth/sign-in"');
     expect(production).not.toContain('href="/auth/sign-up"');

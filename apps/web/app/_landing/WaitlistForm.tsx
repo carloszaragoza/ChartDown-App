@@ -41,6 +41,8 @@ export function WaitlistForm({
     status: "idle",
   });
   const [role, setRole] = useState<WaitlistRole>("music_director");
+  // Kept in state, so a form sent back with a problem still shows what was typed.
+  const [email, setEmail] = useState("");
   const id = useId();
   const done = useRef<HTMLParagraphElement>(null);
   useEffect(() => {
@@ -106,7 +108,8 @@ export function WaitlistForm({
             autoComplete="email"
             inputMode="email"
             placeholder={words.placeholder}
-            defaultValue={state.email ?? ""}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
             aria-invalid={state.status === "invalid" || undefined}
             aria-describedby={problem ? `${id}-problem` : `${id}-hint`}
             required
