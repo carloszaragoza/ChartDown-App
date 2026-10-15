@@ -365,7 +365,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 - R-11.1 **Play and stop** from the viewer and from stand mode. The tempo comes from the chart's `tempo:` header (or the set, if it overrides it); without a tempo, the app asks for one.
 - R-11.2 **Start anywhere:** the user taps a bar (for example bar 2 of the Chorus) and presses play; playback starts on that bar.
-- R-11.3 **Visual pulse:** on every beat the current bar is highlighted and the beat is shown (for example "2 / 4"), so position never depends on color alone. Beat 1 is accented: the click is stronger, and the line along the bar's foot is drawn in full ink on beat 1 and in the quiet ink on the other beats.
+- R-11.3 **Visual pulse:** on every beat the current bar is highlighted and the beat is shown (for example "2 / 4"), so position never depends on color alone. Beat 1 is accented: the click is stronger, and the line along the bar's foot is drawn in full ink on beat 1 and in the quiet ink on the other beats. The line grows the same way into every beat, beat 1 of a new bar included.
 - R-11.4 **Follow the form:** playback moves bar by bar in **play order**: sections in order, `@use` sections, repeats (`|: :|`, `xN`) and first and second endings. In stand mode, the view moves to the next section on its own.
 - R-11.5 **Meter aware:** the number of beats per bar comes from `meter:` (4/4, 3/4, 6/8, 12/8). Uneven splits (`:beats`) highlight the chord that sounds on each beat.
 - R-11.6 **Holds and fermatas:** a bar with a fermata (`~`) waits until the user taps to continue.

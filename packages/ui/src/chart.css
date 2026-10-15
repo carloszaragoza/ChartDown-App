@@ -144,6 +144,14 @@
   transition:
     inline-size var(--chart-beat-ease, 180ms) ease-out,
     background-color var(--chart-beat-ease, 180ms) ease-out;
+  /* Beat 1 lands on a new bar, whose line has nothing to ease from: it grows in from nothing, so
+     every beat moves the same way (owner's review, October 15, 2026). */
+  animation: cd-chart-beat-in var(--chart-beat-ease, 180ms) ease-out;
+}
+@keyframes cd-chart-beat-in {
+  from {
+    inline-size: 0;
+  }
 }
 /* Beat 1 is accented (R-11.3): the same line in full ink, then back to the quiet ink. No hue, so
    it reads the same to everyone; the "1 / 4" counter says it in words too. */
@@ -164,6 +172,7 @@
 @media (prefers-reduced-motion: reduce) {
   .cd-chart__bar--now::after {
     transition: none;
+    animation: none;
   }
 }
 
