@@ -4,7 +4,7 @@ import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Item } from "@astryxdesign/core/Item";
-import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
+import { LayoutHeader } from "@astryxdesign/core/Layout";
 import { List } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -18,6 +18,8 @@ import { deleteNote } from "./actions";
 import { NoteForm } from "./NoteForm";
 import { BandChoice, HideAuthorSwitch } from "./NotesControls";
 import { SectionView, type SectionNote } from "./SectionView";
+import { PageLayout } from "../../../_components/PageLayout";
+import { guessPhone } from "../../../../lib/shell/guessPhone";
 
 // The form's own errors; anything else reads as "could not be saved".
 const NOTE_ERRORS = new Set(["section_required", "bar_invalid", "text_required", "text_too_long"]);
@@ -191,8 +193,10 @@ export default async function NotesPage({
             : t("authorShown")
       : null;
 
+  const phone = await guessPhone();
   return (
-    <Layout
+    <PageLayout
+      phone={phone}
       height="auto"
       // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
       padding={8}
@@ -226,30 +230,38 @@ export default async function NotesPage({
           </HStack>
         </LayoutHeader>
       }
-      start={
-        <LayoutPanel width={260} hasDivider padding={2} label={t("sections")}>
-          <nav aria-label={t("sections")}>
-            <List>
-              {anchors.map((anchor, index) => (
-                <Item
-                  key={anchor.value}
-                  as="li"
-                  href={pageHref(`&section=${index}`)}
-                  isSelected={index === chosen && !editing}
-                  label={anchorLabel(anchor.name, anchor.occurrence, anchor.count)}
-                  endContent={
-                    <Text type="supporting">
-                      {t("noteCount", { count: notesIn(index).length })}
-                    </Text>
-                  }
-                />
-              ))}
-            </List>
-          </nav>
-        </LayoutPanel>
-      }
+      panel={{
+        side: "start",
+        width: 260,
+        padding: 2,
+        label: t("sections"),
+        firstOnPhone: true,
+        children: (
+          <>
+            <nav aria-label={t("sections")}>
+              <List>
+                {anchors.map((anchor, index) => (
+                  <Item
+                    key={anchor.value}
+                    as="li"
+                    href={pageHref(`&section=${index}`)}
+                    isSelected={index === chosen && !editing}
+                    label={anchorLabel(anchor.name, anchor.occurrence, anchor.count)}
+                    endContent={
+                      <Text type="supporting">
+                        {t("noteCount", { count: notesIn(index).length })}
+                      </Text>
+                    }
+                  />
+                ))}
+              </List>
+            </nav>
+          </>
+        ),
+      }}
+      contentProps={{ padding: 8 }}
       content={
-        <LayoutContent padding={8}>
+        <>
           <VStack gap={5}>
             {bands.length > 1 && (
               <BandChoice
@@ -385,7 +397,7 @@ export default async function NotesPage({
               )}
             </SectionView>
           </VStack>
-        </LayoutContent>
+        </>
       }
     />
   );

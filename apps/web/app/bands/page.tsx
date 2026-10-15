@@ -4,7 +4,7 @@ import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Item } from "@astryxdesign/core/Item";
-import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
+import { LayoutHeader } from "@astryxdesign/core/Layout";
 import { List } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
@@ -19,6 +19,8 @@ import { createClient, readUser } from "../../lib/supabase/server";
 import { Invitations, type Invitation } from "../_components/Invitations";
 import { NameForm } from "../_components/NameForm";
 import { createBand } from "./actions";
+import { PageLayout } from "../_components/PageLayout";
+import { guessPhone } from "../../lib/shell/guessPhone";
 
 type Search = Promise<{ error?: string; left?: string; declined?: string }>;
 interface Membership {
@@ -107,8 +109,10 @@ export default async function BandsPage({ searchParams }: { searchParams: Search
     />
   );
 
+  const phone = await guessPhone();
   return (
-    <Layout
+    <PageLayout
+      phone={phone}
       height="auto"
       // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
       padding={8}
@@ -120,21 +124,27 @@ export default async function BandsPage({ searchParams }: { searchParams: Search
           </VStack>
         </LayoutHeader>
       }
-      end={
-        <LayoutPanel width={340} hasDivider role="region" label={t("create")}>
-          <VStack gap={3}>
-            <Heading level={2}>{t("create")}</Heading>
-            <NameForm
-              action={createBand}
-              label={t("name")}
-              description={t("createHint")}
-              submit={t("createButton")}
-            />
-          </VStack>
-        </LayoutPanel>
-      }
+      panel={{
+        side: "end",
+        width: 340,
+        role: "region",
+        label: t("create"),
+        children: (
+          <>
+            <VStack gap={3}>
+              <Heading level={2}>{t("create")}</Heading>
+              <NameForm
+                action={createBand}
+                label={t("name")}
+                description={t("createHint")}
+                submit={t("createButton")}
+              />
+            </VStack>
+          </>
+        ),
+      }}
       content={
-        <LayoutContent>
+        <>
           <VStack gap={5}>
             {(search.left || search.declined) && (
               <Banner status="success" title={search.left ? t("left") : t("declined")} />
@@ -176,7 +186,7 @@ export default async function BandsPage({ searchParams }: { searchParams: Search
               </VStack>
             </section>
           </VStack>
-        </LayoutContent>
+        </>
       }
     />
   );

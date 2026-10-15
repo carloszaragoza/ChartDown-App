@@ -2,7 +2,7 @@ import { Banner } from "@astryxdesign/core/Banner";
 import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
+import { LayoutHeader } from "@astryxdesign/core/Layout";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -15,6 +15,8 @@ import { createSet } from "../../../sets/actions";
 import { SET_TYPES, type SetType } from "../../../../lib/sets/types";
 import { SetForm } from "../../../sets/SetForm";
 import { SetList } from "../../../sets/SetList";
+import { PageLayout } from "../../../_components/PageLayout";
+import { guessPhone } from "../../../../lib/shell/guessPhone";
 
 type Search = Promise<{ error?: string; deleted?: string; when?: string }>;
 export interface SetRow {
@@ -61,8 +63,10 @@ export default async function BandSetsPage({
   const b = await getTranslations("bands");
   const title = band.is_personal ? t("mySets") : t("bandSets", { band: band.name });
 
+  const phone = await guessPhone();
   return (
-    <Layout
+    <PageLayout
+      phone={phone}
       height="auto"
       // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
       padding={8}
@@ -88,35 +92,41 @@ export default async function BandSetsPage({
           </VStack>
         </LayoutHeader>
       }
-      {...(isMd
-        ? {
-            end: (
-              <LayoutPanel width={360} hasDivider role="region" label={t("create")}>
-                <VStack gap={3}>
-                  <Heading level={2}>{t("create")}</Heading>
-                  <SetForm
-                    action={createSet}
-                    hidden={{ bandId: band.id }}
-                    words={{
-                      name: t("name"),
-                      date: t("dateLabel"),
-                      time: t("timeLabel"),
-                      type: t("type"),
-                      chooseType: t("chooseType"),
-                      types: Object.fromEntries(
-                        SET_TYPES.map((type) => [type, t(`types.${type}`)]),
-                      ) as Record<SetType, string>,
-                      submit: t("createButton"),
-                      missing: t("createMissing"),
-                    }}
-                  />
-                </VStack>
-              </LayoutPanel>
-            ),
-          }
-        : {})}
+      panel={
+        isMd
+          ? {
+              side: "end",
+              width: 360,
+              role: "region",
+              label: t("create"),
+              children: (
+                <>
+                  <VStack gap={3}>
+                    <Heading level={2}>{t("create")}</Heading>
+                    <SetForm
+                      action={createSet}
+                      hidden={{ bandId: band.id }}
+                      words={{
+                        name: t("name"),
+                        date: t("dateLabel"),
+                        time: t("timeLabel"),
+                        type: t("type"),
+                        chooseType: t("chooseType"),
+                        types: Object.fromEntries(
+                          SET_TYPES.map((type) => [type, t(`types.${type}`)]),
+                        ) as Record<SetType, string>,
+                        submit: t("createButton"),
+                        missing: t("createMissing"),
+                      }}
+                    />
+                  </VStack>
+                </>
+              ),
+            }
+          : null
+      }
       content={
-        <LayoutContent>
+        <>
           <VStack gap={4}>
             {deleted && <Banner status="success" title={t("deleted")} />}
             {error && (
@@ -124,7 +134,7 @@ export default async function BandSetsPage({
             )}
             <SetList sets={sets} path={`/bands/${band.id}/sets`} when={when} />
           </VStack>
-        </LayoutContent>
+        </>
       }
     />
   );

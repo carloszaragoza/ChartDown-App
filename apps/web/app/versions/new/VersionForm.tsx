@@ -6,7 +6,7 @@ import { Button } from "@astryxdesign/core/Button";
 import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
+import { LayoutHeader } from "@astryxdesign/core/Layout";
 import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
 import { Text } from "@astryxdesign/core/Text";
 import { TextArea } from "@astryxdesign/core/TextArea";
@@ -19,11 +19,14 @@ import { SOURCE_TYPES, type VersionError } from "../../../lib/versions/validate"
 import { ChartPreview } from "../../_components/ChartPreview";
 import { Warnings } from "../[id]/edit/Editor";
 import { createVersion, type VersionFormState } from "./actions";
+import { PageLayout } from "../../_components/PageLayout";
 
 // A place to start: two sections the person replaces with their own chart.
 const STARTER = "## Verse\n1 | 4 | 6m | 5\n\n## Chorus\n4 | 1 | 5 | 1\n";
 
 export interface VersionFormProps {
+  /** The server's guess that the page opens on a phone (R-03.9). */
+  phone: boolean;
   /** The existing song, or null for a new one. */
   song: { id: string; title: string; artists: string[] } | null;
   defaultTitle: string;
@@ -49,7 +52,7 @@ export function missing(fields: {
  * details in a panel, the chart with a live preview beside them. Always published as public
  * (R-02.3). Publish waits for what is required and says what is missing.
  */
-export function VersionForm({ song, defaultTitle, defaultAuthor }: VersionFormProps) {
+export function VersionForm({ song, defaultTitle, defaultAuthor, phone }: VersionFormProps) {
   const t = useTranslations("newVersion");
   const c = useTranslations("catalog");
   const sources = useTranslations("version.source");
@@ -83,7 +86,8 @@ export function VersionForm({ song, defaultTitle, defaultAuthor }: VersionFormPr
   return (
     <form action={action} noValidate>
       {song && <input type="hidden" name="songId" value={song.id} />}
-      <Layout
+      <PageLayout
+        phone={phone}
         height="auto"
         // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
         padding={8}
@@ -111,93 +115,100 @@ export function VersionForm({ song, defaultTitle, defaultAuthor }: VersionFormPr
             </HStack>
           </LayoutHeader>
         }
-        start={
-          <LayoutPanel width={400} hasDivider label={t("details")}>
-            <VStack gap={5}>
-              {state.error && (
-                <div role="alert" ref={alertRef} tabIndex={-1}>
-                  <Banner status="error" title={t(`errors.${state.error}`)} />
-                </div>
-              )}
-              <FormLayout>
-                {song ? (
-                  <VStack gap={0.5}>
-                    <Text type="supporting">{t("song")}</Text>
-                    <Text weight="semibold">
-                      {song.title}
-                      {song.artists.length > 0 && ` · ${song.artists.join(", ")}`}
-                    </Text>
-                  </VStack>
-                ) : (
-                  <>
-                    <TextInput
-                      label={t("songTitle")}
-                      htmlName="title"
-                      value={title}
-                      onChange={setTitle}
-                      isRequired
-                      {...error("title_required")}
-                    />
-                    <TextInput
-                      label={t("artists")}
-                      htmlName="artists"
-                      value={artists}
-                      onChange={setArtists}
-                      description={t("artistsHint")}
-                    />
-                  </>
+        panel={{
+          side: "start",
+          width: 400,
+          label: t("details"),
+          firstOnPhone: true,
+          children: (
+            <>
+              <VStack gap={5}>
+                {state.error && (
+                  <div role="alert" ref={alertRef} tabIndex={-1}>
+                    <Banner status="error" title={t(`errors.${state.error}`)} />
+                  </div>
                 )}
-                <TextInput
-                  label={t("author")}
-                  htmlName="author"
-                  value={author}
-                  onChange={setAuthor}
-                  isRequired
-                  {...error("author_required")}
-                />
-                <RadioList
-                  label={t("source")}
-                  description={t("sourceHint")}
-                  htmlName="sourceType"
-                  value={source}
-                  onChange={setSource}
-                  isRequired
-                  {...error("source_required")}
-                >
-                  {SOURCE_TYPES.map((type) => (
-                    <RadioListItem key={type} value={type} label={sources(type)} />
-                  ))}
-                </RadioList>
-                <TextInput
-                  label={t("album")}
-                  htmlName="album"
-                  value={album}
-                  onChange={setAlbum}
-                  isOptional
-                />
-                <TextInput
-                  label={t("year")}
-                  htmlName="year"
-                  value={year}
-                  onChange={setYear}
-                  isOptional
-                  {...error("year_invalid")}
-                />
-                <TextInput
-                  label={t("youtube")}
-                  htmlName="youtube"
-                  value={youtube}
-                  onChange={setYoutube}
-                  isOptional
-                  {...error("youtube_invalid")}
-                />
-              </FormLayout>
-              <Banner status="info" title={t("cc0Title")} description={t("cc0")} />
-            </VStack>
-          </LayoutPanel>
-        }
+                <FormLayout>
+                  {song ? (
+                    <VStack gap={0.5}>
+                      <Text type="supporting">{t("song")}</Text>
+                      <Text weight="semibold">
+                        {song.title}
+                        {song.artists.length > 0 && ` · ${song.artists.join(", ")}`}
+                      </Text>
+                    </VStack>
+                  ) : (
+                    <>
+                      <TextInput
+                        label={t("songTitle")}
+                        htmlName="title"
+                        value={title}
+                        onChange={setTitle}
+                        isRequired
+                        {...error("title_required")}
+                      />
+                      <TextInput
+                        label={t("artists")}
+                        htmlName="artists"
+                        value={artists}
+                        onChange={setArtists}
+                        description={t("artistsHint")}
+                      />
+                    </>
+                  )}
+                  <TextInput
+                    label={t("author")}
+                    htmlName="author"
+                    value={author}
+                    onChange={setAuthor}
+                    isRequired
+                    {...error("author_required")}
+                  />
+                  <RadioList
+                    label={t("source")}
+                    description={t("sourceHint")}
+                    htmlName="sourceType"
+                    value={source}
+                    onChange={setSource}
+                    isRequired
+                    {...error("source_required")}
+                  >
+                    {SOURCE_TYPES.map((type) => (
+                      <RadioListItem key={type} value={type} label={sources(type)} />
+                    ))}
+                  </RadioList>
+                  <TextInput
+                    label={t("album")}
+                    htmlName="album"
+                    value={album}
+                    onChange={setAlbum}
+                    isOptional
+                  />
+                  <TextInput
+                    label={t("year")}
+                    htmlName="year"
+                    value={year}
+                    onChange={setYear}
+                    isOptional
+                    {...error("year_invalid")}
+                  />
+                  <TextInput
+                    label={t("youtube")}
+                    htmlName="youtube"
+                    value={youtube}
+                    onChange={setYoutube}
+                    isOptional
+                    {...error("youtube_invalid")}
+                  />
+                </FormLayout>
+                <Banner status="info" title={t("cc0Title")} description={t("cc0")} />
+              </VStack>
+            </>
+          ),
+        }}
+        contentProps={{ padding: 8 }}
         content={
-          <LayoutContent padding={8}>
+          <>
             <VStack gap={6}>
               <VStack gap={2}>
                 <HStack gap={2} vAlign="center" hAlign="between">
@@ -221,7 +232,7 @@ export function VersionForm({ song, defaultTitle, defaultAuthor }: VersionFormPr
                 <ChartPreview chart={chart} />
               </section>
             </VStack>
-          </LayoutContent>
+          </>
         }
       />
     </form>

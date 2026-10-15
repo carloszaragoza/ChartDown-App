@@ -7,7 +7,7 @@ import { Grid } from "@astryxdesign/core/Grid";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Item } from "@astryxdesign/core/Item";
-import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
+import { LayoutHeader } from "@astryxdesign/core/Layout";
 import { List } from "@astryxdesign/core/List";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
@@ -42,6 +42,8 @@ import { LinkChoice } from "../_components/LinkChoice";
 import { noticeTexts } from "../notices/text";
 import { Greeting, OfflineDot } from "./HomeClient";
 import type { HomeData, UsagePeriod } from "./load";
+import { PageLayout } from "../_components/PageLayout";
+import { guessPhone } from "../../lib/shell/guessPhone";
 
 const GUIDE = "https://github.com/ChartDown/spec";
 
@@ -268,7 +270,7 @@ export async function HomeView({
   );
 
   const content = (
-    <LayoutContent>
+    <>
       <VStack gap={5}>
         {messages}
         {isNew && (
@@ -456,7 +458,7 @@ export async function HomeView({
           </section>
         )}
       </VStack>
-    </LayoutContent>
+    </>
   );
 
   const panel = isNew ? (
@@ -557,17 +559,20 @@ export async function HomeView({
     </VStack>
   );
 
+  const phone = await guessPhone();
   return (
-    <Layout
+    <PageLayout
+      phone={phone}
       height="auto"
       // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
       padding={8}
       header={header}
-      end={
-        <LayoutPanel width={340} hasDivider label={isNew ? t("help.label") : t("forYou")}>
-          {panel}
-        </LayoutPanel>
-      }
+      panel={{
+        side: "end",
+        width: 340,
+        label: isNew ? t("help.label") : t("forYou"),
+        children: panel,
+      }}
       content={content}
     />
   );
