@@ -1034,7 +1034,9 @@
       "invite": "Invite {email}",
       "inviteShort": "Invite",
       "copy": "Copy {code}",
-      "copied": "Copied {code}"
+      "copied": "Copied {code}",
+      "oldestFirst": "Oldest first.",
+      "newestFirst": "Most recent first."
     },
     "reports": {
       "title": "Reports",
