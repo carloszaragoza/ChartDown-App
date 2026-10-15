@@ -20,6 +20,8 @@ import { ChartPreview } from "../../_components/ChartPreview";
 import { Warnings } from "../[id]/edit/Editor";
 import { createVersion, type VersionFormState } from "./actions";
 import { PageLayout } from "../../_components/PageLayout";
+import type { ReviewItem } from "../../../lib/import/convert";
+import { ImportReview } from "./import/ImportReview";
 
 // A place to start: two sections the person replaces with their own chart.
 const STARTER = "## Verse\n1 | 4 | 6m | 5\n\n## Chorus\n4 | 1 | 5 | 1\n";
@@ -31,6 +33,10 @@ export interface VersionFormProps {
   song: { id: string; title: string; artists: string[] } | null;
   defaultTitle: string;
   defaultAuthor: string;
+  /** The chart to start from, such as an imported sheet's draft (SPEC-10). */
+  defaultContent?: string;
+  /** What an import assumed, shown above the chart until the person publishes (R-10.8). */
+  imported?: { review: ReviewItem[]; key: string; onStartOver: () => void };
 }
 
 /** What is still missing before publishing, in the order the form asks for it. */
@@ -52,7 +58,14 @@ export function missing(fields: {
  * details in a panel, the chart with a live preview beside them. Always published as public
  * (R-02.3). Publish waits for what is required and says what is missing.
  */
-export function VersionForm({ song, defaultTitle, defaultAuthor, phone }: VersionFormProps) {
+export function VersionForm({
+  song,
+  defaultTitle,
+  defaultAuthor,
+  defaultContent,
+  imported,
+  phone,
+}: VersionFormProps) {
   const t = useTranslations("newVersion");
   const c = useTranslations("catalog");
   const sources = useTranslations("version.source");
@@ -68,7 +81,7 @@ export function VersionForm({ song, defaultTitle, defaultAuthor, phone }: Versio
   const [album, setAlbum] = useState(values?.album ?? "");
   const [year, setYear] = useState(values?.year ?? "");
   const [youtube, setYoutube] = useState(values?.youtube ?? "");
-  const [content, setContent] = useState(values?.content ?? STARTER);
+  const [content, setContent] = useState(values?.content ?? defaultContent ?? STARTER);
   const shown = useDeferredValue(content);
   const chart = useMemo(() => parse(shown), [shown]);
   const alertRef = useRef<HTMLDivElement>(null);
@@ -210,6 +223,13 @@ export function VersionForm({ song, defaultTitle, defaultAuthor, phone }: Versio
         content={
           <>
             <VStack gap={6}>
+              {imported && (
+                <ImportReview
+                  review={imported.review}
+                  importedKey={imported.key}
+                  onStartOver={imported.onStartOver}
+                />
+              )}
               <VStack gap={2}>
                 <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
                   <Heading level={2}>{t("chartTitle")}</Heading>

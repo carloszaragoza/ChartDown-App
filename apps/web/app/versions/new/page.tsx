@@ -90,12 +90,15 @@ export default async function NewVersionPage({ searchParams }: { searchParams: S
               <Heading level={1}>{t("title")}</Heading>
               <Text color="secondary">{t("intro")}</Text>
             </VStack>
-            <Button
-              label={t("search.newSong")}
-              variant="primary"
-              href={newSong}
-              icon={<AddIcon />}
-            />
+            <HStack gap={2} vAlign="center" wrap="wrap">
+              <Button label={t("import.open")} href="/versions/new/import" />
+              <Button
+                label={t("search.newSong")}
+                variant="primary"
+                href={newSong}
+                icon={<AddIcon />}
+              />
+            </HStack>
           </HStack>
         </LayoutHeader>
       }
