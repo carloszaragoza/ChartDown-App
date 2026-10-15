@@ -100,77 +100,83 @@ export default async function AdminWaitlistPage({ searchParams }: { searchParams
                 isCompact
               />
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHeaderCell>{t("emailColumn")}</TableHeaderCell>
-                    <TableHeaderCell>{t("languageColumn")}</TableHeaderCell>
-                    <TableHeaderCell>{t("joinedColumn")}</TableHeaderCell>
-                    {tab === "invited" ? (
-                      <>
-                        <TableHeaderCell>{t("invitedColumn")}</TableHeaderCell>
-                        <TableHeaderCell>{t("codeColumn")}</TableHeaderCell>
-                      </>
-                    ) : (
-                      <TableHeaderCell>
-                        <VisuallyHidden>{t("actionsColumn")}</VisuallyHidden>
-                      </TableHeaderCell>
-                    )}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {shown.map((entry) => {
-                    const code = codeOf(entry);
-                    return (
-                      <TableRow key={entry.id}>
-                        <TableCell>
-                          <Text>{entry.email}</Text>
-                        </TableCell>
-                        <TableCell>
-                          <Text>{t(`languages.${entry.language}`)}</Text>
-                        </TableCell>
-                        <TableCell>
-                          <Text>{date(entry.created_at)}</Text>
-                        </TableCell>
-                        {tab === "invited" ? (
-                          <>
-                            <TableCell>
-                              <Text>{entry.invited_at ? date(entry.invited_at) : ""}</Text>
-                            </TableCell>
-                            <TableCell>
-                              {code && (
-                                <HStack gap={1} vAlign="center">
-                                  <Text type="code" weight="bold">
-                                    {code}
-                                  </Text>
-                                  <CopyCode
-                                    code={code}
-                                    copy={t("copy", { code })}
-                                    copied={t("copied", { code })}
-                                  />
-                                </HStack>
-                              )}
-                            </TableCell>
-                          </>
-                        ) : (
+              <VStack gap={2}>
+                {/* A line above the table, so its header never sits under the tabs (owner's review). */}
+                <Text type="supporting">
+                  {tab === "invited" ? t("newestFirst") : t("oldestFirst")}
+                </Text>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHeaderCell>{t("emailColumn")}</TableHeaderCell>
+                      <TableHeaderCell>{t("languageColumn")}</TableHeaderCell>
+                      <TableHeaderCell>{t("joinedColumn")}</TableHeaderCell>
+                      {tab === "invited" ? (
+                        <>
+                          <TableHeaderCell>{t("invitedColumn")}</TableHeaderCell>
+                          <TableHeaderCell>{t("codeColumn")}</TableHeaderCell>
+                        </>
+                      ) : (
+                        <TableHeaderCell>
+                          <VisuallyHidden>{t("actionsColumn")}</VisuallyHidden>
+                        </TableHeaderCell>
+                      )}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {shown.map((entry) => {
+                      const code = codeOf(entry);
+                      return (
+                        <TableRow key={entry.id}>
                           <TableCell>
-                            <form action={inviteFromWaitlist}>
-                              <input type="hidden" name="id" value={entry.id} />
-                              <Button
-                                type="submit"
-                                size="sm"
-                                label={t("invite", { email: entry.email })}
-                              >
-                                {t("inviteShort")}
-                              </Button>
-                            </form>
+                            <Text>{entry.email}</Text>
                           </TableCell>
-                        )}
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                          <TableCell>
+                            <Text>{t(`languages.${entry.language}`)}</Text>
+                          </TableCell>
+                          <TableCell>
+                            <Text>{date(entry.created_at)}</Text>
+                          </TableCell>
+                          {tab === "invited" ? (
+                            <>
+                              <TableCell>
+                                <Text>{entry.invited_at ? date(entry.invited_at) : ""}</Text>
+                              </TableCell>
+                              <TableCell>
+                                {code && (
+                                  <HStack gap={1} vAlign="center">
+                                    <Text type="code" weight="bold">
+                                      {code}
+                                    </Text>
+                                    <CopyCode
+                                      code={code}
+                                      copy={t("copy", { code })}
+                                      copied={t("copied", { code })}
+                                    />
+                                  </HStack>
+                                )}
+                              </TableCell>
+                            </>
+                          ) : (
+                            <TableCell>
+                              <form action={inviteFromWaitlist}>
+                                <input type="hidden" name="id" value={entry.id} />
+                                <Button
+                                  type="submit"
+                                  size="sm"
+                                  label={t("invite", { email: entry.email })}
+                                >
+                                  {t("inviteShort")}
+                                </Button>
+                              </form>
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </VStack>
             )}
           </VStack>
         </LayoutContent>
