@@ -16,10 +16,14 @@ import { groupReview, type ReviewItem } from "../../../../lib/import/review";
 export function ImportReview({
   review,
   importedKey,
+  existing,
+  onUseExisting,
   onStartOver,
 }: {
   review: ReviewItem[];
   importedKey: string;
+  existing: { id: string; title: string } | null;
+  onUseExisting: () => void;
   onStartOver: () => void;
 }) {
   const t = useTranslations("newVersion.import.review");
@@ -35,6 +39,24 @@ export function ImportReview({
           <Button variant="ghost" size="sm" label={t("startOver")} onClick={onStartOver} />
         </HStack>
         <Text color="secondary">{t("notSaved")}</Text>
+        {existing && (
+          <Banner
+            status="info"
+            title={t("existing", { title: existing.title })}
+            description={t("existingHint")}
+            endContent={
+              <HStack gap={2} wrap="wrap">
+                <Button size="sm" label={t("useExisting")} onClick={onUseExisting} />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  label={t("openExisting")}
+                  href={`/songs/${existing.id}`}
+                />
+              </HStack>
+            }
+          />
+        )}
         <Banner
           status={guessed ? "warning" : "info"}
           title={

@@ -466,13 +466,18 @@
       "landmarksHint": "The first {words} words of each section's lyrics, to find your place. The rest of the lyrics are never kept.",
       "rights": "I have the right to use this chord sheet.",
       "rightsFirst": "Confirm you have the right to use this sheet first.",
-      "privacy": "Your sheet is converted in your browser. It is not uploaded or stored.",
+      "privacy": "Your sheet or PDF is read in your browser. It is not uploaded or stored.",
       "convert": "Convert to a chart",
       "cancel": "Cancel",
       "problems": {
         "empty": "Paste a chord sheet first.",
         "too_long": "The sheet is longer than 300 lines. Paste one song at a time.",
-        "no_chords": "No chords were found. Check that the sheet has chord names like G, Em or D/F#."
+        "no_chords": "No chords were found. Check that the sheet has chord names like G, Em or D/F#.",
+        "not_pdf": "That file isn't a PDF.",
+        "too_big": "The PDF is bigger than 5 MB.",
+        "too_many_pages": "The PDF has more than 5 pages. Import one song at a time.",
+        "scanned": "This PDF is a scan or a photo, with no text to read. Scanned sheets can't be imported yet: paste the chords instead.",
+        "unreadable": "This PDF couldn't be read. Try pasting the sheet instead."
       },
       "review": {
         "title": "Check the import",
@@ -489,8 +494,15 @@
           "no-sections": "No section names were found, so the chords start without sections.",
           "chart-warning": "{count, plural, one {# line has a warning} other {# lines have warnings}}.",
           "key-guessed": "The key was guessed."
-        }
-      }
+        },
+        "existing": "“{title}” is already in the catalog.",
+        "existingHint": "You can add your version to that song instead of starting a new one.",
+        "useExisting": "Add my version to that song",
+        "openExisting": "See that song"
+      },
+      "pdf": "Or pick a PDF",
+      "pdfHint": "A PDF with text, up to 5 pages and 5 MB. Its text fills the box below, to check before converting. Scanned sheets and photos can't be read yet.",
+      "pdfRead": "Read {name}. Check the sheet below, then convert it."
     }
   },
   "history": {
