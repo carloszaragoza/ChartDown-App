@@ -546,11 +546,39 @@ export const chartdownStandTheme = {
       },
       {
         "when": {
+          "pointer": "coarse",
+          "width": {
+            "below": "sm"
+          }
+        },
+        "value": {
+          "tokens": {
+            "--size-element-sm": "32px",
+            "--size-element-md": "40px",
+            "--size-element-lg": "44px"
+          }
+        }
+      },
+      {
+        "when": {
           "pointer": "coarse"
         },
         "value": {
           "tokens": {
             "--size-element-lg": "56px"
+          }
+        }
+      },
+      {
+        "when": {
+          "pointer": "coarse",
+          "width": {
+            "below": "sm"
+          }
+        },
+        "value": {
+          "tokens": {
+            "--size-element-lg": "48px"
           }
         }
       }
