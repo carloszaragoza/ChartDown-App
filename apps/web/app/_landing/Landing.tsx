@@ -105,13 +105,13 @@ export function Landing({ signInEnabled, waitlistReady, accountDeleted = false }
               <ChartDownLogo size={30} />
             </a>
             <div className={styles.navLinks}>
-              <a href="#problem" className={styles.navLink}>
+              <a href="#problem" className={`${styles.navLink} ${styles.anchorLink}`}>
                 {t("nav.why")}
               </a>
-              <a href="#features" className={styles.navLink}>
+              <a href="#features" className={`${styles.navLink} ${styles.anchorLink}`}>
                 {t("nav.features")}
               </a>
-              <a href="#open" className={styles.navLink}>
+              <a href="#open" className={`${styles.navLink} ${styles.anchorLink}`}>
                 {t("nav.open")}
               </a>
               {signInEnabled && (
@@ -120,7 +120,7 @@ export function Landing({ signInEnabled, waitlistReady, accountDeleted = false }
                 </Link>
               )}
               {signInEnabled && (
-                <Link href="/auth/sign-in" className={styles.navLink}>
+                <Link href="/auth/sign-in" className={styles.secondary}>
                   {t("nav.signIn")}
                 </Link>
               )}

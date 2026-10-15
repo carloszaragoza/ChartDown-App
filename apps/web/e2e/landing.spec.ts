@@ -71,6 +71,9 @@ test("T-1310 the landing page works on a phone, with no sideways scrolling and 4
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   );
   expect(overflow).toBeLessThanOrEqual(0);
+  // A phone keeps the way in: the catalog and Sign in stay in the top bar.
+  await expect(page.getByRole("banner").getByRole("link", { name: "Catalog" })).toBeVisible();
+  await expect(page.getByRole("banner").getByRole("link", { name: "Sign in" })).toBeVisible();
   for (const target of [
     page.getByRole("banner").getByRole("link", { name: "Join the waitlist" }),
     page.locator("#top").getByRole("button", { name: "Save my spot" }),
