@@ -1,9 +1,9 @@
 "use client";
 
-import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Switch } from "@astryxdesign/core/Switch";
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
+import { ChoiceControl } from "../../../_components/ChoiceControl";
 import { setAuthorNotes } from "./actions";
 
 /** "Hide the author's notes" for the band (R-06.6): switching it saves at once. */
@@ -52,17 +52,14 @@ export function BandChoice({
 }) {
   const router = useRouter();
   return (
-    <SegmentedControl
+    <ChoiceControl
       label={label}
       value={current}
+      options={bands.map((band) => ({ value: band.id, label: band.name }))}
       onChange={(id) => {
         const band = bands.find((item) => item.id === id);
         if (band) router.push(band.href);
       }}
-    >
-      {bands.map((band) => (
-        <SegmentedControlItem key={band.id} value={band.id} label={band.name} />
-      ))}
-    </SegmentedControl>
+    />
   );
 }

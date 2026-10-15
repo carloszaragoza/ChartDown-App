@@ -193,7 +193,7 @@ export async function HomeView({
     <Card>
       <section aria-labelledby="next-up">
         <VStack gap={3}>
-          <HStack gap={2} vAlign="center" hAlign="between">
+          <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
             <Text type="supporting">
               {t("nextUp")} · {relativeDay(data.next.date)}
             </Text>
@@ -261,7 +261,7 @@ export async function HomeView({
         <Text size="3xl" weight="bold">
           {value}
         </Text>
-        <HStack gap={2} vAlign="center" hAlign="between">
+        <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
           <Text type="supporting">{hint}</Text>
           <GoIcon />
         </HStack>
@@ -277,7 +277,7 @@ export async function HomeView({
           <Card>
             <section aria-labelledby="get-started">
               <VStack gap={2}>
-                <HStack gap={2} vAlign="center" hAlign="between">
+                <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
                   <Heading level={2} id="get-started">
                     {t("getStarted")}
                   </Heading>
@@ -427,7 +427,7 @@ export async function HomeView({
         {recent.length > 0 && (
           <section aria-labelledby="recent">
             <VStack gap={2}>
-              <HStack gap={2} vAlign="center" hAlign="between">
+              <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
                 <Heading level={2} id="recent">
                   {t("recent")}
                 </Heading>
@@ -501,7 +501,7 @@ export async function HomeView({
       {data.band && !data.band.personal && data.members.length > 0 && (
         <section aria-labelledby="your-band">
           <VStack gap={2}>
-            <HStack gap={2} vAlign="center" hAlign="between">
+            <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
               <Heading level={2} id="your-band">
                 {t("yourBand")}
               </Heading>
@@ -530,7 +530,7 @@ export async function HomeView({
       )}
       <section aria-labelledby="your-instruments">
         <VStack gap={2}>
-          <HStack gap={2} vAlign="center" hAlign="between">
+          <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
             <Heading level={2} id="your-instruments">
               {t("yourInstruments")}
             </Heading>

@@ -18,6 +18,8 @@ import { SOURCE_TYPES, type SourceType } from "../../lib/versions/validate";
 import { AddIcon, ForkIcon, PublicIcon } from "../_components/ActionIcons";
 import { forkVersion } from "../versions/[id]/actions";
 import { CatalogSearch } from "./CatalogSearch";
+import { ActionRow } from "../_components/ActionRow";
+import { guessPhone } from "../../lib/shell/guessPhone";
 
 type Search = Promise<{ q?: string; source?: string; page?: string; song?: string }>;
 interface Row {
@@ -117,6 +119,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
   const others = songs.filter((song) => song !== open);
   const signedIn = Boolean(auth.user);
 
+  const phone = await guessPhone();
   return (
     <Layout
       height="auto"
@@ -167,7 +170,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
               <>
                 <Card>
                   <VStack gap={2}>
-                    <HStack gap={2} vAlign="center" hAlign="between">
+                    <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
                       <VStack gap={0.5}>
                         <Heading level={2}>{open.title}</Heading>
                         {open.artists.length > 0 && (
@@ -194,9 +197,9 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
                           const mine = signedIn && auth.user?.id === version.owner_id;
                           const names = { title: open.title, author: version.author_name };
                           return (
-                            <Item
+                            <ActionRow
                               key={version.id}
-                              as="li"
+                              phone={phone}
                               startContent={
                                 <Token
                                   label={[sources(version.source_type), version.source_year]
@@ -219,8 +222,8 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
                               ]
                                 .filter(Boolean)
                                 .join(" · ")}
-                              endContent={
-                                <HStack gap={2} vAlign="center">
+                              actions={
+                                <>
                                   <HStack gap={1} vAlign="center">
                                     <PublicIcon />
                                     <Text type="supporting">
@@ -254,7 +257,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
                                         {t("fork")}
                                       </Button>
                                     ))}
-                                </HStack>
+                                </>
                               }
                             />
                           );

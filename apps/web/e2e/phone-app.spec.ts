@@ -36,4 +36,19 @@ test.describe("the app on an Android phone", () => {
     await page.goto("/bands");
     await oneColumn(page, "Create a band");
   });
+
+  test("R-03.9 a long choice becomes a menu, and nothing is cut short", async ({ page }) => {
+    await page.goto("/catalog");
+    await expect(page.getByRole("combobox", { name: "Source" })).toBeVisible();
+    await expect(page.getByRole("radiogroup", { name: "Source" })).toHaveCount(0);
+    const cut = await page.evaluate(
+      () =>
+        [...document.querySelectorAll("button, a, [role=radio]")].filter((element) => {
+          // Only what a person sees: the skip link is hidden until it gets the focus.
+          const box = element.getBoundingClientRect();
+          return box.width > 2 && box.height > 2 && element.scrollWidth > element.clientWidth + 1;
+        }).length,
+    );
+    expect(cut).toBe(0);
+  });
 });

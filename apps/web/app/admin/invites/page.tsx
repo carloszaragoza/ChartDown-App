@@ -120,7 +120,7 @@ export default async function AdminInvitesPage({ searchParams }: { searchParams:
 
             <section aria-labelledby="codes-title">
               <VStack gap={3}>
-                <HStack gap={2} vAlign="center" hAlign="between">
+                <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
                   <Heading level={2} id="codes-title">
                     {t("codes")}
                   </Heading>
