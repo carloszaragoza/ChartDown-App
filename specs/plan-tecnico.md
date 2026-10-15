@@ -110,7 +110,7 @@ Tool versions and prices change; confirm them when starting.
 | set_temp_md | set, member, until (the set's date unless given) | One per set, a member of the set's band (decisions 2 and 9.6) |
 | invite_codes | code (`XXXX-XXXX`, no look-alike characters, case ignored), type (single use or band), max uses (1, a number, or no limit), uses, note, created by, revoked at | R-01.7; admins only. No expiry date: the Admin revokes |
 | invite_claims | code, email, expires at (30 minutes), used at, user, terms version accepted and when | R-01.7; closed, only its functions use it. Accepting the Terms of Use and the Privacy Notice is part of claiming a code, so it covers a password and every sign-in provider alike (T-1202) |
-| waitlist | email (unique, case ignored), language, date | R-01.8; anyone joins through a function that always answers the same; only admins read it |
+| waitlist | email (unique, case ignored), language, date, invited with (an invite code, empty while waiting), invited at | R-01.8, R-07.5; anyone joins through a function that always answers the same; only admins read it, and they invite through a function that creates the code and marks the entry in one step (logged in `admin_log`) |
 | notifications | user, type, detail, read at | SPEC-09; each person reads only their own and marks them read; created only by the server process |
 | notification_prefs | user, type, channel (in-app, email, WhatsApp), active | R-09.5; no row means the notice is on; each person manages their own |
 | event_outbox | type, actor, detail, created at, processed at | Source of every notice; written only by database triggers, closed to the API |

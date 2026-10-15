@@ -84,6 +84,7 @@ Every task is small, has its requirements (R-xx) and is done only when its tests
 | T-404 | Visitors read the public catalog without an account | R-01.4 | T-304 | S | Forking asks the visitor to sign in |
 | T-405 | Delete account: personal data deleted and public versions credited to “ChartDown” | R-01.6, decision 9.5 | T-401 | S | No personal data remains after deletion |
 | T-406 | Transactional email provider for sign-in emails (confirmation, recovery) in production | Technical Plan 12.1 | T-401, T-003 | S | A confirmation email from chartdown.app arrives within a minute |
+| T-407 | Send the confirmation email again: from the sign-up screen's "check your email" and from Sign in when the account is not confirmed yet, through Supabase Auth's resend; the same answer for any email, a rate limit says to wait | R-01.9 | T-401 | S | End-to-end: the second confirmation email arrives (Mailpit locally) and confirms the account; unit: an email with no account gets the same answer |
 
 ## E5 · Catalog and versions (SPEC-02)
 
@@ -165,6 +166,7 @@ Bugs found while reviewing; each is fixed with a test that would have caught it.
 | T-1101 | Instrument catalog: create, rename and deactivate | R-07.3 | T-301 | S | An instrument in use cannot be deleted |
 | T-1102 | Create and revoke invite codes | R-01.7 | T-402 | S | A revoked code stops working |
 | T-1103 | Content reports and hiding versions | R-07.2 | T-505 | S | A hidden version leaves the catalog and its owner gets a notice |
+| T-1104 | Waitlist in Administration (screen built like Invite codes, Astryx `Table`, Waiting and Invited tabs): Invite creates a single-use code noted with the email and marks the entry, in one database function logged in `admin_log`; Copy code beside it. Needs a migration in production before it merges | R-07.5 | T-1102, T-1305 | S | pgTAP: only an admin reads the waitlist and invites, and an invited entry has its code; end-to-end: a visitor joins the waitlist, the Admin invites them and the code creates their account |
 
 ## E12 · Landing page and beta
 
