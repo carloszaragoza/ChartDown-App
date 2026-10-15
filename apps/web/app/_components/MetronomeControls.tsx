@@ -23,6 +23,8 @@ export interface NowPlaying {
   index: number;
   /** The share of the bar's beats counted so far. */
   progress: number;
+  /** It is on beat 1, drawn accented. */
+  downbeat: boolean;
 }
 
 /** A bar chosen to start on, where ChartSection draws it (R-11.2). */
@@ -212,6 +214,7 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
           row: playing.row,
           index: playing.index,
           progress: (click.beat + 1) / Math.max(playing.beats.length, 1),
+          downbeat: click.accent,
         }
       : undefined;
 

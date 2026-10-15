@@ -141,7 +141,14 @@
   inline-size: calc(100% * var(--chart-progress, 0));
   block-size: calc(var(--border-width) * 2);
   background: var(--color-icon-secondary);
-  transition: inline-size var(--chart-beat-ease, 180ms) ease-out;
+  transition:
+    inline-size var(--chart-beat-ease, 180ms) ease-out,
+    background-color var(--chart-beat-ease, 180ms) ease-out;
+}
+/* Beat 1 is accented (R-11.3): the same line in full ink, then back to the quiet ink. No hue, so
+   it reads the same to everyone; the "1 / 4" counter says it in words too. */
+.cd-chart__bar--downbeat::after {
+  background: var(--color-icon-primary);
 }
 /* The bar the metronome will start on (R-11.2): the same quiet ink, dotted across its foot. */
 .cd-chart__bar--start {
