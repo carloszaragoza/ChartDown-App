@@ -41,3 +41,15 @@ test("R-10.13 a pasted chord sheet becomes a draft to check, saved only when pub
   await expect(page.getByRole("heading", { level: 1, name: "Morning Light" })).toBeVisible();
   await expect(page.locator("#section-2")).toContainText("Verse 1");
 });
+
+test("R-10.10 converting waits until the person confirms they may use the sheet", async ({
+  page,
+}) => {
+  await signUpAndConfirm(page, unique("rights"), "Rita Rights");
+  await page.goto("/versions/new/import");
+  await page.locator("textarea").first().fill("Verse\nG    C    D    G\n");
+  const convert = page.getByRole("button", { name: "Convert to a chart" });
+  await expect(convert).toBeDisabled();
+  await page.getByText("I have the right to use this chord sheet.").click();
+  await expect(convert).toBeEnabled();
+});
