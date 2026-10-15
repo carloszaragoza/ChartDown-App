@@ -80,7 +80,7 @@ export default async function AdminPage() {
               <Card key={area.key}>
                 <section aria-labelledby={`area-${area.key}`}>
                   <VStack gap={3}>
-                    <HStack gap={2} vAlign="center" hAlign="between">
+                    <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
                       {area.icon}
                       <HStack gap={1.5} vAlign="center">
                         {area.attention && <StatusDot variant="warning" label={t("attention")} />}

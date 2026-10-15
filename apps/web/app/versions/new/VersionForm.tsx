@@ -211,7 +211,7 @@ export function VersionForm({ song, defaultTitle, defaultAuthor, phone }: Versio
           <>
             <VStack gap={6}>
               <VStack gap={2}>
-                <HStack gap={2} vAlign="center" hAlign="between">
+                <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
                   <Heading level={2}>{t("chartTitle")}</Heading>
                   <Text type="supporting">ChartDown {chart.version ?? SUPPORTED_VERSION}</Text>
                 </HStack>

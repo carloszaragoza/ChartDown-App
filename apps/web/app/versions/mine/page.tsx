@@ -2,7 +2,6 @@ import { Button } from "@astryxdesign/core/Button";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Item } from "@astryxdesign/core/Item";
 import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
 import { List } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
@@ -12,6 +11,8 @@ import { notFound, redirect } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";
 import { createClient, readUser } from "../../../lib/supabase/server";
+import { ActionRow } from "../../_components/ActionRow";
+import { guessPhone } from "../../../lib/shell/guessPhone";
 
 type One<T> = T | T[] | null;
 interface Row {
@@ -50,6 +51,7 @@ export default async function YourVersionsPage() {
           ? t("private")
           : t("public");
 
+  const phone = await guessPhone();
   return (
     <Layout
       height="auto"
@@ -58,7 +60,7 @@ export default async function YourVersionsPage() {
       contentWidth={960}
       header={
         <LayoutHeader>
-          <HStack gap={4} vAlign="center" hAlign="between">
+          <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
             <VStack gap={1}>
               <Heading level={1}>{t("title")}</Heading>
               <Text color="secondary">{t("description")}</Text>
@@ -78,15 +80,15 @@ export default async function YourVersionsPage() {
           ) : (
             <List hasDividers>
               {versions.map((row) => (
-                <Item
+                <ActionRow
                   key={row.id}
-                  as="li"
+                  phone={phone}
                   label={title(row)}
                   description={t("updated", {
                     when: format.dateTime(new Date(row.updated_at), { dateStyle: "medium" }),
                   })}
-                  endContent={
-                    <HStack gap={2} vAlign="center">
+                  actions={
+                    <>
                       <Token label={state(row)} size="sm" />
                       <Button
                         label={t("open", { title: title(row) })}
@@ -112,7 +114,7 @@ export default async function YourVersionsPage() {
                       >
                         {t("notesShort")}
                       </Button>
-                    </HStack>
+                    </>
                   }
                 />
               ))}

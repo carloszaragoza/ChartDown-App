@@ -181,6 +181,23 @@ export function ChartPreview({
       ?.querySelector('[aria-current="step"]')
       ?.scrollIntoView({ block: "center", behavior: still ? "auto" : "smooth" });
   }, [playingRow]);
+  const form = (
+    <SongForm
+      label={c("songForm")}
+      size="lg"
+      isStrip={isPhone}
+      items={formStripItems(chart, -1, () => false).map((item, index) => ({
+        abbreviation: item.abbreviation,
+        description: describe(item),
+        href: `#section-${index + 1}`,
+      }))}
+    />
+  );
+  const counterText = counter && (
+    <Text type="large" weight="bold">
+      {counter}
+    </Text>
+  );
   return (
     <div ref={root} onClick={onTap}>
       <VStack gap={6}>
@@ -198,27 +215,24 @@ export function ChartPreview({
             }}
           >
             <Theme theme={chartdownStandTheme} mode="system">
-              <HStack gap={2} vAlign="center">
-                <StackItem size="fill">
-                  <SongForm
-                    label={c("songForm")}
-                    size="lg"
-                    isStrip={isPhone}
-                    items={formStripItems(chart, -1, () => false).map((item, index) => ({
-                      abbreviation: item.abbreviation,
-                      description: describe(item),
-                      href: `#section-${index + 1}`,
-                    }))}
-                  />
-                </StackItem>
-                {counter && (
-                  <Text type="large" weight="bold">
-                    {counter}
-                  </Text>
-                )}
-                {soundButton}
-                {playButton}
-              </HStack>
+              {/* On a phone the metronome sits on its own line, under the strip (R-03.9). */}
+              {isPhone ? (
+                <VStack gap={2}>
+                  {form}
+                  <HStack gap={2} vAlign="center" hAlign="end">
+                    {counterText}
+                    {soundButton}
+                    {playButton}
+                  </HStack>
+                </VStack>
+              ) : (
+                <HStack gap={2} vAlign="center">
+                  <StackItem size="fill">{form}</StackItem>
+                  {counterText}
+                  {soundButton}
+                  {playButton}
+                </HStack>
+              )}
               {tempoDialog}
             </Theme>
           </div>

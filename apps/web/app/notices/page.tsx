@@ -47,7 +47,7 @@ export default async function NoticesPage() {
       contentWidth={760}
       header={
         <LayoutHeader hasDivider>
-          <HStack gap={4} vAlign="center" hAlign="between">
+          <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
             <VStack gap={1}>
               <Heading level={1}>{t("title")}</Heading>
               <Text color="secondary">{t("description")}</Text>

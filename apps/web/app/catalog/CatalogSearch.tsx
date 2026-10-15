@@ -1,8 +1,8 @@
 "use client";
 
-import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { VStack } from "@astryxdesign/core/VStack";
 import { useRouter } from "next/navigation";
+import { ChoiceControl } from "../_components/ChoiceControl";
 import { SearchField, searchHref } from "../_components/SearchField";
 
 export interface CatalogSearchProps {
@@ -30,17 +30,14 @@ export function CatalogSearch({ query, source, sources, words }: CatalogSearchPr
         placeholder={words.placeholder}
         submit={words.submit}
       />
-      <SegmentedControl
+      <ChoiceControl
         label={words.sources}
         value={source ?? "all"}
+        options={sources}
         onChange={(value) =>
           router.push(searchHref("/catalog", query, value === "all" ? {} : { source: value }))
         }
-      >
-        {sources.map((option) => (
-          <SegmentedControlItem key={option.value} value={option.value} label={option.label} />
-        ))}
-      </SegmentedControl>
+      />
     </VStack>
   );
 }

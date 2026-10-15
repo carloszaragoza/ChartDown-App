@@ -23,6 +23,7 @@ import { ChartPreview } from "../../../../_components/ChartPreview";
 import { LinkChoice } from "../../../../_components/LinkChoice";
 import { UUID } from "../../../../versions/[id]/load";
 import { updatePinned } from "../../../actions";
+import { guessPhone } from "../../../../../lib/shell/guessPhone";
 
 interface Revision {
   number: number;
@@ -117,6 +118,7 @@ export default async function SetSongPage({
 
   const standHref = `${path}/stand${query({ view: style === "letters" ? "letters" : "", beats: beats === "auto" ? "" : beats, as: as ?? "" })}`;
 
+  const phone = await guessPhone();
   return (
     <Layout
       height="auto"
@@ -189,6 +191,7 @@ export default async function SetSongPage({
             )}
             <HStack gap={4} vAlign="center" wrap="wrap">
               <LinkChoice
+                phone={phone}
                 label={v("style")}
                 current={style}
                 options={(["numbers", "letters"] as const).map((option) => ({
@@ -214,6 +217,7 @@ export default async function SetSongPage({
               />
               {leads && (
                 <LinkChoice
+                  phone={phone}
                   label={s("viewAs")}
                   current={as ?? "all"}
                   options={[null, ...viewAsOptions(song, song.instruments)].map((option) => ({
@@ -239,6 +243,7 @@ export default async function SetSongPage({
               </section>
             )}
             <ChartPreview
+              phone={phone}
               chart={chart}
               style={style}
               homeKey={homeKey}
