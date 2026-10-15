@@ -104,6 +104,7 @@ Every task is small, has its requirements (R-xx) and is done only when its tests
 | T-602 | Viewer with numbers or letters and transposition | R-03.2 | T-203, T-103 | S | Changing the key does not change the saved version |
 | T-603 | MD layer editor | R-03.5 | T-303, T-105, T-203 | L | A new note is saved in the layer and the public version doesn't change |
 | T-604 | Stand mode on iPad, light and stage | R-03.3 | T-203 | M | Every section reads without zooming on an iPad in landscape |
+| T-605 | A first chart is easy to start: New version offers Import a chord sheet or a short original template, and the editor says chords can be numbers or letters | R-03.10 | T-601, T-1409 | S | Unit: the template parses with no warnings in numbers and in letters; end-to-end: New version shows both ways to start |
 
 ## E7 · Bands and sets (SPEC-04 and SPEC-05)
 
@@ -275,11 +276,13 @@ Owner's request, October 14, 2026: people share links to songs and always have a
 
 Owner's decision, October 13, 2026, after F-005 to F-008: Play (the sets, a set's songs and stand mode) reads first from what the device already downloaded for offline use (SPEC-08) and brings any change in the background, so it opens at once with or without a connection. To be planned (requirements and tasks) when phase 2 starts.
 
-## E14 · Import from PDF (SPEC-10, phase 2)
+## E14 · Import a chord sheet (SPEC-10, phase 2)
+
+Owner's decision, October 15, 2026: paste first, then PDF. The converter (T-1403 to T-1407) works on lines of text with their column positions, so a pasted sheet and a PDF's text layer go through the same steps; the order is T-1401 (text fixtures), T-1403 to T-1407, T-1409 (paste), then T-1402 (PDF, with `pdfjs-dist`) and T-1408 (the PDF upload in the same screen).
 
 | ID | Task | Requirements | Depends on | Size | Tests / evidence |
 |---|---|---|---|---|---|
-| T-1401 | Original test fixtures: text PDFs of original songs (major, minor, with and without bar lines, with endings) and one scanned PDF | SPEC-10 test data | T-102 | S | Fixtures in the repository; no published songs |
+| T-1401 | Original test fixtures: chord sheets of original songs as plain text, and the same as text PDFs (major, minor, with and without bar lines, with endings) and one scanned PDF | SPEC-10 test data | T-102 | S | Fixtures in the repository; no published songs |
 | T-1402 | Extract text with positions from a PDF in the browser; reject files without a text layer | R-10.1, R-10.9, R-10.11 | T-1401 | M | The scanned fixture is rejected; nothing is uploaded to the server |
 | T-1403 | Detect metadata and sections; map endings and “go to” instructions; skip license and copyright lines | R-10.2, R-10.3 | T-1402 | M | Every fixture gets the right title, key and sections |
 | T-1404 | Align chords to lyric lines and parse chord names; keep bars on chord-only lines with bar lines | R-10.4 | T-1402 | M | The instrumental fixture keeps its bars exactly |
@@ -287,6 +290,7 @@ Owner's decision, October 13, 2026, after F-005 to F-008: Play (the sets, a set'
 | T-1406 | Propose bars when there are none and flag them “needs review” | R-10.6 | T-1404 | M | Every proposed row is flagged |
 | T-1407 | Discard lyrics; optional landmarks (4 words by default, 8 maximum) | R-10.7 | T-1403 | S | With landmarks off, the draft contains no lyric text |
 | T-1408 | Import screen: rights confirmation, review panel in the editor, duplicate suggestion, required source before saving | R-10.8, R-10.10, R-10.12 | T-1405, T-1406, T-1407, T-601 | M | Nothing is saved until the user confirms |
+| T-1409 | Import screen, paste: “Import a chord sheet” from New version; paste the text, choose numbers or letters and landmarks, confirm the rights, and open the draft in the editor with its review panel | R-10.13, R-10.7, R-10.8, R-10.10 | T-1403, T-1404, T-1405, T-1406, T-1407, T-601 | M | End-to-end: a pasted original sheet opens as a draft with its sections and chords and no lyric line over the landmark limit; nothing is saved until confirmed |
 
 ## E15 · Visual metronome and bar follow (SPEC-11, phase 2)
 

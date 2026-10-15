@@ -77,6 +77,7 @@ flowchart LR
 | UI | Next.js (React) with TypeScript, as an installable web app; components from the Astryx design system (`@astryxdesign/core`, theme neutral, MIT; icons from `@heroicons/react`), plus the chart components and the logo in `packages/ui` (Design Handoff 2 and 3) | Fast, discoverable public catalog for visitors (R-01.4); one codebase for desktop and iPad; an open-source component library that covers every screen in light and dark |
 | Languages | next-intl or i18next, English and Spanish strings | R-01.5. The language is stored in the profile: signing in applies it, saving the profile updates it (a signed-in person has no other language switcher), and visitors, who have no profile, use the small EN | ES at the foot of the landing page and keep it in a cookie. With no cookie and no profile the language comes from the browser's `Accept-Language`: the supported language it ranks highest, English when none |
 | Offline | Service worker (Workbox) + IndexedDB | SPEC-08 |
+| Import from PDF | `pdfjs-dist` (Mozilla's PDF reader, Apache 2.0), loaded only on the import screen, its worker served from the app's own bundle | SPEC-10, R-10.9: the PDF is read in the browser and never leaves it (owner's approval, October 15, 2026) |
 | Backend | Supabase: Postgres, auth, row-level security, realtime, storage and functions | Option A |
 | Background | Event table + scheduled job that dispatches it | SPEC-09 |
 | Email (phase 2) | A transactional email provider | R-09.5 |

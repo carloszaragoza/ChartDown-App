@@ -206,6 +206,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-03.7 **Beat marks, shown as the reader chooses:** the viewer, stand mode and a set's song have a Beats control with Off, Auto and Always (Auto by default: marks only in the bars where they tell something). It is a way of viewing the chart, like numbers or letters, and changes nothing in the chart text, its beat checks or its JSON form (owner's request, October 8, 2026).
 - R-03.8 **Reading on a phone:** a song opened from a shared link (the version page, its stand mode and a set's song in stand mode, with the view, beats and theme the link carries) reads on a phone from 375 to 440 CSS px wide, in portrait and landscape. The chart comes first: the controls fit in one compact bar, the song form is one strip that scrolls inside itself, bar rows wrap to fit the width instead of scrolling sideways, and the page never scrolls sideways. (Owner's request, October 14, 2026: people share links and always have a phone with them, not always an iPad.)
 - R-03.9 **The whole app on a phone:** every signed-in page (Home, Sets, a set and its songs, Edit set, Bands and a band, Catalog, Your versions, a version and its history, the chart editor, the director's notes, Notices, Profile and Administration) works on a phone from 360 to 440 CSS px wide, iPhone and Android alike, in portrait: one column, nothing scrolls sideways, nothing a person needs is cut short with "…", and touch targets are a little smaller than on an iPad so the screen holds more than buttons: 40 px, and 48 px for stand mode's section and turn buttons (owner's review, October 15, 2026). A side panel (Home's band, a set's lineup, the notes editor's sections) goes below the page's main content; a choice among more than three options or with long names (View as, the catalog's source) becomes a menu; a row with several actions keeps its title on its own line with the actions under it (owner's request, October 15, 2026: musicians use the app on their phones too, before the beta opens to everyone).
+- R-03.10 **A first chart is easy to start:** a new version doesn't open on a blank editor: it offers to import a chord sheet (SPEC-10) or to start from a short template (a title, a key, two sections and a line of chords), and says that chords can be written as numbers or as letters (`1 | 4 5 | 6m` or `G | C D | Em`). The template is an original example, never a published song (the first playground tester's feedback, October 15, 2026: a blank editor reads like code).
 
 **Acceptance criteria**
 
@@ -325,7 +326,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 ### SPEC-10 · Import from PDF
 
-**Goal:** turn an existing chord sheet in PDF (chords written above the lyrics) into a ChartDown draft in minutes, so MDs don't retype their library. The import keeps the structure and the chords and discards the lyrics.
+**Goal:** turn an existing chord sheet (chords written above the lyrics), pasted as text or uploaded as a PDF, into a ChartDown draft in minutes, so MDs don't retype their library and nobody has to start from a blank editor. The import keeps the structure and the chords and discards the lyrics. The draft is a starting point the MD corrects, then adds notes to (owner's request and the first playground tester's feedback, October 15, 2026).
 
 **Phase:** 2 (during the beta, section 7).
 
@@ -343,6 +344,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-10.10 Before the first import, the user confirms they have the right to use the files they import.
 - R-10.11 A PDF without a text layer (a scan or a photo) is rejected with a clear message. Reading scanned sheets is a later phase.
 - R-10.12 If a public version with the same title and source already exists, the importer suggests using it or forking it instead of creating a duplicate.
+- R-10.13 **Paste:** the user can paste a chord sheet as plain text (chords over lyrics, as copied from a website or a document; up to 300 lines) instead of uploading a PDF. It goes through the same steps (R-10.2 to R-10.8 and R-10.12), and the pasted text is never stored. Paste comes first, then PDF (owner's decision, October 15, 2026).
 
 **Acceptance criteria**
 
@@ -350,6 +352,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - Given a sheet with no bar lines, when it is imported, then every row with proposed bars is marked “needs review” in the editor.
 - Given an instrumental line written with bar lines, when it is imported, then its bars match the sheet exactly.
 - Given a sheet in E minor, when it is imported in numbers, then Em reads `1m`, G reads `b3`, C reads `b6` and D reads `b7`.
+- Given the same original test song pasted as text, when it is imported, then the draft is the same as from its PDF.
 - Given a scanned PDF, when the user uploads it, then the importer explains it can't read scans yet and nothing is created.
 - Given any import, when it finishes, then the PDF is not stored anywhere on our servers.
 - Given landmarks turned off, when the import finishes, then the draft contains no lyric text at all.
