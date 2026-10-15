@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import en from "../../../messages/en.json";
 import { BeatsControl } from "../../_components/BeatsControl";
 import { ChartPreview } from "../../_components/ChartPreview";
-import { displayHref, readDisplay } from "./display";
+import { displayHref, readDisplay, viewAddress } from "./display";
 import { standHref } from "./stand/standHref";
 
 vi.mock("next/navigation", () => ({
@@ -76,5 +76,21 @@ describe("R-03.7 the Beats control in the viewer", () => {
     preview("off");
     preview("always");
     expect(JSON.stringify(parse("## A\n1:3 4:1 | 1 4 5 | x:2 1:2").warnings)).toBe(before);
+  });
+});
+
+describe("F-011 the version page changes its view in place", () => {
+  it("F-011 a new view replaces only the view's part of the address", () => {
+    const letters = { style: "letters", key: chart.key, beats: "always" } as const;
+    expect(viewAddress("/versions/x", "/versions/x", letters, chart)).toBe(
+      "/versions/x?view=letters&beats=always",
+    );
+    expect(
+      viewAddress("/versions/x?beats=off&report=open#report", "/versions/x", letters, chart),
+    ).toBe("/versions/x?report=open&view=letters&beats=always#report");
+    const asWritten = { style: "numbers", key: chart.key, beats: "auto" } as const;
+    expect(viewAddress("/versions/x?view=letters&key=A", "/versions/x", asWritten, chart)).toBe(
+      "/versions/x",
+    );
   });
 });

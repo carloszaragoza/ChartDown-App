@@ -35,10 +35,38 @@ test("R-03.2 changing the key does not change the saved version", async ({ page,
   await expect(page.getByText("(written in G)")).toBeVisible();
   await expect(intro).toContainText("F#");
 
-  await page.getByRole("link", { name: "Back to the written key, G" }).click();
+  await page.getByRole("button", { name: "Back to the written key, G" }).click();
   await expect(page).toHaveURL(new RegExp(`/versions/${id}\\?view=letters$`));
   await page.goto(`/versions/${id}`);
   await expect(style.getByRole("radio", { name: "Numbers" })).toBeChecked();
   await expect(page.getByText("(written in")).toHaveCount(0);
   expect(await saved()).toEqual(before);
+});
+
+test("F-011 the version page changes its view in place, asking the server nothing", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, { title: "Open Road", content: OPEN_ROAD });
+  await page.goto(`/versions/${id}`);
+  const intro = page.locator("#section-1");
+  await expect(intro).toContainText("6");
+  const asked: string[] = [];
+  page.on("request", (sent) => {
+    if (new URL(sent.url()).pathname.startsWith("/versions/")) asked.push(sent.url());
+  });
+
+  const style = page.getByRole("radiogroup", { name: "Numbers or letters" });
+  await style.getByRole("radio", { name: "Letters" }).click();
+  await expect(intro).toContainText("E");
+  await page
+    .getByRole("radiogroup", { name: "Beat slashes" })
+    .getByRole("radio", { name: "Always" })
+    .click();
+  await expect(page).toHaveURL(/view=letters&beats=always/);
+  await expect(page.getByRole("link", { name: "Stand mode" })).toHaveAttribute(
+    "href",
+    `/versions/${id}/stand?view=letters&beats=always`,
+  );
+  expect(asked).toEqual([]);
 });

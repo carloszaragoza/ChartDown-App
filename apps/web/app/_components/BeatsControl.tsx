@@ -66,8 +66,8 @@ export function BeatsControl({
   words,
 }: {
   value: BeatsMode;
-  /** The address for each mode. */
-  hrefs: Record<BeatsMode, string>;
+  /** The address for each mode, when the server draws it. */
+  hrefs?: Record<BeatsMode, string>;
   /** Draws the chosen mode in place instead of asking the server for its address (F-005). */
   onChoose?: (mode: BeatsMode) => void;
   words: { label: string; name: string; off: string; auto: string; always: string };
@@ -91,7 +91,7 @@ export function BeatsControl({
           const chosen = readBeatsMode(mode);
           rememberBeats(chosen);
           if (onChoose) onChoose(chosen);
-          else router.push(hrefs[chosen]);
+          else if (hrefs) router.push(hrefs[chosen]);
         }}
       >
         {BEATS_MODES.map((mode) => (

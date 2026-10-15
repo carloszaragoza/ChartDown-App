@@ -40,6 +40,18 @@ export function readDisplay(
   return { style, key: known ? asked : chart.key, beats: readBeatsMode(params.beats) };
 }
 
+/**
+ * The address a page shown in place moves to when its view changes (F-011): the view's part is
+ * replaced, and the rest (a report form open, a failed fork, a fragment) stays as it was.
+ */
+export function viewAddress(current: string, path: string, display: Display, chart: Chart): string {
+  const url = new URL(current, "http://chartdown.invalid");
+  const view = new URL(displayHref(path, display, chart), url);
+  for (const name of ["view", "key", "beats"]) url.searchParams.delete(name);
+  for (const [name, value] of view.searchParams) url.searchParams.set(name, value);
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
 /** The address of a page shown with a display; the defaults are left out. */
 export function displayHref(path: string, display: Display, chart: Chart): string {
   const params = new URLSearchParams();
