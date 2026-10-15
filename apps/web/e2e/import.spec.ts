@@ -98,6 +98,8 @@ test("R-10.12 a sheet whose song is already in the catalog offers adding a versi
   // The draft stays; it is now a version of that song.
   await expect(page.locator("input[name=songId]")).toHaveCount(1);
   await expect(page.locator("textarea[name=content]")).toHaveValue(/## Verse\n1 \| 4 \| 5 \| 1/);
+});
+
 test("R-10.10 converting waits until the person confirms they may use the sheet", async ({
   page,
 }) => {
