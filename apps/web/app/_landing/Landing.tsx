@@ -6,7 +6,7 @@ import type { CSSProperties } from "react";
 import { LanguageSwitcher } from "../_components/LanguageSwitcher";
 import { demoSections } from "./bars";
 import { BarsView } from "./BarsView";
-import { CONTACT, DEMO_KEYS, DEMO_SET, EXAMPLE_CHART, LANGUAGE_URL } from "./example";
+import { CONTACT, DEMO_KEYS, DEMO_SET, EXAMPLE_CHART, LANGUAGE_URL, SOCIAL } from "./example";
 import {
   Chat,
   DarkBand,
@@ -584,6 +584,11 @@ export function Landing({ signInEnabled, waitlistReady, accountDeleted = false }
             <nav aria-label={t("footer.label")} className={styles.footerLinks}>
               <a href={`mailto:${CONTACT}`}>{t("footer.contact")}</a>
               <a href={LANGUAGE_URL}>{t("footer.github")}</a>
+              {SOCIAL.map((account) => (
+                <a key={account.key} href={account.href} target="_blank" rel="noopener noreferrer">
+                  {t(`footer.${account.key}`)}
+                </a>
+              ))}
               <Link href="/privacy">{t("footer.privacy")}</Link>
               <Link href="/terms">{t("footer.terms")}</Link>
             </nav>

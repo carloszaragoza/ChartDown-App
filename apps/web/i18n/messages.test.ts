@@ -46,6 +46,8 @@ const SAME_IN_BOTH = new Set([
   "landing.founder.name",
   "landing.footer.contact",
   "landing.footer.github",
+  "landing.footer.instagram",
+  "landing.footer.tiktok",
   "stand.setBar",
   "stand.beatOf",
   "stand.tempoTitle",
