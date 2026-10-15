@@ -114,6 +114,22 @@ describe("T-1310 the landing page, version 3", () => {
     expect(render(open)).not.toContain("Your account was deleted");
   });
 
+  it("T-1310 the headline opens on the first pair and keeps every pair's room", () => {
+    const html = render(open);
+    const h1 = html.slice(html.indexOf("<h1"), html.indexOf("</h1>"));
+    // What search engines and screen readers read: the first pair, once.
+    expect(h1).toMatch(/class="[^"]*srOnly[^"]*">Your band\. Same page\. Every night\.</);
+    for (const who of ["Your worship team.", "Your cover band.", "Your session players."])
+      expect(h1).toContain(who);
+    expect(h1.match(/aria-hidden="true"/g)?.length).toBeGreaterThanOrEqual(7);
+  });
+
+  it("R-01.5 in Spanish the headline says En sintonía, never la misma página", () => {
+    const html = render(open, "es");
+    expect(html).toContain("Tu banda. En sintonía. Cada noche.");
+    expect(html).not.toMatch(/la misma página/i);
+  });
+
   it("R-01.5 the landing page reads in Spanish", () => {
     const html = render(open, "es");
     expect(html).toContain("Cada noche.");

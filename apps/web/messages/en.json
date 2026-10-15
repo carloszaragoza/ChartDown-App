@@ -1092,8 +1092,33 @@
     "hero": {
       "tag": "BETA",
       "tagText": "Invite-only · free during the beta",
-      "line1": "Your band. Same page.",
-      "line2": "Every night.",
+      "same": "Same page.",
+      "pairs": {
+        "p1": {
+          "who": "Your band.",
+          "when": "Every night."
+        },
+        "p2": {
+          "who": "Your worship team.",
+          "when": "Every Sunday."
+        },
+        "p3": {
+          "who": "Your cover band.",
+          "when": "Every gig."
+        },
+        "p4": {
+          "who": "Your wedding band.",
+          "when": "At every wedding."
+        },
+        "p5": {
+          "who": "Your students.",
+          "when": "Every rehearsal."
+        },
+        "p6": {
+          "who": "Your session players.",
+          "when": "In the studio."
+        }
+      },
       "lead": "Write the chart once. Every musician opens it on their iPad, in numbers or letters, with the director's notes for each section. No more PDFs in the group chat.",
       "formLabel": "Get early access",
       "hint": "We're letting bands in a few at a time. One email when you're in.",

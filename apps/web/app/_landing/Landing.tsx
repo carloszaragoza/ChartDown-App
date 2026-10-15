@@ -24,6 +24,7 @@ import {
   WriteIn,
   Words,
 } from "./motion";
+import { Headline } from "./Headline";
 import { WaitlistForm, type WaitlistWords } from "./WaitlistForm";
 import styles from "./landing.module.css";
 
@@ -89,7 +90,6 @@ export function Landing({ signInEnabled, waitlistReady, accountDeleted = false }
       : {}),
   });
   const m = (key: string) => t(`problem.messages.${key}`);
-  const heroWords = t("hero.line1").split(" ");
 
   return (
     <MotionRoot>
@@ -147,25 +147,13 @@ export function Landing({ signInEnabled, waitlistReady, accountDeleted = false }
                 <span className={styles.md}>{t("hero.tag")}</span>
                 {t("hero.tagText")}
               </p>
-              <h1 className={styles.h1}>
-                {heroWords.map((word, index) => (
-                  <span key={index}>
-                    <span className={styles.mask}>
-                      <span className={styles.rise} style={{ "--d": index } as CSSProperties}>
-                        {word}
-                      </span>
-                    </span>{" "}
-                  </span>
-                ))}
-                <span className={styles.mask}>
-                  <span
-                    className={`${styles.rise} ${styles.accent} ${styles.underline}`}
-                    style={{ "--d": heroWords.length } as CSSProperties}
-                  >
-                    {t("hero.line2")}
-                  </span>
-                </span>
-              </h1>
+              <Headline
+                same={t("hero.same")}
+                pairs={(["p1", "p2", "p3", "p4", "p5", "p6"] as const).map((pair) => ({
+                  who: t(`hero.pairs.${pair}.who`),
+                  when: t(`hero.pairs.${pair}.when`),
+                }))}
+              />
               <p className={`${styles.lead} ${styles.enter}`} style={{ "--d": 5 } as CSSProperties}>
                 {t("hero.lead")}
               </p>
