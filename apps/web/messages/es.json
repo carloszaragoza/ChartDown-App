@@ -466,13 +466,18 @@
       "landmarksHint": "Las primeras {words} palabras de la letra de cada sección, para ubicarte. El resto de la letra nunca se guarda.",
       "rights": "Tengo derecho a usar esta hoja de acordes.",
       "rightsFirst": "Primero confirma que tienes derecho a usar esta hoja.",
-      "privacy": "Tu hoja se convierte en tu navegador. No se sube ni se guarda.",
+      "privacy": "Tu hoja o tu PDF se leen en tu navegador. No se suben ni se guardan.",
       "convert": "Convertir en chart",
       "cancel": "Cancelar",
       "problems": {
         "empty": "Primero pega una hoja de acordes.",
         "too_long": "La hoja tiene más de 300 líneas. Pega una canción a la vez.",
-        "no_chords": "No se encontraron acordes. Revisa que la hoja tenga nombres de acordes como G, Em o D/F#."
+        "no_chords": "No se encontraron acordes. Revisa que la hoja tenga nombres de acordes como G, Em o D/F#.",
+        "not_pdf": "Ese archivo no es un PDF.",
+        "too_big": "El PDF pesa más de 5 MB.",
+        "too_many_pages": "El PDF tiene más de 5 páginas. Importa una canción a la vez.",
+        "scanned": "Este PDF es un escaneo o una foto, sin texto que leer. Todavía no se pueden importar hojas escaneadas: pega los acordes en su lugar.",
+        "unreadable": "No se pudo leer este PDF. Intenta pegar la hoja en su lugar."
       },
       "review": {
         "title": "Revisa la importación",
@@ -489,8 +494,15 @@
           "no-sections": "No se encontraron nombres de sección, así que los acordes empiezan sin secciones.",
           "chart-warning": "{count, plural, one {# línea tiene una advertencia} other {# líneas tienen advertencias}}.",
           "key-guessed": "El tono se dedujo."
-        }
-      }
+        },
+        "existing": "“{title}” ya está en el catálogo.",
+        "existingHint": "Puedes agregar tu versión a esa canción en lugar de empezar una nueva.",
+        "useExisting": "Agregar mi versión a esa canción",
+        "openExisting": "Ver esa canción"
+      },
+      "pdf": "O elige un PDF",
+      "pdfHint": "Un PDF con texto, de hasta 5 páginas y 5 MB. Su texto llena el cuadro de abajo para que lo revises antes de convertir. Todavía no se pueden leer hojas escaneadas ni fotos.",
+      "pdfRead": "Se leyó {name}. Revisa la hoja abajo y luego conviértela."
     }
   },
   "history": {

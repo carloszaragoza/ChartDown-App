@@ -36,7 +36,14 @@ export interface VersionFormProps {
   /** The chart to start from, such as an imported sheet's draft (SPEC-10). */
   defaultContent?: string;
   /** What an import assumed, shown above the chart until the person publishes (R-10.8). */
-  imported?: { review: ReviewItem[]; key: string; onStartOver: () => void };
+  imported?: {
+    review: ReviewItem[];
+    key: string;
+    /** A song already in the catalog with the same title (R-10.12). */
+    existing: { id: string; title: string; artists: string[] } | null;
+    onUseExisting: () => void;
+    onStartOver: () => void;
+  };
 }
 
 /** What is still missing before publishing, in the order the form asks for it. */
@@ -227,6 +234,8 @@ export function VersionForm({
                 <ImportReview
                   review={imported.review}
                   importedKey={imported.key}
+                  existing={imported.existing}
+                  onUseExisting={imported.onUseExisting}
                   onStartOver={imported.onStartOver}
                 />
               )}

@@ -4,6 +4,7 @@ import { Banner } from "@astryxdesign/core/Banner";
 import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
 import { Button } from "@astryxdesign/core/Button";
 import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
+import { FileInput } from "@astryxdesign/core/FileInput";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
@@ -21,11 +22,15 @@ import {
   type ImportStyle,
 } from "../../../../lib/import/convert";
 import { readPaste } from "../../../../lib/import/paste";
+import { MAX_BYTES } from "../../../../lib/import/pdfLines";
+import { readPdf, type PdfProblem } from "../../../../lib/import/readPdf";
 import { usePhone } from "../../../../lib/shell/phone";
 import { VersionForm } from "../VersionForm";
+import { findSong, type ExistingSong } from "./actions";
 
 /**
- * Importing a chord sheet by pasting it (SPEC-10, R-10.13, T-1409): the person pastes the sheet,
+ * Importing a chord sheet by pasting it or from a PDF (SPEC-10, R-10.13, T-1409, T-1408): the
+ * person pastes the sheet, or picks a PDF whose text fills the same box for them to check,
  * chooses numbers or letters and whether to keep a landmark per section, confirms the sheet is
  * theirs to use, and gets the draft in New version with a list of what to review. The text is
  * converted in the browser and never sent anywhere; nothing is saved until they publish.
@@ -39,18 +44,47 @@ export function ImportFlow({ author, phone }: { author: string; phone: boolean }
   const [style, setStyle] = useState<ImportStyle>("numbers");
   const [landmarks, setLandmarks] = useState(true);
   const [rights, setRights] = useState(false);
-  const [problem, setProblem] = useState<"empty" | "too_long" | "no_chords" | null>(null);
+  const [problem, setProblem] = useState<"empty" | "too_long" | "no_chords" | PdfProblem | null>(
+    null,
+  );
   const [result, setResult] = useState<ImportResult | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [fromPdf, setFromPdf] = useState<string | null>(null);
+  const [existing, setExisting] = useState<ExistingSong | null>(null);
+  const [toExisting, setToExisting] = useState(false);
+
+  // A PDF is read in the browser and its text fills the box, to check before converting.
+  const choosePdf = async (picked: File | File[] | null) => {
+    const one = Array.isArray(picked) ? (picked[0] ?? null) : picked;
+    setFile(one);
+    setFromPdf(null);
+    if (!one) return;
+    const read = await readPdf(one);
+    if ("problem" in read) return setProblem(read.problem);
+    setProblem(null);
+    setText(read.text);
+    setFromPdf(one.name);
+  };
 
   if (result)
     return (
       <VersionForm
         phone={phone}
-        song={null}
+        song={toExisting ? existing : null}
         defaultTitle={result.title ?? ""}
         defaultAuthor={author}
         defaultContent={result.source}
-        imported={{ review: result.review, key: result.key, onStartOver: () => setResult(null) }}
+        imported={{
+          review: result.review,
+          key: result.key,
+          existing: toExisting ? null : existing,
+          onUseExisting: () => setToExisting(true),
+          onStartOver: () => {
+            setResult(null);
+            setExisting(null);
+            setToExisting(false);
+          },
+        }}
       />
     );
 
@@ -64,6 +98,8 @@ export function ImportFlow({ author, phone }: { author: string; phone: boolean }
     if (draft.sections === 0) return setProblem("no_chords");
     setProblem(null);
     setResult(draft);
+    // A song already in the catalog with this title is offered instead of a duplicate (R-10.12).
+    if (draft.title) void findSong(draft.title).then(setExisting);
   };
 
   return (
@@ -87,9 +123,19 @@ export function ImportFlow({ author, phone }: { author: string; phone: boolean }
       content={
         <LayoutContent>
           <VStack gap={5}>
-            {problem && (
-              <div role="alert">
-                <Banner status="error" title={t(`problems.${problem}`)} />
+            {problem && <Banner status="error" title={t(`problems.${problem}`)} />}
+            <FileInput
+              label={t("pdf")}
+              description={t("pdfHint")}
+              accept=".pdf,application/pdf"
+              maxSize={MAX_BYTES}
+              value={file}
+              onChange={(picked) => void choosePdf(picked)}
+              isOptional
+            />
+            {fromPdf && (
+              <div role="status">
+                <Banner status="success" title={t("pdfRead", { name: fromPdf })} />
               </div>
             )}
             <TextArea
