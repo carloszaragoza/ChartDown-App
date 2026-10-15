@@ -78,7 +78,10 @@ test("R-10.11 a scanned PDF is turned away with a clear message, and nothing is 
   await page
     .locator("input[type=file]")
     .setInputFiles(new URL("../../../fixtures/import/scanned-sheet.pdf", import.meta.url).pathname);
-  await expect(page.getByRole("alert")).toContainText("This PDF is a scan or a photo");
+  // Next.js keeps its own empty route announcer as an alert too.
+  await expect(
+    page.getByRole("alert").filter({ hasText: "This PDF is a scan or a photo" }),
+  ).toBeVisible();
   await expect(page.locator("textarea").first()).toHaveValue("");
 });
 
