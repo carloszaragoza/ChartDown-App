@@ -1075,7 +1075,7 @@
     "overview": "Resumen"
   },
   "landing": {
-    "title": "ChartDown: tu banda, en la misma página",
+    "title": "ChartDown: tu banda, en sintonía",
     "description": "Escribe el chart una vez. Cada músico lo abre en su iPad, en números o en letras, con las notas del director. Únete a la beta privada.",
     "nav": {
       "label": "Principal",
@@ -1090,8 +1090,33 @@
     "hero": {
       "tag": "BETA",
       "tagText": "Solo con invitación · gratis durante la beta",
-      "line1": "Tu banda. La misma página.",
-      "line2": "Cada noche.",
+      "same": "En sintonía.",
+      "pairs": {
+        "p1": {
+          "who": "Tu banda.",
+          "when": "Cada noche."
+        },
+        "p2": {
+          "who": "Tu equipo de alabanza.",
+          "when": "Cada domingo."
+        },
+        "p3": {
+          "who": "Tu banda de covers.",
+          "when": "En cada evento."
+        },
+        "p4": {
+          "who": "Tu banda de bodas.",
+          "when": "En cada boda."
+        },
+        "p5": {
+          "who": "Tus alumnos.",
+          "when": "En cada ensayo."
+        },
+        "p6": {
+          "who": "Tus músicos de sesión.",
+          "when": "En el estudio."
+        }
+      },
       "lead": "Escribe el chart una vez. Cada músico lo abre en su iPad, en números o en letras, con las notas del director para cada sección. Se acabaron los PDF en el chat del grupo.",
       "formLabel": "Acceso anticipado",
       "hint": "Dejamos entrar a las bandas de a poco. Un solo correo cuando estés dentro.",
@@ -1209,7 +1234,7 @@
       "role": "Director musical y teclados · fundador"
     },
     "waitlist": {
-      "title": "Pon a tu banda en la misma página.",
+      "title": "Pon a tu banda en sintonía.",
       "body": "Abrimos lugares en grupos pequeños. Dinos quién eres y te guardamos el tuyo. Gratis mientras estés en la beta.",
       "role": "Soy…",
       "roles": {
