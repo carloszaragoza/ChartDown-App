@@ -69,10 +69,16 @@ Every screen uses `AppShell` with the side navigation and a `Layout` with a page
 
 - **iPad landscape (1180 px) and desktop:** the reference layout, with the side navigation open.
 - **iPad portrait and narrower screens:** side panels move below the content; rows of four bars stay.
-- **Phone (R-03.8, owner's request, October 14, 2026):** narrower than 600 CSS px, or shorter than 500 px in landscape. No screen may break or scroll sideways, and the side navigation becomes a drawer. The screens a shared link opens are designed for it; the rest only must not break:
+- **Phone (R-03.8, owner's request, October 14, 2026):** narrower than 600 CSS px, or shorter than 500 px in landscape. No screen may break or scroll sideways, and the side navigation becomes a drawer. Every screen is designed for it (R-03.9, owner's request, October 15, 2026):
   - **Stand mode (version and set song):** one top bar on one line: Close (or Set) as an icon button, the song's title with "Section 1 of 14" (in a set, "Song 2 of 5 · Section 1 of 14"), a **View options** icon button, and Previous and Next as icon buttons (56 px), Next filled. View options opens a bottom sheet with the song's title, key, meter and tempo, Numbers / Letters, Beats, Stage, Full screen and, for the MD, View as. The song form is one row of its 56 px buttons that scrolls sideways inside itself, with the current section kept in view; held sideways it takes the title's place in the top bar, so the bars get the height. The server draws the phone layout from the browser's user agent, so a phone never sees the iPad layout first. The next-section preview is its line alone ("Next: Verse · 8 bars"), with no bars. Swiping the chart left or right moves to the next or previous section, as on the iPad (section 4, 03 Stand mode).
   - **Bar rows:** in portrait, a row wider than the screen wraps into lines of two bars (a row of four reads as 2 + 2) and the chords are drawn at the viewer's size (`md`); in landscape rows of four stay. A bar never shrinks below its minimum width; a single bar wider than the screen still scrolls inside its row.
   - **Version page:** the header's actions wrap under the title, the display choices take two lines at most (Numbers / Letters and the key, then Beats), the pinned song form is the same scrolling strip, and the first section's first row is on the first screen.
+  - **Pages with a side panel** (Home, a set, Edit set, Bands, a band's sets, the chart editor, the director's notes, Administration's instruments): one column, the main content first and the panel after it, full width; the notes editor's section list becomes a section menu above the section it edits.
+  - **Choices:** a SegmentedControl keeps at most three short options on a phone; View as, the catalog's source and any longer choice become a `Selector` with the same options and label.
+  - **Lists with actions** (Your versions, a set's songs, a band's members): the title and its details on their own lines, the actions under them, wrapping; never a title squeezed out by its buttons.
+  - **Page headers:** the actions wrap under the title at their full label, never "…".
+  - **A set's song:** the song form strip scrolls inside itself on its own line, and the metronome's sound and Play buttons sit on the line under it.
+  - **The chart editor:** the text area takes the full width and wraps nothing; the preview follows below it.
   - Touch targets keep their sizes (44 px, 56 px in stand mode); the 32 px gutter becomes 16 px (`--spacing-4`) on a phone.
 
 ## 6. Accessibility
