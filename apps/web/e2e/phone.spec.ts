@@ -99,11 +99,18 @@ test.describe("the version page on an iPhone 16", () => {
     await page.goto(`/versions/${id}`);
     const form = page.getByRole("navigation", { name: "Song form" });
     await expect(form.getByRole("link")).toHaveCount(7);
-    // One strip: every section on the same line, scrolling inside itself.
-    const tops = await form
-      .getByRole("link")
-      .evaluateAll((links) => links.map((link) => Math.round(link.getBoundingClientRect().top)));
-    expect(new Set(tops).size).toBe(1);
+    // One strip: every section on the same line, scrolling inside itself, once the page knows
+    // it is on a phone.
+    await expect
+      .poll(async () => {
+        const tops = await form
+          .getByRole("link")
+          .evaluateAll((links) =>
+            links.map((link) => Math.round(link.getBoundingClientRect().top)),
+          );
+        return new Set(tops).size;
+      })
+      .toBe(1);
     const firstRow = await page
       .locator(".cd-chart__bars")
       .first()
