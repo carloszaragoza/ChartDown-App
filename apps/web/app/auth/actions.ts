@@ -129,6 +129,23 @@ export async function requestPasswordReset(form: FormData): Promise<void> {
   redirect("/auth/forgot-password?sent=1");
 }
 
+/**
+ * Sends the confirmation email again (R-01.9). The same answer whether or not the email has an
+ * account waiting, so nobody learns which emails exist; only a rate limit is reported.
+ */
+export async function resendConfirmation(form: FormData): Promise<void> {
+  ensureEnabled();
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: text(form, "email").toLowerCase(),
+    options: { emailRedirectTo: `${await origin()}/auth/callback?next=/` },
+  });
+  if (error && authError(error) === "rate_limited")
+    redirect("/auth/confirm-again?error=rate_limited");
+  redirect("/auth/confirm-again?sent=1");
+}
+
 export async function updatePassword(form: FormData): Promise<void> {
   ensureEnabled();
   const password = secret(form, "password");

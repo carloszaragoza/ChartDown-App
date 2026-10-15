@@ -83,7 +83,7 @@ Every task is small, has its requirements (R-xx) and is done only when its tests
 | T-403 | Profile: name, language and instruments | R-01.2 | T-401, T-204 | S | The chosen language persists across sessions |
 | T-404 | Visitors read the public catalog without an account | R-01.4 | T-304 | S | Forking asks the visitor to sign in |
 | T-405 | Delete account: personal data deleted and public versions credited to “ChartDown” | R-01.6, decision 9.5 | T-401 | S | No personal data remains after deletion |
-| T-406 | Transactional email provider for sign-in emails (confirmation, recovery) in production | Technical Plan 12.1 | T-401, T-003 | S | A confirmation email from chartdown.app arrives within a minute |
+| T-406 | Transactional email provider for sign-in emails (confirmation, recovery) in production | Technical Plan 12.1 | T-401, T-003 | S | A confirmation email from chartdown.app arrives within a minute. **Done** by the owner before the beta: Resend on chartdown.app, set up in Supabase's SMTP settings (confirmed October 15, 2026) |
 | T-407 | Send the confirmation email again: from the sign-up screen's "check your email" and from Sign in when the account is not confirmed yet, through Supabase Auth's resend; the same answer for any email, a rate limit says to wait | R-01.9 | T-401 | S | End-to-end: the second confirmation email arrives (Mailpit locally) and confirms the account; unit: an email with no account gets the same answer |
 
 ## E5 · Catalog and versions (SPEC-02)
