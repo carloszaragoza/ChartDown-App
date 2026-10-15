@@ -39,6 +39,7 @@ export type NavItem =
   | "overview"
   | "instruments"
   | "invites"
+  | "waitlist"
   | "reports";
 
 /** The side navigation's current item for a page, if any. */
@@ -49,6 +50,7 @@ export function currentItem(pathname: string, personalBand: string | null): NavI
   if (pathname === "/admin") return "overview";
   if (starts("/admin/instruments")) return "instruments";
   if (starts("/admin/invites")) return "invites";
+  if (starts("/admin/waitlist")) return "waitlist";
   if (starts("/admin/reports")) return "reports";
   if (personalBand && starts(`/bands/${personalBand}`)) return "personal";
   if (starts("/bands")) return "bands";

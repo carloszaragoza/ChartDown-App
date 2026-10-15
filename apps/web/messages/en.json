@@ -1012,6 +1012,30 @@
       "copied": "Copied {code}",
       "noneDescription": "Create a code above to invite someone to the beta."
     },
+    "waitlist": {
+      "title": "Waitlist",
+      "description": "People who asked to join the beta. Invite makes a single-use code for them; copy it and send it yourself.",
+      "waitingTab": "Waiting ({count})",
+      "invitedTab": "Invited ({count})",
+      "invitedDone": "Code {code} was created. Copy it from Invited and send it.",
+      "failed": "Something went wrong. Try again.",
+      "noneWaiting": "Nobody is waiting.",
+      "noneInvited": "Nobody has been invited from the waitlist yet.",
+      "emailColumn": "Email",
+      "languageColumn": "Language",
+      "joinedColumn": "Joined",
+      "invitedColumn": "Invited",
+      "codeColumn": "Code",
+      "actionsColumn": "Actions",
+      "languages": {
+        "en": "English",
+        "es": "Spanish"
+      },
+      "invite": "Invite {email}",
+      "inviteShort": "Invite",
+      "copy": "Copy {code}",
+      "copied": "Copied {code}"
+    },
     "reports": {
       "title": "Reports",
       "hint": "Public versions people reported, and the versions you hid.",
@@ -1159,6 +1183,7 @@
     "overview": "Overview",
     "instruments": "Instruments",
     "invites": "Invite codes",
+    "waitlist": "Waitlist",
     "reports": "Reports",
     "openReports": "{count, plural, one {# open report} other {# open reports}}",
     "language": "Language",
