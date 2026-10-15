@@ -92,6 +92,7 @@ describe("T-1310 the landing page, version 3", () => {
     // The footer links to ChartDown's accounts.
     expect(html).toContain('href="https://www.instagram.com/chartdown.app"');
     expect(html).toContain('href="https://www.tiktok.com/@chartdown.app"');
+    expect(html).toContain('href="https://www.youtube.com/@chartdown"');
   });
 
   it("T-1310 the copy has no em dash and promises nothing past the beta, in both languages", () => {
