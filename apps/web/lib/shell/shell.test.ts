@@ -28,6 +28,10 @@ describe("T-1301 the app shell", () => {
     expect(currentItem("/profile", null)).toBeNull();
   });
 
+  it("R-07.5 the waitlist has its own item in Administration", () => {
+    expect(currentItem("/admin/waitlist", null)).toBe("waitlist");
+  });
+
   it("T-1301 on a version's pages, the editor and the notes open that version", () => {
     expect(versionOf(`/versions/${id}`)).toBe(id);
     expect(versionOf(`/versions/${id}/notes`)).toBe(id);

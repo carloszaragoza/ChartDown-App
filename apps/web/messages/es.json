@@ -1005,6 +1005,30 @@
       "copied": "{code} copiado",
       "noneDescription": "Crea un código arriba para invitar a alguien a la beta."
     },
+    "waitlist": {
+      "title": "Lista de espera",
+      "description": "Personas que pidieron entrar a la beta. Invitar crea un código de un solo uso para ellas; cópialo y envíaselo tú.",
+      "waitingTab": "En espera ({count})",
+      "invitedTab": "Invitadas ({count})",
+      "invitedDone": "Se creó el código {code}. Cópialo en Invitadas y envíalo.",
+      "failed": "Algo salió mal. Inténtalo de nuevo.",
+      "noneWaiting": "Nadie está esperando.",
+      "noneInvited": "Todavía no has invitado a nadie de la lista de espera.",
+      "emailColumn": "Correo",
+      "languageColumn": "Idioma",
+      "joinedColumn": "Se anotó",
+      "invitedColumn": "Invitada",
+      "codeColumn": "Código",
+      "actionsColumn": "Acciones",
+      "languages": {
+        "en": "Inglés",
+        "es": "Español"
+      },
+      "invite": "Invitar a {email}",
+      "inviteShort": "Invitar",
+      "copy": "Copiar {code}",
+      "copied": "Se copió {code}"
+    },
     "reports": {
       "title": "Reportes",
       "hint": "Versiones públicas reportadas y las versiones que ocultaste.",
@@ -1152,6 +1176,7 @@
     "overview": "Resumen",
     "instruments": "Instrumentos",
     "invites": "Códigos de invitación",
+    "waitlist": "Lista de espera",
     "reports": "Reportes",
     "openReports": "{count, plural, one {# reporte abierto} other {# reportes abiertos}}",
     "language": "Idioma",

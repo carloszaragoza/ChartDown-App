@@ -26,6 +26,7 @@ import {
   BookOpenIcon,
   ChatBubbleLeftRightIcon,
   CheckIcon,
+  ClockIcon,
   FlagIcon,
   KeyIcon,
   MusicalNoteIcon,
@@ -41,6 +42,7 @@ import {
   HomeIcon as HomeSolid,
   BookOpenIcon as BookOpenSolid,
   ChatBubbleLeftRightIcon as ChatSolid,
+  ClockIcon as ClockSolid,
   FlagIcon as FlagSolid,
   KeyIcon as KeySolid,
   MusicalNoteIcon as MusicalNoteSolid,
@@ -222,6 +224,7 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
             MusicalNoteSolid,
           )}
           {item("invites", t("invites"), "/admin/invites", KeyIcon, KeySolid)}
+          {item("waitlist", t("waitlist"), "/admin/waitlist", ClockIcon, ClockSolid)}
           {item(
             "reports",
             t("reports"),
