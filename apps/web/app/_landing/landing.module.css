@@ -191,6 +191,7 @@
 
 /* Buttons */
 .primary,
+.secondary,
 .light {
   display: inline-flex;
   align-items: center;
@@ -213,6 +214,14 @@
 }
 .primary:hover {
   background: color-mix(in srgb, var(--ink) 86%, var(--paper));
+}
+.secondary {
+  border: var(--stroke-hairline) solid var(--line-strong);
+  background: var(--paper);
+  color: var(--ink) !important;
+}
+.secondary:hover {
+  border-color: var(--ink);
 }
 .primary:disabled {
   cursor: progress;
@@ -1302,8 +1311,20 @@
   .landing {
     --gutter: var(--space-4);
   }
-  .navLinks .navLink {
+  /* On a phone only the links within the page go; the catalog and Sign in stay (owner's
+     review, October 15, 2026). */
+  .navLinks .anchorLink {
     display: none;
+  }
+  .navLinks {
+    flex-wrap: nowrap;
+    gap: var(--space-3);
+    font-size: 0.875rem;
+  }
+  .navLinks .primary,
+  .navLinks .secondary {
+    padding: 0 0.875rem;
+    font-size: 0.875rem;
   }
   .heroText {
     padding-block-start: 3.5rem;
