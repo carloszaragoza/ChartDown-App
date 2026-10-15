@@ -91,7 +91,8 @@ export function InviteForm({
             value={single ? "1" : uses}
             onChange={setUses}
             isDisabled={single}
-            description={single ? words.usesSingle : words.usesBand}
+            // A hint between the label and the box would push this box below its neighbors.
+            {...(single ? { disabledMessage: words.usesSingle } : { placeholder: words.usesBand })}
             width="100%"
           />
           <AdminField label={words.note} name="note" placeholder={words.notePlaceholder} optional />
