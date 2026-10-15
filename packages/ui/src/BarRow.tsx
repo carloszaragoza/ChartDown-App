@@ -132,6 +132,7 @@ function OneBar({
   formatter,
   labels,
   progress,
+  isDownbeat = false,
   isStart = false,
 }: {
   bar: BarData;
@@ -147,6 +148,8 @@ function OneBar({
   labels: BarLabels;
   /** The metronome is on this bar: the share of its beats counted so far (R-11.3). */
   progress?: number;
+  /** The metronome is on beat 1 of this bar, drawn accented (R-11.3). */
+  isDownbeat?: boolean;
   /** The metronome will start on this bar (R-11.2). */
   isStart?: boolean;
 }) {
@@ -164,6 +167,7 @@ function OneBar({
     bar.repeatEnd && "cd-chart__bar--repeat-end",
     bar.ending && "cd-chart__bar--ending",
     progress !== undefined && "cd-chart__bar--now",
+    progress !== undefined && isDownbeat && "cd-chart__bar--downbeat",
     isStart && progress === undefined && "cd-chart__bar--start",
   ].filter(Boolean);
   return (
@@ -294,7 +298,7 @@ export interface BarRowProps {
    * The bar the metronome is on, by its place in the row, and the share of its beats counted so
    * far: a thin line grows under it beat by beat (R-11.3, R-11.5).
    */
-  now?: { index: number; progress: number };
+  now?: { index: number; progress: number; downbeat?: boolean };
   /** The bar the metronome will start on, by its place in the row (R-11.2). */
   start?: number;
 }
@@ -369,7 +373,9 @@ export function BarRow({
               plain={plain}
               formatter={formatter}
               labels={labels}
-              {...(now?.index === index ? { progress: now.progress } : {})}
+              {...(now?.index === index
+                ? { progress: now.progress, isDownbeat: now.downbeat === true }
+                : {})}
               isStart={start === index}
             />
           ))}

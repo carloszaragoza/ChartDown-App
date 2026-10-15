@@ -52,7 +52,7 @@ export interface ChartSectionProps {
   /** How many bars show beat marks (R-03.7); Auto, the default, where they tell something. */
   beats?: BeatsMode;
   /** The bar the metronome is on: its row, its place in the row, and how far into it (R-11.3). */
-  now?: { row: number; index: number; progress: number } | undefined;
+  now?: { row: number; index: number; progress: number; downbeat?: boolean } | undefined;
   /** The bar the metronome will start on: its row and its place in the row (R-11.2). */
   start?: { row: number; index: number } | undefined;
 }
@@ -93,7 +93,15 @@ export function ChartSection({
             size={size}
             beats={beats}
             {...(meter ? { meter } : {})}
-            {...(now?.row === index ? { now: { index: now.index, progress: now.progress } } : {})}
+            {...(now?.row === index
+              ? {
+                  now: {
+                    index: now.index,
+                    progress: now.progress,
+                    downbeat: now.downbeat === true,
+                  },
+                }
+              : {})}
             {...(start?.row === index ? { start: start.index } : {})}
           />
         ))}

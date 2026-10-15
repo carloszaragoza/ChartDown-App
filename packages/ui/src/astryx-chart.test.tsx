@@ -210,7 +210,7 @@ describe("T-2202 bar rows on a phone", () => {
 
 describe("T-1503 the metronome's pulse in a row", () => {
   const split = parse("## A\n1 | 4:2 1:2 | 5\n");
-  const draw = (now: { index: number; progress: number }) =>
+  const draw = (now: { index: number; progress: number; downbeat?: boolean }) =>
     render(
       <BarRow
         row={split.sections[0]!.rows[0]!}
@@ -237,8 +237,18 @@ describe("T-1503 the metronome's pulse in a row", () => {
     expect(line).toContain("block-size: calc(var(--border-width) * 2)");
   });
 
+  it("R-11.3 beat 1 is accented: the same line in full ink, with no hue", () => {
+    expect(draw({ index: 1, progress: 0.25, downbeat: true })).toMatch(
+      /cd-chart__bar--now cd-chart__bar--downbeat"/,
+    );
+    expect(draw({ index: 1, progress: 0.5 })).not.toMatch(/cd-chart__bar--downbeat/);
+    expect(rule(".cd-chart__bar--downbeat::after").trim()).toBe(
+      "background: var(--color-icon-primary);",
+    );
+  });
+
   it("R-11.13 the line eases from beat to beat, and moves in steps with reduced motion", () => {
-    expect(rule(".cd-chart__bar--now::after")).toMatch(/transition: inline-size/);
+    expect(rule(".cd-chart__bar--now::after")).toMatch(/transition:\s+inline-size/);
     expect(css).toMatch(
       /@media \(prefers-reduced-motion: reduce\) \{\s*\.cd-chart__bar--now::after \{\s*transition: none;/,
     );
