@@ -19,7 +19,11 @@ test.describe("the app on an Android phone", () => {
   test("R-03.9 pages with a side panel read in one column, the main content first", async ({
     page,
   }) => {
+    // Signing up checks the side navigation, which a phone keeps in its drawer: sign up on an
+    // iPad, then hold the phone.
+    await page.setViewportSize({ width: 1180, height: 820 });
     await signUpAndConfirm(page, unique("phoneapp"), "Pia Phone");
+    await page.setViewportSize(ANDROID);
     // Home: the first steps, then the help that sat beside them on an iPad.
     await page.goto("/");
     const help = page.getByRole("region", { name: "Help" });
@@ -39,9 +43,11 @@ test.describe("the app on an Android phone", () => {
     await expect(page.getByRole("radiogroup", { name: "Source" })).toHaveCount(0);
     const cut = await page.evaluate(
       () =>
-        [...document.querySelectorAll("button, a, [role=radio]")].filter(
-          (element) => element.scrollWidth > element.clientWidth + 1,
-        ).length,
+        [...document.querySelectorAll("button, a, [role=radio]")].filter((element) => {
+          // Only what a person sees: the skip link is hidden until it gets the focus.
+          const box = element.getBoundingClientRect();
+          return box.width > 2 && box.height > 2 && element.scrollWidth > element.clientWidth + 1;
+        }).length,
     );
     expect(cut).toBe(0);
   });
