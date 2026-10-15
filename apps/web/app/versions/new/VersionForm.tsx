@@ -20,11 +20,9 @@ import { ChartPreview } from "../../_components/ChartPreview";
 import { Warnings } from "../[id]/edit/Editor";
 import { createVersion, type VersionFormState } from "./actions";
 import { PageLayout } from "../../_components/PageLayout";
+import { STARTER } from "../../../lib/versions/starter";
 import type { ReviewItem } from "../../../lib/import/convert";
 import { ImportReview } from "./import/ImportReview";
-
-// A place to start: two sections the person replaces with their own chart.
-const STARTER = "## Verse\n1 | 4 | 6m | 5\n\n## Chorus\n4 | 1 | 5 | 1\n";
 
 export interface VersionFormProps {
   /** The server's guess that the page opens on a phone (R-03.9). */
@@ -256,6 +254,19 @@ export function VersionForm({
                   {...error("chart_required")}
                 />
                 <Warnings warnings={chart.warnings} />
+                {/* Letters work too (R-03.10): nobody has to know the Nashville numbers to start. */}
+                <Text type="supporting">{t("lettersToo")}</Text>
+                {!imported && content === STARTER && (
+                  <HStack gap={2} vAlign="center" wrap="wrap">
+                    <Text type="supporting">{t("starterHint")}</Text>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      label={t("import.open")}
+                      href="/versions/new/import"
+                    />
+                  </HStack>
+                )}
               </VStack>
               <section aria-label={t("preview")}>
                 <ChartPreview chart={chart} />

@@ -99,3 +99,14 @@ test("R-10.12 a sheet whose song is already in the catalog offers adding a versi
   await expect(page.locator("input[name=songId]")).toHaveCount(1);
   await expect(page.locator("textarea[name=content]")).toHaveValue(/## Verse\n1 \| 4 \| 5 \| 1/);
 });
+
+test("R-03.10 New version never opens on a blank chart: a starter, the letters hint and the import", async ({
+  page,
+}) => {
+  await signUpAndConfirm(page, unique("firstchart"), "Fran First");
+  await page.goto("/versions/new?song=new");
+  await expect(page.locator("textarea[name=content]")).toHaveValue(/key: G[\s\S]*## Verse/);
+  await expect(page.getByText(/or as letters \(G \| C D \| Em\)/)).toBeVisible();
+  await page.getByRole("link", { name: "Import a chord sheet" }).first().click();
+  await expect(page).toHaveURL(/\/versions\/new\/import$/);
+});

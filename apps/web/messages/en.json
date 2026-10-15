@@ -503,7 +503,9 @@
       "pdf": "Or pick a PDF",
       "pdfHint": "A PDF with text, up to 5 pages and 5 MB. Its text fills the box below, to check before converting. Scanned sheets and photos can't be read yet.",
       "pdfRead": "Read {name}. Check the sheet below, then convert it."
-    }
+    },
+    "lettersToo": "Write chords as numbers (1 | 4 5 | 6m) or as letters (G | C D | Em): ChartDown reads both, and every musician can switch.",
+    "starterHint": "This is an example to replace. Have a chord sheet already?"
   },
   "history": {
     "title": "History",

@@ -503,7 +503,9 @@
       "pdf": "O elige un PDF",
       "pdfHint": "Un PDF con texto, de hasta 5 páginas y 5 MB. Su texto llena el cuadro de abajo para que lo revises antes de convertir. Todavía no se pueden leer hojas escaneadas ni fotos.",
       "pdfRead": "Se leyó {name}. Revisa la hoja abajo y luego conviértela."
-    }
+    },
+    "lettersToo": "Escribe los acordes en números (1 | 4 5 | 6m) o en letras (G | C D | Em): ChartDown lee los dos, y cada músico puede cambiarlos.",
+    "starterHint": "Esto es un ejemplo para reemplazar. ¿Ya tienes una hoja de acordes?"
   },
   "history": {
     "title": "Historial",
