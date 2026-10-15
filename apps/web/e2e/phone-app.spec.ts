@@ -19,7 +19,11 @@ test.describe("the app on an Android phone", () => {
   test("R-03.9 pages with a side panel read in one column, the main content first", async ({
     page,
   }) => {
+    // Signing up checks the side navigation, which a phone keeps in its drawer: sign up on an
+    // iPad, then hold the phone.
+    await page.setViewportSize({ width: 1180, height: 820 });
     await signUpAndConfirm(page, unique("phoneapp"), "Pia Phone");
+    await page.setViewportSize(ANDROID);
     // Home: the first steps, then the help that sat beside them on an iPad.
     await page.goto("/");
     const help = page.getByRole("region", { name: "Help" });
