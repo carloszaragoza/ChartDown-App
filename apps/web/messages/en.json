@@ -1167,19 +1167,33 @@
       },
       "f4": {
         "title": "Sets",
-        "body": "Line up tonight's songs and share the set with the band."
+        "body": "Line up tonight's songs and share the set with the band.",
+        "visual": "Tonight's set, shared with the band",
+        "setName": "Saturday night",
+        "when": "3 songs · 9 PM",
+        "shared": "Shared",
+        "sharedWith": "The whole band sees it, in their own key"
       },
       "f5": {
         "title": "Versions & history",
         "body": "Your arrangement, a live version, an acoustic one. Every change is kept, so you can go back anytime.",
         "live": "Live",
         "acoustic": "Acoustic",
-        "new": "+ New version"
-      },
-      "f6": {
-        "title": "Your whole band, in",
-        "body": "Create the band, share an invite code, and everyone joins with Google, Apple, Microsoft or email.",
-        "code": "K7QM-R4TX"
+        "new": "+ New version",
+        "visual": "A song's versions and its history",
+        "history": "History",
+        "r3": {
+          "title": "Revision 3 · Bridge cut to 2 bars",
+          "when": "Today"
+        },
+        "r2": {
+          "title": "Revision 2 · Moved to E",
+          "when": "Yesterday"
+        },
+        "r1": {
+          "title": "Revision 1 · First chart",
+          "when": "Last week"
+        }
       }
     },
     "open": {

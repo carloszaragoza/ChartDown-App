@@ -104,13 +104,16 @@ export function Words({ text, accent }: { text: string; accent?: string }) {
   );
 }
 
-/** The chart window lies back and stands up as it scrolls in. */
+/**
+ * The chart window leans back like a chart on a music stand and stands up as it scrolls in
+ * (owner's review, October 15, 2026: more lean, the same straightening).
+ */
 export function TiltWindow({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const still = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start 0.25"] });
-  const rotateX = useTransform(scrollYProgress, [0, 1], [18, 0]);
-  const scale = useTransform(scrollYProgress, [0, 1], [0.92, 1]);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start 0.2"] });
+  const rotateX = useTransform(scrollYProgress, [0, 1], [34, 0]);
+  const scale = useTransform(scrollYProgress, [0, 1], [0.9, 1]);
   return (
     <div ref={ref} className={styles.tiltStage}>
       <motion.div style={still ? {} : { rotateX, scale }} className={styles.tilt}>
@@ -190,6 +193,41 @@ export function Chat({
         ),
       )}
     </motion.div>
+  );
+}
+
+/** A list whose items slide in one after another, as a set or a history fills up. */
+export function Stagger({
+  items,
+  className,
+  itemClassName,
+  ordered = false,
+}: {
+  items: { key: string; node: ReactNode; className?: string | undefined }[];
+  className: string | undefined;
+  itemClassName?: string | undefined;
+  ordered?: boolean;
+}) {
+  const List = ordered ? motion.ol : motion.ul;
+  return (
+    <List
+      className={className}
+      {...reveal(useReducedMotion(), 0.3)}
+      variants={{ shown: { transition: { staggerChildren: 0.14, delayChildren: 0.2 } } }}
+    >
+      {items.map((item) => (
+        <motion.li
+          key={item.key}
+          className={item.className ?? itemClassName}
+          variants={{
+            hidden: { opacity: 0, x: -24 },
+            shown: { opacity: 1, x: 0, transition: { duration: 0.6, ease: EASE } },
+          }}
+        >
+          {item.node}
+        </motion.li>
+      ))}
+    </List>
   );
 }
 

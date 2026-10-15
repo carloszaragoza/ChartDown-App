@@ -1167,19 +1167,33 @@
       },
       "f4": {
         "title": "Sets",
-        "body": "Arma las canciones de esta noche y comparte el set con la banda."
+        "body": "Arma las canciones de esta noche y comparte el set con la banda.",
+        "visual": "El set de esta noche, compartido con la banda",
+        "setName": "Sábado en la noche",
+        "when": "3 canciones · 9 PM",
+        "shared": "Compartido",
+        "sharedWith": "Toda la banda lo ve, cada quien en su tono"
       },
       "f5": {
         "title": "Versiones e historial",
         "body": "Tu arreglo, una versión en vivo, una acústica. Cada cambio se guarda, así puedes regresar cuando quieras.",
         "live": "En vivo",
         "acoustic": "Acústica",
-        "new": "+ Nueva versión"
-      },
-      "f6": {
-        "title": "Toda tu banda, dentro",
-        "body": "Crea la banda, comparte un código de invitación y todos entran con Google, Apple, Microsoft o correo.",
-        "code": "K7QM-R4TX"
+        "new": "+ Nueva versión",
+        "visual": "Las versiones de una canción y su historial",
+        "history": "Historial",
+        "r3": {
+          "title": "Revisión 3 · El puente baja a 2 compases",
+          "when": "Hoy"
+        },
+        "r2": {
+          "title": "Revisión 2 · Pasa a E",
+          "when": "Ayer"
+        },
+        "r1": {
+          "title": "Revisión 1 · Primer chart",
+          "when": "La semana pasada"
+        }
       }
     },
     "open": {

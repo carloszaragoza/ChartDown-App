@@ -18,6 +18,7 @@ import {
   ReadQuote,
   Rise,
   StandCycle,
+  Stagger,
   TiltWindow,
   TypeLines,
   WriteIn,
@@ -422,39 +423,101 @@ export function Landing({ signInEnabled, waitlistReady, accountDeleted = false }
               </Rise>
             </article>
 
-            <div className={styles.cards}>
-              <Rise className={styles.card}>
-                <span className={styles.number}>04</span>
-                <h3 className={styles.h3small}>{t("features.f4.title")}</h3>
-                <p className={styles.body}>{t("features.f4.body")}</p>
-                <ol className={styles.setList}>
-                  {DEMO_SET.map((song, index) => (
-                    <li key={song.title}>
-                      <span>
-                        {index + 1} · {song.title}
-                      </span>
-                      <span className={styles.meta}>{song.key}</span>
-                    </li>
-                  ))}
-                </ol>
+            <article className={`${styles.feature} ${styles.reversed}`}>
+              <Drift>04</Drift>
+              <div className={styles.copy}>
+                <Rise>
+                  <span className={styles.number}>04</span>
+                </Rise>
+                <h3 className={styles.h3}>
+                  <Words text={t("features.f4.title")} />
+                </h3>
+                <Rise delay={0.1}>
+                  <p className={styles.body}>{t("features.f4.body")}</p>
+                </Rise>
+              </div>
+              <Rise delay={0.15} className={styles.visual}>
+                <div className={styles.panel} role="img" aria-label={t("features.f4.visual")}>
+                  <div className={styles.setCard}>
+                    <div className={styles.sectionHead}>
+                      <span className={styles.sectionName}>{t("features.f4.setName")}</span>
+                      <span className={styles.meta}>{t("features.f4.when")}</span>
+                    </div>
+                    <Stagger
+                      ordered
+                      className={styles.setList}
+                      items={DEMO_SET.map((song, index) => ({
+                        key: song.title,
+                        node: (
+                          <>
+                            <span className={styles.setSong}>
+                              <span className={styles.setIndex}>{index + 1}</span>
+                              {song.title}
+                            </span>
+                            <span className={styles.chip}>
+                              {t("window.key", { key: song.key })}
+                            </span>
+                          </>
+                        ),
+                      }))}
+                    />
+                  </div>
+                  <Rise delay={0.9} className={styles.myNote}>
+                    <span className={styles.chipStrong}>{t("features.f4.shared")}</span>
+                    {t("features.f4.sharedWith")}
+                  </Rise>
+                </div>
               </Rise>
-              <Rise className={styles.card} delay={0.12}>
-                <span className={styles.number}>05</span>
-                <h3 className={styles.h3small}>{t("features.f5.title")}</h3>
-                <p className={styles.body}>{t("features.f5.body")}</p>
-                <p className={styles.versions}>
-                  <span className={styles.fakeDark}>{t("features.f5.live")}</span>
-                  <span className={styles.fakeLine}>{t("features.f5.acoustic")}</span>
-                  <span className={styles.fakeLine}>{t("features.f5.new")}</span>
-                </p>
+            </article>
+
+            <article className={styles.feature}>
+              <Drift>05</Drift>
+              <div className={styles.copy}>
+                <Rise>
+                  <span className={styles.number}>05</span>
+                </Rise>
+                <h3 className={styles.h3}>
+                  <Words text={t("features.f5.title")} />
+                </h3>
+                <Rise delay={0.1}>
+                  <p className={styles.body}>{t("features.f5.body")}</p>
+                </Rise>
+              </div>
+              <Rise delay={0.15} className={styles.visual}>
+                <div className={styles.panel} role="img" aria-label={t("features.f5.visual")}>
+                  <p className={styles.versions}>
+                    <span className={styles.fakeDark}>{t("features.f5.live")}</span>
+                    <span className={styles.fakeLine}>{t("features.f5.acoustic")}</span>
+                    <span className={styles.fakeLine}>{t("features.f5.new")}</span>
+                  </p>
+                  <div className={styles.setCard}>
+                    <div className={styles.sectionHead}>
+                      <span className={styles.sectionName}>{t("features.f5.history")}</span>
+                    </div>
+                    <Stagger
+                      className={styles.history}
+                      items={(["r3", "r2", "r1"] as const).map((revision, index) => ({
+                        key: revision,
+                        className: index === 0 ? styles.historyNow : styles.historyItem,
+                        node: (
+                          <>
+                            <span className={styles.dot} aria-hidden="true" />
+                            <span>
+                              <span className={styles.name}>
+                                {t(`features.f5.${revision}.title`)}
+                              </span>
+                              <span className={styles.meta}>
+                                {t(`features.f5.${revision}.when`)}
+                              </span>
+                            </span>
+                          </>
+                        ),
+                      }))}
+                    />
+                  </div>
+                </div>
               </Rise>
-              <Rise className={styles.card} delay={0.24}>
-                <span className={styles.number}>06</span>
-                <h3 className={styles.h3small}>{t("features.f6.title")}</h3>
-                <p className={styles.body}>{t("features.f6.body")}</p>
-                <span className={styles.invite}>{t("features.f6.code")}</span>
-              </Rise>
-            </div>
+            </article>
           </section>
 
           <DarkBand id="open" className={styles.open}>
