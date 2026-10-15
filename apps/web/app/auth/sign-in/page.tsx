@@ -36,6 +36,11 @@ export default async function SignInPage({ searchParams }: { searchParams: Searc
         <Text>
           <Link href="/auth/forgot-password">{t("signIn.forgot")}</Link>
         </Text>
+        {error === "email_not_confirmed" && (
+          <Text>
+            <Link href="/auth/confirm-again">{t("confirmAgain.link")}</Link>
+          </Text>
+        )}
         <Text color="secondary">
           {t("signIn.noAccount")} <Link href="/auth/sign-up">{t("signUp.title")}</Link>
         </Text>

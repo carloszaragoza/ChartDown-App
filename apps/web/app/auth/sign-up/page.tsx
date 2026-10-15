@@ -29,6 +29,12 @@ export default async function SignUpPage({ searchParams }: { searchParams: Searc
     return (
       <AuthPage title={t("signUp.title")}>
         <Banner status="success" title={t("signUp.sent")} />
+        <VStack gap={1}>
+          <Text color="secondary">{t("signUp.notArrived")}</Text>
+          <Text>
+            <Link href="/auth/confirm-again">{t("confirmAgain.link")}</Link>
+          </Text>
+        </VStack>
       </AuthPage>
     );
   }

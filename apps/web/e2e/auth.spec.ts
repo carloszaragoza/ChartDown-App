@@ -36,6 +36,38 @@ test("R-01.1 an account cannot be used before its email is confirmed", async ({ 
   await expect(page.getByRole("main").getByRole("alert")).toContainText("Confirm your email first");
 });
 
+test("R-01.9 a person asks for the confirmation email again and confirms with it", async ({
+  page,
+}) => {
+  const email = unique("again");
+  await claim(page, await createInvite(page.request), email);
+  await page.getByLabel("Your name").fill("Again Test");
+  await page.getByLabel("Password").fill(PASSWORD);
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expectStatus(page, "Check your email");
+  await expect(page.getByText("Look in your spam folder first")).toBeVisible();
+
+  // The first email is lost; Sign in refuses the account and leads to a new one.
+  await page.waitForTimeout(1500);
+  await signIn(page, email, PASSWORD);
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("Confirm your email first");
+  await page.getByRole("link", { name: "Send the confirmation email again" }).click();
+  await page.getByLabel("Email").fill(email);
+  const sentAfter = Date.now();
+  await page.getByRole("button", { name: "Send it again" }).click();
+  await expectStatus(page, "we sent it a new link");
+
+  await page.goto(await latestLink(page.request, email, sentAfter));
+  await expectSignedIn(page, "Again Test");
+});
+
+test("R-01.9 an email with no account waiting gets the same answer", async ({ page }) => {
+  await page.goto("/auth/confirm-again");
+  await page.getByLabel("Email").fill(unique("nobody"));
+  await page.getByRole("button", { name: "Send it again" }).click();
+  await expectStatus(page, "we sent it a new link");
+});
+
 test("R-01.1 a wrong password is refused", async ({ page }) => {
   const email = unique("ben");
   await signUpAndConfirm(page, email, "Ben Test");

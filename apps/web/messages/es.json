@@ -260,13 +260,20 @@
       "providerHint": "Con Google, Microsoft o Apple, usa este mismo correo.",
       "acceptTerms": "Acepto los <terms>Términos de uso</terms> y el <privacy>Aviso de privacidad</privacy>.",
       "acceptPlain": "Acepto los Términos de uso y el Aviso de privacidad.",
-      "readTerms": "Lee los <terms>Términos de uso</terms> y el <privacy>Aviso de privacidad</privacy>."
+      "readTerms": "Lee los <terms>Términos de uso</terms> y el <privacy>Aviso de privacidad</privacy>.",
+      "notArrived": "¿No te llegó? Busca primero en tu carpeta de spam."
     },
     "forgot": {
       "title": "Restablecer tu contraseña",
       "submit": "Envíame un enlace",
       "sent": "Si ese correo tiene una cuenta, le enviamos un enlace para elegir una nueva contraseña.",
       "back": "Volver a iniciar sesión"
+    },
+    "confirmAgain": {
+      "title": "Confirma tu correo",
+      "submit": "Enviarlo otra vez",
+      "sent": "Si ese correo tiene una cuenta por confirmar, le enviamos un enlace nuevo. Busca en tu bandeja de entrada y en spam.",
+      "link": "Enviar otra vez el correo de confirmación"
     },
     "reset": {
       "title": "Elige una nueva contraseña",

@@ -260,13 +260,20 @@
       "providerHint": "With Google, Microsoft or Apple, use this same email.",
       "acceptTerms": "I accept the <terms>Terms of Use</terms> and the <privacy>Privacy Notice</privacy>.",
       "acceptPlain": "I accept the Terms of Use and the Privacy Notice.",
-      "readTerms": "Read the <terms>Terms of Use</terms> and the <privacy>Privacy Notice</privacy>."
+      "readTerms": "Read the <terms>Terms of Use</terms> and the <privacy>Privacy Notice</privacy>.",
+      "notArrived": "Didn’t get it? Look in your spam folder first."
     },
     "forgot": {
       "title": "Reset your password",
       "submit": "Send me a link",
       "sent": "If that email has an account, we sent it a link to choose a new password.",
       "back": "Back to sign in"
+    },
+    "confirmAgain": {
+      "title": "Confirm your email",
+      "submit": "Send it again",
+      "sent": "If that email has an account waiting to be confirmed, we sent it a new link. Look in your inbox and your spam folder.",
+      "link": "Send the confirmation email again"
     },
     "reset": {
       "title": "Choose a new password",
