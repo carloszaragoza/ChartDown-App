@@ -2,7 +2,6 @@ import { Banner } from "@astryxdesign/core/Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Layout, LayoutContent, LayoutPanel } from "@astryxdesign/core/Layout";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import {
   Table,
@@ -22,6 +21,8 @@ import { AddIcon, DeactivateIcon, EditIcon, ReactivateIcon } from "../../_compon
 import { AdminField } from "../AdminControls";
 import { AdminHeader } from "../AdminHeader";
 import { addInstrument, setInstrumentActive, updateInstrument } from "./actions";
+import { PageLayout } from "../../_components/PageLayout";
+import { guessPhone } from "../../../lib/shell/guessPhone";
 
 type Search = Promise<{
   saved?: string;
@@ -116,8 +117,10 @@ export default async function AdminInstrumentsPage({ searchParams }: { searchPar
     </form>
   );
 
+  const phone = await guessPhone();
   return (
-    <Layout
+    <PageLayout
+      phone={phone}
       height="auto"
       // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
       padding={8}
@@ -136,13 +139,14 @@ export default async function AdminInstrumentsPage({ searchParams }: { searchPar
           }
         />
       }
-      end={
-        <LayoutPanel width={320} hasDivider label={panelTitle}>
-          {panel}
-        </LayoutPanel>
-      }
+      panel={{
+        side: "end",
+        width: 320,
+        label: panelTitle,
+        children: <>{panel}</>,
+      }}
       content={
-        <LayoutContent>
+        <>
           <VStack gap={4}>
             {status && <Banner status="success" title={status} />}
             {error && (
@@ -247,7 +251,7 @@ export default async function AdminInstrumentsPage({ searchParams }: { searchPar
               </TableBody>
             </Table>
           </VStack>
-        </LayoutContent>
+        </>
       }
     />
   );

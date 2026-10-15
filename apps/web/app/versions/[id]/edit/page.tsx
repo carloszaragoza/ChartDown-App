@@ -4,6 +4,7 @@ import { authEnabled } from "../../../../lib/auth/enabled";
 import { createClient, readUser } from "../../../../lib/supabase/server";
 import { loadVersion } from "../load";
 import { Editor } from "./Editor";
+import { guessPhone } from "../../../../lib/shell/guessPhone";
 
 /** The chart editor, for the owner of an active version only (R-02.6, R-03.1). */
 export default async function EditPage({ params }: { params: Promise<{ id: string }> }) {
@@ -31,6 +32,7 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
 
   return (
     <Editor
+      phone={await guessPhone()}
       versionId={version.id}
       title={version.title}
       visibility={version.visibility}

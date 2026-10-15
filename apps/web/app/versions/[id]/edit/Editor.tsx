@@ -6,7 +6,7 @@ import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Item } from "@astryxdesign/core/Item";
-import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
+import { LayoutHeader } from "@astryxdesign/core/Layout";
 import { List } from "@astryxdesign/core/List";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
@@ -22,8 +22,11 @@ import { useActionState, useDeferredValue, useEffect, useMemo, useRef, useState 
 import { lineRange } from "../../../../lib/versions/lines";
 import { ChartPreview } from "../../../_components/ChartPreview";
 import { saveChart, type SaveState } from "./actions";
+import { PageLayout } from "../../../_components/PageLayout";
 
 export interface EditorProps {
+  /** The server's guess that the page opens on a phone (R-03.9). */
+  phone: boolean;
   versionId: string;
   title: string;
   visibility: "public" | "private";
@@ -42,6 +45,7 @@ export interface EditorProps {
  * with their lines. Warnings never block a save.
  */
 export function Editor({
+  phone,
   versionId,
   title,
   visibility,
@@ -90,7 +94,8 @@ export function Editor({
   };
 
   return (
-    <Layout
+    <PageLayout
+      phone={phone}
       height="auto"
       // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
       padding={8}
@@ -151,40 +156,47 @@ export function Editor({
           </HStack>
         </LayoutHeader>
       }
-      start={
-        <LayoutPanel width={460} hasDivider label={t("textPanel")}>
-          <VStack gap={3}>
-            <div role="status">
-              {state.status === "saved" && !dirty && (
-                <Banner status="success" title={t("saved", { number: state.number ?? "" })} />
-              )}
-            </div>
-            {(state.status === "changed" || state.status === "error") && (
-              <div role="alert">
-                <Banner
-                  status="error"
-                  title={state.status === "changed" ? t("changed") : t("error")}
-                />
+      panel={{
+        side: "start",
+        width: 460,
+        label: t("textPanel"),
+        firstOnPhone: true,
+        children: (
+          <>
+            <VStack gap={3}>
+              <div role="status">
+                {state.status === "saved" && !dirty && (
+                  <Banner status="success" title={t("saved", { number: state.number ?? "" })} />
+                )}
               </div>
-            )}
-            <Text type="supporting">ChartDown {chart.version ?? SUPPORTED_VERSION}</Text>
-            <TextArea
-              ref={area}
-              label={t("text")}
-              isLabelHidden
-              value={text}
-              onChange={setText}
-              rows={18}
-              hasSpellCheck={false}
-            />
-            <Warnings warnings={chart.warnings} onSelect={goTo} />
-          </VStack>
-        </LayoutPanel>
-      }
+              {(state.status === "changed" || state.status === "error") && (
+                <div role="alert">
+                  <Banner
+                    status="error"
+                    title={state.status === "changed" ? t("changed") : t("error")}
+                  />
+                </div>
+              )}
+              <Text type="supporting">ChartDown {chart.version ?? SUPPORTED_VERSION}</Text>
+              <TextArea
+                ref={area}
+                label={t("text")}
+                isLabelHidden
+                value={text}
+                onChange={setText}
+                rows={18}
+                hasSpellCheck={false}
+              />
+              <Warnings warnings={chart.warnings} onSelect={goTo} />
+            </VStack>
+          </>
+        ),
+      }}
+      contentProps={{ padding: 8, role: "region", label: t("preview") }}
       content={
-        <LayoutContent padding={8} role="region" label={t("preview")}>
+        <>
           <ChartPreview chart={chart} />
-        </LayoutContent>
+        </>
       }
     />
   );

@@ -6,7 +6,7 @@ import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Item } from "@astryxdesign/core/Item";
-import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
+import { LayoutHeader } from "@astryxdesign/core/Layout";
 import { List } from "@astryxdesign/core/List";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Text } from "@astryxdesign/core/Text";
@@ -25,6 +25,8 @@ import { updatePinned } from "../actions";
 import { EditIcon, StandIcon } from "../../_components/ActionIcons";
 import { OfflineChanges } from "../../_components/OfflineChanges";
 import { OfflineButton } from "./OfflineButton";
+import { PageLayout } from "../../_components/PageLayout";
+import { guessPhone } from "../../../lib/shell/guessPhone";
 
 type One<T> = T | T[] | null;
 const one = <T,>(value: One<T>): T | null => (Array.isArray(value) ? (value[0] ?? null) : value);
@@ -169,8 +171,10 @@ export default async function SetPage({
   const facts = [when, t("songs", { count: items.length })].filter(Boolean).join(" · ");
   const status = search.created ? t("status.created") : search.updated ? t("status.updated") : null;
 
+  const phone = await guessPhone();
   return (
-    <Layout
+    <PageLayout
+      phone={phone}
       height="auto"
       // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
       padding={8}
@@ -204,39 +208,46 @@ export default async function SetPage({
           </HStack>
         </LayoutHeader>
       }
-      end={
-        <LayoutPanel width={340} hasDivider role="region" label={t("lineup")}>
-          <VStack gap={3}>
-            <Heading level={2}>{t("lineup")}</Heading>
-            <List>
-              {members.map((member) => {
-                const plays = (lineup.get(member.id) ?? []).map((instrumentId) =>
-                  byId.get(instrumentId),
-                );
-                const name = one(member.profile)?.name ?? "";
-                const role = [
-                  member.role === "md" ? t("mdShort") : null,
-                  plays.length > 0 ? plays.map(nameOf).join(", ") : t("sitsOut"),
-                ]
-                  .filter(Boolean)
-                  .join(" · ");
-                return (
-                  <Item
-                    key={member.id}
-                    as="li"
-                    label={member.user_id === auth.user.id ? t("you", { name }) : name}
-                    description={role}
-                    startContent={<Avatar name={name} tooltip={false} />}
-                  />
-                );
-              })}
-            </List>
-            <Text type="supporting">{t("lineupNote")}</Text>
-          </VStack>
-        </LayoutPanel>
-      }
+      panel={{
+        side: "end",
+        width: 340,
+        role: "region",
+        label: t("lineup"),
+        children: (
+          <>
+            <VStack gap={3}>
+              <Heading level={2}>{t("lineup")}</Heading>
+              <List>
+                {members.map((member) => {
+                  const plays = (lineup.get(member.id) ?? []).map((instrumentId) =>
+                    byId.get(instrumentId),
+                  );
+                  const name = one(member.profile)?.name ?? "";
+                  const role = [
+                    member.role === "md" ? t("mdShort") : null,
+                    plays.length > 0 ? plays.map(nameOf).join(", ") : t("sitsOut"),
+                  ]
+                    .filter(Boolean)
+                    .join(" · ");
+                  return (
+                    <Item
+                      key={member.id}
+                      as="li"
+                      label={member.user_id === auth.user.id ? t("you", { name }) : name}
+                      description={role}
+                      startContent={<Avatar name={name} tooltip={false} />}
+                    />
+                  );
+                })}
+              </List>
+              <Text type="supporting">{t("lineupNote")}</Text>
+            </VStack>
+          </>
+        ),
+      }}
+      contentProps={{ role: "region", label: t("songsTitle") }}
       content={
-        <LayoutContent role="region" label={t("songsTitle")}>
+        <>
           <VStack gap={3}>
             <OfflineChanges setId={set.id} />
             {status && (
@@ -336,7 +347,7 @@ export default async function SetPage({
               </List>
             )}
           </VStack>
-        </LayoutContent>
+        </>
       }
     />
   );

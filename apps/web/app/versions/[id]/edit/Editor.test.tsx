@@ -32,6 +32,7 @@ describe("R-03.1 the chart editor", () => {
     const html = wrap(
       "en",
       <Editor
+        phone={false}
         versionId="00000000-0000-0000-0000-0000000000f1"
         title="Lantern Bay"
         visibility="public"

@@ -15,6 +15,7 @@ import { createClient, readUser } from "../../../lib/supabase/server";
 import { AddIcon } from "../../_components/ActionIcons";
 import { SearchField } from "../../_components/SearchField";
 import { VersionForm } from "./VersionForm";
+import { guessPhone } from "../../../lib/shell/guessPhone";
 
 type Search = Promise<{ q?: string; song?: string }>;
 interface Song {
@@ -50,6 +51,7 @@ export default async function NewVersionPage({ searchParams }: { searchParams: S
     if (chosen !== "new" && !song) notFound();
     return (
       <VersionForm
+        phone={await guessPhone()}
         song={(song as Song | null) ?? null}
         defaultTitle={q.trim()}
         defaultAuthor={profile?.name ?? ""}

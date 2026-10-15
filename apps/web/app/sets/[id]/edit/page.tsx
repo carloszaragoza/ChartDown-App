@@ -8,7 +8,7 @@ import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Item } from "@astryxdesign/core/Item";
-import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
+import { LayoutHeader } from "@astryxdesign/core/Layout";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import Link from "next/link";
@@ -26,6 +26,8 @@ import { duplicateSet, removeTempMd, resetLineup, updatePinned, updateSet } from
 import { SetForm } from "../../SetForm";
 import { ArrangedSongs } from "./ArrangedSongs";
 import { DeleteSetForm, KeySelect, LineupForm, TempMdForm } from "./EditControls";
+import { PageLayout } from "../../../_components/PageLayout";
+import { guessPhone } from "../../../../lib/shell/guessPhone";
 
 type Search = Promise<Record<string, string | undefined>>;
 type One<T> = T | T[] | null;
@@ -211,8 +213,10 @@ export default async function SetPage({
     SET_TYPES.map((type) => [type, t(`types.${type}`)]),
   ) as Record<SetType, string>;
 
+  const phone = await guessPhone();
   return (
-    <Layout
+    <PageLayout
+      phone={phone}
       height="auto"
       // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
       padding={8}
@@ -236,80 +240,84 @@ export default async function SetPage({
           </HStack>
         </LayoutHeader>
       }
-      end={
-        <LayoutPanel width={360} hasDivider>
-          <VStack gap={6}>
-            <section aria-labelledby="lineup">
-              <VStack gap={3}>
-                <Heading level={2} id="lineup">
-                  {t("lineup")}
-                </Heading>
-                <Text type="supporting">{ownLineup ? t("lineupOwn") : t("lineupDefaults")}</Text>
-                <LineupForm
-                  setId={set.id}
-                  members={members.map((member) => ({
-                    id: member.id,
-                    name: profileName(member),
-                    plays: lineupOf(member),
-                  }))}
-                  instruments={sortedInstruments(everyPlays)}
-                  save={t("lineupSave")}
-                />
-                {ownLineup && (
-                  <form action={resetLineup}>
-                    {hidden()}
-                    <Button type="submit" variant="ghost" label={t("lineupReset")} />
-                  </form>
-                )}
-              </VStack>
-            </section>
-            <Divider />
-            <section aria-labelledby="temp-md">
-              <VStack gap={3}>
-                <Heading level={2} id="temp-md">
-                  {t("tempMd")}
-                </Heading>
-                <Text color="secondary">
-                  {isTempMd
-                    ? tempUntil
-                      ? t("youAreTempMdUntil", { date: tempUntil })
-                      : t("youAreTempMd")
-                    : tempMember
-                      ? tempUntil
-                        ? t("tempMdIsUntil", { name: profileName(tempMember), date: tempUntil })
-                        : t("tempMdIs", { name: profileName(tempMember) })
-                      : t("noTempMd")}
-                </Text>
-                {isMd && (
-                  <TempMdForm
+      panel={{
+        side: "end",
+        width: 360,
+        children: (
+          <>
+            <VStack gap={6}>
+              <section aria-labelledby="lineup">
+                <VStack gap={3}>
+                  <Heading level={2} id="lineup">
+                    {t("lineup")}
+                  </Heading>
+                  <Text type="supporting">{ownLineup ? t("lineupOwn") : t("lineupDefaults")}</Text>
+                  <LineupForm
                     setId={set.id}
-                    musicians={members
-                      .filter((member) => member.role === "musician")
-                      .map((member) => ({ value: member.id, label: profileName(member) }))}
-                    current={tempMember?.id ?? null}
-                    until={(tempMd?.until as string | null) ?? set.date ?? null}
-                    words={{
-                      who: t("tempMdWho"),
-                      choose: t("chooseMusician"),
-                      until: t("tempMdUntil"),
-                      hint: t("tempMdHint"),
-                      submit: tempMember ? t("tempMdChange") : t("tempMdAppoint"),
-                    }}
+                    members={members.map((member) => ({
+                      id: member.id,
+                      name: profileName(member),
+                      plays: lineupOf(member),
+                    }))}
+                    instruments={sortedInstruments(everyPlays)}
+                    save={t("lineupSave")}
                   />
-                )}
-                {isMd && tempMember && (
-                  <form action={removeTempMd}>
-                    {hidden()}
-                    <Button type="submit" variant="ghost" label={t("tempMdRemove")} />
-                  </form>
-                )}
-              </VStack>
-            </section>
-          </VStack>
-        </LayoutPanel>
-      }
+                  {ownLineup && (
+                    <form action={resetLineup}>
+                      {hidden()}
+                      <Button type="submit" variant="ghost" label={t("lineupReset")} />
+                    </form>
+                  )}
+                </VStack>
+              </section>
+              <Divider />
+              <section aria-labelledby="temp-md">
+                <VStack gap={3}>
+                  <Heading level={2} id="temp-md">
+                    {t("tempMd")}
+                  </Heading>
+                  <Text color="secondary">
+                    {isTempMd
+                      ? tempUntil
+                        ? t("youAreTempMdUntil", { date: tempUntil })
+                        : t("youAreTempMd")
+                      : tempMember
+                        ? tempUntil
+                          ? t("tempMdIsUntil", { name: profileName(tempMember), date: tempUntil })
+                          : t("tempMdIs", { name: profileName(tempMember) })
+                        : t("noTempMd")}
+                  </Text>
+                  {isMd && (
+                    <TempMdForm
+                      setId={set.id}
+                      musicians={members
+                        .filter((member) => member.role === "musician")
+                        .map((member) => ({ value: member.id, label: profileName(member) }))}
+                      current={tempMember?.id ?? null}
+                      until={(tempMd?.until as string | null) ?? set.date ?? null}
+                      words={{
+                        who: t("tempMdWho"),
+                        choose: t("chooseMusician"),
+                        until: t("tempMdUntil"),
+                        hint: t("tempMdHint"),
+                        submit: tempMember ? t("tempMdChange") : t("tempMdAppoint"),
+                      }}
+                    />
+                  )}
+                  {isMd && tempMember && (
+                    <form action={removeTempMd}>
+                      {hidden()}
+                      <Button type="submit" variant="ghost" label={t("tempMdRemove")} />
+                    </form>
+                  )}
+                </VStack>
+              </section>
+            </VStack>
+          </>
+        ),
+      }}
       content={
-        <LayoutContent>
+        <>
           <VStack gap={6}>
             {status && <Banner status="success" title={t(`status.${status}`)} />}
             {search.error && (
@@ -473,7 +481,7 @@ export default async function SetPage({
               </section>
             )}
           </VStack>
-        </LayoutContent>
+        </>
       }
     />
   );
