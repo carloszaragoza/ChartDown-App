@@ -4,7 +4,8 @@ import { chartdownTheme } from "./chartdown";
 /**
  * Stand mode's theme (Design Handoff 2.0, 1.5): ChartDown's, with bigger large controls on touch
  * screens, since stand mode is played live. Its section and turn buttons use the large size,
- * 56 px on touch; its other controls use the medium one, 44 px.
+ * 56 px on touch (48 px on a phone held upright); its other controls use the medium one, 44 px
+ * (40 px on a phone).
  * Rebuild with `pnpm exec astryx theme build theme/stand.theme.ts` after changing it.
  */
 export const chartdownStandTheme = defineTheme({
@@ -25,6 +26,11 @@ export const chartdownStandTheme = defineTheme({
       {
         when: { pointer: "coarse" },
         value: { tokens: { "--size-element-lg": "56px" } },
+      },
+      {
+        // On a phone held upright the section and turn buttons are 48 px (R-03.9).
+        when: { pointer: "coarse", width: { below: "sm" } },
+        value: { tokens: { "--size-element-lg": "48px" } },
       },
     ],
   },

@@ -718,10 +718,28 @@
   }
 }
 
+@media (width < 640px) and (pointer: coarse) {
+  @scope ([data-astryx-theme="chartdown-stand"]) to ([data-astryx-theme]) {
+    :scope {
+    --size-element-sm: 32px;
+    --size-element-md: 40px;
+    --size-element-lg: 44px;
+  }
+  }
+}
+
 @media (pointer: coarse) {
   @scope ([data-astryx-theme="chartdown-stand"]) to ([data-astryx-theme]) {
     :scope {
     --size-element-lg: 56px;
+  }
+  }
+}
+
+@media (width < 640px) and (pointer: coarse) {
+  @scope ([data-astryx-theme="chartdown-stand"]) to ([data-astryx-theme]) {
+    :scope {
+    --size-element-lg: 48px;
   }
   }
 }
