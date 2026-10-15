@@ -1,0 +1,29 @@
+Harbor Lights
+Key: A
+BPM: 92
+Time Signature: 4/4
+
+INTRO
+| A | A | D | D |
+
+VERSE 1
+A                    D
+Bring the boats in, bring them in slow
+F#m          E       D
+Tide is turning, time to go
+
+PRE-CHORUS
+Bm          D          Bm       E
+Ropes are ready, sails are down
+
+CHORUS (x2)
+A        E       F#m     D
+Harbor lights, harbor lights
+A        E       D       D
+Guide us all back into town
+
+INSTRUMENTAL
+| A  E | F#m D | A  E | D |  x2
+
+OUTRO
+A    D    A
