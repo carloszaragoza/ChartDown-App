@@ -114,3 +114,14 @@ test("R-10.10 converting waits until the person confirms they may use the sheet"
   await page.getByText("I have the right to use this chord sheet.").click();
   await expect(convert).toBeEnabled();
 });
+
+test("R-03.10 New version never opens on a blank chart: a starter, the letters hint and the import", async ({
+  page,
+}) => {
+  await signUpAndConfirm(page, unique("firstchart"), "Fran First");
+  await page.goto("/versions/new?song=new");
+  await expect(page.locator("textarea[name=content]")).toHaveValue(/key: G[\s\S]*## Verse/);
+  await expect(page.getByText(/or as letters \(G \| C D \| Em\)/)).toBeVisible();
+  await page.getByRole("link", { name: "Import a chord sheet" }).first().click();
+  await expect(page).toHaveURL(/\/versions\/new\/import$/);
+});
