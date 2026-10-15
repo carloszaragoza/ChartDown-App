@@ -1,316 +1,540 @@
-import { chordFormatter, keyName, parse, sectionLength } from "chartdown";
-import { ChartDownLogo, Icon } from "@chartdown/ui";
+import { ChartDownLogo } from "@chartdown/ui";
+import { parse } from "chartdown";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useChartLabels } from "../_components/chartLabels";
+import type { CSSProperties } from "react";
 import { LanguageSwitcher } from "../_components/LanguageSwitcher";
-import { joinWaitlist } from "./actions";
-import { EXAMPLE_CHART, LANGUAGE_URL, NOTE_BARS } from "./example";
-import { LandingChart, type SheetBar, type SheetNote } from "./LandingChart";
+import { demoSections } from "./bars";
+import { BarsView } from "./BarsView";
+import { CONTACT, DEMO_KEYS, DEMO_SET, EXAMPLE_CHART, LANGUAGE_URL } from "./example";
+import {
+  Chat,
+  DarkBand,
+  Drift,
+  KeyFlip,
+  Magnetic,
+  Marquee,
+  MotionRoot,
+  ReadQuote,
+  Rise,
+  StandCycle,
+  TiltWindow,
+  TypeLines,
+  WriteIn,
+  Words,
+} from "./motion";
+import { WaitlistForm, type WaitlistWords } from "./WaitlistForm";
 import styles from "./landing.module.css";
-
-// "Built for the stage": four facts, each an ink callout on the stand-mode frame.
-const STAGE = ["offline", "stand", "part", "saved"] as const;
-// The section strip pinned to the top of stand mode, as the app draws it.
-const STRIP = ["I", "V1", "C", "V2", "B"] as const;
-
-export type WaitlistResult = "sent" | "invalid" | "unavailable";
 
 export interface LandingProps {
   /** Whether sign-in is open here: Sign in and "I have an invite code" (R-01.7). */
   signInEnabled: boolean;
   /** Whether the waitlist form can be used here (R-01.8). */
   waitlistReady: boolean;
-  /** How the last waitlist request went. */
-  result?: WaitlistResult | null;
   /** The person just deleted their account (R-01.6). */
   accountDeleted?: boolean;
 }
 
+/** The MD tag, as the app draws it. */
+function Md() {
+  return <span className={styles.md}>MD</span>;
+}
+
+/** How a line of ChartDown is colored in the code card. */
+function tone(line: string): "meta" | "section" | "note" | "bars" | "blank" {
+  if (line === "") return "blank";
+  if (line.startsWith("##")) return "section";
+  if (line.startsWith(">")) return "note";
+  if (/^[-a-z]+:|^---$/.test(line)) return "meta";
+  return "bars";
+}
+
 /**
- * The landing page at chartdown.app (T-1307, Design Handoff 2.0: the red-pen chart sheet): the
- * page is one Nashville Number chart on a music stand. An original chorus drawn by the parser,
- * the music director's notes for each player, the open language, and the invite-only beta's
- * waitlist on the stand's ledge.
+ * The landing page at chartdown.app (T-1310, design handoff: Landing version 3). It looks like
+ * the app, always light, and moves: an opening curtain draws the logo, headlines rise word by
+ * word, the chart window stands up as it scrolls in, and each feature shows itself working.
  */
-export function Landing({
-  signInEnabled,
-  waitlistReady,
-  result = null,
-  accountDeleted = false,
-}: LandingProps) {
+export function Landing({ signInEnabled, waitlistReady, accountDeleted = false }: LandingProps) {
   const t = useTranslations("landing");
   const account = useTranslations("auth.account");
-  const labels = useChartLabels();
   const chart = parse(EXAMPLE_CHART);
-  const section = chart.sections[0];
-  const formatter = chordFormatter(chart, { style: "numbers" });
-  const row = section?.rows[0];
-  const bars: SheetBar[] = (row?.bars ?? []).map((bar) => ({
-    dynamic: bar.dynamic ?? null,
-    chords: bar.items.flatMap((item) => {
-      if (item.type !== "chord" || !row) return [];
-      const { root, quality, bass } = formatter.chord(item, row);
-      return [{ root, quality: quality ?? "", bass: bass ?? "" }];
-    }),
+  const sections = demoSections(EXAMPLE_CHART);
+  const [verse, chorus] = sections;
+  const keys = DEMO_KEYS.map((key) => ({
+    key,
+    label: t("features.f1.key", { key }),
+    bars: demoSections(EXAMPLE_CHART, "letters", key)[0]?.bars ?? [],
   }));
-  const notes: SheetNote[] = (section?.notes ?? []).map((note) => {
-    const role = note.roles.find((item) => item !== "everyone");
-    return {
-      for: role ?? "everyone",
-      label: role ? labels.bar.instrument(role) : "MD",
-      text: note.text,
-      bar: role ? (NOTE_BARS[role] ?? 1) : 1,
-    };
+  const header = chart.header as { key?: string; tempo?: number; meter?: string };
+  const form = (withRole: boolean): WaitlistWords => ({
+    label: withRole ? t("waitlist.email") : t("hero.formLabel"),
+    placeholder: t("waitlist.placeholder"),
+    submit: t("waitlist.submit"),
+    saving: t("waitlist.saving"),
+    hint: withRole ? t("waitlist.hint") : t("hero.hint"),
+    sent: t("waitlist.sent"),
+    invalid: t("waitlist.invalid"),
+    error: t("waitlist.error"),
+    unavailable: t("waitlist.unavailable"),
+    ...(withRole
+      ? {
+          role: t("waitlist.role"),
+          roles: {
+            music_director: t("waitlist.roles.music_director"),
+            musician: t("waitlist.roles.musician"),
+            teacher: t("waitlist.roles.teacher"),
+          },
+        }
+      : {}),
   });
-  const views = [
-    { id: "everyone", label: t("hero.everyone") },
-    ...(["keys", "bass", "drums"] as const).map((id) => ({
-      id,
-      label: labels.bar.instrument(id),
-    })),
-  ];
-  const steps = ["write", "set", "play"] as const;
-  const waitlist =
-    result === "sent" ? (
-      <p role="status" className={styles.ledgeText}>
-        {t("invite.sent")}
-      </p>
-    ) : waitlistReady ? (
-      <form action={joinWaitlist} className={styles.waitlist}>
-        <label className={styles.field}>
-          <span className={styles.fieldLabel}>{t("invite.email")}</span>
-          <input
-            className={styles.input}
-            name="email"
-            type="email"
-            autoComplete="email"
-            placeholder={t("invite.placeholder")}
-            required
-          />
-        </label>
-        <button type="submit" className={styles.primary}>
-          {t("invite.submit")}
-        </button>
-      </form>
-    ) : null;
+  const m = (key: string) => t(`problem.messages.${key}`);
+  const heroWords = t("hero.line1").split(" ");
 
   return (
-    // Follows the system color scheme with the rest of the app: no pinned theme (handoff 2.0, Oct 8).
-    <div className={styles.landing}>
-      <header className={styles.top}>
-        <Link href="/" className={styles.brand} aria-label="ChartDown">
-          <ChartDownLogo size={34} />
-        </Link>
-        <nav aria-label={t("nav")} className={styles.nav}>
-          <a href="#how" className={styles.navLink}>
-            {t("how.title")}
-          </a>
-          <a href="#language" className={styles.navLink}>
-            {t("language.nav")}
-          </a>
-          {signInEnabled && (
-            <Link href="/catalog" className={styles.navLink}>
-              {t("catalog")}
-            </Link>
-          )}
-        </nav>
-        <div className={styles.end}>
-          {signInEnabled && (
-            <Link href="/auth/sign-in" className={styles.secondary}>
-              {t("signIn")}
-            </Link>
-          )}
-          <a href="#invite" className={styles.primary}>
-            {t("requestInvite")}
-          </a>
+    <MotionRoot>
+      {/* Always light (design handoff, Landing version 3): the page looks like the app. */}
+      <div className={styles.landing} data-theme="light">
+        <div className={styles.curtain} aria-hidden="true">
+          <ChartDownLogo variant="symbol" size={72} className={styles.curtainLogo ?? ""} />
         </div>
-      </header>
 
-      <main className={styles.main}>
-        {accountDeleted && (
-          <p role="status" className={styles.notice}>
-            {account("accountDeleted")}
-          </p>
-        )}
-
-        <section className={styles.sheet} aria-labelledby="hero-title">
-          <div className={styles.titleLine}>
-            <h1 id="hero-title" className={styles.headline}>
-              {t("hero.title")}
-            </h1>
-            <p className={styles.chartMeta}>
-              {t("hero.meta", {
-                title: chart.header.title ?? "",
-                key: keyName(chart.key),
-                tempo: chart.header.tempo ?? "",
-                meter: chart.header.meter ?? "4/4",
-              })}
-            </p>
-          </div>
-          <p className={styles.lead}>{t("hero.lead")}</p>
-          {section && (
-            <LandingChart
-              section={section.name}
-              length={labels.length(sectionLength(section))}
-              bars={bars}
-              notes={notes}
-              views={views}
-              words={{
-                viewAs: t("hero.viewAs"),
-                // A text, not a function, so it can travel to the client: it fills {instrument}.
-                viewing: t("hero.viewing", { instrument: "{instrument}" }),
-                example: t("hero.example"),
-                bar: t("hero.bar", { bar: "{bar}" }),
-              }}
-            />
-          )}
-        </section>
-
-        {/* The stand's ledge: where the pencil rests, and where the visitor leaves an email. */}
-        <section id="invite" className={styles.ledge} aria-labelledby="invite-title">
-          <div className={styles.ledgeInner}>
-            <div className={styles.ledgeCopy}>
-              <h2 id="invite-title" className={styles.ledgeTitle}>
-                {t("invite.title")}
-              </h2>
-              <p className={styles.ledgeText}>
-                {t("invite.text")} {t("hero.free")}
-              </p>
-            </div>
-            <div className={styles.ledgeAction}>
-              {waitlist}
-              {(result === "invalid" || result === "unavailable" || !waitlistReady) &&
-                result !== "sent" && (
-                  <p role="alert" className={styles.ledgeText}>
-                    {result === "invalid" ? t("invite.invalid") : t("invite.unavailable")}
-                  </p>
-                )}
+        <header className={styles.header}>
+          <nav className={styles.nav} aria-label={t("nav.label")}>
+            <a href="#top" className={styles.brand} aria-label={t("nav.home")}>
+              <ChartDownLogo size={30} />
+            </a>
+            <div className={styles.navLinks}>
+              <a href="#problem" className={styles.navLink}>
+                {t("nav.why")}
+              </a>
+              <a href="#features" className={styles.navLink}>
+                {t("nav.features")}
+              </a>
+              <a href="#open" className={styles.navLink}>
+                {t("nav.open")}
+              </a>
               {signInEnabled && (
-                <Link href="/auth/sign-up" className={styles.ledgeLink}>
-                  {t("invite.haveCode")}
+                <Link href="/auth/sign-in" className={styles.navLink}>
+                  {t("nav.signIn")}
                 </Link>
               )}
+              <a href="#waitlist" className={styles.primary}>
+                {t("nav.join")}
+              </a>
             </div>
-          </div>
-        </section>
+          </nav>
+        </header>
 
-        <section id="how" className={styles.block} aria-labelledby="how-title">
-          <h2 id="how-title" className={styles.blockTitle}>
-            {t("how.title")}
-          </h2>
-          {/* Three steps read like a set list: a number, a title, a line of text, one rule each. */}
-          <ol className={styles.setList}>
-            {steps.map((step, index) => (
-              <li key={step} className={styles.setItem}>
-                <span className={styles.setNumber} aria-hidden="true">
-                  {index + 1}
-                </span>
-                <h3 className={styles.setTitle}>{t(`how.${step}.title`)}</h3>
-                <p className={styles.text}>{t(`how.${step}.text`)}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
+        <main>
+          {accountDeleted && (
+            <p role="status" className={styles.notice}>
+              {account("accountDeleted")}
+            </p>
+          )}
 
-        <section className={styles.block} aria-labelledby="stage-title">
-          <h2 id="stage-title" className={styles.blockTitle}>
-            {t("stage.title")}
-          </h2>
-          <div className={styles.stage}>
-            {/* Stand mode, drawn in ink: each numbered mark points at one of the facts beside it. */}
-            <figure className={styles.standFrame} aria-label={t("stage.frame")}>
-              <div className={styles.standTop} aria-hidden="true">
-                <span className={styles.standStrip}>
-                  {STRIP.map((label) => (
-                    <span
-                      key={label}
-                      className={styles.standTab}
-                      data-current={label === "C" || undefined}
-                    >
-                      {label}
-                    </span>
-                  ))}
-                </span>
-                <span className={styles.standStatus}>
-                  <Icon name="history" />
-                  <span className={styles.callout}>4</span>
-                  <Icon name="download" />
-                  <span className={styles.callout}>1</span>
-                </span>
-              </div>
-              <div className={styles.standBars} aria-hidden="true">
-                <span className={styles.callout}>2</span>
-                {bars.map((bar, index) => (
-                  <span key={index} className={styles.standBar}>
-                    {bar.chords.map((chord) => `${chord.root}${chord.quality}`).join(" ")}
+          <section id="top" className={styles.hero}>
+            <div className={styles.heroText}>
+              <p
+                className={`${styles.badge} ${styles.enter}`}
+                style={{ "--d": 0 } as CSSProperties}
+              >
+                <span className={styles.md}>{t("hero.tag")}</span>
+                {t("hero.tagText")}
+              </p>
+              <h1 className={styles.h1}>
+                {heroWords.map((word, index) => (
+                  <span key={index}>
+                    <span className={styles.mask}>
+                      <span className={styles.rise} style={{ "--d": index } as CSSProperties}>
+                        {word}
+                      </span>
+                    </span>{" "}
                   </span>
                 ))}
-              </div>
-              <p className={styles.standNote} aria-hidden="true">
-                <span className={styles.callout}>3</span>
-                <span className={styles.noteTag}>{labels.bar.instrument("drums")}</span>{" "}
-                {notes.find((note) => note.for === "drums")?.text}
-              </p>
-            </figure>
-            <ol className={styles.callouts}>
-              {STAGE.map((key, index) => (
-                <li key={key} className={styles.calloutItem}>
-                  <span className={styles.callout} aria-hidden="true">
-                    {index + 1}
+                <span className={styles.mask}>
+                  <span
+                    className={`${styles.rise} ${styles.accent} ${styles.underline}`}
+                    style={{ "--d": heroWords.length } as CSSProperties}
+                  >
+                    {t("hero.line2")}
                   </span>
-                  <h3 className={styles.setTitle}>{t(`stage.${key}.title`)}</h3>
-                  <p className={styles.text}>{t(`stage.${key}.text`)}</p>
-                </li>
-              ))}
-            </ol>
+                </span>
+              </h1>
+              <p className={`${styles.lead} ${styles.enter}`} style={{ "--d": 5 } as CSSProperties}>
+                {t("hero.lead")}
+              </p>
+              <div
+                className={`${styles.heroForm} ${styles.enter}`}
+                style={{ "--d": 6 } as CSSProperties}
+              >
+                <WaitlistForm source="hero" ready={waitlistReady} words={form(false)} />
+                {signInEnabled && (
+                  <Link href="/auth/sign-up" className={styles.textLink}>
+                    {t("hero.hasCode")}
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            <div
+              className={`${styles.windowWrap} ${styles.enter}`}
+              style={{ "--d": 7 } as CSSProperties}
+            >
+              <TiltWindow>
+                <div className={styles.window} role="img" aria-label={t("window.label")}>
+                  <div className={styles.chrome}>
+                    <span className={styles.lights}>
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                    <span className={styles.url}>chartdown.app</span>
+                  </div>
+                  <div className={styles.screen}>
+                    <div className={styles.songHead}>
+                      <div className={styles.songInfo}>
+                        <span className={styles.meta}>{t("window.byline")}</span>
+                        <span className={styles.songTitle}>{chart.header.title}</span>
+                        <span className={styles.tags}>
+                          <span className={styles.chip}>
+                            {t("window.key", { key: header.key ?? "E" })}
+                          </span>
+                          <span className={styles.chip}>
+                            {t("window.time", { meter: header.meter ?? "4/4" })}
+                          </span>
+                          <span className={styles.chip}>
+                            {t("window.tempo", { tempo: header.tempo ?? 72 })}
+                          </span>
+                        </span>
+                        <span className={styles.meta}>{t("window.arrangement")}</span>
+                      </div>
+                      <div className={styles.actions}>
+                        <span className={styles.fakeDark}>{t("window.stand")}</span>
+                        <span className={`${styles.fake} ${styles.wide}`}>{t("window.edit")}</span>
+                        <span className={`${styles.fake} ${styles.wide}`}>
+                          {t("window.history")}
+                        </span>
+                        <span className={`${styles.fake} ${styles.wide}`}>
+                          {t("window.myNotes")}
+                        </span>
+                      </div>
+                    </div>
+                    <div className={styles.controls}>
+                      <span className={styles.segmentedStill}>
+                        <span className={styles.segmentOn}>{t("window.numbers")}</span>
+                        <span>{t("window.letters")}</span>
+                      </span>
+                      <span className={styles.meta}>{t("window.beats")}</span>
+                      <span className={styles.segmentedStill}>
+                        <span>{t("window.off")}</span>
+                        <span className={styles.segmentOn}>{t("window.auto")}</span>
+                        <span>{t("window.always")}</span>
+                      </span>
+                    </div>
+                    <div className={styles.jumps}>
+                      {["V1", "C1", "V2", "B", "C2"].map((jump) => (
+                        <span key={jump} className={styles.jump}>
+                          {jump}
+                        </span>
+                      ))}
+                    </div>
+                    <div className={styles.sectionCard}>
+                      <div className={styles.sectionHead}>
+                        <span className={styles.sectionName}>{verse?.name}</span>
+                        <span className={styles.meta}>
+                          {t("window.bars", { count: verse?.length ?? 4 })}
+                        </span>
+                      </div>
+                      <p className={styles.note}>
+                        <Md />
+                        {verse?.note}
+                      </p>
+                      <BarsView bars={verse?.bars ?? []} size="lg" pulse />
+                    </div>
+                  </div>
+                </div>
+              </TiltWindow>
+            </div>
+          </section>
+
+          <Marquee words={Object.values(t.raw("marquee") as Record<string, string>)} />
+
+          <section id="problem" className={styles.problem} aria-labelledby="problem-title">
+            <div className={styles.split}>
+              <div className={styles.copy}>
+                <Rise>
+                  <span className={styles.md}>{t("problem.tag")}</span>
+                </Rise>
+                <h2 id="problem-title" className={styles.h2}>
+                  <Words text={t("problem.title")} />
+                </h2>
+                <Rise delay={0.1}>
+                  <p className={styles.body}>{t("problem.body")}</p>
+                </Rise>
+                <Rise delay={0.2}>
+                  <p className={styles.answer}>{t("problem.answer")}</p>
+                </Rise>
+              </div>
+              <Chat
+                className={styles.chat}
+                label={t("problem.chatLabel")}
+                items={[
+                  { side: "in", node: <p className={styles.chatTitle}>{t("problem.chat")}</p> },
+                  {
+                    side: "in",
+                    node: (
+                      <p className={styles.bubble}>
+                        <span className={styles.who}>{m("dani")}</span>
+                        {m("sending")}
+                      </p>
+                    ),
+                  },
+                  {
+                    side: "in",
+                    node: (
+                      <p className={styles.file}>
+                        <span className={styles.pdf}>PDF</span>
+                        {m("file1")}
+                      </p>
+                    ),
+                  },
+                  { side: "out", node: <p className={styles.bubbleOut}>{m("old")}</p> },
+                  {
+                    side: "in",
+                    node: (
+                      <p className={`${styles.file} ${styles.shake}`}>
+                        <span className={styles.pdf}>PDF</span>
+                        {m("file2")}
+                      </p>
+                    ),
+                  },
+                  {
+                    side: "in",
+                    node: (
+                      <p className={styles.bubble}>
+                        <span className={styles.who}>{m("marco")}</span>
+                        {m("which")}
+                      </p>
+                    ),
+                  },
+                  {
+                    side: "in",
+                    node: (
+                      <p className={styles.bubble}>
+                        <span className={styles.who}>{m("lu")}</span>
+                        {m("bridge")}
+                      </p>
+                    ),
+                  },
+                ]}
+              />
+            </div>
+          </section>
+
+          <section id="features" className={styles.features} aria-label={t("features.label")}>
+            <article className={styles.feature}>
+              <Drift>01</Drift>
+              <div className={styles.copy}>
+                <Rise>
+                  <span className={styles.number}>01</span>
+                </Rise>
+                <h3 className={styles.h3}>
+                  <Words text={t("features.f1.title")} />
+                </h3>
+                <Rise delay={0.1}>
+                  <p className={styles.body}>{t("features.f1.body")}</p>
+                </Rise>
+              </div>
+              <Rise delay={0.15} className={styles.visual}>
+                <KeyFlip
+                  numbers={verse?.bars ?? []}
+                  keys={keys}
+                  words={{
+                    numbers: t("window.numbers"),
+                    letters: t("window.letters"),
+                    label: t("features.f1.visual"),
+                  }}
+                />
+              </Rise>
+            </article>
+
+            <article className={`${styles.feature} ${styles.reversed}`}>
+              <Drift>02</Drift>
+              <div className={styles.copy}>
+                <Rise>
+                  <span className={styles.number}>02</span>
+                </Rise>
+                <h3 className={styles.h3}>
+                  <Words text={t("features.f2.title")} />
+                </h3>
+                <Rise delay={0.1}>
+                  <p className={styles.body}>{t("features.f2.body")}</p>
+                </Rise>
+              </div>
+              <Rise delay={0.15} className={styles.visual}>
+                <div className={styles.panel} role="img" aria-label={t("features.f2.visual")}>
+                  <div className={styles.sectionCard}>
+                    <div className={styles.sectionHead}>
+                      <span className={styles.sectionName}>{chorus?.name}</span>
+                      <span className={styles.meta}>
+                        {t("window.bars", { count: chorus?.length ?? 4 })}
+                      </span>
+                    </div>
+                    <p className={styles.note}>
+                      <Md />
+                      <WriteIn delay={0.3}>{chorus?.note}</WriteIn>
+                    </p>
+                    <BarsView bars={chorus?.bars ?? []} size="md" />
+                  </div>
+                  <Rise delay={1.2} className={styles.myNote}>
+                    <span className={styles.chipStrong}>{t("features.f2.myNotes")}</span>
+                    {t("features.f2.myNote")}
+                  </Rise>
+                </div>
+              </Rise>
+            </article>
+
+            <article className={styles.feature}>
+              <Drift>03</Drift>
+              <div className={styles.copy}>
+                <Rise>
+                  <span className={styles.number}>03</span>
+                </Rise>
+                <h3 className={styles.h3}>
+                  <Words text={t("features.f3.title")} />
+                </h3>
+                <Rise delay={0.1}>
+                  <p className={styles.body}>{t("features.f3.body")}</p>
+                </Rise>
+              </div>
+              <Rise delay={0.15} className={styles.visual}>
+                <div className={styles.ipad} role="img" aria-label={t("features.f3.visual")}>
+                  <StandCycle
+                    title={chart.header.title ?? ""}
+                    sections={sections.slice(1).concat(sections.slice(0, 1))}
+                  />
+                </div>
+              </Rise>
+            </article>
+
+            <div className={styles.cards}>
+              <Rise className={styles.card}>
+                <span className={styles.number}>04</span>
+                <h3 className={styles.h3small}>{t("features.f4.title")}</h3>
+                <p className={styles.body}>{t("features.f4.body")}</p>
+                <ol className={styles.setList}>
+                  {DEMO_SET.map((song, index) => (
+                    <li key={song.title}>
+                      <span>
+                        {index + 1} · {song.title}
+                      </span>
+                      <span className={styles.meta}>{song.key}</span>
+                    </li>
+                  ))}
+                </ol>
+              </Rise>
+              <Rise className={styles.card} delay={0.12}>
+                <span className={styles.number}>05</span>
+                <h3 className={styles.h3small}>{t("features.f5.title")}</h3>
+                <p className={styles.body}>{t("features.f5.body")}</p>
+                <p className={styles.versions}>
+                  <span className={styles.fakeDark}>{t("features.f5.live")}</span>
+                  <span className={styles.fakeLine}>{t("features.f5.acoustic")}</span>
+                  <span className={styles.fakeLine}>{t("features.f5.new")}</span>
+                </p>
+              </Rise>
+              <Rise className={styles.card} delay={0.24}>
+                <span className={styles.number}>06</span>
+                <h3 className={styles.h3small}>{t("features.f6.title")}</h3>
+                <p className={styles.body}>{t("features.f6.body")}</p>
+                <span className={styles.invite}>{t("features.f6.code")}</span>
+              </Rise>
+            </div>
+          </section>
+
+          <DarkBand id="open" className={styles.open}>
+            <div className={styles.split}>
+              <div className={styles.copy}>
+                <h2 className={styles.h2}>
+                  <Words text={t("open.title1")} />
+                  <br />
+                  <Words text={t("open.title2")} />
+                </h2>
+                <Rise delay={0.1}>
+                  <p className={styles.bodyDark}>{t("open.body")}</p>
+                </Rise>
+                <Rise delay={0.2}>
+                  <Magnetic>
+                    <a href={LANGUAGE_URL} className={styles.light}>
+                      {t("open.cta")}
+                    </a>
+                  </Magnetic>
+                </Rise>
+              </div>
+              <Rise delay={0.15} className={styles.visual}>
+                <TypeLines
+                  label={t("open.codeLabel")}
+                  lines={EXAMPLE_CHART.split("\n").map((text) => ({ text, tone: tone(text) }))}
+                />
+              </Rise>
+            </div>
+          </DarkBand>
+
+          <section className={styles.founder} aria-label={t("founder.name")}>
+            <Rise>
+              <Md />
+            </Rise>
+            <ReadQuote text={`“${t("founder.quote")}”`} />
+            <Rise className={styles.person}>
+              <span className={styles.avatar} aria-hidden="true">
+                CZ
+              </span>
+              <span>
+                <span className={styles.name}>{t("founder.name")}</span>
+                <span className={styles.meta}>{t("founder.role")}</span>
+              </span>
+            </Rise>
+          </section>
+
+          <section
+            id="waitlist"
+            className={styles.waitlistSection}
+            aria-labelledby="waitlist-title"
+          >
+            {/* Links from the ChartDown spec and its campaign point here. */}
+            <span id="invite" className={styles.anchor} />
+            <Rise scale className={styles.waitlistPanel}>
+              <div className={styles.copy}>
+                <h2 id="waitlist-title" className={styles.h2big}>
+                  <Words text={t("waitlist.title")} />
+                </h2>
+                <p className={styles.body}>{t("waitlist.body")}</p>
+              </div>
+              <div className={styles.waitlistForm}>
+                <WaitlistForm
+                  source="final_cta"
+                  withRole
+                  ready={waitlistReady}
+                  words={form(true)}
+                />
+              </div>
+            </Rise>
+          </section>
+        </main>
+
+        <footer className={styles.footer}>
+          <div className={styles.footerInner}>
+            <ChartDownLogo size={24} />
+            <nav aria-label={t("footer.label")} className={styles.footerLinks}>
+              <a href={`mailto:${CONTACT}`}>{t("footer.contact")}</a>
+              <a href={LANGUAGE_URL}>{t("footer.github")}</a>
+              <Link href="/privacy">{t("footer.privacy")}</Link>
+              <Link href="/terms">{t("footer.terms")}</Link>
+            </nav>
+            <LanguageSwitcher />
           </div>
-        </section>
-
-        <section id="language" className={styles.language} aria-labelledby="language-title">
-          <div className={styles.languageCopy}>
-            <h2 id="language-title" className={styles.blockTitle}>
-              {t("language.title")}
-            </h2>
-            <p className={styles.text}>{t("language.text")}</p>
-            <a href={LANGUAGE_URL} className={styles.secondary}>
-              {t("language.spec")}
-            </a>
-          </div>
-          <pre className={styles.code} aria-label={t("language.example")}>
-            {EXAMPLE_CHART}
-          </pre>
-        </section>
-
-        <section className={styles.ending} aria-labelledby="ending-title">
-          <svg className={styles.fermata} viewBox="0 0 64 36" aria-hidden="true">
-            <path pathLength={100} d="M4 32C6 12 20 4 32 4s26 8 28 28" />
-            <circle cx="32" cy="27" r="4" />
-          </svg>
-          <h2 id="ending-title" className={styles.endingTitle}>
-            {t("ending.title")}
-          </h2>
-          <a href="#invite" className={styles.primary}>
-            {t("requestInvite")}
-          </a>
-        </section>
-      </main>
-
-      <footer className={styles.footer}>
-        <div className={styles.footerInner}>
-          <span>{t("footer.copyright")}</span>
-          <a href={LANGUAGE_URL} className={styles.footerLink}>
-            {t("footer.language")}
-          </a>
-          <Link href="/terms" className={styles.footerLink}>
-            {t("footer.terms")}
-          </Link>
-          <Link href="/privacy" className={styles.footerLink}>
-            {t("footer.privacy")}
-          </Link>
-          <LanguageSwitcher />
-        </div>
-      </footer>
-    </div>
+        </footer>
+      </div>
+    </MotionRoot>
   );
 }

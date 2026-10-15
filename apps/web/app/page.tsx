@@ -9,11 +9,22 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { BAND_COOKIE } from "../lib/shell/shell";
 import { loadHome, type UsagePeriod } from "./_home/load";
 import { HomeView } from "./_home/HomeView";
-import { Landing, type WaitlistResult } from "./_landing/Landing";
+import type { Metadata } from "next";
+import { Landing } from "./_landing/Landing";
 import { Invitations, type Invitation } from "./_components/Invitations";
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
-const RESULTS: readonly string[] = ["sent", "invalid", "unavailable"];
+
+/** The landing's title and description, for search and link previews (T-1310). */
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("landing");
+  return {
+    title: t("title"),
+    description: t("description"),
+    openGraph: { title: t("title"), description: t("description") },
+    twitter: { card: "summary_large_image", title: t("title"), description: t("description") },
+  };
+}
 
 export default async function HomePage({ searchParams }: { searchParams: Search }) {
   const search = await searchParams;
@@ -22,17 +33,12 @@ export default async function HomePage({ searchParams }: { searchParams: Search 
   if (callback) redirect(callback);
   const text = (value: string | string[] | undefined) =>
     typeof value === "string" ? value : undefined;
-  const [password, account, waitlist] = [
-    text(search.password),
-    text(search.account),
-    text(search.waitlist),
-  ];
+  const [password, account] = [text(search.password), text(search.account)];
   // Visitors get the landing page (T-1201); signed-in people get their home.
   const landing = (
     <Landing
       signInEnabled={authEnabled()}
       waitlistReady={waitlistEnabled()}
-      result={RESULTS.includes(waitlist ?? "") ? (waitlist as WaitlistResult) : null}
       accountDeleted={account === "deleted"}
     />
   );

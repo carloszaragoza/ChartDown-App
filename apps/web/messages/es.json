@@ -1075,83 +1075,149 @@
     "overview": "Resumen"
   },
   "landing": {
-    "nav": "Principal",
-    "signIn": "Iniciar sesión",
-    "requestInvite": "Pedir una invitación",
-    "hero": {
-      "title": "Una canción para toda la banda. Indicaciones para cada músico.",
-      "lead": "ChartDown App convierte charts del sistema de números de Nashville en texto plano en charts de banda para iPad y computadora, con notas del director musical para cada instrumento.",
-      "try": "Probar la notación",
-      "free": "Gratis durante la beta por invitación.",
-      "example": "Un cifrado original de ejemplo",
-      "viewing": "Viendo como {instrument}",
-      "everyone": "Todos",
-      "viewAs": "Ver como",
-      "meta": "{title} · Tono {key} · {tempo} bpm · {meter}",
-      "bar": "compás {bar}"
+    "title": "ChartDown: tu banda, en la misma página",
+    "description": "Escribe el chart una vez. Cada músico lo abre en su iPad, en números o en letras, con las notas del director. Únete a la beta privada.",
+    "nav": {
+      "label": "Principal",
+      "home": "Inicio de ChartDown",
+      "why": "Por qué ChartDown",
+      "features": "Funciones",
+      "open": "Estándar abierto",
+      "join": "Unirme a la lista",
+      "signIn": "Iniciar sesión"
     },
-    "how": {
-      "title": "Cómo funciona",
-      "write": {
-        "title": "Escríbelo en ChartDown",
-        "text": "Texto plano que se lee como un chart: secciones, compases, números y notas para cada instrumento."
-      },
-      "set": {
-        "title": "Arma tu set",
-        "text": "Elige las versiones que tocan, fija la tonalidad de cada canción y asigna un instrumento a cada músico."
-      },
-      "play": {
-        "title": "Toca desde tu parte",
-        "text": "Todos ven la misma canción. Cada músico ve las indicaciones que son para él o ella."
+    "hero": {
+      "tag": "BETA",
+      "tagText": "Solo con invitación · gratis durante la beta",
+      "line1": "Tu banda. La misma página.",
+      "line2": "Cada noche.",
+      "lead": "Escribe el chart una vez. Cada músico lo abre en su iPad, en números o en letras, con las notas del director para cada sección. Se acabaron los PDF en el chat del grupo.",
+      "formLabel": "Acceso anticipado",
+      "hint": "Dejamos entrar a las bandas de a poco. Un solo correo cuando estés dentro.",
+      "hasCode": "Tengo un código de invitación"
+    },
+    "window": {
+      "label": "Vista previa de un chart en ChartDown",
+      "byline": "Canción original · En vivo",
+      "arrangement": "Arreglo de Carlos Zaragoza",
+      "key": "Tono {key}",
+      "time": "Compás {meter}",
+      "tempo": "Tempo {tempo}",
+      "stand": "Modo atril",
+      "edit": "Editar",
+      "history": "Historial",
+      "myNotes": "Mis notas",
+      "numbers": "Números",
+      "letters": "Letras",
+      "beats": "Tiempos",
+      "off": "No",
+      "auto": "Auto",
+      "always": "Siempre",
+      "bars": "{count, plural, one {# compás} other {# compases}}"
+    },
+    "marquee": {
+      "w1": "Números",
+      "w2": "Letras",
+      "w3": "Modo atril",
+      "w4": "Notas del director",
+      "w5": "Sets",
+      "w6": "Cualquier tono",
+      "w7": "Sin conexión",
+      "w8": "Un solo chart"
+    },
+    "problem": {
+      "tag": "¿TE SUENA?",
+      "title": "Todos hemos estado en este chat.",
+      "body": "Son las 11:42 p.m. La prueba de sonido es a las 8. Tres PDF, dos tonos, y nadie sabe quién tiene el puente.",
+      "answer": "ChartDown le da a la banda un solo chart. Todos leen el mismo.",
+      "chat": "Chat de la banda · 11:42 PM",
+      "chatLabel": "El chat de una banda la noche antes de tocar",
+      "messages": {
+        "dani": "Dani · teclados",
+        "sending": "ahí van los charts",
+        "file1": "MorningLight_FINAL.pdf",
+        "old": "espera, ese es el VIEJO",
+        "file2": "MorningLight_FINAL_v2_BUENO.pdf",
+        "marco": "Marco · bajo",
+        "which": "¿¿la tocamos en E o en D??",
+        "lu": "Lu · batería",
+        "bridge": "¿quién tiene el puente?"
       }
     },
-    "stage": {
-      "title": "Hecho para el escenario",
-      "saved": {
-        "title": "Cada cambio guardado",
-        "text": "Vuelve a cualquier revisión. Los sets se quedan en la versión que elegiste."
+    "features": {
+      "label": "Funciones",
+      "f1": {
+        "title": "Números o letras. Cada quien lee a su manera.",
+        "body": "Escríbelo una vez en números Nashville. El guitarrista que piensa en acordes lo cambia a letras. Cambia el tono y el chart sigue funcionando.",
+        "visual": "Los mismos cuatro compases en números y en letras",
+        "key": "Tono {key}"
       },
-      "offline": {
-        "title": "Sets sin conexión",
-        "text": "Descarga un set antes de salir. Cada chart abre en modo avión."
+      "f2": {
+        "title": "La voz del director, en el mismo chart.",
+        "body": "Notas del director en cada sección, frases de la letra como referencia y dinámicas. Cada músico puede tener también sus propias notas. El plan vive donde todos están mirando.",
+        "visual": "Un coro con la nota del director y una nota propia del músico",
+        "myNotes": "Mis notas",
+        "myNote": "Ver a Lu para el corte del compás 8"
       },
-      "stand": {
-        "title": "Modo atril",
-        "text": "Pantalla completa, números grandes, un toque a la siguiente sección."
+      "f3": {
+        "title": "Modo atril. Hecho para el atril.",
+        "body": "Un toque y el chart llena tu iPad. Números grandes, barras gruesas, salta a cualquier sección. Se lee a media canción, bajo las luces del escenario.",
+        "visual": "El modo atril en un iPad"
       },
-      "part": {
-        "title": "Solo tu parte",
-        "text": "Cada músico ve las notas del director musical para su propio instrumento."
+      "f4": {
+        "title": "Sets",
+        "body": "Arma las canciones de esta noche y comparte el set con la banda."
       },
-      "frame": "El coro en modo atril"
+      "f5": {
+        "title": "Versiones e historial",
+        "body": "Tu arreglo, una versión en vivo, una acústica. Cada cambio se guarda, así puedes regresar cuando quieras.",
+        "live": "En vivo",
+        "acoustic": "Acústica",
+        "new": "+ Nueva versión"
+      },
+      "f6": {
+        "title": "Toda tu banda, dentro",
+        "body": "Crea la banda, comparte un código de invitación y todos entran con Google, Apple, Microsoft o correo.",
+        "code": "K7QM-R4TX"
+      }
     },
-    "language": {
-      "nav": "El lenguaje",
-      "title": "ChartDown es un lenguaje abierto",
-      "text": "La notación es de dominio público (CC0) y vive en GitHub. Escribe tus charts una vez, guárdalos como texto plano para siempre y úsalos en cualquier app que soporte ChartDown.",
-      "spec": "Leer la especificación en GitHub",
-      "example": "El mismo coro, escrito en ChartDown"
+    "open": {
+      "title1": "Hecho sobre un estándar abierto.",
+      "title2": "Tus charts van a donde tú vayas.",
+      "body": "ChartDown está hecho sobre ChartDown Spec, un estándar público y abierto para escribir charts. Como es un estándar y no un formato secreto, tus charts nunca quedan encerrados en una sola app. Puedes llevártelos y usarlos donde el estándar esté soportado.",
+      "cta": "Ver el estándar abierto",
+      "codeLabel": "La canción de ejemplo, escrita en ChartDown"
     },
-    "invite": {
-      "title": "Únete a la beta",
-      "text": "ChartDown App es por invitación mientras la probamos con bandas reales.",
+    "founder": {
+      "quote": "Nuestros charts siempre iban un paso atrás. Acordes equivocados, versiones viejas y músicos en el escenario sin saber cuál tocar. Hice ChartDown para que toda la banda tenga siempre el chart correcto.",
+      "name": "Carlos Zaragoza",
+      "role": "Director musical y teclados · fundador"
+    },
+    "waitlist": {
+      "title": "Pon a tu banda en la misma página.",
+      "body": "Abrimos lugares en grupos pequeños. Dinos quién eres y te guardamos el tuyo. Gratis mientras estés en la beta.",
+      "role": "Soy…",
+      "roles": {
+        "music_director": "Director musical",
+        "musician": "Músico",
+        "teacher": "Maestro"
+      },
       "email": "Correo",
-      "placeholder": "tu@ejemplo.com",
-      "submit": "Unirme a la lista de espera",
-      "sent": "Gracias. Si este correo aún no estaba en la lista, ya está; te escribiremos cuando haya lugar para ti.",
+      "placeholder": "tu@tubanda.com",
+      "submit": "Guardar mi lugar",
+      "saving": "Guardando…",
+      "hint": "Un solo correo cuando estés dentro. Nada de spam.",
+      "sent": "Ya estás en la lista. Te escribiremos cuando se abra tu lugar.",
       "invalid": "Escribe un correo válido.",
-      "unavailable": "La lista de espera aún no está disponible. Vuelve pronto.",
-      "haveCode": "Tengo un código de invitación"
+      "error": "Algo salió mal. Inténtalo de nuevo.",
+      "unavailable": "La lista de espera todavía no está disponible."
     },
     "footer": {
-      "copyright": "© 2026 ChartDown · chartdown.app",
-      "language": "El lenguaje en GitHub",
-      "terms": "Términos",
-      "privacy": "Privacidad"
-    },
-    "catalog": "Catálogo",
-    "ending": {
-      "title": "Llévalo al domingo."
+      "label": "Pie de página",
+      "contact": "contact@chartdown.app",
+      "github": "GitHub",
+      "privacy": "Privacidad",
+      "terms": "Términos"
     }
   },
   "legal": {

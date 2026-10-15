@@ -1,24 +1,28 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { waitlistEnabled } from "../../lib/auth/enabled";
 import { createClient } from "../../lib/supabase/server";
+import { readWaitlist, type WaitlistState } from "./waitlist";
 
 /**
- * The landing page's waitlist (R-01.8, T-1201). It works in production too, once the database is
- * there; the database function always answers the same, so nothing is learned about who is on it.
+ * The landing page's waitlist (R-01.8, T-1310): the email, the role when the final panel gives
+ * one, and which form it came from. The database function answers the same for an email already
+ * on the list, so nothing is learned about who is on it; a filled hidden field is a bot, and it
+ * is told it worked.
  */
-export async function joinWaitlist(form: FormData): Promise<void> {
-  if (!waitlistEnabled()) redirect("/?waitlist=unavailable#invite");
+export async function joinWaitlist(_: WaitlistState, form: FormData): Promise<WaitlistState> {
+  const read = readWaitlist(form);
+  if (read.status !== "ok") return { status: read.status };
+  if (read.bot) return { status: "sent" };
+  if (!waitlistEnabled()) return { status: "unavailable" };
   const supabase = await createClient();
   const { error } = await supabase.rpc("join_waitlist", {
-    email: String(form.get("email") ?? "").trim(),
+    email: read.email,
     language: await getLocale(),
+    role: read.role,
+    source: read.source,
   });
-  if (error) {
-    // A malformed email is the person's to fix; anything else means the database is not ready.
-    redirect(`/?waitlist=${error.code === "22023" ? "invalid" : "unavailable"}#invite`);
-  }
-  redirect("/?waitlist=sent#invite");
+  if (error) return { status: error.code === "22023" ? "invalid" : "error", email: read.email };
+  return { status: "sent" };
 }

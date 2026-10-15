@@ -89,6 +89,7 @@ export async function joinWaitlist(form: FormData): Promise<void> {
   const { error } = await supabase.rpc("join_waitlist", {
     email: text(form, "email"),
     language: await getLocale(),
+    source: "sign_up",
   });
   if (error) redirect("/auth/waitlist?error=email_invalid");
   redirect("/auth/waitlist?sent=1");
