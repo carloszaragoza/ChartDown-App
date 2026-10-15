@@ -103,24 +103,30 @@ export function Headline({ pairs, same }: { pairs: HeadlinePair[]; same: string 
           page below never jumps when it changes. */}
       {pairs.map((pair) => (
         <span key={pair.who} className={styles.headSizer} aria-hidden="true">
-          <span className={styles.headWho}>{pair.who}</span> {same} {pair.when}
+          <span className={styles.headLine}>{pair.who}</span>
+          <span className={styles.headLine}>{same}</span>
+          <span className={styles.headLine}>{pair.when}</span>
         </span>
       ))}
       <span className={styles.headShown} aria-hidden="true">
-        <span className={styles.headWho}>
+        <span className={styles.headLine}>
           <Slot text={shown.who} first={!moved} delay={0} />
-        </span>{" "}
-        <span className={styles.mask}>
-          <span className={styles.rise} style={{ "--d": 1 } as CSSProperties}>
-            {same}
+        </span>
+        <span className={styles.headLine}>
+          <span className={styles.mask}>
+            <span className={styles.rise} style={{ "--d": 1 } as CSSProperties}>
+              {same}
+            </span>
           </span>
-        </span>{" "}
-        <Slot
-          text={shown.when}
-          first={!moved}
-          delay={2}
-          className={`${styles.accent} ${styles.underline}`}
-        />
+        </span>
+        <span className={styles.headLine}>
+          <Slot
+            text={shown.when}
+            first={!moved}
+            delay={2}
+            className={`${styles.accent} ${styles.underline}`}
+          />
+        </span>
       </span>
     </h1>
   );
