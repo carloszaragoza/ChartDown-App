@@ -247,10 +247,15 @@ describe("T-1503 the metronome's pulse in a row", () => {
     );
   });
 
+  it("R-11.3 the line grows into beat 1 of a new bar too, from nothing", () => {
+    expect(rule(".cd-chart__bar--now::after")).toMatch(/animation: cd-chart-beat-in /);
+    expect(css).toMatch(/@keyframes cd-chart-beat-in \{\s*from \{\s*inline-size: 0;/);
+  });
+
   it("R-11.13 the line eases from beat to beat, and moves in steps with reduced motion", () => {
     expect(rule(".cd-chart__bar--now::after")).toMatch(/transition:\s+inline-size/);
     expect(css).toMatch(
-      /@media \(prefers-reduced-motion: reduce\) \{\s*\.cd-chart__bar--now::after \{\s*transition: none;/,
+      /@media \(prefers-reduced-motion: reduce\) \{\s*\.cd-chart__bar--now::after \{\s*transition: none;\s*animation: none;/,
     );
   });
 });
