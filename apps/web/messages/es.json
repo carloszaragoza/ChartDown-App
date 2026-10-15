@@ -451,7 +451,47 @@
     "details": "Datos de la canción",
     "chartTitle": "Cifrado",
     "preview": "Vista previa",
-    "intro": "Busca la canción en el catálogo, o empieza una nueva."
+    "intro": "Busca la canción en el catálogo, o empieza una nueva.",
+    "import": {
+      "open": "Importar una hoja de acordes",
+      "title": "Importar una hoja de acordes",
+      "intro": "Pega una hoja con los acordes sobre la letra, como la copiarías de una página web o un documento. Obtienes un borrador del chart para revisarlo y luego agregarle tus notas.",
+      "sheet": "Hoja de acordes",
+      "sheetHint": "Hasta 300 líneas. Ayudan los nombres de sección como Verse, Coro o Puente.",
+      "placeholder": "Verso 1\nG          C\nPrimera línea de la canción\nEm         D\nSegunda línea de la canción",
+      "style": "Escribir los acordes en",
+      "numbers": "Números",
+      "letters": "Letras",
+      "landmarks": "Conservar una referencia por sección",
+      "landmarksHint": "Las primeras {words} palabras de la letra de cada sección, para ubicarte. El resto de la letra nunca se guarda.",
+      "rights": "Tengo derecho a usar esta hoja de acordes.",
+      "rightsFirst": "Primero confirma que tienes derecho a usar esta hoja.",
+      "privacy": "Tu hoja se convierte en tu navegador. No se sube ni se guarda.",
+      "convert": "Convertir en chart",
+      "cancel": "Cancelar",
+      "problems": {
+        "empty": "Primero pega una hoja de acordes.",
+        "too_long": "La hoja tiene más de 300 líneas. Pega una canción a la vez.",
+        "no_chords": "No se encontraron acordes. Revisa que la hoja tenga nombres de acordes como G, Em o D/F#."
+      },
+      "review": {
+        "title": "Revisa la importación",
+        "startOver": "Pegar otra hoja",
+        "notSaved": "Es un borrador: nada se guarda hasta que lo publiques.",
+        "keyRead": "Tono {key}, como dice la hoja.",
+        "keyGuessed": "Tono {key}, deducido del primer acorde. Revísalo.",
+        "lines": "Líneas {lines} del chart.",
+        "nothing": "No hay nada más que revisar.",
+        "kinds": {
+          "bars-proposed": "{count, plural, one {# fila tiene compases propuestos} other {# filas tienen compases propuestos}}: un acorde por compás. Revisa dónde empieza cada compás.",
+          "unknown-chord": "{count, plural, one {# acorde no se reconoció} other {# acordes no se reconocieron}}.",
+          "unmapped": "{count, plural, one {# indicación no se pudo pasar al chart} other {# indicaciones no se pudieron pasar al chart}}, como una repetición. Quedó como comentario.",
+          "no-sections": "No se encontraron nombres de sección, así que los acordes empiezan sin secciones.",
+          "chart-warning": "{count, plural, one {# línea tiene una advertencia} other {# líneas tienen advertencias}}.",
+          "key-guessed": "El tono se dedujo."
+        }
+      }
+    }
   },
   "history": {
     "title": "Historial",

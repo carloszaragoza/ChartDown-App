@@ -451,7 +451,47 @@
     "details": "Song details",
     "chartTitle": "Chart",
     "preview": "Preview",
-    "intro": "Find the song in the catalog, or start a new one."
+    "intro": "Find the song in the catalog, or start a new one.",
+    "import": {
+      "open": "Import a chord sheet",
+      "title": "Import a chord sheet",
+      "intro": "Paste a chord sheet with chords over the lyrics, as you'd copy it from a website or a document. You get a chart draft to check and then add your notes to.",
+      "sheet": "Chord sheet",
+      "sheetHint": "Up to 300 lines. Section names like Verse, Chorus or Bridge help.",
+      "placeholder": "Verse 1\nG          C\nFirst line of the song\nEm         D\nSecond line of the song",
+      "style": "Write the chords as",
+      "numbers": "Numbers",
+      "letters": "Letters",
+      "landmarks": "Keep a landmark per section",
+      "landmarksHint": "The first {words} words of each section's lyrics, to find your place. The rest of the lyrics are never kept.",
+      "rights": "I have the right to use this chord sheet.",
+      "rightsFirst": "Confirm you have the right to use this sheet first.",
+      "privacy": "Your sheet is converted in your browser. It is not uploaded or stored.",
+      "convert": "Convert to a chart",
+      "cancel": "Cancel",
+      "problems": {
+        "empty": "Paste a chord sheet first.",
+        "too_long": "The sheet is longer than 300 lines. Paste one song at a time.",
+        "no_chords": "No chords were found. Check that the sheet has chord names like G, Em or D/F#."
+      },
+      "review": {
+        "title": "Check the import",
+        "startOver": "Paste another sheet",
+        "notSaved": "This is a draft: nothing is saved until you publish it.",
+        "keyRead": "Key {key}, as the sheet says.",
+        "keyGuessed": "Key {key}, guessed from the first chord. Check it.",
+        "lines": "Lines {lines} of the chart.",
+        "nothing": "Nothing else to check.",
+        "kinds": {
+          "bars-proposed": "{count, plural, one {# row has bars we proposed} other {# rows have bars we proposed}}: one chord per bar. Check where each bar starts.",
+          "unknown-chord": "{count, plural, one {# chord wasn't recognized} other {# chords weren't recognized}}.",
+          "unmapped": "{count, plural, one {# instruction couldn't be turned into the chart} other {# instructions couldn't be turned into the chart}}, like a repeat. It's kept as a comment.",
+          "no-sections": "No section names were found, so the chords start without sections.",
+          "chart-warning": "{count, plural, one {# line has a warning} other {# lines have warnings}}.",
+          "key-guessed": "The key was guessed."
+        }
+      }
+    }
   },
   "history": {
     "title": "History",
