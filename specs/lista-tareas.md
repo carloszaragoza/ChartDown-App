@@ -256,6 +256,15 @@ What moves with the parser: its sources, its history, its tests (SPEC-00, R-00.x
 | T-2102 | github.com/ChartDown/parser: the history of `packages/core` (only that folder), a standalone build with no monorepo files, its own CI (type check, tests, the suite), MIT, and `homepage`, `repository` and `bugs` pointing to it; its README links to the spec | – | T-2101 | M | The repository's CI passes; the packed package passes the 0.7 suite through its adapter |
 | T-2103 | The app installs `chartdown` from npm (`^0.3.0`) in `apps/web` and `packages/ui`, and `packages/core` leaves the monorepo; the R-00.1 catalog test and the example charts the app's tests use move into the app; the root README and LICENSE no longer list `packages/core` | R-00.1 | T-2007 | S | CI passes with the package from npm; the R-00.1 test reads `supabase/migrations` |
 
+## E23 · ChartDown 0.8
+
+ChartDown 0.8 (ChartDown/spec PR #18, `732dc25`, October 15, 2026) adds a count after `@use`. The parser follows the merged spec in its own repository, and the app installs the release (owner's approval, October 15, 2026).
+
+| ID | Task | Requirements | Depends on | Size | Tests / evidence |
+|---|---|---|---|---|---|
+| T-2301 | `chartdown` 0.4.0 in ChartDown/parser: `@use Name Nx` and `xN`, the play order of a counted copy, `use-zero-times`, notes for one pass in a counted copy, `sections[].times`, `chartdown: 0.8`; the conformance copy pinned to `732dc25` (148 cases); the owner publishes | R-00.17, R-00.4, R-00.12 | T-2102 | M | The suite passes 148 of 148; the port matches the 0.8 playground |
+| T-2302 | The app installs `chartdown` 0.4.0: the `use-zero-times` warning in English and Spanish, a counted copy drawn with `×N` in its heading and the song form, the metronome's timeline follows it, and the editor says ChartDown 0.8 | R-00.17 | T-2301 | S | Unit: the timeline plays a counted copy N times; every warning code has both messages; end-to-end: a chart with `@use Chorus 2x` shows `×2` |
+
 ## E22 · Charts on a phone
 
 Owner's request, October 14, 2026: people share links to songs and always have a phone, not always an iPad. Measured that day on production with an iPhone 16 (393 × 852) and a Pro Max (440 × 956): stand mode's controls and its 14 section buttons fill more than half of the portrait screen, the current section shows two bars cut at the bottom, and in landscape (852 × 393) the current section is not on screen at all. Requirement R-03.8; the layout is in the design handoff, section 5.
