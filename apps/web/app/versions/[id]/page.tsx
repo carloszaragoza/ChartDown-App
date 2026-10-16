@@ -45,6 +45,7 @@ export default async function VersionPage({
   return (
     <VersionView
       id={version.id}
+      songId={version.songId}
       title={version.title}
       artists={version.artists}
       author={version.author}
