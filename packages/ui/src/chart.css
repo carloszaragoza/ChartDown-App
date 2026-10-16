@@ -438,12 +438,17 @@
 }
 .cd-lines__track {
   position: relative;
-  block-size: calc(var(--cd-lines-top, var(--spacing-2)) * 2 + var(--cd-lines-height, 1.5em) * var(--cd-lines-count, 1));
+  block-size: calc(
+    var(--cd-lines-top, var(--spacing-2)) * 2 + var(--cd-lines-height, 1.5em) *
+      var(--cd-lines-count, 1)
+  );
 }
 .cd-lines__mark {
   position: absolute;
   inset-inline: 0;
-  inset-block-start: calc(var(--cd-lines-top, var(--spacing-2)) + var(--cd-lines-height, 1.5em) * var(--cd-lines-at, 0));
+  inset-block-start: calc(
+    var(--cd-lines-top, var(--spacing-2)) + var(--cd-lines-height, 1.5em) * var(--cd-lines-at, 0)
+  );
   display: flex;
   justify-content: flex-end;
   block-size: var(--cd-lines-height, 1.5em);
