@@ -85,7 +85,19 @@ const HEIGHT = 200;
  * link is offered. Given the chart, the dock shows its sections as a bar that follows the video
  * (T-2502).
  */
-export function VideoLink({ url, chart }: { url: string; chart?: Chart | undefined }) {
+export function VideoLink({
+  url,
+  chart,
+  saved,
+  save,
+}: {
+  url: string;
+  chart?: Chart | undefined;
+  /** Where the music starts, in seconds, as the owner saved it (T-2503). */
+  saved?: number | null | undefined;
+  /** For the version's owner: saves where the music starts for everyone. */
+  save?: ((milliseconds: number) => Promise<boolean>) | undefined;
+}) {
   const t = useTranslations("video");
   const id = videoId(url);
   const isOnline = useSyncExternalStore(
@@ -123,6 +135,8 @@ export function VideoLink({ url, chart }: { url: string; chart?: Chart | undefin
             start={startSeconds(url)}
             url={url}
             chart={chart}
+            saved={saved ?? null}
+            save={save}
             onClose={() => setOpen(false)}
           />,
           document.body,
@@ -136,12 +150,16 @@ function VideoDock({
   start,
   url,
   chart,
+  saved: savedStart,
+  save,
   onClose,
 }: {
   id: string;
   start: number;
   url: string;
   chart: Chart | undefined;
+  saved: number | null;
+  save: ((milliseconds: number) => Promise<boolean>) | undefined;
   onClose: () => void;
 }) {
   const t = useTranslations("video");
@@ -149,7 +167,9 @@ function VideoDock({
   const player = useRef<YouTubePlayer | null>(null);
   const [now, setNow] = useState(0);
   // Where the first bar falls in the video; the reader moves it to match the recording.
-  const [musicStart, setMusicStart] = useState(start);
+  const [musicStart, setMusicStart] = useState(savedStart ?? start);
+  const [stored, setStored] = useState(savedStart);
+  const [saving, setSaving] = useState<"idle" | "saving" | "failed">("idle");
   const startRef = useRef(musicStart);
   useEffect(() => {
     startRef.current = musicStart;
@@ -264,6 +284,27 @@ function VideoDock({
                   onClick={() => setMusicStart(Math.round(now * 10) / 10)}
                 />
               </HStack>
+              {save && musicStart !== stored && (
+                <HStack gap={2} vAlign="center" wrap="wrap">
+                  <Button
+                    label={t("saveStart")}
+                    size="sm"
+                    isLoading={saving === "saving"}
+                    onClick={() => {
+                      setSaving("saving");
+                      void save(musicStart * 1000).then((done) => {
+                        setSaving(done ? "idle" : "failed");
+                        if (done) setStored(musicStart);
+                      });
+                    }}
+                  />
+                  {saving === "failed" && (
+                    <div role="alert">
+                      <Text type="supporting">{t("saveFailed")}</Text>
+                    </div>
+                  )}
+                </HStack>
+              )}
             </>
           ) : (
             <Text type="supporting">{t("noTempo")}</Text>

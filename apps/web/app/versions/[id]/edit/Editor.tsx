@@ -21,6 +21,7 @@ import { useActionState, useDeferredValue, useEffect, useMemo, useRef, useState 
 import { ChartTextArea, type ChartTextAreaHandle } from "../../../_components/ChartTextArea";
 import { ChartPreview } from "../../../_components/ChartPreview";
 import { saveChart, type SaveState } from "./actions";
+import { saveVideoStart } from "../actions";
 import { CancelButton, WriteLayout } from "../../../_components/WriteLayout";
 import { VideoLink } from "../../../_components/VideoDock";
 import { splitTitle, withTitle } from "../../../../lib/versions/title";
@@ -45,6 +46,8 @@ export interface EditorProps {
     album: string | null;
     year: number | null;
     youtube: string | null;
+    /** Where the music starts in the video, in seconds, as saved (R-03.11). */
+    videoStart?: number | null;
   };
 }
 
@@ -108,7 +111,17 @@ export function Editor({
         { label: n("source"), value: source },
         details.album ? { label: n("album"), value: details.album } : null,
         details.youtube
-          ? { label: n("youtube"), value: <VideoLink url={details.youtube} chart={chart} /> }
+          ? {
+              label: n("youtube"),
+              value: (
+                <VideoLink
+                  url={details.youtube}
+                  chart={chart}
+                  saved={details.videoStart}
+                  save={(milliseconds) => saveVideoStart(versionId, milliseconds)}
+                />
+              ),
+            }
           : null,
       ].filter((fact) => fact !== null)
     : [];

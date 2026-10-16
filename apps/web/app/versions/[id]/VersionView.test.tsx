@@ -7,7 +7,11 @@ import en from "../../../messages/en.json";
 import es from "../../../messages/es.json";
 import { setChoiceLabel, VersionView, type VersionViewProps } from "./VersionView";
 
-vi.mock("./actions", () => ({ forkVersion: () => undefined, reportVersion: () => undefined }));
+vi.mock("./actions", () => ({
+  forkVersion: () => undefined,
+  reportVersion: () => undefined,
+  saveVideoStart: async () => true,
+}));
 vi.mock("../../sets/actions", () => ({ addToSet: () => undefined }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: () => undefined }) }));
 

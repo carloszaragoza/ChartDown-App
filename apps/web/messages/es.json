@@ -1395,6 +1395,8 @@
     "notesShort": "Notas del director"
   },
   "video": {
+    "saveStart": "Guardar para todos",
+    "saveFailed": "No se pudo guardar. Inténtalo de nuevo.",
     "sections": "Secciones",
     "goTo": "Ir a {name}",
     "musicStarts": "La música empieza en {time}",

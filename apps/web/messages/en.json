@@ -1395,6 +1395,8 @@
     "notesShort": "Director's notes"
   },
   "video": {
+    "saveStart": "Save for everyone",
+    "saveFailed": "It could not be saved. Try again.",
     "sections": "Sections",
     "goTo": "Go to {name}",
     "musicStarts": "Music starts at {time}",

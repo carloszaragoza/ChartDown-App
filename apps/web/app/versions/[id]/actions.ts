@@ -53,3 +53,20 @@ export async function reportVersion(form: FormData): Promise<void> {
   const result = !error ? "sent" : error.code === "23505" ? "already" : "failed";
   redirect(`/versions/${versionId}?report=${result}`);
 }
+
+/**
+ * Saves where the music starts in the version's video, for everyone (R-03.11, T-2503). Only the
+ * owner of an active version can: the database's policy finds no other. True when it was saved.
+ */
+export async function saveVideoStart(versionId: string, milliseconds: number): Promise<boolean> {
+  if (!authEnabled() || !UUID.test(versionId)) return false;
+  const value = Math.round(milliseconds);
+  if (!Number.isFinite(value) || value < 0 || value > 3_600_000) return false;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("versions")
+    .update({ video_start_ms: value })
+    .eq("id", versionId)
+    .select("id");
+  return !error && (data?.length ?? 0) === 1;
+}

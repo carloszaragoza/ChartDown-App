@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { EditIcon, ForkIcon, StandIcon } from "../../_components/ActionIcons";
-import { forkVersion } from "./actions";
+import { forkVersion, saveVideoStart } from "./actions";
 import type { Display } from "./display";
 import { BackToCatalog } from "./BackToCatalog";
 import { VideoLink } from "../../_components/VideoDock";
@@ -67,6 +67,8 @@ export interface VersionViewProps {
   phone?: boolean;
   /** The song, for the way back to the catalog when the person came from there (R-02.10). */
   songId?: string;
+  /** Where the music starts in the video, in seconds, as the owner saved it (R-03.11). */
+  videoStart?: number | null;
 }
 
 /** How a set reads in the "Add to a set" choice: its band, or the person's own sets, and its name. */
@@ -101,6 +103,7 @@ export function VersionView({
   message,
   phone = false,
   songId,
+  videoStart = null,
 }: VersionViewProps) {
   const t = useTranslations("version");
   const s = useTranslations("sets");
@@ -178,7 +181,16 @@ export function VersionView({
                   </Text>
                   {source.youtube && (
                     <HStack>
-                      <VideoLink url={source.youtube} chart={chart} />
+                      <VideoLink
+                        url={source.youtube}
+                        chart={chart}
+                        saved={videoStart}
+                        save={
+                          owner && reading && status === "active"
+                            ? saveVideoStart.bind(null, id)
+                            : undefined
+                        }
+                      />
                     </HStack>
                   )}
                 </VStack>
