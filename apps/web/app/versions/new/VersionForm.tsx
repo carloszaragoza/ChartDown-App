@@ -19,6 +19,8 @@ import { ChartPreview } from "../../_components/ChartPreview";
 import { Warnings } from "../[id]/edit/Editor";
 import { createVersion, type VersionFormState } from "./actions";
 import { CancelButton, WriteLayout } from "../../_components/WriteLayout";
+import { VideoLink } from "../../_components/VideoDock";
+import { videoId } from "../../../lib/video/youtube";
 import { bodyLine, splitTitle, withTitle } from "../../../lib/versions/title";
 import { STARTER } from "../../../lib/versions/starter";
 import type { ReviewItem } from "../../../lib/import/convert";
@@ -217,14 +219,21 @@ export function VersionForm({
                 isOptional
                 {...error("year_invalid")}
               />
-              <TextInput
-                label={t("youtube")}
-                htmlName="youtube"
-                value={youtube}
-                onChange={setYoutube}
-                isOptional
-                {...error("youtube_invalid")}
-              />
+              <VStack gap={1}>
+                <TextInput
+                  label={t("youtube")}
+                  htmlName="youtube"
+                  value={youtube}
+                  onChange={setYoutube}
+                  isOptional
+                  {...error("youtube_invalid")}
+                />
+                {videoId(youtube) && (
+                  <HStack>
+                    <VideoLink url={youtube} />
+                  </HStack>
+                )}
+              </VStack>
               <GridSpan columns="full">
                 <RadioList
                   label={t("source")}

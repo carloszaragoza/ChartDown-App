@@ -1393,5 +1393,11 @@
     "editShort": "Editar",
     "notes": "Notas del director de {title}",
     "notesShort": "Notas del director"
+  },
+  "video": {
+    "play": "Ver el video",
+    "player": "Video",
+    "openYouTube": "Abrir en YouTube",
+    "close": "Cerrar el video"
   }
 }

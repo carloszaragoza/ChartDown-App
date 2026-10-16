@@ -14,6 +14,7 @@ import { EditIcon, ForkIcon, StandIcon } from "../../_components/ActionIcons";
 import { forkVersion } from "./actions";
 import type { Display } from "./display";
 import { BackToCatalog } from "./BackToCatalog";
+import { VideoLink } from "../../_components/VideoDock";
 import type { BasedOn } from "./load";
 import { AddToSet, ReportForm, VersionMenu } from "./VersionControls";
 import { DisplayBar, DisplayedChart, ShownKey, StandLink, VersionDisplay } from "./VersionDisplay";
@@ -162,14 +163,6 @@ export function VersionView({
                   </HStack>
                   <Text color="secondary">
                     {t("by", { author })}
-                    {source.youtube && (
-                      <>
-                        {" · "}
-                        <a href={source.youtube} target="_blank" rel="noopener noreferrer">
-                          {t("youtube")}
-                        </a>
-                      </>
-                    )}
                     {basedOn && (
                       <>
                         {" · "}
@@ -183,6 +176,11 @@ export function VersionView({
                       </>
                     )}
                   </Text>
+                  {source.youtube && (
+                    <HStack>
+                      <VideoLink url={source.youtube} />
+                    </HStack>
+                  )}
                 </VStack>
                 <VStack gap={2} hAlign="end">
                   <HStack gap={2} vAlign="center" wrap="wrap">
