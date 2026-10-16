@@ -96,7 +96,7 @@ Tool versions and prices change; confirm them when starting.
 | instruments | id, slug, English and Spanish names, aliases (other names a chart may use, as in ChartDown 4.1), active | Admin's catalog (R-07.3); the parser resolves notes with slug and aliases (R-00.1) |
 | user_instruments | user, instrument | What each person plays (R-01.2); each person manages their own; a deactivated instrument can't be added but stays where it is (R-07.3) |
 | songs | id, title, artists | No CCLI data (decision 10) |
-| versions | id, song, owner, author name at publish time, visibility, status (active, frozen, hidden), forked from, current revision, source (type, album, year, YouTube link) | The source lives in the version's own columns, so its type can be required (R-02.2) |
+| versions | id, song, owner, author name at publish time, visibility, status (active, frozen, hidden), forked from, current revision, source (type, album, year, YouTube link), where the music starts in that video (milliseconds, optional; R-03.11) | The source lives in the version's own columns, so its type can be required (R-02.2) |
 | revisions | id, version, number, ChartDown text, author, date, restored from | Immutable (R-02.8) |
 | bands | id, name, is_personal, personal owner | Personal space (R-04.7): the personal owner is unique, `is_personal` follows from it, and the band is deleted with the account |
 | band_members | band, user, role (MD or musician) | An index guarantees one MD per band (decision 2) |
