@@ -41,6 +41,13 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
       source={[sources(version.source.type), version.source.year].filter(Boolean).join(" ")}
       revisionNumber={revision.number as number}
       savedAt={revision.created_at as string}
+      details={{
+        artists: version.artists,
+        author: version.author,
+        album: version.source.album,
+        year: version.source.year,
+        youtube: version.source.youtube,
+      }}
     />
   );
 }

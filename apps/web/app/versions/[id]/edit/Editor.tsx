@@ -1,6 +1,7 @@
 "use client";
 
 import { Banner } from "@astryxdesign/core/Banner";
+import { Grid } from "@astryxdesign/core/Grid";
 import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
@@ -14,14 +15,14 @@ import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import { parse, SUPPORTED_VERSION, type Warning } from "chartdown";
 import { ClockIcon, GlobeAltIcon, LockClosedIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useActionState, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { ChartTextArea, type ChartTextAreaHandle } from "../../../_components/ChartTextArea";
 import { ChartPreview } from "../../../_components/ChartPreview";
 import { saveChart, type SaveState } from "./actions";
-import { PageLayout } from "../../../_components/PageLayout";
+import { CancelButton, WriteLayout } from "../../../_components/WriteLayout";
+import { splitTitle, withTitle } from "../../../../lib/versions/title";
 
 export interface EditorProps {
   /** The server's guess that the page opens on a phone (R-03.9). */
@@ -36,12 +37,22 @@ export interface EditorProps {
   revisionNumber: number;
   /** When the current revision was saved (ISO). */
   savedAt: string;
+  /** The song's details, shown at the top (T-2404). */
+  details?: {
+    artists: string[];
+    author: string;
+    album: string | null;
+    year: number | null;
+    youtube: string | null;
+  };
 }
 
 /**
- * The chart editor (R-03.1; Design Handoff 2.0 screen 06): the text in a panel on the left, a
- * live preview beside it that follows the typing without reloading, and the parser's warnings
- * with their lines. Warnings never block a save.
+ * The chart editor (R-03.1; T-2404): the song's details at the top, the text on the left as tall
+ * as the screen and a live preview beside it that follows the typing without reloading, with the
+ * parser's warnings and their lines. The title is written once, in the details: the text leaves
+ * out its `title:` line and saving puts it back. Warnings never block a save; a save returns to
+ * the version, and Cancel goes back to it.
  */
 export function Editor({
   phone,
@@ -53,28 +64,28 @@ export function Editor({
   source,
   revisionNumber,
   savedAt,
+  details,
 }: EditorProps) {
   const t = useTranslations("editor");
   const v = useTranslations("version");
+  const n = useTranslations("newVersion");
   const format = useFormatter();
   const now = useNow({ updateInterval: 30_000 });
   const router = useRouter();
-  const [text, setText] = useState(content);
+  const [text, setText] = useState(() => splitTitle(content).body);
   const [state, action, pending] = useActionState<SaveState, FormData>(saveChart, {
     status: "idle",
     baseRevisionId: revisionId,
     savedContent: content,
   });
-  const dirty = text !== state.savedContent;
+  const dirty = text !== splitTitle(state.savedContent).body;
   // The preview may lag a keystroke behind so typing never waits for it.
   const shown = useDeferredValue(text);
-  const chart = useMemo(() => parse(shown), [shown]);
+  const chart = useMemo(() => parse(withTitle(shown, title)), [shown, title]);
+  // The warnings name the lines of the text on screen, which has no title line.
+  const warnings = useMemo(() => parse(shown).warnings, [shown]);
   const lines = useRef<ChartTextAreaHandle>(null);
-  // After a save, the header follows the new revision.
-  const saved =
-    state.number && state.savedAt
-      ? { number: state.number, at: state.savedAt }
-      : { number: revisionNumber, at: savedAt };
+  const page = `/versions/${versionId}`;
 
   // Leaving with unsaved changes asks first.
   useEffect(() => {
@@ -84,14 +95,28 @@ export function Editor({
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
 
+  // A save returns to the version, with its new revision.
+  useEffect(() => {
+    if (state.status === "saved") router.push(`${page}?saved=${state.number ?? ""}`);
+  }, [state, router, page]);
+
   const goTo = (line: number) => lines.current?.goTo(line);
+  const facts = details
+    ? [
+        {
+          label: n("song"),
+          value: [title, details.artists.join(", ")].filter(Boolean).join(" · "),
+        },
+        { label: n("author"), value: details.author },
+        { label: n("source"), value: source },
+        details.album ? { label: n("album"), value: details.album } : null,
+        details.youtube ? { label: n("youtube"), value: details.youtube } : null,
+      ].filter((fact) => fact !== null)
+    : [];
 
   return (
-    <PageLayout
+    <WriteLayout
       phone={phone}
-      height="auto"
-      // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
-      padding={8}
       header={
         <LayoutHeader hasDivider>
           <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
@@ -99,16 +124,15 @@ export function Editor({
               <Text type="supporting">
                 {t("savedLine", {
                   source,
-                  number: saved.number,
-                  when: format.relativeTime(new Date(saved.at), now),
-                })}{" "}
-                · <Link href={`/versions/${versionId}`}>{t("view")}</Link>
+                  number: state.number ?? revisionNumber,
+                  when: format.relativeTime(new Date(state.savedAt ?? savedAt), now),
+                })}
               </Text>
               <Heading level={1}>{title}</Heading>
             </VStack>
             <form action={action}>
               <input type="hidden" name="versionId" value={versionId} />
-              <input type="hidden" name="content" value={text} />
+              <input type="hidden" name="content" value={withTitle(text, title)} />
               <HStack gap={2} vAlign="center" wrap="wrap">
                 {/* Going private is its own flow (R-02.4), with no way back. */}
                 <SegmentedControl
@@ -136,6 +160,7 @@ export function Editor({
                   href={`/versions/${versionId}/history`}
                   icon={<Icon icon={ClockIcon} />}
                 />
+                <CancelButton href={page} dirty={dirty} />
                 <Button
                   type="submit"
                   variant="primary"
@@ -149,51 +174,44 @@ export function Editor({
           </HStack>
         </LayoutHeader>
       }
-      panel={{
-        side: "start",
-        width: 460,
-        label: t("textPanel"),
-        firstOnPhone: true,
-        children: (
-          <>
-            <VStack gap={3}>
-              <div role="status">
-                {state.status === "saved" && !dirty && (
-                  <Banner status="success" title={t("saved", { number: state.number ?? "" })} />
-                )}
-              </div>
-              {(state.status === "changed" || state.status === "error") && (
-                <div role="alert">
-                  <Banner
-                    status="error"
-                    title={state.status === "changed" ? t("changed") : t("error")}
-                  />
-                </div>
-              )}
-              <Text type="supporting">ChartDown {chart.version ?? SUPPORTED_VERSION}</Text>
-              <ChartTextArea
-                handle={lines}
-                label={t("text")}
-                value={text}
-                onChange={setText}
-                rows={18}
-                flags={chart.warnings.map((warning) => ({
-                  line: warning.line,
-                  kind: "warning" as const,
-                }))}
-                goToLabel={(line) => t("goToLine", { line })}
-              />
-              <Warnings warnings={chart.warnings} onSelect={goTo} />
+      detailsLabel={n("details")}
+      details={
+        <Grid columns={{ minWidth: 180 }} gap={4}>
+          {facts.map((fact) => (
+            <VStack key={fact.label} gap={0.5}>
+              <Text type="supporting">{fact.label}</Text>
+              <Text weight="semibold">{fact.value}</Text>
             </VStack>
-          </>
-        ),
-      }}
-      contentProps={{ padding: 8, role: "region", label: t("preview") }}
-      content={
-        <>
-          <ChartPreview chart={chart} />
-        </>
+          ))}
+        </Grid>
       }
+      textLabel={t("textPanel")}
+      text={
+        <VStack gap={3}>
+          {(state.status === "changed" || state.status === "error") && (
+            <div role="alert">
+              <Banner
+                status="error"
+                title={state.status === "changed" ? t("changed") : t("error")}
+              />
+            </div>
+          )}
+          <Text type="supporting">ChartDown {chart.version ?? SUPPORTED_VERSION}</Text>
+          <ChartTextArea
+            handle={lines}
+            label={t("text")}
+            value={text}
+            onChange={setText}
+            rows={18}
+            isTall
+            flags={warnings.map((warning) => ({ line: warning.line, kind: "warning" as const }))}
+            goToLabel={(line) => t("goToLine", { line })}
+          />
+          <Warnings warnings={warnings} onSelect={goTo} />
+        </VStack>
+      }
+      previewLabel={t("preview")}
+      preview={<ChartPreview chart={chart} />}
     />
   );
 }

@@ -1,5 +1,7 @@
 import { parse } from "chartdown";
+import { Banner } from "@astryxdesign/core/Banner";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";
 import { guessPhone } from "../../../lib/shell/guessPhone";
 import { createClient, readUser } from "../../../lib/supabase/server";
@@ -24,6 +26,7 @@ export default async function VersionPage({
     beats?: string;
     set?: string;
     report?: string;
+    saved?: string;
   }>;
 }) {
   if (!authEnabled()) notFound();
@@ -42,6 +45,9 @@ export default async function VersionPage({
   const search = await searchParams;
   const setChoices = auth.user ? await mySets(supabase, auth.user.id) : [];
   const chart = parse(revision.content);
+  // Back from the editor after a save (T-2404): the new revision is said once, here.
+  const saved = /^\d+$/.test(search.saved ?? "") ? Number(search.saved) : null;
+  const e = await getTranslations("editor");
   return (
     <VersionView
       id={version.id}
@@ -70,6 +76,15 @@ export default async function VersionPage({
       setChoices={setChoices}
       setFailed={search.set === "failed"}
       phone={await guessPhone()}
+      {...(saved !== null
+        ? {
+            message: (
+              <div role="status">
+                <Banner status="success" title={e("saved", { number: saved })} />
+              </div>
+            ),
+          }
+        : {})}
     />
   );
 }

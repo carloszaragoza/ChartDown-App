@@ -28,8 +28,10 @@ test("R-10.13 a pasted chord sheet becomes a draft to check, saved only when pub
   await expect(page.getByText("Key E, as the sheet says.")).toBeVisible();
   await expect(page.getByText(/rows have bars we proposed/)).toBeVisible();
   await expect(page.locator("input[name=title]")).toHaveValue("Morning Light");
-  const draft = await page.locator("textarea[name=content]").inputValue();
+  const draft = await page.getByLabel("Chart (ChartDown)").inputValue();
   expect(draft).toContain("## Verse 1");
+  // R-02.1 the title is written once, in the details (T-2404).
+  expect(draft).not.toMatch(/^title:/m);
   expect(draft).toContain('1 "Morning comes slow over" | 5/7');
   expect(draft).not.toContain("Light on the water");
   expect(draft).not.toMatch(/copyright|ccli/i);
@@ -65,7 +67,7 @@ test("R-10.9 a PDF is read in the browser: its text fills the sheet, and nothing
   await page.getByText("I have the right to use this chord sheet.").click();
   await page.getByRole("button", { name: "Convert to a chart" }).click();
   await expect(page.getByText("Key Em, as the sheet says.")).toBeVisible();
-  await expect(page.locator("textarea[name=content]")).toHaveValue(
+  await expect(page.getByLabel("Chart (ChartDown)")).toHaveValue(
     /b6 "Shine, shine, Lantern Bay" \| b3/,
   );
 });
@@ -100,7 +102,7 @@ test("R-10.12 a sheet whose song is already in the catalog offers adding a versi
   await page.getByRole("button", { name: "Add my version to that song" }).click();
   // The draft stays; it is now a version of that song.
   await expect(page.locator("input[name=songId]")).toHaveCount(1);
-  await expect(page.locator("textarea[name=content]")).toHaveValue(/## Verse\n1 \| 4 \| 5 \| 1/);
+  await expect(page.getByLabel("Chart (ChartDown)")).toHaveValue(/## Verse\n1 \| 4 \| 5 \| 1/);
 });
 
 test("R-10.10 converting waits until the person confirms they may use the sheet", async ({
@@ -120,7 +122,7 @@ test("R-03.10 New version never opens on a blank chart: a starter, the letters h
 }) => {
   await signUpAndConfirm(page, unique("firstchart"), "Fran First");
   await page.goto("/versions/new?song=new");
-  await expect(page.locator("textarea[name=content]")).toHaveValue(/key: G[\s\S]*## Verse/);
+  await expect(page.getByLabel("Chart (ChartDown)")).toHaveValue(/key: G[\s\S]*## Verse/);
   await expect(page.getByText(/or as letters \(G \| C D \| Em\)/)).toBeVisible();
   await page.getByRole("link", { name: "Import a chord sheet" }).first().click();
   await expect(page).toHaveURL(/\/versions\/new\/import$/);
@@ -135,16 +137,16 @@ test("R-10.8 a line the review names is marked beside the chart, and choosing it
   await page.getByText("I have the right to use this chord sheet.").click();
   await page.getByRole("button", { name: "Convert to a chart" }).click();
   const line = page.locator(".cd-lines__mark", {
-    has: page.getByRole("button", { name: "Go to line 10" }),
+    has: page.getByRole("button", { name: "Go to line 9" }),
   });
   await expect(line).toHaveAttribute("data-flag", "review");
-  await expect(line).toHaveText("10");
+  await expect(line).toHaveText("9");
   await page
     .getByRole("group", { name: "Lines to check" })
-    .getByRole("button", { name: "Go to line 10" })
+    .getByRole("button", { name: "Go to line 9" })
     .click();
   const selected = await page.evaluate(() => {
-    const field = document.querySelector<HTMLTextAreaElement>("textarea[name=content]");
+    const field = document.querySelector<HTMLTextAreaElement>(".cd-lines textarea");
     return field ? field.value.slice(field.selectionStart, field.selectionEnd) : "";
   });
   expect(selected).toBe('1 "Morning comes slow over" | 5/7');

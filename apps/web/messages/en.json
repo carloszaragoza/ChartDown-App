@@ -564,6 +564,11 @@
     "otherSongs": "Other songs"
   },
   "editor": {
+    "cancel": "Cancel",
+    "leaveTitle": "Leave without saving?",
+    "leaveDescription": "Your changes to this chart will be lost.",
+    "leave": "Leave",
+    "keepWriting": "Keep writing",
     "public": "Public",
     "view": "View version",
     "save": "Save",

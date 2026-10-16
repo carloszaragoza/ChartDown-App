@@ -60,6 +60,8 @@ export interface VersionViewProps {
   path?: string;
   /** Shown above the chart, e.g. when reading an earlier revision. */
   notice?: ReactNode;
+  /** A message on the current version, such as a save just made; it changes nothing else. */
+  message?: ReactNode;
   /** The server's guess that this is a phone: a 16 px gutter and the song form as a strip (R-03.8). */
   phone?: boolean;
   /** The song, for the way back to the catalog when the person came from there (R-02.10). */
@@ -95,6 +97,7 @@ export function VersionView({
   display,
   path,
   notice,
+  message,
   phone = false,
   songId,
 }: VersionViewProps) {
@@ -132,6 +135,7 @@ export function VersionView({
           <LayoutHeader hasDivider>
             <VStack gap={3}>
               {notice}
+              {message}
               <HStack gap={4} vAlign="start" hAlign="between" wrap="wrap">
                 <VStack gap={1}>
                   {songId && <BackToCatalog song={songId} label={t("backToCatalog")} />}
