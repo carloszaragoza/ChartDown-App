@@ -32,7 +32,11 @@ test("R-07.2 a reported version the Admin hides leaves the catalog and its owner
   const address = new URL(page.url()).pathname;
   await expect(page.getByRole("button", { name: "Report" })).toHaveCount(0);
   await expect(page.getByText("Report", { exact: true })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "More actions" })).toHaveCount(0);
+  // Her own version's menu offers a new version of the song, never a report.
+  await page.getByRole("button", { name: "More actions" }).click();
+  await expect(page.getByRole("menuitem", { name: "New version of this song" })).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: "Report" })).toHaveCount(0);
+  await page.keyboard.press("Escape");
   await signOut(page);
 
   // Ben reports it.
