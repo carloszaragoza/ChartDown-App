@@ -147,6 +147,7 @@ function VideoDock({
   const t = useTranslations("video");
   const frame = useRef<HTMLDivElement>(null);
   const player = useRef<YouTubePlayer | null>(null);
+  const seeking = useRef<{ to: number; at: number } | null>(null);
   const [now, setNow] = useState(0);
   // Where the first bar falls in the video; the reader moves it to match the recording.
   const [musicStart, setMusicStart] = useState(start);
@@ -175,6 +176,13 @@ function VideoDock({
     const timer = window.setInterval(() => {
       const time = player.current?.getCurrentTime?.();
       if (typeof time !== "number") return;
+      // A section just chosen holds until the video has moved there: until then the player may
+      // still report where it was (or 0, not started yet).
+      const target = seeking.current;
+      if (target !== null) {
+        if (Math.abs(time - target.to) > 1 && performance.now() - target.at < 3000) return;
+        seeking.current = null;
+      }
       setNow(time);
       videoClock.set({
         time,
@@ -192,8 +200,10 @@ function VideoDock({
   }, [id, start]);
 
   const seek = (seconds: number) => {
-    player.current?.seekTo(Math.max(0, seconds), true);
-    setNow(seconds);
+    const to = Math.max(0, seconds);
+    seeking.current = { to, at: performance.now() };
+    player.current?.seekTo(to, true);
+    setNow(to);
   };
   const clock = (seconds: number) =>
     `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
