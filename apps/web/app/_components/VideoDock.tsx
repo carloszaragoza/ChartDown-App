@@ -6,15 +6,23 @@ import { Icon } from "@astryxdesign/core/Icon";
 import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
-import { ArrowTopRightOnSquareIcon, PlayIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowTopRightOnSquareIcon,
+  MinusIcon,
+  PlayIcon,
+  PlusIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import { sectionAt, videoSections, type VideoSection } from "../../lib/video/sections";
 import { startSeconds, videoId } from "../../lib/video/youtube";
 
 /** The part of YouTube's IFrame API the dock uses. */
 interface YouTubePlayer {
-  getCurrentTime(): number;
+  getCurrentTime?(): number;
   seekTo(seconds: number, allowSeekAhead: boolean): void;
   destroy(): void;
 }
@@ -71,9 +79,10 @@ const HEIGHT = 200;
  * A version's YouTube link (R-03.11, T-2501): it opens the video in a mini player docked at the
  * bottom of the page, small and closable, so the chart stays in view while it plays; the dock also
  * links to the video on YouTube. Embedded from youtube-nocookie.com. With no connection only the
- * link is offered.
+ * link is offered. Given the chart, the dock shows its sections as a bar that follows the video
+ * (T-2502).
  */
-export function VideoLink({ url }: { url: string }) {
+export function VideoLink({ url, chart }: { url: string; chart?: Chart | undefined }) {
   const t = useTranslations("video");
   const id = videoId(url);
   const isOnline = useSyncExternalStore(
@@ -106,7 +115,13 @@ export function VideoLink({ url }: { url: string }) {
       />
       {open &&
         createPortal(
-          <VideoDock id={id} start={startSeconds(url)} url={url} onClose={() => setOpen(false)} />,
+          <VideoDock
+            id={id}
+            start={startSeconds(url)}
+            url={url}
+            chart={chart}
+            onClose={() => setOpen(false)}
+          />,
           document.body,
         )}
     </>
@@ -117,22 +132,31 @@ function VideoDock({
   id,
   start,
   url,
+  chart,
   onClose,
 }: {
   id: string;
   start: number;
   url: string;
+  chart: Chart | undefined;
   onClose: () => void;
 }) {
   const t = useTranslations("video");
   const frame = useRef<HTMLDivElement>(null);
+  const player = useRef<YouTubePlayer | null>(null);
+  const [now, setNow] = useState(0);
+  // Where the first bar falls in the video; the reader moves it to match the recording.
+  const [musicStart, setMusicStart] = useState(start);
+  const sections = useMemo(
+    () => (chart ? videoSections(chart, musicStart) : null),
+    [chart, musicStart],
+  );
 
   useEffect(() => {
-    let player: YouTubePlayer | null = null;
     let gone = false;
     void youTubeApi().then((api) => {
       if (gone || !frame.current) return;
-      player = new api.Player(frame.current, {
+      player.current = new api.Player(frame.current, {
         host: "https://www.youtube-nocookie.com",
         videoId: id,
         width: WIDTH,
@@ -140,11 +164,25 @@ function VideoDock({
         playerVars: { playsinline: 1, rel: 0, start: Math.floor(start) },
       });
     });
+    // The bar follows the video.
+    const timer = window.setInterval(() => {
+      const time = player.current?.getCurrentTime?.();
+      if (typeof time === "number") setNow(time);
+    }, 250);
     return () => {
       gone = true;
-      player?.destroy();
+      window.clearInterval(timer);
+      player.current?.destroy();
+      player.current = null;
     };
   }, [id, start]);
+
+  const seek = (seconds: number) => {
+    player.current?.seekTo(Math.max(0, seconds), true);
+    setNow(seconds);
+  };
+  const clock = (seconds: number) =>
+    `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
   return (
     <aside className="cd-video-dock" aria-label={t("player")}>
@@ -173,10 +211,102 @@ function VideoDock({
             onClick={onClose}
           />
         </HStack>
+        {chart &&
+          (sections ? (
+            <>
+              <SectionsBar
+                sections={sections}
+                now={now}
+                onSeek={seek}
+                label={t("sections")}
+                goTo={(name) => t("goTo", { name })}
+              />
+              <HStack gap={1} vAlign="center" wrap="wrap">
+                <StackItem size="fill">
+                  <Text type="supporting">{t("musicStarts", { time: clock(musicStart) })}</Text>
+                </StackItem>
+                <Button
+                  label={t("earlier")}
+                  variant="ghost"
+                  size="sm"
+                  icon={<Icon icon={MinusIcon} />}
+                  isIconOnly
+                  tooltip={t("earlier")}
+                  onClick={() => setMusicStart((at) => Math.max(0, at - 0.5))}
+                />
+                <Button
+                  label={t("later")}
+                  variant="ghost"
+                  size="sm"
+                  icon={<Icon icon={PlusIcon} />}
+                  isIconOnly
+                  tooltip={t("later")}
+                  onClick={() => setMusicStart((at) => at + 0.5)}
+                />
+                <Button
+                  label={t("startHere")}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setMusicStart(Math.round(now * 10) / 10)}
+                />
+              </HStack>
+            </>
+          ) : (
+            <Text type="supporting">{t("noTempo")}</Text>
+          ))}
         <div className="cd-video-dock__frame">
           <div ref={frame} />
         </div>
       </VStack>
     </aside>
+  );
+}
+
+/**
+ * The song's sections in the order the chart plays them, each as wide as it lasts; the one playing
+ * is marked (selection blue, and its name read out), and choosing one takes the video there.
+ */
+function SectionsBar({
+  sections,
+  now,
+  onSeek,
+  label,
+  goTo,
+}: {
+  sections: VideoSection[];
+  now: number;
+  onSeek: (seconds: number) => void;
+  label: string;
+  goTo: (name: string) => string;
+}) {
+  const playing = sectionAt(sections, now);
+  const first = sections[0]?.start ?? 0;
+  const last = sections.at(-1)?.end ?? first;
+  const span = Math.max(last - first, 1);
+  const at = Math.min(Math.max((now - first) / span, 0), 1);
+  return (
+    <div className="cd-video-bar" role="group" aria-label={label}>
+      {sections.map((section, index) => (
+        <button
+          key={`${section.section}-${index}`}
+          type="button"
+          className="cd-video-bar__section"
+          style={{ flexGrow: section.end - section.start }}
+          aria-label={goTo(section.name)}
+          aria-current={index === playing ? "true" : undefined}
+          title={section.name}
+          onClick={() => onSeek(section.start)}
+        >
+          {section.name}
+        </button>
+      ))}
+      {now >= first && now <= last && (
+        <span
+          className="cd-video-bar__mark"
+          aria-hidden="true"
+          style={{ insetInlineStart: `${at * 100}%` }}
+        />
+      )}
+    </div>
   );
 }

@@ -514,3 +514,46 @@
   inline-size: 100%;
   block-size: 100%;
 }
+/* The sections bar over the video (R-03.11): each section as wide as it lasts, the one playing in
+   the selection color, and a mark where the video is. */
+.cd-video-bar {
+  position: relative;
+  display: flex;
+  gap: var(--border-width);
+  min-block-size: var(--spacing-11);
+}
+.cd-video-bar__section {
+  flex-basis: 0;
+  min-inline-size: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0 var(--spacing-1);
+  border: 0;
+  background: var(--color-background-muted);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--font-size-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cd-video-bar__section:first-child {
+  border-start-start-radius: var(--radius-inner);
+  border-end-start-radius: var(--radius-inner);
+}
+.cd-video-bar__section:last-of-type {
+  border-start-end-radius: var(--radius-inner);
+  border-end-end-radius: var(--radius-inner);
+}
+.cd-video-bar__section[aria-current="true"] {
+  background: var(--color-background-blue);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+.cd-video-bar__mark {
+  position: absolute;
+  inset-block: 0;
+  inline-size: calc(var(--border-width) * 2);
+  background: var(--color-text-primary);
+  pointer-events: none;
+}

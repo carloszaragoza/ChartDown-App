@@ -108,7 +108,7 @@ export function Editor({
         { label: n("source"), value: source },
         details.album ? { label: n("album"), value: details.album } : null,
         details.youtube
-          ? { label: n("youtube"), value: <VideoLink url={details.youtube} /> }
+          ? { label: n("youtube"), value: <VideoLink url={details.youtube} chart={chart} /> }
           : null,
       ].filter((fact) => fact !== null)
     : [];

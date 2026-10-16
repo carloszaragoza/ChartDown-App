@@ -230,7 +230,7 @@ export function VersionForm({
                 />
                 {videoId(youtube) && (
                   <HStack>
-                    <VideoLink url={youtube} />
+                    <VideoLink url={youtube} chart={chart} />
                   </HStack>
                 )}
               </VStack>
