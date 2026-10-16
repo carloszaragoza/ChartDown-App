@@ -17,12 +17,15 @@ import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import { videoClock } from "../../lib/video/clock";
 import { sectionAt, videoSections, type VideoSection } from "../../lib/video/sections";
 import { startSeconds, videoId } from "../../lib/video/youtube";
 
 /** The part of YouTube's IFrame API the dock uses. */
 interface YouTubePlayer {
   getCurrentTime?(): number;
+  /** 1 while playing. */
+  getPlayerState?(): number;
   seekTo(seconds: number, allowSeekAhead: boolean): void;
   destroy(): void;
 }
@@ -144,9 +147,14 @@ function VideoDock({
   const t = useTranslations("video");
   const frame = useRef<HTMLDivElement>(null);
   const player = useRef<YouTubePlayer | null>(null);
+  const seeking = useRef<{ to: number; at: number } | null>(null);
   const [now, setNow] = useState(0);
   // Where the first bar falls in the video; the reader moves it to match the recording.
   const [musicStart, setMusicStart] = useState(start);
+  const startRef = useRef(musicStart);
+  useEffect(() => {
+    startRef.current = musicStart;
+  }, [musicStart]);
   const sections = useMemo(
     () => (chart ? videoSections(chart, musicStart) : null),
     [chart, musicStart],
@@ -164,22 +172,38 @@ function VideoDock({
         playerVars: { playsinline: 1, rel: 0, start: Math.floor(start) },
       });
     });
-    // The bar follows the video.
+    // The bar follows the video, and so does the chart on the page (T-2504).
     const timer = window.setInterval(() => {
       const time = player.current?.getCurrentTime?.();
-      if (typeof time === "number") setNow(time);
+      if (typeof time !== "number") return;
+      // A section just chosen holds until the video has moved there: until then the player may
+      // still report where it was (or 0, not started yet).
+      const target = seeking.current;
+      if (target !== null) {
+        if (Math.abs(time - target.to) > 1 && performance.now() - target.at < 3000) return;
+        seeking.current = null;
+      }
+      setNow(time);
+      videoClock.set({
+        time,
+        musicStart: startRef.current,
+        playing: player.current?.getPlayerState?.() === 1,
+      });
     }, 250);
     return () => {
       gone = true;
       window.clearInterval(timer);
+      videoClock.set(null);
       player.current?.destroy();
       player.current = null;
     };
   }, [id, start]);
 
   const seek = (seconds: number) => {
-    player.current?.seekTo(Math.max(0, seconds), true);
-    setNow(seconds);
+    const to = Math.max(0, seconds);
+    seeking.current = { to, at: performance.now() };
+    player.current?.seekTo(to, true);
+    setNow(to);
   };
   const clock = (seconds: number) =>
     `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
