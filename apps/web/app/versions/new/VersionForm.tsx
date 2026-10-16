@@ -3,7 +3,7 @@
 import { Banner } from "@astryxdesign/core/Banner";
 import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
 import { Button } from "@astryxdesign/core/Button";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
+import { Grid, GridSpan } from "@astryxdesign/core/Grid";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { LayoutHeader } from "@astryxdesign/core/Layout";
@@ -18,7 +18,8 @@ import { SOURCE_TYPES, type VersionError } from "../../../lib/versions/validate"
 import { ChartPreview } from "../../_components/ChartPreview";
 import { Warnings } from "../[id]/edit/Editor";
 import { createVersion, type VersionFormState } from "./actions";
-import { PageLayout } from "../../_components/PageLayout";
+import { CancelButton, WriteLayout } from "../../_components/WriteLayout";
+import { bodyLine, splitTitle, withTitle } from "../../../lib/versions/title";
 import { STARTER } from "../../../lib/versions/starter";
 import type { ReviewItem } from "../../../lib/import/convert";
 import { ImportReview } from "./import/ImportReview";
@@ -34,6 +35,8 @@ export interface VersionFormProps {
   defaultAuthor: string;
   /** The chart to start from, such as an imported sheet's draft (SPEC-10). */
   defaultContent?: string;
+  /** Where Cancel goes: where the person came from (T-2404). */
+  cancelHref?: string;
   /** What an import assumed, shown above the chart until the person publishes (R-10.8). */
   imported?: {
     review: ReviewItem[];
@@ -60,15 +63,18 @@ export function missing(fields: {
 }
 
 /**
- * The chart, its author and its source (R-02.1, R-02.2; Design Handoff 2.0 screen 05): the song's
- * details in a panel, the chart with a live preview beside them. Always published as public
- * (R-02.3). Publish waits for what is required and says what is missing.
+ * The chart, its author and its source (R-02.1, R-02.2; T-2404): the same layout as the editor,
+ * the song's details at the top and the chart's text beside its live preview. The title is
+ * written once, in the details: a draft's `title:` line moves there, and publishing writes it
+ * back into the chart. Always published as public (R-02.3). Publish waits for what is required
+ * and says what is missing; Cancel goes back.
  */
 export function VersionForm({
   song,
   defaultTitle,
   defaultAuthor,
   defaultContent,
+  cancelHref = "/versions/new",
   imported,
   phone,
 }: VersionFormProps) {
@@ -82,18 +88,35 @@ export function VersionForm({
     values: null,
   });
   const values = state.values;
-  const [title, setTitle] = useState(values?.title ?? defaultTitle);
+  // A draft's title moves to the details; the import's lines follow the text without it.
+  const [draft] = useState(() => splitTitle(values?.content ?? defaultContent ?? STARTER));
+  const [title, setTitle] = useState(values?.title ?? (defaultTitle || draft.title || ""));
   const [artists, setArtists] = useState(values?.artists ?? "");
   const [author, setAuthor] = useState(values?.author ?? defaultAuthor);
   const [source, setSource] = useState<string>(values?.sourceType ?? "");
   const [album, setAlbum] = useState(values?.album ?? "");
   const [year, setYear] = useState(values?.year ?? "");
   const [youtube, setYoutube] = useState(values?.youtube ?? "");
-  const [content, setContent] = useState(values?.content ?? defaultContent ?? STARTER);
+  const [content, setContent] = useState(draft.body);
+  const songTitle = song ? song.title : title.trim();
   const shown = useDeferredValue(content);
-  const chart = useMemo(() => parse(shown), [shown]);
+  const chart = useMemo(() => parse(withTitle(shown, songTitle)), [shown, songTitle]);
+  const warnings = useMemo(() => parse(shown).warnings, [shown]);
+  const review = useMemo(
+    () =>
+      imported?.review.map((item) => {
+        if (item.line === undefined) return item;
+        const line = bodyLine(item.line, draft.removed);
+        if (line !== null) return { ...item, line };
+        const rest = { ...item };
+        delete rest.line;
+        return rest;
+      }) ?? [],
+    [imported, draft],
+  );
   const alertRef = useRef<HTMLDivElement>(null);
   const lacking = missing({ title: song ? null : title, author, content, source });
+  const dirty = content !== draft.body || (!song && title !== (defaultTitle || draft.title || ""));
   const error = (code: VersionError) =>
     state.error === code
       ? { status: { type: "error" as const, message: t(`errors.${code}`) } }
@@ -107,11 +130,13 @@ export function VersionForm({
   return (
     <form action={action} noValidate>
       {song && <input type="hidden" name="songId" value={song.id} />}
-      <PageLayout
+      <input
+        type="hidden"
+        name="content"
+        value={content.trim() ? withTitle(content, songTitle) : ""}
+      />
+      <WriteLayout
         phone={phone}
-        height="auto"
-        // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
-        padding={8}
         header={
           <LayoutHeader hasDivider>
             <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
@@ -120,10 +145,10 @@ export function VersionForm({
                   <BreadcrumbItem href="/catalog">{c("title")}</BreadcrumbItem>
                   <BreadcrumbItem>{t("title")}</BreadcrumbItem>
                 </Breadcrumbs>
-                <Heading level={1}>{(song ? song.title : title.trim()) || t("title")}</Heading>
+                <Heading level={1}>{songTitle || t("title")}</Heading>
               </VStack>
               <HStack gap={2} vAlign="center">
-                <Button label={t("changeSong")} variant="ghost" href="/versions/new" />
+                <CancelButton href={cancelHref} dirty={dirty} />
                 <Button
                   type="submit"
                   variant="primary"
@@ -136,160 +161,153 @@ export function VersionForm({
             </HStack>
           </LayoutHeader>
         }
-        panel={{
-          side: "start",
-          width: 400,
-          label: t("details"),
-          firstOnPhone: true,
-          children: (
-            <>
-              <VStack gap={5}>
-                {state.error && (
-                  <div role="alert" ref={alertRef} tabIndex={-1}>
-                    <Banner status="error" title={t(`errors.${state.error}`)} />
-                  </div>
-                )}
-                <FormLayout>
-                  {song ? (
-                    <VStack gap={0.5}>
-                      <Text type="supporting">{t("song")}</Text>
-                      <Text weight="semibold">
-                        {song.title}
-                        {song.artists.length > 0 && ` · ${song.artists.join(", ")}`}
-                      </Text>
-                    </VStack>
-                  ) : (
-                    <>
-                      <TextInput
-                        label={t("songTitle")}
-                        htmlName="title"
-                        value={title}
-                        onChange={setTitle}
-                        isRequired
-                        {...error("title_required")}
-                      />
-                      <TextInput
-                        label={t("artists")}
-                        htmlName="artists"
-                        value={artists}
-                        onChange={setArtists}
-                        description={t("artistsHint")}
-                      />
-                    </>
-                  )}
-                  <TextInput
-                    label={t("author")}
-                    htmlName="author"
-                    value={author}
-                    onChange={setAuthor}
-                    isRequired
-                    {...error("author_required")}
-                  />
-                  <RadioList
-                    label={t("source")}
-                    description={t("sourceHint")}
-                    htmlName="sourceType"
-                    value={source}
-                    onChange={setSource}
-                    isRequired
-                    {...error("source_required")}
-                  >
-                    {SOURCE_TYPES.map((type) => (
-                      <RadioListItem key={type} value={type} label={sources(type)} />
-                    ))}
-                  </RadioList>
-                  <TextInput
-                    label={t("album")}
-                    htmlName="album"
-                    value={album}
-                    onChange={setAlbum}
-                    isOptional
-                  />
-                  <TextInput
-                    label={t("year")}
-                    htmlName="year"
-                    value={year}
-                    onChange={setYear}
-                    isOptional
-                    {...error("year_invalid")}
-                  />
-                  <TextInput
-                    label={t("youtube")}
-                    htmlName="youtube"
-                    value={youtube}
-                    onChange={setYoutube}
-                    isOptional
-                    {...error("youtube_invalid")}
-                  />
-                </FormLayout>
-                <Banner status="info" title={t("cc0Title")} description={t("cc0")} />
-              </VStack>
-            </>
-          ),
-        }}
-        contentProps={{ padding: 8 }}
-        content={
-          <>
-            <VStack gap={6}>
-              {imported && (
-                <ImportReview
-                  onGoTo={(line) => lines.current?.goTo(line)}
-                  review={imported.review}
-                  importedKey={imported.key}
-                  existing={imported.existing}
-                  onUseExisting={imported.onUseExisting}
-                  onStartOver={imported.onStartOver}
-                />
-              )}
-              <VStack gap={2}>
-                <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
-                  <Heading level={2}>{t("chartTitle")}</Heading>
-                  <Text type="supporting">ChartDown {chart.version ?? SUPPORTED_VERSION}</Text>
-                </HStack>
-                <ChartTextArea
-                  handle={lines}
-                  label={t("chart")}
-                  htmlName="content"
-                  value={content}
-                  onChange={setContent}
-                  rows={imported ? 16 : 10}
-                  isRequired
-                  flags={[
-                    ...chart.warnings.map((warning) => ({
-                      line: warning.line,
-                      kind: "warning" as const,
-                    })),
-                    ...(imported ? reviewLines(imported.review) : []),
-                  ]}
-                  goToLabel={(line) => e("goToLine", { line })}
-                  {...(state.error === "chart_required"
-                    ? { status: { type: "error" as const, message: t("errors.chart_required") } }
-                    : {})}
-                />
-                <Warnings
-                  warnings={chart.warnings}
-                  onSelect={(line) => lines.current?.goTo(line)}
-                />
-                {/* Letters work too (R-03.10): nobody has to know the Nashville numbers to start. */}
-                <Text type="supporting">{t("lettersToo")}</Text>
-                {!imported && content === STARTER && (
+        detailsLabel={t("details")}
+        details={
+          <VStack gap={4}>
+            {state.error && (
+              <div role="alert" ref={alertRef} tabIndex={-1}>
+                <Banner status="error" title={t(`errors.${state.error}`)} />
+              </div>
+            )}
+            <Grid columns={{ minWidth: 220 }} gap={4} align="start">
+              {song ? (
+                <VStack gap={0.5}>
+                  <Text type="supporting">{t("song")}</Text>
                   <HStack gap={2} vAlign="center" wrap="wrap">
-                    <Text type="supporting">{t("starterHint")}</Text>
+                    <Text weight="semibold">
+                      {song.title}
+                      {song.artists.length > 0 && ` · ${song.artists.join(", ")}`}
+                    </Text>
                     <Button
-                      size="sm"
+                      label={t("changeSong")}
                       variant="ghost"
-                      label={t("import.open")}
-                      href="/versions/new/import"
+                      size="sm"
+                      href="/versions/new"
                     />
                   </HStack>
-                )}
-              </VStack>
-              <section aria-label={t("preview")}>
-                <ChartPreview chart={chart} />
-              </section>
-            </VStack>
-          </>
+                </VStack>
+              ) : (
+                <>
+                  <TextInput
+                    label={t("songTitle")}
+                    htmlName="title"
+                    value={title}
+                    onChange={setTitle}
+                    isRequired
+                    {...error("title_required")}
+                  />
+                  <TextInput
+                    label={t("artists")}
+                    htmlName="artists"
+                    value={artists}
+                    onChange={setArtists}
+                    description={t("artistsHint")}
+                  />
+                </>
+              )}
+              <TextInput
+                label={t("author")}
+                htmlName="author"
+                value={author}
+                onChange={setAuthor}
+                isRequired
+                {...error("author_required")}
+              />
+              <TextInput
+                label={t("album")}
+                htmlName="album"
+                value={album}
+                onChange={setAlbum}
+                isOptional
+              />
+              <TextInput
+                label={t("year")}
+                htmlName="year"
+                value={year}
+                onChange={setYear}
+                isOptional
+                {...error("year_invalid")}
+              />
+              <TextInput
+                label={t("youtube")}
+                htmlName="youtube"
+                value={youtube}
+                onChange={setYoutube}
+                isOptional
+                {...error("youtube_invalid")}
+              />
+              <GridSpan columns="full">
+                <RadioList
+                  label={t("source")}
+                  description={t("sourceHint")}
+                  htmlName="sourceType"
+                  value={source}
+                  onChange={setSource}
+                  orientation={phone ? "vertical" : "horizontal"}
+                  isRequired
+                  {...error("source_required")}
+                >
+                  {SOURCE_TYPES.map((type) => (
+                    <RadioListItem key={type} value={type} label={sources(type)} />
+                  ))}
+                </RadioList>
+              </GridSpan>
+            </Grid>
+            <Banner status="info" title={t("cc0Title")} description={t("cc0")} />
+          </VStack>
         }
+        textLabel={t("chartTitle")}
+        text={
+          <VStack gap={3}>
+            {imported && (
+              <ImportReview
+                onGoTo={(line) => lines.current?.goTo(line)}
+                review={review}
+                importedKey={imported.key}
+                existing={imported.existing}
+                onUseExisting={imported.onUseExisting}
+                onStartOver={imported.onStartOver}
+              />
+            )}
+            <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
+              <Heading level={2}>{t("chartTitle")}</Heading>
+              <Text type="supporting">ChartDown {chart.version ?? SUPPORTED_VERSION}</Text>
+            </HStack>
+            <ChartTextArea
+              handle={lines}
+              label={t("chart")}
+              value={content}
+              onChange={setContent}
+              rows={16}
+              isTall
+              isRequired
+              flags={[
+                ...warnings.map((warning) => ({ line: warning.line, kind: "warning" as const })),
+                ...(imported ? reviewLines(review) : []),
+              ]}
+              goToLabel={(line) => e("goToLine", { line })}
+              {...(state.error === "chart_required"
+                ? { status: { type: "error" as const, message: t("errors.chart_required") } }
+                : {})}
+            />
+            <Warnings warnings={warnings} onSelect={(line) => lines.current?.goTo(line)} />
+            {/* Letters work too (R-03.10): nobody has to know the Nashville numbers to start. */}
+            <Text type="supporting">{t("lettersToo")}</Text>
+            {!imported && content === STARTER && (
+              <HStack gap={2} vAlign="center" wrap="wrap">
+                <Text type="supporting">{t("starterHint")}</Text>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  label={t("import.open")}
+                  href="/versions/new/import"
+                />
+              </HStack>
+            )}
+          </VStack>
+        }
+        previewLabel={t("preview")}
+        preview={<ChartPreview chart={chart} />}
       />
     </form>
   );

@@ -40,6 +40,7 @@ export function ChartTextArea({
   isRequired,
   status,
   goToLabel,
+  isTall = false,
 }: {
   handle?: Ref<ChartTextAreaHandle>;
   label: string;
@@ -52,6 +53,8 @@ export function ChartTextArea({
   status?: { type: "error"; message: string } | undefined;
   /** "Go to line {line}", for the numbers a person can choose. */
   goToLabel: (line: number) => string;
+  /** As tall as the screen, for the pages where writing the chart is the job (T-2404). */
+  isTall?: boolean;
 }) {
   const box = useRef<HTMLDivElement>(null);
   const area = useRef<HTMLTextAreaElement>(null);
@@ -115,7 +118,7 @@ export function ChartTextArea({
 
   return (
     <div
-      className="cd-lines"
+      className={isTall ? "cd-lines cd-lines--tall" : "cd-lines"}
       ref={box}
       style={
         metrics

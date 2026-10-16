@@ -176,6 +176,13 @@
   }
 }
 
+/* The preview beside the text where a version is written (T-2404): half the page, so the bars are
+   narrower and the chords a size smaller, and a row of four still fits. */
+.cd-chart-compact .cd-chart {
+  --chart-bar-min-width: calc(var(--spacing-12) * 1.75);
+  --chart-chord-size: var(--font-size-2xl);
+}
+
 /* A phone in portrait (design handoff 5, R-03.8): a row wraps into lines of two bars instead of
    scrolling sideways, every line sharing the row's four lines; the chords are drawn at the viewer's
    size and a bar may be narrower. Each line starts with a bar line, a repeat's where one starts.
@@ -469,6 +476,10 @@
   font-weight: var(--font-weight-bold);
   line-height: var(--cd-lines-height, 1.5em);
   user-select: none;
+}
+/* The page's job is the chart: the text fills the screen's height, below the page's header. */
+.cd-lines--tall textarea {
+  block-size: max(calc(100dvh - var(--spacing-12) * 2), 18rem);
 }
 .cd-lines textarea {
   white-space: pre;

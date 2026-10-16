@@ -44,9 +44,8 @@ test("R-03.1 the preview updates without reloading", async ({ page }) => {
   await expect(
     page.getByRole("main").getByRole("status").filter({ hasText: "Saved as revision 2." }).first(),
   ).toBeVisible();
-  await expect(save).toBeDisabled();
-
-  await page.getByRole("link", { name: "View version" }).click();
+  // R-03.1 a save returns to the version (T-2404).
+  await expect(page).toHaveURL(new RegExp(`${address}\\?saved=2$`));
   await expect(page.getByRole("heading", { name: "Coda" })).toBeVisible();
   await page.getByRole("main").getByRole("link", { name: "History" }).click();
   await expect(
@@ -109,4 +108,37 @@ test("R-03.1 saving refuses a version that changed elsewhere and keeps the text"
   ).toBeVisible();
   await expect(page.getByLabel("Chart (ChartDown)")).toHaveValue("## Verse\n1 | 6m\n");
   await context.close();
+});
+
+test("R-03.1 Cancel leaves the editor for the version, asking first when there are changes", async ({
+  page,
+}) => {
+  const title = `Willow Gate ${Date.now()}`;
+  await signUpAndConfirm(page, unique("cancel"), "Cass Cancel");
+  await page.goto(`/versions/new?song=new&q=${encodeURIComponent(title)}`);
+  // R-02.1 the title is written once: in the details, not in the chart's text (T-2404).
+  await expect(page.getByLabel("Song title")).toHaveValue(title);
+  await expect(page.getByLabel("Chart (ChartDown)")).not.toHaveValue(/title:/);
+  await page.getByLabel("Live").check();
+  await page.getByRole("button", { name: "Publish version" }).click();
+  await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
+  const address = new URL(page.url()).pathname;
+
+  await page.goto(`${address}/edit`);
+  await expect(page.getByRole("region", { name: "Song details" })).toContainText(title);
+  await expect(page.getByLabel("Chart (ChartDown)")).not.toHaveValue(/title:/);
+  await page.getByRole("link", { name: "Cancel", exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`${address}$`));
+
+  await page.goto(`${address}/edit`);
+  await writeChart(page, "## Verse\n6m | 4\n");
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  const ask = page.getByRole("alertdialog", { name: "Leave without saving?" });
+  await ask.getByRole("button", { name: "Keep writing" }).click();
+  await expect(page.getByLabel("Chart (ChartDown)")).toHaveValue("## Verse\n6m | 4\n");
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  await ask.getByRole("button", { name: "Leave" }).click();
+  await expect(page).toHaveURL(new RegExp(`${address}$`));
+  // The starter's chorus is still there: nothing was saved.
+  await expect(page.getByRole("heading", { name: "Chorus" })).toBeVisible();
 });
