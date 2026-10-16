@@ -16,3 +16,19 @@ export function groupReview(
   }
   return [...groups].map(([kind, group]) => ({ kind, ...group }));
 }
+
+// What the parser says about the chart is shown live under it; the review keeps what only the
+// import knows: its own assumptions.
+const LIVE: readonly ReviewItem["kind"][] = ["unknown-chord", "chart-warning"];
+
+/** The import's own assumptions, without what the parser reports live. */
+export function importAssumptions(review: ReviewItem[]): ReviewItem[] {
+  return review.filter((item) => !LIVE.includes(item.kind));
+}
+
+/** The lines the import asks to check, to mark beside the text. */
+export function reviewLines(review: ReviewItem[]): { line: number; kind: "review" }[] {
+  return importAssumptions(review).flatMap((item) =>
+    item.line === undefined ? [] : [{ line: item.line, kind: "review" as const }],
+  );
+}

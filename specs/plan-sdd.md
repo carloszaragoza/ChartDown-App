@@ -198,7 +198,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 **Requirements**
 
-- R-03.1 ChartDown text editor with live preview and error warnings.
+- R-03.1 ChartDown text editor with live preview and error warnings. The text shows its line numbers; a line with a warning, or one an import asks to check (R-10.8), has its number marked, and choosing a warning, a marked number or a line in the import's review selects that line (owner's review, October 15, 2026).
 - R-03.2 Switch between numbers and letters, and transpose.
 - R-03.3 Stand mode: full screen, large type, advance by section with one tap. On a touch screen (iPad or phone), swiping the chart left or right also moves to the next or previous section (owner's request, October 14, 2026).
 - R-03.4 Print or export to PDF.

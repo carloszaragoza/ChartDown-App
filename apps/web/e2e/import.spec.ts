@@ -125,3 +125,24 @@ test("R-03.10 New version never opens on a blank chart: a starter, the letters h
   await page.getByRole("link", { name: "Import a chord sheet" }).first().click();
   await expect(page).toHaveURL(/\/versions\/new\/import$/);
 });
+
+test("R-10.8 a line the review names is marked beside the chart, and choosing it selects the line", async ({
+  page,
+}) => {
+  await signUpAndConfirm(page, unique("lines"), "Lina Lines");
+  await page.goto("/versions/new/import");
+  await page.locator("textarea").first().fill(MORNING_LIGHT);
+  await page.getByText("I have the right to use this chord sheet.").click();
+  await page.getByRole("button", { name: "Convert to a chart" }).click();
+  const line = page.locator(".cd-lines").getByRole("button", { name: "Go to line 10" });
+  await expect(line).toHaveAttribute("data-flag", "review");
+  await page
+    .getByRole("group", { name: "Lines to check" })
+    .getByRole("button", { name: "Go to line 10" })
+    .click();
+  const selected = await page.evaluate(() => {
+    const field = document.querySelector<HTMLTextAreaElement>("textarea[name=content]");
+    return field ? field.value.slice(field.selectionStart, field.selectionEnd) : "";
+  });
+  expect(selected).toBe('1 "Morning comes slow over" | 5/7');
+});

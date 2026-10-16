@@ -7,7 +7,7 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import { useTranslations } from "next-intl";
-import { groupReview, type ReviewItem } from "../../../../lib/import/review";
+import { groupReview, importAssumptions, type ReviewItem } from "../../../../lib/import/review";
 
 /**
  * What the import assumed, above the draft (R-10.8): the key it read or guessed, the rows whose
@@ -19,16 +19,21 @@ export function ImportReview({
   existing,
   onUseExisting,
   onStartOver,
+  onGoTo,
 }: {
   review: ReviewItem[];
   importedKey: string;
   existing: { id: string; title: string } | null;
   onUseExisting: () => void;
   onStartOver: () => void;
+  /** Selects a line of the chart. */
+  onGoTo: (line: number) => void;
 }) {
   const t = useTranslations("newVersion.import.review");
   const guessed = review.some((item) => item.kind === "key-guessed");
-  const groups = groupReview(review).filter((group) => group.kind !== "key-guessed");
+  const groups = groupReview(importAssumptions(review)).filter(
+    (group) => group.kind !== "key-guessed",
+  );
   return (
     <section aria-labelledby="import-review">
       <VStack gap={3}>
@@ -64,16 +69,30 @@ export function ImportReview({
           }
         />
         {groups.map((group) => (
-          <Banner
-            key={group.kind}
-            status="warning"
-            title={t(`kinds.${group.kind}`, { count: Math.max(group.lines.length, 1) })}
-            {...(group.lines.length > 0
-              ? { description: t("lines", { lines: group.lines.join(", ") }) }
-              : group.details.length > 0
+          <VStack key={group.kind} gap={2}>
+            <Banner
+              status="warning"
+              title={t(`kinds.${group.kind}`, { count: Math.max(group.lines.length, 1) })}
+              {...(group.lines.length === 0 && group.details.length > 0
                 ? { description: group.details.join(" · ") }
                 : {})}
-          />
+            />
+            {group.lines.length > 0 && (
+              <HStack gap={1} wrap="wrap" role="group" aria-label={t("linesLabel")}>
+                {group.lines.map((line, index) => (
+                  <Button
+                    key={`${line}-${index}`}
+                    size="sm"
+                    variant="ghost"
+                    label={t("goTo", { line })}
+                    onClick={() => onGoTo(line)}
+                  >
+                    {String(line)}
+                  </Button>
+                ))}
+              </HStack>
+            )}
+          </VStack>
         ))}
         {groups.length === 0 && <Banner status="success" title={t("nothing")} />}
       </VStack>

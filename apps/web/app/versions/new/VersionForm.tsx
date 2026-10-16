@@ -9,7 +9,6 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { LayoutHeader } from "@astryxdesign/core/Layout";
 import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
 import { Text } from "@astryxdesign/core/Text";
-import { TextArea } from "@astryxdesign/core/TextArea";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { VStack } from "@astryxdesign/core/VStack";
 import { parse, SUPPORTED_VERSION } from "chartdown";
@@ -23,6 +22,8 @@ import { PageLayout } from "../../_components/PageLayout";
 import { STARTER } from "../../../lib/versions/starter";
 import type { ReviewItem } from "../../../lib/import/convert";
 import { ImportReview } from "./import/ImportReview";
+import { ChartTextArea, type ChartTextAreaHandle } from "../../_components/ChartTextArea";
+import { reviewLines } from "../../../lib/import/review";
 
 export interface VersionFormProps {
   /** The server's guess that the page opens on a phone (R-03.9). */
@@ -72,6 +73,8 @@ export function VersionForm({
   phone,
 }: VersionFormProps) {
   const t = useTranslations("newVersion");
+  const e = useTranslations("editor");
+  const lines = useRef<ChartTextAreaHandle>(null);
   const c = useTranslations("catalog");
   const sources = useTranslations("version.source");
   const [state, action, pending] = useActionState<VersionFormState, FormData>(createVersion, {
@@ -230,6 +233,7 @@ export function VersionForm({
             <VStack gap={6}>
               {imported && (
                 <ImportReview
+                  onGoTo={(line) => lines.current?.goTo(line)}
                   review={imported.review}
                   importedKey={imported.key}
                   existing={imported.existing}
@@ -242,18 +246,30 @@ export function VersionForm({
                   <Heading level={2}>{t("chartTitle")}</Heading>
                   <Text type="supporting">ChartDown {chart.version ?? SUPPORTED_VERSION}</Text>
                 </HStack>
-                <TextArea
+                <ChartTextArea
+                  handle={lines}
                   label={t("chart")}
-                  isLabelHidden
                   htmlName="content"
                   value={content}
                   onChange={setContent}
-                  rows={10}
-                  hasSpellCheck={false}
+                  rows={imported ? 16 : 10}
                   isRequired
-                  {...error("chart_required")}
+                  flags={[
+                    ...chart.warnings.map((warning) => ({
+                      line: warning.line,
+                      kind: "warning" as const,
+                    })),
+                    ...(imported ? reviewLines(imported.review) : []),
+                  ]}
+                  goToLabel={(line) => e("goToLine", { line })}
+                  {...(state.error === "chart_required"
+                    ? { status: { type: "error" as const, message: t("errors.chart_required") } }
+                    : {})}
                 />
-                <Warnings warnings={chart.warnings} />
+                <Warnings
+                  warnings={chart.warnings}
+                  onSelect={(line) => lines.current?.goTo(line)}
+                />
                 {/* Letters work too (R-03.10): nobody has to know the Nashville numbers to start. */}
                 <Text type="supporting">{t("lettersToo")}</Text>
                 {!imported && content === STARTER && (

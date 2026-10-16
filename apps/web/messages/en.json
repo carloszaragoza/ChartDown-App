@@ -486,7 +486,6 @@
         "notSaved": "This is a draft: nothing is saved until you publish it.",
         "keyRead": "Key {key}, as the sheet says.",
         "keyGuessed": "Key {key}, guessed from the first chord. Check it.",
-        "lines": "Lines {lines} of the chart.",
         "nothing": "Nothing else to check.",
         "kinds": {
           "bars-proposed": "{count, plural, one {# row has bars we proposed} other {# rows have bars we proposed}}: one chord per bar. Check where each bar starts.",
@@ -499,7 +498,9 @@
         "existing": "“{title}” is already in the catalog.",
         "existingHint": "You can add your version to that song instead of starting a new one.",
         "useExisting": "Add my version to that song",
-        "openExisting": "See that song"
+        "openExisting": "See that song",
+        "linesLabel": "Lines to check",
+        "goTo": "Go to line {line}"
       },
       "pdf": "Or pick a PDF",
       "pdfHint": "A PDF with text, up to 5 pages and 5 MB. Its text fills the box below, to check before converting. Scanned sheets and photos can't be read yet.",
@@ -578,7 +579,8 @@
     "visibility": "Visibility",
     "numbers": "Numbers",
     "privateForGood": "This version is private; a private version doesn't go back to public.",
-    "textPanel": "ChartDown text"
+    "textPanel": "ChartDown text",
+    "goToLine": "Go to line {line}"
   },
   "viewer": {
     "label": "Display",
