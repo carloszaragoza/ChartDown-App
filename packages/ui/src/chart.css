@@ -486,3 +486,31 @@
   overflow-wrap: normal;
   overflow-x: auto;
 }
+
+/* The mini player (R-03.11): docked at the bottom of the page, over the content, at YouTube's
+   smallest size, so the chart stays in view while the video plays. */
+.cd-video-dock {
+  position: fixed;
+  z-index: 20;
+  inset-inline-end: var(--spacing-4);
+  inset-block-end: calc(var(--spacing-4) + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+  inline-size: calc(356px + var(--spacing-2) * 2);
+  max-inline-size: calc(100vw - var(--spacing-4) * 2);
+  padding: var(--spacing-2);
+  border: var(--border-width) solid var(--color-border-emphasized);
+  border-radius: var(--radius-container);
+  background: var(--color-background-card);
+  box-shadow: var(--shadow-high);
+}
+.cd-video-dock__frame {
+  overflow: hidden;
+  border-radius: var(--radius-inner);
+  aspect-ratio: 356 / 200;
+  max-inline-size: 100%;
+}
+.cd-video-dock__frame iframe {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}

@@ -101,3 +101,20 @@ test("R-02.1 a new version from a version's page starts from that version's char
   await page.getByRole("link", { name: "Cancel", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/versions/${first}$`));
 });
+
+test("R-03.11 a YouTube link opens the video in a mini player, and Close closes it", async ({
+  page,
+}) => {
+  await signUpAndConfirm(page, unique("video"), "Vera Video");
+  await page.goto("/versions/new?song=new&q=Tide%20Lamp");
+  await page.getByLabel("YouTube link").fill("https://www.youtube.com/watch?v=hBL9EBKB5DI");
+  await page.getByRole("button", { name: "Play the video" }).click();
+  const dock = page.getByRole("complementary", { name: "Video" });
+  await expect(dock).toBeVisible();
+  await expect(dock.getByRole("link", { name: "Open on YouTube" })).toHaveAttribute(
+    "href",
+    "https://www.youtube.com/watch?v=hBL9EBKB5DI",
+  );
+  await dock.getByRole("button", { name: "Close the video" }).click();
+  await expect(dock).toHaveCount(0);
+});

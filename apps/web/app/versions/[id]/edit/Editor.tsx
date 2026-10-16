@@ -22,6 +22,7 @@ import { ChartTextArea, type ChartTextAreaHandle } from "../../../_components/Ch
 import { ChartPreview } from "../../../_components/ChartPreview";
 import { saveChart, type SaveState } from "./actions";
 import { CancelButton, WriteLayout } from "../../../_components/WriteLayout";
+import { VideoLink } from "../../../_components/VideoDock";
 import { splitTitle, withTitle } from "../../../../lib/versions/title";
 
 export interface EditorProps {
@@ -106,7 +107,9 @@ export function Editor({
         { label: n("author"), value: details.author },
         { label: n("source"), value: source },
         details.album ? { label: n("album"), value: details.album } : null,
-        details.youtube ? { label: n("youtube"), value: details.youtube } : null,
+        details.youtube
+          ? { label: n("youtube"), value: <VideoLink url={details.youtube} /> }
+          : null,
       ].filter((fact) => fact !== null)
     : [];
 
@@ -179,7 +182,11 @@ export function Editor({
           {facts.map((fact) => (
             <VStack key={fact.label} gap={0.5}>
               <Text type="supporting">{fact.label}</Text>
-              <Text weight="semibold">{fact.value}</Text>
+              {typeof fact.value === "string" ? (
+                <Text weight="semibold">{fact.value}</Text>
+              ) : (
+                <HStack>{fact.value}</HStack>
+              )}
             </VStack>
           ))}
         </Grid>

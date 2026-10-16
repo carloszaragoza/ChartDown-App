@@ -23,7 +23,7 @@ const props: VersionViewProps = {
     type: "own_arrangement",
     album: null,
     year: 2026,
-    youtube: "https://www.youtube.com/watch?v=x",
+    youtube: "https://www.youtube.com/watch?v=hBL9EBKB5DI",
   },
   chart: openRoad,
   signedIn: false,
@@ -42,7 +42,8 @@ describe("R-01.4 a public version as everyone reads it", () => {
     expect(html).toContain("Open Road");
     expect(html).toContain("Arrangement by Carlos");
     expect(html).toContain("Own arrangement · 2026");
-    expect(html).toContain("Watch on YouTube");
+    // R-03.11 the link opens the video in the mini player.
+    expect(html).toContain("Play the video");
     expect(html.match(/<section aria-label="[^"]*" id="section-\d+"/g)).toHaveLength(
       openRoad.sections.length,
     );
