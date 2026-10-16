@@ -1,9 +1,5 @@
-import {
-  sectionLength,
-  type ChordFormatter,
-  type Section as SectionData,
-  type SectionLength,
-} from "chartdown";
+import { playedLength } from "./played";
+import { type ChordFormatter, type Section as SectionData, type SectionLength } from "chartdown";
 import { BarRow, type BarLabels } from "./Bar";
 import { MDNote, orderNotes, type MDNoteData } from "./MDNote";
 
@@ -40,7 +36,7 @@ export function Section({
     <section className="cd-section" aria-label={section.name} id={id}>
       <header className="cd-section__header">
         <h2 className="cd-section__title">{section.name}</h2>
-        <span className="cd-section__length">{labels.length(sectionLength(section))}</span>
+        <span className="cd-section__length">{labels.length(playedLength(section))}</span>
       </header>
       {orderNotes(notes).map((note, index) => (
         <MDNote key={index} note={note} instrumentName={labels.bar.instrument} />
@@ -70,7 +66,7 @@ export function NextSection({
   return (
     <div className="cd-next">
       <p className="cd-next__title">
-        {labels.next}: <b>{section.name}</b> · {labels.length(sectionLength(section))}
+        {labels.next}: <b>{section.name}</b> · {labels.length(playedLength(section))}
         {hasNotesForYou && ` · ${labels.notesForYou}`}
       </p>
       {first && <BarRow row={first} formatter={formatter} size="sm" labels={labels.bar} />}

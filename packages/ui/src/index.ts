@@ -61,3 +61,4 @@ export {
   type SectionLabels,
   type SectionProps,
 } from "./Section";
+export { playedLength } from "./played";

@@ -70,3 +70,16 @@ test("F-011 the version page changes its view in place, asking the server nothin
   );
   expect(asked).toEqual([]);
 });
+
+test("R-00.17 a section reused with a count shows how many times it plays", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, {
+    title: `Counted Copy ${Date.now()}`,
+    content: "---\nchartdown: 0.8\n---\n## Chorus\n4 | 1 | 5 | 6m\n## Chorus 2\n@use Chorus 3x\n",
+  });
+  await page.goto(`/versions/${id}`);
+  await expect(page.locator("#section-2")).toContainText("4 bars ×3");
+  await expect(page.locator("#section-1")).not.toContainText("×");
+});

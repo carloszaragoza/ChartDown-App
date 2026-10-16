@@ -143,6 +143,7 @@
     "unsupported-version": "This chart says ChartDown {version}; this parser reads {supported}",
     "header-not-closed": "The header needs a closing <code>---</code> line",
     "use-with-rows": "<code>@use</code> must be the only content line of a section; its own rows are kept",
+    "use-zero-times": "A section plays at least once: <code>0x</code> is read as <code>1x</code>",
     "layer-no-section": "Notes need a section first, like <code>## Chorus</code>",
     "layer-line": "A layer holds only sections, bar headings and notes",
     "bad-bar-heading": "Bar headings look like <code>### Bar 3</code>",
