@@ -127,16 +127,16 @@ test("R-03.1 Cancel leaves the editor for the version, asking first when there a
   await page.goto(`${address}/edit`);
   await expect(page.getByRole("region", { name: "Song details" })).toContainText(title);
   await expect(page.getByLabel("Chart (ChartDown)")).not.toHaveValue(/title:/);
-  await page.getByRole("link", { name: "Cancel" }).click();
+  await page.getByRole("link", { name: "Cancel", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`${address}$`));
 
   await page.goto(`${address}/edit`);
   await writeChart(page, "## Verse\n6m | 4\n");
-  await page.getByRole("button", { name: "Cancel" }).click();
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
   const ask = page.getByRole("alertdialog", { name: "Leave without saving?" });
   await ask.getByRole("button", { name: "Keep writing" }).click();
   await expect(page.getByLabel("Chart (ChartDown)")).toHaveValue("## Verse\n6m | 4\n");
-  await page.getByRole("button", { name: "Cancel" }).click();
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
   await ask.getByRole("button", { name: "Leave" }).click();
   await expect(page).toHaveURL(new RegExp(`${address}$`));
   // The starter's chorus is still there: nothing was saved.
