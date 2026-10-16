@@ -33,7 +33,11 @@ export function splitTitle(content: string): {
     lines.splice(0, 2);
     removed.push(1, end + 1);
   }
-  return { title: title || null, body: lines.join(newline), removed: removed.sort((a, b) => a - b) };
+  return {
+    title: title || null,
+    body: lines.join(newline),
+    removed: removed.sort((a, b) => a - b),
+  };
 }
 
 /** The chart with the title as its header's `title:` line, in place of any it had. */
