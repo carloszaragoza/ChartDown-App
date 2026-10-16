@@ -256,6 +256,16 @@ What moves with the parser: its sources, its history, its tests (SPEC-00, R-00.x
 | T-2102 | github.com/ChartDown/parser: the history of `packages/core` (only that folder), a standalone build with no monorepo files, its own CI (type check, tests, the suite), MIT, and `homepage`, `repository` and `bugs` pointing to it; its README links to the spec | – | T-2101 | M | The repository's CI passes; the packed package passes the 0.7 suite through its adapter |
 | T-2103 | The app installs `chartdown` from npm (`^0.3.0`) in `apps/web` and `packages/ui`, and `packages/core` leaves the monorepo; the R-00.1 catalog test and the example charts the app's tests use move into the app; the root README and LICENSE no longer list `packages/core` | R-00.1 | T-2007 | S | CI passes with the package from npm; the R-00.1 test reads `supabase/migrations` |
 
+## E25 · Listen while you read (owner's review, October 16, 2026)
+
+A version's YouTube video in a mini player at the bottom, with the song's sections as a bar that follows it (R-03.11). The video is embedded from youtube-nocookie.com with YouTube's IFrame API; its sound is never read. Saving where the music starts adds one column to versions and a function for its owner (Technical Plan, data model), reviewed with the owner before it reaches a database.
+
+| ID | Task | Requirements | Depends on | Size | Tests / evidence |
+|---|---|---|---|---|---|
+| T-2501 | The mini player: the YouTube link on the version page, the editor and New version opens the video docked at the bottom, 200 px, closable, not offered offline; in Edit the link is a link | R-03.11 | T-2404 | M | Unit: a YouTube address gives its video id, others none; end-to-end: tapping the link opens the player and Close closes it |
+| T-2502 | The sections bar: each section's start and length in seconds from the tempo, meter, bars and the order the chart plays, from where the music starts; the mark follows the video, a section takes the video there, and Music starts at is adjusted on screen; no tempo, a message instead of the bar | R-03.11 | T-2501 | M | Unit: the times of a chart with repeats and a jump at 72 and 120 bpm, with a start of 7 s; end-to-end: tapping Chorus moves the video's time |
+| T-2503 | Where the music starts is saved by the version's owner for everyone: a column on versions and a function only the owner may call (migration reviewed with the owner) | R-03.11 | T-2502 | S | SQL: only the owner saves it; end-to-end: saved, a visitor's bar starts there |
+
 ## E24 · The app's flow (owner's review, October 16, 2026)
 
 The owner's review of the app in use: the editor shouldn't read like code, a whole row is a tap target, the catalog keeps its place, editing and new versions share one layout with a way back, the person's versions can be searched, and Edit set stays short with many musicians.
