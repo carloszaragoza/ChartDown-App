@@ -1372,6 +1372,8 @@
     "homeLink": "Inicio"
   },
   "mine": {
+    "search": "Busca tus versiones por título",
+    "none": "Ninguna de tus versiones coincide.",
     "title": "Tus versiones",
     "description": "Las versiones que publicaste o mantienes privadas. Edita un chart o escribe las notas del director para tu banda.",
     "newVersion": "Nueva versión",
