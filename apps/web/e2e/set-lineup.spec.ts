@@ -1,16 +1,17 @@
 import { expect, test } from "@playwright/test";
 import { createVersion } from "./admin";
 import {
+  addToSet,
+  chooseInstrument,
+  createSet,
+  expectSignedIn,
+  expectStatus,
   PASSWORD,
+  setKey,
   signIn,
   signOut,
   signUpAndConfirm,
   unique,
-  addToSet,
-  expectStatus,
-  createSet,
-  setKey,
-  expectSignedIn,
 } from "./flows";
 
 const CHART = "---\nkey: G\n---\n## Verse\n1 | 4 | 5 | 1\n";
@@ -71,7 +72,7 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
   await setKey(page, title, "A");
   await expectStatus(page, "The key was saved.");
   await expect(page.getByText("in A (written in G)")).toBeVisible();
-  await page.getByRole("group", { name: "Ben Bass" }).getByLabel("Bass", { exact: true }).check();
+  await chooseInstrument(page, "Ben Bass", "Bass");
   await page.getByRole("button", { name: "Save lineup" }).click();
   await expectStatus(page, "The lineup was saved.");
   await expect(page.getByText("This set has its own lineup.")).toBeVisible();

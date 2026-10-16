@@ -151,3 +151,10 @@ export async function expectSignedIn(page: Page, name: string) {
   // The person's link to their profile, in any language.
   await expect(page.locator('a[href="/profile"]').filter({ hasText: name }).first()).toBeVisible();
 }
+
+/** Puts a musician on an instrument in Edit set's lineup, from their instruments menu (T-2407). */
+export async function chooseInstrument(page: Page, name: string, instrument: string) {
+  await page.getByRole("combobox", { name: `Instruments for ${name}` }).click();
+  await page.getByRole("option", { name: instrument, exact: true }).click();
+  await page.keyboard.press("Escape");
+}

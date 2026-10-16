@@ -2,8 +2,11 @@
 
 import { Button } from "@astryxdesign/core/Button";
 import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
+import { Item } from "@astryxdesign/core/Item";
+import { List } from "@astryxdesign/core/List";
+import { MultiSelector } from "@astryxdesign/core/MultiSelector";
+import { TextInput } from "@astryxdesign/core/TextInput";
 import { DateInput } from "@astryxdesign/core/DateInput";
-import { Grid } from "@astryxdesign/core/Grid";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Text } from "@astryxdesign/core/Text";
@@ -50,31 +53,37 @@ export function KeySelect({
   );
 }
 
-/** Who plays what in this set (R-05.3): each member's instruments, by default their own. */
+/**
+ * The set's lineup (R-05.3): one line per musician, their instruments chosen from a menu, so a
+ * band of a dozen still fits the panel; with more than 8 musicians, a filter by name (T-2407).
+ */
 export function LineupForm({
   setId,
   members,
   instruments,
-  save,
+  words,
 }: {
   setId: string;
-  members: { id: string; name: string; plays: string[] }[];
+  /** Each musician, with the name of their instruments' menu ("Instruments for Ana"). */
+  members: { id: string; name: string; plays: string[]; menu: string }[];
   instruments: { id: string; name: string }[];
-  save: string;
+  words: { save: string; filter: string; none: string };
 }) {
   const [lineup, setLineup] = useState(
     Object.fromEntries(members.map((member) => [member.id, member.plays])),
   );
-  const toggle = (memberId: string, instrumentId: string, on: boolean) =>
-    setLineup((current) => ({
-      ...current,
-      [memberId]: on
-        ? [...(current[memberId] ?? []), instrumentId]
-        : (current[memberId] ?? []).filter((id) => id !== instrumentId),
-    }));
+  const [filter, setFilter] = useState("");
+  const shown = members.filter((member) =>
+    member.name.toLocaleLowerCase().includes(filter.trim().toLocaleLowerCase()),
+  );
+  const options = instruments.map((instrument) => ({
+    value: instrument.id,
+    label: instrument.name,
+  }));
   return (
     <form action={saveLineup}>
       <input type="hidden" name="setId" value={setId} />
+      {/* Every musician is saved, including those the filter hides. */}
       {members.map((member) => (
         <Fragment key={member.id}>
           <input type="hidden" name="member" value={member.id} />
@@ -83,29 +92,35 @@ export function LineupForm({
           ))}
         </Fragment>
       ))}
-      <VStack gap={4}>
-        {members.map((member) => (
-          <VStack key={member.id} gap={1}>
-            <Text weight="semibold" id={`lineup-${member.id}`}>
-              {member.name}
-            </Text>
-            <div role="group" aria-labelledby={`lineup-${member.id}`}>
-              <Grid columns={{ minWidth: 120 }} gap={0.5}>
-                {instruments.map((instrument) => (
-                  <CheckboxInput
-                    key={instrument.id}
-                    label={instrument.name}
-                    size="sm"
-                    value={(lineup[member.id] ?? []).includes(instrument.id)}
-                    onChange={(on) => toggle(member.id, instrument.id, on)}
-                  />
-                ))}
-              </Grid>
-            </div>
-          </VStack>
-        ))}
+      <VStack gap={3}>
+        {members.length > 8 && (
+          <TextInput label={words.filter} value={filter} onChange={setFilter} size="sm" />
+        )}
+        <List hasDividers density="compact">
+          {shown.map((member) => (
+            <Item
+              key={member.id}
+              as="li"
+              label={member.name}
+              endContent={
+                <MultiSelector
+                  label={member.menu}
+                  isLabelHidden
+                  options={options}
+                  value={lineup[member.id] ?? []}
+                  onChange={(value) => setLineup((current) => ({ ...current, [member.id]: value }))}
+                  triggerDisplay="labels"
+                  placeholder={words.none}
+                  hasSearch={options.length > 15}
+                  size="sm"
+                  width={180}
+                />
+              }
+            />
+          ))}
+        </List>
         <HStack>
-          <Button type="submit" variant="primary" label={save} />
+          <Button type="submit" variant="primary" label={words.save} />
         </HStack>
       </VStack>
     </form>

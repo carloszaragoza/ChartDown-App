@@ -258,9 +258,14 @@ export default async function SetPage({
                       id: member.id,
                       name: profileName(member),
                       plays: lineupOf(member),
+                      menu: t("lineupFor", { name: profileName(member) }),
                     }))}
                     instruments={sortedInstruments(everyPlays)}
-                    save={t("lineupSave")}
+                    words={{
+                      save: t("lineupSave"),
+                      filter: t("lineupFilter"),
+                      none: t("lineupNone"),
+                    }}
                   />
                   {ownLineup && (
                     <form action={resetLineup}>
@@ -312,6 +317,41 @@ export default async function SetPage({
                   )}
                 </VStack>
               </section>
+              {isMd && (
+                <>
+                  <Divider />
+                  <section aria-labelledby="set-copy">
+                    <VStack gap={3}>
+                      <Heading level={2} id="set-copy">
+                        {t("duplicate")}
+                      </Heading>
+                      <NameForm
+                        action={duplicateSet}
+                        hidden={{ setId: set.id }}
+                        label={t("newName")}
+                        defaultValue={t("copyName", { name: set.name })}
+                        description={t("duplicateHint")}
+                        submit={t("duplicateButton")}
+                        variant="secondary"
+                        isReadyAsIs
+                      />
+                    </VStack>
+                  </section>
+                  <Divider />
+                  <section aria-labelledby="set-delete">
+                    <VStack gap={3}>
+                      <Heading level={2} id="set-delete">
+                        {t("delete")}
+                      </Heading>
+                      <DeleteSetForm
+                        setId={set.id}
+                        bandId={set.band_id}
+                        words={{ confirm: t("deleteConfirm"), submit: t("deleteButton") }}
+                      />
+                    </VStack>
+                  </section>
+                </>
+              )}
             </VStack>
           </>
         ),
@@ -449,31 +489,6 @@ export default async function SetPage({
                           submit: t("save"),
                           missing: t("createMissing"),
                         }}
-                      />
-                    </VStack>
-                  </Card>
-                  <Card>
-                    <VStack gap={3}>
-                      <Heading level={3}>{t("duplicate")}</Heading>
-                      <NameForm
-                        action={duplicateSet}
-                        hidden={{ setId: set.id }}
-                        label={t("newName")}
-                        defaultValue={t("copyName", { name: set.name })}
-                        description={t("duplicateHint")}
-                        submit={t("duplicateButton")}
-                        variant="secondary"
-                        isReadyAsIs
-                      />
-                    </VStack>
-                  </Card>
-                  <Card>
-                    <VStack gap={3}>
-                      <Heading level={3}>{t("delete")}</Heading>
-                      <DeleteSetForm
-                        setId={set.id}
-                        bandId={set.band_id}
-                        words={{ confirm: t("deleteConfirm"), submit: t("deleteButton") }}
                       />
                     </VStack>
                   </Card>
