@@ -20,7 +20,11 @@ describe("T-2401 the editor marks a flagged line where it is", () => {
       { line: 2, kind: "review" },
       { line: 5, kind: "warning" },
     ]);
-    const marks = [...html.matchAll(/class="cd-lines__mark" data-flag="(\w+)"[^>]*><button[^>]*aria-label="Go to line (\d+)"[^>]*>(\d+)</g)];
+    const marks = [
+      ...html.matchAll(
+        /class="cd-lines__mark" data-flag="(\w+)"[^>]*><button[^>]*aria-label="Go to line (\d+)"[^>]*>(\d+)</g,
+      ),
+    ];
     expect(marks.map((mark) => [mark[1], mark[2], mark[3]])).toEqual([
       ["review", "2", "2"],
       ["warning", "5", "5"],
