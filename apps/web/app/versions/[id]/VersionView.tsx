@@ -178,7 +178,7 @@ export function VersionView({
                   </Text>
                   {source.youtube && (
                     <HStack>
-                      <VideoLink url={source.youtube} />
+                      <VideoLink url={source.youtube} chart={chart} />
                     </HStack>
                   )}
                 </VStack>

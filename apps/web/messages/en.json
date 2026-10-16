@@ -1395,6 +1395,13 @@
     "notesShort": "Director's notes"
   },
   "video": {
+    "sections": "Sections",
+    "goTo": "Go to {name}",
+    "musicStarts": "Music starts at {time}",
+    "earlier": "Earlier",
+    "later": "Later",
+    "startHere": "Music starts here",
+    "noTempo": "Add a tempo to the chart to place its sections on the video.",
     "play": "Play the video",
     "player": "Video",
     "openYouTube": "Open on YouTube",

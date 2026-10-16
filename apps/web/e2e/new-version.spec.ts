@@ -115,6 +115,18 @@ test("R-03.11 a YouTube link opens the video in a mini player, and Close closes 
     "href",
     "https://www.youtube.com/watch?v=hBL9EBKB5DI",
   );
+  // The chart's sections as a bar over the video; choosing one goes there (T-2502).
+  const bar = dock.getByRole("group", { name: "Sections" });
+  await expect(bar.getByRole("button")).toHaveText(["Verse", "Chorus"]);
+  await bar.getByRole("button", { name: "Go to Chorus" }).click();
+  await expect(bar.getByRole("button", { name: "Go to Chorus" })).toHaveAttribute(
+    "aria-current",
+    "true",
+  );
+  await expect(dock).toContainText("Music starts at 0:00");
+  await dock.getByRole("button", { name: "Later" }).click();
+  await dock.getByRole("button", { name: "Later" }).click();
+  await expect(dock).toContainText("Music starts at 0:01");
   await dock.getByRole("button", { name: "Close the video" }).click();
   await expect(dock).toHaveCount(0);
 });
