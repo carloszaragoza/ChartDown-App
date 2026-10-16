@@ -256,6 +256,20 @@ What moves with the parser: its sources, its history, its tests (SPEC-00, R-00.x
 | T-2102 | github.com/ChartDown/parser: the history of `packages/core` (only that folder), a standalone build with no monorepo files, its own CI (type check, tests, the suite), MIT, and `homepage`, `repository` and `bugs` pointing to it; its README links to the spec | – | T-2101 | M | The repository's CI passes; the packed package passes the 0.7 suite through its adapter |
 | T-2103 | The app installs `chartdown` from npm (`^0.3.0`) in `apps/web` and `packages/ui`, and `packages/core` leaves the monorepo; the R-00.1 catalog test and the example charts the app's tests use move into the app; the root README and LICENSE no longer list `packages/core` | R-00.1 | T-2007 | S | CI passes with the package from npm; the R-00.1 test reads `supabase/migrations` |
 
+## E24 · The app's flow (owner's review, October 16, 2026)
+
+The owner's review of the app in use: the editor shouldn't read like code, a whole row is a tap target, the catalog keeps its place, editing and new versions share one layout with a way back, the person's versions can be searched, and Edit set stays short with many musicians.
+
+| ID | Task | Requirements | Depends on | Size | Tests / evidence |
+|---|---|---|---|---|---|
+| T-2401 | The editor marks a flagged line where it is: a band across the line with its number inside, at the right; no column of numbers. Replaces the gutter of T-601 | R-03.1 | T-601 | S | Unit: only flagged lines have a mark, with their number; end-to-end: choosing a review line selects it |
+| T-2402 | Catalog rows are tap targets as a whole: a song in the list and a version of the open song lead where their name does | R-02.10 | T-501 | S | End-to-end: tapping a version's row, away from its name, opens the version |
+| T-2403 | The catalog keeps its place: a version opened from the catalog has a way back to it with the search, source, page and open song kept, and the catalog brings that song into view | R-02.10 | T-2402 | S | End-to-end: search, open a version, go back: the same search and song, the song in view |
+| T-2404 | One layout to write a version, for Edit and New version: the song's details in a panel at the top (song, arrangement by, source, album, year, YouTube), the chart's text on the left as tall as the screen and wider when there is room, the drawn chart on the right; the title written once, in the details (the text has no `title:` line; saving writes it into the header); Cancel goes back to where the person came from (asking first when there are changes), and Save returns to the version | R-02.1, R-02.2, R-03.1 | T-601, T-1409 | L | Unit: the title moves from the text to the details and back on save; end-to-end: Edit, Cancel returns to the version unchanged; Save returns to the version with the new revision; New version, Cancel returns |
+| T-2405 | A new version of an existing song starts from its chart: the version the person came from, or the song's most recently updated public version | R-02.1 | T-2404 | S | End-to-end: New version from a version's page starts with that version's chart |
+| T-2406 | Your versions can be searched by title and is shown 50 at a time with More; its row actions are icon buttons (Open, Edit, Director's notes) | R-03.1, R-03.5 | T-2402 | S | End-to-end: searching finds one version among many; the row's icons open, edit and annotate it |
+| T-2407 | Edit set: Duplicate and Delete in the side panel; the lineup as one line per musician with their instruments as chips, changed from a menu, and a filter by name when there are more than 8 musicians | R-05.3, R-05.6 | T-705 | M | End-to-end: a band of 12 sets its lineup from the menus; Duplicate and Delete are in the panel |
+
 ## E23 · ChartDown 0.8
 
 ChartDown 0.8 (ChartDown/spec PR #18, `732dc25`, October 15, 2026) adds a count after `@use`. The parser follows the merged spec in its own repository, and the app installs the release (owner's approval, October 15, 2026).
