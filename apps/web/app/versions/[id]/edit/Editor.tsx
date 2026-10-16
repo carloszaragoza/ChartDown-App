@@ -103,10 +103,6 @@ export function Editor({
   const goTo = (line: number) => lines.current?.goTo(line);
   const facts = details
     ? [
-        {
-          label: n("song"),
-          value: [title, details.artists.join(", ")].filter(Boolean).join(" · "),
-        },
         { label: n("author"), value: details.author },
         { label: n("source"), value: source },
         details.album ? { label: n("album"), value: details.album } : null,
@@ -129,6 +125,9 @@ export function Editor({
                 })}
               </Text>
               <Heading level={1}>{title}</Heading>
+              {details && details.artists.length > 0 && (
+                <Text color="secondary">{details.artists.join(", ")}</Text>
+              )}
             </VStack>
             <form action={action}>
               <input type="hidden" name="versionId" value={versionId} />

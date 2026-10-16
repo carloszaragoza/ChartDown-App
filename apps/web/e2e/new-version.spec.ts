@@ -66,6 +66,9 @@ test("R-02.1 a version of a song already in the catalog", async ({ page, request
   await page.getByRole("link", { name: `Use ${title}` }).click();
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
   await expect(page.getByLabel("Song title")).toHaveCount(0);
+  // The artists under the title, and Choose another song beside Cancel, in the header.
+  await expect(page.getByText("ChartDown examples", { exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Choose another song" })).toBeVisible();
   // It starts from the song's chart, not from the example (T-2405).
   await expect(page.getByLabel("Chart (ChartDown)")).toHaveValue(/## Verse\n1 \| 4/);
   await page.getByLabel("Acoustic").check();

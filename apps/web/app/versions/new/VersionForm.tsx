@@ -146,8 +146,13 @@ export function VersionForm({
                   <BreadcrumbItem>{t("title")}</BreadcrumbItem>
                 </Breadcrumbs>
                 <Heading level={1}>{songTitle || t("title")}</Heading>
+                {/* The song's artists under its title; the details don't repeat the song. */}
+                {song && song.artists.length > 0 && (
+                  <Text color="secondary">{song.artists.join(", ")}</Text>
+                )}
               </VStack>
-              <HStack gap={2} vAlign="center">
+              <HStack gap={2} vAlign="center" wrap="wrap">
+                {song && <Button label={t("changeSong")} variant="ghost" href="/versions/new" />}
                 <CancelButton href={cancelHref} dirty={dirty} />
                 <Button
                   type="submit"
@@ -170,23 +175,7 @@ export function VersionForm({
               </div>
             )}
             <Grid columns={{ minWidth: 220 }} gap={4} align="start">
-              {song ? (
-                <VStack gap={0.5}>
-                  <Text type="supporting">{t("song")}</Text>
-                  <HStack gap={2} vAlign="center" wrap="wrap">
-                    <Text weight="semibold">
-                      {song.title}
-                      {song.artists.length > 0 && ` · ${song.artists.join(", ")}`}
-                    </Text>
-                    <Button
-                      label={t("changeSong")}
-                      variant="ghost"
-                      size="sm"
-                      href="/versions/new"
-                    />
-                  </HStack>
-                </VStack>
-              ) : (
+              {!song && (
                 <>
                   <TextInput
                     label={t("songTitle")}
