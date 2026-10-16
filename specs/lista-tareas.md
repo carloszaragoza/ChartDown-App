@@ -279,7 +279,7 @@ Owner's request, October 14, 2026: people share links to songs and always have a
 | T-2205 | The owner checks a shared link on a real iPhone 16 and Pro Max, in portrait and landscape, light and Stage | – | T-2203, T-2204, T-2206 | S | The owner approves |
 | T-2207 | Pages with a side panel on a phone: one shared layout that puts the panel under the main content when `usePhone` says so (server guess first), used by Home, a set, Edit set, Bands, a band's sets, the chart editor, New version, the director's notes (its section list first) and Administration's instruments | R-03.9 | T-2203 | M | End-to-end at 360 and 390 px: each page has one column, its main content first, no sideways scroll; unit: the layout without a panel slot on a phone |
 | T-2208 | Choices, lists and headers on a phone: View as and the catalog's source become a `Selector`; Your versions' rows and a set's songs put the title first and wrap their actions; page headers wrap their actions at full length; a set's song puts the metronome buttons on their own line | R-03.9 | T-2207 | M | End-to-end at 360 px: no "…" in a button, a choice or a title the person needs; the song titles in Your versions are visible; 44 px targets |
-| T-2209 | The owner checks the app on a real iPhone and an Android phone (Samsung), signed in as an MD and as a musician | – | T-2207, T-2208 | S | The owner's report; findings become tasks |
+| T-2209 | The owner checks the app on a real iPhone and an Android phone (Samsung), signed in as an MD and as a musician | – | T-2207, T-2208 | S | The owner's report; findings become tasks. **Done**: the owner tested on real phones on October 15, 2026, with no findings |
 
 ## E19 · Play from the device first (phase 2)
 
