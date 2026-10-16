@@ -258,13 +258,14 @@ What moves with the parser: its sources, its history, its tests (SPEC-00, R-00.x
 
 ## E25 · Listen while you read (owner's review, October 16, 2026)
 
-A version's YouTube video in a mini player at the bottom, with the song's sections as a bar that follows it (R-03.11). The video is embedded from youtube-nocookie.com with YouTube's IFrame API; its sound is never read. Saving where the music starts adds one column to versions and a function for its owner (Technical Plan, data model), reviewed with the owner before it reaches a database.
+A version's YouTube video in a mini player at the bottom, with the song's sections as a bar that follows it (R-03.11). The video is embedded from youtube-nocookie.com with YouTube's IFrame API; its sound is never read. Saving where the music starts adds one column to versions, which the owner's existing update permission covers (Technical Plan, data model); approved by the owner on October 16, 2026.
 
 | ID | Task | Requirements | Depends on | Size | Tests / evidence |
 |---|---|---|---|---|---|
 | T-2501 | The mini player: the YouTube link on the version page, the editor and New version opens the video docked at the bottom, 200 px, closable, not offered offline; in Edit the link is a link | R-03.11 | T-2404 | M | Unit: a YouTube address gives its video id, others none; end-to-end: tapping the link opens the player and Close closes it |
 | T-2502 | The sections bar: each section's start and length in seconds from the tempo, meter, bars and the order the chart plays, from where the music starts; the mark follows the video, a section takes the video there, and Music starts at is adjusted on screen; no tempo, a message instead of the bar | R-03.11 | T-2501 | M | Unit: the times of a chart with repeats and a jump at 72 and 120 bpm, with a start of 7 s; end-to-end: tapping Chorus moves the video's time |
-| T-2503 | Where the music starts is saved by the version's owner for everyone: a column on versions and a function only the owner may call (migration reviewed with the owner) | R-03.11 | T-2502 | S | SQL: only the owner saves it; end-to-end: saved, a visitor's bar starts there |
+| T-2503 | Where the music starts is saved by the version's owner for everyone: one column on versions (0 to 1 hour, in milliseconds) that the owner's existing update permission covers, and Save for everyone in the dock; everyone's bar starts there | R-03.11 | T-2502 | S | SQL: only the owner of an active version saves it, and only within its limits; end-to-end: saved, it is there when the video is opened again |
+| T-2504 | The chart follows the video: while it plays, the bar being played (from the video's time, where the music starts and the chart's tempo) is marked on the chart and kept in view, as with the metronome; the metronome, when playing, comes first | R-03.11 | T-2502 | M | Unit: the bar playing at a time, with repeats, at 72 bpm and a start of 7 s |
 
 ## E24 · The app's flow (owner's review, October 16, 2026)
 
