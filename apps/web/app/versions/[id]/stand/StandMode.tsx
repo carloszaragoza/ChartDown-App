@@ -12,13 +12,14 @@ import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
 import { chartdownStandTheme } from "../../../../theme/chartdown-stand";
-import { chordFormatter, keyName, parse, sectionLength, type Key } from "chartdown";
+import { chordFormatter, keyName, parse, type Key } from "chartdown";
 import {
   BarRow,
   formStripItems,
   hasPickup,
   type FormStripItem,
   type MDNoteData,
+  playedLength,
 } from "@chartdown/ui";
 import {
   AdjustmentsHorizontalIcon,
@@ -622,7 +623,7 @@ function StandModeView({
                 <>
                   <Text type="supporting">
                     {labels.next}: <b>{again ? t("again", { name: next.name }) : next.name}</b> ·{" "}
-                    {labels.length(sectionLength(next), { pickup: hasPickup(next) })}
+                    {labels.length(playedLength(next), { pickup: hasPickup(next) })}
                     {forYou[nextIndex] && ` · ${labels.notesForYou}`}
                   </Text>
                   {!isPhone && next.rows[0] && (

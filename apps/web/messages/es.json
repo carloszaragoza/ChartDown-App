@@ -143,6 +143,7 @@
     "unsupported-version": "Este cifrado indica ChartDown {version}; este lector lee {supported}",
     "header-not-closed": "El encabezado necesita una línea de cierre <code>---</code>",
     "use-with-rows": "<code>@use</code> debe ser la única línea de contenido de la sección; se conservan sus propias filas",
+    "use-zero-times": "Una sección se toca al menos una vez: <code>0x</code> se lee como <code>1x</code>",
     "layer-no-section": "Las notas necesitan una sección antes, como <code>## Chorus</code>",
     "layer-line": "Una capa solo contiene secciones, encabezados de compás y notas",
     "bad-bar-heading": "Los encabezados de compás tienen la forma <code>### Bar 3</code>",

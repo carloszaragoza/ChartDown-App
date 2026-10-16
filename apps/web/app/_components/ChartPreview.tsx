@@ -8,7 +8,6 @@ import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import {
   chordFormatter,
-  sectionLength,
   type Chart,
   type ChordFormatter,
   type ChordStyle,
@@ -25,6 +24,7 @@ import {
   type FormStripItem,
   type MDNoteData,
   type SectionLabels,
+  playedLength,
 } from "@chartdown/ui";
 import { Theme } from "@astryxdesign/core";
 import { chartdownStandTheme } from "../../theme/chartdown-stand";
@@ -80,7 +80,7 @@ export function ChartSection({
         <HStack gap={2} vAlign="center">
           <Heading level={2}>{section.name}</Heading>
           <Text type="supporting">
-            {labels.length(sectionLength(section), { pickup: hasPickup(section) })}
+            {labels.length(playedLength(section), { pickup: hasPickup(section) })}
           </Text>
         </HStack>
         <MDNotes notes={notes ?? section.notes} instrumentName={labels.bar.instrument} />

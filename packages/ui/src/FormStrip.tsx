@@ -1,4 +1,5 @@
-import { sectionLength, type Chart, type SectionLength } from "chartdown";
+import { playedLength } from "./played";
+import { type Chart, type SectionLength } from "chartdown";
 
 export type FormState = "played" | "current" | "upcoming";
 
@@ -66,7 +67,7 @@ export function formStripItems(
       name: section.name,
       abbreviation:
         count > 1 && !/\d$/.test(abbreviation) ? `${abbreviation}${count}` : abbreviation,
-      length: sectionLength(section),
+      length: playedLength(section),
       state: index < current ? "played" : index === current ? "current" : "upcoming",
       hasNotes: hasNotes(index),
       href: `#section-${index + 1}`,
