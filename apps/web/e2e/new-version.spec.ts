@@ -95,6 +95,6 @@ test("R-02.1 a new version from a version's page starts from that version's char
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
   await expect(page.getByLabel("Chart (ChartDown)")).toHaveValue(/## Verse\n1 \| 5/);
   // Cancel goes back to the version it came from.
-  await page.getByRole("link", { name: "Cancel" }).click();
+  await page.getByRole("link", { name: "Cancel", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/versions/${first}$`));
 });
