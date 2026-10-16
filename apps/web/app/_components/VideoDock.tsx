@@ -17,12 +17,15 @@ import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import { videoClock } from "../../lib/video/clock";
 import { sectionAt, videoSections, type VideoSection } from "../../lib/video/sections";
 import { startSeconds, videoId } from "../../lib/video/youtube";
 
 /** The part of YouTube's IFrame API the dock uses. */
 interface YouTubePlayer {
   getCurrentTime?(): number;
+  /** 1 while playing. */
+  getPlayerState?(): number;
   seekTo(seconds: number, allowSeekAhead: boolean): void;
   destroy(): void;
 }
@@ -147,6 +150,10 @@ function VideoDock({
   const [now, setNow] = useState(0);
   // Where the first bar falls in the video; the reader moves it to match the recording.
   const [musicStart, setMusicStart] = useState(start);
+  const startRef = useRef(musicStart);
+  useEffect(() => {
+    startRef.current = musicStart;
+  }, [musicStart]);
   const sections = useMemo(
     () => (chart ? videoSections(chart, musicStart) : null),
     [chart, musicStart],
@@ -164,14 +171,21 @@ function VideoDock({
         playerVars: { playsinline: 1, rel: 0, start: Math.floor(start) },
       });
     });
-    // The bar follows the video.
+    // The bar follows the video, and so does the chart on the page (T-2504).
     const timer = window.setInterval(() => {
       const time = player.current?.getCurrentTime?.();
-      if (typeof time === "number") setNow(time);
+      if (typeof time !== "number") return;
+      setNow(time);
+      videoClock.set({
+        time,
+        musicStart: startRef.current,
+        playing: player.current?.getPlayerState?.() === 1,
+      });
     }, 250);
     return () => {
       gone = true;
       window.clearInterval(timer);
+      videoClock.set(null);
       player.current?.destroy();
       player.current = null;
     };
