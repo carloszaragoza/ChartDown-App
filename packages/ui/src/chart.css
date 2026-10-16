@@ -421,50 +421,54 @@
    warning, amber for something to check (never color alone: it is also a button that selects
    its line, named "Go to line N"). */
 .cd-lines {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: start;
+  position: relative;
 }
-.cd-lines__gutter {
-  box-sizing: border-box;
-  max-block-size: calc(var(--cd-lines-box, 100%) + var(--border-width) * 2);
+/* Over the text's box, scrolled with it; only the numbers take a tap. */
+.cd-lines__marks {
+  position: absolute;
   overflow: hidden;
-  margin-block-start: var(--border-width);
-  padding-block: var(--cd-lines-top, var(--spacing-2));
-  padding-inline-end: var(--spacing-1);
-  color: var(--color-text-secondary);
-  font-family: var(--font-family-code);
-  font-size: var(--font-size-sm);
-  text-align: end;
-  user-select: none;
+  pointer-events: none;
+}
+.cd-lines__track {
+  position: relative;
+  block-size: calc(
+    var(--cd-lines-top, var(--spacing-2)) * 2 + var(--cd-lines-height, 1.5em) *
+      var(--cd-lines-count, 1)
+  );
+}
+.cd-lines__mark {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: calc(
+    var(--cd-lines-top, var(--spacing-2)) + var(--cd-lines-height, 1.5em) * var(--cd-lines-at, 0)
+  );
+  display: flex;
+  justify-content: flex-end;
+  block-size: var(--cd-lines-height, 1.5em);
+  border-inline-start: var(--border-width-thick, 2px) solid var(--cd-lines-ink);
+  background: color-mix(in srgb, var(--cd-lines-tint) 30%, transparent);
+}
+.cd-lines__mark[data-flag="review"] {
+  --cd-lines-ink: var(--color-warning);
+  --cd-lines-tint: var(--color-warning-muted);
+}
+.cd-lines__mark[data-flag="warning"] {
+  --cd-lines-ink: var(--color-error);
+  --cd-lines-tint: var(--color-error-muted);
 }
 .cd-lines__number {
-  display: block;
-  box-sizing: border-box;
-  inline-size: 100%;
-  block-size: var(--cd-lines-height, 1.5em);
-  min-inline-size: 2.5ch;
+  pointer-events: auto;
   margin: 0;
-  padding: 0 var(--spacing-1);
+  padding: 0 var(--spacing-2);
   border: 0;
-  border-radius: var(--radius-sm, 4px);
-  background: none;
-  color: inherit;
-  font: inherit;
-  line-height: var(--cd-lines-height, 1.5em);
-  text-align: end;
-}
-.cd-lines__number[data-flag] {
+  background: var(--cd-lines-tint);
+  color: var(--cd-lines-ink);
   cursor: pointer;
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
-}
-.cd-lines__number[data-flag="review"] {
-  background: var(--color-warning-muted);
-  color: var(--color-warning);
-}
-.cd-lines__number[data-flag="warning"] {
-  background: var(--color-error-muted);
-  color: var(--color-error);
+  line-height: var(--cd-lines-height, 1.5em);
+  user-select: none;
 }
 .cd-lines textarea {
   white-space: pre;

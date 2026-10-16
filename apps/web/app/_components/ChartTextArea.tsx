@@ -23,10 +23,11 @@ export interface ChartTextAreaHandle {
 }
 
 /**
- * The ChartDown text with its line numbers beside it (owner's review, October 15, 2026): the
- * warnings and the import's review name lines, so the editor shows them. A flagged line's number
- * is marked, red for a warning and amber for something to check; a number selects its line.
- * Lines don't wrap, so each number stays beside its line; a long line scrolls sideways.
+ * The ChartDown text with its flagged lines marked where they are (owner's reviews, October 15
+ * and 16, 2026): a band across a line with a warning, red, or one the import asks to check,
+ * amber, with the line's number inside the band at its right end; the number selects the line.
+ * Other lines show no number, so the editor doesn't read like code. Lines don't wrap, so a band
+ * stays on its line; a long line scrolls sideways.
  */
 export function ChartTextArea({
   handle,
@@ -52,17 +53,21 @@ export function ChartTextArea({
   /** "Go to line {line}", for the numbers a person can choose. */
   goToLabel: (line: number) => string;
 }) {
+  const box = useRef<HTMLDivElement>(null);
   const area = useRef<HTMLTextAreaElement>(null);
-  const gutter = useRef<HTMLDivElement>(null);
+  const marks = useRef<HTMLDivElement>(null);
   const [metrics, setMetrics] = useState<{
     lineHeight: string;
     paddingTop: string;
+    top: number;
+    left: number;
+    width: number;
     height: number;
   } | null>(null);
   const count = value.split("\n").length;
   const flagOf = new Map<number, LineFlag["kind"]>();
   for (const flag of flags)
-    if (flagOf.get(flag.line) !== "warning") flagOf.set(flag.line, flag.kind);
+    if (flag.line <= count && flagOf.get(flag.line) !== "warning") flagOf.set(flag.line, flag.kind);
 
   const goTo = (line: number) => {
     const field = area.current;
@@ -72,23 +77,28 @@ export function ChartTextArea({
     field.setSelectionRange(start, end);
     const height = Number.parseFloat(getComputedStyle(field).lineHeight) || 20;
     field.scrollTop = Math.max(0, (line - 3) * height);
-    if (gutter.current) gutter.current.scrollTop = field.scrollTop;
+    if (marks.current) marks.current.scrollTop = field.scrollTop;
   };
   useImperativeHandle(handle, () => ({ goTo }));
 
-  // The numbers follow the text: the same line height and top padding, and the same scroll.
+  // The marks lie over the text's box: the same line height and top padding, and the same scroll.
   useEffect(() => {
     const field = area.current;
     if (!field) return;
     const follow = () => {
-      if (gutter.current) gutter.current.scrollTop = field.scrollTop;
+      if (marks.current) marks.current.scrollTop = field.scrollTop;
     };
-    // As tall as the text's box, measured again when the person resizes it.
+    // Measured again when the person or the page resizes the text.
     const measure = () => {
       const style = getComputedStyle(field);
+      const outer = box.current?.getBoundingClientRect();
+      const inner = field.getBoundingClientRect();
       setMetrics({
         lineHeight: style.lineHeight,
         paddingTop: style.paddingTop,
+        top: inner.top - (outer?.top ?? inner.top) + field.clientTop,
+        left: inner.left - (outer?.left ?? inner.left) + field.clientLeft,
+        width: field.clientWidth,
         height: field.clientHeight,
       });
       follow();
@@ -106,38 +116,16 @@ export function ChartTextArea({
   return (
     <div
       className="cd-lines"
+      ref={box}
       style={
         metrics
           ? ({
               "--cd-lines-height": metrics.lineHeight,
               "--cd-lines-top": metrics.paddingTop,
-              "--cd-lines-box": `${metrics.height}px`,
             } as CSSProperties)
           : undefined
       }
     >
-      <div className="cd-lines__gutter" ref={gutter}>
-        {Array.from({ length: count }, (_, index) => {
-          const line = index + 1;
-          const kind = flagOf.get(line);
-          return kind ? (
-            <button
-              key={line}
-              type="button"
-              className="cd-lines__number"
-              data-flag={kind}
-              aria-label={goToLabel(line)}
-              onClick={() => goTo(line)}
-            >
-              {line}
-            </button>
-          ) : (
-            <span key={line} className="cd-lines__number" aria-hidden="true">
-              {line}
-            </span>
-          );
-        })}
-      </div>
       <TextArea
         ref={area}
         label={label}
@@ -150,6 +138,42 @@ export function ChartTextArea({
         {...(isRequired ? { isRequired } : {})}
         {...(status ? { status } : {})}
       />
+      {flagOf.size > 0 && (
+        <div
+          className="cd-lines__marks"
+          ref={marks}
+          style={
+            metrics
+              ? {
+                  top: metrics.top,
+                  left: metrics.left,
+                  width: metrics.width,
+                  height: metrics.height,
+                }
+              : { display: "none" }
+          }
+        >
+          <div className="cd-lines__track" style={{ "--cd-lines-count": count } as CSSProperties}>
+            {[...flagOf].map(([line, kind]) => (
+              <div
+                key={line}
+                className="cd-lines__mark"
+                data-flag={kind}
+                style={{ "--cd-lines-at": line - 1 } as CSSProperties}
+              >
+                <button
+                  type="button"
+                  className="cd-lines__number"
+                  aria-label={goToLabel(line)}
+                  onClick={() => goTo(line)}
+                >
+                  {line}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
