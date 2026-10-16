@@ -47,6 +47,7 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
         album: version.source.album,
         year: version.source.year,
         youtube: version.source.youtube,
+        videoStart: version.videoStart,
       }}
     />
   );

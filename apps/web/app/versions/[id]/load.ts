@@ -15,6 +15,8 @@ export interface LoadedVersion {
   title: string;
   artists: string[];
   source: VersionSource;
+  /** Where the music starts in the video, in seconds, when the owner saved it (R-03.11). */
+  videoStart: number | null;
 }
 
 /**
@@ -29,7 +31,7 @@ export async function loadVersion(
   const { data: version } = await supabase
     .from("versions")
     .select(
-      "id, song_id, owner_id, author_name, forked_from_id, visibility, status, source_type, source_album, source_year, source_youtube_url, current_revision_id, song:songs(title, artists)",
+      "id, song_id, owner_id, author_name, forked_from_id, visibility, status, source_type, source_album, source_year, source_youtube_url, video_start_ms, current_revision_id, song:songs(title, artists)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -55,6 +57,7 @@ export async function loadVersion(
       year: version.source_year,
       youtube: version.source_youtube_url,
     },
+    videoStart: typeof version.video_start_ms === "number" ? version.video_start_ms / 1000 : null,
   };
 }
 

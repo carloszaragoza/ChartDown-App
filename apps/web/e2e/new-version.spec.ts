@@ -130,3 +130,31 @@ test("R-03.11 a YouTube link opens the video in a mini player, and Close closes 
   await dock.getByRole("button", { name: "Close the video" }).click();
   await expect(dock).toHaveCount(0);
 });
+
+test("R-03.11 the owner saves where the music starts, and it is there for the next reader", async ({
+  page,
+}) => {
+  await signUpAndConfirm(page, unique("start"), "Stella Start");
+  await page.goto("/versions/new?song=new&q=Brass%20Lantern");
+  await page.getByLabel("YouTube link").fill("https://www.youtube.com/watch?v=hBL9EBKB5DI");
+  await page.getByLabel("Live").check();
+  await page.getByRole("button", { name: "Publish version" }).click();
+  await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
+  const address = new URL(page.url()).pathname;
+
+  await page.getByRole("button", { name: "Play the video" }).click();
+  const dock = page.getByRole("complementary", { name: "Video" });
+  await dock.getByRole("button", { name: "Later" }).click();
+  await dock.getByRole("button", { name: "Later" }).click();
+  await dock.getByRole("button", { name: "Save for everyone" }).click();
+  await expect(dock.getByRole("button", { name: "Save for everyone" })).toHaveCount(0);
+
+  // A visitor opens the video: the bar starts where the owner said.
+  await signOut(page);
+  await page.goto(address);
+  await page.getByRole("button", { name: "Play the video" }).click();
+  await expect(page.getByRole("complementary", { name: "Video" })).toContainText(
+    "Music starts at 0:01",
+  );
+  await expect(page.getByRole("button", { name: "Save for everyone" })).toHaveCount(0);
+});
