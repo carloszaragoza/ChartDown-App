@@ -2,6 +2,7 @@
 
 import { Icon } from "@astryxdesign/core/Icon";
 import {
+  ArrowLeftIcon,
   ArrowPathIcon,
   ArrowRightIcon,
   ArrowsPointingOutIcon,
@@ -99,4 +100,8 @@ export function HideIcon() {
 
 export function ShowIcon() {
   return <Icon icon={EyeIcon} />;
+}
+
+export function BackIcon() {
+  return <Icon icon={ArrowLeftIcon} />;
 }

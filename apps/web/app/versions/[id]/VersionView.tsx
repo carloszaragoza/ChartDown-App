@@ -13,6 +13,7 @@ import type { ReactNode } from "react";
 import { EditIcon, ForkIcon, StandIcon } from "../../_components/ActionIcons";
 import { forkVersion } from "./actions";
 import type { Display } from "./display";
+import { BackToCatalog } from "./BackToCatalog";
 import type { BasedOn } from "./load";
 import { AddToSet, ReportForm, VersionMenu } from "./VersionControls";
 import { DisplayBar, DisplayedChart, ShownKey, StandLink, VersionDisplay } from "./VersionDisplay";
@@ -61,6 +62,8 @@ export interface VersionViewProps {
   notice?: ReactNode;
   /** The server's guess that this is a phone: a 16 px gutter and the song form as a strip (R-03.8). */
   phone?: boolean;
+  /** The song, for the way back to the catalog when the person came from there (R-02.10). */
+  songId?: string;
 }
 
 /** How a set reads in the "Add to a set" choice: its band, or the person's own sets, and its name. */
@@ -93,6 +96,7 @@ export function VersionView({
   path,
   notice,
   phone = false,
+  songId,
 }: VersionViewProps) {
   const t = useTranslations("version");
   const s = useTranslations("sets");
@@ -130,6 +134,7 @@ export function VersionView({
               {notice}
               <HStack gap={4} vAlign="start" hAlign="between" wrap="wrap">
                 <VStack gap={1}>
+                  {songId && <BackToCatalog song={songId} label={t("backToCatalog")} />}
                   <Text type="supporting">
                     {[artists.join(", "), ...facts].filter(Boolean).join(" · ")}
                   </Text>

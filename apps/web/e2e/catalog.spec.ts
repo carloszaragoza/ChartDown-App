@@ -87,3 +87,32 @@ test("R-02.10 a version's whole row opens it, not only its Open button", async (
   await page.getByRole("main").getByText("Low Tide").first().click();
   await expect(page).toHaveURL(new RegExp(`/versions/${id}$`));
 });
+
+test("R-02.10 back from a version, the catalog keeps the search and the open song", async ({
+  page,
+  request,
+}) => {
+  const stamp = Date.now();
+  await createVersion(request, { title: `Ember Road ${stamp} A`, content: "## Verse\n1 | 4\n" });
+  const second = await createVersion(request, {
+    title: `Ember Road ${stamp} B`,
+    content: "## Verse\n1 | 5\n",
+    album: "Far Lanterns",
+  });
+  await page.goto(`/catalog?q=${encodeURIComponent(`Ember Road ${stamp}`)}`);
+  await page.getByRole("link", { name: new RegExp(`Ember Road ${stamp} B`) }).click();
+  await expect(page.getByRole("main").getByRole("heading", { level: 2 })).toHaveText(
+    `Ember Road ${stamp} B`,
+  );
+  await page.getByRole("main").getByText("Far Lanterns").first().click();
+  await expect(page).toHaveURL(new RegExp(`/versions/${second}$`));
+
+  await page.getByRole("link", { name: "Back to the catalog" }).click();
+  await expect(page).toHaveURL(/\/catalog\?/);
+  await expect(page.getByLabel("Search by title, artist or album")).toHaveValue(
+    `Ember Road ${stamp}`,
+  );
+  const open = page.getByRole("main").getByRole("heading", { level: 2 });
+  await expect(open).toHaveText(`Ember Road ${stamp} B`);
+  await expect(open).toBeInViewport();
+});

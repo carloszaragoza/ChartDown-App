@@ -5,6 +5,7 @@ export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{1
 
 export interface LoadedVersion {
   id: string;
+  songId: string;
   ownerId: string | null;
   author: string;
   currentRevisionId: string | null;
@@ -28,7 +29,7 @@ export async function loadVersion(
   const { data: version } = await supabase
     .from("versions")
     .select(
-      "id, owner_id, author_name, forked_from_id, visibility, status, source_type, source_album, source_year, source_youtube_url, current_revision_id, song:songs(title, artists)",
+      "id, song_id, owner_id, author_name, forked_from_id, visibility, status, source_type, source_album, source_year, source_youtube_url, current_revision_id, song:songs(title, artists)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -39,6 +40,7 @@ export async function loadVersion(
   } | null;
   return {
     id: version.id,
+    songId: version.song_id,
     ownerId: version.owner_id,
     author: version.author_name,
     currentRevisionId: version.current_revision_id,

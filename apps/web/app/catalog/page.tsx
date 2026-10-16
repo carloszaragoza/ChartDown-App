@@ -19,6 +19,7 @@ import { AddIcon, ForkIcon, PublicIcon } from "../_components/ActionIcons";
 import { forkVersion } from "../versions/[id]/actions";
 import { CatalogSearch } from "./CatalogSearch";
 import { ActionRow } from "../_components/ActionRow";
+import { RememberCatalog } from "./RememberCatalog";
 import { guessPhone } from "../../lib/shell/guessPhone";
 
 type Search = Promise<{ q?: string; source?: string; page?: string; song?: string }>;
@@ -168,111 +169,122 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
               <EmptyState title={t("none")} />
             ) : (
               <>
-                <Card>
-                  <VStack gap={2}>
-                    <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
-                      <VStack gap={0.5}>
-                        <Heading level={2}>{open.title}</Heading>
-                        {open.artists.length > 0 && (
-                          <Text type="supporting">{open.artists.join(", ")}</Text>
-                        )}
-                      </VStack>
-                      <Text type="supporting">{t("versions", { count: open.versions })}</Text>
-                    </HStack>
-                    <List
-                      hasDividers
-                      edgeCompensation="inline"
-                      header={
-                        <Text className="cd-visually-hidden">
-                          {t("versionsOf", { title: open.title })}
-                        </Text>
-                      }
-                    >
-                      {versions
-                        .filter((version) => version.song_id === open.song_id)
-                        .map((version) => {
-                          const chart = version.current_revision_id
-                            ? charts.get(version.current_revision_id)
-                            : undefined;
-                          const mine = signedIn && auth.user?.id === version.owner_id;
-                          const names = { title: open.title, author: version.author_name };
-                          return (
-                            <ActionRow
-                              key={version.id}
-                              phone={phone}
-                              isLink
-                              startContent={
-                                <Token
-                                  label={[sources(version.source_type), version.source_year]
-                                    .filter(Boolean)
-                                    .join(" ")}
-                                  size="sm"
-                                />
-                              }
-                              label={
-                                version.source_album
-                                  ? v("album", { album: version.source_album })
-                                  : version.source_youtube_url
-                                    ? v("youtube")
-                                    : sources(version.source_type)
-                              }
-                              description={[
-                                t("by", { author: version.author_name }),
-                                chart && `${t("key")} ${chart.key}`,
-                                chart?.meter,
-                              ]
-                                .filter(Boolean)
-                                .join(" · ")}
-                              actions={
-                                <>
-                                  <HStack gap={1} vAlign="center">
-                                    <PublicIcon />
-                                    <Text type="supporting">
-                                      {version.status === "frozen" ? v("frozen") : t("public")}
-                                    </Text>
-                                  </HStack>
-                                  <Button
-                                    label={t("openName", names)}
-                                    href={`/versions/${version.id}`}
-                                  >
-                                    {t("open")}
-                                  </Button>
-                                  {!mine &&
-                                    (signedIn ? (
-                                      <form action={forkVersion}>
-                                        <input type="hidden" name="versionId" value={version.id} />
+                <RememberCatalog
+                  url={href({ song: open.song_id })}
+                  song={open.song_id}
+                  target="catalog-open-song"
+                />
+                <div id="catalog-open-song">
+                  <Card>
+                    <VStack gap={2}>
+                      <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
+                        <VStack gap={0.5}>
+                          <Heading level={2}>{open.title}</Heading>
+                          {open.artists.length > 0 && (
+                            <Text type="supporting">{open.artists.join(", ")}</Text>
+                          )}
+                        </VStack>
+                        <Text type="supporting">{t("versions", { count: open.versions })}</Text>
+                      </HStack>
+                      <List
+                        hasDividers
+                        edgeCompensation="inline"
+                        header={
+                          <Text className="cd-visually-hidden">
+                            {t("versionsOf", { title: open.title })}
+                          </Text>
+                        }
+                      >
+                        {versions
+                          .filter((version) => version.song_id === open.song_id)
+                          .map((version) => {
+                            const chart = version.current_revision_id
+                              ? charts.get(version.current_revision_id)
+                              : undefined;
+                            const mine = signedIn && auth.user?.id === version.owner_id;
+                            const names = { title: open.title, author: version.author_name };
+                            return (
+                              <ActionRow
+                                key={version.id}
+                                phone={phone}
+                                isLink
+                                startContent={
+                                  <Token
+                                    label={[sources(version.source_type), version.source_year]
+                                      .filter(Boolean)
+                                      .join(" ")}
+                                    size="sm"
+                                  />
+                                }
+                                label={
+                                  version.source_album
+                                    ? v("album", { album: version.source_album })
+                                    : version.source_youtube_url
+                                      ? v("youtube")
+                                      : sources(version.source_type)
+                                }
+                                description={[
+                                  t("by", { author: version.author_name }),
+                                  chart && `${t("key")} ${chart.key}`,
+                                  chart?.meter,
+                                ]
+                                  .filter(Boolean)
+                                  .join(" · ")}
+                                actions={
+                                  <>
+                                    <HStack gap={1} vAlign="center">
+                                      <PublicIcon />
+                                      <Text type="supporting">
+                                        {version.status === "frozen" ? v("frozen") : t("public")}
+                                      </Text>
+                                    </HStack>
+                                    <Button
+                                      label={t("openName", names)}
+                                      href={`/versions/${version.id}`}
+                                    >
+                                      {t("open")}
+                                    </Button>
+                                    {!mine &&
+                                      (signedIn ? (
+                                        <form action={forkVersion}>
+                                          <input
+                                            type="hidden"
+                                            name="versionId"
+                                            value={version.id}
+                                          />
+                                          <Button
+                                            type="submit"
+                                            label={t("forkName", names)}
+                                            icon={<ForkIcon />}
+                                          >
+                                            {t("fork")}
+                                          </Button>
+                                        </form>
+                                      ) : (
                                         <Button
-                                          type="submit"
                                           label={t("forkName", names)}
+                                          href={`/auth/sign-in?next=${encodeURIComponent(`/versions/${version.id}`)}`}
                                           icon={<ForkIcon />}
                                         >
                                           {t("fork")}
                                         </Button>
-                                      </form>
-                                    ) : (
-                                      <Button
-                                        label={t("forkName", names)}
-                                        href={`/auth/sign-in?next=${encodeURIComponent(`/versions/${version.id}`)}`}
-                                        icon={<ForkIcon />}
-                                      >
-                                        {t("fork")}
-                                      </Button>
-                                    ))}
-                                </>
-                              }
-                            />
-                          );
-                        })}
-                    </List>
-                    <HStack>
-                      <Button
-                        label={t("songPage", { title: open.title })}
-                        variant="ghost"
-                        href={`/songs/${open.song_id}`}
-                      />
-                    </HStack>
-                  </VStack>
-                </Card>
+                                      ))}
+                                  </>
+                                }
+                              />
+                            );
+                          })}
+                      </List>
+                      <HStack>
+                        <Button
+                          label={t("songPage", { title: open.title })}
+                          variant="ghost"
+                          href={`/songs/${open.song_id}`}
+                        />
+                      </HStack>
+                    </VStack>
+                  </Card>
+                </div>
                 {others.length > 0 && (
                   <List
                     hasDividers
