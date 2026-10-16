@@ -125,7 +125,8 @@ test("R-03.1 Cancel leaves the editor for the version, asking first when there a
   const address = new URL(page.url()).pathname;
 
   await page.goto(`${address}/edit`);
-  await expect(page.getByRole("region", { name: "Song details" })).toContainText(title);
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Song details" })).toContainText("Cass Cancel");
   await expect(page.getByLabel("Chart (ChartDown)")).not.toHaveValue(/title:/);
   await page.getByRole("link", { name: "Cancel", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`${address}$`));
