@@ -70,3 +70,20 @@ test("R-02.10 a visitor searches the catalog and opens a version", async ({ page
   await expect(page).toHaveURL(new RegExp(`/versions/${live}$`));
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
 });
+
+test("R-02.10 a version's whole row opens it, not only its Open button", async ({
+  page,
+  request,
+}) => {
+  const title = `Slate Harbor ${Date.now()}`;
+  const id = await createVersion(request, {
+    title,
+    content: "## Verse\n1 | 4\n",
+    sourceType: "live",
+    album: "Low Tide",
+  });
+  await page.goto(`/catalog?q=${encodeURIComponent(title)}`);
+  // A tap on the row's title, away from its buttons.
+  await page.getByRole("main").getByText("Low Tide").first().click();
+  await expect(page).toHaveURL(new RegExp(`/versions/${id}$`));
+});
