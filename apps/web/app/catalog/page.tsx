@@ -200,6 +200,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
                             <ActionRow
                               key={version.id}
                               phone={phone}
+                              isLink
                               startContent={
                                 <Token
                                   label={[sources(version.source_type), version.source_year]
