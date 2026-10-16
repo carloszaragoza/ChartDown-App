@@ -173,7 +173,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 **Requirements**
 
-- R-02.1 Create a song or pick an existing one, and create a version of it.
+- R-02.1 Create a song or pick an existing one, and create a version of it. A new version of an existing song starts from a chart of it: the version the person came from, or else the song's most recently updated public version, never a blank example (owner's review, October 16, 2026).
 - R-02.2 The source is required: type, and optionally album, year and YouTube link.
 - R-02.3 Versions are public by default.
 - R-02.4 **Making a public version private** creates a private copy for the owner. The public one stays in the catalog under the author's name, marked “frozen public version” (decision 9.4), and the sets and forks that use it are not affected (decision 6).
@@ -182,7 +182,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-02.7 A fork copies the chart and keeps a reference to the original version and its author. The MD layer does not travel with the fork.
 - R-02.8 **History:** every save creates a revision. The owner sees the revisions and can go back to an earlier one; going back is also recorded (decision 7).
 - R-02.9 Duplicates are allowed. The catalog shows how many versions each song has.
-- R-02.10 Search by title, artist and source.
+- R-02.10 Search by title, artist and source. A whole row is a tap target, not only its name; coming back from a version to the catalog finds the catalog as it was (the search, the source, the page and the open song), with that song in view (owner's review, October 16, 2026).
 - R-02.11 **Credit in numbers:** the author of a public version (active or frozen) sees how many bands and how many musicians have it in a set, over the last 7 days, the last 30 days or all time. **Totals only:** never which bands, sets or people, never anything of a band's notes, and never for anyone but the author. Private versions are not counted. It is the community's thanks to those who share their arrangements, and the Terms and Privacy Notice say so.
 
 **Acceptance criteria**
@@ -198,7 +198,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 **Requirements**
 
-- R-03.1 ChartDown text editor with live preview and error warnings. The text shows its line numbers; a line with a warning, or one an import asks to check (R-10.8), has its number marked, and choosing a warning, a marked number or a line in the import's review selects that line (owner's review, October 15, 2026).
+- R-03.1 ChartDown text editor with live preview and error warnings. A line with a warning, or one an import asks to check (R-10.8), is marked where it is: a band across that line with its number inside the band, at its right end; other lines show no number, so the editor doesn't read like code. Choosing a warning or a line in the import's review selects that line (owner's reviews, October 15 and 16, 2026).
 - R-03.2 Switch between numbers and letters, and transpose.
 - R-03.3 Stand mode: full screen, large type, advance by section with one tap. On a touch screen (iPad or phone), swiping the chart left or right also moves to the next or previous section (owner's request, October 14, 2026).
 - R-03.4 Print or export to PDF.
@@ -244,7 +244,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 - R-05.1 The MD creates a set with a name unique within their band (decision 8), an optional date and time and a type (rehearsal, service, concert).
 - R-05.2 Adds versions to the set and orders them. Each song is pinned to the revision it was added with. If the author publishes a new revision, the MD gets a notice with “Update” and decides; this way an author's change never affects other MDs in the community (decision 9.2).
-- R-05.3 Defines the lineup: which musician plays which instrument, one or several. By default the band's are used.
+- R-05.3 Defines the lineup: which musician plays which instrument, one or several. By default the band's are used. With many musicians it stays short: one line per musician with their instruments, changed from a menu, and a filter by name (owner's review, October 16, 2026).
 - R-05.4 **Key per song in the set.** It does not change the version or affect other users (decision 9).
 - R-05.5 **Temporary MD:** the MD appoints a member as MD for one set. They can edit that set (order, keys, lineup) and nothing else, without writing in the notes layer (decision 9.6), and the role ends when the MD removes it or the set's date passes (decision 2).
 - R-05.6 List of upcoming and past sets. Duplicate an existing set.
