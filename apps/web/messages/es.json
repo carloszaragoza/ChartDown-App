@@ -373,6 +373,7 @@
     }
   },
   "version": {
+    "newOfSong": "Nueva versión de esta canción",
     "backToCatalog": "Volver al catálogo",
     "by": "Arreglo de {author}",
     "source": {

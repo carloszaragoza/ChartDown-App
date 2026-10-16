@@ -66,6 +66,8 @@ test("R-02.1 a version of a song already in the catalog", async ({ page, request
   await page.getByRole("link", { name: `Use ${title}` }).click();
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
   await expect(page.getByLabel("Song title")).toHaveCount(0);
+  // It starts from the song's chart, not from the example (T-2405).
+  await expect(page.getByLabel("Chart (ChartDown)")).toHaveValue(/## Verse\n1 \| 4/);
   await page.getByLabel("Acoustic").check();
   await page.getByRole("button", { name: "Publish version" }).click();
   await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
@@ -78,4 +80,21 @@ test("R-01.4 creating a version asks a visitor to sign in", async ({ page }) => 
   await expect(page).toHaveURL(
     /\/auth\/sign-in\?next=%2Fversions%2Fnew|\/auth\/sign-in\?next=\/versions\/new/,
   );
+});
+
+test("R-02.1 a new version from a version's page starts from that version's chart", async ({
+  page,
+  request,
+}) => {
+  const title = `Cedar Steps ${Date.now()}`;
+  const first = await createVersion(request, { title, content: "## Verse\n1 | 5\n" });
+  await signUpAndConfirm(page, unique("from"), "Fern From");
+  await page.goto(`/versions/${first}`);
+  await page.getByRole("button", { name: "More actions" }).click();
+  await page.getByRole("menuitem", { name: "New version of this song" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+  await expect(page.getByLabel("Chart (ChartDown)")).toHaveValue(/## Verse\n1 \| 5/);
+  // Cancel goes back to the version it came from.
+  await page.getByRole("link", { name: "Cancel" }).click();
+  await expect(page).toHaveURL(new RegExp(`/versions/${first}$`));
 });

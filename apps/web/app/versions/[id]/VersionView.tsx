@@ -114,6 +114,13 @@ export function VersionView({
   const written = keyName(chart.key);
   const canFork = signedIn && !owner && visibility === "public" && reading;
   const canReport = canFork && status !== "hidden";
+  // A new version of the song starts from this chart (R-02.1, T-2405).
+  const menu = [
+    ...(signedIn && reading && songId
+      ? [{ label: t("newOfSong"), href: `/versions/new?song=${songId}&from=${id}` }]
+      : []),
+    ...(canReport ? [{ label: t("report.open"), href: `/versions/${id}?report=open#report` }] : []),
+  ];
   const state =
     status === "hidden"
       ? t("hidden")
@@ -209,13 +216,7 @@ export function VersionView({
                         icon={<ForkIcon />}
                       />
                     )}
-                    {canReport && (
-                      <VersionMenu
-                        label={t("more")}
-                        report={t("report.open")}
-                        reportHref={`/versions/${id}?report=open#report`}
-                      />
-                    )}
+                    {menu.length > 0 && <VersionMenu label={t("more")} items={menu} />}
                   </HStack>
                   {canFork && <Text type="supporting">{t("forkCc0")}</Text>}
                   {!signedIn && <Text type="supporting">{t("forkHint")}</Text>}

@@ -17,7 +17,7 @@ import { SearchField } from "../../_components/SearchField";
 import { VersionForm } from "./VersionForm";
 import { guessPhone } from "../../../lib/shell/guessPhone";
 
-type Search = Promise<{ q?: string; song?: string }>;
+type Search = Promise<{ q?: string; song?: string; from?: string }>;
 interface Song {
   id: string;
   title: string;
@@ -34,7 +34,7 @@ const literal = (text: string) => text.replace(/[\\%_]/g, (character) => `\\${ch
  */
 export default async function NewVersionPage({ searchParams }: { searchParams: Search }) {
   if (!authEnabled()) notFound();
-  const { q = "", song: chosen } = await searchParams;
+  const { q = "", song: chosen, from } = await searchParams;
   const supabase = await createClient();
   const { data: auth } = await readUser(supabase);
   if (!auth.user) redirect("/auth/sign-in?next=/versions/new");
@@ -49,12 +49,15 @@ export default async function NewVersionPage({ searchParams }: { searchParams: S
         : supabase.from("songs").select("id, title, artists").eq("id", chosen).maybeSingle(),
     ]);
     if (chosen !== "new" && !song) notFound();
+    const start = song ? await startingChart(supabase, song.id as string, from) : null;
     return (
       <VersionForm
         phone={await guessPhone()}
         song={(song as Song | null) ?? null}
         defaultTitle={q.trim()}
         defaultAuthor={profile?.name ?? ""}
+        {...(start ? { defaultContent: start.content } : {})}
+        cancelHref={start?.from ? `/versions/${start.from}` : "/versions/new"}
       />
     );
   }
@@ -145,4 +148,48 @@ export default async function NewVersionPage({ searchParams }: { searchParams: S
       }
     />
   );
+}
+
+/**
+ * The chart a new version of an existing song starts from (R-02.1, T-2405): the version the
+ * person came from, when it is of this song and they may read it, or else the song's most
+ * recently updated public version; never a blank example.
+ */
+async function startingChart(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  songId: string,
+  from: string | undefined,
+): Promise<{ content: string; from: string | null } | null> {
+  const chosen =
+    from && UUID.test(from)
+      ? (
+          await supabase
+            .from("versions")
+            .select("id, current_revision_id")
+            .eq("id", from)
+            .eq("song_id", songId)
+            .maybeSingle()
+        ).data
+      : null;
+  const version =
+    chosen ??
+    (
+      await supabase
+        .from("versions")
+        .select("id, current_revision_id")
+        .eq("song_id", songId)
+        .eq("visibility", "public")
+        .eq("status", "active")
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+    ).data;
+  if (!version?.current_revision_id) return null;
+  const { data: revision } = await supabase
+    .from("revisions")
+    .select("content")
+    .eq("id", version.current_revision_id)
+    .maybeSingle();
+  if (!revision) return null;
+  return { content: revision.content as string, from: chosen ? (chosen.id as string) : null };
 }

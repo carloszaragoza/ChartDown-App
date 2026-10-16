@@ -373,6 +373,7 @@
     }
   },
   "version": {
+    "newOfSong": "New version of this song",
     "backToCatalog": "Back to the catalog",
     "by": "Arrangement by {author}",
     "source": {

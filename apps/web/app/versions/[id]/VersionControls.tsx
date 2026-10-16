@@ -93,17 +93,18 @@ export function AddToSet({
 /** Secondary actions on a version: reporting it to the administrators (R-07.2). */
 export function VersionMenu({
   label,
-  report,
-  reportHref,
+  items,
 }: {
   label: string;
-  report: string;
-  /** The version's page with the report form open. */
-  reportHref: string;
+  /** What the menu offers, each a page to go to: a new version of the song, the report form. */
+  items: { label: string; href: string }[];
 }) {
   const router = useRouter();
   return (
-    <MoreMenu label={label} items={[{ label: report, onClick: () => router.push(reportHref) }]} />
+    <MoreMenu
+      label={label}
+      items={items.map((item) => ({ label: item.label, onClick: () => router.push(item.href) }))}
+    />
   );
 }
 
