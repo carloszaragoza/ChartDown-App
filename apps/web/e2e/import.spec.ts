@@ -134,8 +134,11 @@ test("R-10.8 a line the review names is marked beside the chart, and choosing it
   await page.locator("textarea").first().fill(MORNING_LIGHT);
   await page.getByText("I have the right to use this chord sheet.").click();
   await page.getByRole("button", { name: "Convert to a chart" }).click();
-  const line = page.locator(".cd-lines").getByRole("button", { name: "Go to line 10" });
+  const line = page.locator(".cd-lines__mark", {
+    has: page.getByRole("button", { name: "Go to line 10" }),
+  });
   await expect(line).toHaveAttribute("data-flag", "review");
+  await expect(line).toHaveText("10");
   await page
     .getByRole("group", { name: "Lines to check" })
     .getByRole("button", { name: "Go to line 10" })
