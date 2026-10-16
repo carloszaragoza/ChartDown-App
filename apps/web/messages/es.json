@@ -485,7 +485,6 @@
         "notSaved": "Es un borrador: nada se guarda hasta que lo publiques.",
         "keyRead": "Tono {key}, como dice la hoja.",
         "keyGuessed": "Tono {key}, deducido del primer acorde. Revísalo.",
-        "lines": "Líneas {lines} del chart.",
         "nothing": "No hay nada más que revisar.",
         "kinds": {
           "bars-proposed": "{count, plural, one {# fila tiene compases propuestos} other {# filas tienen compases propuestos}}: un acorde por compás. Revisa dónde empieza cada compás.",
@@ -498,7 +497,9 @@
         "existing": "“{title}” ya está en el catálogo.",
         "existingHint": "Puedes agregar tu versión a esa canción en lugar de empezar una nueva.",
         "useExisting": "Agregar mi versión a esa canción",
-        "openExisting": "Ver esa canción"
+        "openExisting": "Ver esa canción",
+        "linesLabel": "Líneas por revisar",
+        "goTo": "Ir a la línea {line}"
       },
       "pdf": "O elige un PDF",
       "pdfHint": "Un PDF con texto, de hasta 5 páginas y 5 MB. Su texto llena el cuadro de abajo para que lo revises antes de convertir. Todavía no se pueden leer hojas escaneadas ni fotos.",
@@ -577,7 +578,8 @@
     "visibility": "Visibilidad",
     "numbers": "Números",
     "privateForGood": "Esta versión es privada; una versión privada no vuelve a ser pública.",
-    "textPanel": "Texto en ChartDown"
+    "textPanel": "Texto en ChartDown",
+    "goToLine": "Ir a la línea {line}"
   },
   "viewer": {
     "label": "Visualización",

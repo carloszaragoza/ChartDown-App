@@ -414,3 +414,60 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* The ChartDown text with its line numbers (owner's review, October 15, 2026): warnings and an
+   import's review name lines, so the editor shows them. Lines don't wrap, so each number stays
+   beside its line; the numbers scroll with the text. A flagged number is marked: red for a
+   warning, amber for something to check (never color alone: it is also a button that selects
+   its line, named "Go to line N"). */
+.cd-lines {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+}
+.cd-lines__gutter {
+  box-sizing: border-box;
+  max-block-size: calc(var(--cd-lines-box, 100%) + var(--border-width) * 2);
+  overflow: hidden;
+  margin-block-start: var(--border-width);
+  padding-block: var(--cd-lines-top, var(--spacing-2));
+  padding-inline-end: var(--spacing-1);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-code);
+  font-size: var(--font-size-sm);
+  text-align: end;
+  user-select: none;
+}
+.cd-lines__number {
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: var(--cd-lines-height, 1.5em);
+  min-inline-size: 2.5ch;
+  margin: 0;
+  padding: 0 var(--spacing-1);
+  border: 0;
+  border-radius: var(--radius-sm, 4px);
+  background: none;
+  color: inherit;
+  font: inherit;
+  line-height: var(--cd-lines-height, 1.5em);
+  text-align: end;
+}
+.cd-lines__number[data-flag] {
+  cursor: pointer;
+  font-weight: var(--font-weight-bold);
+}
+.cd-lines__number[data-flag="review"] {
+  background: var(--color-warning-muted);
+  color: var(--color-warning);
+}
+.cd-lines__number[data-flag="warning"] {
+  background: var(--color-error-muted);
+  color: var(--color-error);
+}
+.cd-lines textarea {
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+}

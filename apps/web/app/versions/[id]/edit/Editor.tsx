@@ -11,7 +11,6 @@ import { List } from "@astryxdesign/core/List";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Text } from "@astryxdesign/core/Text";
-import { TextArea } from "@astryxdesign/core/TextArea";
 import { VStack } from "@astryxdesign/core/VStack";
 import { parse, SUPPORTED_VERSION, type Warning } from "chartdown";
 import { ClockIcon, GlobeAltIcon, LockClosedIcon } from "@heroicons/react/24/outline";
@@ -19,7 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useActionState, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { lineRange } from "../../../../lib/versions/lines";
+import { ChartTextArea, type ChartTextAreaHandle } from "../../../_components/ChartTextArea";
 import { ChartPreview } from "../../../_components/ChartPreview";
 import { saveChart, type SaveState } from "./actions";
 import { PageLayout } from "../../../_components/PageLayout";
@@ -70,7 +69,7 @@ export function Editor({
   // The preview may lag a keystroke behind so typing never waits for it.
   const shown = useDeferredValue(text);
   const chart = useMemo(() => parse(shown), [shown]);
-  const area = useRef<HTMLTextAreaElement>(null);
+  const lines = useRef<ChartTextAreaHandle>(null);
   // After a save, the header follows the new revision.
   const saved =
     state.number && state.savedAt
@@ -85,13 +84,7 @@ export function Editor({
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
 
-  const goTo = (line: number) => {
-    const field = area.current;
-    if (!field) return;
-    const { start, end } = lineRange(field.value, line);
-    field.focus();
-    field.setSelectionRange(start, end);
-  };
+  const goTo = (line: number) => lines.current?.goTo(line);
 
   return (
     <PageLayout
@@ -178,14 +171,17 @@ export function Editor({
                 </div>
               )}
               <Text type="supporting">ChartDown {chart.version ?? SUPPORTED_VERSION}</Text>
-              <TextArea
-                ref={area}
+              <ChartTextArea
+                handle={lines}
                 label={t("text")}
-                isLabelHidden
                 value={text}
                 onChange={setText}
                 rows={18}
-                hasSpellCheck={false}
+                flags={chart.warnings.map((warning) => ({
+                  line: warning.line,
+                  kind: "warning" as const,
+                }))}
+                goToLabel={(line) => t("goToLine", { line })}
               />
               <Warnings warnings={chart.warnings} onSelect={goTo} />
             </VStack>
