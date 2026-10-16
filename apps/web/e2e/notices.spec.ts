@@ -1,16 +1,17 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
 import {
+  addToSet,
+  chooseInstrument,
+  createSet,
+  expectSignedIn,
+  expectStatus,
   PASSWORD,
+  setKey,
   signIn,
   signOut,
   signUpAndConfirm,
   unique,
-  addToSet,
-  expectStatus,
-  createSet,
-  setKey,
-  expectSignedIn,
 } from "./flows";
 
 const CHART = "---\nkey: G\n---\n## Verse\n1 | 4 | 5 | 1\n";
@@ -81,7 +82,7 @@ test("R-09.1 R-09.3 adding Luis to the set reaches him instantly, saying what ch
   await expect(luisPage.getByText(`You were added to ${set}`)).toHaveCount(0);
 
   // Ana puts him on bass; the notice reaches him without reloading.
-  await page.getByRole("group", { name: "Luis Bass" }).getByLabel("Bass", { exact: true }).check();
+  await chooseInstrument(page, "Luis Bass", "Bass");
   await page.getByRole("button", { name: "Save lineup" }).click();
   await expectStatus(page, "The lineup was saved.");
   // Each notice is a link: its dot ("New"), what changed, and when.
@@ -120,7 +121,7 @@ test("R-09.5 a notice Luis turned off is not delivered; the others still are", a
   });
 
   // Ana puts Luis on bass and changes the song's key.
-  await page.getByRole("group", { name: "Luis Bass" }).getByLabel("Bass", { exact: true }).check();
+  await chooseInstrument(page, "Luis Bass", "Bass");
   await page.getByRole("button", { name: "Save lineup" }).click();
   await expectStatus(page, "The lineup was saved.");
   await setKey(page, title, "A");
