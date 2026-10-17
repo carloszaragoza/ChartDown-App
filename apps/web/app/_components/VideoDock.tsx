@@ -26,7 +26,8 @@ interface YouTubePlayer {
   getCurrentTime?(): number;
   /** 1 while playing. */
   getPlayerState?(): number;
-  seekTo(seconds: number, allowSeekAhead: boolean): void;
+  /** Only once the player is ready. */
+  seekTo?(seconds: number, allowSeekAhead: boolean): void;
   destroy(): void;
 }
 interface YouTubeApi {
@@ -38,6 +39,7 @@ interface YouTubeApi {
       width: number;
       height: number;
       playerVars: Record<string, number>;
+      events?: { onReady?: () => void };
     },
   ) => YouTubePlayer;
 }
@@ -190,6 +192,16 @@ function VideoDock({
         width: WIDTH,
         height: HEIGHT,
         playerVars: { playsinline: 1, rel: 0, start: Math.floor(start) },
+        // A section chosen while the player was still loading is played once it is ready.
+        events: {
+          onReady: () => {
+            const target = seeking.current;
+            if (target) {
+              seeking.current = { to: target.to, at: performance.now() };
+              player.current?.seekTo?.(target.to, true);
+            }
+          },
+        },
       });
     });
     // The bar follows the video, and so does the chart on the page (T-2504).
@@ -222,7 +234,7 @@ function VideoDock({
   const seek = (seconds: number) => {
     const to = Math.max(0, seconds);
     seeking.current = { to, at: performance.now() };
-    player.current?.seekTo(to, true);
+    player.current?.seekTo?.(to, true);
     setNow(to);
   };
   const clock = (seconds: number) =>
