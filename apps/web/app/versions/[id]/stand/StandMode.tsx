@@ -25,6 +25,7 @@ import {
 import {
   AdjustmentsHorizontalIcon,
   ArrowUturnLeftIcon,
+  XMarkIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
@@ -410,48 +411,64 @@ function StandModeView({
       ))}
     </SegmentedControl>
   );
+  // The view's controls, in the View sheet on a phone and split across the top on an iPad
+  // (T-2706): Letters and Beats under the metronome, Stage and Full screen beside it.
+  const lettersButton = (size: "md" | "lg") => (
+    <Button
+      label={style === "letters" ? v("numbers") : v("letters")}
+      href={styleHref}
+      as={Link}
+      variant="secondary"
+      size={size}
+    />
+  );
+  const beatsControl = (
+    <BeatsControl
+      value={beats}
+      hrefs={{
+        off: href(current, { display: { ...display, beats: "off" } }),
+        auto: href(current, { display: { ...display, beats: "auto" } }),
+        always: href(current, { display: { ...display, beats: "always" } }),
+      }}
+      onChoose={(mode) => changeView({ beats: mode })}
+      words={{
+        label: c("beatsLabel"),
+        name: c("beatsName"),
+        off: c("beatsOff"),
+        auto: c("beatsAuto"),
+        always: c("beatsAlways"),
+      }}
+    />
+  );
+  const screenButtons = (size: "md" | "lg") => (
+    <>
+      <Button
+        label={theme === "stage" ? t("light") : t("stage")}
+        href={themeHref}
+        as={Link}
+        variant="secondary"
+        size={size}
+      />
+      {canFullscreen && (
+        <Button
+          label={t("fullscreen")}
+          variant="secondary"
+          size={size}
+          onClick={() =>
+            document.fullscreenElement
+              ? void document.exitFullscreen()
+              : void root.current?.requestFullscreen()
+          }
+        />
+      )}
+    </>
+  );
   const tools = (
     <nav aria-label={t("tools")}>
       <HStack gap={2} wrap="wrap">
-        <Button
-          label={style === "letters" ? v("numbers") : v("letters")}
-          href={styleHref}
-          as={Link}
-          variant="secondary"
-        />
-        <BeatsControl
-          value={beats}
-          hrefs={{
-            off: href(current, { display: { ...display, beats: "off" } }),
-            auto: href(current, { display: { ...display, beats: "auto" } }),
-            always: href(current, { display: { ...display, beats: "always" } }),
-          }}
-          onChoose={(mode) => changeView({ beats: mode })}
-          words={{
-            label: c("beatsLabel"),
-            name: c("beatsName"),
-            off: c("beatsOff"),
-            auto: c("beatsAuto"),
-            always: c("beatsAlways"),
-          }}
-        />
-        <Button
-          label={theme === "stage" ? t("light") : t("stage")}
-          href={themeHref}
-          as={Link}
-          variant="secondary"
-        />
-        {canFullscreen && (
-          <Button
-            label={t("fullscreen")}
-            variant="secondary"
-            onClick={() =>
-              document.fullscreenElement
-                ? void document.exitFullscreen()
-                : void root.current?.requestFullscreen()
-            }
-          />
-        )}
+        {lettersButton("md")}
+        {beatsControl}
+        {screenButtons("md")}
       </HStack>
     </nav>
   );
@@ -555,24 +572,46 @@ function StandModeView({
               </nav>
             ) : (
               <>
-                {/* Back to the set or the version, where we are, View as in a set, and Previous
-                  and Next (Design Handoff 2.0 screen 03). */}
+                {/* Two lines (T-2706): Close, large, with the song beside it, and Stage, Full
+                  screen and the metronome at the other end; then the song form, and under the
+                  metronome View as, Letters and Beats. */}
                 <nav aria-label={set ? t("setBar") : t("turn")}>
                   <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
-                    <HStack gap={2} vAlign="center">
+                    <HStack gap={3} vAlign="center" wrap="wrap">
                       <Button
                         label={back.label}
                         href={back.href}
                         as={Link}
-                        variant="ghost"
-                        icon={<Icon icon={ArrowUturnLeftIcon} />}
+                        variant="secondary"
+                        size="lg"
+                        icon={<Icon icon={set ? ArrowUturnLeftIcon : XMarkIcon} />}
                       />
                       <VStack gap={0}>
-                        {set && <Text weight="semibold">{set.name}</Text>}
-                        <Text type="supporting">{set ? set.songOf : position}</Text>
+                        {set && (
+                          <Text type="supporting">
+                            {set.name} · {set.songOf}
+                          </Text>
+                        )}
+                        <HStack gap={3} vAlign="center" wrap="wrap">
+                          <Heading level={1}>{title}</Heading>
+                          <Text type="large" weight="bold">
+                            {c("key")} {shown}
+                          </Text>
+                          <Text type="supporting">
+                            {[
+                              shown !== written ? c("writtenIn", { key: written }) : null,
+                              chart.header.meter,
+                              chart.header.tempo ? `${c("tempo")} ${chart.header.tempo}` : null,
+                              position,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </Text>
+                        </HStack>
                       </VStack>
                     </HStack>
                     <HStack gap={2} vAlign="center" wrap="wrap">
+                      {screenButtons("lg")}
                       {!isPlaying && counter && (
                         <Text type="large" weight="bold">
                           {counter}
@@ -580,22 +619,22 @@ function StandModeView({
                       )}
                       {audio}
                       {control}
-                      {viewAsControl}
                     </HStack>
                   </HStack>
                 </nav>
 
                 <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
+                  <StackItem size="fill">{songForm}</StackItem>
                   <HStack gap={2} vAlign="center" wrap="wrap">
-                    <Heading level={1}>{title}</Heading>
-                    {songTokens}
+                    {viewAsControl}
+                    {lettersButton("lg")}
+                    {beatsControl}
                   </HStack>
-                  {tools}
                 </HStack>
               </>
             )}
 
-            {!isSideways && songForm}
+            {isPhone && !isSideways && songForm}
 
             {/* The current section sits right under the song form, with the next one right after
               it; when it is taller than the screen it scrolls inside its own area (F-001). */}

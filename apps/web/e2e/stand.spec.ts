@@ -141,8 +141,16 @@ test("R-03.3 the clearer stand: one metronome control, the next section's notes,
   });
   await page.goto(`/versions/${id}/stand`);
 
+  // T-2706: the first line has Close, the song and the metronome; Beats is on the second.
+  const top = page.getByRole("navigation", { name: "Sections" });
+  await expect(top.getByRole("link", { name: "Close" })).toBeVisible();
+  await expect(top.getByRole("heading", { level: 1 })).toContainText("Clear Stand");
+  const metronome = top.getByRole("group", { name: "Metronome" });
+  const beatsBox = await page.getByRole("radiogroup", { name: "Beat slashes" }).boundingBox();
+  const metronomeBox = await metronome.boundingBox();
+  expect((beatsBox?.y ?? 0) > (metronomeBox?.y ?? 0) + (metronomeBox?.height ?? 0) - 1).toBe(true);
+
   // T-2701: Play shows the tempo, the counter while it plays; the options sit beside it.
-  const metronome = page.getByRole("group", { name: "Metronome" });
   await expect(metronome.getByRole("button", { name: "Play" })).toHaveText("96");
   await metronome.getByRole("button", { name: "Play" }).click();
   await expect(metronome.getByRole("button", { name: "Stop" })).toHaveText(/^\d \/ 4$/);
