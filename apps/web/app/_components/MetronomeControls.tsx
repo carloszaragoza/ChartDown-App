@@ -21,6 +21,7 @@ import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { speedFor, tapTempo } from "../../lib/metronome/tapTempo";
+import { MetronomeIcon } from "./MetronomeIcon";
 import { useMetronome } from "../../lib/metronome/useMetronome";
 
 /** Where the metronome is in one section, as ChartSection draws it (R-11.3). */
@@ -237,7 +238,9 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
       <Button
         label={metronome.isPlaying ? t("stop") : t("play")}
         variant={metronome.isPlaying ? "primary" : "secondary"}
-        icon={<Icon icon={metronome.isPlaying ? StopIcon : PlayIcon} />}
+        // The metronome itself, playing or not: Play and Stop are its name, and the button
+        // turns primary and counts while it plays.
+        icon={<Icon icon={MetronomeIcon} />}
         onClick={toggle}
       >
         {(metronome.isPlaying && counter) ||
