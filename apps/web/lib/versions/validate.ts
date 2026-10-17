@@ -71,15 +71,8 @@ export function validateVersion(
   const author = values.author.trim();
   if (author.length < 1 || author.length > 80) return { error: "author_required" };
   if (values.content.trim().length === 0) return { error: "chart_required" };
-  if (!(SOURCE_TYPES as readonly string[]).includes(values.sourceType))
-    return { error: "source_required" };
-  const yearText = values.year.trim();
-  const year = yearText === "" ? null : Number(yearText);
-  if (year !== null && (!Number.isInteger(year) || year < 1800 || year > 2200))
-    return { error: "year_invalid" };
-  const youtube = values.youtube.trim();
-  if (youtube !== "" && !YOUTUBE.test(youtube)) return { error: "youtube_invalid" };
-  const album = values.album.trim().slice(0, 200);
+  const checked = validateSource(values);
+  if ("error" in checked) return checked;
   return {
     input: {
       song_id: existing,
@@ -92,6 +85,37 @@ export function validateVersion(
             .filter(Boolean),
       author_name: author,
       content: values.content,
+      ...checked.source,
+    },
+  };
+}
+
+/** A version's source as the database keeps it (R-02.2). */
+export interface VersionSourceInput {
+  source_type: SourceType;
+  source_album: string | null;
+  source_year: number | null;
+  source_youtube_url: string | null;
+}
+
+/**
+ * Checks a version's source (R-02.2): for a new version, and when its owner changes it in the
+ * editor (T-2408). The database checks the same rules.
+ */
+export function validateSource(
+  values: Pick<VersionValues, "sourceType" | "album" | "year" | "youtube">,
+): { error: VersionError } | { source: VersionSourceInput } {
+  if (!(SOURCE_TYPES as readonly string[]).includes(values.sourceType))
+    return { error: "source_required" };
+  const yearText = values.year.trim();
+  const year = yearText === "" ? null : Number(yearText);
+  if (year !== null && (!Number.isInteger(year) || year < 1800 || year > 2200))
+    return { error: "year_invalid" };
+  const youtube = values.youtube.trim();
+  if (youtube !== "" && !YOUTUBE.test(youtube)) return { error: "youtube_invalid" };
+  const album = values.album.trim().slice(0, 200);
+  return {
+    source: {
       source_type: values.sourceType as SourceType,
       source_album: album || null,
       source_year: year,
