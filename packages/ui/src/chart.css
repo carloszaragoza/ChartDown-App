@@ -64,9 +64,10 @@
   min-width: 0;
 }
 /* Stand mode: the largest chords. */
-/* Stand mode: one size up on an iPad or a desktop (T-2702); a phone keeps its own below. */
+/* Stand mode: half a size up on an iPad or a desktop (T-2702), between the theme's two largest;
+   a phone keeps its own below. */
 .cd-chart--lg {
-  --chart-chord-size: var(--font-size-5xl);
+  --chart-chord-size: calc((var(--font-size-4xl) + var(--font-size-5xl)) / 2);
 }
 /* The next-section preview: smaller, in the secondary color. */
 .cd-chart--sm {

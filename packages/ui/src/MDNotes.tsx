@@ -11,7 +11,8 @@ export interface MDNotesProps {
   notes: readonly MDNoteData[];
   /** The instrument's name in the interface language. */
   instrumentName: (id: string) => string;
-  /** At most this many, closer together, and how many more there are (a preview, T-2703). */
+  /** At most this many, on one line as space allows, and how many more there are (a preview,
+   * T-2703). */
   limit?: { count: number; more: (count: number) => string } | undefined;
 }
 
@@ -27,8 +28,12 @@ export function MDNotes({ notes, instrumentName, limit }: MDNotesProps) {
   const ordered = orderNotes(notes);
   const shown = limit ? ordered.slice(0, limit.count) : ordered;
   const hidden = ordered.length - shown.length;
+  const Stack = limit ? HStack : VStack;
   return (
-    <VStack gap={limit ? 1 : 2}>
+    <Stack
+      gap={limit ? 4 : 2}
+      {...(limit ? { wrap: "wrap" as const, vAlign: "center" as const } : {})}
+    >
       {shown.map((note, index) =>
         note.md ? (
           <HStack key={index} gap={2} vAlign="center" wrap="wrap">
@@ -58,6 +63,6 @@ export function MDNotes({ notes, instrumentName, limit }: MDNotesProps) {
         ),
       )}
       {limit && hidden > 0 && <Text type="supporting">{limit.more(hidden)}</Text>}
-    </VStack>
+    </Stack>
   );
 }

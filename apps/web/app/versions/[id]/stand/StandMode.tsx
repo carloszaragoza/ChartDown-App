@@ -638,8 +638,7 @@ function StandModeView({
                     {labels.length(playedLength(next), { pickup: hasPickup(next) })}
                   </Text>
                   {/* Its notes for this reader, before it comes (T-2703): the same ones the
-                    section shows, already filtered for them. With notes, they take the place of
-                    its first bars, so the section being played keeps its room. */}
+                    section shows, already filtered for them, on one line above its first bars. */}
                   {nextNotes.length > 0 && (
                     <MDNotes
                       notes={nextNotes}
@@ -647,7 +646,7 @@ function StandModeView({
                       limit={{ count: 2, more: (count) => t("moreNotes", { count }) }}
                     />
                   )}
-                  {!isPhone && nextNotes.length === 0 && next.rows[0] && (
+                  {!isPhone && next.rows[0] && (
                     <BarRow
                       row={next.rows[0]}
                       formatter={formatter}
