@@ -10,6 +10,9 @@ import { readDisplay } from "../../../../../versions/[id]/display";
 import { UUID } from "../../../../../versions/[id]/load";
 import { readSection } from "../../../../../versions/[id]/stand/standHref";
 import { StandMode } from "../../../../../versions/[id]/stand/StandMode";
+import { AudioButton } from "../../../../../_components/AudioDock";
+import { saveAudioStart } from "../../../../../versions/[id]/audio";
+import { setRecording } from "../../../../../../lib/sets/recording";
 
 type Search = Promise<{
   s?: string;
@@ -125,6 +128,13 @@ export default async function SetStandPage({
     };
   };
   const shown = notesFor(as);
+  // The band's recording plays in stand mode too, and the section follows it (R-06.7, T-2604).
+  const recording = await setRecording(
+    supabase,
+    id,
+    song.version_id,
+    (await getTranslations("audio"))("personal"),
+  );
 
   return (
     <StandMode
@@ -141,6 +151,21 @@ export default async function SetStandPage({
       notes={shown.notes}
       forYou={shown.forYou}
       phone={await guessPhone()}
+      {...(recording
+        ? {
+            audio: (
+              <AudioButton
+                recording={recording}
+                chart={chart}
+                save={
+                  leads
+                    ? saveAudioStart.bind(null, recording.bandId, recording.versionId)
+                    : undefined
+                }
+              />
+            ),
+          }
+        : {})}
       set={{
         href: `/sets/${id}`,
         name: `${song.set_name} – ${types(set.type as "service")}`,

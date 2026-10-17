@@ -1,6 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
 import {
+  addToSet,
+  createSet,
   expectSignedIn,
   expectStatus,
   PASSWORD,
@@ -23,6 +25,7 @@ test("R-06.7 the MD adds the band's audio; its musicians hear it, nobody else", 
   page,
   request,
 }) => {
+  test.slow();
   const stamp = Date.now();
   const band = `Reed Band ${stamp}`;
   const ana = unique("audiomd");
@@ -108,4 +111,85 @@ test("R-06.7 the MD adds the band's audio; its musicians hear it, nobody else", 
   await page.goto(`/versions/${version}`);
   await expect(page.getByText(`${band}'s recording`)).toHaveCount(0);
   await expect(page.getByRole("button", { name: `Play ${band}'s recording` })).toHaveCount(0);
+});
+
+test("R-06.7 a downloaded set keeps its songs' recordings: stand mode plays them offline", async ({
+  page,
+  context,
+  request,
+}) => {
+  // Two accounts, a band, a set, an upload and a download: more than the usual time.
+  test.slow();
+  const stamp = Date.now();
+  const band = `Tide Band ${stamp}`;
+  const set = `Evensong ${stamp}`;
+  const ana = unique("offaudiomd");
+  const ben = unique("offaudio");
+  const version = await createVersion(request, {
+    title: `Salt Lanterns ${stamp}`,
+    content: "---\ntempo: 120\n---\n## Verse\n1 | 4\n## Chorus\n4 | 1\n",
+  });
+
+  await signUpAndConfirm(page, ana, "Ana Tide");
+  await page.goto("/bands");
+  await page.getByLabel("Band name").fill(band);
+  await page.getByRole("button", { name: "Create band" }).click();
+  await page.getByLabel("Their email").fill(ben);
+  await page.getByRole("button", { name: "Send invitation" }).click();
+  await expectStatus(page, "Invitation sent.");
+  await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
+  await createSet(page, { name: set, type: "Rehearsal" });
+  await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
+  const setId = new URL(page.url()).pathname.split("/")[2] ?? "";
+  await page.goto(`/versions/${version}`);
+  await page.getByRole("button", { name: "Add the band's audio" }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("combobox", { name: "Band" }).click();
+  await page.getByRole("option", { name: band }).click();
+  await dialog.locator("input[type=file]").setInputFiles(TONE);
+  await dialog.getByText("The band has the right to use this recording.").click();
+  await dialog.getByRole("button", { name: "Upload" }).click();
+  await expect(page.getByText(`${band}'s recording · 0:08`)).toBeVisible();
+  // Adding the song opens the set's page.
+  await addToSet(page, `${band} · ${set}`);
+  await expectStatus(page, "added at the end");
+
+  await page.goto("/");
+  await signOut(page);
+  await signUpAndConfirm(page, ben, "Ben Tide");
+  await page
+    .getByRole("region", { name: "Invitations" })
+    .getByRole("button", { name: `Accept the invitation to ${band}` })
+    .click();
+  await expectStatus(page, "Welcome to the band.");
+
+  // Ben downloads the set; the recording is kept with it.
+  await page.goto(`/sets/${setId}`);
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.reload();
+  await expect
+    .poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller)))
+    .toBe(true);
+  await page.getByRole("button", { name: "Download for offline" }).click();
+  await expect(page.getByText("Downloaded for offline")).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate(async () => {
+        const keys = await (await caches.open("chartdown-sets-v1")).keys();
+        return keys.some((key) => new URL(key.url).pathname.startsWith("/offline/audio/"));
+      }),
+    )
+    .toBe(true);
+
+  // Airplane mode: stand mode plays the band's recording.
+  await context.setOffline(true);
+  await page.goto(`/offline/set/${setId}/1/stand`);
+  await page.getByRole("button", { name: `Play ${band}'s recording` }).click();
+  const player = page.getByRole("complementary", { name: "Band audio" });
+  const play = player.getByRole("button", { name: "Play", exact: true });
+  await expect(play).toBeEnabled();
+  await play.click();
+  await expect(player.getByRole("button", { name: "Pause" })).toBeVisible();
+  await expect(player).not.toContainText("can't be loaded");
+  await context.setOffline(false);
 });

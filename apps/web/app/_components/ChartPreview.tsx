@@ -32,9 +32,8 @@ import { usePhone } from "../../lib/shell/phone";
 import { useMetronomeControls } from "./MetronomeControls";
 import { SongForm } from "./SongForm";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
-import { videoClock } from "../../lib/video/clock";
-import { barAt, chartClicks } from "../../lib/video/sections";
+import { useEffect, useRef } from "react";
+import { barIn, usePlaybackBar } from "./usePlaybackBar";
 import { useChartLabels } from "./chartLabels";
 import { hasJump, playRuns } from "../../lib/chart/playRuns";
 
@@ -164,23 +163,9 @@ export function ChartPreview({
     chooseStart,
     startIn,
   } = useMetronomeControls(chart, null);
-  // The open video, when it plays, moves the chart as the metronome does; the metronome first.
-  const video = useSyncExternalStore(videoClock.subscribe, videoClock.get, () => null);
-  const placed = useMemo(() => chartClicks(chart), [chart]);
-  const videoBar =
-    !isPlaying && video?.playing && placed
-      ? barAt(placed.bars, placed.list, video.time, video.musicStart)
-      : null;
-  const nowAt = (index: number) =>
-    nowIn(index) ??
-    (videoBar && videoBar.section === index
-      ? {
-          row: videoBar.row,
-          index: videoBar.index,
-          progress: videoBar.progress,
-          downbeat: videoBar.downbeat,
-        }
-      : undefined);
+  // The open video or band recording, when it plays, moves the chart as the metronome does.
+  const videoBar = usePlaybackBar(chart, isPlaying);
+  const nowAt = (index: number) => nowIn(index) ?? barIn(videoBar, index);
   // A tap on the chart: on after a fermata (R-11.6), or, stopped, the bar to start on (R-11.2).
   const onTap = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!hasForm) return;

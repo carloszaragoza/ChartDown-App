@@ -172,3 +172,28 @@ test("R-02.2 the owner changes the version's source in the editor", async ({ pag
   await expect(page.getByRole("button", { name: "Play the video" })).toBeVisible();
   await expect(page.getByRole("status").filter({ hasText: "Saved as revision" })).toHaveCount(0);
 });
+
+test("R-03.1 the separator between the text and the chart gives either more width, and is kept", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1400, height: 900 });
+  await signUpAndConfirm(page, unique("split"), "Sid Split");
+  await page.goto("/versions/new?song=new&q=Wide%20Field");
+  const text = page.getByRole("region", { name: "Chart", exact: true });
+  const before = (await text.boundingBox())?.width ?? 0;
+  const handle = page.getByRole("separator", { name: "Resize the text and the chart" });
+  const box = await handle.boundingBox();
+  if (!box) throw new Error("no separator");
+  await page.mouse.move(box.x + box.width / 2, box.y + 200);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 160, box.y + 200, { steps: 8 });
+  await page.mouse.up();
+  await expect
+    .poll(async () => (await text.boundingBox())?.width ?? 0)
+    .toBeGreaterThan(before + 100);
+  const widened = (await text.boundingBox())?.width ?? 0;
+  await page.reload();
+  await expect
+    .poll(async () => Math.round((await text.boundingBox())?.width ?? 0))
+    .toBe(Math.round(widened));
+});

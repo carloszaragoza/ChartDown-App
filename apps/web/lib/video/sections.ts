@@ -47,7 +47,7 @@ export function sectionAt(sections: readonly VideoSection[], seconds: number): n
   return sections.findIndex((section) => seconds >= section.start && seconds < section.end);
 }
 
-/** The bar being played at a time in the video, where it is drawn and how far into it, or null. */
+/** The bar being played at a time in the video, where it is drawn and its beat, or null. */
 export interface VideoBar {
   section: number;
   row: number;
@@ -80,13 +80,12 @@ export function barAt(
   const click = list[low] as Click;
   const bar = bars[click.bar];
   if (!bar) return null;
-  const beats = Math.max(bar.beats.length, 1);
-  const into = Math.min((time - click.time) / click.duration, 1);
+  // Beat by beat, as the metronome marks it: the beat sounding fills its share of the bar.
   return {
     section: bar.section,
     row: bar.row,
     index: bar.index,
-    progress: Math.min((click.beat + into) / beats, 1),
+    progress: (click.beat + 1) / Math.max(bar.beats.length, 1),
     downbeat: click.count === 1,
   };
 }

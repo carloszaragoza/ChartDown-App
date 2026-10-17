@@ -92,6 +92,7 @@ export function VideoLink({
   chart,
   saved,
   save,
+  isIconOnly = false,
 }: {
   url: string;
   chart?: Chart | undefined;
@@ -99,6 +100,8 @@ export function VideoLink({
   saved?: number | null | undefined;
   /** For the version's owner: saves where the music starts for everyone. */
   save?: ((milliseconds: number) => Promise<boolean>) | undefined;
+  /** Only the play icon, as beside the YouTube link's field. */
+  isIconOnly?: boolean;
 }) {
   const t = useTranslations("video");
   const id = videoId(url);
@@ -126,8 +129,10 @@ export function VideoLink({
       <Button
         label={t("play")}
         variant="ghost"
-        size="sm"
+        size={isIconOnly ? "md" : "sm"}
         icon={<Icon icon={PlayIcon} />}
+        isIconOnly={isIconOnly}
+        {...(isIconOnly ? { tooltip: t("play") } : {})}
         onClick={() => setOpen(true)}
       />
       {open &&
@@ -204,7 +209,8 @@ function VideoDock({
         },
       });
     });
-    // The bar follows the video, and so does the chart on the page (T-2504).
+    // The bar follows the video, and so does the chart on the page (T-2504), read often enough
+    // that each beat shows when it sounds.
     const timer = window.setInterval(() => {
       const time = player.current?.getCurrentTime?.();
       if (typeof time !== "number") return;
@@ -221,7 +227,7 @@ function VideoDock({
         musicStart: startRef.current,
         playing: player.current?.getPlayerState?.() === 1,
       });
-    }, 250);
+    }, 50);
     return () => {
       gone = true;
       window.clearInterval(timer);

@@ -18,6 +18,7 @@ import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { storedAudio } from "../../lib/offline/store";
 import { createClient } from "../../lib/supabase/browser";
 import { videoClock } from "../../lib/video/clock";
 import { sectionAt, videoSections } from "../../lib/video/sections";
@@ -115,24 +116,31 @@ function AudioDock({
     });
   }, [recording.peaks]);
 
-  // The file comes from the band's private storage, readable by its members only.
+  // The file kept with a downloaded set plays with no connection (T-2604); otherwise it comes
+  // from the band's private storage, readable by its members only.
+  const { bandId, versionId } = recording;
   useEffect(() => {
     let url: string | null = null;
     let gone = false;
-    void createClient()
-      .storage.from("band-audio")
-      .download(`${recording.bandId}/${recording.versionId}`)
-      .then(({ data, error }) => {
-        if (gone) return;
-        if (error || !data) return setFailed(true);
-        url = URL.createObjectURL(data);
-        setSource(url);
-      });
+    const show = (data: Blob) => {
+      url = URL.createObjectURL(data);
+      setSource(url);
+    };
+    void storedAudio({ bandId, versionId }).then(async (kept) => {
+      if (gone) return;
+      if (kept) return show(kept);
+      const { data, error } = await createClient()
+        .storage.from("band-audio")
+        .download(`${bandId}/${versionId}`);
+      if (gone) return;
+      if (error || !data) return setFailed(true);
+      show(data);
+    });
     return () => {
       gone = true;
       if (url) URL.revokeObjectURL(url);
     };
-  }, [recording.bandId, recording.versionId]);
+  }, [bandId, versionId]);
 
   // The chart follows the audio, through the same clock as the video (T-2504).
   useEffect(() => {
