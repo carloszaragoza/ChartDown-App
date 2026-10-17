@@ -44,7 +44,9 @@ describe("R-03.3 stand mode", () => {
     expect(html).toContain("Verse 2");
     // The current section at stand mode's size; the next one as the small preview (chart.css).
     expect(html).toContain("cd-chart cd-chart--lg");
-    expect(html).toContain("cd-chart cd-chart--sm");
+    // Verse 2 has a note: the preview shows it in place of its first bars (T-2703).
+    expect(html.slice(html.indexOf("Verse 2"))).toMatch(/>MD</);
+    expect(html).not.toContain("cd-chart cd-chart--sm");
     expect(html).toContain("Section 3 of 7");
   });
 
