@@ -631,3 +631,12 @@
   background: var(--color-text-primary);
   pointer-events: none;
 }
+
+/* The metronome control's tempo or count (T-2701): one width for "74" and "3 / 4", so the control
+   never jumps while it counts. */
+.cd-metronome-count {
+  display: inline-block;
+  min-inline-size: 5ch;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
