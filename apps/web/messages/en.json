@@ -664,6 +664,8 @@
     "textPlaceholder": "Short and direct, like “Out on the first pass.”"
   },
   "stand": {
+    "noTempoShort": "– bpm",
+    "view": "View",
     "moreNotes": "+{count, plural, one {# more note} other {# more notes}}",
     "turnPage": "Previous and next",
     "pedalHint": "Tap Next, or use a page-turner pedal.",

@@ -7,6 +7,7 @@ import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
+import { Selector } from "@astryxdesign/core/Selector";
 import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
@@ -128,6 +129,9 @@ const BACK = new Set(["ArrowLeft", "ArrowUp", "PageUp"]);
  * instant and the address follows. Another song, or another View as, starts afresh: the router
  * keeps the page, so its state would carry over.
  */
+const PEDAL_HINT = "chartdown:pedal-hint";
+const noSubscription = () => () => {};
+
 export function StandMode(props: StandModeProps) {
   const place = new URLSearchParams(props.keep ?? {}).toString();
   return <StandModeView key={`${props.path ?? props.versionId}?${place}`} {...props} />;
@@ -380,6 +384,25 @@ function StandModeView({
       ? t("timeOf", { time: copyAt(timelineBars, at), count })
       : t("times", { count });
   };
+  // The page-turner reminder, the first time stand mode opens on this device (T-2706).
+  const showPedalHint = useSyncExternalStore(
+    noSubscription,
+    () => {
+      try {
+        return localStorage.getItem(PEDAL_HINT) === null;
+      } catch {
+        return false;
+      }
+    },
+    () => false,
+  );
+  useEffect(() => {
+    try {
+      localStorage.setItem(PEDAL_HINT, "seen");
+    } catch {
+      // No storage: the reminder may show again.
+    }
+  }, []);
   const nextNotes = next ? (notes ? (notes[nextIndex] ?? []) : next.notes) : [];
   const again = queued !== null && queued === playingSection;
   const written = keyName(chart.key);
@@ -400,17 +423,27 @@ function StandModeView({
       {chart.header.tempo && <Token label={`${chart.header.tempo} bpm`} size="sm" />}
     </>
   );
-  const viewAsControl = viewAs && (
-    <SegmentedControl
-      label={t("viewAs")}
-      value={(chosenView ?? viewAs.options.find((option) => option.current))?.label ?? ""}
-      onChange={chooseView}
-    >
-      {viewAs.options.map((option) => (
-        <SegmentedControlItem key={option.href} value={option.label} label={option.label} />
-      ))}
-    </SegmentedControl>
-  );
+  // View as: a segmented control in the phone's View sheet; a compact menu on the top line of an
+  // iPad, so the song's name keeps its room in portrait (T-2706).
+  const viewAsValue = (chosenView ?? viewAs?.options.find((option) => option.current))?.label ?? "";
+  const viewAsControl =
+    viewAs &&
+    (isPhone ? (
+      <SegmentedControl label={t("viewAs")} value={viewAsValue} onChange={chooseView}>
+        {viewAs.options.map((option) => (
+          <SegmentedControlItem key={option.href} value={option.label} label={option.label} />
+        ))}
+      </SegmentedControl>
+    ) : (
+      <Selector
+        label={t("viewAs")}
+        isLabelHidden
+        size="lg"
+        options={viewAs.options.map((option) => ({ value: option.label, label: option.label }))}
+        value={viewAsValue}
+        onChange={chooseView}
+      />
+    ));
   // The view's controls, in the View sheet on a phone and split across the top on an iPad
   // (T-2706): Letters and Beats under the metronome, Stage and Full screen beside it.
   const lettersButton = (size: "md" | "lg") => (
@@ -572,65 +605,62 @@ function StandModeView({
               </nav>
             ) : (
               <>
-                {/* Two lines (T-2706): Close, large, with the song beside it, and Stage, Full
-                  screen and the metronome at the other end; then the song form, and under the
-                  metronome View as, Letters and Beats. */}
+                {/* One line (T-2706), in portrait and landscape: the way back with the song
+                  beside it, then View as for the MD, View and the metronome. What is set once
+                  (Letters, Beats, Stage, Full screen) is in View. */}
                 <nav aria-label={set ? t("setBar") : t("turn")}>
-                  <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
-                    <HStack gap={3} vAlign="center" wrap="wrap">
-                      <Button
-                        label={back.label}
-                        href={back.href}
-                        as={Link}
-                        variant="secondary"
-                        size="lg"
-                        icon={<Icon icon={set ? ArrowUturnLeftIcon : XMarkIcon} />}
-                      />
+                  <HStack gap={3} vAlign="center">
+                    <Button
+                      label={back.label}
+                      href={back.href}
+                      as={Link}
+                      variant="secondary"
+                      size="lg"
+                      icon={<Icon icon={set ? ArrowUturnLeftIcon : XMarkIcon} />}
+                    />
+                    <StackItem size="fill">
                       <VStack gap={0}>
                         {set && (
-                          <Text type="supporting">
+                          <Text type="supporting" maxLines={1}>
                             {set.name} · {set.songOf}
                           </Text>
                         )}
-                        <HStack gap={3} vAlign="center" wrap="wrap">
-                          <Heading level={1}>{title}</Heading>
-                          <Text type="large" weight="bold">
-                            {c("key")} {shown}
-                          </Text>
-                          <Text type="supporting">
-                            {[
-                              shown !== written ? c("writtenIn", { key: written }) : null,
-                              chart.header.meter,
-                              chart.header.tempo ? `${c("tempo")} ${chart.header.tempo}` : null,
-                              position,
-                            ]
-                              .filter(Boolean)
-                              .join(" · ")}
-                          </Text>
-                        </HStack>
-                      </VStack>
-                    </HStack>
-                    <HStack gap={2} vAlign="center" wrap="wrap">
-                      {screenButtons("lg")}
-                      {!isPlaying && counter && (
-                        <Text type="large" weight="bold">
-                          {counter}
+                        <Heading level={1} maxLines={1}>
+                          {title}
+                        </Heading>
+                        <Text type="supporting" maxLines={1}>
+                          {[
+                            `${c("key")} ${shown}`,
+                            shown !== written ? c("writtenIn", { key: written }) : null,
+                            chart.header.meter,
+                            chart.header.tempo ? `${c("tempo")} ${chart.header.tempo}` : null,
+                            position,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
                         </Text>
-                      )}
-                      {audio}
-                      {control}
-                    </HStack>
+                      </VStack>
+                    </StackItem>
+                    {viewAsControl}
+                    <Button
+                      label={t("viewOptions")}
+                      variant="secondary"
+                      size="lg"
+                      icon={<Icon icon={AdjustmentsHorizontalIcon} />}
+                      onClick={() => setSheetOpen(true)}
+                    >
+                      {t("view")}
+                    </Button>
+                    {!isPlaying && counter && (
+                      <Text type="large" weight="bold">
+                        {counter}
+                      </Text>
+                    )}
+                    {audio}
+                    {control}
                   </HStack>
                 </nav>
-
-                <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
-                  <StackItem size="fill">{songForm}</StackItem>
-                  <HStack gap={2} vAlign="center" wrap="wrap">
-                    {viewAsControl}
-                    {lettersButton("lg")}
-                    {beatsControl}
-                  </HStack>
-                </HStack>
+                {songForm}
               </>
             )}
 
@@ -669,6 +699,13 @@ function StandModeView({
               )}
             </main>
 
+            {/* The room left goes between the section and what comes next, which sits right
+              above Previous and Next (T-2706). */}
+            {!isPhone && (
+              <StackItem size="fill">
+                <span />
+              </StackItem>
+            )}
             <VStack gap={2}>
               {next ? (
                 <>
@@ -705,9 +742,6 @@ function StandModeView({
               a phone keeps them in its one top bar. */}
             {!isPhone && (
               <>
-                <StackItem size="fill">
-                  <span />
-                </StackItem>
                 <nav aria-label={t("turnPage")}>
                   <HStack gap={3} vAlign="center" hAlign="between">
                     {previous ? (
@@ -720,7 +754,7 @@ function StandModeView({
                     ) : (
                       <span />
                     )}
-                    <Text type="supporting">{t("pedalHint")}</Text>
+                    <Text type="supporting">{showPedalHint ? t("pedalHint") : ""}</Text>
                     {following ? (
                       <Button
                         label={following.label}
@@ -738,7 +772,7 @@ function StandModeView({
             )}
           </VStack>
           {tempoDialog}
-          {isPhone && (
+          {
             <BottomSheet
               isOpen={isSheetOpen}
               onOpenChange={setSheetOpen}
@@ -753,12 +787,12 @@ function StandModeView({
                     {songTokens}
                   </HStack>
                 </VStack>
-                {viewAsControl}
+                {isPhone && viewAsControl}
                 {tools}
-                {soundControls}
+                {isPhone && soundControls}
               </VStack>
             </BottomSheet>
-          )}
+          }
         </div>
       </Theme>
     </div>

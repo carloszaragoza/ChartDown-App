@@ -119,14 +119,10 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   await expect(current).toContainText(notes.bass);
 
   const viewAs = async (label: string) => {
-    // View as is a segmented choice in the stand bar (Design Handoff 2.0 screen 03).
-    await page
-      .getByRole("radiogroup", { name: "View as" })
-      .getByRole("radio", { name: label })
-      .click();
-    await expect(
-      page.getByRole("radiogroup", { name: "View as" }).getByRole("radio", { name: label }),
-    ).toBeChecked();
+    // View as is a menu on the stand's top line on an iPad (T-2706).
+    await page.getByRole("combobox", { name: "View as" }).click();
+    await page.getByRole("option", { name: label, exact: true }).click();
+    await expect(page.getByRole("combobox", { name: "View as" })).toContainText(label);
   };
   // F-006: every view came with the page, so switching asks the server nothing for this song
   // (the next song, loaded ahead, follows the view).
@@ -158,7 +154,7 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   // Ben has no View as, and the bass note never reaches him, even asking for it.
   await switchTo(page, ben, "Ben Stand");
   const response = await page.goto(`${setAddress}/songs/1/stand?s=2&as=bass`);
-  await expect(page.getByRole("radiogroup", { name: "View as" })).toHaveCount(0);
+  await expect(page.getByRole("combobox", { name: "View as" })).toHaveCount(0);
   await expect(page.getByRole("main")).toContainText(notes.keys);
   expect(await response?.text()).not.toContain(notes.bass);
 });

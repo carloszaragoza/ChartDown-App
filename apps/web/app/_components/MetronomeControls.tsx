@@ -253,7 +253,7 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
         {/* One width whatever it shows, the tempo or the count (T-2701). */}
         <span className="cd-metronome-count">
           {(metronome.isPlaying && counter) ||
-            (shownTempo !== null ? t("tempoShort", { bpm: shownTempo }) : t("play"))}
+            (shownTempo !== null ? t("tempoShort", { bpm: shownTempo }) : t("noTempoShort"))}
         </span>
       </Button>
       <Button

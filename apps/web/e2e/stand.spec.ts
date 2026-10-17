@@ -68,7 +68,9 @@ test("R-03.3 every section reads without zooming on an iPad in landscape", async
     page.locator("[data-stand]").evaluate((stand) => getComputedStyle(stand).backgroundColor);
   const lightSize = await size();
   const lightBackground = await background();
-  await page.getByRole("link", { name: "Stage" }).click();
+  // Stage is set once, in View (T-2706).
+  await page.getByRole("button", { name: "View options" }).click();
+  await page.getByRole("dialog").getByRole("link", { name: "Stage" }).click();
   await expect(page).toHaveURL(/theme=stage/);
   await expectWholeSection(page, "Chorus");
   expect(await size()).toBe(lightSize);
@@ -141,14 +143,19 @@ test("R-03.3 the clearer stand: one metronome control, the next section's notes,
   });
   await page.goto(`/versions/${id}/stand`);
 
-  // T-2706: the first line has Close, the song and the metronome; Beats is on the second.
+  // T-2706: one line with Close, the song, View and the metronome; Beats is in View.
   const top = page.getByRole("navigation", { name: "Sections" });
   await expect(top.getByRole("link", { name: "Close" })).toBeVisible();
   await expect(top.getByRole("heading", { level: 1 })).toContainText("Clear Stand");
   const metronome = top.getByRole("group", { name: "Metronome" });
-  const beatsBox = await page.getByRole("radiogroup", { name: "Beat slashes" }).boundingBox();
+  const closeBox = await top.getByRole("link", { name: "Close" }).boundingBox();
   const metronomeBox = await metronome.boundingBox();
-  expect((beatsBox?.y ?? 0) > (metronomeBox?.y ?? 0) + (metronomeBox?.height ?? 0) - 1).toBe(true);
+  expect(Math.abs((closeBox?.y ?? 0) - (metronomeBox?.y ?? 0))).toBeLessThan(20);
+  await top.getByRole("button", { name: "View options" }).click();
+  await expect(
+    page.getByRole("dialog").getByRole("radiogroup", { name: "Beat slashes" }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
 
   // T-2701: Play shows the tempo, the counter while it plays; the options sit beside it.
   await expect(metronome.getByRole("button", { name: "Play" })).toHaveText("96");
