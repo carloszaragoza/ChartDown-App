@@ -174,7 +174,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 **Requirements**
 
 - R-02.1 Create a song or pick an existing one, and create a version of it. A new version of an existing song starts from a chart of it: the version the person came from, or else the song's most recently updated public version, never a blank example (owner's review, October 16, 2026).
-- R-02.2 The source is required: type, and optionally album, year and YouTube link.
+- R-02.2 The source is required: type, and optionally album, year and YouTube link. The version's owner can change its source later, in the editor, with the same rules; the song's title and artists are the song's and stay as they are, and a change of source is no new revision (owner's review, October 16, 2026).
 - R-02.3 Versions are public by default.
 - R-02.4 **Making a public version private** creates a private copy for the owner. The public one stays in the catalog under the author's name, marked “frozen public version” (decision 9.4), and the sets and forks that use it are not affected (decision 6).
 - R-02.5 A private version never appears in the catalog or in search.

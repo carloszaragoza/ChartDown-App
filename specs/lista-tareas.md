@@ -280,6 +280,7 @@ The owner's review of the app in use: the editor shouldn't read like code, a who
 | T-2405 | A new version of an existing song starts from its chart: the version the person came from, or the song's most recently updated public version | R-02.1 | T-2404 | S | End-to-end: New version from a version's page starts with that version's chart |
 | T-2406 | Your versions can be searched by title and is shown 50 at a time with More; its row actions are icon buttons (Open, Edit, Director's notes) | R-03.1, R-03.5 | T-2402 | S | End-to-end: searching finds one version among many; the row's icons open, edit and annotate it |
 | T-2407 | Edit set: Duplicate and Delete in the side panel; the lineup as one line per musician with their instruments as chips, changed from a menu, and a filter by name when there are more than 8 musicians | R-05.3, R-05.6 | T-705 | M | End-to-end: a band of 12 sets its lineup from the menus; Duplicate and Delete are in the panel |
+| T-2408 | In the editor the version's source (type, album, year, YouTube) is a form, not text: the owner changes it and Save keeps it with the chart, with the same rules as New version and no new revision when only the source changed | R-02.2 | T-2404 | S | End-to-end: the owner changes the album and the YouTube link, saves, and the version page shows them; a wrong year is refused with its message |
 
 ## E23 · ChartDown 0.8
 
