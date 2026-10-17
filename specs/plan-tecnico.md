@@ -51,7 +51,7 @@ flowchart LR
     DB[("Postgres with row-level security")]
     FN["Server functions: per-instrument view, offline bundle, make private"]
     RT["Realtime: in-app notices"]
-    ST["Storage: exported PDFs"]
+    ST["Storage: exported PDFs, the bands' audio (private)"]
   end
   subgraph Jobs["Background"]
     OUT["Event log"]
@@ -105,6 +105,7 @@ Tool versions and prices change; confirm them when starting.
 | layers | band, version, hide author notes | One per band and version (decisions 9.1, 9.3) |
 | layer_notes | layer, section, occurrence, optional bar, text, the passes of a repeat it is for (none: every pass), revision it was anchored to (a revision of the layer's version) | Anchors follow `specs/chartdown-layers-0.5.md`; detects “unplaced” notes when a section changes |
 | layer_note_instruments | note, instrument | No rows = the note is for everyone; one or more instruments otherwise, as in `> MD bass, keys:` |
+| band_audio | band, version, storage path, size, duration, content type, waveform peaks, where the music starts (milliseconds), added by, added at | R-06.7; one per band and version. Private to the band like the layer: members read it, the MD (or the set's temporary MD) adds, replaces and removes it. The file lives in the private Storage bucket `band-audio` under `<band>/<version>`, whose policies give the same access; MP3 or M4A, at most 15 MB, enforced by the bucket's limits |
 | sets | band, name, optional date, optional time (the band's local time, without a time zone; only with a date), type | Name unique per band, ignoring case (decision 8) |
 | set_items | set, position, version, pinned revision (a revision of that version), set key (a key name such as `A` or `Bbm`; empty = the version's key) | Decisions 9 and 9.2 |
 | set_lineup | set, member, instrument | A member of the set's band; one or more instruments (R-05.3) |

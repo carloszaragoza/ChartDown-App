@@ -256,6 +256,17 @@ What moves with the parser: its sources, its history, its tests (SPEC-00, R-00.x
 | T-2102 | github.com/ChartDown/parser: the history of `packages/core` (only that folder), a standalone build with no monorepo files, its own CI (type check, tests, the suite), MIT, and `homepage`, `repository` and `bugs` pointing to it; its README links to the spec | – | T-2101 | M | The repository's CI passes; the packed package passes the 0.7 suite through its adapter |
 | T-2103 | The app installs `chartdown` from npm (`^0.3.0`) in `apps/web` and `packages/ui`, and `packages/core` leaves the monorepo; the R-00.1 catalog test and the example charts the app's tests use move into the app; the root README and LICENSE no longer list `packages/core` | R-00.1 | T-2007 | S | CI passes with the package from npm; the R-00.1 test reads `supabase/migrations` |
 
+## E26 · The band's audio (owner's request, October 16, 2026)
+
+The band's own recording of a song instead of a YouTube video, for practice (R-06.7): private to the band, drawn as its real waveform with the sections over it, the chart following it, and kept with a downloaded set so it plays offline. The owner chose: the band hears it (never public), MP3 or M4A of at most 15 MB, offline from the start. The migration (table, private bucket and their policies) is reviewed with the owner before it reaches a database.
+
+| ID | Task | Requirements | Depends on | Size | Tests / evidence |
+|---|---|---|---|---|---|
+| T-2601 | The band's audio in the database: `band_audio`, the private bucket `band-audio` (MP3 and M4A, 15 MB) and their policies: members read, the MD and the set's temporary MD add, replace and remove; nobody else, in the table or in storage | R-06.7 | T-2503 | M | SQL: a member reads; a musician can't add; another band's member and a visitor read nothing, in the table or the bucket; a file over 15 MB or of another type is refused |
+| T-2602 | Adding it: on the version page the MD of a band chooses the band and a file, confirms the band may use it, and the browser checks the type and size, reads its length and waveform, and uploads it; replace and remove | R-06.7 | T-2601 | M | End-to-end: the MD adds a short recording; a musician of the band sees it; a 16 MB file is refused before uploading |
+| T-2603 | The audio player: a thin bar at the bottom of the version page and a set's song for the band's members, with play and pause, the waveform with the sections over it, the mark following the audio, a section taking it there, Music starts at adjusted and saved by the MD, and the chart following it bar by bar | R-06.7, R-03.11 | T-2602, T-2504 | M | Unit: the waveform's peaks from samples; end-to-end: a member plays it and taps Chorus; a visitor sees no player |
+| T-2604 | Offline and stand mode: downloading a set keeps its songs' recordings on the device, and stand mode plays them, with no connection too | R-06.7, R-08.1 | T-2603, T-902 | M | End-to-end: a downloaded set's song plays its audio offline |
+
 ## E25 · Listen while you read (owner's review, October 16, 2026)
 
 A version's YouTube video in a mini player at the bottom, with the song's sections as a bar that follows it (R-03.11). The video is embedded from youtube-nocookie.com with YouTube's IFrame API; its sound is never read. Saving where the music starts adds one column to versions, which the owner's existing update permission covers (Technical Plan, data model); approved by the owner on October 16, 2026.
