@@ -142,8 +142,6 @@ test("R-06.7 a downloaded set keeps its songs' recordings: stand mode plays them
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   const setId = new URL(page.url()).pathname.split("/")[2] ?? "";
   await page.goto(`/versions/${version}`);
-  await addToSet(page, `${band} · ${set}`);
-  await expectStatus(page, "added at the end");
   await page.getByRole("button", { name: "Add the band's audio" }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByRole("combobox", { name: "Band" }).click();
@@ -152,6 +150,9 @@ test("R-06.7 a downloaded set keeps its songs' recordings: stand mode plays them
   await dialog.getByText("The band has the right to use this recording.").click();
   await dialog.getByRole("button", { name: "Upload" }).click();
   await expect(page.getByText(`${band}'s recording · 0:08`)).toBeVisible();
+  // Adding the song opens the set's page.
+  await addToSet(page, `${band} · ${set}`);
+  await expectStatus(page, "added at the end");
 
   await page.goto("/");
   await signOut(page);
