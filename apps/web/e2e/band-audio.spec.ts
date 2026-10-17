@@ -48,9 +48,12 @@ test("R-06.7 the MD adds the band's audio; its musicians hear it, nobody else", 
     .getByRole("button", { name: `Accept the invitation to ${band}` })
     .click();
   await expectStatus(page, "Welcome to the band.");
-  // A musician can't add one.
+  // A musician adds one for their own personal space only, never for the band.
   await page.goto(`/versions/${version}`);
-  await expect(page.getByRole("button", { name: "Add the band's audio" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Add the band's audio" }).click();
+  await expect(page.getByRole("dialog")).toContainText("For Just me");
+  await expect(page.getByRole("dialog")).not.toContainText(band);
+  await page.getByRole("dialog").getByRole("button", { name: "Cancel" }).click();
 
   await switchTo(page, ana, "Ana Audio");
   await page.goto(`/versions/${version}`);

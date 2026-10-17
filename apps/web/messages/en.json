@@ -1410,6 +1410,7 @@
     "close": "Close the video"
   },
   "audio": {
+    "for": "For {band}",
     "personal": "Just me",
     "recording": "{band}'s recording · {length}",
     "add": "Add the band's audio",

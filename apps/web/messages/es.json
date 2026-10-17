@@ -1410,6 +1410,7 @@
     "close": "Cerrar el video"
   },
   "audio": {
+    "for": "Para {band}",
     "personal": "Solo yo",
     "recording": "Grabación de {band} · {length}",
     "add": "Añadir el audio de la banda",

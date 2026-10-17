@@ -145,6 +145,9 @@ export function BandAudio({
         <VStack gap={4}>
           <Heading level={2}>{t("addTitle")}</Heading>
           <Text color="secondary">{t("addIntro")}</Text>
+          {bands.length === 1 && (
+            <Text weight="semibold">{t("for", { band: bands[0]?.name ?? "" })}</Text>
+          )}
           {bands.length > 1 && (
             <Selector
               label={t("band")}
