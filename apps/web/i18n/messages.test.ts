@@ -27,6 +27,8 @@ const codeFragments = (text: string) =>
 // language names, which are always written in their own language, an instrument name
 // spelled the same in both, and "Sets", which Spanish-speaking musicians say too.
 const SAME_IN_BOTH = new Set([
+  "stand.noTempoShort",
+  "stand.tempoShort",
   "video.player",
   "home.title",
   "language.en",

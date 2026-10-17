@@ -5,6 +5,7 @@ import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
+import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
 import {
   chordFormatter,
@@ -56,6 +57,8 @@ export interface ChartSectionProps {
   now?: { row: number; index: number; progress: number; downbeat?: boolean } | undefined;
   /** The bar the metronome will start on: its row and its place in the row (R-11.2). */
   start?: { row: number; index: number } | undefined;
+  /** A section played more than once: "3 times", or "Time 2 of 3" while it plays (T-2704). */
+  times?: string | undefined;
 }
 
 /**
@@ -74,6 +77,7 @@ export function ChartSection({
   beats = "auto",
   now,
   start,
+  times,
 }: ChartSectionProps) {
   const body = (
     <section aria-label={section.name} {...(id ? { id } : {})}>
@@ -83,6 +87,7 @@ export function ChartSection({
           <Text type="supporting">
             {labels.length(playedLength(section), { pickup: hasPickup(section) })}
           </Text>
+          {times && <Token label={times} size="sm" color="blue" />}
         </HStack>
         <MDNotes notes={notes ?? section.notes} instrumentName={labels.bar.instrument} />
         {section.rows.map((row, index) => (
@@ -151,8 +156,7 @@ export function ChartPreview({
   // The visual metronome on the version page (T-1503): Play in the pinned bar, from the song's
   // start, and the page keeps the bar being played in view.
   const {
-    playButton,
-    soundButton,
+    control,
     tempoDialog,
     counter,
     nowIn,
@@ -228,17 +232,15 @@ export function ChartPreview({
                 <VStack gap={2}>
                   {form}
                   <HStack gap={2} vAlign="center" hAlign="end">
-                    {counterText}
-                    {soundButton}
-                    {playButton}
+                    {!isPlaying && counterText}
+                    {control}
                   </HStack>
                 </VStack>
               ) : (
                 <HStack gap={2} vAlign="center">
                   <StackItem size="fill">{form}</StackItem>
-                  {counterText}
-                  {soundButton}
-                  {playButton}
+                  {!isPlaying && counterText}
+                  {control}
                 </HStack>
               )}
               {tempoDialog}

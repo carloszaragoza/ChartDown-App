@@ -68,7 +68,9 @@ test("R-03.3 every section reads without zooming on an iPad in landscape", async
     page.locator("[data-stand]").evaluate((stand) => getComputedStyle(stand).backgroundColor);
   const lightSize = await size();
   const lightBackground = await background();
-  await page.getByRole("link", { name: "Stage" }).click();
+  // Stage is set once, in View (T-2706).
+  await page.getByRole("button", { name: "View options" }).click();
+  await page.getByRole("dialog").getByRole("link", { name: "Stage" }).click();
   await expect(page).toHaveURL(/theme=stage/);
   await expectWholeSection(page, "Chorus");
   expect(await size()).toBe(lightSize);
@@ -128,4 +130,52 @@ test.describe("on an iPad, during a performance", () => {
       expect(Math.round(box?.height ?? 0), name).toBeGreaterThanOrEqual(56);
     }
   });
+});
+
+test("R-03.3 the clearer stand: one metronome control, the next section's notes, its times, Next at the bottom", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, {
+    title: `Clear Stand ${Date.now()}`,
+    content:
+      "---\ntempo: 96\n---\n## Verse\n1 | 4 | 5 | 1\n## Bridge\n> MD: Build a little more each time.\n4 | 5 | 6m | 1\n## Bridges\n@use Bridge 3x\n",
+  });
+  await page.goto(`/versions/${id}/stand`);
+
+  // T-2706: one line with Close, the song, View and the metronome; Beats is in View.
+  const top = page.getByRole("navigation", { name: "Sections" });
+  await expect(top.getByRole("link", { name: "Close" })).toBeVisible();
+  await expect(top.getByRole("heading", { level: 1 })).toContainText("Clear Stand");
+  const metronome = top.getByRole("group", { name: "Metronome" });
+  const closeBox = await top.getByRole("link", { name: "Close" }).boundingBox();
+  const metronomeBox = await metronome.boundingBox();
+  expect(Math.abs((closeBox?.y ?? 0) - (metronomeBox?.y ?? 0))).toBeLessThan(20);
+  await top.getByRole("button", { name: "View options" }).click();
+  await expect(
+    page.getByRole("dialog").getByRole("radiogroup", { name: "Beat slashes" }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+
+  // T-2701: Play shows the tempo, the counter while it plays; the options sit beside it.
+  await expect(metronome.getByRole("button", { name: "Play" })).toHaveText("96");
+  await metronome.getByRole("button", { name: "Play" }).click();
+  await expect(metronome.getByRole("button", { name: "Stop" })).toHaveText(/^\d \/ 4$/);
+  await metronome.getByRole("button", { name: "Stop" }).click();
+  await metronome.getByRole("button", { name: "Metronome options" }).click();
+  await expect(page.getByRole("dialog")).toContainText("Count-in");
+  await page.keyboard.press("Escape");
+
+  // T-2703: the next section's note shows before it comes, in its preview.
+  await expect(page.getByText("Next:")).toContainText("Bridge");
+  await expect(page.getByText("Build a little more each time.")).toBeVisible();
+
+  // T-2705: Next is at the bottom; T-2704: a section reused three times says so.
+  const turn = page.getByRole("navigation", { name: "Previous and next" });
+  await turn.getByRole("link", { name: "Next", exact: true }).click();
+  await turn.getByRole("link", { name: "Next", exact: true }).click();
+  await expect(
+    page.getByRole("main").getByRole("heading", { level: 2, name: "Bridges" }),
+  ).toBeVisible();
+  await expect(page.getByRole("main")).toContainText("3 times");
 });

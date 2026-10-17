@@ -64,8 +64,10 @@
   min-width: 0;
 }
 /* Stand mode: the largest chords. */
+/* Stand mode: half a size up on an iPad or a desktop (T-2702), between the theme's two largest;
+   a phone keeps its own below. */
 .cd-chart--lg {
-  --chart-chord-size: var(--font-size-4xl);
+  --chart-chord-size: calc((var(--font-size-4xl) + var(--font-size-5xl)) / 2);
 }
 /* The next-section preview: smaller, in the secondary color. */
 .cd-chart--sm {
@@ -628,4 +630,26 @@
   inline-size: calc(var(--border-width) * 2);
   background: var(--color-text-primary);
   pointer-events: none;
+}
+
+/* The metronome control's tempo or count (T-2701): one width for "74" and "3 / 4", so the control
+   never jumps while it counts. */
+.cd-metronome-count {
+  display: inline-block;
+  min-inline-size: 5ch;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* The metronome's pendulum (T-2701): it swings about its foot, taking the beat's time. */
+.cd-metronome-pendulum {
+  transform-box: view-box;
+  transform-origin: 12px 15.75px;
+  transition-property: transform;
+  transition-timing-function: ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cd-metronome-pendulum {
+    transition: none;
+  }
 }
