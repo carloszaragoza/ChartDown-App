@@ -48,12 +48,12 @@ describe("T-2502 where each section falls in the video", () => {
     const at = (seconds: number) => barAt(placed.bars, placed.list, seconds, 7);
     const bar = 10 / 3; // 4 beats at 72 bpm
     expect(at(6)).toBeNull();
-    expect(at(7)).toMatchObject({ section: 0, row: 0, index: 0, progress: 0, downbeat: true });
-    expect(at(7 + bar * 1.5)).toMatchObject({ section: 0, index: 1 });
-    expect(at(7 + bar * 1.5)?.progress).toBeCloseTo(0.5);
+    // Beat by beat, as the metronome: the first beat fills a quarter of a 4/4 bar.
+    expect(at(7)).toMatchObject({ section: 0, row: 0, index: 0, progress: 0.25, downbeat: true });
+    expect(at(7 + bar * 1.5)).toMatchObject({ section: 0, index: 1, progress: 0.75 });
+    expect(at(7 + bar * 1.6)).toMatchObject({ progress: 0.75, downbeat: false });
     // The verse's second pass: its first bar again.
-    expect(at(7 + bar * 4.25)).toMatchObject({ section: 1, index: 0 });
-    expect(at(7 + bar * 4.25)?.progress).toBeCloseTo(0.25);
+    expect(at(7 + bar * 4.3)).toMatchObject({ section: 1, index: 0, progress: 0.5 });
     expect(at(7 + bar * 7.9)).toMatchObject({ section: 2, index: 1 });
     expect(at(7 + bar * 8)).toBeNull();
   });
