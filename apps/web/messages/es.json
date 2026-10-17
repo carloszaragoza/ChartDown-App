@@ -664,6 +664,13 @@
     "textPlaceholder": "Corta y directa, como “Fuera en la primera vuelta.”"
   },
   "stand": {
+    "moreNotes": "+{count, plural, one {# nota más} other {# notas más}}",
+    "turnPage": "Anterior y siguiente",
+    "pedalHint": "Toca Siguiente, o usa un pedal para pasar página.",
+    "times": "{count} veces",
+    "timeOf": "Vez {time} de {count}",
+    "metronome": "Metrónomo",
+    "tempoShort": "{bpm}",
     "tools": "Herramientas del atril",
     "light": "Claro",
     "stage": "Escenario",

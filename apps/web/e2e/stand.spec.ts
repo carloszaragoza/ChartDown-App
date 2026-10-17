@@ -129,3 +129,38 @@ test.describe("on an iPad, during a performance", () => {
     }
   });
 });
+
+test("R-03.3 the clearer stand: one metronome control, the next section's notes, its times, Next at the bottom", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, {
+    title: `Clear Stand ${Date.now()}`,
+    content:
+      "---\ntempo: 96\n---\n## Verse\n1 | 4 | 5 | 1\n## Bridge\n> MD: Build a little more each time.\n4 | 5 | 6m | 1\n## Bridges\n@use Bridge 3x\n",
+  });
+  await page.goto(`/versions/${id}/stand`);
+
+  // T-2701: Play shows the tempo, the counter while it plays; the options sit beside it.
+  const metronome = page.getByRole("group", { name: "Metronome" });
+  await expect(metronome.getByRole("button", { name: "Play" })).toHaveText("96");
+  await metronome.getByRole("button", { name: "Play" }).click();
+  await expect(metronome.getByRole("button", { name: "Stop" })).toHaveText(/^\d \/ 4$/);
+  await metronome.getByRole("button", { name: "Stop" }).click();
+  await metronome.getByRole("button", { name: "Metronome options" }).click();
+  await expect(page.getByRole("dialog")).toContainText("Count-in");
+  await page.keyboard.press("Escape");
+
+  // T-2703: the next section's note shows before it comes, in its preview.
+  await expect(page.getByText("Next:")).toContainText("Bridge");
+  await expect(page.getByText("Build a little more each time.")).toBeVisible();
+
+  // T-2705: Next is at the bottom; T-2704: a section reused three times says so.
+  const turn = page.getByRole("navigation", { name: "Previous and next" });
+  await turn.getByRole("link", { name: "Next", exact: true }).click();
+  await turn.getByRole("link", { name: "Next", exact: true }).click();
+  await expect(
+    page.getByRole("main").getByRole("heading", { level: 2, name: "Bridges" }),
+  ).toBeVisible();
+  await expect(page.getByRole("main")).toContainText("3 times");
+});

@@ -11,6 +11,8 @@ export interface MDNotesProps {
   notes: readonly MDNoteData[];
   /** The instrument's name in the interface language. */
   instrumentName: (id: string) => string;
+  /** At most this many, closer together, and how many more there are (a preview, T-2703). */
+  limit?: { count: number; more: (count: number) => string } | undefined;
 }
 
 const forEveryone = (note: MDNoteData) =>
@@ -21,10 +23,13 @@ const forEveryone = (note: MDNoteData) =>
  * the instrument's name and icon, then the note. Never color alone: the Token's word carries the
  * meaning. Notes that aren't the music director's are plain secondary text.
  */
-export function MDNotes({ notes, instrumentName }: MDNotesProps) {
+export function MDNotes({ notes, instrumentName, limit }: MDNotesProps) {
+  const ordered = orderNotes(notes);
+  const shown = limit ? ordered.slice(0, limit.count) : ordered;
+  const hidden = ordered.length - shown.length;
   return (
-    <VStack gap={2}>
-      {orderNotes(notes).map((note, index) =>
+    <VStack gap={limit ? 1 : 2}>
+      {shown.map((note, index) =>
         note.md ? (
           <HStack key={index} gap={2} vAlign="center" wrap="wrap">
             {/* A note for one pass says so in words: "2x" before who it is for (spec 9.1). */}
@@ -52,6 +57,7 @@ export function MDNotes({ notes, instrumentName }: MDNotesProps) {
           </Text>
         ),
       )}
+      {limit && hidden > 0 && <Text type="supporting">{limit.more(hidden)}</Text>}
     </VStack>
   );
 }

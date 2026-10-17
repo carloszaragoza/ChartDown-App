@@ -17,6 +17,7 @@ import {
   BarRow,
   formStripItems,
   hasPickup,
+  MDNotes,
   type FormStripItem,
   type MDNoteData,
   playedLength,
@@ -48,6 +49,7 @@ import { useMetronomeControls } from "../../../_components/MetronomeControls";
 import { SongForm } from "../../../_components/SongForm";
 import { BeatsControl } from "../../../_components/BeatsControl";
 import { barIn, usePlaybackBar } from "../../../_components/usePlaybackBar";
+import { copyAt } from "../../../../lib/chart/copies";
 import { useChartLabels } from "../../../_components/chartLabels";
 import type { Display } from "../display";
 import { inSidewaysScroll, swipeTurn } from "./swipe";
@@ -163,12 +165,14 @@ function StandModeView({
   // section follows it.
   const {
     playButton,
-    soundButton,
+    control,
     soundControls,
     tempoDialog,
     counter,
     nowIn,
     playingSection,
+    playingAt,
+    metronome: { bars: timelineBars },
     queued,
     queue,
     isPlaying,
@@ -361,6 +365,21 @@ function StandModeView({
   // What comes next: the queued section while the metronome plays, the following one otherwise.
   const nextIndex = queued ?? current + 1;
   const next = chart.sections[nextIndex];
+  // A section reused with a count says so, and which time is playing (T-2704).
+  const timesOf = (section: number) => {
+    const count = chart.sections[section]?.use?.times ?? 1;
+    if (count < 2) return undefined;
+    const at =
+      playingSection === section
+        ? playingAt
+        : playbackBar?.section === section
+          ? playbackBar.at
+          : undefined;
+    return at !== undefined
+      ? t("timeOf", { time: copyAt(timelineBars, at), count })
+      : t("times", { count });
+  };
+  const nextNotes = next ? (notes ? (notes[nextIndex] ?? []) : next.notes) : [];
   const again = queued !== null && queued === playingSection;
   const written = keyName(chart.key);
   const shown = keyName(homeKey);
@@ -554,32 +573,14 @@ function StandModeView({
                       </VStack>
                     </HStack>
                     <HStack gap={2} vAlign="center" wrap="wrap">
-                      {counter && (
+                      {!isPlaying && counter && (
                         <Text type="large" weight="bold">
                           {counter}
                         </Text>
                       )}
                       {audio}
-                      {soundButton}
-                      {playButton}
+                      {control}
                       {viewAsControl}
-                      {previous && (
-                        <Button
-                          label={previous.label}
-                          size="lg"
-                          href={previous.href}
-                          icon={<Icon icon={ChevronLeftIcon} />}
-                        />
-                      )}
-                      {following && (
-                        <Button
-                          label={following.label}
-                          size="lg"
-                          href={following.href}
-                          variant="primary"
-                          endContent={<Icon icon={ChevronRightIcon} />}
-                        />
-                      )}
                     </HStack>
                   </HStack>
                 </nav>
@@ -624,6 +625,7 @@ function StandModeView({
                   size="lg"
                   now={nowIn(current) ?? barIn(playbackBar, current)}
                   start={startIn(current)}
+                  times={timesOf(current)}
                 />
               )}
             </main>
@@ -634,9 +636,18 @@ function StandModeView({
                   <Text type="supporting">
                     {labels.next}: <b>{again ? t("again", { name: next.name }) : next.name}</b> ·{" "}
                     {labels.length(playedLength(next), { pickup: hasPickup(next) })}
-                    {forYou[nextIndex] && ` · ${labels.notesForYou}`}
                   </Text>
-                  {!isPhone && next.rows[0] && (
+                  {/* Its notes for this reader, before it comes (T-2703): the same ones the
+                    section shows, already filtered for them. With notes, they take the place of
+                    its first bars, so the section being played keeps its room. */}
+                  {nextNotes.length > 0 && (
+                    <MDNotes
+                      notes={nextNotes}
+                      instrumentName={labels.bar.instrument}
+                      limit={{ count: 2, more: (count) => t("moreNotes", { count }) }}
+                    />
+                  )}
+                  {!isPhone && nextNotes.length === 0 && next.rows[0] && (
                     <BarRow
                       row={next.rows[0]}
                       formatter={formatter}
@@ -651,6 +662,42 @@ function StandModeView({
                 <Text type="supporting">{t("end")}</Text>
               )}
             </VStack>
+
+            {/* Back and Next at the bottom, where the thumb is, on an iPad or a desktop (T-2705);
+              a phone keeps them in its one top bar. */}
+            {!isPhone && (
+              <>
+                <StackItem size="fill">
+                  <span />
+                </StackItem>
+                <nav aria-label={t("turnPage")}>
+                  <HStack gap={3} vAlign="center" hAlign="between">
+                    {previous ? (
+                      <Button
+                        label={previous.label}
+                        size="lg"
+                        href={previous.href}
+                        icon={<Icon icon={ChevronLeftIcon} />}
+                      />
+                    ) : (
+                      <span />
+                    )}
+                    <Text type="supporting">{t("pedalHint")}</Text>
+                    {following ? (
+                      <Button
+                        label={following.label}
+                        size="lg"
+                        href={following.href}
+                        variant="primary"
+                        endContent={<Icon icon={ChevronRightIcon} />}
+                      />
+                    ) : (
+                      <span />
+                    )}
+                  </HStack>
+                </nav>
+              </>
+            )}
           </VStack>
           {tempoDialog}
           {isPhone && (

@@ -49,6 +49,8 @@ export function sectionAt(sections: readonly VideoSection[], seconds: number): n
 
 /** The bar being played at a time in the video, where it is drawn and its beat, or null. */
 export interface VideoBar {
+  /** The bar's place in the timeline. */
+  at: number;
   section: number;
   row: number;
   index: number;
@@ -82,6 +84,7 @@ export function barAt(
   if (!bar) return null;
   // Beat by beat, as the metronome marks it: the beat sounding fills its share of the bar.
   return {
+    at: click.bar,
     section: bar.section,
     row: bar.row,
     index: bar.index,

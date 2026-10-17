@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@astryxdesign/core/Button";
+import { ButtonGroup } from "@astryxdesign/core/ButtonGroup";
 import { Dialog } from "@astryxdesign/core/Dialog";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
@@ -10,7 +11,12 @@ import { Slider } from "@astryxdesign/core/Slider";
 import { Switch } from "@astryxdesign/core/Switch";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
-import { PlayIcon, SpeakerWaveIcon, StopIcon } from "@heroicons/react/24/outline";
+import {
+  AdjustmentsVerticalIcon,
+  PlayIcon,
+  SpeakerWaveIcon,
+  StopIcon,
+} from "@heroicons/react/24/outline";
 import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
@@ -218,8 +224,39 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
         }
       : undefined;
 
+  // The metronome as one control (T-2701): Play with the tempo on it, the beat counter while it
+  // plays, and its options beside it. The same control in stand mode, on the version page and on
+  // a set's song.
+  const shownTempo = written
+    ? Math.round((written * speed) / 100)
+    : tapped !== null
+      ? Math.round(tapped)
+      : null;
+  const control = (
+    <ButtonGroup label={t("metronome")} size="lg">
+      <Button
+        label={metronome.isPlaying ? t("stop") : t("play")}
+        variant={metronome.isPlaying ? "primary" : "secondary"}
+        icon={<Icon icon={metronome.isPlaying ? StopIcon : PlayIcon} />}
+        onClick={toggle}
+      >
+        {(metronome.isPlaying && counter) ||
+          (shownTempo !== null ? t("tempoShort", { bpm: shownTempo }) : t("play"))}
+      </Button>
+      <Button
+        label={t("sound")}
+        variant={metronome.isPlaying ? "primary" : "secondary"}
+        isIconOnly
+        icon={<Icon icon={AdjustmentsVerticalIcon} />}
+        tooltip={t("sound")}
+        onClick={() => setSoundOpen(true)}
+      />
+    </ButtonGroup>
+  );
+
   return {
     metronome,
+    control,
     playButton,
     soundButton,
     soundControls,
@@ -232,6 +269,8 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
     counter,
     nowIn,
     playingSection: playing?.section,
+    /** The bar playing, by its place in the timeline. */
+    playingAt: click && click.bar >= 0 ? click.bar : undefined,
     queued: metronome.queued,
     queue: metronome.queue,
     isPlaying: metronome.isPlaying,
