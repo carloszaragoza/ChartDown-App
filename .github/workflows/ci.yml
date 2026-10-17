@@ -65,8 +65,9 @@ jobs:
         with:
           version: 2.119.0
 
-      - name: Start Supabase (database and auth only)
-        run: supabase start -x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      # Storage too: the bands' audio lives in a bucket with its own policies (R-06.7).
+      - name: Start Supabase (database, auth and storage)
+        run: supabase start -x realtime,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
 
       - name: Schema tests
         run: supabase test db
@@ -99,8 +100,8 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Start Supabase (database, auth, API, mail and realtime)
-        run: supabase start -x storage-api,imgproxy,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      - name: Start Supabase (database, auth, API, storage, mail and realtime)
+        run: supabase start -x imgproxy,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
 
       # The local stack's URL and public key; they are fixed demo values, not secrets.
       - name: Point the app at the local Supabase
