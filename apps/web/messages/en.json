@@ -565,6 +565,7 @@
     "otherSongs": "Other songs"
   },
   "editor": {
+    "resize": "Resize the text and the chart",
     "cancel": "Cancel",
     "leaveTitle": "Leave without saving?",
     "leaveDescription": "Your changes to this chart will be lost.",

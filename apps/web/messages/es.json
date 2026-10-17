@@ -565,6 +565,7 @@
     "otherSongs": "Otras canciones"
   },
   "editor": {
+    "resize": "Cambiar el ancho del texto y del chart",
     "cancel": "Cancelar",
     "leaveTitle": "¿Salir sin guardar?",
     "leaveDescription": "Se perderán tus cambios en este chart.",
