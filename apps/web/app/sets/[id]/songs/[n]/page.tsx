@@ -19,7 +19,9 @@ import { songView, viewAs, viewAsOptions, type SetSong } from "../../../../../li
 import { createClient } from "../../../../../lib/supabase/server";
 import { StandIcon } from "../../../../_components/ActionIcons";
 import { BeatsControl } from "../../../../_components/BeatsControl";
+import { AudioButton } from "../../../../_components/AudioDock";
 import { ChartPreview } from "../../../../_components/ChartPreview";
+import { saveAudioStart } from "../../../../versions/[id]/audio";
 import { LinkChoice } from "../../../../_components/LinkChoice";
 import { UUID } from "../../../../versions/[id]/load";
 import { updatePinned } from "../../../actions";
@@ -118,6 +120,36 @@ export default async function SetSongPage({
 
   const standHref = `${path}/stand${query({ view: style === "letters" ? "letters" : "", beats: beats === "auto" ? "" : beats, as: as ?? "" })}`;
 
+  // The band's recording of this song, for its members (R-06.7, T-2603).
+  const { data: setRow } = await supabase
+    .from("sets")
+    .select("band_id, band:bands(name, is_personal)")
+    .eq("id", song.set_id)
+    .maybeSingle();
+  const { data: audioRow } = setRow
+    ? await supabase
+        .from("band_audio")
+        .select("duration_ms, peaks, music_start_ms")
+        .match({ band_id: setRow.band_id, version_id: song.version_id })
+        .maybeSingle()
+    : { data: null };
+  const setBand = (Array.isArray(setRow?.band) ? setRow?.band[0] : setRow?.band) as {
+    name: string;
+    is_personal: boolean;
+  } | null;
+  const a = await getTranslations("audio");
+  const recording =
+    setRow && audioRow
+      ? {
+          bandId: setRow.band_id as string,
+          versionId: song.version_id,
+          band: setBand?.is_personal ? a("personal") : (setBand?.name ?? ""),
+          durationMs: audioRow.duration_ms as number,
+          peaks: (audioRow.peaks as number[] | null) ?? [],
+          musicStartMs: audioRow.music_start_ms as number,
+        }
+      : null;
+
   const phone = await guessPhone();
   return (
     <Layout
@@ -150,6 +182,20 @@ export default async function SetSongPage({
                     ? t("allNotesMd")
                     : t("allNotesTempMd")}
               </Text>
+              {recording && (
+                <HStack gap={1} vAlign="center">
+                  <AudioButton
+                    recording={recording}
+                    chart={chart}
+                    save={
+                      leads
+                        ? saveAudioStart.bind(null, recording.bandId, recording.versionId)
+                        : undefined
+                    }
+                  />
+                  <Text type="supporting">{a("bandRecording", { band: recording.band })}</Text>
+                </HStack>
+              )}
             </VStack>
             <HStack gap={2} vAlign="center" wrap="wrap">
               <Button

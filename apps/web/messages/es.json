@@ -1410,6 +1410,13 @@
     "close": "Cerrar el video"
   },
   "audio": {
+    "bandRecording": "Grabación de {band}",
+    "play": "Escuchar la grabación de {band}",
+    "playShort": "Escuchar",
+    "pause": "Pausa",
+    "close": "Cerrar el reproductor",
+    "player": "Audio de la banda",
+    "saveStart": "Guardar para la banda",
     "for": "Para {band}",
     "personal": "Solo yo",
     "recording": "Grabación de {band} · {length}",
@@ -1426,6 +1433,7 @@
     "remove": "Quitar la grabación de {band}",
     "removeShort": "Quitar",
     "errors": {
+      "unavailable": "La grabación no se puede cargar ahora.",
       "type": "Solo archivos MP3 o M4A.",
       "size": "El archivo pasa de 15 MB.",
       "unreadable": "Este archivo no se puede leer como audio.",

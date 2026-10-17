@@ -52,7 +52,7 @@ export default async function VersionPage({
   const { data: audioRows } = auth.user
     ? await supabase
         .from("band_audio")
-        .select("band_id, duration_ms, band:bands(name, is_personal)")
+        .select("band_id, duration_ms, peaks, music_start_ms, band:bands(name, is_personal)")
         .eq("version_id", version.id)
     : { data: [] };
   const recordings = (audioRows ?? []).map((row) => {
@@ -64,6 +64,8 @@ export default async function VersionPage({
       bandId: row.band_id as string,
       band: bandName(band),
       durationMs: row.duration_ms as number,
+      peaks: (row.peaks as number[] | null) ?? [],
+      musicStartMs: row.music_start_ms as number,
       canArrange: arranged.some((one) => one.id === row.band_id),
     };
   });

@@ -1410,6 +1410,13 @@
     "close": "Close the video"
   },
   "audio": {
+    "bandRecording": "{band}'s recording",
+    "play": "Play {band}'s recording",
+    "playShort": "Play",
+    "pause": "Pause",
+    "close": "Close the player",
+    "player": "Band audio",
+    "saveStart": "Save for the band",
     "for": "For {band}",
     "personal": "Just me",
     "recording": "{band}'s recording · {length}",
@@ -1426,6 +1433,7 @@
     "remove": "Remove {band}'s recording",
     "removeShort": "Remove",
     "errors": {
+      "unavailable": "The recording can't be loaded right now.",
       "type": "Only MP3 or M4A files.",
       "size": "The file is over 15 MB.",
       "unreadable": "This file can't be read as audio.",

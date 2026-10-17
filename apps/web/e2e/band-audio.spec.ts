@@ -84,8 +84,28 @@ test("R-06.7 the MD adds the band's audio; its musicians hear it, nobody else", 
   await switchTo(page, ben, "Ben Audio");
   await page.goto(`/versions/${version}`);
   await expect(page.getByText(`${band}'s recording · 0:08`)).toBeVisible();
+  // T-2603: he plays it; the sections lie over its waveform and the chart follows it.
+  await page.getByRole("button", { name: `Play ${band}'s recording` }).click();
+  const player = page.getByRole("complementary", { name: "Band audio" });
+  const play = player.getByRole("button", { name: "Play", exact: true });
+  await expect(play).toBeEnabled();
+  await play.click();
+  await expect(player.getByRole("button", { name: "Pause" })).toBeVisible();
+  const sections = player.getByRole("group", { name: "Sections" });
+  await expect(sections.getByRole("button")).toHaveText(["Verse", "Chorus"]);
+  await sections.getByRole("button", { name: "Go to Chorus" }).click();
+  await expect(sections.getByRole("button", { name: "Go to Chorus" })).toHaveAttribute(
+    "aria-current",
+    "true",
+  );
+  await expect(page.locator('#section-2 [aria-current="step"]')).toHaveCount(1);
+  // A musician moves where the music starts for himself but can't save it for the band.
+  await player.getByRole("button", { name: "Later" }).click();
+  await expect(player.getByRole("button", { name: "Save for the band" })).toHaveCount(0);
+  await player.getByRole("button", { name: "Close the player" }).click();
   await page.goto("/");
   await signOut(page);
   await page.goto(`/versions/${version}`);
   await expect(page.getByText(`${band}'s recording`)).toHaveCount(0);
+  await expect(page.getByRole("button", { name: `Play ${band}'s recording` })).toHaveCount(0);
 });
