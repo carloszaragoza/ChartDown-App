@@ -44,6 +44,7 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
       details={{
         artists: version.artists,
         author: version.author,
+        sourceType: version.source.type,
         album: version.source.album,
         year: version.source.year,
         youtube: version.source.youtube,

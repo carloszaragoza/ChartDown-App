@@ -143,3 +143,32 @@ test("R-03.1 Cancel leaves the editor for the version, asking first when there a
   // The starter's chorus is still there: nothing was saved.
   await expect(page.getByRole("heading", { name: "Chorus" })).toBeVisible();
 });
+
+test("R-02.2 the owner changes the version's source in the editor", async ({ page }) => {
+  const title = `Linen Harbor ${Date.now()}`;
+  await signUpAndConfirm(page, unique("source"), "Sol Source");
+  await page.goto(`/versions/new?song=new&q=${encodeURIComponent(title)}`);
+  await page.getByLabel("Live").check();
+  await page.getByRole("button", { name: "Publish version" }).click();
+  await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
+  const address = new URL(page.url()).pathname;
+
+  await page.goto(`${address}/edit`);
+  const details = page.getByRole("region", { name: "Song details" });
+  // A wrong year is refused, with its message, and nothing changes.
+  await details.getByLabel("Year").fill("12");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "year" }).first()).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`${address}/edit$`));
+
+  await details.getByLabel("Year").fill("2024");
+  await details.getByLabel("Album").fill("Harbor Nights");
+  await details.getByLabel("YouTube link").fill("https://www.youtube.com/watch?v=hBL9EBKB5DI");
+  await details.getByLabel("Acoustic").check();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  // Only the source changed: back to the version, with no new revision.
+  await expect(page).toHaveURL(new RegExp(`${address}$`));
+  await expect(page.getByText("Acoustic · Album: Harbor Nights · 2024")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Play the video" })).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "Saved as revision" })).toHaveCount(0);
+});

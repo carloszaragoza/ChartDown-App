@@ -1,7 +1,9 @@
 "use client";
 
 import { Banner } from "@astryxdesign/core/Banner";
-import { Grid } from "@astryxdesign/core/Grid";
+import { Grid, GridSpan } from "@astryxdesign/core/Grid";
+import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
+import { TextInput } from "@astryxdesign/core/TextInput";
 import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
@@ -20,7 +22,9 @@ import { useFormatter, useNow, useTranslations } from "next-intl";
 import { useActionState, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { ChartTextArea, type ChartTextAreaHandle } from "../../../_components/ChartTextArea";
 import { ChartPreview } from "../../../_components/ChartPreview";
-import { saveChart, type SaveState } from "./actions";
+import { saveChart, type SaveState, type SourceValues } from "./actions";
+import { SOURCE_TYPES, type VersionError } from "../../../../lib/versions/validate";
+import { videoId } from "../../../../lib/video/youtube";
 import { saveVideoStart } from "../actions";
 import { CancelButton, WriteLayout } from "../../../_components/WriteLayout";
 import { VideoLink } from "../../../_components/VideoDock";
@@ -43,6 +47,8 @@ export interface EditorProps {
   details?: {
     artists: string[];
     author: string;
+    /** The source's type as saved, for its choice (T-2408). */
+    sourceType: string;
     album: string | null;
     year: number | null;
     youtube: string | null;
@@ -54,8 +60,9 @@ export interface EditorProps {
 /**
  * The chart editor (R-03.1; T-2404): the song's details at the top, the text on the left as tall
  * as the screen and a live preview beside it that follows the typing without reloading, with the
- * parser's warnings and their lines. The title is written once, in the details: the text leaves
- * out its `title:` line and saving puts it back. Warnings never block a save; a save returns to
+ * parser's warnings and their lines. The title is written once, in the header: the text leaves
+ * out its `title:` line and saving puts it back. The version's source is a form the owner can
+ * change, saved with the chart (R-02.2, T-2408). Warnings never block a save; a save returns to
  * the version, and Cancel goes back to it.
  */
 export function Editor({
@@ -73,16 +80,38 @@ export function Editor({
   const t = useTranslations("editor");
   const v = useTranslations("version");
   const n = useTranslations("newVersion");
+  const sources = useTranslations("version.source");
   const format = useFormatter();
   const now = useNow({ updateInterval: 30_000 });
   const router = useRouter();
   const [text, setText] = useState(() => splitTitle(content).body);
+  const initialSource: SourceValues = {
+    sourceType: details?.sourceType ?? "",
+    album: details?.album ?? "",
+    year: details?.year ? String(details.year) : "",
+    youtube: details?.youtube ?? "",
+  };
   const [state, action, pending] = useActionState<SaveState, FormData>(saveChart, {
     status: "idle",
     baseRevisionId: revisionId,
     savedContent: content,
+    savedSource: initialSource,
   });
-  const dirty = text !== splitTitle(state.savedContent).body;
+  const [sourceType, setSourceType] = useState(initialSource.sourceType);
+  const [album, setAlbum] = useState(initialSource.album);
+  const [year, setYear] = useState(initialSource.year);
+  const [youtube, setYoutube] = useState(initialSource.youtube);
+  const saved = state.savedSource;
+  const dirty =
+    text !== splitTitle(state.savedContent).body ||
+    sourceType !== saved.sourceType ||
+    album.trim() !== saved.album.trim() ||
+    year.trim() !== saved.year.trim() ||
+    youtube.trim() !== saved.youtube.trim();
+  const fieldError = (code: VersionError) =>
+    state.status === "invalid" && state.error === code
+      ? { status: { type: "error" as const, message: n(`errors.${code}`) } }
+      : {};
   // The preview may lag a keystroke behind so typing never waits for it.
   const shown = useDeferredValue(text);
   const chart = useMemo(() => parse(withTitle(shown, title)), [shown, title]);
@@ -99,33 +128,13 @@ export function Editor({
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
 
-  // A save returns to the version, with its new revision.
+  // A save returns to the version, saying the new revision when the chart changed.
   useEffect(() => {
-    if (state.status === "saved") router.push(`${page}?saved=${state.number ?? ""}`);
-  }, [state, router, page]);
+    if (state.status !== "saved") return;
+    router.push(state.baseRevisionId !== revisionId ? `${page}?saved=${state.number ?? ""}` : page);
+  }, [state, router, page, revisionId]);
 
   const goTo = (line: number) => lines.current?.goTo(line);
-  const facts = details
-    ? [
-        { label: n("author"), value: details.author },
-        { label: n("source"), value: source },
-        details.album ? { label: n("album"), value: details.album } : null,
-        details.youtube
-          ? {
-              label: n("youtube"),
-              value: (
-                <VideoLink
-                  url={details.youtube}
-                  chart={chart}
-                  saved={details.videoStart}
-                  save={(milliseconds) => saveVideoStart(versionId, milliseconds)}
-                />
-              ),
-            }
-          : null,
-      ].filter((fact) => fact !== null)
-    : [];
-
   return (
     <WriteLayout
       phone={phone}
@@ -148,6 +157,10 @@ export function Editor({
             <form action={action}>
               <input type="hidden" name="versionId" value={versionId} />
               <input type="hidden" name="content" value={withTitle(text, title)} />
+              <input type="hidden" name="sourceType" value={sourceType} />
+              <input type="hidden" name="album" value={album} />
+              <input type="hidden" name="year" value={year} />
+              <input type="hidden" name="youtube" value={youtube} />
               <HStack gap={2} vAlign="center" wrap="wrap">
                 {/* Going private is its own flow (R-02.4), with no way back. */}
                 <SegmentedControl
@@ -191,18 +204,62 @@ export function Editor({
       }
       detailsLabel={n("details")}
       details={
-        <Grid columns={{ minWidth: 180 }} gap={4}>
-          {facts.map((fact) => (
-            <VStack key={fact.label} gap={0.5}>
-              <Text type="supporting">{fact.label}</Text>
-              {typeof fact.value === "string" ? (
-                <Text weight="semibold">{fact.value}</Text>
-              ) : (
-                <HStack>{fact.value}</HStack>
+        <VStack gap={4}>
+          {state.status === "invalid" && state.error && (
+            <div role="alert">
+              <Banner status="error" title={n(`errors.${state.error}`)} />
+            </div>
+          )}
+          <Grid columns={{ minWidth: 220 }} gap={4} align="start">
+            {details && (
+              <VStack gap={0.5}>
+                <Text type="supporting">{n("author")}</Text>
+                <Text weight="semibold">{details.author}</Text>
+              </VStack>
+            )}
+            <TextInput label={n("album")} value={album} onChange={setAlbum} isOptional />
+            <TextInput
+              label={n("year")}
+              value={year}
+              onChange={setYear}
+              isOptional
+              {...fieldError("year_invalid")}
+            />
+            <VStack gap={1}>
+              <TextInput
+                label={n("youtube")}
+                value={youtube}
+                onChange={setYoutube}
+                isOptional
+                {...fieldError("youtube_invalid")}
+              />
+              {videoId(youtube) && (
+                <HStack>
+                  <VideoLink
+                    url={youtube}
+                    chart={chart}
+                    saved={details?.videoStart}
+                    save={(milliseconds) => saveVideoStart(versionId, milliseconds)}
+                  />
+                </HStack>
               )}
             </VStack>
-          ))}
-        </Grid>
+            <GridSpan columns="full">
+              <RadioList
+                label={n("source")}
+                value={sourceType}
+                onChange={setSourceType}
+                orientation={phone ? "vertical" : "horizontal"}
+                isRequired
+                {...fieldError("source_required")}
+              >
+                {SOURCE_TYPES.map((type) => (
+                  <RadioListItem key={type} value={type} label={sources(type)} />
+                ))}
+              </RadioList>
+            </GridSpan>
+          </Grid>
+        </VStack>
       }
       textLabel={t("textPanel")}
       text={
