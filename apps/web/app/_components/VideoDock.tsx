@@ -204,7 +204,8 @@ function VideoDock({
         },
       });
     });
-    // The bar follows the video, and so does the chart on the page (T-2504).
+    // The bar follows the video, and so does the chart on the page (T-2504), read often enough
+    // that each beat shows when it sounds.
     const timer = window.setInterval(() => {
       const time = player.current?.getCurrentTime?.();
       if (typeof time !== "number") return;
@@ -221,7 +222,7 @@ function VideoDock({
         musicStart: startRef.current,
         playing: player.current?.getPlayerState?.() === 1,
       });
-    }, 250);
+    }, 50);
     return () => {
       gone = true;
       window.clearInterval(timer);
