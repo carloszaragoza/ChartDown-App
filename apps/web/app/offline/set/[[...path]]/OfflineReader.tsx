@@ -30,6 +30,7 @@ import { songView, type SetSong } from "../../../../lib/sets/song";
 import { setWhen } from "../../../../lib/sets/when";
 import { readBeatsMode } from "@chartdown/ui";
 import { BeatsMemory } from "../../../_components/BeatsControl";
+import { AudioButton } from "../../../_components/AudioDock";
 import { ChartPreview } from "../../../_components/ChartPreview";
 import { readDisplay } from "../../../versions/[id]/display";
 import { readSection } from "../../../versions/[id]/stand/standHref";
@@ -71,6 +72,7 @@ export function OfflineReader() {
   const t = useTranslations("offline");
   const s = useTranslations("sets");
   const c = useTranslations("chart");
+  const a = useTranslations("audio");
   const format = useFormatter();
   // Drawn only in the browser: the address and the stored sets are only known there.
   const pathname = useSyncExternalStore(
@@ -294,6 +296,14 @@ export function OfflineReader() {
   );
   const search = new URLSearchParams(window.location.search);
   const beats = readBeatsMode(search.get("beats"));
+  // The band's recording, kept with the set: it plays with no connection (R-06.7, T-2604).
+  const kept = bundle.audio?.find((recording) => recording.versionId === song.version_id);
+  const audio = kept ? (
+    <AudioButton
+      recording={{ ...kept, band: bundle.set.personal ? a("personal") : bundle.set.band }}
+      chart={chart}
+    />
+  ) : null;
 
   if (place.stand) {
     const display = readDisplay(chart, {
@@ -312,6 +322,7 @@ export function OfflineReader() {
         theme={search.get("theme") === "stage" ? "stage" : "light"}
         path={`${base}/${song.position}/stand`}
         notes={notes}
+        {...(audio ? { audio } : {})}
         forYou={view.sections.map((section) => section.some((note) => note.forYou))}
         set={{
           href: base,
@@ -379,6 +390,7 @@ export function OfflineReader() {
             <VStack gap={5}>
               {banner}
               <OfflineChanges setId={bundle.set.id} />
+              {audio}
               <>
                 <BeatsMemory current={beats} />
                 <ChartPreview

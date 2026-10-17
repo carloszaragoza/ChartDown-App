@@ -40,12 +40,14 @@ import {
   useState,
   useSyncExternalStore,
   type MouseEvent,
+  type ReactNode,
   type TouchEvent,
 } from "react";
 import { ChartSection } from "../../../_components/ChartPreview";
 import { useMetronomeControls } from "../../../_components/MetronomeControls";
 import { SongForm } from "../../../_components/SongForm";
 import { BeatsControl } from "../../../_components/BeatsControl";
+import { barIn, usePlaybackBar } from "../../../_components/usePlaybackBar";
 import { useChartLabels } from "../../../_components/chartLabels";
 import type { Display } from "../display";
 import { inSidewaysScroll, swipeTurn } from "./swipe";
@@ -76,6 +78,8 @@ export interface StandModeProps {
   notes?: readonly (readonly MDNoteData[])[];
   forYou?: readonly boolean[];
   set?: StandSet;
+  /** The band's recording's play button, in a set (R-06.7). */
+  audio?: ReactNode;
   /** The server's guess that this is a phone (R-03.8); the screen decides once it is drawn. */
   phone?: boolean;
 }
@@ -141,6 +145,7 @@ function StandModeView({
   forYou: forYouGiven = [],
   set,
   phone: phoneGuess = false,
+  audio,
 }: StandModeProps) {
   const t = useTranslations("stand");
   const c = useTranslations("chart");
@@ -216,10 +221,13 @@ function StandModeView({
   );
   // Playing, the section follows the metronome (R-11.4): when it enters another section, stand
   // mode turns to it; in between, the musician may look ahead.
-  const [followed, setFollowed] = useState(playingSection);
-  if (playingSection !== followed) {
-    setFollowed(playingSection);
-    if (playingSection !== undefined) setCurrent(playingSection);
+  // The band's recording, playing, is followed the same way (R-06.7).
+  const playbackBar = usePlaybackBar(chart, isPlaying);
+  const leading = playingSection ?? playbackBar?.section;
+  const [followed, setFollowed] = useState(leading);
+  if (leading !== followed) {
+    setFollowed(leading);
+    if (leading !== undefined) setCurrent(leading);
   }
 
   // The address follows the section and the view.
@@ -512,6 +520,7 @@ function StandModeView({
                     onClick={() => setSheetOpen(true)}
                   />
                   {/* Play takes Previous's place: a swipe to the right goes back (R-03.3). */}
+                  {audio}
                   {playButton}
                   {following && (
                     <Button
@@ -550,6 +559,7 @@ function StandModeView({
                           {counter}
                         </Text>
                       )}
+                      {audio}
                       {soundButton}
                       {playButton}
                       {viewAsControl}
@@ -612,7 +622,7 @@ function StandModeView({
                   meter={chart.meter}
                   beats={beats}
                   size="lg"
-                  now={nowIn(current)}
+                  now={nowIn(current) ?? barIn(playbackBar, current)}
                   start={startIn(current)}
                 />
               )}
