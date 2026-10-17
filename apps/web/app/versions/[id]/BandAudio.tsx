@@ -17,13 +17,17 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { audioProblem, audioType, MAX_AUDIO_BYTES, peaksFrom } from "../../../lib/audio/file";
 import { createClient } from "../../../lib/supabase/browser";
-import { recordAudio, removeAudio } from "./audio";
+import type { Chart } from "chartdown";
+import { AudioButton } from "../../_components/AudioDock";
+import { recordAudio, removeAudio, saveAudioStart } from "./audio";
 
 /** A band's recording of this version, as its members see it. */
 export interface BandRecording {
   bandId: string;
   band: string;
   durationMs: number;
+  peaks: number[];
+  musicStartMs: number;
   /** The person can replace or remove it: the band's MD. */
   canArrange: boolean;
 }
@@ -42,8 +46,11 @@ export function BandAudio({
   versionId,
   recordings,
   bands,
+  chart,
 }: {
   versionId: string;
+  /** The chart the player places its sections on (T-2603). */
+  chart: Chart;
   recordings: BandRecording[];
   /** The bands whose recording this person may add: those they arrange. */
   bands: { id: string; name: string }[];
@@ -115,6 +122,15 @@ export function BandAudio({
           <Text>
             {t("recording", { band: recording.band, length: minutes(recording.durationMs) })}
           </Text>
+          <AudioButton
+            recording={{ ...recording, versionId }}
+            chart={chart}
+            save={
+              recording.canArrange
+                ? (milliseconds) => saveAudioStart(recording.bandId, versionId, milliseconds)
+                : undefined
+            }
+          />
           {recording.canArrange && (
             <Button
               label={t("remove", { band: recording.band })}

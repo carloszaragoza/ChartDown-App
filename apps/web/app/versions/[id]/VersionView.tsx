@@ -184,7 +184,12 @@ export function VersionView({
                     )}
                   </Text>
                   {audio && reading && (
-                    <BandAudio versionId={id} recordings={audio.recordings} bands={audio.bands} />
+                    <BandAudio
+                      versionId={id}
+                      recordings={audio.recordings}
+                      bands={audio.bands}
+                      chart={chart}
+                    />
                   )}
                   {source.youtube && (
                     <HStack>

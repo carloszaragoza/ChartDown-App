@@ -57,3 +57,21 @@ export async function removeAudio(bandId: string, versionId: string): Promise<bo
   await supabase.storage.from("band-audio").remove([`${bandId}/${versionId}`]);
   return true;
 }
+
+/** Saves where the music starts in the band's recording, for the band (R-06.7). */
+export async function saveAudioStart(
+  bandId: string,
+  versionId: string,
+  milliseconds: number,
+): Promise<boolean> {
+  if (!authEnabled() || !UUID.test(bandId) || !UUID.test(versionId)) return false;
+  const value = Math.round(milliseconds);
+  if (!Number.isFinite(value) || value < 0 || value > 3_600_000) return false;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("band_audio")
+    .update({ music_start_ms: value })
+    .match({ band_id: bandId, version_id: versionId })
+    .select("id");
+  return !error && data?.length === 1;
+}
