@@ -5,6 +5,7 @@ import { authEnabled } from "../../../../lib/auth/enabled";
 import { withChartVersion } from "../../../../lib/chart/version";
 import { createClient } from "../../../../lib/supabase/server";
 import { normalizeLineBreaks } from "../../../../lib/versions/lines";
+import { splitTitle } from "../../../../lib/versions/title";
 import { validateSource, type VersionError } from "../../../../lib/versions/validate";
 import { UUID } from "../load";
 
@@ -60,7 +61,8 @@ export async function saveChart(previous: SaveState, form: FormData): Promise<Sa
   if (!auth.user)
     redirect(`/auth/sign-in?next=${encodeURIComponent(`/versions/${versionId}/edit`)}`);
 
-  const chartChanged = content !== previous.savedContent;
+  // The title line is the details', written back on every save: only the rest is the chart.
+  const chartChanged = splitTitle(content).body !== splitTitle(previous.savedContent).body;
   const sourceChanged = !sameSource(source, previous.savedSource);
   if (!chartChanged && !sourceChanged) return { ...previous, status: "unchanged" };
 
