@@ -44,6 +44,29 @@ export default async function VersionPage({
 
   const search = await searchParams;
   const setChoices = auth.user ? await mySets(supabase, auth.user.id) : [];
+  // The bands' recordings of this version: the database gives each person their bands' only.
+  const a = await getTranslations("audio");
+  const arranged = auth.user ? await bandsArranged(supabase, auth.user.id) : [];
+  const bandName = (band: { name: string; is_personal: boolean } | null) =>
+    band?.is_personal ? a("personal") : (band?.name ?? "");
+  const { data: audioRows } = auth.user
+    ? await supabase
+        .from("band_audio")
+        .select("band_id, duration_ms, band:bands(name, is_personal)")
+        .eq("version_id", version.id)
+    : { data: [] };
+  const recordings = (audioRows ?? []).map((row) => {
+    const band = (Array.isArray(row.band) ? row.band[0] : row.band) as {
+      name: string;
+      is_personal: boolean;
+    } | null;
+    return {
+      bandId: row.band_id as string,
+      band: bandName(band),
+      durationMs: row.duration_ms as number,
+      canArrange: arranged.some((one) => one.id === row.band_id),
+    };
+  });
   const chart = parse(revision.content);
   // Back from the editor after a save (T-2404): the new revision is said once, here.
   const saved = /^\d+$/.test(search.saved ?? "") ? Number(search.saved) : null;
@@ -77,6 +100,14 @@ export default async function VersionPage({
       setChoices={setChoices}
       setFailed={search.set === "failed"}
       phone={await guessPhone()}
+      {...(auth.user
+        ? {
+            audio: {
+              recordings,
+              bands: arranged.map((band) => ({ id: band.id, name: bandName(band) })),
+            },
+          }
+        : {})}
       {...(saved !== null
         ? {
             message: (
@@ -120,4 +151,27 @@ async function mySets(
     band: names.get(set.band_id as string) ?? null,
     name: set.name as string,
   }));
+}
+
+/** The bands this person arranges as their MD, whose recordings they add (R-06.7). */
+async function bandsArranged(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+): Promise<{ id: string; name: string; is_personal: boolean }[]> {
+  const { data } = await supabase
+    .from("band_members")
+    .select("band_id, band:bands(name, is_personal)")
+    .eq("user_id", userId)
+    .eq("role", "md");
+  return (data ?? []).map((row) => {
+    const band = (Array.isArray(row.band) ? row.band[0] : row.band) as {
+      name: string;
+      is_personal: boolean;
+    } | null;
+    return {
+      id: row.band_id as string,
+      name: band?.name ?? "",
+      is_personal: band?.is_personal ?? false,
+    };
+  });
 }
