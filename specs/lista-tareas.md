@@ -256,6 +256,18 @@ What moves with the parser: its sources, its history, its tests (SPEC-00, R-00.x
 | T-2102 | github.com/ChartDown/parser: the history of `packages/core` (only that folder), a standalone build with no monorepo files, its own CI (type check, tests, the suite), MIT, and `homepage`, `repository` and `bugs` pointing to it; its README links to the spec | – | T-2101 | M | The repository's CI passes; the packed package passes the 0.7 suite through its adapter |
 | T-2103 | The app installs `chartdown` from npm (`^0.3.0`) in `apps/web` and `packages/ui`, and `packages/core` leaves the monorepo; the R-00.1 catalog test and the example charts the app's tests use move into the app; the root README and LICENSE no longer list `packages/core` | R-00.1 | T-2007 | S | CI passes with the package from npm; the R-00.1 test reads `supabase/migrations` |
 
+## E27 · A clearer stand (owner's review, October 16, 2026)
+
+The owner's sketch of stand mode, taken as an idea, not a design to copy: the metronome as one clear control, bigger numbers, the next section's notes before it comes, how many times a section repeats, and Back and Next where the thumb is. The version page and a set's song use the same metronome control, so the app reads as one.
+
+| ID | Task | Requirements | Depends on | Size | Tests / evidence |
+|---|---|---|---|---|---|
+| T-2701 | The metronome as one control in stand mode, the version page and a set's song: Play with the tempo on it ("74"), the beat counter on it while it plays ("2 / 4"), and a settings button beside it that opens the click, volume, practice speed, tap tempo and count-in | R-11.1, R-11.3, R-11.7 | T-1503 | S | Unit: the control shows the tempo, and the counter while playing; end-to-end: Play and Stop, and the settings open from the control |
+| T-2702 | Bigger numbers in stand mode on an iPad or a desktop (one size up); a bar whose chords don't fit its width keeps them whole; a phone keeps its sizes | R-03.3 | – | S | At 1180 × 820 a row of four bars of long chords (`4add2/6`) is whole, with no cut chord |
+| T-2703 | The next section's preview shows its notes for the reader (MD first), one line each, before the section comes; nobody sees a note that is not theirs | R-03.3, R-06.2 | T-2701 | S | End-to-end: the bassist sees the bass note of the next section in its preview, never the keys note |
+| T-2704 | A section played more than once (`@use Name 3x`) says so in stand mode: "3 times" by its name, and while the metronome or the band's audio plays, "Time 2 of 3" | R-03.3, R-00.17 | – | S | Unit: a section with `@use Bridge 3x` says 3 times, and time 2 of 3 on its second pass |
+| T-2705 | Back and Next at the bottom of stand mode on an iPad or a desktop, large, with a reminder that a page-turner pedal works too; the top bar keeps the way back, the song, the metronome and View as | R-03.3 | T-2701 | S | End-to-end: Next at the bottom turns to the next section; the arrow keys still do |
+
 ## E25 · Listen while you read (owner's review, October 16, 2026)
 
 A version's YouTube video in a mini player at the bottom, with the song's sections as a bar that follows it (R-03.11). The video is embedded from youtube-nocookie.com with YouTube's IFrame API; its sound is never read. Saving where the music starts adds one column to versions, which the owner's existing update permission covers (Technical Plan, data model); approved by the owner on October 16, 2026.
