@@ -167,7 +167,7 @@ test("R-11.9 the practice speed changes the tempo played, never the chart", asyn
   await expect(page.getByRole("dialog").getByText("80% · 192 bpm")).toBeVisible();
   await page.keyboard.press("Escape");
   // The chart still says 240.
-  await expect(page.getByText("240 bpm")).toBeVisible();
+  await expect(page.getByText(/Tempo 240/)).toBeVisible();
 });
 
 test("R-11.10 the space bar plays and stops; a pedal queues the next section while playing", async ({

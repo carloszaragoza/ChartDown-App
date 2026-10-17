@@ -1,5 +1,6 @@
 "use client";
 
+import { BottomSheet } from "@astryxdesign/core/BottomSheet";
 import { Button } from "@astryxdesign/core/Button";
 import { ButtonGroup } from "@astryxdesign/core/ButtonGroup";
 import { Dialog } from "@astryxdesign/core/Dialog";
@@ -195,13 +196,14 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
       onClick={() => setSoundOpen(true)}
     />
   );
+  // The options open from the bottom, as stand mode's View does, so both read the same.
   const soundDialog = (
-    <Dialog isOpen={isSoundOpen} onOpenChange={setSoundOpen} padding={4}>
-      <VStack gap={4}>
+    <BottomSheet isOpen={isSoundOpen} onOpenChange={setSoundOpen} label={t("sound")} height="hug">
+      <VStack gap={4} padding={4}>
         <Heading level={2}>{t("sound")}</Heading>
         {soundControls}
       </VStack>
-    </Dialog>
+    </BottomSheet>
   );
 
   // "2 / 4", the beat and the beats of the bar, so the pulse never rests on the line (R-11.3).
