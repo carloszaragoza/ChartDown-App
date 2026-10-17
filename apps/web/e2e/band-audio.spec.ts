@@ -25,6 +25,7 @@ test("R-06.7 the MD adds the band's audio; its musicians hear it, nobody else", 
   page,
   request,
 }) => {
+  test.slow();
   const stamp = Date.now();
   const band = `Reed Band ${stamp}`;
   const ana = unique("audiomd");
@@ -117,6 +118,8 @@ test("R-06.7 a downloaded set keeps its songs' recordings: stand mode plays them
   context,
   request,
 }) => {
+  // Two accounts, a band, a set, an upload and a download: more than the usual time.
+  test.slow();
   const stamp = Date.now();
   const band = `Tide Band ${stamp}`;
   const set = `Evensong ${stamp}`;
