@@ -13,6 +13,7 @@ import { LayoutHeader } from "@astryxdesign/core/Layout";
 import { List } from "@astryxdesign/core/List";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
+import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import { parse, SUPPORTED_VERSION, type Warning } from "chartdown";
@@ -225,25 +226,26 @@ export function Editor({
               isOptional
               {...fieldError("year_invalid")}
             />
-            <VStack gap={1}>
-              <TextInput
-                label={n("youtube")}
-                value={youtube}
-                onChange={setYoutube}
-                isOptional
-                {...fieldError("youtube_invalid")}
-              />
+            <HStack gap={1} vAlign="end">
               {videoId(youtube) && (
-                <HStack>
-                  <VideoLink
-                    url={youtube}
-                    chart={chart}
-                    saved={details?.videoStart}
-                    save={(milliseconds) => saveVideoStart(versionId, milliseconds)}
-                  />
-                </HStack>
+                <VideoLink
+                  url={youtube}
+                  chart={chart}
+                  saved={details?.videoStart}
+                  save={(milliseconds) => saveVideoStart(versionId, milliseconds)}
+                  isIconOnly
+                />
               )}
-            </VStack>
+              <StackItem size="fill">
+                <TextInput
+                  label={n("youtube")}
+                  value={youtube}
+                  onChange={setYoutube}
+                  isOptional
+                  {...fieldError("youtube_invalid")}
+                />
+              </StackItem>
+            </HStack>
             <GridSpan columns="full">
               <RadioList
                 label={n("source")}

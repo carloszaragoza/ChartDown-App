@@ -8,6 +8,7 @@ import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { LayoutHeader } from "@astryxdesign/core/Layout";
 import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
+import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -219,21 +220,19 @@ export function VersionForm({
                 isOptional
                 {...error("year_invalid")}
               />
-              <VStack gap={1}>
-                <TextInput
-                  label={t("youtube")}
-                  htmlName="youtube"
-                  value={youtube}
-                  onChange={setYoutube}
-                  isOptional
-                  {...error("youtube_invalid")}
-                />
-                {videoId(youtube) && (
-                  <HStack>
-                    <VideoLink url={youtube} chart={chart} />
-                  </HStack>
-                )}
-              </VStack>
+              <HStack gap={1} vAlign="end">
+                {videoId(youtube) && <VideoLink url={youtube} chart={chart} isIconOnly />}
+                <StackItem size="fill">
+                  <TextInput
+                    label={t("youtube")}
+                    htmlName="youtube"
+                    value={youtube}
+                    onChange={setYoutube}
+                    isOptional
+                    {...error("youtube_invalid")}
+                  />
+                </StackItem>
+              </HStack>
               <GridSpan columns="full">
                 <RadioList
                   label={t("source")}

@@ -3,17 +3,23 @@
 import { AlertDialog } from "@astryxdesign/core/AlertDialog";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
+import { HStack } from "@astryxdesign/core/HStack";
+import { ResizeHandle, useResizable } from "@astryxdesign/core/Resizable";
+import { percent, pixel } from "@astryxdesign/core/Resizable/utils";
+import { StackItem } from "@astryxdesign/core/Stack";
 import { VStack } from "@astryxdesign/core/VStack";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { usePhone } from "../../lib/shell/phone";
 import { PageLayout } from "./PageLayout";
 
 /**
  * One layout to write a version, for Edit and New version (R-02.1, R-03.1; owner's review,
  * October 16, 2026): the song's details in a panel at the top, then the chart's text on the left,
- * as tall as the screen, and the drawn chart on the right; one column on a narrow screen.
+ * as tall as the screen, and the drawn chart on the right, with a separator between them that the
+ * person drags to give either more width, remembered on the device (T-2409); one column on a
+ * phone.
  */
 export function WriteLayout({
   phone,
@@ -47,15 +53,80 @@ export function WriteLayout({
           <Card>
             <section aria-label={detailsLabel}>{details}</section>
           </Card>
-          <Grid columns={{ minWidth: 360, max: 2 }} gap={6} align="start">
-            <section aria-label={textLabel}>{text}</section>
-            <section aria-label={previewLabel} className="cd-chart-compact">
-              {preview}
-            </section>
-          </Grid>
+          <Split
+            phone={phone}
+            text={<section aria-label={textLabel}>{text}</section>}
+            preview={
+              <section aria-label={previewLabel} className="cd-chart-compact">
+                {preview}
+              </section>
+            }
+          />
         </VStack>
       }
     />
+  );
+}
+
+const SPLIT_KEY = "chartdown:write-split";
+
+/**
+ * The chart's text and the drawn chart side by side, with a separator to drag; each keeps at
+ * least a quarter of the row. On a phone, one above the other.
+ */
+function Split({ phone, text, preview }: { phone: boolean; text: ReactNode; preview: ReactNode }) {
+  const t = useTranslations("editor");
+  const isPhone = usePhone(phone);
+  const row = useRef<HTMLDivElement>(null);
+  const textWidth = useResizable({
+    containerRef: row,
+    defaultSize: pixel(520),
+    minSize: percent(25, { min: pixel(240) }),
+    maxSize: "75%",
+  });
+  // The width is kept on this device: saved when the person lets go of the separator, and read
+  // once the page is in the browser (the server has none).
+  const { resize } = textWidth;
+  const width = useRef(textWidth.size);
+  useEffect(() => {
+    width.current = textWidth.size;
+  });
+  const keep = () => {
+    try {
+      localStorage.setItem(SPLIT_KEY, String(Math.round(width.current)));
+    } catch {
+      // Not kept: the default width next time.
+    }
+  };
+  useEffect(() => {
+    try {
+      const kept = Number(localStorage.getItem(SPLIT_KEY));
+      if (kept > 0) resize(kept);
+    } catch {
+      // No storage, as in a private window: the default width.
+    }
+  }, [resize]);
+  if (isPhone)
+    return (
+      <VStack gap={6}>
+        {text}
+        {preview}
+      </VStack>
+    );
+  return (
+    <HStack ref={row} gap={2} vAlign="stretch">
+      <div style={{ flex: "none", inlineSize: textWidth.size, minInlineSize: 0 }}>{text}</div>
+      {/* Stretched to the row's height, so the handle can be grabbed all along it. */}
+      <div
+        style={{ display: "flex", flex: "none" }}
+        // A moment later, so the width is the one the separator ended on.
+        onPointerUp={() => window.setTimeout(keep)}
+        onKeyUp={() => window.setTimeout(keep)}
+      >
+        <ResizeHandle direction="horizontal" resizable={textWidth.props} label={t("resize")} />
+      </div>
+      <StackItem size="fill">{preview}</StackItem>
+    </HStack>
   );
 }
 
