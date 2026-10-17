@@ -1408,5 +1408,28 @@
     "player": "Video",
     "openYouTube": "Abrir en YouTube",
     "close": "Cerrar el video"
+  },
+  "audio": {
+    "for": "Para {band}",
+    "personal": "Solo yo",
+    "recording": "Grabación de {band} · {length}",
+    "add": "Añadir el audio de la banda",
+    "addTitle": "El audio de la banda",
+    "addIntro": "Una grabación para que la banda ensaye: solo la oyen los miembros de la banda, nadie más.",
+    "band": "Banda",
+    "file": "Archivo de audio",
+    "fileHint": "MP3 o M4A, de 15 MB como máximo.",
+    "replaces": "Reemplaza la grabación de la banda de esta canción.",
+    "rights": "La banda tiene derecho a usar esta grabación.",
+    "upload": "Subir",
+    "cancel": "Cancelar",
+    "remove": "Quitar la grabación de {band}",
+    "removeShort": "Quitar",
+    "errors": {
+      "type": "Solo archivos MP3 o M4A.",
+      "size": "El archivo pasa de 15 MB.",
+      "unreadable": "Este archivo no se puede leer como audio.",
+      "failed": "No se pudo subir. Inténtalo de nuevo."
+    }
   }
 }

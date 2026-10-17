@@ -1408,5 +1408,28 @@
     "player": "Video",
     "openYouTube": "Open on YouTube",
     "close": "Close the video"
+  },
+  "audio": {
+    "for": "For {band}",
+    "personal": "Just me",
+    "recording": "{band}'s recording · {length}",
+    "add": "Add the band's audio",
+    "addTitle": "The band's audio",
+    "addIntro": "A recording for the band to practice with: only the band's members hear it, never anyone else.",
+    "band": "Band",
+    "file": "Audio file",
+    "fileHint": "MP3 or M4A, at most 15 MB.",
+    "replaces": "It replaces the band's recording of this song.",
+    "rights": "The band has the right to use this recording.",
+    "upload": "Upload",
+    "cancel": "Cancel",
+    "remove": "Remove {band}'s recording",
+    "removeShort": "Remove",
+    "errors": {
+      "type": "Only MP3 or M4A files.",
+      "size": "The file is over 15 MB.",
+      "unreadable": "This file can't be read as audio.",
+      "failed": "It could not be uploaded. Try again."
+    }
   }
 }

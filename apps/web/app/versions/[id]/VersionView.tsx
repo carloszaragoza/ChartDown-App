@@ -14,6 +14,7 @@ import { EditIcon, ForkIcon, StandIcon } from "../../_components/ActionIcons";
 import { forkVersion, saveVideoStart } from "./actions";
 import type { Display } from "./display";
 import { BackToCatalog } from "./BackToCatalog";
+import { BandAudio, type BandRecording } from "./BandAudio";
 import { VideoLink } from "../../_components/VideoDock";
 import type { BasedOn } from "./load";
 import { AddToSet, ReportForm, VersionMenu } from "./VersionControls";
@@ -69,6 +70,8 @@ export interface VersionViewProps {
   songId?: string;
   /** Where the music starts in the video, in seconds, as the owner saved it (R-03.11). */
   videoStart?: number | null;
+  /** The bands' recordings of this version, and the bands this person adds one for (R-06.7). */
+  audio?: { recordings: BandRecording[]; bands: { id: string; name: string }[] };
 }
 
 /** How a set reads in the "Add to a set" choice: its band, or the person's own sets, and its name. */
@@ -104,6 +107,7 @@ export function VersionView({
   phone = false,
   songId,
   videoStart = null,
+  audio,
 }: VersionViewProps) {
   const t = useTranslations("version");
   const s = useTranslations("sets");
@@ -179,6 +183,9 @@ export function VersionView({
                       </>
                     )}
                   </Text>
+                  {audio && reading && (
+                    <BandAudio versionId={id} recordings={audio.recordings} bands={audio.bands} />
+                  )}
                   {source.youtube && (
                     <HStack>
                       <VideoLink
