@@ -21,7 +21,6 @@ import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { speedFor, tapTempo } from "../../lib/metronome/tapTempo";
-import { BeatDial } from "./BeatDial";
 import { MetronomeIcon } from "./MetronomeIcon";
 import { useMetronome } from "../../lib/metronome/useMetronome";
 
@@ -239,14 +238,15 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
       <Button
         label={metronome.isPlaying ? t("stop") : t("play")}
         variant={metronome.isPlaying ? "primary" : "secondary"}
-        // The metronome at rest; playing, a dial of the bar's beats in its place. Play and Stop
-        // are its name, and the button turns primary and counts while it plays.
+        // The metronome, its pendulum swinging with the beat while it plays. Play and Stop are
+        // its name, and the button turns primary and counts while it plays.
         icon={
-          metronome.isPlaying && click ? (
-            <BeatDial beat={click.count} of={click.of} />
-          ) : (
-            <Icon icon={MetronomeIcon} />
-          )
+          <MetronomeIcon
+            width="1.25em"
+            height="1.25em"
+            beat={metronome.isPlaying && click ? click.count : undefined}
+            seconds={click?.duration}
+          />
         }
         onClick={toggle}
       >

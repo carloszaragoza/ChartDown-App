@@ -640,3 +640,16 @@
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
+
+/* The metronome's pendulum (T-2701): it swings about its foot, taking the beat's time. */
+.cd-metronome-pendulum {
+  transform-box: view-box;
+  transform-origin: 12px 15.75px;
+  transition-property: transform;
+  transition-timing-function: ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cd-metronome-pendulum {
+    transition: none;
+  }
+}
