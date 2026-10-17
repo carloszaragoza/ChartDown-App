@@ -354,3 +354,9 @@ These tasks start after E15.
 | T-1605 | Shared metronome: followers see the leader's beat and bar; click sound stays personal | R-12.7 | T-1602, T-1503 | M | Leader and followers show the same beat |
 | T-1606 | Connection loss and recovery with the downloaded set; hand over control | R-12.9, R-12.11 | T-1602, T-902 | M | After reconnecting, followers jump to the leader's position |
 | T-1607 | “Live now” on Home, Notices and the set; live-ended notice | R-12.2, R-12.10 | T-1604, T-1002 | S | Lineup members see “Live now” when the session starts |
+
+## Nice to have
+
+Ideas the owner wants kept for later, with no tasks or dates yet. Each needs its own spec before any work.
+
+- **Transcribe a recording into ChartDown** (owner's question, October 16, 2026): from the band's audio (R-06.7), a draft chart reviewed like an import (R-10.8). Feasible in steps: tempo and bar lines, and the key, are reliable and could fill the tempo and where the music starts; chords per bar are roughly 70–85 % right on simple songs and miss extensions, inversions and modulations; section names are guesses. In the browser it stays private and free but is less accurate; on a server it is more accurate but needs uploading, compute costs and a new dependency. Before committing, measure the chord accuracy on five or six original songs.
