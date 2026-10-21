@@ -144,7 +144,7 @@ test("R-03.11 the owner saves where the music starts, and it is there for the ne
   await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
   const address = new URL(page.url()).pathname;
 
-  await page.getByRole("button", { name: "Play the video" }).click();
+  await page.getByRole("button", { name: "Watch the video" }).click();
   const dock = page.getByRole("complementary", { name: "Video" });
   await dock.getByRole("button", { name: "Later" }).click();
   await dock.getByRole("button", { name: "Later" }).click();
