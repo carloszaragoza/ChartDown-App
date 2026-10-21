@@ -6,6 +6,10 @@ describe("T-1506 practice tempo and tap tempo", () => {
     expect(tapTempo([0, 500, 1000, 1500])).toBe(120);
   });
 
+  it("R-11.9 T-2808 a tapped tempo keeps its tenth: taps 805 ms apart are 74.5 bpm", () => {
+    expect(tapTempo([0, 805, 1610, 2415])).toBe(74.5);
+  });
+
   it("R-11.9 one uneven tap doesn't throw the tempo", () => {
     expect(tapTempo([0, 600, 1200, 1500, 2400, 3000])).toBe(100);
   });
