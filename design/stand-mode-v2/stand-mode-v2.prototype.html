@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Stand mode v2, focus + what's ahead</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700&amp;family=Barlow+Condensed:wght@600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F2F2F3}
+button{font:inherit;color:inherit}
+button:focus-visible{outline:3px solid #2F6FED;outline-offset:2px}
+#cd-stack{scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch}
+#cd-stack section{scroll-snap-align:start;scroll-margin-top:6px}
+</style>
+</helmet>
+<div style="{{rootStyle}}">
+
+<!-- TOP BAR -->
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 20px 10px">
+<button type="button" style="{{ghostBtn}}">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+Close
+</button>
+<div style="flex: 1 1 auto; min-width: 0">
+<div style="font-weight: 700; font-size: 20px; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">How Awesome</div>
+<div style="{{mutedText}}; font-size: 14px; white-space: nowrap">Key F · 4/4 · Tempo 70.5 · {{counter}}</div>
+</div>
+<button type="button" onClick="{{toggleSettings}}" aria-expanded="{{settingsOpen}}" style="{{ghostBtn}}">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"></path><circle cx="16" cy="7" r="2"></circle><circle cx="8" cy="17" r="2"></circle></svg>
+View
+</button>
+<div style="position: relative; display: inline-flex; align-items: stretch">
+<button type="button" onClick="{{toggleClick}}" aria-pressed="{{clickOn}}" aria-label="{{clickAria}}" style="{{clickBtn}}">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l3.5 18h-13z"></path><path d="M12 15l5-8"></path></svg>
+<span>{{clickLabel}}</span>
+<sc-if value="{{clickOn}}" hint-placeholder-val="{{ false }}">
+<span aria-hidden="true" style="display: inline-flex; gap: 5px; margin-left: 2px"><sc-for list="{{beatDots}}" as="d" hint-placeholder-count="4"><span style="{{d.style}}"></span></sc-for></span>
+</sc-if>
+</button>
+<button type="button" onClick="{{toggleMetro}}" aria-expanded="{{metroOpen}}" aria-label="Metronome settings" style="{{metroSetBtn}}">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"></path><circle cx="16" cy="7" r="2"></circle><circle cx="8" cy="17" r="2"></circle></svg>
+</button>
+<sc-if value="{{metroOpen}}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-label="Metronome settings" style="{{metroPanel}}; right: 0; top: 56px">
+<div style="display: flex; justify-content: space-between; align-items: center"><div style="font-weight: 700; font-size: 18px">Metronome</div><button type="button" onClick="{{toggleMetro}}" style="{{doneBtn}}">Done</button></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="font-weight: 600; font-size: 14px">Tempo</div>
+<div style="display: flex; align-items: center; gap: 10px">
+<button type="button" onClick="{{bpmDown}}" aria-label="Slower" style="{{stepBtn}}">−</button>
+<div style="flex: 1 1 auto; text-align: center; font-weight: 800; font-size: 28px">{{bpm}} <span style="font-size: 15px; font-weight: 600; {{mutedInline}}">BPM</span></div>
+<button type="button" onClick="{{bpmUp}}" aria-label="Faster" style="{{stepBtn}}">+</button>
+</div>
+<div style="font-size: 13px; {{mutedInline}}">{{bpmNote}}</div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="font-weight: 600; font-size: 14px">Count-in</div>
+<div style="{{mTrack}}"><sc-for list="{{countOpts}}" as="o" hint-placeholder-count="3"><button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="{{o.style}}">{{o.label}}</button></sc-for></div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="font-weight: 600; font-size: 14px">Sound</div>
+<div style="{{mTrack}}"><sc-for list="{{soundOpts}}" as="o" hint-placeholder-count="3"><button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="{{o.style}}">{{o.label}}</button></sc-for></div></div>
+</div>
+</sc-if>
+</div>
+</div>
+
+<!-- ROADMAP -->
+<nav aria-label="Song sections" style="display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 12px">
+<sc-for list="{{pills}}" as="p" hint-placeholder-count="16">
+<button type="button" onClick="{{p.pick}}" aria-current="{{p.current}}" aria-label="{{p.full}}" style="{{p.style}}">{{p.label}}</button>
+</sc-for>
+</nav>
+
+<!-- SECTION STACK -->
+<div id="cd-stack" onScroll="{{onStackScroll}}" style="{{stackStyle}}">
+<sc-for list="{{cards}}" as="sec" hint-placeholder-count="4">
+<section id="{{sec.domId}}" onClick="{{sec.pick}}" aria-current="{{sec.current}}" style="{{sec.cardStyle}}">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+<sc-if value="{{sec.isNow}}" hint-placeholder-val="{{ false }}">
+<span style="{{nowTag}}">{{nowLabel}}</span>
+</sc-if>
+<h2 style="{{sec.titleStyle}}">{{sec.title}}</h2>
+<span style="{{sec.metaStyle}}">{{sec.barsLabel}}</span>
+<sc-if value="{{sec.showProgress}}" hint-placeholder-val="{{ false }}">
+<span style="{{progressStyle}}">{{progressLabel}}</span>
+</sc-if>
+</div>
+<sc-if value="{{sec.hasNotes}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{sec.notes}}" as="n" hint-placeholder-count="2">
+<div style="{{sec.noteStyle}}"><span style="{{n.tagStyle}}">{{n.tag}}</span><span>{{n.text}}</span></div>
+</sc-for>
+</div>
+</sc-if>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{sec.rows}}" as="row" hint-placeholder-count="2">
+<div style="{{row.style}}">
+<sc-for list="{{row.bars}}" as="bar" hint-placeholder-count="4">
+<div style="{{bar.style}}">
+<sc-if value="{{bar.hasDyn}}" hint-placeholder-val="{{ false }}">
+<span style="{{bar.dynStyle}}">{{bar.dyn}}</span>
+</sc-if>
+<sc-for list="{{bar.chords}}" as="ch" hint-placeholder-count="1">
+<span style="{{sec.numStyle}}">{{ch.main}}<sup style="{{sec.supStyle}}">{{ch.sup}}</sup><span style="{{sec.bassStyle}}">{{ch.bass}}</span></span>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-for>
+<div style="height: 70vh"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div style="{{navStyle}}">
+<button type="button" onClick="{{prev}}" style="{{backBtn}}">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+Back
+</button>
+<div style="flex: 1 1 auto; min-width: 0; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis"><div style="font-size: 15px; font-weight: 600"><span style="{{mutedText}}">Next up:</span> {{nextTitle}}</div><div style="font-size: 13px; {{mutedText}}">{{followHint}}</div></div>
+<button type="button" onClick="{{goNext}}" style="{{nextBtn}}">
+{{nextBtnLabel}}
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg>
+</button>
+</div>
+
+<!-- VIEW SHEET -->
+<sc-if value="{{settingsOpen}}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-label="View settings" style="{{sheetStyle}}">
+<div style="display: flex; justify-content: space-between; align-items: center"><div style="font-weight: 700; font-size: 20px">View</div>
+<button type="button" onClick="{{toggleSettings}}" style="{{ghostBtn}}">Done</button></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="font-weight: 600; font-size: 15px">Chart</div>
+<div style="{{segTrack}}"><sc-for list="{{views}}" as="o" hint-placeholder-count="2"><button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="{{o.style}}">{{o.label}}</button></sc-for></div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="font-weight: 600; font-size: 15px">Coming up</div>
+<div style="{{segTrack}}"><sc-for list="{{aheads}}" as="o" hint-placeholder-count="3"><button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="{{o.style}}">{{o.label}}</button></sc-for></div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="font-weight: 600; font-size: 15px">Motion</div>
+<div style="{{segTrack}}"><sc-for list="{{motions}}" as="o" hint-placeholder-count="2"><button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="{{o.style}}">{{o.label}}</button></sc-for></div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="font-weight: 600; font-size: 15px">Screen</div>
+<div style="{{segTrack}}"><sc-for list="{{themes}}" as="o" hint-placeholder-count="2"><button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="{{o.style}}">{{o.label}}</button></sc-for></div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="font-weight: 600; font-size: 15px">Number size</div>
+<div style="{{segTrack}}"><sc-for list="{{sizes}}" as="o" hint-placeholder-count="3"><button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="{{o.style}}">{{o.label}}</button></sc-for></div></div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"focus":{"editor":"color","default":"#2F6FED","options":["#2F6FED","#E8A317","#16A34A"]},"$preview":{"width":1180,"height":820}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { idx: 1, view: 'numbers', ahead: 'fill', theme: 'light', size: 'm', motion: 'calm', counting: 0, secBeats: 0, settingsOpen: false, clickOn: false, beat: 0, bpm: 71, countIn: '1', clickSound: 'click', metroOpen: false };
+    this.onKey = this.onKey.bind(this);
+  }
+  componentDidMount() { window.addEventListener('keydown', this.onKey); var self = this; setTimeout(function () { self.animateTo(self.state.idx, true); }, 0); }
+  scheduleScroll(i) {
+    var self = this;
+    clearTimeout(this.scrollTimer);
+    this.scrollTimer = setTimeout(function () { self.animateTo(i, false); }, 40);
+  }
+  goTo(i) {
+    var n = this.sections().length;
+    i = Math.max(0, Math.min(n - 1, i));
+    clearTimeout(this.scrollT);
+    this.setState({ idx: i, secBeats: this.state.clickOn ? -1 : 0, counting: 0 });
+    this.scheduleScroll(i);
+  }
+  animateTo(idx, instant) {
+    var self = this;
+    var stack = document.getElementById('cd-stack');
+    var card = document.getElementById('cd-sec-' + idx);
+    if (!stack || !card) return;
+    var from = stack.scrollTop, to = Math.max(0, Math.min(stack.scrollHeight - stack.clientHeight, card.getBoundingClientRect().top - stack.getBoundingClientRect().top + stack.scrollTop - 6));
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (this.raf) cancelAnimationFrame(this.raf);
+    if (instant || reduce || Math.abs(to - from) < 2) { stack.scrollTop = to; return; }
+    var bounce = this.state.motion === 'bounce';
+    var dur = bounce ? 820 : 700;
+    function ease(t) {
+      if (bounce) { var c1 = 0.9, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); }
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+    stack.style.scrollSnapType = 'none';
+    this.animating = true;
+    var t0 = null;
+    function step(ts) {
+      if (t0 === null) t0 = ts;
+      var p = Math.min(1, (ts - t0) / dur);
+      stack.scrollTop = from + (to - from) * ease(p);
+      if (p < 1) { self.raf = requestAnimationFrame(step); }
+      else { stack.scrollTop = to; setTimeout(function () { stack.style.scrollSnapType = ''; self.animating = false; }, 60); }
+    }
+    this.raf = requestAnimationFrame(step);
+  }
+  detectActive() {
+    var stack = document.getElementById('cd-stack');
+    if (!stack) return;
+    var secs = this.sections(), best = this.state.idx, bestD = Infinity;
+    for (var i = 0; i < secs.length; i++) {
+      var card = document.getElementById('cd-sec-' + i);
+      if (!card) continue;
+      var d = Math.abs(card.getBoundingClientRect().top - stack.getBoundingClientRect().top - 6);
+      if (d < bestD) { bestD = d; best = i; }
+    }
+    if (best !== this.state.idx) { this.setState({ idx: best, secBeats: this.state.clickOn ? -1 : 0, counting: 0 }); }
+  }
+  onBeat() {
+    var st = this.state, secs = this.sections();
+    var upd = { beat: (st.beat % 4) + 1 };
+    if (st.counting > 0) { upd.counting = st.counting - 1; this.setState(upd); return; }
+    var sb = st.secBeats + 1, need = secs[st.idx].bars.length * 4;
+    if (sb >= need) {
+      if (st.idx < secs.length - 1) { upd.idx = st.idx + 1; upd.secBeats = 0; this.scheduleScroll(st.idx + 1); }
+      else { this.stopTimer(); upd.clickOn = false; upd.beat = 0; upd.secBeats = 0; }
+    } else { upd.secBeats = sb; }
+    this.setState(upd);
+  }
+  onKey(e) {
+    var n = this.sections().length;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === 'ArrowDown') { e.preventDefault(); this.goTo(this.state.idx + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'ArrowUp') { e.preventDefault(); this.goTo(this.state.idx - 1); }
+  }
+  startTimer(bpm) {
+    var self = this;
+    if (this.timer) clearInterval(this.timer);
+    this.timer = setInterval(function () { self.onBeat(); }, Math.round(60000 / bpm));
+  }
+  stopTimer() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
+  componentWillUnmount() { this.stopTimer(); if (this.onKey) window.removeEventListener('keydown', this.onKey); }
+  metroVals(c) {
+    var self = this, st = this.state;
+    function seg(on) {
+      return 'flex: 1 1 0; min-height: 40px; padding: 0 10px; border: 0; border-radius: 9px; cursor: pointer; font-size: 15px; ' + (on ? 'background: ' + c.card + '; color: ' + c.text + '; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.12)' : 'background: transparent; color: ' + c.muted + '; font-weight: 500');
+    }
+    function setBpm(v) { v = Math.max(30, Math.min(240, v)); self.setState({ bpm: v }); if (st.clickOn) self.startTimer(v); }
+    var dots = [1, 2, 3, 4].map(function (n) {
+      var on = st.beat === n;
+      var col = on ? (n === 1 ? c.accent : c.dotOn) : c.dotOff;
+      return { style: 'width: 9px; height: 9px; border-radius: 50%; background: ' + col };
+    });
+    return {
+      clickOn: st.clickOn,
+      clickLabel: st.clickOn ? 'Stop' : 'Click ' + st.bpm,
+      clickAria: st.clickOn ? 'Stop metronome' : 'Start metronome at ' + st.bpm + ' BPM',
+      beatDots: dots,
+      toggleClick: function () {
+        if (st.clickOn) { self.stopTimer(); self.setState({ clickOn: false, beat: 0 }); }
+        else { var ci = Number(st.countIn) * 4; self.setState({ clickOn: true, beat: 1, counting: ci > 0 ? ci - 1 : 0, secBeats: ci > 0 ? -1 : 0 }); self.startTimer(st.bpm); }
+      },
+      clickBtn: 'display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px; border: 0; border-radius: 12px 0 0 12px; font-weight: 700; font-size: 16px; cursor: pointer; ' + (st.clickOn ? 'background: ' + c.runBg + '; color: ' + c.runText : 'background: ' + c.primary + '; color: ' + c.primaryText),
+      metroSetBtn: 'width: 46px; min-height: 48px; border: 0; border-left: 1px solid ' + c.split + '; border-radius: 0 12px 12px 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; ' + (st.clickOn ? 'background: ' + c.runBg + '; color: ' + c.runText : 'background: ' + c.primary + '; color: ' + c.primaryText),
+      metroOpen: st.metroOpen,
+      toggleMetro: function () { self.setState({ metroOpen: !st.metroOpen, settingsOpen: false, moreOpen: false, keyOpen: false, setOpen: false }); },
+      metroPanel: 'position: absolute; z-index: 40; width: 320px; background: ' + c.card + '; color: ' + c.text + '; border: 1px solid ' + c.soft + '; border-radius: 18px; box-shadow: 0 16px 40px rgba(0,0,0,0.25); padding: 18px; display: flex; flex-direction: column; gap: 16px',
+      doneBtn: 'min-height: 40px; padding: 0 14px; border: 0; border-radius: 10px; background: ' + c.soft + '; color: ' + c.text + '; font-weight: 600; cursor: pointer',
+      stepBtn: 'width: 48px; height: 48px; border: 0; border-radius: 12px; background: ' + c.soft + '; color: ' + c.text + '; font-size: 24px; font-weight: 700; cursor: pointer',
+      bpm: st.bpm,
+      bpmNote: st.bpm === 71 ? 'Same as the chart tempo.' : 'Chart tempo is 71.',
+      bpmDown: function () { setBpm(st.bpm - 1); },
+      bpmUp: function () { setBpm(st.bpm + 1); },
+      mutedInline: 'color: ' + c.muted,
+      mTrack: 'display: flex; background: ' + c.soft + '; border-radius: 12px; padding: 4px; gap: 2px',
+      countOpts: [['0', 'Off'], ['1', '1 bar'], ['2', '2 bars']].map(function (o) { var on = st.countIn === o[0]; return { label: o[1], on: on, style: seg(on), pick: function () { self.setState({ countIn: o[0] }); } }; }),
+      soundOpts: [['click', 'Click'], ['wood', 'Wood'], ['beep', 'Beep']].map(function (o) { var on = st.clickSound === o[0]; return { label: o[1], on: on, style: seg(on), pick: function () { self.setState({ clickSound: o[0] }); } }; })
+    };
+  }
+  sections() {
+    var intro = ['6-', '5', '1/3', '4'];
+    var verse = ['6-7', '5', '1/3', '4add2', '6-7', '5/7', '1/3', '5'];
+    var chorus = ['4add2', '5add2', '1/3', '6-7', '4add2', '5add2', '1', '1'];
+    var bridge = ['4add2', '1/3', '5', '6-7'];
+    var md = function (t) { return { tag: 'MD', text: t }; };
+    var keys = function (t) { return { tag: 'Keys', text: t }; };
+    var drums = function (t) { return { tag: 'Drums', text: t }; };
+    return [
+      { label: 'I', title: 'Intro', bars: intro, notes: [] },
+      { label: 'V1', title: 'Verse 1', bars: verse, dyn: 'p', notes: [md('Intimate. Let the vocal breathe.'), keys('Pad and soft piano, mid register.'), drums('Out, cymbal swells only.')] },
+      { label: 'V', title: 'Vamp', bars: ['5'], notes: [] },
+      { label: 'C', title: 'Chorus', bars: chorus, dyn: 'mf', notes: [md('Open it up a little. Not all the way yet.'), drums('Come in with a light groove.')] },
+      { label: 'V2', title: 'Verse 2', bars: verse, notes: [md('[MD note]')] },
+      { label: 'C2', title: 'Chorus 2', bars: chorus, notes: [md('[MD note]')] },
+      { label: 'B1', title: 'Bridge 1', bars: bridge, notes: [md('[MD note]')] },
+      { label: 'B2', title: 'Bridge 2', bars: bridge, notes: [] },
+      { label: 'C3', title: 'Chorus 3', bars: chorus, notes: [] },
+      { label: 'T', title: 'Turnaround', bars: ['4add2', '5'], notes: [] },
+      { label: 'I2', title: 'Intro 2', bars: intro, notes: [] },
+      { label: 'B3', title: 'Bridge 3', bars: bridge, notes: [] },
+      { label: 'B4', title: 'Bridge 4', bars: bridge, notes: [md('[MD note]')] },
+      { label: 'C4', title: 'Chorus 4', bars: chorus, notes: [] },
+      { label: 'T2', title: 'Turnaround 2', bars: ['4add2', '5'], notes: [] },
+      { label: 'E', title: 'Ending', bars: ['4add2', '5', '1', '1'], notes: [md('[MD note]')] }
+    ];
+  }
+  renderVals() {
+    var self = this, st = this.state;
+    var secs = this.sections();
+    var focus = this.props.focus ?? '#2F6FED';
+    var dark = st.theme === 'stage';
+    var letters = st.view === 'letters';
+    var F = { '1': 'F', '2': 'Gm', '3': 'Am', '4': 'Bb', '5': 'C', '6': 'Dm', '7': 'E' };
+    var FB = { '1': 'F', '2': 'G', '3': 'A', '4': 'Bb', '5': 'C', '6': 'D', '7': 'E' };
+    var scale = st.size === 's' ? 0.85 : (st.size === 'l' ? 1.15 : 1);
+    var c = dark
+      ? { bg: '#0E0E10', card: '#1C1C20', text: '#F4F4F5', muted: '#A1A1AA', line: '#F4F4F5', soft: '#2A2A2E', btn: '#2A2A2E', primary: '#F4F4F5', primaryText: '#0E0E10', upText: '#B4B4BC', upLine: '#71717A', upBorder: '#2A2A2E', mdBg: '#3B1D1D', mdText: '#FF9B9B', dyn: '#9CC2FF' }
+      : { bg: '#F2F2F3', card: '#FFFFFF', text: '#111113', muted: '#6B6B73', line: '#111113', soft: '#E4E4E8', btn: '#E4E4E8', primary: '#111113', primaryText: '#FFFFFF', upText: '#4A4A52', upLine: '#8E8E96', upBorder: '#E4E4E8', mdBg: '#FDE8E8', mdText: '#C93A3A', dyn: '#1D4ED8' };
+    function chord(tok) {
+      var deg = tok.charAt(0), rest = tok.slice(1), sup = '', bass = '';
+      if (rest.charAt(0) === '/') bass = '/' + rest.slice(1); else sup = rest;
+      if (!letters) return { main: deg, sup: sup, bass: bass };
+      var root = F[deg];
+      if (sup === '-' || sup === '-7') { root = FB[deg] + 'm'; sup = sup === '-7' ? '7' : ''; }
+      else if (sup) { root = FB[deg]; }
+      return { main: root, sup: sup, bass: bass ? '/' + FB[bass.slice(1)] : '' };
+    }
+    var maxAhead = st.ahead === 'fill' ? 99 : Number(st.ahead);
+    var playingBar = st.clickOn && st.secBeats >= 0 ? Math.floor(st.secBeats / 4) : -1;
+    var curBars = secs[st.idx].bars.length;
+    var cards = [];
+    for (var i = 0; i < secs.length; i++) {
+      (function (i) {
+        var s = secs[i];
+        var isNow = i === st.idx;
+        var past = i < st.idx;
+        var hidden = i > st.idx + maxAhead;
+        if (hidden) return;
+        var k = 1;
+        var num = Math.round(46 * scale * k);
+        var cols = Math.min(4, s.bars.length);
+        var lineCol = isNow ? c.line : c.upLine;
+        var lw = 4;
+        var rows = [];
+        for (var r = 0; r < s.bars.length; r += 4) {
+          var bars = s.bars.slice(r, r + 4).map(function (tok, j) {
+            var first = r === 0 && j === 0 && !!s.dyn;
+            return {
+              chords: [chord(tok)], hasDyn: first, dyn: first ? s.dyn : '',
+              dynStyle: "position: absolute; left: 12px; top: 6px; font-family: 'Figtree', sans-serif; font-style: italic; font-weight: 700; font-size: " + 15 + 'px; color: ' + (isNow ? c.dyn : c.upText),
+              style: 'position: relative; border-right: ' + lw + 'px solid ' + lineCol + '; min-height: ' + Math.round(num * 1.3) + 'px; display: flex; align-items: center; justify-content: center; transition: background-color 0.25s ease; background: ' + (isNow && playingBar === r + j ? focus + '1F' : 'transparent')
+            };
+          });
+          rows.push({ bars: bars, style: 'display: grid; grid-template-columns: repeat(' + cols + ', minmax(0, 1fr)); border-left: ' + lw + 'px solid ' + lineCol });
+        }
+        var trans = '; transition: background-color 0.45s ease, border-color 0.45s ease, box-shadow 0.45s ease, opacity 0.45s ease';
+        var cardStyle = isNow
+          ? 'background: ' + c.card + '; border: 3px solid ' + focus + '; box-shadow: 0 0 0 5px ' + focus + '22; border-radius: 20px; padding: 14px 20px 18px; display: flex; flex-direction: column; gap: 12px; cursor: default' + trans
+          : 'background: transparent; border: 3px solid transparent; box-shadow: inset 0 0 0 1px ' + c.upBorder + '; border-radius: 20px; padding: 14px 20px 18px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; opacity: ' + (past ? '0.45' : '1') + trans;
+        cards.push({
+          domId: 'cd-sec-' + i, isNow: isNow, current: isNow ? 'step' : 'false',
+          title: s.title, barsLabel: s.bars.length + (s.bars.length === 1 ? ' bar' : ' bars'),
+          titleStyle: 'margin: 0; font-weight: 700; font-size: 22px; transition: color 0.45s ease; color: ' + (isNow ? c.text : c.upText),
+          metaStyle: 'font-size: 14px; color: ' + c.muted,
+          hasNotes: s.notes.length > 0, showProgress: isNow && st.clickOn,
+          noteStyle: 'display: flex; align-items: flex-start; gap: 10px; line-height: 1.3; font-weight: 500; font-size: ' + 16 + 'px; color: ' + (isNow ? c.text : c.upText),
+          notes: s.notes.map(function (n) {
+            return { tag: n.tag, text: n.text, tagStyle: 'flex: 0 0 auto; border-radius: 7px; font-weight: 700; padding: 2px 9px; font-size: ' + 13 + 'px; background: ' + c.mdBg + '; color: ' + c.mdText };
+          }),
+          rows: rows,
+          numStyle: "font-family: 'Barlow Condensed', sans-serif; font-weight: 700; line-height: 1; transition: color 0.45s ease; font-size: " + num + 'px; color: ' + (isNow ? c.text : c.upText),
+          supStyle: 'font-size: ' + Math.round(num * 0.45) + 'px',
+          bassStyle: 'font-size: ' + Math.round(num * 0.6) + 'px',
+          cardStyle: cardStyle,
+          pick: function () { if (!isNow) self.goTo(i); }
+        });
+      })(i);
+    }
+    function seg(on) {
+      return 'flex: 1 1 0; min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; cursor: pointer; font-size: 15px; ' + (on ? 'background: ' + c.card + '; color: ' + c.text + '; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.15)' : 'background: transparent; color: ' + c.muted + '; font-weight: 500');
+    }
+    function opts(list, key) {
+      return list.map(function (o) { var on = st[key] === o[0]; var u = {}; u[key] = o[0]; return { label: o[1], on: on, style: seg(on), pick: function () { self.setState(u); } }; });
+    }
+    var nx = secs[st.idx + 1];
+    var metro = this.metroVals({ card: c.card, text: c.text, muted: c.muted, soft: c.soft, primary: c.btn, primaryText: c.text, runBg: c.mdBg, runText: c.mdText, split: c.bg, accent: c.mdText, dotOn: c.mdText, dotOff: dark ? '#5A2E2E' : '#F3B7B7' });
+    return Object.assign(metro, {
+      rootStyle: 'display: flex; flex-direction: column; width: 100%; height: 100vh; min-height: 820px; overflow: hidden; position: relative; background: ' + c.bg + '; color: ' + c.text + "; font-family: 'Figtree', 'Helvetica Neue', sans-serif",
+      mutedText: 'color: ' + c.muted,
+      ghostBtn: 'display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px; border: 0; border-radius: 12px; background: ' + c.btn + '; color: ' + c.text + '; font-weight: 600; font-size: 16px; cursor: pointer',
+      counter: 'Section ' + (st.idx + 1) + ' of ' + secs.length,
+      settingsOpen: st.settingsOpen,
+      toggleSettings: function () { self.setState({ settingsOpen: !st.settingsOpen, metroOpen: false }); },
+      pills: secs.map(function (s, i) {
+        var on = i === st.idx, past = i < st.idx;
+        return {
+          label: s.label, full: s.title, current: on ? 'step' : 'false',
+          style: 'min-width: 44px; min-height: 44px; padding: 0 11px; border-radius: 10px; font-weight: 700; font-size: 16px; cursor: pointer; ' + (on ? 'border: 0; background: ' + focus + '; color: #FFFFFF' : 'border: 0; background: ' + c.btn + '; color: ' + (past ? c.muted : c.text)),
+          pick: function () { self.goTo(i); }
+        };
+      }),
+      nowTag: 'background: ' + focus + '; color: #FFFFFF; font-weight: 800; font-size: 13px; letter-spacing: 0.08em; padding: 4px 9px; border-radius: 7px',
+      stackStyle: 'position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 6px 20px 0; display: flex; flex-direction: column; gap: 12px',
+      cards: cards,
+      navStyle: 'display: flex; align-items: center; gap: 12px; padding: 12px 20px 16px; background: ' + c.bg + '; border-top: 1px solid ' + c.upBorder,
+      prev: function () { self.goTo(st.idx - 1); },
+      goNext: function () { self.goTo(nx ? st.idx + 1 : 0); },
+      onStackScroll: function () { if (self.animating) return; clearTimeout(self.scrollT); self.scrollT = setTimeout(function () { self.detectActive(); }, 120); },
+      nowLabel: st.clickOn && (st.counting > 0 || st.secBeats < 0) ? 'COUNT-IN' : 'NOW',
+      progressStyle: 'font-size: 14px; font-weight: 700; color: ' + focus,
+      progressLabel: playingBar >= 0 ? 'Bar ' + (playingBar + 1) + ' of ' + curBars : 'Starting',
+      followHint: st.clickOn ? 'Following the metronome. Scroll anytime to jump.' : 'Scroll up, tap Next or use a pedal',
+      motions: opts([['calm', 'Calm'], ['bounce', 'Soft bounce']], 'motion'),
+      nextTitle: nx ? nx.title : 'End of song',
+      nextBtnLabel: nx ? 'Next' : 'Next song',
+      backBtn: 'display: inline-flex; align-items: center; gap: 8px; min-height: 64px; padding: 0 24px; border: 0; border-radius: 16px; background: ' + c.btn + '; color: ' + c.text + '; font-weight: 700; font-size: 20px; cursor: pointer',
+      nextBtn: 'display: inline-flex; align-items: center; gap: 10px; min-height: 64px; padding: 0 30px; border: 0; border-radius: 16px; background: ' + c.primary + '; color: ' + c.primaryText + '; font-weight: 800; font-size: 24px; cursor: pointer',
+      sheetStyle: 'position: absolute; top: 72px; right: 20px; z-index: 30; width: 360px; background: ' + c.card + '; color: ' + c.text + '; border: 1px solid ' + c.soft + '; border-radius: 20px; box-shadow: 0 20px 48px rgba(0,0,0,0.25); padding: 20px; display: flex; flex-direction: column; gap: 18px',
+      segTrack: 'display: flex; background: ' + c.soft + '; border-radius: 12px; padding: 4px; gap: 2px',
+      views: opts([['numbers', 'Numbers'], ['letters', 'Letters']], 'view'),
+      aheads: opts([['1', '1 section'], ['2', '2 sections'], ['fill', 'Fill screen']], 'ahead'),
+      themes: opts([['light', 'Light'], ['stage', 'Stage (dark)']], 'theme'),
+      sizes: opts([['s', 'Small'], ['m', 'Medium'], ['l', 'Large']], 'size')
+    });
+  }
+}
+</script>
+</body>
+</html>

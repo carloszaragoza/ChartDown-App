@@ -1,18 +1,19 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
 import {
-  chooseSection,
-  gapUnderSongMap,
   PASSWORD,
+  addToSet,
+  chooseSection,
+  createSet,
+  expectSignedIn,
+  expectStatus,
+  gapUnderSongMap,
+  setInstruments,
   signIn,
   signOut,
   signUpAndConfirm,
+  standNow,
   unique,
-  expectStatus,
-  addToSet,
-  setInstruments,
-  createSet,
-  expectSignedIn,
 } from "./flows";
 
 const CHART = "## Verse\n1 | 4\n\n## Chorus\n4 | 5 | 6m | 1\n";
@@ -112,7 +113,8 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   await expect(page.getByText(`Song 1 of 2`)).toBeVisible();
   // F-001: in a set too, the section sits right under the song map.
   expect(await gapUnderSongMap(page)).toBeLessThan(40);
-  const current = page.getByRole("main");
+  // The current section, at the top of the stack (R-03.12).
+  const current = standNow(page);
   await expect(current).toContainText(notes.all);
   await page.getByRole("link", { name: "Next", exact: true }).click();
   await expect(current).toContainText(notes.keys);

@@ -33,8 +33,9 @@ import { usePhone } from "../../lib/shell/phone";
 import { useMetronomeControls } from "./MetronomeControls";
 import { SongForm } from "./SongForm";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { barIn, usePlaybackBar } from "./usePlaybackBar";
+import { DockRoom, useDockRoomSize } from "./DockRoom";
 import { useChartLabels } from "./chartLabels";
 import { hasJump, playRuns } from "../../lib/chart/playRuns";
 
@@ -59,6 +60,10 @@ export interface ChartSectionProps {
   start?: { row: number; index: number } | undefined;
   /** A section played more than once: "3 times", or "Time 2 of 3" while it plays (T-2704). */
   times?: string | undefined;
+  /** Before the section's name, such as stand mode's Now tag (R-03.12). */
+  badge?: ReactNode;
+  /** After the section's length, such as stand mode's "Bar 3 of 8" (R-03.12). */
+  after?: ReactNode;
 }
 
 /**
@@ -78,16 +83,20 @@ export function ChartSection({
   now,
   start,
   times,
+  badge,
+  after,
 }: ChartSectionProps) {
   const body = (
     <section aria-label={section.name} {...(id ? { id } : {})}>
       <VStack gap={3}>
-        <HStack gap={2} vAlign="center">
+        <HStack gap={2} vAlign="center" wrap="wrap">
+          {badge}
           <Heading level={2}>{section.name}</Heading>
           <Text type="supporting">
             {labels.length(playedLength(section), { pickup: hasPickup(section) })}
           </Text>
           {times && <Token label={times} size="sm" color="blue" />}
+          {after}
         </HStack>
         <MDNotes notes={notes ?? section.notes} instrumentName={labels.bar.instrument} />
         {section.rows.map((row, index) => (
@@ -180,6 +189,8 @@ export function ChartPreview({
     chooseStart(Number(section) - 1, Number(bar.dataset.bar));
   };
   const root = useRef<HTMLDivElement>(null);
+  // An open player takes the screen's bottom: the bar being followed is centered above it (T-2505).
+  const room = useDockRoomSize();
   const playingRow =
     playingSection !== undefined
       ? `${playingSection}:${nowIn(playingSection)?.row}`
@@ -211,7 +222,11 @@ export function ChartPreview({
     </Text>
   );
   return (
-    <div ref={root} onClick={onTap}>
+    <div
+      ref={root}
+      onClick={onTap}
+      style={{ "--cd-dock-room": `${room}px` } as React.CSSProperties}
+    >
       <VStack gap={6}>
         {hasForm && (
           // The song form stays pinned at the top while the chart scrolls, at stand mode's size,
@@ -277,6 +292,7 @@ export function ChartPreview({
           />
         ))}
       </VStack>
+      <DockRoom />
     </div>
   );
 }

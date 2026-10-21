@@ -18,7 +18,13 @@ import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { videoClock } from "../../lib/video/clock";
-import { sectionAt, videoSections, type VideoSection } from "../../lib/video/sections";
+import {
+  sectionAt,
+  sectionLabels,
+  videoSections,
+  type VideoSection,
+} from "../../lib/video/sections";
+import { useDockRoom, useDockTarget } from "./DockRoom";
 import { startSeconds, videoId } from "../../lib/video/youtube";
 
 /** The part of YouTube's IFrame API the dock uses. */
@@ -111,6 +117,7 @@ export function VideoLink({
     () => true,
   );
   const [open, setOpen] = useState(false);
+  const target = useDockTarget();
   const external = (
     <Button
       label={t("openYouTube")}
@@ -136,6 +143,7 @@ export function VideoLink({
         onClick={() => setOpen(true)}
       />
       {open &&
+        target &&
         createPortal(
           <VideoDock
             id={id}
@@ -146,7 +154,7 @@ export function VideoLink({
             save={save}
             onClose={() => setOpen(false)}
           />,
-          document.body,
+          target,
         )}
     </>
   );
@@ -170,6 +178,8 @@ function VideoDock({
   onClose: () => void;
 }) {
   const t = useTranslations("video");
+  const dock = useRef<HTMLElement>(null);
+  useDockRoom(dock);
   const frame = useRef<HTMLDivElement>(null);
   const player = useRef<YouTubePlayer | null>(null);
   const seeking = useRef<{ to: number; at: number } | null>(null);
@@ -247,7 +257,7 @@ function VideoDock({
     `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
   return (
-    <aside className="cd-video-dock" aria-label={t("player")}>
+    <aside ref={dock} className="cd-video-dock" aria-label={t("player")}>
       <VStack gap={2}>
         <HStack gap={1} vAlign="center">
           <StackItem size="fill">
@@ -277,6 +287,7 @@ function VideoDock({
           (sections ? (
             <>
               <SectionsBar
+                chart={chart}
                 sections={sections}
                 now={now}
                 onSeek={seek}
@@ -346,16 +357,19 @@ function VideoDock({
 }
 
 /**
- * The song's sections in the order the chart plays them, each as wide as it lasts; the one playing
- * is marked (selection blue, and its name read out), and choosing one takes the video there.
+ * The song's sections in the order the chart plays them, each as wide as it lasts and named as in
+ * the song form (T-2505); the one playing is marked (selection blue, and its full name written
+ * above the bar), and choosing one takes the video there.
  */
 function SectionsBar({
+  chart,
   sections,
   now,
   onSeek,
   label,
   goTo,
 }: {
+  chart: Chart;
   sections: VideoSection[];
   now: number;
   onSeek: (seconds: number) => void;
@@ -363,33 +377,64 @@ function SectionsBar({
   goTo: (name: string) => string;
 }) {
   const playing = sectionAt(sections, now);
+  const names = sectionLabels(chart, sections);
   const first = sections[0]?.start ?? 0;
   const last = sections.at(-1)?.end ?? first;
   const span = Math.max(last - first, 1);
   const at = Math.min(Math.max((now - first) / span, 0), 1);
   return (
-    <div className="cd-video-bar" role="group" aria-label={label}>
-      {sections.map((section, index) => (
-        <button
-          key={`${section.section}-${index}`}
-          type="button"
-          className="cd-video-bar__section"
-          style={{ flexGrow: section.end - section.start }}
-          aria-label={goTo(section.name)}
-          aria-current={index === playing ? "true" : undefined}
-          title={section.name}
-          onClick={() => onSeek(section.start)}
-        >
-          {section.name}
-        </button>
-      ))}
-      {now >= first && now <= last && (
-        <span
-          className="cd-video-bar__mark"
-          aria-hidden="true"
-          style={{ insetInlineStart: `${at * 100}%` }}
-        />
-      )}
-    </div>
+    <VStack gap={1}>
+      <PlayingName name={sections[playing]?.name} />
+      <div className="cd-video-bar" role="group" aria-label={label}>
+        {sections.map((section, index) => (
+          <button
+            key={`${section.section}-${index}`}
+            type="button"
+            className="cd-video-bar__section"
+            style={{ flexGrow: section.end - section.start }}
+            aria-label={goTo(section.name)}
+            aria-current={index === playing ? "true" : undefined}
+            title={section.name}
+            onClick={() => onSeek(section.start)}
+          >
+            <SectionName {...names[index]} />
+          </button>
+        ))}
+        {now >= first && now <= last && (
+          <span
+            className="cd-video-bar__mark"
+            aria-hidden="true"
+            style={{ insetInlineStart: `${at * 100}%` }}
+          />
+        )}
+      </div>
+    </VStack>
+  );
+}
+
+/** A section in a player's bar, as the song form names it: B1, then B1² the second time. */
+export function SectionName({
+  abbreviation = "",
+  time = 1,
+  of = 1,
+}: {
+  abbreviation?: string;
+  time?: number;
+  of?: number;
+}) {
+  return (
+    <span aria-hidden="true">
+      {abbreviation}
+      {of > 1 && time > 1 && <sup>{time}</sup>}
+    </span>
+  );
+}
+
+/** The full name of the section playing, above a player's bar; a line kept empty between them. */
+export function PlayingName({ name }: { name: string | undefined }) {
+  return (
+    <Text type="large" weight="semibold" maxLines={1}>
+      {name ?? "\u00a0"}
+    </Text>
   );
 }

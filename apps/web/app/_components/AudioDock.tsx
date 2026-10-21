@@ -21,7 +21,9 @@ import { createPortal } from "react-dom";
 import { storedAudio } from "../../lib/offline/store";
 import { createClient } from "../../lib/supabase/browser";
 import { videoClock } from "../../lib/video/clock";
-import { sectionAt, videoSections } from "../../lib/video/sections";
+import { sectionAt, sectionLabels, videoSections } from "../../lib/video/sections";
+import { useDockRoom, useDockTarget } from "./DockRoom";
+import { PlayingName, SectionName } from "./VideoDock";
 
 /** A band's recording of a version, as the player needs it (R-06.7). */
 export interface PlayerRecording {
@@ -58,6 +60,7 @@ export function AudioButton({
 }) {
   const t = useTranslations("audio");
   const [open, setOpen] = useState(false);
+  const target = useDockTarget();
   return (
     <>
       <Button
@@ -70,6 +73,7 @@ export function AudioButton({
         onClick={() => setOpen(true)}
       />
       {open &&
+        target &&
         createPortal(
           <AudioDock
             recording={recording}
@@ -77,7 +81,7 @@ export function AudioButton({
             save={save}
             onClose={() => setOpen(false)}
           />,
-          document.body,
+          target,
         )}
     </>
   );
@@ -97,6 +101,8 @@ function AudioDock({
   const t = useTranslations("audio");
   const v = useTranslations("video");
   const audio = useRef<HTMLAudioElement>(null);
+  const dock = useRef<HTMLElement>(null);
+  useDockRoom(dock);
   const [source, setSource] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -167,9 +173,10 @@ function AudioDock({
     else element.pause();
   };
   const playingSection = sections ? sectionAt(sections, now) : -1;
+  const names = sections ? sectionLabels(chart, sections) : [];
 
   return (
-    <aside className="cd-audio-dock" aria-label={t("player")}>
+    <aside ref={dock} className="cd-audio-dock" aria-label={t("player")}>
       <VStack gap={2}>
         <HStack gap={2} vAlign="center">
           <Button
@@ -203,6 +210,7 @@ function AudioDock({
             <Text type="supporting">{t("errors.unavailable")}</Text>
           </div>
         )}
+        {sections && <PlayingName name={sections[playingSection]?.name} />}
         <div className="cd-audio-wave">
           <div className="cd-audio-wave__bars" aria-hidden="true">
             {bars.map((height, index) => (
@@ -230,7 +238,7 @@ function AudioDock({
                   title={section.name}
                   onClick={() => seek(section.start)}
                 >
-                  {section.name}
+                  <SectionName {...names[index]} />
                 </button>
               ))}
             </div>

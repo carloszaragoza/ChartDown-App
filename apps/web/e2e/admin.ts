@@ -48,6 +48,7 @@ export async function createVersion(
     songId,
     sourceType = "own_arrangement",
     album,
+    youtube,
   }: {
     title: string;
     content: string;
@@ -56,6 +57,7 @@ export async function createVersion(
     songId?: string;
     sourceType?: "studio" | "live" | "acoustic" | "own_arrangement";
     album?: string;
+    youtube?: string;
   },
 ): Promise<string> {
   const post = async (table: string, data: unknown) => {
@@ -73,6 +75,7 @@ export async function createVersion(
     author_name: "ChartDown",
     source_type: sourceType,
     source_album: album ?? null,
+    source_youtube_url: youtube ?? null,
     visibility,
   });
   const revision = await post("revisions", { version_id: version, number: 1, content });

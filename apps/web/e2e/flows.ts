@@ -70,6 +70,24 @@ export async function gapUnderSongMap(page: Page): Promise<number> {
   });
 }
 
+/** Stand mode's current section: the card at the top of the stack, marked Now (R-03.12). */
+export function standNow(page: Page) {
+  return page.locator('.cd-stand-card[data-state="current"]');
+}
+
+/** Waits until a section is the current one and has glided to the top of the stack (R-03.12). */
+export async function expectStandNow(page: Page, name: string) {
+  const card = standNow(page);
+  await expect(card.getByRole("heading", { level: 2, name, exact: true })).toBeVisible();
+  await expect(async () => {
+    const [cardBox, stackBox] = await Promise.all([
+      card.boundingBox(),
+      page.getByRole("main").boundingBox(),
+    ]);
+    expect(Math.abs((cardBox?.y ?? 0) - (stackBox?.y ?? 0)), name).toBeLessThan(16);
+  }).toPass();
+}
+
 /** Waits for a status message on the page; Astryx banners carry their own live region. */
 export async function expectStatus(page: Page, text: string) {
   await expect(

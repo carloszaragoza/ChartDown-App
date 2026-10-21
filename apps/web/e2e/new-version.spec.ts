@@ -117,12 +117,14 @@ test("R-03.11 a YouTube link opens the video in a mini player, and Close closes 
   );
   // The chart's sections as a bar over the video; choosing one goes there (T-2502).
   const bar = dock.getByRole("group", { name: "Sections" });
-  await expect(bar.getByRole("button")).toHaveText(["Verse", "Chorus"]);
+  // Named as in the song form, the one playing in full above the bar (T-2505).
+  await expect(bar.getByRole("button")).toHaveText(["V", "C"]);
   await bar.getByRole("button", { name: "Go to Chorus" }).click();
   await expect(bar.getByRole("button", { name: "Go to Chorus" })).toHaveAttribute(
     "aria-current",
     "true",
   );
+  await expect(dock.getByText("Chorus", { exact: true })).toBeVisible();
   await expect(dock).toContainText("Music starts at 0:00");
   await dock.getByRole("button", { name: "Later" }).click();
   await dock.getByRole("button", { name: "Later" }).click();
@@ -157,4 +159,32 @@ test("R-03.11 the owner saves where the music starts, and it is there for the ne
     "Music starts at 0:01",
   );
   await expect(page.getByRole("button", { name: "Save for everyone" })).toHaveCount(0);
+});
+
+test("R-03.11 the open video never hides the chart: its last bar scrolls above the player", async ({
+  page,
+  request,
+}) => {
+  const sections = ["Intro", "Verse 1", "Chorus", "Verse 2", "Chorus", "Bridge", "Chorus", "Tag"];
+  const content = `---\ntempo: 72\n---\n${sections
+    .map((name) => `## ${name}\n1 | 4 | 5 | 6m\n4 | 5 | 1 | 1`)
+    .join("\n")}\n`;
+  const id = await createVersion(request, {
+    title: `Dock Room ${Date.now()}`,
+    content,
+    youtube: "https://www.youtube.com/watch?v=hBL9EBKB5DI",
+  });
+  await page.setViewportSize({ width: 1180, height: 820 });
+  await page.goto(`/versions/${id}`);
+  await page.getByRole("button", { name: "Play the video" }).click();
+  const dock = page.getByRole("complementary", { name: "Video" });
+  await expect(dock).toBeVisible();
+  const last = page.locator("section[id^='section-']").last().locator(".cd-chart__bar").last();
+  await last.scrollIntoViewIfNeeded();
+  await page.mouse.wheel(0, 10_000);
+  await expect(async () => {
+    const bar = await last.boundingBox();
+    const player = await dock.boundingBox();
+    expect(bar && player && bar.y + bar.height <= player.y).toBe(true);
+  }).toPass();
 });

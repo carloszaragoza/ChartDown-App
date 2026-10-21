@@ -33,21 +33,34 @@ const render = (overrides: Partial<StandModeProps> = {}) =>
     </NextIntlClientProvider>,
   );
 
-describe("R-03.3 stand mode", () => {
-  it("R-03.3 the current section is drawn large in a card and the next one as a small preview", () => {
+describe("R-03.3 R-03.12 stand mode", () => {
+  it("R-03.12 every section is a card in the stack, the current one at the top marked Now", () => {
     const html = render({ section: 2 });
-    const current = html.slice(html.indexOf('id="current-section"'));
-    // The current section: its name, then its bars (BarRow, Design Handoff 2.0 screen 03).
-    expect(current).toMatch(/^id="current-section"[^>]*>.*?<h2[^>]*>Chorus<\/h2>/s);
-    expect(current).toMatch(/role="group"/);
-    // The preview of the next section, small and in the secondary color.
-    expect(html).toContain("Verse 2");
-    // The current section at stand mode's size; the next one as the small preview (chart.css).
-    expect(html).toContain("cd-chart cd-chart--lg");
-    // Verse 2 has a note: the preview shows it above its first bars (T-2703).
-    expect(html.slice(html.indexOf("Verse 2"))).toMatch(/>MD</);
-    expect(html).toContain("cd-chart cd-chart--sm");
+    const cards = [
+      ...html.matchAll(/<li class="cd-stand-card" data-card="(\d+)" data-state="(\w+)"/g),
+    ];
+    expect(cards.map(([, index, state]) => [Number(index), state])).toEqual([
+      [0, "past"],
+      [1, "past"],
+      [2, "current"],
+      [3, "upcoming"],
+      [4, "upcoming"],
+      [5, "upcoming"],
+      [6, "upcoming"],
+    ]);
+    // Only the current one is current, with its Now tag and its name; all at stand mode's size.
+    // (aria-current="step" stays the bar that sounds.)
+    const current = html.slice(html.indexOf('data-state="current"'));
+    expect(current).toMatch(/^data-state="current" aria-current="true"/);
+    expect(html.match(/data-state="\w+" aria-current="true"/g)).toHaveLength(1);
+    expect(current).toMatch(/cd-stand-card__now">Now<.*?<h2[^>]*>Chorus<\/h2>/s);
+    expect(html.match(/cd-stand-card__now/g)).toHaveLength(1);
+    expect(html.match(/cd-chart cd-chart--lg/g)?.length).toBeGreaterThan(7);
+    // Verse 2, still to come, shows its note in its own card (R-06.4 filters them on the server).
+    const verse2 = html.slice(html.indexOf('data-card="3"'), html.indexOf('data-card="4"'));
+    expect(verse2).toMatch(/>MD</);
     expect(html).toContain("Section 3 of 7");
+    expect(html).toContain("Next up:");
   });
 
   it("R-03.3 Previous and Next move one section; none before the first or after the last", () => {
@@ -59,6 +72,9 @@ describe("R-03.3 stand mode", () => {
     expect(last).toContain(">Previous<");
     expect(last).not.toContain(">Next<");
     expect(last).toContain("End of the song");
+    // With no set, Next on the last section goes back to the first (R-03.12).
+    expect(last).toContain(`href="/versions/${ID}/stand"`);
+    expect(last).toContain(">From the top<");
   });
 
   it("R-03.3 the stage theme changes colors only, through the theme tokens", () => {

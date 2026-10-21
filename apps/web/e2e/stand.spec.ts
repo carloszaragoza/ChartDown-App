@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { createVersion } from "./admin";
-import { gapUnderSongMap } from "./flows";
+import { expectStandNow, gapUnderSongMap, standNow } from "./flows";
 
 const OPEN_ROAD = readFileSync(
   new URL("../../../fixtures/open-road.chartdown", import.meta.url),
@@ -12,17 +12,11 @@ const SECTIONS = ["Intro", "Verse 1", "Chorus", "Verse 2", "Chorus 2", "Bridge",
 // iPad in landscape (iPad Air 11", 1180 × 820 CSS pixels).
 test.use({ viewport: { width: 1180, height: 820 }, hasTouch: true });
 
-/** The current section is whole on screen: nothing to the side, nothing below, no zoom. */
+/** The current section is at the top of the stack, marked Now, and nothing scrolls sideways. */
 async function expectWholeSection(page: Page, name: string) {
-  const current = page.getByRole("main");
-  await expect(current.getByRole("heading", { level: 2, name, exact: true })).toBeVisible();
-  const fits = await current.evaluate((area) => ({
-    below: area.scrollHeight - area.clientHeight,
-    side: document.documentElement.scrollWidth - window.innerWidth,
-    bottom: area.getBoundingClientRect().bottom - window.innerHeight,
-  }));
-  expect(fits, name).toEqual({ below: 0, side: 0, bottom: expect.any(Number) });
-  expect(fits.bottom, name).toBeLessThanOrEqual(0);
+  await expectStandNow(page, name);
+  const side = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(side, name).toBe(0);
 }
 
 test("R-03.3 every section reads without zooming on an iPad in landscape", async ({
@@ -44,8 +38,10 @@ test("R-03.3 every section reads without zooming on an iPad in landscape", async
     else await page.keyboard.press("ArrowRight");
     await expect(page).toHaveURL(new RegExp(`\\?s=${index + 2}$`));
   }
+  // On the last section Next goes back to the first (R-03.12).
   await expect(page.getByRole("link", { name: "Next", exact: true })).toHaveCount(0);
   await expect(page.getByText("End of the song")).toBeVisible();
+  await expect(page.getByRole("link", { name: "From the top" })).toBeVisible();
   await page.keyboard.press("ArrowLeft");
   await expectWholeSection(page, "Bridge");
 
@@ -70,7 +66,8 @@ test("R-03.3 every section reads without zooming on an iPad in landscape", async
   const lightBackground = await background();
   // Stage is set once, in View (T-2706).
   await page.getByRole("button", { name: "View options" }).click();
-  await page.getByRole("dialog").getByRole("link", { name: "Stage" }).click();
+  await page.getByRole("dialog").getByRole("radio", { name: "Stage" }).click();
+  await page.keyboard.press("Escape");
   await expect(page).toHaveURL(/theme=stage/);
   await expectWholeSection(page, "Chorus");
   expect(await size()).toBe(lightSize);
@@ -146,6 +143,11 @@ test("R-03.3 the clearer stand: one metronome control, the next section's notes,
   // T-2706: one line with Close, the song, View and the metronome; Beats is in View.
   const top = page.getByRole("navigation", { name: "Sections" });
   await expect(top.getByRole("link", { name: "Close" })).toBeVisible();
+  // T-2810: the way back is a quiet icon, with no word, still at the large touch size.
+  await expect(top.getByRole("link", { name: "Close" })).toHaveText("");
+  expect(
+    Math.round((await top.getByRole("link", { name: "Close" }).boundingBox())?.height ?? 0),
+  ).toBeGreaterThanOrEqual(56);
   await expect(top.getByRole("heading", { level: 1 })).toContainText("Clear Stand");
   const metronome = top.getByRole("group", { name: "Metronome" });
   const closeBox = await top.getByRole("link", { name: "Close" }).boundingBox();
@@ -166,16 +168,133 @@ test("R-03.3 the clearer stand: one metronome control, the next section's notes,
   await expect(page.getByRole("dialog")).toContainText("Count-in");
   await page.keyboard.press("Escape");
 
-  // T-2703: the next section's note shows before it comes, in its preview.
-  await expect(page.getByText("Next:")).toContainText("Bridge");
-  await expect(page.getByText("Build a little more each time.")).toBeVisible();
+  // T-2703, R-03.12: the next section and its note are on screen before it comes, in its card.
+  await expect(page.getByText("Next up:")).toContainText("Bridge");
+  await expect(page.locator('.cd-stand-card[data-state="upcoming"]').first()).toContainText(
+    "Build a little more each time.",
+  );
+  await expect(page.getByText("Build a little more each time.").first()).toBeInViewport();
 
   // T-2705: Next is at the bottom; T-2704: a section reused three times says so.
   const turn = page.getByRole("navigation", { name: "Previous and next" });
   await turn.getByRole("link", { name: "Next", exact: true }).click();
   await turn.getByRole("link", { name: "Next", exact: true }).click();
-  await expect(
-    page.getByRole("main").getByRole("heading", { level: 2, name: "Bridges" }),
-  ).toBeVisible();
-  await expect(page.getByRole("main")).toContainText("3 times");
+  await expectStandNow(page, "Bridges");
+  await expect(standNow(page)).toContainText("3 times");
+});
+
+// Stand mode v2 (R-03.12): the current section and what follows it, stacked.
+const STACK =
+  "---\ntempo: 96\n---\n## Verse\n1 | 4 | 5 | 1\n## Chorus\n> MD: Big from here.\n4 | 5 | 6m | 1\n## Bridge\n6m | 5 | 4 | 4\n## Tag\n4 | 5\n";
+
+for (const [device, viewport] of [
+  ["an iPad in landscape", { width: 1180, height: 820 }],
+  ["an iPad in portrait", { width: 820, height: 1180 }],
+  ["a phone", { width: 393, height: 852 }],
+] as const) {
+  test(`R-03.12 on ${device}, the current section and the next one with its note are on screen`, async ({
+    page,
+    request,
+  }) => {
+    await page.setViewportSize(viewport);
+    const id = await createVersion(request, { title: `Stack ${Date.now()}`, content: STACK });
+    await page.goto(`/versions/${id}/stand`);
+    await expectStandNow(page, "Verse");
+    await expect(standNow(page)).toContainText("Now");
+    const chorus = page.locator('.cd-stand-card[data-card="1"]');
+    await expect(chorus).toHaveAttribute("data-state", "upcoming");
+    await expect(chorus.getByText("Big from here.")).toBeInViewport();
+    // A card keeps its size when it becomes the current one: only its color changes.
+    const before = (await chorus.boundingBox())?.height;
+    await page.keyboard.press("PageDown");
+    await expectStandNow(page, "Chorus");
+    expect((await chorus.boundingBox())?.height).toBe(before);
+    await expect(page.locator('.cd-stand-card[data-card="0"]')).toHaveAttribute(
+      "data-state",
+      "past",
+    );
+  });
+}
+
+test("R-03.12 Next, a pedal, a tap on a card and a settled scroll each make a section current", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, { title: `Stack ${Date.now()}`, content: STACK });
+  await page.goto(`/versions/${id}/stand`);
+  await expectStandNow(page, "Verse");
+  await page
+    .getByRole("navigation", { name: "Previous and next" })
+    .getByRole("link", { name: "Next", exact: true })
+    .click();
+  await expectStandNow(page, "Chorus");
+  await page.keyboard.press("PageDown");
+  await expectStandNow(page, "Bridge");
+  await page.locator('.cd-stand-card[data-card="0"]').click();
+  await expectStandNow(page, "Verse");
+  await expect(page).toHaveURL(new RegExp(`/versions/${id}/stand$`));
+  // Scrolled with the finger (or a wheel) until the Bridge sits at the top, it becomes current.
+  await page.getByRole("main").evaluate((stack) => {
+    const bridge = stack.querySelector<HTMLElement>('[data-card="2"]');
+    if (bridge)
+      stack.scrollTop += bridge.getBoundingClientRect().top - stack.getBoundingClientRect().top;
+  });
+  await expectStandNow(page, "Bridge");
+  await expect(page).toHaveURL(/\?s=3$/);
+});
+
+test.describe("R-03.12 with reduced motion", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("R-03.12 a section moves to the top at once", async ({ page, request }) => {
+    const id = await createVersion(request, { title: `Stack ${Date.now()}`, content: STACK });
+    await page.goto(`/versions/${id}/stand`);
+    await expectStandNow(page, "Verse");
+    await page.keyboard.press("PageDown");
+    // No glide: the very next frame already has the Chorus at the top.
+    const offset = await page.evaluate(
+      () =>
+        new Promise<number>((done) =>
+          requestAnimationFrame(() => {
+            const stack = document.querySelector("main");
+            const chorus = document.querySelector('[data-card="1"]');
+            done(
+              Math.abs(
+                (chorus?.getBoundingClientRect().top ?? 0) -
+                  (stack?.getBoundingClientRect().top ?? 0),
+              ),
+            );
+          }),
+        ),
+    );
+    expect(offset).toBeLessThan(16);
+  });
+});
+
+test("R-03.12 View's Coming up and Number size are kept on the device", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, { title: `Stack ${Date.now()}`, content: STACK });
+  await page.goto(`/versions/${id}/stand`);
+  await expectStandNow(page, "Verse");
+  await expect(page.locator(".cd-stand-card")).toHaveCount(4);
+  const chord = () =>
+    standNow(page)
+      .locator(".cd-chart__chord")
+      .first()
+      .evaluate((element) => parseFloat(getComputedStyle(element).fontSize));
+  const medium = await chord();
+  await page.getByRole("button", { name: "View options" }).click();
+  const sheet = page.getByRole("dialog");
+  await sheet.getByRole("radio", { name: "1 section" }).click();
+  await sheet.getByRole("radio", { name: "Large" }).click();
+  await page.keyboard.press("Escape");
+  // The current section and one more.
+  await expect(page.locator(".cd-stand-card")).toHaveCount(2);
+  expect(await chord()).toBeGreaterThan(medium);
+  await page.reload();
+  await expectStandNow(page, "Verse");
+  await expect(page.locator(".cd-stand-card")).toHaveCount(2);
+  expect(await chord()).toBeGreaterThan(medium);
 });

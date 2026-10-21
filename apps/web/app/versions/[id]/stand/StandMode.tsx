@@ -11,18 +11,11 @@ import { Selector } from "@astryxdesign/core/Selector";
 import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
+import { VisuallyHidden } from "@astryxdesign/core/VisuallyHidden";
 import { VStack } from "@astryxdesign/core/VStack";
 import { chartdownStandTheme } from "../../../../theme/chartdown-stand";
 import { chordFormatter, keyName, parse, type Key } from "chartdown";
-import {
-  BarRow,
-  formStripItems,
-  hasPickup,
-  MDNotes,
-  type FormStripItem,
-  type MDNoteData,
-  playedLength,
-} from "@chartdown/ui";
+import { formStripItems, type FormStripItem, type MDNoteData } from "@chartdown/ui";
 import {
   AdjustmentsHorizontalIcon,
   ArrowUturnLeftIcon,
@@ -52,7 +45,16 @@ import { SongForm } from "../../../_components/SongForm";
 import { BeatsControl } from "../../../_components/BeatsControl";
 import { barIn, usePlaybackBar } from "../../../_components/usePlaybackBar";
 import { copyAt } from "../../../../lib/chart/copies";
+import { glide, nearestCard, stackTarget, type StandMotion } from "../../../../lib/stand/motion";
+import { barProgress } from "../../../../lib/stand/progress";
+import {
+  standPreferences,
+  upcomingSections,
+  type ComingUp,
+  type NumberSize,
+} from "../../../../lib/stand/preferences";
 import { useChartLabels } from "../../../_components/chartLabels";
+import { DockRoom } from "../../../_components/DockRoom";
 import type { Display } from "../display";
 import { inSidewaysScroll, swipeTurn } from "./swipe";
 import {
@@ -124,13 +126,11 @@ const FORWARD = new Set(["ArrowRight", "ArrowDown", "PageDown"]);
 const BACK = new Set(["ArrowLeft", "ArrowUp", "PageUp"]);
 
 /**
- * Stand mode (R-03.3): the current section in chord-xl, the next in chord-sm, and one tap to
- * move on. Every control is a plain link, so it works without JavaScript; with it, moving is
- * instant and the address follows. Another song, or another View as, starts afresh: the router
- * keeps the page, so its state would carry over.
+ * Stand mode (R-03.3, R-03.12): every section stacked in order, the current one at the top of the
+ * stack, and one tap to move on. Every control is a plain link, so it works without JavaScript;
+ * with it, moving is instant and the address follows. Another song, or another View as, starts
+ * afresh: the router keeps the page, so its state would carry over.
  */
-const PEDAL_HINT = "chartdown:pedal-hint";
-const noSubscription = () => () => {};
 
 export function StandMode(props: StandModeProps) {
   const place = new URLSearchParams(props.keep ?? {}).toString();
@@ -177,6 +177,7 @@ function StandModeView({
     nowIn,
     playingSection,
     playingAt,
+    isCountingIn,
     metronome: { bars: timelineBars },
     queued,
     queue,
@@ -211,6 +212,17 @@ function StandModeView({
     () => false,
   );
   const root = useRef<HTMLDivElement>(null);
+  const preferences = useSyncExternalStore(
+    standPreferences.subscribe,
+    standPreferences.get,
+    standPreferences.server,
+  );
+  // Stand mode asks for full screen when it opens, where the browser allows it (R-03.12): most
+  // allow it only right after a tap, such as the one that opened it.
+  useEffect(() => {
+    if (!document.fullscreenElement && root.current?.requestFullscreen)
+      root.current.requestFullscreen().catch(() => {});
+  }, []);
   const atEdge = useRef({ first: true, last: false });
   const display: Display = { style, key: homeKey, beats };
   const formatter = chordFormatter(chart, { style, key: homeKey });
@@ -276,6 +288,7 @@ function StandModeView({
   const forward = useCallback(() => {
     if (isPlaying) lead(1);
     else if (atEdge.current.last && nextSong) router.push(nextSong);
+    else if (atEdge.current.last) move(() => 0);
     else move((now) => now + 1);
   }, [isPlaying, lead, move, nextSong, router]);
   const backward = useCallback(() => {
@@ -384,27 +397,19 @@ function StandModeView({
       ? t("timeOf", { time: copyAt(timelineBars, at), count })
       : t("times", { count });
   };
-  // The page-turner reminder, the first time stand mode opens on this device (T-2706).
-  const showPedalHint = useSyncExternalStore(
-    noSubscription,
-    () => {
-      try {
-        return localStorage.getItem(PEDAL_HINT) === null;
-      } catch {
-        return false;
-      }
-    },
-    () => false,
-  );
-  useEffect(() => {
-    try {
-      localStorage.setItem(PEDAL_HINT, "seen");
-    } catch {
-      // No storage: the reminder may show again.
-    }
-  }, []);
-  const nextNotes = next ? (notes ? (notes[nextIndex] ?? []) : next.notes) : [];
   const again = queued !== null && queued === playingSection;
+  // The cards in the order they will be played: the played ones, the current one, then what comes
+  // next, from the queued section when there is one (T-2804, R-11.15); Coming up keeps one, two
+  // or all of them (T-2805).
+  const cards = [
+    ...Array.from({ length: current + 1 }, (_, index) => index),
+    ...upcomingSections(current, last, queued, preferences.comingUp),
+  ];
+  // While the metronome plays, which bar of the current section sounds (T-2804).
+  const progress =
+    playingAt !== undefined && playingSection === current
+      ? barProgress(timelineBars, playingAt)
+      : undefined;
   const written = keyName(chart.key);
   const shown = keyName(homeKey);
 
@@ -444,49 +449,93 @@ function StandModeView({
         onChange={chooseView}
       />
     ));
-  // The view's controls, in the View sheet on a phone and split across the top on an iPad
-  // (T-2706): Letters and Beats under the metronome, Stage and Full screen beside it.
-  const lettersButton = (size: "md" | "lg") => (
-    <Button
-      label={style === "letters" ? v("numbers") : v("letters")}
-      href={styleHref}
-      as={Link}
-      variant="secondary"
-      size={size}
-    />
+  // View (R-03.12, T-2805): what is set once, each choice with its name above it. Numbers or
+  // letters, Beat marks and the screen live in the address; Coming up, the motion and the number
+  // size are kept on the device.
+  const choice = (
+    name: string,
+    value: string,
+    options: readonly (readonly [string, string])[],
+    onChange: (value: string) => void,
+  ) => (
+    <VStack gap={1}>
+      <Text type="label">{name}</Text>
+      <SegmentedControl label={name} value={value} onChange={onChange}>
+        {options.map(([option, label]) => (
+          <SegmentedControlItem key={option} value={option} label={label} />
+        ))}
+      </SegmentedControl>
+    </VStack>
   );
-  const beatsControl = (
-    <BeatsControl
-      value={beats}
-      hrefs={{
-        off: href(current, { display: { ...display, beats: "off" } }),
-        auto: href(current, { display: { ...display, beats: "auto" } }),
-        always: href(current, { display: { ...display, beats: "always" } }),
-      }}
-      onChoose={(mode) => changeView({ beats: mode })}
-      words={{
-        label: c("beatsLabel"),
-        name: c("beatsName"),
-        off: c("beatsOff"),
-        auto: c("beatsAuto"),
-        always: c("beatsAlways"),
-      }}
-    />
-  );
-  const screenButtons = (size: "md" | "lg") => (
-    <>
-      <Button
-        label={theme === "stage" ? t("light") : t("stage")}
-        href={themeHref}
-        as={Link}
-        variant="secondary"
-        size={size}
+  const tools = (
+    <VStack gap={4}>
+      {choice(
+        t("chartChoice"),
+        style,
+        [
+          ["numbers", v("numbers")],
+          ["letters", v("letters")],
+        ],
+        (chosen) => changeView({ style: chosen === "letters" ? "letters" : "numbers" }),
+      )}
+      <BeatsControl
+        value={beats}
+        hrefs={{
+          off: href(current, { display: { ...display, beats: "off" } }),
+          auto: href(current, { display: { ...display, beats: "auto" } }),
+          always: href(current, { display: { ...display, beats: "always" } }),
+        }}
+        onChoose={(mode) => changeView({ beats: mode })}
+        words={{
+          label: c("beatsLabel"),
+          name: c("beatsName"),
+          off: c("beatsOff"),
+          auto: c("beatsAuto"),
+          always: c("beatsAlways"),
+        }}
       />
+      {choice(
+        t("comingUp"),
+        preferences.comingUp,
+        [
+          ["1", t("comingUpOne")],
+          ["2", t("comingUpTwo")],
+          ["fill", t("comingUpFill")],
+        ],
+        (chosen) => standPreferences.set({ comingUp: chosen as ComingUp }),
+      )}
+      {choice(
+        t("motion"),
+        preferences.motion,
+        [
+          ["calm", t("motionCalm")],
+          ["bounce", t("motionBounce")],
+        ],
+        (chosen) => standPreferences.set({ motion: chosen as StandMotion }),
+      )}
+      {choice(
+        t("screen"),
+        theme,
+        [
+          ["light", t("light")],
+          ["stage", t("stage")],
+        ],
+        (chosen) => changeView({ theme: chosen === "stage" ? "stage" : "light" }),
+      )}
+      {choice(
+        t("numberSize"),
+        preferences.size,
+        [
+          ["sm", t("sizeSmall")],
+          ["md", t("sizeMedium")],
+          ["lg", t("sizeLarge")],
+        ],
+        (chosen) => standPreferences.set({ size: chosen as NumberSize }),
+      )}
       {canFullscreen && (
         <Button
           label={t("fullscreen")}
           variant="secondary"
-          size={size}
           onClick={() =>
             document.fullscreenElement
               ? void document.exitFullscreen()
@@ -494,16 +543,7 @@ function StandModeView({
           }
         />
       )}
-    </>
-  );
-  const tools = (
-    <nav aria-label={t("tools")}>
-      <HStack gap={2} wrap="wrap">
-        {lettersButton("md")}
-        {beatsControl}
-        {screenButtons("md")}
-      </HStack>
-    </nav>
+    </VStack>
   );
   const songForm = (
     <SongForm
@@ -533,12 +573,101 @@ function StandModeView({
       : previousSong
         ? { label: t("previousSong"), href: previousSong }
         : undefined;
+  // On the last section Next goes on to the set's next song, or back to the first (R-03.12).
   const following =
     current < last
       ? { label: t("next"), href: href(current + 1) }
       : nextSong
         ? { label: t("nextSong"), href: nextSong }
-        : undefined;
+        : last > 0
+          ? { label: t("fromTop"), href: href(0) }
+          : undefined;
+
+  // The stack (R-03.12, T-2803): the current section glides to the top, the active zone; a scroll
+  // that settles makes the section nearest the top the current one, unless the metronome plays,
+  // when a scroll only looks ahead.
+  const stack = useRef<HTMLElement>(null);
+  const stopGlide = useRef<(() => void) | null>(null);
+  const isGliding = useRef(false);
+  const settledOn = useRef<number | null>(null);
+  const hasGlided = useRef(false);
+  const settleTimer = useRef(0);
+  const live = useRef({ current, isPlaying, motion: preferences.motion });
+  useEffect(() => {
+    live.current = { current, isPlaying, motion: preferences.motion };
+  }, [current, isPlaying, preferences.motion]);
+  useEffect(() => {
+    const box = stack.current;
+    const card = box?.querySelector<HTMLElement>(`[data-card="${current}"]`);
+    if (!box || !card) return;
+    if (settledOn.current === current) {
+      settledOn.current = null;
+      return;
+    }
+    stopGlide.current?.();
+    isGliding.current = true;
+    const instant =
+      !hasGlided.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    hasGlided.current = true;
+    const to = stackTarget({
+      cardTop: card.getBoundingClientRect().top,
+      stackTop: box.getBoundingClientRect().top,
+      scrollTop: box.scrollTop,
+      maxScroll: box.scrollHeight - box.clientHeight,
+      margin: parseFloat(getComputedStyle(card).scrollMarginTop) || 0,
+    });
+    stopGlide.current = glide(box, to, {
+      motion: live.current.motion,
+      instant,
+      onDone: () => {
+        isGliding.current = false;
+      },
+    });
+  }, [current]);
+  useEffect(
+    () => () => {
+      stopGlide.current?.();
+      window.clearTimeout(settleTimer.current);
+    },
+    [],
+  );
+  const onStackScroll = () => {
+    if (isGliding.current) return;
+    window.clearTimeout(settleTimer.current);
+    settleTimer.current = window.setTimeout(() => {
+      const box = stack.current;
+      if (!box || isGliding.current || live.current.isPlaying) return;
+      const cards = [...box.querySelectorAll<HTMLElement>("[data-card]")];
+      const first = cards[0];
+      const zone =
+        box.getBoundingClientRect().top +
+        (first ? parseFloat(getComputedStyle(first).scrollMarginTop) || 0 : 0);
+      const card =
+        cards[
+          nearestCard(
+            cards.map((each) => each.getBoundingClientRect().top),
+            zone,
+          )
+        ];
+      const index = Number(card?.dataset.card);
+      if (card && index !== live.current.current) {
+        settledOn.current = index;
+        setCurrent(index);
+      }
+    }, 120);
+  };
+  // A tap on another section makes it current, or queues it while the metronome plays; on the
+  // current one a tapped bar is where Play starts (R-11.2), and after a fermata it goes on (R-11.6).
+  const onCard = (index: number, event: MouseEvent<HTMLElement>) => {
+    if (isWaiting) return resume();
+    if (index !== current) {
+      if (isPlaying) queue(index);
+      else move(() => index);
+      return;
+    }
+    const bar = (event.target as HTMLElement).closest<HTMLElement>(".cd-chart__bar");
+    if (!isPlaying && bar) chooseStart(current, Number(bar.dataset.bar));
+  };
 
   return (
     <div ref={root} onClickCapture={onClickCapture}>
@@ -610,12 +739,16 @@ function StandModeView({
                   (Letters, Beats, Stage, Full screen) is in View. */}
                 <nav aria-label={set ? t("setBar") : t("turn")}>
                   <HStack gap={3} vAlign="center">
+                    {/* The way back is quiet: used once, at the end, so the song's title leads the
+                      line (T-2810); it keeps the large touch size. */}
                     <Button
                       label={back.label}
                       href={back.href}
                       as={Link}
-                      variant="secondary"
+                      variant="ghost"
                       size="lg"
+                      isIconOnly
+                      tooltip={back.label}
                       icon={<Icon icon={set ? ArrowUturnLeftIcon : XMarkIcon} />}
                     />
                     <StackItem size="fill">
@@ -666,110 +799,117 @@ function StandModeView({
 
             {isPhone && !isSideways && songForm}
 
-            {/* The current section sits right under the song form, with the next one right after
-              it; when it is taller than the screen it scrolls inside its own area (F-001). */}
+            {/* Every section in order, the current one at the top of the stack, the played ones
+              above it, dimmed; each card keeps one size, so only its color shows where we are
+              (R-03.12). */}
             <main
-              aria-live="polite"
-              style={{ flex: "0 1 auto", minHeight: 0, overflowY: "auto" }}
+              ref={stack}
+              className="cd-stand-stack"
+              data-size={preferences.size}
+              onScroll={onStackScroll}
               onTouchStart={onTouchStart}
               onTouchEnd={onTouchEnd}
-              onClick={(event) => {
-                // On after a fermata (R-11.6); stopped, a tapped bar is where Play starts (R-11.2).
-                if (isWaiting) return resume();
-                const bar = (event.target as HTMLElement).closest<HTMLElement>(".cd-chart__bar");
-                if (!isPlaying && bar) chooseStart(current, Number(bar.dataset.bar));
-              }}
             >
-              {now && (
-                <ChartSection
-                  key={current}
-                  section={now}
-                  formatter={formatter}
-                  labels={labels}
-                  notes={notes ? (notes[current] ?? []) : now.notes}
-                  id="current-section"
-                  isFramed
-                  meter={chart.meter}
-                  beats={beats}
-                  size="lg"
-                  now={nowIn(current) ?? barIn(playbackBar, current)}
-                  start={startIn(current)}
-                  times={timesOf(current)}
-                />
-              )}
+              <ol className="cd-stand-stack__list">
+                {cards.map((index, place) => {
+                  const section = chart.sections[index];
+                  if (!section) return null;
+                  const isCurrent = place === current;
+                  // A section queued again, or one already played, shows a second time ahead.
+                  const isAgain = place > current && index <= current;
+                  return (
+                    <li
+                      key={isAgain ? `again-${index}` : index}
+                      className="cd-stand-card"
+                      data-card={index}
+                      data-state={place < current ? "past" : isCurrent ? "current" : "upcoming"}
+                      {...(isCurrent ? { "aria-current": "true" as const } : {})}
+                      onClick={(event) => onCard(index, event)}
+                    >
+                      <ChartSection
+                        section={section}
+                        formatter={formatter}
+                        labels={labels}
+                        notes={notes ? (notes[index] ?? []) : section.notes}
+                        {...(isCurrent ? { id: "current-section" } : {})}
+                        meter={chart.meter}
+                        beats={beats}
+                        size="lg"
+                        now={isAgain ? undefined : (nowIn(index) ?? barIn(playbackBar, index))}
+                        start={isAgain ? undefined : startIn(index)}
+                        times={timesOf(index)}
+                        badge={
+                          isCurrent ? (
+                            <span className="cd-stand-card__now">
+                              {isCountingIn ? t("countInTag") : t("now")}
+                            </span>
+                          ) : undefined
+                        }
+                        after={
+                          isCurrent && progress ? (
+                            <span className="cd-stand-card__progress">{t("barOf", progress)}</span>
+                          ) : undefined
+                        }
+                      />
+                    </li>
+                  );
+                })}
+              </ol>
+              {/* Room after the last section, so the last ones can reach the top. */}
+              <div className="cd-stand-stack__end" aria-hidden="true" />
             </main>
+            <VisuallyHidden as="div" aria-live="polite">
+              {now ? t("nowLive", { name: now.name }) : ""}
+            </VisuallyHidden>
 
-            {/* The room left goes between the section and what comes next, which sits right
-              above Previous and Next (T-2706). */}
+            {/* Previous, what comes next and Next at the bottom, where the thumb is, on an iPad or
+              a desktop (T-2705); a phone keeps them in its one top bar. */}
             {!isPhone && (
-              <StackItem size="fill">
-                <span />
-              </StackItem>
-            )}
-            <VStack gap={2}>
-              {next ? (
-                <>
-                  <Text type="supporting">
-                    {labels.next}: <b>{again ? t("again", { name: next.name }) : next.name}</b> ·{" "}
-                    {labels.length(playedLength(next), { pickup: hasPickup(next) })}
-                  </Text>
-                  {/* Its notes for this reader, before it comes (T-2703): the same ones the
-                    section shows, already filtered for them, on one line above its first bars. */}
-                  {nextNotes.length > 0 && (
-                    <MDNotes
-                      notes={nextNotes}
-                      instrumentName={labels.bar.instrument}
-                      limit={{ count: 2, more: (count) => t("moreNotes", { count }) }}
+              <nav aria-label={t("turnPage")}>
+                <HStack gap={3} vAlign="center">
+                  {previous ? (
+                    <Button
+                      label={previous.label}
+                      size="lg"
+                      href={previous.href}
+                      icon={<Icon icon={ChevronLeftIcon} />}
                     />
+                  ) : (
+                    <span />
                   )}
-                  {!isPhone && next.rows[0] && (
-                    <BarRow
-                      row={next.rows[0]}
-                      formatter={formatter}
-                      labels={labels.bar}
-                      meter={chart.meter}
-                      beats={beats}
-                      size="sm"
+                  <StackItem size="fill">
+                    <VStack gap={0} hAlign="center">
+                      <Text maxLines={1}>
+                        {next ? (
+                          <>
+                            {t("nextUp")}{" "}
+                            <b>{again ? t("again", { name: next.name }) : next.name}</b>
+                          </>
+                        ) : (
+                          t("end")
+                        )}
+                      </Text>
+                      <Text type="supporting" maxLines={1}>
+                        {isPlaying ? t("hintPlaying") : t("hintIdle")}
+                      </Text>
+                    </VStack>
+                  </StackItem>
+                  {following ? (
+                    <Button
+                      label={following.label}
+                      size="lg"
+                      href={following.href}
+                      variant="primary"
+                      endContent={<Icon icon={ChevronRightIcon} />}
                     />
+                  ) : (
+                    <span />
                   )}
-                </>
-              ) : (
-                <Text type="supporting">{t("end")}</Text>
-              )}
-            </VStack>
-
-            {/* Back and Next at the bottom, where the thumb is, on an iPad or a desktop (T-2705);
-              a phone keeps them in its one top bar. */}
-            {!isPhone && (
-              <>
-                <nav aria-label={t("turnPage")}>
-                  <HStack gap={3} vAlign="center" hAlign="between">
-                    {previous ? (
-                      <Button
-                        label={previous.label}
-                        size="lg"
-                        href={previous.href}
-                        icon={<Icon icon={ChevronLeftIcon} />}
-                      />
-                    ) : (
-                      <span />
-                    )}
-                    <Text type="supporting">{showPedalHint ? t("pedalHint") : ""}</Text>
-                    {following ? (
-                      <Button
-                        label={following.label}
-                        size="lg"
-                        href={following.href}
-                        variant="primary"
-                        endContent={<Icon icon={ChevronRightIcon} />}
-                      />
-                    ) : (
-                      <span />
-                    )}
-                  </HStack>
-                </nav>
-              </>
+                </HStack>
+              </nav>
             )}
+            {/* An open player sits over the bottom: Previous and Next stay above it (T-2505). */}
+            <DockRoom />
           </VStack>
           {tempoDialog}
           {
