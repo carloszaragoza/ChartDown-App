@@ -143,6 +143,11 @@ test("R-03.3 the clearer stand: one metronome control, the next section's notes,
   // T-2706: one line with Close, the song, View and the metronome; Beats is in View.
   const top = page.getByRole("navigation", { name: "Sections" });
   await expect(top.getByRole("link", { name: "Close" })).toBeVisible();
+  // T-2810: the way back is a quiet icon, with no word, still at the large touch size.
+  await expect(top.getByRole("link", { name: "Close" })).toHaveText("");
+  expect(
+    Math.round((await top.getByRole("link", { name: "Close" }).boundingBox())?.height ?? 0),
+  ).toBeGreaterThanOrEqual(56);
   await expect(top.getByRole("heading", { level: 1 })).toContainText("Clear Stand");
   const metronome = top.getByRole("group", { name: "Metronome" });
   const closeBox = await top.getByRole("link", { name: "Close" }).boundingBox();

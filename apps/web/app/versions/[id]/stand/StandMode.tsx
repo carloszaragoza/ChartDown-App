@@ -739,12 +739,16 @@ function StandModeView({
                   (Letters, Beats, Stage, Full screen) is in View. */}
                 <nav aria-label={set ? t("setBar") : t("turn")}>
                   <HStack gap={3} vAlign="center">
+                    {/* The way back is quiet: used once, at the end, so the song's title leads the
+                      line (T-2810); it keeps the large touch size. */}
                     <Button
                       label={back.label}
                       href={back.href}
                       as={Link}
-                      variant="secondary"
+                      variant="ghost"
                       size="lg"
+                      isIconOnly
+                      tooltip={back.label}
                       icon={<Icon icon={set ? ArrowUturnLeftIcon : XMarkIcon} />}
                     />
                     <StackItem size="fill">
