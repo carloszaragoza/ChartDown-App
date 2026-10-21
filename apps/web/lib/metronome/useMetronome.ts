@@ -23,6 +23,9 @@ export interface MetronomePosition {
  * and the position the audio clock has reached, read once per frame for the pulse (R-11.3).
  * The AudioContext is created by the tap on Play, as browsers ask.
  */
+/** How long Play waits at most for the audio clock to wake before counting anyway. */
+const WAKE_WAIT_MS = 500;
+
 export function useMetronome(chart: Chart) {
   const bars = useMemo(() => timeline(chart), [chart]);
   const needsTempo = bars.some((bar) => bar.tempo === undefined);
@@ -74,7 +77,8 @@ export function useMetronome(chart: Chart) {
       };
       respectSilentMode();
       const audio = (context.current ??= new AudioContext());
-      void audio.resume();
+      // Asked for inside the tap, as Safari requires; the count waits for it below.
+      const waking = audio.state === "running" ? null : audio.resume();
       const list = clicks(bars, { from, countIn: heard.current.countIn, ...options });
       const metronome = new Metronome(list, audioClock(audio), (click, at) => {
         if (heard.current.click) {
@@ -83,7 +87,6 @@ export function useMetronome(chart: Chart) {
         }
       });
       engine.current = metronome;
-      metronome.start();
       awake.current = keepAwake();
       setPlaying(true);
       let shown: Click | undefined;
@@ -104,7 +107,21 @@ export function useMetronome(chart: Chart) {
         }
         frame.current = requestAnimationFrame(tick);
       };
-      frame.current = requestAnimationFrame(tick);
+      // The first click is timed once the audio clock runs (T-2817): a clock still waking up
+      // (Safari, Bluetooth headphones) would bunch the first clicks together, then jump. A clock
+      // that never wakes (no tap to allow sound) still lets the pulse play, silently.
+      let begun = false;
+      const begin = () => {
+        if (begun || engine.current !== metronome) return;
+        begun = true;
+        metronome.start();
+        frame.current = requestAnimationFrame(tick);
+      };
+      if (!waking) begin();
+      else {
+        void waking.then(begin, begin);
+        setTimeout(begin, WAKE_WAIT_MS);
+      }
     },
     [bars, stop],
   );
