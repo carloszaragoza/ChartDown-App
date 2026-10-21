@@ -24,7 +24,7 @@ import {
   videoSections,
   type VideoSection,
 } from "../../lib/video/sections";
-import { useDockRoom } from "./DockRoom";
+import { useDockRoom, useDockTarget } from "./DockRoom";
 import { startSeconds, videoId } from "../../lib/video/youtube";
 
 /** The part of YouTube's IFrame API the dock uses. */
@@ -117,6 +117,7 @@ export function VideoLink({
     () => true,
   );
   const [open, setOpen] = useState(false);
+  const target = useDockTarget();
   const external = (
     <Button
       label={t("openYouTube")}
@@ -142,6 +143,7 @@ export function VideoLink({
         onClick={() => setOpen(true)}
       />
       {open &&
+        target &&
         createPortal(
           <VideoDock
             id={id}
@@ -152,7 +154,7 @@ export function VideoLink({
             save={save}
             onClose={() => setOpen(false)}
           />,
-          document.body,
+          target,
         )}
     </>
   );

@@ -95,7 +95,8 @@ test("R-06.7 the MD adds the band's audio; its musicians hear it, nobody else", 
   await play.click();
   await expect(player.getByRole("button", { name: "Pause" })).toBeVisible();
   const sections = player.getByRole("group", { name: "Sections" });
-  await expect(sections.getByRole("button")).toHaveText(["Verse", "Chorus"]);
+  // Named as in the song form (T-2505).
+  await expect(sections.getByRole("button")).toHaveText(["V", "C"]);
   await sections.getByRole("button", { name: "Go to Chorus" }).click();
   await expect(sections.getByRole("button", { name: "Go to Chorus" })).toHaveAttribute(
     "aria-current",

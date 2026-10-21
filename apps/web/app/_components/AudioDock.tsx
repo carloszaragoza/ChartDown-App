@@ -22,7 +22,7 @@ import { storedAudio } from "../../lib/offline/store";
 import { createClient } from "../../lib/supabase/browser";
 import { videoClock } from "../../lib/video/clock";
 import { sectionAt, sectionLabels, videoSections } from "../../lib/video/sections";
-import { useDockRoom } from "./DockRoom";
+import { useDockRoom, useDockTarget } from "./DockRoom";
 import { PlayingName, SectionName } from "./VideoDock";
 
 /** A band's recording of a version, as the player needs it (R-06.7). */
@@ -60,6 +60,7 @@ export function AudioButton({
 }) {
   const t = useTranslations("audio");
   const [open, setOpen] = useState(false);
+  const target = useDockTarget();
   return (
     <>
       <Button
@@ -72,6 +73,7 @@ export function AudioButton({
         onClick={() => setOpen(true)}
       />
       {open &&
+        target &&
         createPortal(
           <AudioDock
             recording={recording}
@@ -79,7 +81,7 @@ export function AudioButton({
             save={save}
             onClose={() => setOpen(false)}
           />,
-          document.body,
+          target,
         )}
     </>
   );

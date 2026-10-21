@@ -281,7 +281,7 @@ test("R-03.12 View's Coming up and Number size are kept on the device", async ({
   await expect(page.locator(".cd-stand-card")).toHaveCount(4);
   const chord = () =>
     standNow(page)
-      .locator(".cd-chord")
+      .locator(".cd-chart__chord")
       .first()
       .evaluate((element) => parseFloat(getComputedStyle(element).fontSize));
   const medium = await chord();

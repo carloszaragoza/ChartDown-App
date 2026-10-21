@@ -41,3 +41,20 @@ export function DockRoom() {
 export function useDockRoomSize() {
   return useSyncExternalStore(dockRoom.subscribe, dockRoom.get, () => 0);
 }
+
+const fullscreen = (onChange: () => void) => {
+  document.addEventListener("fullscreenchange", onChange);
+  return () => document.removeEventListener("fullscreenchange", onChange);
+};
+
+/**
+ * Where an open player is drawn: in the element shown full screen when there is one, such as stand
+ * mode (R-03.12), since nothing outside it is shown or can be tapped; otherwise in the page's body.
+ */
+export function useDockTarget(): HTMLElement | null {
+  return useSyncExternalStore(
+    fullscreen,
+    () => (document.fullscreenElement as HTMLElement | null) ?? document.body,
+    () => null,
+  );
+}
