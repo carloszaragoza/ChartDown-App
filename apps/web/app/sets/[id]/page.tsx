@@ -25,6 +25,7 @@ import { updatePinned } from "../actions";
 import { EditIcon, StandIcon } from "../../_components/ActionIcons";
 import { OfflineChanges } from "../../_components/OfflineChanges";
 import { OfflineButton } from "./OfflineButton";
+import { LiveNow } from "../../_components/live/LiveNow";
 import { PageLayout } from "../../_components/PageLayout";
 import { guessPhone } from "../../../lib/shell/guessPhone";
 
@@ -250,6 +251,7 @@ export default async function SetPage({
         <>
           <VStack gap={3}>
             <OfflineChanges setId={set.id} />
+            {auth.user && <LiveNow supabase={supabase} me={auth.user.id} setId={set.id} />}
             {status && (
               <div role="status">
                 <Banner status="success" title={status} />

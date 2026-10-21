@@ -44,6 +44,9 @@ import { useMetronomeControls } from "../../../_components/MetronomeControls";
 import { SongForm } from "../../../_components/SongForm";
 import { BeatsControl } from "../../../_components/BeatsControl";
 import { barIn, usePlaybackBar } from "../../../_components/usePlaybackBar";
+import { GoLive, LiveStrip } from "../../../_components/live/LiveControls";
+import { useLive } from "../../../_components/live/LiveProvider";
+import { metronomeStep } from "../../../../lib/live/protocol";
 import { copyAt } from "../../../../lib/chart/copies";
 import { glide, nearestCard, stackTarget, type StandMotion } from "../../../../lib/stand/motion";
 import { barProgress } from "../../../../lib/stand/progress";
@@ -178,9 +181,10 @@ function StandModeView({
     playingSection,
     playingAt,
     isCountingIn,
-    metronome: { bars: timelineBars },
+    metronome: player,
     queued,
     queue,
+    speed,
     isPlaying,
     isWaiting,
     toggle,
@@ -188,6 +192,7 @@ function StandModeView({
     chooseStart,
     startIn,
   } = useMetronomeControls(chart, current);
+  const timelineBars = player.bars;
   // Numbers or letters, Beats and the theme change here at once, with no trip to the server
   // (F-005); the address follows, so a reload or a shared link shows the same.
   const [view, setView] = useState<StandView>({
@@ -276,6 +281,41 @@ function StandModeView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, style, beats, theme, view.as, homeKey, path, chart]);
 
+  // Live mode (SPEC-12): the leader's device says where it is and what its metronome does; a
+  // follower's moves with it, unless they looked away (R-12.3 to R-12.7).
+  const session = useLive();
+  const isLeading = session?.role === "leader";
+  const report = session?.report;
+  const reportMetronome = session?.reportMetronome;
+  useEffect(() => {
+    if (isLeading) report?.({ section: current, queued });
+  }, [isLeading, report, current, queued]);
+  useEffect(() => {
+    if (isLeading) reportMetronome?.({ playing: isPlaying, at: playingAt ?? null, speed });
+  }, [isLeading, reportMetronome, isPlaying, playingAt, speed]);
+  const isFollowing = session?.role === "follower" && session.isJoined && !session.isDetached;
+  const aim = isFollowing && session.target?.song === session.song ? session.target : null;
+  const [aimed, setAimed] = useState<number | null>(null);
+  if (aim && aim.seq !== aimed) {
+    setAimed(aim.seq);
+    setCurrent(Math.min(Math.max(aim.section, 0), last));
+  }
+  const leaderMetronome = isFollowing ? (session?.leaderMetronome ?? null) : null;
+  const liveSong = session?.song ?? null;
+  useEffect(() => {
+    if (!leaderMetronome || liveSong === null) return;
+    const step = metronomeStep(leaderMetronome, {
+      song: liveSong,
+      playing: isPlaying,
+      at: playingAt,
+    });
+    // The beat follows the leader's; the click stays this musician's choice (R-12.7).
+    if (step.kind === "start") player.play(step.at, { speed: step.speed, countIn: false });
+    else if (step.kind === "stop") player.stop();
+  }, [leaderMetronome, liveSong, isPlaying, playingAt, player]);
+  // A follower who moves on their own looks away; Back to live returns them (R-12.5).
+  const detach = session?.detach;
+
   // The songs at a set's edges carry the view as it is now, and the one the pedal leads to next
   // is loaded ahead, whole, so moving on is instant (F-005, F-006).
   const previousSong = set?.previousSong && withView(set.previousSong, view);
@@ -297,16 +337,18 @@ function StandModeView({
   );
   // On, and back: at a song's edge, the pedal and a swipe go on to the set's next song.
   const forward = useCallback(() => {
+    detach?.();
     if (isPlaying) lead(1);
     else if (atEdge.current.last && nextSong) router.push(nextSong);
     else if (atEdge.current.last) move(() => 0);
     else move((now) => now + 1);
-  }, [isPlaying, lead, move, nextSong, router]);
+  }, [isPlaying, lead, move, nextSong, router, detach]);
   const backward = useCallback(() => {
+    detach?.();
     if (isPlaying) lead(-1);
     else if (atEdge.current.first && previousSong) router.push(previousSong);
     else move((now) => now - 1);
-  }, [isPlaying, lead, move, previousSong, router]);
+  }, [isPlaying, lead, move, previousSong, router, detach]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -368,6 +410,7 @@ function StandModeView({
     if (!link || event.metaKey || event.ctrlKey || event.shiftKey) return;
     const to = link.getAttribute("href") ?? "";
     const section = sectionHrefs.indexOf(to);
+    if (section >= 0 || to === previousSong || to === nextSong) detach?.();
     // Playing, the song form queues a section (the same one repeats it, the queued one cancels
     // it), and Previous and Next queue the one before or after (R-11.15).
     if (section >= 0 && isPlaying) {
@@ -478,8 +521,10 @@ function StandModeView({
       </SegmentedControl>
     </VStack>
   );
+  const sectionNames = chart.sections.map((section) => section.name);
   const tools = (
     <VStack gap={4}>
+      {set && <GoLive />}
       {choice(
         t("chartChoice"),
         style,
@@ -805,10 +850,12 @@ function StandModeView({
                     {control}
                   </HStack>
                 </nav>
+                <LiveStrip sections={sectionNames} />
                 {songForm}
               </>
             )}
 
+            {isPhone && <LiveStrip sections={sectionNames} />}
             {isPhone && !isSideways && songForm}
 
             {/* Every section in order, the current one at the top of the stack, the played ones

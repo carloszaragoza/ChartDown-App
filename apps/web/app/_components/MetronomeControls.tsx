@@ -356,6 +356,8 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
     isCountingIn: metronome.isPlaying && click?.bar === -1,
     queued: metronome.queued,
     queue: metronome.queue,
+    /** The practice speed as a share of the chart's tempo (1 is the chart's tempo). */
+    speed: speed / 100,
     isPlaying: metronome.isPlaying,
     isWaiting: metronome.isWaiting,
     toggle,

@@ -1011,7 +1011,9 @@
       "order_changed": "Cambió el orden de las canciones de {set}.",
       "note_added": "Nueva nota para {for} en {title}, {place}: «{text}»",
       "new_revision": "{title} tiene una nueva revisión de su autor, la {number}; {set} sigue tocando la revisión {pinned}.",
-      "version_hidden": "La administración ocultó {title} a la comunidad {reason}. Tú todavía la ves."
+      "version_hidden": "La administración ocultó {title} a la comunidad {reason}. Tú todavía la ves.",
+      "live_started": "{leader} inició el modo en vivo de {set}. Únete para seguirlo.",
+      "live_ended": "Terminó el modo en vivo de {set}."
     },
     "kinds": {
       "lineup_added": "Cuando me agregan a un set",
@@ -1021,7 +1023,9 @@
       "order_changed": "Cuando cambia el orden de uno de mis sets",
       "note_added": "Cuando hay una nota nueva para mis instrumentos",
       "new_revision": "Cuando una canción de los sets de mi banda tiene una revisión nueva (dirección musical)",
-      "version_hidden": "Cuando la administración oculta una de mis versiones"
+      "version_hidden": "Cuando la administración oculta una de mis versiones",
+      "live_started": "Cuando empieza el modo en vivo de uno de mis sets",
+      "live_ended": "Cuando termina el modo en vivo"
     },
     "reasons": {
       "lyrics": "porque tiene la letra completa",
@@ -1481,5 +1485,35 @@
       "unreadable": "Este archivo no se puede leer como audio.",
       "failed": "No se pudo subir. Inténtalo de nuevo."
     }
+  },
+  "live": {
+    "title": "Modo en vivo",
+    "start": "Iniciar en vivo",
+    "startHint": "La banda te sigue de canción en canción: quien está en la alineación se une desde Inicio, Avisos o este set.",
+    "already": "Alguien más está dirigiendo este set en vivo.",
+    "failed": "No se pudo iniciar el modo en vivo. Inténtalo de nuevo.",
+    "live": "En vivo",
+    "liveNow": "En vivo ahora",
+    "isLeading": "{name} está dirigiendo este set.",
+    "join": "Unirme",
+    "following": "Siguiendo a {name}",
+    "leading": "{count, plural, =0 {Diriges; nadie se ha unido aún} one {Diriges a # músico} other {Diriges a # músicos}}",
+    "next": "Sigue: {section}",
+    "options": "Opciones en vivo",
+    "cue": "Siguiente sección",
+    "cueHint": "La banda la ve venir antes de que te muevas. Con el metrónomo sonando, la sección que pongas en cola es la siguiente.",
+    "cued": "{section}, la siguiente",
+    "connected": "Conectados ({count})",
+    "nobodyYet": "Nadie se ha unido aún.",
+    "handOver": "Pasar el control a {name}",
+    "handOverShort": "Pasar control",
+    "end": "Terminar el modo en vivo",
+    "ended": "El modo en vivo terminó. Te quedas donde estabas.",
+    "dismiss": "Entendido",
+    "paused": "Sin conexión – seguimiento en pausa",
+    "reconnecting": "Reconectando…",
+    "backToLive": "Volver a en vivo",
+    "banner": "En vivo ahora: {set}",
+    "bannerLeader": "{name} está dirigiendo."
   }
 }

@@ -162,3 +162,25 @@ describe("T-1003 choosing which notices to receive", () => {
     }
   });
 });
+
+describe("T-1607 live mode's notices", () => {
+  it("R-12.2 Live now says who leads which set and opens the session; its end opens the set", () => {
+    const started = {
+      type: "live_started",
+      detail: { set_id: "s1", set_name: "Sunday", leader: "Ana" },
+    };
+    expect(noticeMessage(started, words)).toEqual({
+      key: "live_started",
+      values: { set: "Sunday", leader: "Ana" },
+    });
+    expect(noticeHref(started)).toBe("/sets/s1/live");
+    const ended = { type: "live_ended", detail: { set_id: "s1", set_name: "Sunday" } };
+    expect(noticeMessage(ended, words)).toEqual({ key: "live_ended", values: { set: "Sunday" } });
+    expect(noticeHref(ended)).toBe("/sets/s1");
+    for (const messages of [en, es]) {
+      expect(messages.notices.types.live_started).toContain("{leader}");
+      expect(messages.notices.kinds.live_ended).toBeTruthy();
+    }
+    expect(NOTICE_TYPES).toContain("live_started");
+  });
+});
