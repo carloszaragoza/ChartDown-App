@@ -286,6 +286,8 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
     playingSection: playing?.section,
     /** The bar playing, by its place in the timeline. */
     playingAt: click && click.bar >= 0 ? click.bar : undefined,
+    /** Playing the count-in bar, before the song's first bar. */
+    isCountingIn: metronome.isPlaying && click?.bar === -1,
     queued: metronome.queued,
     queue: metronome.queue,
     isPlaying: metronome.isPlaying,

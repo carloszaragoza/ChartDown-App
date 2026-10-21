@@ -46,6 +46,7 @@ import { BeatsControl } from "../../../_components/BeatsControl";
 import { barIn, usePlaybackBar } from "../../../_components/usePlaybackBar";
 import { copyAt } from "../../../../lib/chart/copies";
 import { glide, nearestCard, stackTarget } from "../../../../lib/stand/motion";
+import { barProgress } from "../../../../lib/stand/progress";
 import { useChartLabels } from "../../../_components/chartLabels";
 import type { Display } from "../display";
 import { inSidewaysScroll, swipeTurn } from "./swipe";
@@ -169,6 +170,7 @@ function StandModeView({
     nowIn,
     playingSection,
     playingAt,
+    isCountingIn,
     metronome: { bars: timelineBars },
     queued,
     queue,
@@ -378,6 +380,11 @@ function StandModeView({
       : t("times", { count });
   };
   const again = queued !== null && queued === playingSection;
+  // While the metronome plays, which bar of the current section sounds (T-2804).
+  const progress =
+    playingAt !== undefined && playingSection === current
+      ? barProgress(timelineBars, playingAt)
+      : undefined;
   const written = keyName(chart.key);
   const shown = keyName(homeKey);
 
@@ -764,7 +771,14 @@ function StandModeView({
                       times={timesOf(index)}
                       badge={
                         index === current ? (
-                          <span className="cd-stand-card__now">{t("now")}</span>
+                          <span className="cd-stand-card__now">
+                            {isCountingIn ? t("countInTag") : t("now")}
+                          </span>
+                        ) : undefined
+                      }
+                      after={
+                        index === current && progress ? (
+                          <span className="cd-stand-card__progress">{t("barOf", progress)}</span>
                         ) : undefined
                       }
                     />

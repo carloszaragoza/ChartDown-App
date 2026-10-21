@@ -712,7 +712,9 @@
     "nextUp": "Sigue:",
     "hintIdle": "Desliza, toca Siguiente o usa un pedal",
     "hintPlaying": "Siguiendo el metrónomo. Desliza cuando quieras para ver lo que viene.",
-    "fromTop": "Desde el inicio"
+    "fromTop": "Desde el inicio",
+    "countInTag": "Entrada",
+    "barOf": "Compás {bar} de {of}"
   },
   "bands": {
     "title": "Bandas",

@@ -41,6 +41,26 @@ test("R-11.4 playing, stand mode moves to the next section on its own", async ({
   await expect(page).toHaveURL(/\?s=2$/);
 });
 
+test("R-03.12 playing, the current section says which bar sounds, after a count-in that says so", async ({
+  page,
+  request,
+}) => {
+  const slow = "---\ntempo: 120\n---\n## Verse\n1 | 4 | 5 | 1\n## Chorus\n5 | 1\n";
+  const id = await createVersion(request, { title: "Count Me In", content: slow });
+  await page.goto(`/versions/${id}/stand`);
+  await page.getByRole("button", { name: "Metronome options" }).click();
+  await page.getByRole("dialog").getByRole("switch", { name: "Count-in" }).click();
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Play" }).click();
+  // Half a second a beat: the count-in bar lasts two seconds, then the Verse counts its bars.
+  await expect(standNow(page)).toContainText("Count-in");
+  await expect(standNow(page)).toContainText("Bar 1 of 4", { timeout: 4000 });
+  await expect(standNow(page)).toContainText("Bar 2 of 4", { timeout: 4000 });
+  await expect(page.getByText("Following the metronome.", { exact: false })).toBeVisible();
+  await page.getByRole("button", { name: "Stop" }).click();
+  await expect(standNow(page)).not.toContainText("Bar ");
+});
+
 test("R-11.1 a chart with no tempo asks for one before it plays", async ({ page, request }) => {
   const id = await createVersion(request, { title: "No Tempo", content: "## A\n1 | 4\n" });
   await page.goto(`/versions/${id}/stand`);

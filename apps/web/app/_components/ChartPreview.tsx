@@ -61,6 +61,8 @@ export interface ChartSectionProps {
   times?: string | undefined;
   /** Before the section's name, such as stand mode's Now tag (R-03.12). */
   badge?: ReactNode;
+  /** After the section's length, such as stand mode's "Bar 3 of 8" (R-03.12). */
+  after?: ReactNode;
 }
 
 /**
@@ -81,6 +83,7 @@ export function ChartSection({
   start,
   times,
   badge,
+  after,
 }: ChartSectionProps) {
   const body = (
     <section aria-label={section.name} {...(id ? { id } : {})}>
@@ -92,6 +95,7 @@ export function ChartSection({
             {labels.length(playedLength(section), { pickup: hasPickup(section) })}
           </Text>
           {times && <Token label={times} size="sm" color="blue" />}
+          {after}
         </HStack>
         <MDNotes notes={notes ?? section.notes} instrumentName={labels.bar.instrument} />
         {section.rows.map((row, index) => (

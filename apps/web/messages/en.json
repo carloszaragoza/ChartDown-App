@@ -712,7 +712,9 @@
     "nextUp": "Next up:",
     "hintIdle": "Scroll, tap Next or use a pedal",
     "hintPlaying": "Following the metronome. Scroll anytime to look ahead.",
-    "fromTop": "From the top"
+    "fromTop": "From the top",
+    "countInTag": "Count-in",
+    "barOf": "Bar {bar} of {of}"
   },
   "bands": {
     "title": "Bands",

@@ -738,3 +738,9 @@
     transition: none;
   }
 }
+/* "Bar 3 of 8" while the metronome plays: the theme's blue text, AA in light and Stage. */
+.cd-stand-card__progress {
+  color: var(--color-text-blue);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
