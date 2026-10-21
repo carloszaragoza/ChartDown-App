@@ -848,7 +848,7 @@
     "down": "Bajar",
     "upName": "Subir {title}",
     "downName": "Bajar {title}",
-    "remove": "Quitar",
+    "remove": "Quitar del set",
     "removeName": "Quitar {title} del set",
     "addHint": "Para agregar una canción, abre su versión y elige Agregar a un set.",
     "catalog": "Abrir el catálogo",

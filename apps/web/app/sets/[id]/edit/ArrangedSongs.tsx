@@ -2,9 +2,11 @@
 
 import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
+import { Icon } from "@astryxdesign/core/Icon";
 import { Item } from "@astryxdesign/core/Item";
 import { List } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
+import { ArrowDownIcon, ArrowUpIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useOptimistic, type ReactNode } from "react";
 import { moveItem, removeItem } from "../../actions";
 
@@ -36,7 +38,9 @@ export function arrange<T extends { id: string }>(songs: readonly T[], change: C
 }
 
 /**
- * The set's songs in order, with Up, Down and Remove (R-05.2). A change shows at once while the
+ * The set's songs in order, with Up, Down and Remove as icon buttons named in a tooltip (R-05.2,
+ * T-2819): Up and Down are on every row, off on the first and the last, so the rows line up. A
+ * change shows at once while the
  * server saves it; the server's answer replaces it, and a refusal brings back the server's order
  * with its message (F-006).
  */
@@ -69,36 +73,52 @@ export function ArrangedSongs({
           label={song.label}
           description={song.description}
           endContent={
-            <HStack gap={1} vAlign="center" wrap="wrap">
+            <HStack gap={1} vAlign="center">
               {song.keySelect}
-              {index > 0 && (
-                <form
-                  action={async (form) => {
-                    change({ type: "move", id: song.id, by: -1 });
-                    await moveItem(form);
-                  }}
-                >
-                  {hidden(song.id)}
-                  <input type="hidden" name="position" value={index} />
-                  <Button type="submit" variant="ghost" label={song.names.up}>
-                    {words.up}
-                  </Button>
-                </form>
-              )}
-              {index < shown.length - 1 && (
-                <form
-                  action={async (form) => {
-                    change({ type: "move", id: song.id, by: 1 });
-                    await moveItem(form);
-                  }}
-                >
-                  {hidden(song.id)}
-                  <input type="hidden" name="position" value={index + 2} />
-                  <Button type="submit" variant="ghost" label={song.names.down}>
-                    {words.down}
-                  </Button>
-                </form>
-              )}
+              {[
+                {
+                  by: -1 as const,
+                  to: index,
+                  icon: ArrowUpIcon,
+                  name: song.names.up,
+                  tip: words.up,
+                },
+                {
+                  by: 1 as const,
+                  to: index + 2,
+                  icon: ArrowDownIcon,
+                  name: song.names.down,
+                  tip: words.down,
+                },
+              ].map((move) => {
+                const isEdge = move.by < 0 ? index === 0 : index === shown.length - 1;
+                const button = (
+                  <Button
+                    type={isEdge ? "button" : "submit"}
+                    variant="ghost"
+                    isIconOnly
+                    icon={<Icon icon={move.icon} />}
+                    label={move.name}
+                    tooltip={move.tip}
+                    isDisabled={isEdge}
+                  />
+                );
+                // The first song has nowhere up to go, the last nowhere down: off, and no form.
+                if (isEdge) return <span key={move.by}>{button}</span>;
+                return (
+                  <form
+                    key={move.by}
+                    action={async (form) => {
+                      change({ type: "move", id: song.id, by: move.by });
+                      await moveItem(form);
+                    }}
+                  >
+                    {hidden(song.id)}
+                    <input type="hidden" name="position" value={move.to} />
+                    {button}
+                  </form>
+                );
+              })}
               {canRemove && (
                 <form
                   action={async (form) => {
@@ -107,9 +127,14 @@ export function ArrangedSongs({
                   }}
                 >
                   {hidden(song.id)}
-                  <Button type="submit" variant="ghost" label={song.names.remove}>
-                    {words.remove}
-                  </Button>
+                  <Button
+                    type="submit"
+                    variant="ghost"
+                    isIconOnly
+                    icon={<Icon icon={TrashIcon} />}
+                    label={song.names.remove}
+                    tooltip={words.remove}
+                  />
                 </form>
               )}
             </HStack>
