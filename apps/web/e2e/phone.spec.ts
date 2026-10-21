@@ -75,10 +75,10 @@ test.describe("on an iPhone 16 in portrait", () => {
     await expect(page).toHaveURL(/view=letters/);
     await page.keyboard.press("Escape");
 
-    // Next moves on; on a phone the turn buttons are 48 px (R-03.9).
+    // Next moves on; on a phone the turn buttons are 40 px (R-03.9, T-2811).
     const next = page.getByRole("link", { name: "Next", exact: true });
     const size = await next.boundingBox();
-    expect(size?.height).toBeGreaterThanOrEqual(48);
+    expect(size?.height).toBeGreaterThanOrEqual(40);
     await next.click();
     await expect(current.getByRole("heading", { level: 2, name: "Verse 1" })).toBeVisible();
     await expect(page.getByText("Section 2 of 7")).toBeVisible();
@@ -114,6 +114,10 @@ test.describe("the version page on an iPhone 16", () => {
       .first()
       .evaluate((row) => row.getBoundingClientRect().top);
     expect(firstRow).toBeLessThan(PORTRAIT.height);
+    // R-03.9 the header's actions are smaller than on an iPad, still easy to tap (T-2811).
+    const stand = await page.getByRole("link", { name: "Stand mode" }).boundingBox();
+    expect(stand?.height).toBeLessThan(44);
+    expect(stand?.height).toBeGreaterThanOrEqual(32);
     await expectNoSidewaysScroll(page);
   });
 });

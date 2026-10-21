@@ -107,7 +107,7 @@ test("R-02.10 back from a version, the catalog keeps the search and the open son
   await page.getByRole("main").getByText("Far Lanterns").first().click();
   await expect(page).toHaveURL(new RegExp(`/versions/${second}$`));
 
-  await page.getByRole("link", { name: "Back to the catalog" }).click();
+  await page.getByRole("main").getByRole("link", { name: "Catalog" }).click();
   await expect(page).toHaveURL(/\/catalog\?/);
   await expect(page.getByLabel("Search by title, artist or album")).toHaveValue(
     `Ember Road ${stamp}`,

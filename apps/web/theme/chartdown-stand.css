@@ -721,9 +721,11 @@
 @media (width < 640px) and (pointer: coarse) {
   @scope ([data-astryx-theme="chartdown-stand"]) to ([data-astryx-theme]) {
     :scope {
-    --size-element-sm: 32px;
-    --size-element-md: 40px;
-    --size-element-lg: 44px;
+    --size-element-sm: 28px;
+    --size-element-md: 32px;
+    --size-element-lg: 36px;
+    --text-heading-1-size: var(--font-size-xl);
+    --text-heading-2-size: var(--font-size-lg);
   }
   }
 }
@@ -739,7 +741,11 @@
 @media (width < 640px) and (pointer: coarse) {
   @scope ([data-astryx-theme="chartdown-stand"]) to ([data-astryx-theme]) {
     :scope {
-    --size-element-lg: 48px;
+    --size-element-lg: 40px;
+  }
+
+    .astryx-button[data-size="lg"] {
+    font-size: var(--font-size-lg);
   }
   }
 }

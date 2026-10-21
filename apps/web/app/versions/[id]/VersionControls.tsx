@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { addToSet } from "../../sets/actions";
 import { reportVersion } from "./actions";
+import { openAddAudio } from "./BandAudio";
 
 /**
  * Numbers or letters, and the key (R-03.2). Nothing is saved: the page draws the choice in place
@@ -90,20 +91,37 @@ export function AddToSet({
   );
 }
 
-/** Secondary actions on a version: reporting it to the administrators (R-07.2). */
+/** An entry in a version's "…" menu: a page to go to, the band's audio dialog, or a divider. */
+export type VersionMenuItem =
+  { label: string; href: string } | { label: string; opens: "bandAudio" } | { type: "divider" };
+
+/**
+ * Secondary actions on a version (T-2806): a new version of the song, the report form, and for
+ * those who may, Make private and adding the band's audio.
+ */
 export function VersionMenu({
   label,
   items,
+  size = "lg",
 }: {
   label: string;
-  /** What the menu offers, each a page to go to: a new version of the song, the report form. */
-  items: { label: string; href: string }[];
+  items: VersionMenuItem[];
+  size?: "md" | "lg";
 }) {
   const router = useRouter();
   return (
     <MoreMenu
       label={label}
-      items={items.map((item) => ({ label: item.label, onClick: () => router.push(item.href) }))}
+      size={size}
+      alignment="end"
+      items={items.map((item) =>
+        "type" in item
+          ? item
+          : {
+              label: item.label,
+              onClick: () => ("href" in item ? router.push(item.href) : openAddAudio()),
+            },
+      )}
     />
   );
 }

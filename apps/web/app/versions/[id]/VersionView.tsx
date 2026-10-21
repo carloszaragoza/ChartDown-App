@@ -17,7 +17,7 @@ import { BackToCatalog } from "./BackToCatalog";
 import { BandAudio, type BandRecording } from "./BandAudio";
 import { VideoLink } from "../../_components/VideoDock";
 import type { BasedOn } from "./load";
-import { AddToSet, ReportForm, VersionMenu } from "./VersionControls";
+import { AddToSet, ReportForm, VersionMenu, type VersionMenuItem } from "./VersionControls";
 import { DisplayBar, DisplayedChart, ShownKey, StandLink, VersionDisplay } from "./VersionDisplay";
 
 export interface VersionSource {
@@ -80,6 +80,42 @@ export function setChoiceLabel(choice: SetChoice, mySets: string): string {
 }
 
 /**
+ * The version's "…" menu (T-2806): a new version of the song for anyone signed in, adding the
+ * band's audio for a band's MD, Make private for the owner of an active public version (R-02.4),
+ * and the report form for everyone else (R-07.2). Who sees what is unchanged (R-02.6).
+ */
+export function versionMenuItems({
+  id,
+  songId,
+  newOfSong,
+  addAudio,
+  makePrivate,
+  report,
+}: {
+  id: string;
+  songId?: string | undefined;
+  /** Each label is given when the person is offered that entry. */
+  newOfSong?: string | false;
+  addAudio?: string | false;
+  makePrivate?: string | false;
+  report?: string | false;
+}): VersionMenuItem[] {
+  const first: VersionMenuItem[] = [
+    ...(newOfSong && songId
+      ? [{ label: newOfSong, href: `/versions/new?song=${songId}&from=${id}` }]
+      : []),
+    ...(addAudio ? [{ label: addAudio, opens: "bandAudio" as const }] : []),
+  ];
+  const last: VersionMenuItem[] = [
+    ...(makePrivate ? [{ label: makePrivate, href: `/versions/${id}/make-private` }] : []),
+    ...(report ? [{ label: report, href: `/versions/${id}?report=open#report` }] : []),
+  ];
+  return first.length > 0 && last.length > 0
+    ? [...first, { type: "divider" }, ...last]
+    : [...first, ...last];
+}
+
+/**
  * A version as everyone reads it (Design Handoff 2.0, the screens table: Version): its chart in
  * the written key, with no band's layer (R-06.5). The header names the song, its source, key and
  * meter; Stand mode leads the actions, then what this person may do with it.
@@ -122,13 +158,18 @@ export function VersionView({
   const written = keyName(chart.key);
   const canFork = signedIn && !owner && visibility === "public" && reading;
   const canReport = canFork && status !== "hidden";
+  const a = useTranslations("audio");
+  // The header's actions: the large touch size, the medium one on a phone (T-2811).
+  const size = phone ? "md" : "lg";
   // A new version of the song starts from this chart (R-02.1, T-2405).
-  const menu = [
-    ...(signedIn && reading && songId
-      ? [{ label: t("newOfSong"), href: `/versions/new?song=${songId}&from=${id}` }]
-      : []),
-    ...(canReport ? [{ label: t("report.open"), href: `/versions/${id}?report=open#report` }] : []),
-  ];
+  const menu = versionMenuItems({
+    id,
+    songId,
+    newOfSong: signedIn && reading && t("newOfSong"),
+    addAudio: reading && (audio?.bands.length ?? 0) > 0 && a("add"),
+    makePrivate: owner && visibility === "public" && status === "active" && t("makePrivate"),
+    report: canReport && t("report.open"),
+  });
   const state =
     status === "hidden"
       ? t("hidden")
@@ -151,9 +192,14 @@ export function VersionView({
             <VStack gap={3}>
               {notice}
               {message}
+              {/* One start edge: the way back, the song, its tokens and its media (T-2806). */}
+              {songId && (
+                <HStack>
+                  <BackToCatalog song={songId} label={t("backToCatalog")} />
+                </HStack>
+              )}
               <HStack gap={4} vAlign="start" hAlign="between" wrap="wrap">
                 <VStack gap={1}>
-                  {songId && <BackToCatalog song={songId} label={t("backToCatalog")} />}
                   <Text type="supporting">
                     {[artists.join(", "), ...facts].filter(Boolean).join(" · ")}
                   </Text>
@@ -183,17 +229,60 @@ export function VersionView({
                       </>
                     )}
                   </Text>
-                  {audio && reading && (
-                    <BandAudio
-                      versionId={id}
-                      recordings={audio.recordings}
-                      bands={audio.bands}
-                      chart={chart}
-                    />
-                  )}
+                </VStack>
+                {/* The actions on the title's row, at the large touch size, wrapping; on a phone they
+                    fall under the title, on its start edge. */}
+                <VStack gap={2} hAlign={phone ? "start" : "end"}>
+                  <HStack gap={2} vAlign="center" wrap="wrap">
+                    {reading && (
+                      <StandLink
+                        base={`/versions/${id}/stand`}
+                        label={t("stand")}
+                        icon={<StandIcon />}
+                        size={size}
+                      />
+                    )}
+                    {signedIn && reading && (
+                      <Button label={t("myNotes")} href={`/versions/${id}/notes`} size={size} />
+                    )}
+                    {owner && status === "active" && (
+                      <Button
+                        label={t("edit")}
+                        href={`/versions/${id}/edit`}
+                        icon={<EditIcon />}
+                        size={size}
+                      />
+                    )}
+                    {owner && (
+                      <Button label={t("history")} href={`/versions/${id}/history`} size={size} />
+                    )}
+                    {canFork && (
+                      <form action={forkVersion}>
+                        <input type="hidden" name="versionId" value={id} />
+                        <Button type="submit" label={t("fork")} icon={<ForkIcon />} size={size} />
+                      </form>
+                    )}
+                    {!signedIn && (
+                      <Button
+                        label={t("fork")}
+                        href={`/auth/sign-in?next=${encodeURIComponent(`/versions/${id}`)}`}
+                        icon={<ForkIcon />}
+                        size={size}
+                      />
+                    )}
+                    {menu.length > 0 && <VersionMenu label={t("more")} items={menu} size={size} />}
+                  </HStack>
+                  {canFork && <Text type="supporting">{t("forkCc0")}</Text>}
+                  {!signedIn && <Text type="supporting">{t("forkHint")}</Text>}
+                </VStack>
+              </HStack>
+              {/* The media: the video, then the bands' recordings. */}
+              {(source.youtube || (audio && reading)) && (
+                <VStack gap={2}>
                   {source.youtube && (
                     <HStack>
                       <VideoLink
+                        size={size}
                         url={source.youtube}
                         chart={chart}
                         saved={videoStart}
@@ -205,45 +294,16 @@ export function VersionView({
                       />
                     </HStack>
                   )}
+                  {audio && reading && (
+                    <BandAudio
+                      versionId={id}
+                      recordings={audio.recordings}
+                      bands={audio.bands}
+                      chart={chart}
+                    />
+                  )}
                 </VStack>
-                <VStack gap={2} hAlign="end">
-                  <HStack gap={2} vAlign="center" wrap="wrap">
-                    {reading && (
-                      <StandLink
-                        base={`/versions/${id}/stand`}
-                        label={t("stand")}
-                        icon={<StandIcon />}
-                      />
-                    )}
-                    {owner && status === "active" && (
-                      <Button label={t("edit")} href={`/versions/${id}/edit`} icon={<EditIcon />} />
-                    )}
-                    {owner && <Button label={t("history")} href={`/versions/${id}/history`} />}
-                    {owner && visibility === "public" && status === "active" && (
-                      <Button label={t("makePrivate")} href={`/versions/${id}/make-private`} />
-                    )}
-                    {signedIn && reading && (
-                      <Button label={t("myNotes")} href={`/versions/${id}/notes`} />
-                    )}
-                    {canFork && (
-                      <form action={forkVersion}>
-                        <input type="hidden" name="versionId" value={id} />
-                        <Button type="submit" label={t("fork")} icon={<ForkIcon />} />
-                      </form>
-                    )}
-                    {!signedIn && (
-                      <Button
-                        label={t("fork")}
-                        href={`/auth/sign-in?next=${encodeURIComponent(`/versions/${id}`)}`}
-                        icon={<ForkIcon />}
-                      />
-                    )}
-                    {menu.length > 0 && <VersionMenu label={t("more")} items={menu} />}
-                  </HStack>
-                  {canFork && <Text type="supporting">{t("forkCc0")}</Text>}
-                  {!signedIn && <Text type="supporting">{t("forkHint")}</Text>}
-                </VStack>
-              </HStack>
+              )}
             </VStack>
           </LayoutHeader>
         }

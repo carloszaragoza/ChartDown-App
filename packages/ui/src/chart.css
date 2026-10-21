@@ -194,11 +194,13 @@
    Landscape and larger screens keep the whole row. Media queries take no tokens: 600 px is the
    handoff's phone width. */
 @media (max-width: 599px) {
+  /* The chords a size smaller than on an iPad (owner's review, October 21, 2026). */
   .cd-chart {
     --chart-bar-min-width: calc(var(--spacing-12) * 2.5);
+    --chart-chord-size: var(--font-size-2xl);
   }
   .cd-chart--lg {
-    --chart-chord-size: calc(var(--font-size-3xl) * var(--stand-scale, 1));
+    --chart-chord-size: calc(var(--font-size-2xl) * var(--stand-scale, 1));
   }
   .cd-chart__bars {
     grid-template-columns: repeat(var(--chart-bars-phone), minmax(var(--chart-bar-min-width), 1fr));

@@ -10,6 +10,7 @@ import {
   signOut,
   signUpAndConfirm,
   unique,
+  moreAction,
 } from "./flows";
 
 const TONE = new URL("../../../fixtures/audio/practice-tone.mp3", import.meta.url).pathname;
@@ -53,14 +54,14 @@ test("R-06.7 the MD adds the band's audio; its musicians hear it, nobody else", 
   await expectStatus(page, "Welcome to the band.");
   // A musician adds one for their own personal space only, never for the band.
   await page.goto(`/versions/${version}`);
-  await page.getByRole("button", { name: "Add the band's audio" }).click();
+  await moreAction(page, "Add the band's audio");
   await expect(page.getByRole("dialog")).toContainText("For Just me");
   await expect(page.getByRole("dialog")).not.toContainText(band);
   await page.getByRole("dialog").getByRole("button", { name: "Cancel" }).click();
 
   await switchTo(page, ana, "Ana Audio");
   await page.goto(`/versions/${version}`);
-  await page.getByRole("button", { name: "Add the band's audio" }).click();
+  await moreAction(page, "Add the band's audio");
   const dialog = page.getByRole("dialog");
   await dialog.getByRole("combobox", { name: "Band" }).click();
   await page.getByRole("option", { name: band }).click();
@@ -143,7 +144,7 @@ test("R-06.7 a downloaded set keeps its songs' recordings: stand mode plays them
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   const setId = new URL(page.url()).pathname.split("/")[2] ?? "";
   await page.goto(`/versions/${version}`);
-  await page.getByRole("button", { name: "Add the band's audio" }).click();
+  await moreAction(page, "Add the band's audio");
   const dialog = page.getByRole("dialog");
   await dialog.getByRole("combobox", { name: "Band" }).click();
   await page.getByRole("option", { name: band }).click();

@@ -5,7 +5,12 @@ import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import en from "../../../messages/en.json";
 import es from "../../../messages/es.json";
-import { setChoiceLabel, VersionView, type VersionViewProps } from "./VersionView";
+import {
+  setChoiceLabel,
+  versionMenuItems,
+  VersionView,
+  type VersionViewProps,
+} from "./VersionView";
 
 vi.mock("./actions", () => ({
   forkVersion: () => undefined,
@@ -47,7 +52,7 @@ describe("R-01.4 a public version as everyone reads it", () => {
     expect(html).toContain("Arrangement by Carlos");
     expect(html).toContain("Own arrangement · 2026");
     // R-03.11 the link opens the video in the mini player.
-    expect(html).toContain("Play the video");
+    expect(html).toContain("Watch the video");
     expect(html.match(/<section aria-label="[^"]*" id="section-\d+"/g)).toHaveLength(
       openRoad.sections.length,
     );
@@ -103,14 +108,25 @@ describe("R-02.4 making a version private", () => {
   const makePrivate = 'href="/versions/00000000-0000-0000-0000-0000000000f1/make-private"';
 
   it("R-02.4 only the owner of an active public version is offered Make private", () => {
-    expect(render("en", { signedIn: true, owner: true })).toContain(makePrivate);
-    expect(render("en", { signedIn: true })).not.toContain(makePrivate);
-    expect(render("en", { signedIn: true, owner: true, status: "frozen" })).not.toContain(
-      makePrivate,
-    );
-    expect(render("en", { signedIn: true, owner: true, visibility: "private" })).not.toContain(
-      makePrivate,
-    );
+    expect(render("en", { signedIn: true, owner: true })).not.toContain(makePrivate);
+    // T-2806 it sits in the "…" menu, after a divider.
+    expect(
+      versionMenuItems({ id: "v1", songId: "s1", newOfSong: "New", makePrivate: "Make private" }),
+    ).toEqual([
+      { label: "New", href: "/versions/new?song=s1&from=v1" },
+      { type: "divider" },
+      { label: "Make private", href: "/versions/v1/make-private" },
+    ]);
+    expect(versionMenuItems({ id: "v1", makePrivate: false, report: "Report" })).toEqual([
+      { label: "Report", href: "/versions/v1?report=open#report" },
+    ]);
+  });
+
+  it("R-06.7 the band's MD adds the band's audio from the menu", () => {
+    expect(versionMenuItems({ id: "v1", addAudio: "Add the band's audio" })).toEqual([
+      { label: "Add the band's audio", opens: "bandAudio" },
+    ]);
+    expect(versionMenuItems({ id: "v1", addAudio: false })).toEqual([]);
   });
 
   it("R-02.4 a frozen version says so, and can still be forked", () => {
