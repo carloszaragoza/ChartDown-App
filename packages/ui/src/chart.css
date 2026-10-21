@@ -522,7 +522,7 @@
   position: relative;
   display: flex;
   gap: var(--border-width);
-  min-block-size: var(--spacing-11);
+  min-block-size: var(--spacing-12);
 }
 .cd-video-bar__section {
   flex-basis: 0;
@@ -535,8 +535,10 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--font-size-xs);
-  text-overflow: ellipsis;
+  /* Named as in the song form (V1, C2), large and bold enough to read while playing (T-2505). */
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  text-overflow: clip;
   white-space: nowrap;
 }
 .cd-video-bar__section:first-child {
@@ -560,6 +562,11 @@
   pointer-events: none;
 }
 
+/* With a player open, the bar being followed is centered in what the player leaves (T-2505). */
+.cd-chart__bar[aria-current="step"] {
+  scroll-margin-block-end: var(--cd-dock-room, 0px);
+}
+
 /* The band's audio player (R-06.7): a thin bar docked at the bottom, the recording's waveform with
    the song's sections over it, the part already played in the ink color and a mark where it is. */
 .cd-audio-dock {
@@ -581,7 +588,7 @@
 }
 .cd-audio-wave__bars {
   position: absolute;
-  inset: var(--spacing-4) 0 0;
+  inset: var(--spacing-5) 0 0;
   display: flex;
   align-items: center;
   gap: 1px;
@@ -611,8 +618,9 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   font: inherit;
-  font-size: var(--font-size-xs);
-  line-height: var(--spacing-4);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--spacing-5);
   text-align: start;
   text-overflow: ellipsis;
   vertical-align: top;

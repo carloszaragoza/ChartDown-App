@@ -1,6 +1,6 @@
 import { parse } from "chartdown";
 import { describe, expect, it } from "vitest";
-import { barAt, chartClicks, sectionAt, videoSections } from "./sections";
+import { barAt, chartClicks, sectionAt, sectionLabels, videoSections } from "./sections";
 
 const SONG = "---\ntempo: 120\n---\n## Intro\n1 | 4\n## Verse\n|: 1 | 5 :|\n## Chorus\n4 | 1\n";
 
@@ -56,5 +56,35 @@ describe("T-2502 where each section falls in the video", () => {
     expect(at(7 + bar * 4.3)).toMatchObject({ section: 1, index: 0, progress: 0.5 });
     expect(at(7 + bar * 7.9)).toMatchObject({ section: 2, index: 1 });
     expect(at(7 + bar * 8)).toBeNull();
+  });
+});
+
+describe("T-2505 the sections bar names sections as the song form does", () => {
+  it("R-03.11 abbreviations, and which time a section the chart plays again is", () => {
+    const chart = parse(
+      "---\ntempo: 120\n---\n## Verse 1\n1 | 4\n## Chorus\n4 | 1\n## Verse 2\n1 | 4\n## Chorus\n4 | 1\n## Bridge\n|: 6m | 5 :|\n## Bridge\n@use Bridge\n",
+    );
+    const sections = videoSections(chart, 0) ?? [];
+    expect(sectionLabels(chart, sections)).toEqual([
+      { abbreviation: "V1", time: 1, of: 1 },
+      { abbreviation: "C", time: 1, of: 1 },
+      { abbreviation: "V2", time: 1, of: 1 },
+      { abbreviation: "C2", time: 1, of: 1 },
+      { abbreviation: "B", time: 1, of: 1 },
+      { abbreviation: "B2", time: 1, of: 1 },
+    ]);
+  });
+
+  it("R-06.7 a section the chart plays again reads B1, then B1²", () => {
+    const chart = parse(
+      "---\ntempo: 120\n---\n## Bridge 1\n6m | 5\n## Chorus\n4 | 1\n## Bridge 1\n@use Bridge 1\n",
+    );
+    const sections = videoSections(chart, 0) ?? [];
+    const labels = sectionLabels(chart, sections);
+    expect(labels).toEqual([
+      { abbreviation: "B1", time: 1, of: 2 },
+      { abbreviation: "C", time: 1, of: 1 },
+      { abbreviation: "B1", time: 2, of: 2 },
+    ]);
   });
 });
