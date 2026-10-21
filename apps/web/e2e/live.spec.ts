@@ -11,12 +11,21 @@ import {
   signIn,
   signOut,
   signUpAndConfirm,
+  standNow,
   unique,
 } from "./flows";
 
 const FIRST = "## Verse\n1 | 4\n## Chorus\n4 | 5\n## Bridge\n6m | 4\n";
 const SECOND = "## Intro\n1 | 5\n## Outro\n4 | 1\n";
 const FOLLOW = { timeout: 10_000 };
+
+// Which section a device shows as Now; the other device's window may sit behind, where its stack
+// does not glide, so this reads the section, not where it scrolled to.
+async function expectNow(page: Page, name: string) {
+  await expect(standNow(page).getByRole("heading", { level: 2, name, exact: true })).toBeVisible(
+    FOLLOW,
+  );
+}
 
 // Two devices side by side: the one acting comes to the front first, since a window behind gets
 // no animation frames and a click there never settles.
@@ -91,17 +100,14 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 the band follows 
   await luisPage.getByRole("link", { name: "Join", exact: true }).click();
   await expect(luisPage).toHaveURL(new RegExp(`${setAddress}/songs/1/stand`));
   await expect(luisPage.getByText("Following Ana Live")).toBeVisible(FOLLOW);
-  await expectStandNow(luisPage, "Verse");
+  await expectNow(luisPage, "Verse");
   // The leader sees who joined.
   await expect(page.getByText("You lead 1 musician")).toBeVisible(FOLLOW);
 
   // R-12.3 Ana moves; Luis's stand mode moves with her.
   await pressOn(page, "ArrowRight");
   await expectStandNow(page, "Chorus");
-  await expect(luisPage.locator('.cd-stand-card[data-state="current"]')).toContainText(
-    "Chorus",
-    FOLLOW,
-  );
+  await expectNow(luisPage, "Chorus");
 
   // R-12.4 Ana marks the Bridge next; Luis sees it before she moves.
   await page.bringToFront();
@@ -112,16 +118,16 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 the band follows 
 
   // R-12.5 Luis looks ahead; Ana's moves wait for him until Back to live.
   await pressOn(luisPage, "ArrowRight");
-  await expectStandNow(luisPage, "Bridge");
+  await expectNow(luisPage, "Bridge");
   const back = luisPage.getByRole("button", { name: "Back to live" });
   await expect(back).toBeVisible();
   await pressOn(page, "ArrowLeft");
   await expectStandNow(page, "Verse");
   await luisPage.waitForTimeout(1500);
-  await expectStandNow(luisPage, "Bridge");
+  await expectNow(luisPage, "Bridge");
   await luisPage.bringToFront();
   await back.click();
-  await expectStandNow(luisPage, "Verse");
+  await expectNow(luisPage, "Verse");
 
   // R-12.6 Ana goes on to the next song; Luis goes with her.
   await pressOn(page, "ArrowRight");
@@ -130,13 +136,13 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 the band follows 
   await pressOn(page, "ArrowRight");
   await expect(page).toHaveURL(new RegExp(`${setAddress}/songs/2/stand`));
   await expect(luisPage).toHaveURL(new RegExp(`${setAddress}/songs/2/stand`), FOLLOW);
-  await expectStandNow(luisPage, "Intro");
+  await expectNow(luisPage, "Intro");
 
   // R-12.10 Ana ends live mode; Luis stays where he was and is told.
   await page.bringToFront();
   await page.getByRole("button", { name: "Live options" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "End live mode" }).click();
   await expect(luisPage.getByText("Live mode ended. You stay where you were.")).toBeVisible(FOLLOW);
-  await expectStandNow(luisPage, "Intro");
+  await expectNow(luisPage, "Intro");
   await luisDevice.close();
 });
