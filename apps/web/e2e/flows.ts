@@ -108,7 +108,8 @@ export async function moreAction(page: Page, name: string) {
 export async function addToSet(page: Page, label: string) {
   await page.getByRole("button", { name: "Add to set" }).click();
   await page.getByRole("menuitem", { name: label, exact: true }).click();
-  await expect(page.getByText(`Added to ${label.split(" · ").pop()}`)).toBeVisible();
+  // The toast is also read out, so its words are on the page twice.
+  await expect(page.getByText(`Added to ${label.split(" · ").pop()}`).first()).toBeVisible();
 }
 
 /** In the layer editor, the row of a section in the list on the left, with its note count. */
