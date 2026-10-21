@@ -99,12 +99,20 @@ export type VersionMenuItem =
  * Secondary actions on a version (T-2806): a new version of the song, the report form, and for
  * those who may, Make private and adding the band's audio.
  */
-export function VersionMenu({ label, items }: { label: string; items: VersionMenuItem[] }) {
+export function VersionMenu({
+  label,
+  items,
+  size = "lg",
+}: {
+  label: string;
+  items: VersionMenuItem[];
+  size?: "md" | "lg";
+}) {
   const router = useRouter();
   return (
     <MoreMenu
       label={label}
-      size="lg"
+      size={size}
       alignment="end"
       items={items.map((item) =>
         "type" in item

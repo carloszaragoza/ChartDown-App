@@ -99,6 +99,7 @@ export function VideoLink({
   saved,
   save,
   isIconOnly = false,
+  size = "lg",
 }: {
   url: string;
   chart?: Chart | undefined;
@@ -108,6 +109,8 @@ export function VideoLink({
   save?: ((milliseconds: number) => Promise<boolean>) | undefined;
   /** Only the play icon, as beside the YouTube link's field. */
   isIconOnly?: boolean;
+  /** The labelled button's size: large, medium on a phone (T-2811). */
+  size?: "md" | "lg";
 }) {
   const t = useTranslations("video");
   const id = videoId(url);
@@ -136,7 +139,7 @@ export function VideoLink({
       <Button
         label={isIconOnly ? t("play") : t("watch")}
         variant={isIconOnly ? "ghost" : "secondary"}
-        size={isIconOnly ? "md" : "lg"}
+        size={isIconOnly ? "md" : size}
         icon={<Icon icon={PlayIcon} />}
         isIconOnly={isIconOnly}
         {...(isIconOnly ? { tooltip: t("play") } : {})}

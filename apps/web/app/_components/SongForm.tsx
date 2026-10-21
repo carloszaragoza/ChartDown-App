@@ -2,6 +2,7 @@
 
 import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
+import { StackItem } from "@astryxdesign/core/Stack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
@@ -56,31 +57,34 @@ export function SongForm({
         {items.map((item, index) => {
           const { time, of } = times[index] ?? { time: 1, of: 1 };
           const isCurrent = index === current;
+          // In a strip each section keeps its whole name and the strip scrolls; a button left
+          // to the row would shrink and cut it short ("V…").
           return (
-            <Button
-              key={index}
-              href={item.href}
-              size={size}
-              variant={isCurrent ? "primary" : size === "lg" ? "secondary" : "ghost"}
-              label={[
-                item.description,
-                of > 1 ? c("nthTime", { time }) : "",
-                item.isQueued ? c("queued") : "",
-              ]
-                .filter(Boolean)
-                .join(", ")}
-              {...(isCurrent ? { "aria-current": "true" as const } : {})}
-              {...(item.isQueued
-                ? { endContent: <Icon icon={ChevronDoubleRightIcon} /> }
-                : item.hasNotes && notesLabel
-                  ? { endContent: <StatusDot variant="error" label={notesLabel} /> }
-                  : {})}
-            >
-              <span aria-hidden="true">
-                {item.abbreviation}
-                {of > 1 && time > 1 && <sup>{time}</sup>}
-              </span>
-            </Button>
+            <StackItem key={index}>
+              <Button
+                href={item.href}
+                size={size}
+                variant={isCurrent ? "primary" : size === "lg" ? "secondary" : "ghost"}
+                label={[
+                  item.description,
+                  of > 1 ? c("nthTime", { time }) : "",
+                  item.isQueued ? c("queued") : "",
+                ]
+                  .filter(Boolean)
+                  .join(", ")}
+                {...(isCurrent ? { "aria-current": "true" as const } : {})}
+                {...(item.isQueued
+                  ? { endContent: <Icon icon={ChevronDoubleRightIcon} /> }
+                  : item.hasNotes && notesLabel
+                    ? { endContent: <StatusDot variant="error" label={notesLabel} /> }
+                    : {})}
+              >
+                <span aria-hidden="true">
+                  {item.abbreviation}
+                  {of > 1 && time > 1 && <sup>{time}</sup>}
+                </span>
+              </Button>
+            </StackItem>
           );
         })}
       </HStack>

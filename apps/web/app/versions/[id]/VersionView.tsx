@@ -159,6 +159,8 @@ export function VersionView({
   const canFork = signedIn && !owner && visibility === "public" && reading;
   const canReport = canFork && status !== "hidden";
   const a = useTranslations("audio");
+  // The header's actions: the large touch size, the medium one on a phone (T-2811).
+  const size = phone ? "md" : "lg";
   // A new version of the song starts from this chart (R-02.1, T-2405).
   const menu = versionMenuItems({
     id,
@@ -237,26 +239,27 @@ export function VersionView({
                         base={`/versions/${id}/stand`}
                         label={t("stand")}
                         icon={<StandIcon />}
+                        size={size}
                       />
                     )}
                     {signedIn && reading && (
-                      <Button label={t("myNotes")} href={`/versions/${id}/notes`} size="lg" />
+                      <Button label={t("myNotes")} href={`/versions/${id}/notes`} size={size} />
                     )}
                     {owner && status === "active" && (
                       <Button
                         label={t("edit")}
                         href={`/versions/${id}/edit`}
                         icon={<EditIcon />}
-                        size="lg"
+                        size={size}
                       />
                     )}
                     {owner && (
-                      <Button label={t("history")} href={`/versions/${id}/history`} size="lg" />
+                      <Button label={t("history")} href={`/versions/${id}/history`} size={size} />
                     )}
                     {canFork && (
                       <form action={forkVersion}>
                         <input type="hidden" name="versionId" value={id} />
-                        <Button type="submit" label={t("fork")} icon={<ForkIcon />} size="lg" />
+                        <Button type="submit" label={t("fork")} icon={<ForkIcon />} size={size} />
                       </form>
                     )}
                     {!signedIn && (
@@ -264,10 +267,10 @@ export function VersionView({
                         label={t("fork")}
                         href={`/auth/sign-in?next=${encodeURIComponent(`/versions/${id}`)}`}
                         icon={<ForkIcon />}
-                        size="lg"
+                        size={size}
                       />
                     )}
-                    {menu.length > 0 && <VersionMenu label={t("more")} items={menu} />}
+                    {menu.length > 0 && <VersionMenu label={t("more")} items={menu} size={size} />}
                   </HStack>
                   {canFork && <Text type="supporting">{t("forkCc0")}</Text>}
                   {!signedIn && <Text type="supporting">{t("forkHint")}</Text>}
@@ -279,6 +282,7 @@ export function VersionView({
                   {source.youtube && (
                     <HStack>
                       <VideoLink
+                        size={size}
                         url={source.youtube}
                         chart={chart}
                         saved={videoStart}

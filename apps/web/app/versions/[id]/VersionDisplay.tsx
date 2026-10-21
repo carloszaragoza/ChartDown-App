@@ -68,14 +68,24 @@ export function ShownKey({ words }: { words: { key: string; writtenIn: string } 
 }
 
 /** Stand mode, opened with the view chosen here. */
-export function StandLink({ base, label, icon }: { base: string; label: string; icon: ReactNode }) {
+export function StandLink({
+  base,
+  label,
+  icon,
+  size = "lg",
+}: {
+  base: string;
+  label: string;
+  icon: ReactNode;
+  size?: "md" | "lg";
+}) {
   const { chart, display } = useDisplay();
   if (!display) return null;
   return (
     <Button
       label={label}
       variant="primary"
-      size="lg"
+      size={size}
       href={displayHref(base, display, chart)}
       icon={icon}
     />

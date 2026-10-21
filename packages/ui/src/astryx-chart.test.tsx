@@ -204,9 +204,11 @@ describe("T-2202 bar rows on a phone", () => {
   });
 
   it("R-03.8 on a phone stand mode's chords are drawn at the viewer's size", () => {
+    // R-03.9 a size smaller than on an iPad (T-2811).
+    expect(phone).toMatch(/\.cd-chart \{[^}]*--chart-chord-size: var\(--font-size-2xl\)/);
     // At the viewer's size, times the Number size chosen in View (R-03.12, Medium is 1).
     expect(phone).toMatch(
-      /\.cd-chart--lg \{\s*--chart-chord-size: calc\(var\(--font-size-3xl\) \* var\(--stand-scale, 1\)\)/,
+      /\.cd-chart--lg \{\s*--chart-chord-size: calc\(var\(--font-size-2xl\) \* var\(--stand-scale, 1\)\)/,
     );
   });
 });

@@ -553,9 +553,11 @@ export const chartdownStandTheme = {
         },
         "value": {
           "tokens": {
-            "--size-element-sm": "32px",
-            "--size-element-md": "40px",
-            "--size-element-lg": "44px"
+            "--size-element-sm": "28px",
+            "--size-element-md": "32px",
+            "--size-element-lg": "36px",
+            "--text-heading-1-size": "var(--font-size-xl)",
+            "--text-heading-2-size": "var(--font-size-lg)"
           }
         }
       },
@@ -578,7 +580,14 @@ export const chartdownStandTheme = {
         },
         "value": {
           "tokens": {
-            "--size-element-lg": "48px"
+            "--size-element-lg": "40px"
+          },
+          "components": {
+            "button": {
+              "size:lg": {
+                "fontSize": "var(--font-size-lg)"
+              }
+            }
           }
         }
       }
