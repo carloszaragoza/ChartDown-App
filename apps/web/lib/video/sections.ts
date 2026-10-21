@@ -1,6 +1,8 @@
 // Where each section falls in a version's video (R-03.11, T-2502): the chart played in order at its
 // tempo, as the metronome counts it, counted from where the music starts in the video.
+import { formStripItems } from "@chartdown/ui";
 import type { Chart } from "chartdown";
+import { repeats } from "../chart/repeats";
 import { clicks, type Click } from "../metronome/engine";
 import { timeline, type TimelineBar } from "../metronome/timeline";
 
@@ -40,6 +42,23 @@ export function videoSections(chart: Chart, musicStart: number): VideoSection[] 
   const last = out.at(-1);
   if (final && last) last.end = musicStart + final.time + final.duration;
   return out;
+}
+
+/**
+ * How the sections bar names each section (T-2505): as the song form does, by its abbreviation
+ * (V1, C2), with which time it is when the chart plays it more than once (B1, B1², B1³).
+ */
+export function sectionLabels(
+  chart: Chart,
+  sections: readonly VideoSection[],
+): { abbreviation: string; time: number; of: number }[] {
+  const names = formStripItems(chart, -1, () => false).map((item) => item.abbreviation);
+  const abbreviations = sections.map((section) => names[section.section] ?? "");
+  const times = repeats(abbreviations);
+  return abbreviations.map((abbreviation, index) => ({
+    abbreviation,
+    ...(times[index] ?? { time: 1, of: 1 }),
+  }));
 }
 
 /** The section playing at a time in the video, as an index into the list, or -1 outside it. */

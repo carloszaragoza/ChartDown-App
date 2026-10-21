@@ -35,6 +35,7 @@ import { SongForm } from "./SongForm";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, type ReactNode } from "react";
 import { barIn, usePlaybackBar } from "./usePlaybackBar";
+import { DockRoom, useDockRoomSize } from "./DockRoom";
 import { useChartLabels } from "./chartLabels";
 import { hasJump, playRuns } from "../../lib/chart/playRuns";
 
@@ -188,6 +189,8 @@ export function ChartPreview({
     chooseStart(Number(section) - 1, Number(bar.dataset.bar));
   };
   const root = useRef<HTMLDivElement>(null);
+  // An open player takes the screen's bottom: the bar being followed is centered above it (T-2505).
+  const room = useDockRoomSize();
   const playingRow =
     playingSection !== undefined
       ? `${playingSection}:${nowIn(playingSection)?.row}`
@@ -219,7 +222,11 @@ export function ChartPreview({
     </Text>
   );
   return (
-    <div ref={root} onClick={onTap}>
+    <div
+      ref={root}
+      onClick={onTap}
+      style={{ "--cd-dock-room": `${room}px` } as React.CSSProperties}
+    >
       <VStack gap={6}>
         {hasForm && (
           // The song form stays pinned at the top while the chart scrolls, at stand mode's size,
@@ -285,6 +292,7 @@ export function ChartPreview({
           />
         ))}
       </VStack>
+      <DockRoom />
     </div>
   );
 }

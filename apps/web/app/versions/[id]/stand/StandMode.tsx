@@ -54,6 +54,7 @@ import {
   type NumberSize,
 } from "../../../../lib/stand/preferences";
 import { useChartLabels } from "../../../_components/chartLabels";
+import { DockRoom } from "../../../_components/DockRoom";
 import type { Display } from "../display";
 import { inSidewaysScroll, swipeTurn } from "./swipe";
 import {
@@ -903,6 +904,8 @@ function StandModeView({
                 </HStack>
               </nav>
             )}
+            {/* An open player sits over the bottom: Previous and Next stay above it (T-2505). */}
+            <DockRoom />
           </VStack>
           {tempoDialog}
           {
