@@ -88,16 +88,26 @@ export async function deleteSet(form: FormData): Promise<void> {
   redirect(`/bands/${bandId}/sets?deleted=1`);
 }
 
-/** From a version's page, the MD adds it to one of their sets (R-05.2). */
-export async function addToSet(form: FormData): Promise<void> {
+/**
+ * From a version's page, the MD adds it to one of their sets in one step and stays on the page
+ * (R-05.2, T-2807). Gives the new item, for Undo, or null when it could not be added.
+ */
+export async function addToSet(setId: string, versionId: string): Promise<string | null> {
+  if (!UUID.test(setId) || !UUID.test(versionId)) return null;
   const supabase = await client();
-  const setId = field(form, "setId");
-  const versionId = field(form, "versionId");
-  if (!UUID.test(versionId)) redirect("/");
-  if (!UUID.test(setId)) redirect(`/versions/${versionId}?set=choose`);
-  const { error } = await supabase.rpc("add_to_set", { set_id: setId, version_id: versionId });
-  if (error) redirect(`/versions/${versionId}?set=failed`);
-  redirect(setPage(setId, "added=1"));
+  const { data, error } = await supabase.rpc("add_to_set", {
+    set_id: setId,
+    version_id: versionId,
+  });
+  return error || typeof data !== "string" ? null : data;
+}
+
+/** Undo on the toast after adding: takes that song out of the set again (T-2807). */
+export async function undoAddToSet(itemId: string): Promise<boolean> {
+  if (!UUID.test(itemId)) return false;
+  const supabase = await client();
+  const { error } = await supabase.rpc("remove_from_set", { item_id: itemId });
+  return !error;
 }
 
 /** Moves a song one place up or down (R-05.2). */

@@ -17,7 +17,10 @@ vi.mock("./actions", () => ({
   reportVersion: () => undefined,
   saveVideoStart: async () => true,
 }));
-vi.mock("../../sets/actions", () => ({ addToSet: () => undefined }));
+vi.mock("../../sets/actions", () => ({
+  addToSet: async () => null,
+  undoAddToSet: async () => true,
+}));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: () => undefined }) }));
 
 const openRoad = parse(
@@ -163,6 +166,10 @@ describe("R-03.2 the display bar", () => {
     expect(html).toContain("Key A");
     expect(html).toContain("(written in G)");
     expect(html).toContain("Back to the written key, G");
+    // T-2807 the key says whether it is the written one; Beat marks has its help button.
+    expect(html).toContain("Key A · transposed");
+    expect(html).toContain("Beat marks");
+    expect(html).toContain('aria-label="About beat marks"');
     // Stand mode opens in the same view.
     expect(html).toMatch(/href="\/versions\/[^"]*\/stand\?[^"]*key=A/);
     expect(render("en")).not.toContain("written in");
@@ -189,13 +196,18 @@ describe("R-05.2 adding a version to a set", () => {
         { id: "00000000-0000-0000-0000-00000000c502", band: null, name: "Practice" },
       ],
     });
-    expect(html).toContain("Add to a set");
+    // T-2807 one menu button, its sets and New set inside.
+    expect(html).toContain("Add to set");
     expect(setChoiceLabel({ id: "c501", band: "Harbor Band", name: "Sunday" }, "My sets")).toBe(
       "Harbor Band · Sunday",
     );
     expect(setChoiceLabel({ id: "c502", band: null, name: "Practice" }, "My sets")).toBe(
       "My sets · Practice",
     );
-    expect(render("en", { signedIn: true })).not.toContain("Add to a set");
+    expect(render("en", { signedIn: true })).not.toContain("Add to set");
+    // An MD with no set yet still finds New set there.
+    expect(
+      render("en", { signedIn: true, setBands: [{ id: "b1", name: "Harbor Band" }] }),
+    ).toContain("Add to set");
   });
 });

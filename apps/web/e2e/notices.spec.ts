@@ -61,7 +61,6 @@ async function bandWithSet(
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   await page.goto(`/versions/${id}`);
   await addToSet(page, `${band} · ${set}`);
-  await expectStatus(page, "added at the end");
   return { set, title, luis };
 }
 

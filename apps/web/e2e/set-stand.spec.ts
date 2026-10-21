@@ -80,7 +80,6 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   for (const version of [v1, v2]) {
     await page.goto(`/versions/${version}`);
     await addToSet(page, `${band} · ${set}`);
-    await expectStatus(page, "added at the end");
   }
   await page.goto(`/versions/${v1}/notes`);
   await page.getByRole("radiogroup", { name: "Bands" }).getByRole("radio", { name: band }).click();

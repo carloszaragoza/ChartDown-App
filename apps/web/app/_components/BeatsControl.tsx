@@ -1,11 +1,15 @@
 "use client";
 
+import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
+import { Icon } from "@astryxdesign/core/Icon";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { BEATS_MODES, readBeatsMode, type BeatsMode } from "@chartdown/ui";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "chartdown:beats";
 
@@ -70,20 +74,41 @@ export function BeatsControl({
   hrefs?: Record<BeatsMode, string>;
   /** Draws the chosen mode in place instead of asking the server for its address (F-005). */
   onChoose?: (mode: BeatsMode) => void;
-  words: { label: string; name: string; off: string; auto: string; always: string };
+  words: {
+    label: string;
+    name: string;
+    off: string;
+    auto: string;
+    always: string;
+    /** An info button that shows one line on what each mode shows (T-2807). */
+    help?: { about: string; text: string };
+  };
 }) {
   const router = useRouter();
+  const [isHelpShown, setHelpShown] = useState(false);
   const labels: Record<BeatsMode, string> = {
     off: words.off,
     auto: words.auto,
     always: words.always,
   };
-  return (
+  const control = (
     <HStack gap={2} vAlign="center">
       <BeatsMemory current={value} onChoose={onChoose} />
       <Text type="supporting" aria-hidden="true">
         {words.label}
       </Text>
+      {words.help && (
+        <Button
+          label={words.help.about}
+          tooltip={words.help.about}
+          variant="ghost"
+          size="sm"
+          icon={<Icon icon={InformationCircleIcon} />}
+          isIconOnly
+          aria-expanded={isHelpShown}
+          onClick={() => setHelpShown(!isHelpShown)}
+        />
+      )}
       <SegmentedControl
         label={words.name}
         value={value}
@@ -99,5 +124,12 @@ export function BeatsControl({
         ))}
       </SegmentedControl>
     </HStack>
+  );
+  if (!words.help || !isHelpShown) return control;
+  return (
+    <VStack gap={1}>
+      {control}
+      <Text type="supporting">{words.help.text}</Text>
+    </VStack>
   );
 }

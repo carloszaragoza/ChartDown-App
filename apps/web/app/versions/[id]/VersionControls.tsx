@@ -4,16 +4,21 @@ import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
+import { DropdownMenu } from "@astryxdesign/core/DropdownMenu";
+import { Icon } from "@astryxdesign/core/Icon";
 import { MoreMenu } from "@astryxdesign/core/MoreMenu";
 import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Selector } from "@astryxdesign/core/Selector";
 import { TextArea } from "@astryxdesign/core/TextArea";
+import { useToast } from "@astryxdesign/core/Toast";
 import { VStack } from "@astryxdesign/core/VStack";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import type { Key } from "chartdown";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { addToSet } from "../../sets/actions";
+import { addToSet, undoAddToSet } from "../../sets/actions";
 import { reportVersion } from "./actions";
 import { openAddAudio } from "./BandAudio";
 
@@ -31,7 +36,7 @@ export function DisplayControls({
 }: {
   style: "numbers" | "letters";
   onStyle: (style: "numbers" | "letters") => void;
-  /** Every key to show. */
+  /** Every key to show, each with its whole label. */
   keys: { value: string; label: string; key: Key }[];
   shown: string;
   onKey: (key: Key) => void;
@@ -47,11 +52,11 @@ export function DisplayControls({
         <SegmentedControlItem value="numbers" label={words.numbers} />
         <SegmentedControlItem value="letters" label={words.letters} />
       </SegmentedControl>
-      {/* The key says what it is in its own text ("Key G (written)"), on the same line. */}
+      {/* The key says what it is in its own text ("Key E · original"), on the same line. */}
       <Selector
         label={words.key}
         isLabelHidden
-        options={keys.map(({ value, label }) => ({ value, label: `${words.key} ${label}` }))}
+        options={keys.map(({ value, label }) => ({ value, label }))}
         value={shown}
         onChange={(value) => {
           const key = keys.find((item) => item.value === value);
@@ -62,32 +67,61 @@ export function DisplayControls({
   );
 }
 
-/** Adds the version to one of the MD's sets (R-05.2). */
+/**
+ * Add to set as one menu button (R-05.2, T-2807): choosing a set adds the song at once and a toast
+ * says so, with Undo; the last items start a new set in the MD's bands.
+ */
 export function AddToSet({
   versionId,
   choices,
-  words,
+  newSets,
 }: {
   versionId: string;
-  choices: { value: string; label: string }[];
-  words: { label: string; placeholder: string; submit: string };
+  choices: { value: string; label: string; name: string }[];
+  /** Where each of the MD's bands starts a new set. */
+  newSets: { label: string; href: string }[];
 }) {
-  const [set, setSet] = useState("");
-  return (
-    <form action={addToSet}>
-      <input type="hidden" name="versionId" value={versionId} />
-      <HStack gap={2} vAlign="end">
-        <Selector
-          label={words.label}
-          htmlName="setId"
-          options={choices}
-          value={set}
-          onChange={setSet}
-          placeholder={words.placeholder}
+  const t = useTranslations("sets");
+  const router = useRouter();
+  const toast = useToast();
+  const add = async (choice: { value: string; name: string }) => {
+    const item = await addToSet(choice.value, versionId);
+    if (!item) return void toast({ body: t("addFailed"), type: "error" });
+    // The answer to Undo takes the same toast's place.
+    const uniqueID = `added-${item}`;
+    toast({
+      body: t("added", { set: choice.name }),
+      uniqueID,
+      autoHideDuration: 8000,
+      endContent: (
+        <Button
+          label={t("undo")}
+          variant="ghost"
+          size="sm"
+          onClick={() =>
+            void undoAddToSet(item).then((done) =>
+              toast(
+                done
+                  ? { body: t("undone", { set: choice.name }), uniqueID }
+                  : { body: t("addFailed"), type: "error", uniqueID },
+              ),
+            )
+          }
         />
-        <Button type="submit" label={words.submit} isDisabled={!set} />
-      </HStack>
-    </form>
+      ),
+    });
+  };
+  return (
+    <DropdownMenu
+      button={{ label: t("addTo"), icon: <Icon icon={PlusIcon} /> }}
+      alignment="end"
+      presentation="adaptive"
+      items={[
+        ...choices.map((choice) => ({ label: choice.label, onClick: () => void add(choice) })),
+        ...(newSets.length > 0 ? [{ type: "divider" as const }] : []),
+        ...newSets.map((item) => ({ label: item.label, onClick: () => router.push(item.href) })),
+      ]}
+    />
   );
 }
 

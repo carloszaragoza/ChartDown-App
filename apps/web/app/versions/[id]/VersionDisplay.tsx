@@ -5,6 +5,7 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { keyName, type Chart } from "chartdown";
+import { useTranslations } from "next-intl";
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 import { BeatsControl } from "../../_components/BeatsControl";
 import { ChartPreview } from "../../_components/ChartPreview";
@@ -92,7 +93,7 @@ export function StandLink({
   );
 }
 
-/** Numbers or letters, the key, Beats, and the way back to the written key. */
+/** Numbers or letters, the key, Beat marks, and the way back to the written key. */
 export function DisplayBar({
   words,
 }: {
@@ -102,11 +103,18 @@ export function DisplayBar({
     numbers: string;
     letters: string;
     key: string;
-    writtenOption: string;
     written: string;
-    beats: { label: string; name: string; off: string; auto: string; always: string };
+    beats: {
+      label: string;
+      name: string;
+      off: string;
+      auto: string;
+      always: string;
+      help: { about: string; text: string };
+    };
   };
 }) {
+  const v = useTranslations("viewer");
   const { chart, display, choose } = useDisplay();
   if (!display) return null;
   const written = keyName(chart.key);
@@ -118,7 +126,8 @@ export function DisplayBar({
         shown={keyName(display.key)}
         keys={keysInMode(chart.key.minor).map((key) => ({
           value: keyName(key),
-          label: keyName(key) === written ? words.writtenOption : keyName(key),
+          // "Key E · original" for the written key, "Key D · transposed" otherwise (T-2807).
+          label: v(keyName(key) === written ? "original" : "transposed", { key: keyName(key) }),
           key,
         }))}
         onKey={(key) => choose({ ...display, key })}
@@ -141,7 +150,7 @@ export function DisplayBar({
 }
 
 /** The chart, drawn in the view chosen. */
-export function DisplayedChart({ phone }: { phone: boolean }) {
+export function DisplayedChart({ phone, toolbar }: { phone: boolean; toolbar?: ReactNode }) {
   const { chart, display } = useDisplay();
   return (
     <ChartPreview
@@ -152,6 +161,7 @@ export function DisplayedChart({ phone }: { phone: boolean }) {
       hasForm
       beats={display?.beats ?? "auto"}
       phone={phone}
+      toolbar={toolbar}
     />
   );
 }

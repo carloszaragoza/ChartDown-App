@@ -32,7 +32,6 @@ async function newSet(page: Page, band: string, name: string, date: string) {
 async function addSong(page: Page, version: string, label: string) {
   await page.goto(`/versions/${version}`);
   await addToSet(page, label);
-  await expectStatus(page, "added at the end");
 }
 
 test("R-05.5 the temporary MD cannot edit other sets or the layer", async ({ page, request }) => {

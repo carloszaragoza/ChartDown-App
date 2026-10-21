@@ -74,7 +74,6 @@ test("R-06.4 the keyboardist's device never receives the bass notes", async ({ p
   const setAddress = new URL(page.url()).pathname;
   await page.goto(`/versions/${version}`);
   await addToSet(page, `${band} · ${set}`);
-  await expectStatus(page, "added at the end");
   await page.goto(`/versions/${version}/notes`);
   await page.getByRole("radiogroup", { name: "Bands" }).getByRole("radio", { name: band }).click();
   await expect(page.getByText(`Notes of ${band}`)).toBeVisible();

@@ -50,8 +50,13 @@ test("R-05.1 a set's name is unique in the band; songs are added, ordered and du
   for (const version of versions) {
     await page.goto(`/versions/${version}`);
     await addToSet(page, `${band} · ${sunday}`);
-    await expectStatus(page, "added at the end");
   }
+  // T-2807 Undo on the toast takes the song out again.
+  await page.goto(`/versions/${versions[0]}`);
+  await addToSet(page, `${band} · ${sunday}`);
+  await page.getByRole("button", { name: "Undo" }).click();
+  await expect(page.getByText(`Taken out of ${sunday}`)).toBeVisible();
+  await page.goto(`${setAddress}/edit`);
   await expect(songs(page)).toHaveText(
     titles.map((title, index) => new RegExp(`^${index + 1}${title}`)),
   );

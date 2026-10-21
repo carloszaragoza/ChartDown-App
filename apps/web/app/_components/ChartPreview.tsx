@@ -140,6 +140,7 @@ export function ChartPreview({
   notes,
   beats = "auto",
   phone = false,
+  toolbar,
 }: {
   chart: Chart;
   style?: ChordStyle;
@@ -156,6 +157,11 @@ export function ChartPreview({
   beats?: BeatsMode;
   /** The server's guess that this is a phone, where the song form is one strip (R-03.8). */
   phone?: boolean;
+  /**
+   * The version page's toolbar, pinned with the song form while the chart scrolls (T-2807); on
+   * a phone it stays above, so the pinned part holds only the form.
+   */
+  toolbar?: ReactNode;
 }) {
   const isPhone = usePhone(phone);
   const labels = useChartLabels();
@@ -228,6 +234,7 @@ export function ChartPreview({
       style={{ "--cd-dock-room": `${room}px` } as React.CSSProperties}
     >
       <VStack gap={6}>
+        {isPhone && toolbar}
         {hasForm && (
           // The song form stays pinned at the top while the chart scrolls, at stand mode's size,
           // so any section is one tap away (Design Handoff 2.0, 1.5).
@@ -241,6 +248,9 @@ export function ChartPreview({
               paddingBlock: "var(--spacing-2)",
             }}
           >
+            {!isPhone && toolbar && (
+              <div style={{ paddingBlockEnd: "var(--spacing-3)" }}>{toolbar}</div>
+            )}
             <Theme theme={chartdownStandTheme} mode="system">
               {/* On a phone the metronome sits on its own line, under the strip (R-03.9). */}
               {isPhone ? (

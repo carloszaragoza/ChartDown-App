@@ -51,7 +51,8 @@ export interface VersionViewProps {
   status?: "active" | "frozen" | "hidden";
   /** The sets of the bands where this person is the MD (R-05.2). */
   setChoices?: SetChoice[];
-  setFailed?: boolean;
+  /** The bands where this person is the MD, to start a new set in; null names their own. */
+  setBands?: { id: string; name: string | null }[];
   /** The last fork attempt failed. */
   forkFailed?: boolean;
   /** How the person's report went (R-07.2). */
@@ -135,7 +136,7 @@ export function VersionView({
   forkFailed = false,
   report = null,
   setChoices = [],
-  setFailed = false,
+  setBands = [],
   display,
   path,
   notice,
@@ -158,6 +159,7 @@ export function VersionView({
   const written = keyName(chart.key);
   const canFork = signedIn && !owner && visibility === "public" && reading;
   const canReport = canFork && status !== "hidden";
+  const canAddToSet = setChoices.length > 0 || setBands.length > 0;
   const a = useTranslations("audio");
   // The header's actions: the large touch size, the medium one on a phone (T-2811).
   const size = phone ? "md" : "lg";
@@ -312,7 +314,6 @@ export function VersionView({
           <LayoutContent isScrollable={false}>
             <VStack gap={5}>
               {forkFailed && <Banner status="error" title={t("forkFailed")} />}
-              {setFailed && <Banner status="error" title={s("addFailed")} />}
               {(report === "sent" || report === "already") && (
                 <Banner status="success" title={t(`report.${report}`)} />
               )}
@@ -330,47 +331,56 @@ export function VersionView({
                   }}
                 />
               )}
-              {(display || (setChoices.length > 0 && reading)) && (
-                <HStack gap={4} vAlign="end" hAlign="between" wrap="wrap">
-                  {display && path ? (
-                    <DisplayBar
-                      words={{
-                        label: v("label"),
-                        style: v("style"),
-                        numbers: v("numbers"),
-                        letters: v("letters"),
-                        key: v("key"),
-                        writtenOption: v("writtenOption", { key: written }),
-                        written: v("written", { key: written }),
-                        beats: {
-                          label: c("beatsLabel"),
-                          name: c("beatsName"),
-                          off: c("beatsOff"),
-                          auto: c("beatsAuto"),
-                          always: c("beatsAlways"),
-                        },
-                      }}
-                    />
-                  ) : (
-                    <span />
-                  )}
-                  {setChoices.length > 0 && reading && (
-                    <AddToSet
-                      versionId={id}
-                      choices={setChoices.map((choice) => ({
-                        value: choice.id,
-                        label: setChoiceLabel(choice, s("mySets")),
-                      }))}
-                      words={{
-                        label: s("addTo"),
-                        placeholder: s("chooseSet"),
-                        submit: s("addButton"),
-                      }}
-                    />
-                  )}
-                </HStack>
-              )}
-              <DisplayedChart phone={phone} />
+              <DisplayedChart
+                phone={phone}
+                toolbar={
+                  // Numbers / Letters, the key, Beat marks and Add to set, pinned with the song
+                  // form (T-2807).
+                  (display || (canAddToSet && reading)) && (
+                    <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
+                      {display && path ? (
+                        <DisplayBar
+                          words={{
+                            label: v("label"),
+                            style: v("style"),
+                            numbers: v("numbers"),
+                            letters: v("letters"),
+                            key: v("key"),
+                            written: v("written", { key: written }),
+                            beats: {
+                              label: c("beatsLabel"),
+                              name: c("beatsName"),
+                              off: c("beatsOff"),
+                              auto: c("beatsAuto"),
+                              always: c("beatsAlways"),
+                              help: { about: c("beatsAbout"), text: c("beatsHelp") },
+                            },
+                          }}
+                        />
+                      ) : (
+                        <span />
+                      )}
+                      {canAddToSet && reading && (
+                        <AddToSet
+                          versionId={id}
+                          choices={setChoices.map((choice) => ({
+                            value: choice.id,
+                            label: setChoiceLabel(choice, s("mySets")),
+                            name: choice.name,
+                          }))}
+                          newSets={setBands.map((band) => ({
+                            label:
+                              setBands.length === 1
+                                ? s("newSet")
+                                : s("newSetIn", { band: band.name ?? s("mySets") }),
+                            href: `/bands/${band.id}/sets`,
+                          }))}
+                        />
+                      )}
+                    </HStack>
+                  )
+                }
+              />
             </VStack>
           </LayoutContent>
         }

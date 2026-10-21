@@ -65,7 +65,7 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
   const setAddress = new URL(page.url()).pathname;
   await page.goto(`/versions/${id}`);
   await addToSet(page, `${band} · ${set}`);
-  await expectStatus(page, "added at the end");
+  await page.goto(`${setAddress}/edit`);
 
   // The key for this set, and the set's own lineup (R-05.3, R-05.4).
   await expect(page.getByText("This set uses the band's default instruments.")).toBeVisible();

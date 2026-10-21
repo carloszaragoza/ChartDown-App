@@ -29,9 +29,13 @@ test("R-03.2 changing the key does not change the saved version", async ({ page,
   await style.getByRole("radio", { name: "Letters" }).click();
   await expect(page).toHaveURL(/view=letters/);
   await expect(intro).toContainText("E");
+  // T-2807 the written key is "original", any other "transposed"; the header's token follows.
+  await expect(page.getByRole("combobox", { name: "Key" })).toContainText("Key G · original");
   await page.getByRole("combobox", { name: "Key" }).click();
-  await page.getByRole("option", { name: "Key A", exact: true }).click();
+  await page.getByRole("option", { name: "Key A · transposed", exact: true }).click();
   await expect(page).toHaveURL(/view=letters&key=A/);
+  await expect(page.getByRole("combobox", { name: "Key" })).toContainText("Key A · transposed");
+  await expect(page.getByText("Key A", { exact: true })).toBeVisible();
   await expect(page.getByText("(written in G)")).toBeVisible();
   await expect(intro).toContainText("F#");
 
