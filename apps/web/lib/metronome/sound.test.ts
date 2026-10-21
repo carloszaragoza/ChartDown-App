@@ -9,15 +9,15 @@ describe("T-1505 the click", () => {
   });
 
   it("R-11.7 beat 1 is accented: higher and louder than the others", () => {
-    const one = clickTone(true, 70);
-    const other = clickTone(false, 70);
+    const one = clickTone("accent", 70);
+    const other = clickTone("beat", 70);
     expect(one.frequency).toBeGreaterThan(other.frequency);
     expect(one.peak).toBeGreaterThan(other.peak);
   });
 
   it("R-11.7 the volume scales the click, and at 0 nothing plays", () => {
-    expect(clickTone(true, 50).peak).toBeCloseTo(clickTone(true, 100).peak / 2);
-    expect(clickTone(true, 0).peak).toBe(0);
+    expect(clickTone("accent", 50).peak).toBeCloseTo(clickTone("accent", 100).peak / 2);
+    expect(clickTone("accent", 0).peak).toBe(0);
   });
 });
 
@@ -33,5 +33,17 @@ describe("T-2816 the beat line", () => {
       countIn: false,
       beatLine: "steps",
     });
+  });
+});
+
+describe("T-2817 the click in 6/8 and 12/8", () => {
+  it("R-11.7 the start of each group of three sounds between beat 1 and the other eighths", () => {
+    const [one, group, other] = (["accent", "group", "beat"] as const).map((level) =>
+      clickTone(level, 70),
+    );
+    expect(group?.frequency).toBeLessThan(one?.frequency ?? 0);
+    expect(group?.frequency).toBeGreaterThan(other?.frequency ?? 0);
+    expect(group?.peak).toBeLessThan(one?.peak ?? 0);
+    expect(group?.peak).toBeGreaterThan(other?.peak ?? 0);
   });
 });

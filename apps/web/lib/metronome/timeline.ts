@@ -21,11 +21,28 @@ export interface TimelineBar {
   number: number;
   pass: number;
   meter: Meter;
-  /** Beats per minute, counting the meter's own unit; undefined when the chart has none. */
+  /**
+   * Beats per minute, counting the meter's own unit, or the dotted quarter in 6/8, 9/8 and 12/8
+   * (see `eighthsPerBeat`); undefined when the chart has none.
+   */
   tempo?: number;
   /** A fermata in the bar: playback waits there for a tap (R-11.6). */
   fermata: boolean;
   beats: TimelineBeat[];
+}
+
+/**
+ * Eighths in one beat of the tempo (R-11.5, T-2817): 3 in 6/8, 9/8 and 12/8, whose tempo counts
+ * the dotted quarter, as charts and click tracks give it; 1 in every other meter, whose tempo
+ * counts the meter's own unit. The metronome still clicks every eighth of a compound bar.
+ */
+export function eighthsPerBeat(meter: Meter): number {
+  return meter.unit === 8 && meter.beats > 3 && meter.beats % 3 === 0 ? 3 : 1;
+}
+
+/** The first eighth of each group of three in 6/8, 9/8 and 12/8, after beat 1 (R-11.7). */
+export function startsGroup(meter: Meter, beat: number): boolean {
+  return eighthsPerBeat(meter) === 3 && beat > 0 && beat % 3 === 0;
 }
 
 const isTimed = (item: BarItem) =>

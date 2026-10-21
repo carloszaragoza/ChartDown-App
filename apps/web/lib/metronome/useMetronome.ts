@@ -77,7 +77,10 @@ export function useMetronome(chart: Chart) {
       void audio.resume();
       const list = clicks(bars, { from, countIn: heard.current.countIn, ...options });
       const metronome = new Metronome(list, audioClock(audio), (click, at) => {
-        if (heard.current.click) playClick(audio, at, click.accent, heard.current.volume);
+        if (heard.current.click) {
+          const level = click.accent ? "accent" : click.group ? "group" : "beat";
+          playClick(audio, at, level, heard.current.volume);
+        }
       });
       engine.current = metronome;
       metronome.start();
