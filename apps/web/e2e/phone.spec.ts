@@ -51,29 +51,32 @@ test.describe("on an iPhone 16 in portrait", () => {
     await expectNoSidewaysScroll(page);
   });
 
-  test("R-03.12 T-2815 in dark mode the status bar's edge takes the header's color", async ({
+  test("R-03.12 T-2815 in dark mode the status bar's edge takes the color at the top of the page", async ({
     page,
   }) => {
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/catalog");
-    const header = await page
-      .getByRole("img", { name: "ChartDown" })
-      .first()
-      .evaluate((logo) => {
-        for (let at: Element | null = logo; at; at = at.parentElement) {
-          const color = getComputedStyle(at).backgroundColor;
-          if (color !== "rgba(0, 0, 0, 0)") return color;
-        }
-        return "";
-      });
-    expect(header).not.toBe("");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    // What a person sees at the top: the first solid surface there, short of the page behind.
+    const top = await page.evaluate(() => {
+      for (
+        let at = document.elementFromPoint(window.innerWidth / 2, 1);
+        at && at !== document.documentElement;
+        at = at.parentElement
+      ) {
+        const color = getComputedStyle(at).backgroundColor;
+        if (color !== "rgba(0, 0, 0, 0)") return color;
+      }
+      return getComputedStyle(document.documentElement).backgroundColor;
+    });
     await expect
       .poll(() =>
         page
           .locator('meta[name="theme-color"]')
           .evaluateAll((metas) => [...new Set(metas.map((meta) => meta.getAttribute("content")))]),
       )
-      .toEqual([header]);
+      .toEqual([top]);
+    expect(top).not.toBe("rgb(23, 33, 43)");
   });
 
   test("R-03.8 stand mode puts the chart first: one top bar, the View sheet, Next", async ({
