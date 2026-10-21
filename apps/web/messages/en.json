@@ -1456,6 +1456,7 @@
     "play": "Play the video",
     "player": "Video",
     "openYouTube": "Open on YouTube",
+    "volume": "Video volume",
     "close": "Close the video"
   },
   "audio": {
