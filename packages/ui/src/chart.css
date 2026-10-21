@@ -67,7 +67,10 @@
 /* Stand mode: half a size up on an iPad or a desktop (T-2702), between the theme's two largest;
    a phone keeps its own below. */
 .cd-chart--lg {
-  --chart-chord-size: calc((var(--font-size-4xl) + var(--font-size-5xl)) / 2);
+  /* Stand mode's Number size (R-03.12): Small and Large scale it a little either way. */
+  --chart-chord-size: calc(
+    (var(--font-size-4xl) + var(--font-size-5xl)) / 2 * var(--stand-scale, 1)
+  );
 }
 /* The next-section preview: smaller, in the secondary color. */
 .cd-chart--sm {
@@ -195,7 +198,7 @@
     --chart-bar-min-width: calc(var(--spacing-12) * 2.5);
   }
   .cd-chart--lg {
-    --chart-chord-size: var(--font-size-3xl);
+    --chart-chord-size: calc(var(--font-size-3xl) * var(--stand-scale, 1));
   }
   .cd-chart__bars {
     grid-template-columns: repeat(var(--chart-bars-phone), minmax(var(--chart-bar-min-width), 1fr));
@@ -743,4 +746,11 @@
   color: var(--color-text-blue);
   font-weight: var(--font-weight-bold);
   font-variant-numeric: tabular-nums;
+}
+/* Number size in stand mode's View (T-2805): Medium is the size above. */
+.cd-stand-stack[data-size="sm"] {
+  --stand-scale: 0.85;
+}
+.cd-stand-stack[data-size="lg"] {
+  --stand-scale: 1.15;
 }

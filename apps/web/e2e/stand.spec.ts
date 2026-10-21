@@ -66,7 +66,8 @@ test("R-03.3 every section reads without zooming on an iPad in landscape", async
   const lightBackground = await background();
   // Stage is set once, in View (T-2706).
   await page.getByRole("button", { name: "View options" }).click();
-  await page.getByRole("dialog").getByRole("link", { name: "Stage" }).click();
+  await page.getByRole("dialog").getByRole("radio", { name: "Stage" }).click();
+  await page.keyboard.press("Escape");
   await expect(page).toHaveURL(/theme=stage/);
   await expectWholeSection(page, "Chorus");
   expect(await size()).toBe(lightSize);
@@ -263,4 +264,32 @@ test.describe("R-03.12 with reduced motion", () => {
     );
     expect(offset).toBeLessThan(16);
   });
+});
+
+test("R-03.12 View's Coming up and Number size are kept on the device", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, { title: `Stack ${Date.now()}`, content: STACK });
+  await page.goto(`/versions/${id}/stand`);
+  await expectStandNow(page, "Verse");
+  await expect(page.locator(".cd-stand-card")).toHaveCount(4);
+  const chord = () =>
+    standNow(page)
+      .locator(".cd-chord")
+      .first()
+      .evaluate((element) => parseFloat(getComputedStyle(element).fontSize));
+  const medium = await chord();
+  await page.getByRole("button", { name: "View options" }).click();
+  const sheet = page.getByRole("dialog");
+  await sheet.getByRole("radio", { name: "1 section" }).click();
+  await sheet.getByRole("radio", { name: "Large" }).click();
+  await page.keyboard.press("Escape");
+  // The current section and one more.
+  await expect(page.locator(".cd-stand-card")).toHaveCount(2);
+  expect(await chord()).toBeGreaterThan(medium);
+  await page.reload();
+  await expectStandNow(page, "Verse");
+  await expect(page.locator(".cd-stand-card")).toHaveCount(2);
+  expect(await chord()).toBeGreaterThan(medium);
 });

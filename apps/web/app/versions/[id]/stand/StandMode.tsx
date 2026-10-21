@@ -45,8 +45,14 @@ import { SongForm } from "../../../_components/SongForm";
 import { BeatsControl } from "../../../_components/BeatsControl";
 import { barIn, usePlaybackBar } from "../../../_components/usePlaybackBar";
 import { copyAt } from "../../../../lib/chart/copies";
-import { glide, nearestCard, stackTarget } from "../../../../lib/stand/motion";
+import { glide, nearestCard, stackTarget, type StandMotion } from "../../../../lib/stand/motion";
 import { barProgress } from "../../../../lib/stand/progress";
+import {
+  lastShown,
+  standPreferences,
+  type ComingUp,
+  type NumberSize,
+} from "../../../../lib/stand/preferences";
 import { useChartLabels } from "../../../_components/chartLabels";
 import type { Display } from "../display";
 import { inSidewaysScroll, swipeTurn } from "./swipe";
@@ -205,6 +211,17 @@ function StandModeView({
     () => false,
   );
   const root = useRef<HTMLDivElement>(null);
+  const preferences = useSyncExternalStore(
+    standPreferences.subscribe,
+    standPreferences.get,
+    standPreferences.server,
+  );
+  // Stand mode asks for full screen when it opens, where the browser allows it (R-03.12): most
+  // allow it only right after a tap, such as the one that opened it.
+  useEffect(() => {
+    if (!document.fullscreenElement && root.current?.requestFullscreen)
+      root.current.requestFullscreen().catch(() => {});
+  }, []);
   const atEdge = useRef({ first: true, last: false });
   const display: Display = { style, key: homeKey, beats };
   const formatter = chordFormatter(chart, { style, key: homeKey });
@@ -380,6 +397,8 @@ function StandModeView({
       : t("times", { count });
   };
   const again = queued !== null && queued === playingSection;
+  // Coming up: how many sections follow the current one (T-2805).
+  const shownTo = lastShown(current, last, preferences.comingUp);
   // While the metronome plays, which bar of the current section sounds (T-2804).
   const progress =
     playingAt !== undefined && playingSection === current
@@ -424,49 +443,93 @@ function StandModeView({
         onChange={chooseView}
       />
     ));
-  // The view's controls, in the View sheet on a phone and split across the top on an iPad
-  // (T-2706): Letters and Beats under the metronome, Stage and Full screen beside it.
-  const lettersButton = (size: "md" | "lg") => (
-    <Button
-      label={style === "letters" ? v("numbers") : v("letters")}
-      href={styleHref}
-      as={Link}
-      variant="secondary"
-      size={size}
-    />
+  // View (R-03.12, T-2805): what is set once, each choice with its name above it. Numbers or
+  // letters, Beat marks and the screen live in the address; Coming up, the motion and the number
+  // size are kept on the device.
+  const choice = (
+    name: string,
+    value: string,
+    options: readonly (readonly [string, string])[],
+    onChange: (value: string) => void,
+  ) => (
+    <VStack gap={1}>
+      <Text type="label">{name}</Text>
+      <SegmentedControl label={name} value={value} onChange={onChange}>
+        {options.map(([option, label]) => (
+          <SegmentedControlItem key={option} value={option} label={label} />
+        ))}
+      </SegmentedControl>
+    </VStack>
   );
-  const beatsControl = (
-    <BeatsControl
-      value={beats}
-      hrefs={{
-        off: href(current, { display: { ...display, beats: "off" } }),
-        auto: href(current, { display: { ...display, beats: "auto" } }),
-        always: href(current, { display: { ...display, beats: "always" } }),
-      }}
-      onChoose={(mode) => changeView({ beats: mode })}
-      words={{
-        label: c("beatsLabel"),
-        name: c("beatsName"),
-        off: c("beatsOff"),
-        auto: c("beatsAuto"),
-        always: c("beatsAlways"),
-      }}
-    />
-  );
-  const screenButtons = (size: "md" | "lg") => (
-    <>
-      <Button
-        label={theme === "stage" ? t("light") : t("stage")}
-        href={themeHref}
-        as={Link}
-        variant="secondary"
-        size={size}
+  const tools = (
+    <VStack gap={4}>
+      {choice(
+        t("chartChoice"),
+        style,
+        [
+          ["numbers", v("numbers")],
+          ["letters", v("letters")],
+        ],
+        (chosen) => changeView({ style: chosen === "letters" ? "letters" : "numbers" }),
+      )}
+      <BeatsControl
+        value={beats}
+        hrefs={{
+          off: href(current, { display: { ...display, beats: "off" } }),
+          auto: href(current, { display: { ...display, beats: "auto" } }),
+          always: href(current, { display: { ...display, beats: "always" } }),
+        }}
+        onChoose={(mode) => changeView({ beats: mode })}
+        words={{
+          label: c("beatsLabel"),
+          name: c("beatsName"),
+          off: c("beatsOff"),
+          auto: c("beatsAuto"),
+          always: c("beatsAlways"),
+        }}
       />
+      {choice(
+        t("comingUp"),
+        preferences.comingUp,
+        [
+          ["1", t("comingUpOne")],
+          ["2", t("comingUpTwo")],
+          ["fill", t("comingUpFill")],
+        ],
+        (chosen) => standPreferences.set({ comingUp: chosen as ComingUp }),
+      )}
+      {choice(
+        t("motion"),
+        preferences.motion,
+        [
+          ["calm", t("motionCalm")],
+          ["bounce", t("motionBounce")],
+        ],
+        (chosen) => standPreferences.set({ motion: chosen as StandMotion }),
+      )}
+      {choice(
+        t("screen"),
+        theme,
+        [
+          ["light", t("light")],
+          ["stage", t("stage")],
+        ],
+        (chosen) => changeView({ theme: chosen === "stage" ? "stage" : "light" }),
+      )}
+      {choice(
+        t("numberSize"),
+        preferences.size,
+        [
+          ["sm", t("sizeSmall")],
+          ["md", t("sizeMedium")],
+          ["lg", t("sizeLarge")],
+        ],
+        (chosen) => standPreferences.set({ size: chosen as NumberSize }),
+      )}
       {canFullscreen && (
         <Button
           label={t("fullscreen")}
           variant="secondary"
-          size={size}
           onClick={() =>
             document.fullscreenElement
               ? void document.exitFullscreen()
@@ -474,16 +537,7 @@ function StandModeView({
           }
         />
       )}
-    </>
-  );
-  const tools = (
-    <nav aria-label={t("tools")}>
-      <HStack gap={2} wrap="wrap">
-        {lettersButton("md")}
-        {beatsControl}
-        {screenButtons("md")}
-      </HStack>
-    </nav>
+    </VStack>
   );
   const songForm = (
     <SongForm
@@ -532,10 +586,10 @@ function StandModeView({
   const settledOn = useRef<number | null>(null);
   const hasGlided = useRef(false);
   const settleTimer = useRef(0);
-  const live = useRef({ current, isPlaying });
+  const live = useRef({ current, isPlaying, motion: preferences.motion });
   useEffect(() => {
-    live.current = { current, isPlaying };
-  }, [current, isPlaying]);
+    live.current = { current, isPlaying, motion: preferences.motion };
+  }, [current, isPlaying, preferences.motion]);
   useEffect(() => {
     const box = stack.current;
     const card = box?.querySelector<HTMLElement>(`[data-card="${current}"]`);
@@ -557,7 +611,7 @@ function StandModeView({
       margin: parseFloat(getComputedStyle(card).scrollMarginTop) || 0,
     });
     stopGlide.current = glide(box, to, {
-      motion: "calm",
+      motion: live.current.motion,
       instant,
       onDone: () => {
         isGliding.current = false;
@@ -741,12 +795,13 @@ function StandModeView({
             <main
               ref={stack}
               className="cd-stand-stack"
+              data-size={preferences.size}
               onScroll={onStackScroll}
               onTouchStart={onTouchStart}
               onTouchEnd={onTouchEnd}
             >
               <ol className="cd-stand-stack__list">
-                {chart.sections.map((section, index) => (
+                {chart.sections.slice(0, shownTo + 1).map((section, index) => (
                   <li
                     key={index}
                     className="cd-stand-card"

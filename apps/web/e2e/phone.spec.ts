@@ -66,12 +66,12 @@ test.describe("on an iPhone 16 in portrait", () => {
     expect(top).toBeLessThan(PORTRAIT.height / 2);
     await expect(page.getByText("Section 1 of 7")).toBeVisible();
     // The display choices wait in the View sheet.
-    await expect(page.getByRole("link", { name: "Letters" })).toBeHidden();
+    await expect(page.getByRole("radio", { name: "Letters" })).toBeHidden();
     await page.getByRole("button", { name: "View options" }).click();
     const sheet = page.getByRole("dialog", { name: "View options" });
-    await expect(sheet.getByRole("link", { name: "Letters" })).toBeVisible();
-    await expect(sheet.getByRole("link", { name: "Stage" })).toBeVisible();
-    await sheet.getByRole("link", { name: "Letters" }).click();
+    await expect(sheet.getByRole("radio", { name: "Letters" })).toBeVisible();
+    await expect(sheet.getByRole("radio", { name: "Stage" })).toBeVisible();
+    await sheet.getByRole("radio", { name: "Letters" }).click();
     await expect(page).toHaveURL(/view=letters/);
     await page.keyboard.press("Escape");
 
