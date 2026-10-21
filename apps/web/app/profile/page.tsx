@@ -35,7 +35,10 @@ const GROUPS = [
 ] as const;
 // The notices, in the design's groups (R-09.5).
 const NOTICE_GROUPS = [
-  { key: "sets", types: ["lineup_added", "lineup_removed", "temp_md"] },
+  {
+    key: "sets",
+    types: ["lineup_added", "lineup_removed", "temp_md", "live_started", "live_ended"],
+  },
   { key: "songs", types: ["key_changed", "order_changed", "note_added"] },
   { key: "md", types: ["new_revision"] },
   { key: "versions", types: ["version_hidden"] },

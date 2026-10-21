@@ -8,6 +8,7 @@ import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { NumberInput } from "@astryxdesign/core/NumberInput";
+import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Slider } from "@astryxdesign/core/Slider";
 import { StackItem } from "@astryxdesign/core/Stack";
 import { Switch } from "@astryxdesign/core/Switch";
@@ -34,6 +35,7 @@ import {
   TEMPO_MIN,
 } from "../../lib/metronome/practiceTempo";
 import { MetronomeIcon } from "./MetronomeIcon";
+import type { BeatLine } from "../../lib/metronome/sound";
 import { useMetronome } from "../../lib/metronome/useMetronome";
 
 /** Where the metronome is in one section, as ChartSection draws it (R-11.3). */
@@ -250,6 +252,17 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
         value={sound.countIn}
         onChange={(countIn) => setSound({ ...sound, countIn })}
       />
+      <VStack gap={1}>
+        <Text type="label">{t("beatLine")}</Text>
+        <SegmentedControl
+          label={t("beatLine")}
+          value={sound.beatLine}
+          onChange={(beatLine) => setSound({ ...sound, beatLine: beatLine as BeatLine })}
+        >
+          <SegmentedControlItem value="steps" label={t("beatLineSteps")} />
+          <SegmentedControlItem value="smooth" label={t("beatLineSmooth")} />
+        </SegmentedControl>
+      </VStack>
     </VStack>
   );
   const soundButton = (
@@ -356,6 +369,8 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
     isCountingIn: metronome.isPlaying && click?.bar === -1,
     queued: metronome.queued,
     queue: metronome.queue,
+    /** The practice speed as a share of the chart's tempo (1 is the chart's tempo). */
+    speed: speed / 100,
     isPlaying: metronome.isPlaying,
     isWaiting: metronome.isWaiting,
     toggle,

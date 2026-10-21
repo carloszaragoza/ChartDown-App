@@ -115,6 +115,30 @@ test.describe("on an iPad, during a performance", () => {
     expect(await page.evaluate(() => (window as unknown as { asked: number }).asked)).toBe(0);
   });
 
+  test("R-03.12 T-2815 in Light on a dark-mode device the top edge takes stand mode's background", async ({
+    page,
+    request,
+  }) => {
+    const id = await createVersion(request, {
+      title: `Clear Sky ${Date.now()}`,
+      content: "## Intro\n1 | 4\n",
+    });
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto(`/versions/${id}/stand`);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Clear Sky");
+    const ground = await page
+      .locator("[data-stand]")
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+    await expect
+      .poll(() => page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor))
+      .toBe(ground);
+    const colors = await page
+      .locator('meta[name="theme-color"]')
+      .evaluateAll((metas) => metas.map((meta) => meta.getAttribute("content")));
+    expect(colors.length).toBeGreaterThan(0);
+    for (const color of colors) expect(color).toBe(ground);
+  });
+
   test("T-1302 T-2813 the song form and Previous / Next are at least 50 px, with room between sections", async ({
     page,
     request,

@@ -12,6 +12,7 @@ import { HomeView } from "./_home/HomeView";
 import type { Metadata } from "next";
 import { Landing } from "./_landing/Landing";
 import { Invitations, type Invitation } from "./_components/Invitations";
+import { LiveNow } from "./_components/live/LiveNow";
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
@@ -67,6 +68,7 @@ export default async function HomePage({ searchParams }: { searchParams: Search 
         <VStack gap={3}>
           {account === "deleted" && <Banner status="success" title={a("accountDeleted")} />}
           {password === "updated" && <Banner status="success" title={a("passwordUpdated")} />}
+          <LiveNow supabase={supabase} me={data.user.id} />
           <Invitations invitations={invitations} />
         </VStack>
       }

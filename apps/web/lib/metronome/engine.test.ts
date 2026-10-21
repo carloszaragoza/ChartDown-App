@@ -182,3 +182,31 @@ describe("T-1504 a fermata waits for a tap", () => {
     expect((times[3] ?? 0) - (times[0] ?? 0)).toBeCloseTo(3, 1);
   });
 });
+
+describe("T-2817 the metronome in 6/8 and 12/8", () => {
+  it("R-11.5 the tempo counts the dotted quarter: each of the six eighths lasts a third of it", () => {
+    const list = clicks(timeline(parse("---\ntempo: 60\nmeter: 6/8\n---\n## A\n1\n")));
+    expect(list.map((click) => click.count)).toEqual([1, 2, 3, 4, 5, 6]);
+    list.forEach((click, at) => expect(click.time).toBeCloseTo(at / 3));
+    // A bar of 6/8 at 60 is two beats: two seconds.
+    expect((list.at(-1)?.time ?? 0) + (list.at(-1)?.duration ?? 0)).toBeCloseTo(2);
+  });
+
+  it("R-11.5 12/8 at 68 is four beats of 68 a bar, and 3/4 and 4/4 count quarters as before", () => {
+    const twelve = clicks(timeline(parse("---\ntempo: 68\nmeter: 12/8\n---\n## A\n1\n")));
+    expect(twelve).toHaveLength(12);
+    expect(twelve[1]?.time).toBeCloseTo(60 / 68 / 3);
+    const three = clicks(timeline(parse("---\ntempo: 60\nmeter: 3/4\n---\n## A\n1\n")));
+    expect(three.map((click) => click.time)).toEqual([0, 1, 2]);
+  });
+
+  it("R-11.7 R-11.8 beat 1 is accented and each group of three starts a little stronger, count-in too", () => {
+    const list = clicks(timeline(parse("---\ntempo: 60\nmeter: 6/8\n---\n## A\n1\n")), {
+      countIn: true,
+    });
+    const marks = list.map((click) => (click.accent ? "1" : click.group ? "g" : "."));
+    expect(marks.join("")).toBe("1..g..1..g..");
+    const four = clicks(timeline(parse("---\ntempo: 60\n---\n## A\n1\n")));
+    expect(four.some((click) => click.group)).toBe(false);
+  });
+});

@@ -1,5 +1,5 @@
 import type { BeatStrength } from "@chartdown/ui";
-import type { TimelineBar } from "./timeline";
+import { eighthsPerBeat, startsGroup, type TimelineBar } from "./timeline";
 
 /** One click of the metronome: when it sounds, from the start, and where it is in the song. */
 export interface Click {
@@ -16,6 +16,8 @@ export interface Click {
   strength: BeatStrength;
   /** Beat 1 is accented (R-11.7, R-11.8). */
   accent: boolean;
+  /** The first eighth of a group of three in 6/8, 9/8 or 12/8, a little stronger (R-11.7). */
+  group?: true;
   /** Seconds until the next beat, at this bar's tempo. */
   duration: number;
   /** The last beat of a bar with a fermata: playback waits after it for a tap (R-11.6). */
@@ -45,7 +47,8 @@ export function clicks(bars: readonly TimelineBar[], options: ClickOptions = {})
   const length = (bar: TimelineBar) => {
     const bpm = bar.tempo ?? asked;
     if (!bpm || bpm <= 0) throw new Error("The chart has no tempo: ask the person for one");
-    return 60 / (bpm * speed);
+    // One click per counted beat: an eighth in 6/8, 9/8 and 12/8, whose tempo is the dotted quarter.
+    return 60 / (bpm * speed * eighthsPerBeat(bar.meter));
   };
   const out: Click[] = [];
   let time = 0;
@@ -60,6 +63,7 @@ export function clicks(bars: readonly TimelineBar[], options: ClickOptions = {})
         of: start.meter.beats,
         strength: beat === 0 ? "strong" : "weak",
         accent: beat === 0,
+        ...(startsGroup(start.meter, beat) ? { group: true as const } : {}),
         duration: length(start),
       });
       time += length(start);
@@ -77,6 +81,7 @@ export function clicks(bars: readonly TimelineBar[], options: ClickOptions = {})
         of: bar.meter.beats,
         strength: counted.strength,
         accent: counted.count === 1,
+        ...(startsGroup(bar.meter, counted.count - 1) ? { group: true as const } : {}),
         duration: beat,
         ...(bar.fermata && at === bar.beats.length - 1 ? { waits: true as const } : {}),
       });

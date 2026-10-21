@@ -133,8 +133,9 @@
 /* The bar the metronome is on (R-11.3): no fill and no color, only a thin, quiet line along its
    foot that grows beat by beat, so it guides the eye without pulling it (owner's review, October
    14, 2026). Its ink keeps at least 3:1 against the card in both themes (5.4:1 light, 6.4:1
-   stage). The line passes under the chord that sounds (R-11.5) and eases from beat to beat; with
-   reduced motion it moves in steps, never animated (R-11.13). */
+   stage). The line passes under the chord that sounds (R-11.5) and moves in steps, a beat at a
+   time, unless the metronome's Beat line is Smooth (T-2816, owner's review, October 21, 2026);
+   with reduced motion it always moves in steps (R-11.13). */
 .cd-chart__bar--now {
   position: relative;
 }
@@ -146,11 +147,14 @@
   inline-size: calc(100% * var(--chart-progress, 0));
   block-size: calc(var(--border-width) * 2);
   background: var(--color-icon-secondary);
+}
+/* Smooth: the line eases from beat to beat. Beat 1 lands on a new bar, whose line has nothing to
+   ease from: it grows in from nothing, so every beat moves the same way (owner's review, October
+   15, 2026). */
+[data-beat-line="smooth"] .cd-chart__bar--now::after {
   transition:
     inline-size var(--chart-beat-ease, 180ms) ease-out,
     background-color var(--chart-beat-ease, 180ms) ease-out;
-  /* Beat 1 lands on a new bar, whose line has nothing to ease from: it grows in from nothing, so
-     every beat moves the same way (owner's review, October 15, 2026). */
   animation: cd-chart-beat-in var(--chart-beat-ease, 180ms) ease-out;
 }
 @keyframes cd-chart-beat-in {
@@ -175,7 +179,7 @@
   border-block-end: calc(var(--border-width) * 2) dotted var(--color-icon-secondary);
 }
 @media (prefers-reduced-motion: reduce) {
-  .cd-chart__bar--now::after {
+  [data-beat-line="smooth"] .cd-chart__bar--now::after {
     transition: none;
     animation: none;
   }

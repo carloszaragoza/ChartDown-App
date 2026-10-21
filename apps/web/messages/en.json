@@ -712,6 +712,9 @@
     "volume": "Volume",
     "countIn": "Count-in",
     "countInHint": "One bar of clicks before the first bar.",
+    "beatLine": "Beat line",
+    "beatLineSteps": "Steps",
+    "beatLineSmooth": "Smooth",
     "speed": "Practice speed",
     "speedValue": "{speed}% · {bpm} bpm",
     "tapTempo": "Tap tempo",
@@ -1011,7 +1014,9 @@
       "order_changed": "The order of the songs in {set} changed.",
       "note_added": "New note for {for} in {title}, {place}: “{text}”",
       "new_revision": "{title} has a new revision from its author, {number}; {set} still plays revision {pinned}.",
-      "version_hidden": "The administrators hid {title} from the community {reason}. You still see it."
+      "version_hidden": "The administrators hid {title} from the community {reason}. You still see it.",
+      "live_started": "{leader} started live mode for {set}. Join to follow along.",
+      "live_ended": "Live mode for {set} ended."
     },
     "kinds": {
       "lineup_added": "When I am added to a set",
@@ -1021,7 +1026,9 @@
       "order_changed": "When the order of one of my sets changes",
       "note_added": "When there is a new note for my instruments",
       "new_revision": "When a song in my band's sets has a new revision (music directors)",
-      "version_hidden": "When the administrators hide one of my versions"
+      "version_hidden": "When the administrators hide one of my versions",
+      "live_started": "When live mode starts for one of my sets",
+      "live_ended": "When live mode ends"
     },
     "reasons": {
       "lyrics": "because it has full song lyrics",
@@ -1481,5 +1488,35 @@
       "unreadable": "This file can't be read as audio.",
       "failed": "It could not be uploaded. Try again."
     }
+  },
+  "live": {
+    "title": "Live mode",
+    "start": "Go live",
+    "startHint": "The band follows you from song to song: whoever is in the lineup joins from Home, Notices or this set.",
+    "already": "Someone else is leading this set live.",
+    "failed": "Live mode could not start. Try again.",
+    "live": "Live",
+    "liveNow": "Live now",
+    "isLeading": "{name} is leading this set.",
+    "join": "Join",
+    "following": "Following {name}",
+    "leading": "{count, plural, =0 {You lead; nobody has joined yet} one {You lead # musician} other {You lead # musicians}}",
+    "next": "Next: {section}",
+    "options": "Live options",
+    "cue": "Next section",
+    "cueHint": "The band sees it coming before you move. While the metronome plays, the section you queue is the next one.",
+    "cued": "{section}, next",
+    "connected": "Connected ({count})",
+    "nobodyYet": "Nobody has joined yet.",
+    "handOver": "Hand control to {name}",
+    "handOverShort": "Hand over",
+    "end": "End live mode",
+    "ended": "Live mode ended. You stay where you were.",
+    "dismiss": "OK",
+    "paused": "Offline – following paused",
+    "reconnecting": "Reconnecting…",
+    "backToLive": "Back to live",
+    "banner": "Live now: {set}",
+    "bannerLeader": "{name} is leading."
   }
 }

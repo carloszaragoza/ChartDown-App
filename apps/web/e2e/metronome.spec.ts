@@ -293,6 +293,30 @@ test("R-11.10 the space bar plays and stops; a pedal queues the next section whi
   await expect(now).toHaveCount(0);
 });
 
+test("R-11.3 T-2816 the beat line moves in steps, or smoothly when Metronome options say Smooth", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, { title: "Step By Step", content: FAST });
+  await page.goto(`/versions/${id}/stand`);
+  const line = () =>
+    page
+      .getByRole("main")
+      .locator('[aria-current="step"]')
+      .evaluate((bar) => Number.parseFloat(getComputedStyle(bar, "::after").transitionDuration));
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(page.getByRole("main").locator('[aria-current="step"]')).toHaveCount(1);
+  expect(await line()).toBe(0);
+  await page.getByRole("button", { name: "Stop" }).click();
+  await page.getByRole("button", { name: "Metronome options" }).click();
+  await page.getByRole("dialog").getByText("Smooth", { exact: true }).click();
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(page.getByRole("main").locator('[aria-current="step"]')).toHaveCount(1);
+  expect(await line()).toBeGreaterThan(0);
+  await page.getByRole("button", { name: "Stop" }).click();
+});
+
 test.describe("with reduced motion", () => {
   test.use({ reducedMotion: "reduce" });
 

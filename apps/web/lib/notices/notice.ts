@@ -17,6 +17,8 @@ export const NOTICE_TYPES = [
   "note_added",
   "new_revision",
   "version_hidden",
+  "live_started",
+  "live_ended",
 ] as const;
 export type NoticeType = (typeof NOTICE_TYPES)[number];
 
@@ -66,6 +68,8 @@ export function noticeHref(notice: Pick<Notice, "type" | "detail">): string {
   if (notice.type === "note_added" || notice.type === "version_hidden")
     return `/versions/${text(detail.version_id)}`;
   const set = text(detail.set_id);
+  // Live now opens the session, on the leader's song (R-12.2).
+  if (notice.type === "live_started" && set) return `/sets/${set}/live`;
   return set ? `/sets/${set}` : "/notices";
 }
 
@@ -138,6 +142,10 @@ export function noticeMessage(
         key: "version_hidden",
         values: { title, reason: words.reason(text(detail.reason)) },
       };
+    case "live_started":
+      return { key: "live_started", values: { set, leader: text(detail.leader) } };
+    case "live_ended":
+      return { key: "live_ended", values: { set } };
     default:
       return null;
   }
