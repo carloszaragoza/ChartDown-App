@@ -148,6 +148,8 @@ export function VersionMenu({
       label={label}
       size={size}
       alignment="end"
+      // A bottom sheet on a phone: a popover at the row's start edge had no room (T-2812).
+      presentation="adaptive"
       items={items.map((item) =>
         "type" in item
           ? item

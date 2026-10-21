@@ -15,7 +15,7 @@ import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../lib/auth/enabled";
 import { createClient, readUser } from "../../lib/supabase/server";
 import { SOURCE_TYPES, type SourceType } from "../../lib/versions/validate";
-import { AddIcon, ForkIcon, PublicIcon } from "../_components/ActionIcons";
+import { AddIcon, ForkIcon } from "../_components/ActionIcons";
 import { forkVersion } from "../versions/[id]/actions";
 import { CatalogSearch } from "./CatalogSearch";
 import { ActionRow } from "../_components/ActionRow";
@@ -97,7 +97,11 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
       const chart = parse(revision.content as string);
       return [
         revision.id as string,
-        { key: keyName(chart.key), meter: chart.header.meter ?? "4/4" },
+        {
+          key: keyName(chart.key),
+          meter: chart.header.meter ?? "4/4",
+          tempo: chart.header.tempo ?? null,
+        },
       ];
     }),
   );
@@ -105,6 +109,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
   const t = await getTranslations("catalog");
   const sources = await getTranslations("version.source");
   const v = await getTranslations("version");
+  const c = await getTranslations("chart");
   const href = (changes: { page?: number; song?: string }) => {
     const params = new URLSearchParams();
     if (query) params.set("q", query);
@@ -208,36 +213,34 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
                                 key={version.id}
                                 phone={phone}
                                 isLink
-                                startContent={
-                                  <Token
-                                    label={[sources(version.source_type), version.source_year]
-                                      .filter(Boolean)
-                                      .join(" ")}
-                                    size="sm"
-                                  />
-                                }
+                                // What a musician plays first, then where it comes from and
+                                // who arranged it (owner's review, October 21, 2026; T-2812).
                                 label={
-                                  version.source_album
-                                    ? v("album", { album: version.source_album })
-                                    : version.source_youtube_url
-                                      ? v("youtube")
-                                      : sources(version.source_type)
+                                  chart
+                                    ? [
+                                        `${t("key")} ${chart.key}`,
+                                        chart.meter,
+                                        chart.tempo && `${c("tempo")} ${chart.tempo}`,
+                                      ]
+                                        .filter(Boolean)
+                                        .join(" · ")
+                                    : sources(version.source_type)
                                 }
                                 description={[
+                                  chart && sources(version.source_type),
+                                  version.source_album &&
+                                    v("album", { album: version.source_album }),
+                                  version.source_year && String(version.source_year),
                                   t("by", { author: version.author_name }),
-                                  chart && `${t("key")} ${chart.key}`,
-                                  chart?.meter,
                                 ]
                                   .filter(Boolean)
                                   .join(" · ")}
                                 actions={
                                   <>
-                                    <HStack gap={1} vAlign="center">
-                                      <PublicIcon />
-                                      <Text type="supporting">
-                                        {version.status === "frozen" ? v("frozen") : t("public")}
-                                      </Text>
-                                    </HStack>
+                                    {/* The catalog is all public: only a frozen one says so. */}
+                                    {version.status === "frozen" && (
+                                      <Token label={v("frozen")} size="sm" />
+                                    )}
                                     <Button
                                       label={t("openName", names)}
                                       href={`/versions/${version.id}`}
