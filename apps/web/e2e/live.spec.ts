@@ -61,6 +61,7 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 the band follows 
   await page.getByRole("link", { name: band, exact: true }).click();
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
   await createSet(page, { name: set, type: "Service" });
+  await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   const setAddress = new URL(page.url()).pathname;
   for (const id of [first, second]) {
     await page.goto(`/versions/${id}`);
