@@ -86,7 +86,7 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 the band follows 
   await expectSignedIn(luisPage, "Luis Live");
   await luisPage.goto("/");
   await expect(luisPage.getByText(`Live now: ${set}`)).toBeVisible(FOLLOW);
-  await luisPage.getByRole("link", { name: "Join" }).click();
+  await luisPage.getByRole("link", { name: "Join", exact: true }).click();
   await expect(luisPage).toHaveURL(new RegExp(`${setAddress}/songs/1/stand`));
   await expect(luisPage.getByText("Following Ana Live")).toBeVisible(FOLLOW);
   await expectStandNow(luisPage, "Verse");
