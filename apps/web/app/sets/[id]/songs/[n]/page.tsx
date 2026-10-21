@@ -21,6 +21,7 @@ import { StandIcon } from "../../../../_components/ActionIcons";
 import { BeatsControl } from "../../../../_components/BeatsControl";
 import { AudioButton } from "../../../../_components/AudioDock";
 import { ChartPreview } from "../../../../_components/ChartPreview";
+import { ViewOptions } from "../../../../_components/ViewOptions";
 import { saveAudioStart } from "../../../../versions/[id]/audio";
 import { setRecording } from "../../../../../lib/sets/recording";
 import { LinkChoice } from "../../../../_components/LinkChoice";
@@ -210,45 +211,6 @@ export default async function SetSongPage({
                 }
               />
             )}
-            <HStack gap={4} vAlign="center" wrap="wrap">
-              <LinkChoice
-                phone={phone}
-                label={v("style")}
-                current={style}
-                options={(["numbers", "letters"] as const).map((option) => ({
-                  value: option,
-                  label: v(option),
-                  href: withPreview(viewing(beats, option === "letters")),
-                }))}
-              />
-              <BeatsControl
-                value={beats}
-                hrefs={{
-                  off: withPreview(viewing("off")),
-                  auto: withPreview(viewing("auto")),
-                  always: withPreview(viewing("always")),
-                }}
-                words={{
-                  label: c("beatsLabel"),
-                  name: c("beatsName"),
-                  off: c("beatsOff"),
-                  auto: c("beatsAuto"),
-                  always: c("beatsAlways"),
-                }}
-              />
-              {leads && (
-                <LinkChoice
-                  phone={phone}
-                  label={s("viewAs")}
-                  current={as ?? "all"}
-                  options={[null, ...viewAsOptions(song, song.instruments)].map((option) => ({
-                    value: option ?? "all",
-                    label: option ? nameOf(option) : s("allNotes"),
-                    href: `${path}${query({ view: style === "letters" ? "letters" : "", beats: beats === "auto" ? "" : beats, as: option ?? "" })}`,
-                  }))}
-                />
-              )}
-            </HStack>
             {shown.unplaced.length > 0 && (
               <section aria-labelledby="unplaced">
                 <VStack gap={2}>
@@ -271,6 +233,50 @@ export default async function SetSongPage({
               isFramed
               hasForm
               beats={beats}
+              // Numbers / Letters, Beat marks and View as in one sheet beside the metronome, as on
+              // the version page and in stand mode (T-2807).
+              viewOptions={
+                <ViewOptions>
+                  <LinkChoice
+                    phone={phone}
+                    label={v("style")}
+                    current={style}
+                    options={(["numbers", "letters"] as const).map((option) => ({
+                      value: option,
+                      label: v(option),
+                      href: withPreview(viewing(beats, option === "letters")),
+                    }))}
+                  />
+                  <BeatsControl
+                    value={beats}
+                    hrefs={{
+                      off: withPreview(viewing("off")),
+                      auto: withPreview(viewing("auto")),
+                      always: withPreview(viewing("always")),
+                    }}
+                    words={{
+                      label: c("beatsLabel"),
+                      name: c("beatsName"),
+                      off: c("beatsOff"),
+                      auto: c("beatsAuto"),
+                      always: c("beatsAlways"),
+                      help: { about: c("beatsAbout"), text: c("beatsHelp") },
+                    }}
+                  />
+                  {leads && (
+                    <LinkChoice
+                      phone={phone}
+                      label={s("viewAs")}
+                      current={as ?? "all"}
+                      options={[null, ...viewAsOptions(song, song.instruments)].map((option) => ({
+                        value: option ?? "all",
+                        label: option ? nameOf(option) : s("allNotes"),
+                        href: `${path}${query({ view: style === "letters" ? "letters" : "", beats: beats === "auto" ? "" : beats, as: option ?? "" })}`,
+                      }))}
+                    />
+                  )}
+                </ViewOptions>
+              }
               notes={chart.sections.map((_, index) =>
                 (shown.sections[index] ?? []).map((note) => ({
                   md: note.md,

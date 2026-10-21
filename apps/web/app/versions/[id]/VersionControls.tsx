@@ -10,6 +10,7 @@ import { MoreMenu } from "@astryxdesign/core/MoreMenu";
 import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Selector } from "@astryxdesign/core/Selector";
+import { Text } from "@astryxdesign/core/Text";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { useToast } from "@astryxdesign/core/Toast";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -43,19 +44,22 @@ export function DisplayControls({
   words: { label: string; style: string; numbers: string; letters: string; key: string };
 }) {
   return (
-    <HStack gap={3} vAlign="center" wrap="wrap" role="group" aria-label={words.label}>
-      <SegmentedControl
-        label={words.style}
-        value={style}
-        onChange={(value) => onStyle(value === "letters" ? "letters" : "numbers")}
-      >
-        <SegmentedControlItem value="numbers" label={words.numbers} />
-        <SegmentedControlItem value="letters" label={words.letters} />
-      </SegmentedControl>
-      {/* The key says what it is in its own text ("Key E · original"), on the same line. */}
+    <VStack gap={4} role="group" aria-label={words.label}>
+      {/* Each choice with its name above it, as in stand mode's View (T-2807). */}
+      <VStack gap={1}>
+        <Text type="label">{words.style}</Text>
+        <SegmentedControl
+          label={words.style}
+          value={style}
+          onChange={(value) => onStyle(value === "letters" ? "letters" : "numbers")}
+        >
+          <SegmentedControlItem value="numbers" label={words.numbers} />
+          <SegmentedControlItem value="letters" label={words.letters} />
+        </SegmentedControl>
+      </VStack>
+      {/* The key says what it is in its own text ("Key E · original"). */}
       <Selector
         label={words.key}
-        isLabelHidden
         options={keys.map(({ value, label }) => ({ value, label }))}
         value={shown}
         onChange={(value) => {
@@ -63,7 +67,7 @@ export function DisplayControls({
           if (key) onKey(key.key);
         }}
       />
-    </HStack>
+    </VStack>
   );
 }
 
@@ -75,11 +79,13 @@ export function AddToSet({
   versionId,
   choices,
   newSets,
+  size = "lg",
 }: {
   versionId: string;
   choices: { value: string; label: string; name: string }[];
   /** Where each of the MD's bands starts a new set. */
   newSets: { label: string; href: string }[];
+  size?: "md" | "lg";
 }) {
   const t = useTranslations("sets");
   const router = useRouter();
@@ -113,7 +119,7 @@ export function AddToSet({
   };
   return (
     <DropdownMenu
-      button={{ label: t("addTo"), icon: <Icon icon={PlusIcon} /> }}
+      button={{ label: t("addTo"), icon: <Icon icon={PlusIcon} />, size }}
       alignment="end"
       presentation="adaptive"
       items={[

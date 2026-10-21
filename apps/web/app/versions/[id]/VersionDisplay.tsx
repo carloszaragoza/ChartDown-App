@@ -2,6 +2,7 @@
 
 import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
+import { VStack } from "@astryxdesign/core/VStack";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { keyName, type Chart } from "chartdown";
@@ -93,7 +94,7 @@ export function StandLink({
   );
 }
 
-/** Numbers or letters, the key, Beat marks, and the way back to the written key. */
+/** In View options: numbers or letters, the key, Beat marks, and the way back to the written key. */
 export function DisplayBar({
   words,
 }: {
@@ -119,7 +120,7 @@ export function DisplayBar({
   if (!display) return null;
   const written = keyName(chart.key);
   return (
-    <HStack gap={3} vAlign="center" wrap="wrap">
+    <VStack gap={4}>
       <DisplayControls
         style={display.style}
         onStyle={(style) => choose({ ...display, style })}
@@ -139,18 +140,26 @@ export function DisplayBar({
         words={words.beats}
       />
       {keyName(display.key) !== written && (
-        <Button
-          label={words.written}
-          variant="ghost"
-          onClick={() => choose({ ...display, key: chart.key })}
-        />
+        <HStack>
+          <Button
+            label={words.written}
+            variant="secondary"
+            onClick={() => choose({ ...display, key: chart.key })}
+          />
+        </HStack>
       )}
-    </HStack>
+    </VStack>
   );
 }
 
 /** The chart, drawn in the view chosen. */
-export function DisplayedChart({ phone, toolbar }: { phone: boolean; toolbar?: ReactNode }) {
+export function DisplayedChart({
+  phone,
+  viewOptions,
+}: {
+  phone: boolean;
+  viewOptions?: ReactNode;
+}) {
   const { chart, display } = useDisplay();
   return (
     <ChartPreview
@@ -161,7 +170,7 @@ export function DisplayedChart({ phone, toolbar }: { phone: boolean; toolbar?: R
       hasForm
       beats={display?.beats ?? "auto"}
       phone={phone}
-      toolbar={toolbar}
+      viewOptions={viewOptions}
     />
   );
 }

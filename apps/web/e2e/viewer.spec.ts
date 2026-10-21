@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { createVersion } from "./admin";
+import { openViewOptions } from "./flows";
 
 const OPEN_ROAD = readFileSync(
   new URL("../../../fixtures/open-road.chartdown", import.meta.url),
@@ -25,6 +26,8 @@ test("R-03.2 changing the key does not change the saved version", async ({ page,
   await expect(page.getByText("Key G", { exact: true })).toBeVisible();
   await expect(intro).toContainText("6");
 
+  // T-2807 the settings are in View options, beside the metronome.
+  await openViewOptions(page);
   const style = page.getByRole("radiogroup", { name: "Numbers or letters" });
   await style.getByRole("radio", { name: "Letters" }).click();
   await expect(page).toHaveURL(/view=letters/);
@@ -42,6 +45,7 @@ test("R-03.2 changing the key does not change the saved version", async ({ page,
   await page.getByRole("button", { name: "Back to the written key, G" }).click();
   await expect(page).toHaveURL(new RegExp(`/versions/${id}\\?view=letters$`));
   await page.goto(`/versions/${id}`);
+  await openViewOptions(page);
   await expect(style.getByRole("radio", { name: "Numbers" })).toBeChecked();
   await expect(page.getByText("(written in")).toHaveCount(0);
   expect(await saved()).toEqual(before);
@@ -60,6 +64,7 @@ test("F-011 the version page changes its view in place, asking the server nothin
     if (new URL(sent.url()).pathname.startsWith("/versions/")) asked.push(sent.url());
   });
 
+  await openViewOptions(page);
   const style = page.getByRole("radiogroup", { name: "Numbers or letters" });
   await style.getByRole("radio", { name: "Letters" }).click();
   await expect(intro).toContainText("E");

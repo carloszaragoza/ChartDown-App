@@ -12,6 +12,7 @@ import {
   signOut,
   signUpAndConfirm,
   unique,
+  openViewOptions,
 } from "./flows";
 
 const CHART = "---\nkey: G\n---\n## Verse\n1 | 4 | 5 | 1\n";
@@ -89,6 +90,7 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
   await page.getByRole("link", { name: title }).click();
   await expect(page.getByText("Song 1 of 1")).toBeVisible();
   await expect(page.getByText("(written in G)")).toBeVisible();
+  await openViewOptions(page);
   await page
     .getByRole("radiogroup", { name: "Numbers or letters" })
     .getByRole("radio", { name: "Letters" })
@@ -99,6 +101,7 @@ test("R-05.4 the set key does not change the version for others", async ({ page,
   // Everyone else still sees the version as written, and it never changed.
   await page.goto(`/versions/${id}`);
   await expect(page.getByText("(written in")).toHaveCount(0);
+  await openViewOptions(page);
   await page
     .getByRole("radiogroup", { name: "Numbers or letters" })
     .getByRole("radio", { name: "Letters" })

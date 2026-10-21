@@ -91,24 +91,27 @@ export function BeatsControl({
     auto: words.auto,
     always: words.always,
   };
-  const control = (
-    <HStack gap={2} vAlign="center">
+  // Its name above it, as every choice in View options (T-2807), with the help beside the name.
+  return (
+    <VStack gap={1}>
       <BeatsMemory current={value} onChoose={onChoose} />
-      <Text type="supporting" aria-hidden="true">
-        {words.label}
-      </Text>
-      {words.help && (
-        <Button
-          label={words.help.about}
-          tooltip={words.help.about}
-          variant="ghost"
-          size="sm"
-          icon={<Icon icon={InformationCircleIcon} />}
-          isIconOnly
-          aria-expanded={isHelpShown}
-          onClick={() => setHelpShown(!isHelpShown)}
-        />
-      )}
+      <HStack gap={1} vAlign="center">
+        <Text type="label" aria-hidden="true">
+          {words.label}
+        </Text>
+        {words.help && (
+          <Button
+            label={words.help.about}
+            tooltip={words.help.about}
+            variant="ghost"
+            size="sm"
+            icon={<Icon icon={InformationCircleIcon} />}
+            isIconOnly
+            aria-expanded={isHelpShown}
+            onClick={() => setHelpShown(!isHelpShown)}
+          />
+        )}
+      </HStack>
       <SegmentedControl
         label={words.name}
         value={value}
@@ -123,13 +126,7 @@ export function BeatsControl({
           <SegmentedControlItem key={mode} value={mode} label={labels[mode]} />
         ))}
       </SegmentedControl>
-    </HStack>
-  );
-  if (!words.help || !isHelpShown) return control;
-  return (
-    <VStack gap={1}>
-      {control}
-      <Text type="supporting">{words.help.text}</Text>
+      {words.help && isHelpShown && <Text type="supporting">{words.help.text}</Text>}
     </VStack>
   );
 }

@@ -492,6 +492,7 @@ function StandModeView({
           off: c("beatsOff"),
           auto: c("beatsAuto"),
           always: c("beatsAlways"),
+          help: { about: c("beatsAbout"), text: c("beatsHelp") },
         }}
       />
       {choice(

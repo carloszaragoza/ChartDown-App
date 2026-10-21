@@ -95,6 +95,12 @@ export async function expectStatus(page: Page, text: string) {
   ).toBeVisible();
 }
 
+/** On a page with a whole chart, opens View options, where its settings are (T-2807). */
+export async function openViewOptions(page: Page) {
+  await page.getByRole("button", { name: "View options" }).click();
+  await expect(page.getByRole("dialog", { name: "View options" })).toBeVisible();
+}
+
 /** On a version's page, opens the "…" menu and chooses one of its actions (T-2806). */
 export async function moreAction(page: Page, name: string) {
   await page.getByRole("button", { name: "More actions" }).click();

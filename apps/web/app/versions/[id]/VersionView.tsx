@@ -16,6 +16,7 @@ import type { Display } from "./display";
 import { BackToCatalog } from "./BackToCatalog";
 import { BandAudio, type BandRecording } from "./BandAudio";
 import { VideoLink } from "../../_components/VideoDock";
+import { ViewOptions } from "../../_components/ViewOptions";
 import type { BasedOn } from "./load";
 import { AddToSet, ReportForm, VersionMenu, type VersionMenuItem } from "./VersionControls";
 import { DisplayBar, DisplayedChart, ShownKey, StandLink, VersionDisplay } from "./VersionDisplay";
@@ -272,6 +273,24 @@ export function VersionView({
                         size={size}
                       />
                     )}
+                    {canAddToSet && reading && (
+                      <AddToSet
+                        size={size}
+                        versionId={id}
+                        choices={setChoices.map((choice) => ({
+                          value: choice.id,
+                          label: setChoiceLabel(choice, s("mySets")),
+                          name: choice.name,
+                        }))}
+                        newSets={setBands.map((band) => ({
+                          label:
+                            setBands.length === 1
+                              ? s("newSet")
+                              : s("newSetIn", { band: band.name ?? s("mySets") }),
+                          href: `/bands/${band.id}/sets`,
+                        }))}
+                      />
+                    )}
                     {menu.length > 0 && <VersionMenu label={t("more")} items={menu} size={size} />}
                   </HStack>
                   {canFork && <Text type="supporting">{t("forkCc0")}</Text>}
@@ -333,51 +352,30 @@ export function VersionView({
               )}
               <DisplayedChart
                 phone={phone}
-                toolbar={
-                  // Numbers / Letters, the key, Beat marks and Add to set, pinned with the song
-                  // form (T-2807).
-                  (display || (canAddToSet && reading)) && (
-                    <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
-                      {display && path ? (
-                        <DisplayBar
-                          words={{
-                            label: v("label"),
-                            style: v("style"),
-                            numbers: v("numbers"),
-                            letters: v("letters"),
-                            key: v("key"),
-                            written: v("written", { key: written }),
-                            beats: {
-                              label: c("beatsLabel"),
-                              name: c("beatsName"),
-                              off: c("beatsOff"),
-                              auto: c("beatsAuto"),
-                              always: c("beatsAlways"),
-                              help: { about: c("beatsAbout"), text: c("beatsHelp") },
-                            },
-                          }}
-                        />
-                      ) : (
-                        <span />
-                      )}
-                      {canAddToSet && reading && (
-                        <AddToSet
-                          versionId={id}
-                          choices={setChoices.map((choice) => ({
-                            value: choice.id,
-                            label: setChoiceLabel(choice, s("mySets")),
-                            name: choice.name,
-                          }))}
-                          newSets={setBands.map((band) => ({
-                            label:
-                              setBands.length === 1
-                                ? s("newSet")
-                                : s("newSetIn", { band: band.name ?? s("mySets") }),
-                            href: `/bands/${band.id}/sets`,
-                          }))}
-                        />
-                      )}
-                    </HStack>
+                // The page's settings in one sheet beside the metronome, as in stand mode (T-2807).
+                viewOptions={
+                  display &&
+                  path && (
+                    <ViewOptions>
+                      <DisplayBar
+                        words={{
+                          label: v("label"),
+                          style: v("style"),
+                          numbers: v("numbers"),
+                          letters: v("letters"),
+                          key: v("key"),
+                          written: v("written", { key: written }),
+                          beats: {
+                            label: c("beatsLabel"),
+                            name: c("beatsName"),
+                            off: c("beatsOff"),
+                            auto: c("beatsAuto"),
+                            always: c("beatsAlways"),
+                            help: { about: c("beatsAbout"), text: c("beatsHelp") },
+                          },
+                        }}
+                      />
+                    </ViewOptions>
                   )
                 }
               />
