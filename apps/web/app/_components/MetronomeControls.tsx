@@ -9,12 +9,15 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { NumberInput } from "@astryxdesign/core/NumberInput";
 import { Slider } from "@astryxdesign/core/Slider";
+import { StackItem } from "@astryxdesign/core/Stack";
 import { Switch } from "@astryxdesign/core/Switch";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import {
   AdjustmentsVerticalIcon,
+  MinusIcon,
   PlayIcon,
+  PlusIcon,
   SpeakerWaveIcon,
   StopIcon,
 } from "@heroicons/react/24/outline";
@@ -22,6 +25,13 @@ import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { speedFor, tapTempo } from "../../lib/metronome/tapTempo";
+import {
+  clampTempo,
+  practiceTempo,
+  speedForTempo,
+  TEMPO_MAX,
+  TEMPO_MIN,
+} from "../../lib/metronome/practiceTempo";
 import { MetronomeIcon } from "./MetronomeIcon";
 import { useMetronome } from "../../lib/metronome/useMetronome";
 
@@ -130,8 +140,64 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
 
   // The click (off by default), its volume and the count-in, kept on this device (R-11.7, R-11.8).
   const { sound, setSound } = metronome;
+  // The tempo stepper (T-2808): the practice tempo in beats per minute, from the chart's own; on a
+  // chart with no tempo, the tempo asked for.
+  const stepped = written ? practiceTempo(written, speed) : clampTempo(tapped ?? askedTempo);
+  const step = (bpm: number) => {
+    if (written) setSpeed(speedForTempo(bpm, written));
+    else setTapped(clampTempo(bpm));
+  };
+  const tempoHint = !written
+    ? t("tempoNone")
+    : stepped === Math.round(written)
+      ? t("tempoSame")
+      : t("tempoChart", { bpm: Math.round(written) });
   const soundControls = (
     <VStack gap={4}>
+      {/* − and + at the touch size beside the field, which also takes a typed tempo (T-2808). */}
+      <VStack gap={2}>
+        <VStack gap={0.5}>
+          <Text type="label">{t("tempoTitle")}</Text>
+          <Text type="supporting">{tempoHint}</Text>
+        </VStack>
+        <HStack gap={2} vAlign="center">
+          <Button
+            label={t("slower")}
+            tooltip={t("slower")}
+            size="lg"
+            variant="secondary"
+            isIconOnly
+            icon={<Icon icon={MinusIcon} />}
+            isDisabled={stepped <= TEMPO_MIN}
+            onClick={() => step(stepped - 1)}
+          />
+          <StackItem size="fill">
+            <NumberInput
+              label={t("tempoTitle")}
+              isLabelHidden
+              value={stepped}
+              min={TEMPO_MIN}
+              max={TEMPO_MAX}
+              step={1}
+              isIntegerOnly
+              isWheelEnabled={false}
+              units="bpm"
+              size="lg"
+              onChange={step}
+            />
+          </StackItem>
+          <Button
+            label={t("faster")}
+            tooltip={t("faster")}
+            size="lg"
+            variant="secondary"
+            isIconOnly
+            icon={<Icon icon={PlusIcon} />}
+            isDisabled={stepped >= TEMPO_MAX}
+            onClick={() => step(stepped + 1)}
+          />
+        </HStack>
+      </VStack>
       <Switch
         label={t("click")}
         description={t("clickHint")}
@@ -157,8 +223,8 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
         valueDisplay="text"
         formatValue={(value) =>
           t("speedValue", {
-            speed: value,
-            bpm: Math.round(((written ?? tapped ?? askedTempo) * value) / 100),
+            speed: Math.round(value),
+            bpm: practiceTempo(written ?? tapped ?? askedTempo, value),
           })
         }
         marks={[{ value: 100 }]}
