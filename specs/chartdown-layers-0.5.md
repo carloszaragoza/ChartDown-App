@@ -21,10 +21,10 @@ A note also has its **roles**: everyone, or one or more instruments, resolved li
 
 Each note lands on the section and bar its anchor names. A note whose anchor cannot be found is **unplaced**, with a reason:
 
-| Reason | When |
-|---|---|
+| Reason    | When                                                                                         |
+| --------- | -------------------------------------------------------------------------------------------- |
 | `section` | No section has that name, or the chart has fewer sections with that name than the occurrence |
-| `bar` | The section exists but has fewer bars than the note's bar |
+| `bar`     | The section exists but has fewer bars than the note's bar                                    |
 
 **Occurrences can shift.** Renaming, adding or removing a section with the same name changes which section is the first, second… with that name. So when the revision a note was anchored to is known, a note is placed only if the chart still has **the same number of sections with that name** as that revision. Otherwise the note is unplaced (reason `section`), even if a section with that name and occurrence exists, and the MD anchors it again. For example, renaming the first of two Choruses flags every Chorus note instead of moving the first Chorus's notes onto the second. Adding a third Chorus also flags them: cautious, but never wrong. A note without a known revision, such as one read from the text form, is placed by name and occurrence alone.
 

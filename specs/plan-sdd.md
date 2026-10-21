@@ -38,58 +38,58 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 **Platform roles**
 
-| Role | Description |
-|---|---|
-| Visitor | No account. Can browse the public catalog but cannot create or save anything (decision 3). |
-| User | Registered person. Creates songs, versions and bands. |
-| Administrator | Manages users, content and the instrument catalog (decision 5). |
+| Role          | Description                                                                                |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| Visitor       | No account. Can browse the public catalog but cannot create or save anything (decision 3). |
+| User          | Registered person. Creates songs, versions and bands.                                      |
+| Administrator | Manages users, content and the instrument catalog (decision 5).                            |
 
 **Roles within a band** (the role depends on the band: you can be MD in one band and keyboardist in another, decision 1)
 
-| Role | Description |
-|---|---|
-| MD | Only one per band (decision 2). Manages musicians, sets and the notes layer. |
+| Role         | Description                                                                                                                |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| MD           | Only one per band (decision 2). Manages musicians, sets and the notes layer.                                               |
 | Temporary MD | A member the MD appoints for one specific set when the MD can't be there. Their authority ends with that set (decision 2). |
-| Musician | Member with one or more assigned instruments. Sees their band's sets. |
+| Musician     | Member with one or more assigned instruments. Sees their band's sets.                                                      |
 
 **Permission matrix**
 
-| Action | Visitor | User | Musician | Temporary MD | MD | Admin |
-|---|---|---|---|---|---|---|
-| Browse the public catalog | Yes | Yes | Yes | Yes | Yes | Yes |
-| Create a song, version or fork | No | Yes | Yes | Yes | Yes | Yes |
-| Edit their own version | No | Yes | Yes | Yes | Yes | Yes |
-| Edit someone else's version | No | No | No | No | No | Moderate only |
-| Make their version private (a public copy remains) | No | Yes | Yes | Yes | Yes | Yes |
-| Create a band (and be its MD) | No | Yes | Yes | Yes | Yes | Yes |
-| Invite musicians and assign instruments | No | No | No | No | Yes | No |
-| Appoint a temporary MD | No | No | No | No | Yes | No |
-| Create sets | No | No | No | No | Yes | No |
-| Edit a set (order, keys, lineup) | No | No | No | Their set only | Yes | No |
-| Write the MD notes layer | No | No | No | No (decision 9.6) | Yes | No |
-| See their band's sets | No | No | Yes | Yes | Yes | No |
-| See layer notes | No | No | General and their instrument | All, in their set | All | No |
-| Manage the instrument catalog | No | No | No | No | No | Yes |
-| Hide content, suspend users | No | No | No | No | No | Yes |
+| Action                                             | Visitor | User | Musician                     | Temporary MD      | MD  | Admin         |
+| -------------------------------------------------- | ------- | ---- | ---------------------------- | ----------------- | --- | ------------- |
+| Browse the public catalog                          | Yes     | Yes  | Yes                          | Yes               | Yes | Yes           |
+| Create a song, version or fork                     | No      | Yes  | Yes                          | Yes               | Yes | Yes           |
+| Edit their own version                             | No      | Yes  | Yes                          | Yes               | Yes | Yes           |
+| Edit someone else's version                        | No      | No   | No                           | No                | No  | Moderate only |
+| Make their version private (a public copy remains) | No      | Yes  | Yes                          | Yes               | Yes | Yes           |
+| Create a band (and be its MD)                      | No      | Yes  | Yes                          | Yes               | Yes | Yes           |
+| Invite musicians and assign instruments            | No      | No   | No                           | No                | Yes | No            |
+| Appoint a temporary MD                             | No      | No   | No                           | No                | Yes | No            |
+| Create sets                                        | No      | No   | No                           | No                | Yes | No            |
+| Edit a set (order, keys, lineup)                   | No      | No   | No                           | Their set only    | Yes | No            |
+| Write the MD notes layer                           | No      | No   | No                           | No (decision 9.6) | Yes | No            |
+| See their band's sets                              | No      | No   | Yes                          | Yes               | Yes | No            |
+| See layer notes                                    | No      | No   | General and their instrument | All, in their set | All | No            |
+| Manage the instrument catalog                      | No      | No   | No                           | No                | No  | Yes           |
+| Hide content, suspend users                        | No      | No   | No                           | No                | No  | Yes           |
 
 ## 5. Domain model (conceptual)
 
-| Entity | What it is | Related to |
-|---|---|---|
-| User | Person with an account, preferred language and instruments they play | Bands, versions, sets |
-| Song | The work: title and writers (no CCLI data) | Many versions |
-| Version (arrangement) | A chart in ChartDown: owner, visibility, source; may come from a fork | A song, its revisions |
-| Revision | Each saved change to a version; allows going back (decision 7) | A version |
-| Source | Studio, live, acoustic or own arrangement; album, year, YouTube link | A version |
-| Instrument | Entry in the catalog managed by the Admin (decision 5) | Members, lineups, notes |
-| Band | Group of musicians with a single MD | Members, sets, layers |
-| Member | User within a band, with a role and default instruments | Band, user |
-| MD layer | Notes per section and instrument that a band puts on top of a version, without touching the chart (decision 4) | Band, version |
-| Set | Group of songs with a name unique within the band (decision 8), optional date and type | Band, items, lineup |
-| Set item | A version at a position, with its key for that set (decision 9) | Set, version, layer |
-| Set lineup | Which musician plays which instrument, and who is temporary MD | Set, members |
-| Notification | Notice of a change to a person (decision 13) | User, set, version |
-| Offline download | Copy of a set stored on the device (decision 12) | Set, user |
+| Entity                | What it is                                                                                                     | Related to              |
+| --------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| User                  | Person with an account, preferred language and instruments they play                                           | Bands, versions, sets   |
+| Song                  | The work: title and writers (no CCLI data)                                                                     | Many versions           |
+| Version (arrangement) | A chart in ChartDown: owner, visibility, source; may come from a fork                                          | A song, its revisions   |
+| Revision              | Each saved change to a version; allows going back (decision 7)                                                 | A version               |
+| Source                | Studio, live, acoustic or own arrangement; album, year, YouTube link                                           | A version               |
+| Instrument            | Entry in the catalog managed by the Admin (decision 5)                                                         | Members, lineups, notes |
+| Band                  | Group of musicians with a single MD                                                                            | Members, sets, layers   |
+| Member                | User within a band, with a role and default instruments                                                        | Band, user              |
+| MD layer              | Notes per section and instrument that a band puts on top of a version, without touching the chart (decision 4) | Band, version           |
+| Set                   | Group of songs with a name unique within the band (decision 8), optional date and type                         | Band, items, lineup     |
+| Set item              | A version at a position, with its key for that set (decision 9)                                                | Set, version, layer     |
+| Set lineup            | Which musician plays which instrument, and who is temporary MD                                                 | Set, members            |
+| Notification          | Notice of a change to a person (decision 13)                                                                   | User, set, version      |
+| Offline download      | Copy of a set stored on the device (decision 12)                                                               | Set, user               |
 
 **Design decisions**
 
@@ -207,7 +207,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-03.7 **Beat marks, shown as the reader chooses:** the viewer, stand mode and a set's song have a Beats control with Off, Auto and Always (Auto by default: marks only in the bars where they tell something). It is a way of viewing the chart, like numbers or letters, and changes nothing in the chart text, its beat checks or its JSON form (owner's request, October 8, 2026).
 - R-03.12 **Stand mode shows what comes next (v2):** stand mode shows the section being played and every section after it, stacked from top to bottom like a teleprompter, each with its title, length, notes for the reader (filtered as R-06.4 says) and bars; the sections already played sit above it, dimmed, and can be scrolled back to. The section at the top of the stack (the active zone) is the one being played and is marked **Now**. Every section keeps the same size whether it is current or not: the current one is shown by its color, its frame and the Now tag, never by a size change, so nothing moves while the reader scrolls. A scroll that settles makes the section nearest the top the current one; Next, Back, the song form, a tap on a section, the arrow and page keys and a page-turner pedal bring the chosen section to the top with a short motion (Calm by default, or Soft bounce), instantly with reduced motion. On the last section Next becomes Next song in a set, and goes back to the first section otherwise. While the metronome plays the stack follows it: a count-in says Count-in on the Now tag, the current section says which bar is playing ("Bar 3 of 8"), the stack brings each section to the top as it starts sounding, and the metronome stops after the last one; choosing a section while it plays still queues it (R-11.15), and the stack then shows the queued section right after the current one, followed by what plays after it, so what comes next on screen is what the band will play (owner's review, October 20, 2026); a scroll with the finger only looks, without changing what sounds. View sets how many sections follow the current one (1, 2 or as many as fit), the motion, Light or Stage, and the number size (Small, Medium, Large); the device remembers these choices, and stand mode asks for full screen when it opens where the browser allows it. The same on an iPad in both orientations, on a desktop and on a phone (owner's handoff and decisions, October 20, 2026, `design/stand-mode-v2/`).
 - R-03.8 **Reading on a phone:** a song opened from a shared link (the version page, its stand mode and a set's song in stand mode, with the view, beats and theme the link carries) reads on a phone from 375 to 440 CSS px wide, in portrait and landscape. The chart comes first: the controls fit in one compact bar, the song form is one strip that scrolls inside itself, bar rows wrap to fit the width instead of scrolling sideways, and the page never scrolls sideways. (Owner's request, October 14, 2026: people share links and always have a phone with them, not always an iPad.)
-- R-03.9 **The whole app on a phone:** every signed-in page (Home, Sets, a set and its songs, Edit set, Bands and a band, Catalog, Your versions, a version and its history, the chart editor, the director's notes, Notices, Profile and Administration) works on a phone from 360 to 440 CSS px wide, iPhone and Android alike, in portrait: one column, nothing scrolls sideways, nothing a person needs is cut short with "…", and touch targets are a little smaller than on an iPad so the screen holds more than buttons: 40 px, and 48 px for stand mode's section and turn buttons (owner's review, October 15, 2026). A side panel (Home's band, a set's lineup, the notes editor's sections) goes below the page's main content; a choice among more than three options or with long names (View as, the catalog's source) becomes a menu; a row with several actions keeps its title on its own line with the actions under it (owner's request, October 15, 2026: musicians use the app on their phones too, before the beta opens to everyone).
+- R-03.9 **The whole app on a phone:** every signed-in page (Home, Sets, a set and its songs, Edit set, Bands and a band, Catalog, Your versions, a version and its history, the chart editor, the director's notes, Notices, Profile and Administration) works on a phone from 360 to 440 CSS px wide, iPhone and Android alike, in portrait: one column, nothing scrolls sideways, nothing a person needs is cut short with "…", and touch targets are smaller than on an iPad so the screen holds more than buttons: 32 px, and 40 px for stand mode's section and turn buttons; the icons, the page title and the chart's numbers are a size smaller too (owner's reviews, October 15 and October 21, 2026: about a fifth smaller than before). A side panel (Home's band, a set's lineup, the notes editor's sections) goes below the page's main content; a choice among more than three options or with long names (View as, the catalog's source) becomes a menu; a row with several actions keeps its title on its own line with the actions under it (owner's request, October 15, 2026: musicians use the app on their phones too, before the beta opens to everyone).
 - R-03.10 **A first chart is easy to start:** a new version doesn't open on a blank editor: it offers to import a chord sheet (SPEC-10) or to start from a short template (a title, a key, two sections and a line of chords), and says that chords can be written as numbers or as letters (`1 | 4 5 | 6m` or `G | C D | Em`). The template is an original example, never a published song (the first playground tester's feedback, October 15, 2026: a blank editor reads like code).
 - R-03.11 **Listen while you read or write:** a version's YouTube link opens a mini player docked at the bottom of the version page, the chart editor and New version, small (YouTube's minimum, 200 px) and closable, with a bar above it showing the song's sections in the order the chart plays them; the bar's mark follows the video, and tapping a section takes the video there. While the video plays, the chart on the page follows it as it follows the metronome: the bar being played is marked and kept in view. Where each section falls comes from the chart's tempo, meter and bars, counted from where the music starts in the video, which the reader adjusts on screen and the version's owner can save for everyone. A chart with no tempo shows the video and asks for one to place the sections. The video's own sound is never read or drawn: YouTube doesn't allow it, so the bar is the chart's sections, not a waveform. With no connection the player is not offered (owner's review, October 16, 2026). The open player never hides the chart: the page keeps room below the chart's end (in stand mode, above Previous and Next) as tall as the player, so the last sections can be read above it, and the bar being followed is kept in view above it. The sections bar is easy to read: each section is named as in the song form (V1, C2, B1²), in a larger, bold type, and the full name of the section playing is written above the bar (owner's review, October 20, 2026).
 
@@ -432,12 +432,12 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 ## 7. Phases
 
-| Phase | Includes | Outcome |
-|---|---|---|
-| 0 | Constitution, specs and decisions | Specs approved (done) |
-| 1 (MVP) | SPEC-00 (R-00.1 to R-00.16: ChartDown 0.7 and its conformance suite), 01, 02, 03 with layer editor, 04, 05 with key per set and temporary MD, 06, 08 offline reading, 09 in-app notices | A real band prepares a set, each musician reads their notes and plays without depending on the internet |
-| 2 (from October 14, 2026, during the beta) | Advanced stand mode, print and export to PDF (R-03.4), invite links, email notices, revision comparison, advanced search; import from PDF (SPEC-10), visual metronome and bar follow (SPEC-11), live mode where the band follows the MD (SPEC-12) | Comfortable use in rehearsal and on stage |
-| 3 | Full administration and reports, WhatsApp notices, offline editing, native phone app | Platform open to the public |
+| Phase                                      | Includes                                                                                                                                                                                                                                          | Outcome                                                                                                 |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| 0                                          | Constitution, specs and decisions                                                                                                                                                                                                                 | Specs approved (done)                                                                                   |
+| 1 (MVP)                                    | SPEC-00 (R-00.1 to R-00.16: ChartDown 0.7 and its conformance suite), 01, 02, 03 with layer editor, 04, 05 with key per set and temporary MD, 06, 08 offline reading, 09 in-app notices                                                           | A real band prepares a set, each musician reads their notes and plays without depending on the internet |
+| 2 (from October 14, 2026, during the beta) | Advanced stand mode, print and export to PDF (R-03.4), invite links, email notices, revision comparison, advanced search; import from PDF (SPEC-10), visual metronome and bar follow (SPEC-11), live mode where the band follows the MD (SPEC-12) | Comfortable use in rehearsal and on stage                                                               |
+| 3                                          | Full administration and reports, WhatsApp notices, offline editing, native phone app                                                                                                                                                              | Platform open to the public                                                                             |
 
 ## 8. Decisions from the Clarify phase
 
