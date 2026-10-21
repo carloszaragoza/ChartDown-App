@@ -32,9 +32,20 @@ export function readPreferences(saved: unknown): StandPreferences {
   };
 }
 
-/** The last section shown after the current one, as an index, for Coming up. */
-export function lastShown(current: number, last: number, comingUp: ComingUp): number {
-  return comingUp === "fill" ? last : Math.min(last, current + Number(comingUp));
+/**
+ * The sections the stack shows after the current one, in the order they will be played (T-2804):
+ * from the queued section when there is one (R-11.15), otherwise from the next; Coming up keeps
+ * one, two or every one of them.
+ */
+export function upcomingSections(
+  current: number,
+  last: number,
+  queued: number | null,
+  comingUp: ComingUp,
+): number[] {
+  const from = queued ?? current + 1;
+  const all = Array.from({ length: Math.max(last - from + 1, 0) }, (_, step) => from + step);
+  return comingUp === "fill" ? all : all.slice(0, Number(comingUp));
 }
 
 let cached: StandPreferences | null = null;

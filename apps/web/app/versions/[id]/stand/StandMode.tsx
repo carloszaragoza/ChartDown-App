@@ -48,8 +48,8 @@ import { copyAt } from "../../../../lib/chart/copies";
 import { glide, nearestCard, stackTarget, type StandMotion } from "../../../../lib/stand/motion";
 import { barProgress } from "../../../../lib/stand/progress";
 import {
-  lastShown,
   standPreferences,
+  upcomingSections,
   type ComingUp,
   type NumberSize,
 } from "../../../../lib/stand/preferences";
@@ -397,8 +397,13 @@ function StandModeView({
       : t("times", { count });
   };
   const again = queued !== null && queued === playingSection;
-  // Coming up: how many sections follow the current one (T-2805).
-  const shownTo = lastShown(current, last, preferences.comingUp);
+  // The cards in the order they will be played: the played ones, the current one, then what comes
+  // next, from the queued section when there is one (T-2804, R-11.15); Coming up keeps one, two
+  // or all of them (T-2805).
+  const cards = [
+    ...Array.from({ length: current + 1 }, (_, index) => index),
+    ...upcomingSections(current, last, queued, preferences.comingUp),
+  ];
   // While the metronome plays, which bar of the current section sounds (T-2804).
   const progress =
     playingAt !== undefined && playingSection === current
@@ -801,44 +806,49 @@ function StandModeView({
               onTouchEnd={onTouchEnd}
             >
               <ol className="cd-stand-stack__list">
-                {chart.sections.slice(0, shownTo + 1).map((section, index) => (
-                  <li
-                    key={index}
-                    className="cd-stand-card"
-                    data-card={index}
-                    data-state={
-                      index < current ? "past" : index === current ? "current" : "upcoming"
-                    }
-                    {...(index === current ? { "aria-current": "true" as const } : {})}
-                    onClick={(event) => onCard(index, event)}
-                  >
-                    <ChartSection
-                      section={section}
-                      formatter={formatter}
-                      labels={labels}
-                      notes={notes ? (notes[index] ?? []) : section.notes}
-                      {...(index === current ? { id: "current-section" } : {})}
-                      meter={chart.meter}
-                      beats={beats}
-                      size="lg"
-                      now={nowIn(index) ?? barIn(playbackBar, index)}
-                      start={startIn(index)}
-                      times={timesOf(index)}
-                      badge={
-                        index === current ? (
-                          <span className="cd-stand-card__now">
-                            {isCountingIn ? t("countInTag") : t("now")}
-                          </span>
-                        ) : undefined
-                      }
-                      after={
-                        index === current && progress ? (
-                          <span className="cd-stand-card__progress">{t("barOf", progress)}</span>
-                        ) : undefined
-                      }
-                    />
-                  </li>
-                ))}
+                {cards.map((index, place) => {
+                  const section = chart.sections[index];
+                  if (!section) return null;
+                  const isCurrent = place === current;
+                  // A section queued again, or one already played, shows a second time ahead.
+                  const isAgain = place > current && index <= current;
+                  return (
+                    <li
+                      key={isAgain ? `again-${index}` : index}
+                      className="cd-stand-card"
+                      data-card={index}
+                      data-state={place < current ? "past" : isCurrent ? "current" : "upcoming"}
+                      {...(isCurrent ? { "aria-current": "true" as const } : {})}
+                      onClick={(event) => onCard(index, event)}
+                    >
+                      <ChartSection
+                        section={section}
+                        formatter={formatter}
+                        labels={labels}
+                        notes={notes ? (notes[index] ?? []) : section.notes}
+                        {...(isCurrent ? { id: "current-section" } : {})}
+                        meter={chart.meter}
+                        beats={beats}
+                        size="lg"
+                        now={isAgain ? undefined : (nowIn(index) ?? barIn(playbackBar, index))}
+                        start={isAgain ? undefined : startIn(index)}
+                        times={timesOf(index)}
+                        badge={
+                          isCurrent ? (
+                            <span className="cd-stand-card__now">
+                              {isCountingIn ? t("countInTag") : t("now")}
+                            </span>
+                          ) : undefined
+                        }
+                        after={
+                          isCurrent && progress ? (
+                            <span className="cd-stand-card__progress">{t("barOf", progress)}</span>
+                          ) : undefined
+                        }
+                      />
+                    </li>
+                  );
+                })}
               </ol>
               {/* Room after the last section, so the last ones can reach the top. */}
               <div className="cd-stand-stack__end" aria-hidden="true" />

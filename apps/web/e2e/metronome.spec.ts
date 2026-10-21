@@ -112,6 +112,27 @@ test("R-11.15 choosing the section that plays repeats it; the screen stays on wh
   await expect(form.getByRole("link", { name: /plays next/ })).toHaveCount(0);
 });
 
+test("R-11.15 a queued section's card comes right after the one playing", async ({
+  page,
+  request,
+}) => {
+  const song =
+    "---\ntempo: 60\n---\n## Verse\n1 | 4 | 5 | 1\n## Chorus\n4 | 5\n## Tag\n1 | 1\n## Bridge\n6m | 5\n";
+  const id = await createVersion(request, { title: "Jump Ahead", content: song });
+  await page.goto(`/versions/${id}/stand`);
+  const coming = page.locator('.cd-stand-card[data-state="upcoming"]').first();
+  await expect(coming.getByRole("heading", { level: 2 })).toHaveText("Chorus");
+  await page.getByRole("button", { name: "Play" }).click();
+  // From the Verse, the band is told to go to the Bridge: its card comes next, then the Chorus is
+  // back in its place once the queue is cancelled.
+  const form = page.getByRole("navigation", { name: "Song form" });
+  await form.getByRole("link", { name: /^Bridge,/ }).click();
+  await expect(coming.getByRole("heading", { level: 2 })).toHaveText("Bridge");
+  await expect(page.getByText("Next up: Bridge", { exact: false })).toBeVisible();
+  await form.getByRole("link", { name: /^Bridge,/ }).click();
+  await expect(coming.getByRole("heading", { level: 2 })).toHaveText("Chorus");
+});
+
 test("R-11.2 tapping a bar and pressing Play starts there, then the next bar follows", async ({
   page,
   request,
