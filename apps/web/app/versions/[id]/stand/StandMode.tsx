@@ -47,7 +47,6 @@ import { barIn, usePlaybackBar } from "../../../_components/usePlaybackBar";
 import { copyAt } from "../../../../lib/chart/copies";
 import { glide, nearestCard, stackTarget, type StandMotion } from "../../../../lib/stand/motion";
 import { barProgress } from "../../../../lib/stand/progress";
-import { paintTopEdge } from "../../../../lib/stand/topEdge";
 import {
   standPreferences,
   upcomingSections,
@@ -235,14 +234,6 @@ function StandModeView({
     () => Boolean(document.fullscreenElement) && window.matchMedia("(pointer: coarse)").matches,
     () => false,
   );
-  // The screen's top edge, under a phone's status bar, shows stand mode's own background (T-2815),
-  // read from its mode's tokens, never the system's light or dark page behind it.
-  const ground = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!ground.current) return;
-    const background = getComputedStyle(ground.current).backgroundColor;
-    return paintTopEdge(document, background, theme === "stage" ? "dark" : "light");
-  }, [theme]);
   const atEdge = useRef({ first: true, last: false });
   const display: Display = { style, key: homeKey, beats };
   const formatter = chordFormatter(chart, { style, key: homeKey });
@@ -696,7 +687,6 @@ function StandModeView({
         {/* Stand mode fills the screen in its own mode (light or stage), so it paints its own
             background from that mode's tokens. */}
         <div
-          ref={ground}
           data-stand={theme}
           style={{ background: "var(--color-background-body)", color: "var(--color-text-primary)" }}
         >

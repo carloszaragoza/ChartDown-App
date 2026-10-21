@@ -51,6 +51,31 @@ test.describe("on an iPhone 16 in portrait", () => {
     await expectNoSidewaysScroll(page);
   });
 
+  test("R-03.12 T-2815 in dark mode the status bar's edge takes the header's color", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto("/catalog");
+    const header = await page
+      .getByRole("img", { name: "ChartDown" })
+      .first()
+      .evaluate((logo) => {
+        for (let at: Element | null = logo; at; at = at.parentElement) {
+          const color = getComputedStyle(at).backgroundColor;
+          if (color !== "rgba(0, 0, 0, 0)") return color;
+        }
+        return "";
+      });
+    expect(header).not.toBe("");
+    await expect
+      .poll(() =>
+        page
+          .locator('meta[name="theme-color"]')
+          .evaluateAll((metas) => [...new Set(metas.map((meta) => meta.getAttribute("content")))]),
+      )
+      .toEqual([header]);
+  });
+
   test("R-03.8 stand mode puts the chart first: one top bar, the View sheet, Next", async ({
     page,
     request,
