@@ -108,7 +108,7 @@ test("R-03.11 a YouTube link opens the video in a mini player, and Close closes 
   await signUpAndConfirm(page, unique("video"), "Vera Video");
   await page.goto("/versions/new?song=new&q=Tide%20Lamp");
   await page.getByLabel("YouTube link").fill("https://www.youtube.com/watch?v=hBL9EBKB5DI");
-  await page.getByRole("button", { name: "Play the video" }).click();
+  await page.getByRole("button", { name: "Watch the video" }).click();
   const dock = page.getByRole("complementary", { name: "Video" });
   await expect(dock).toBeVisible();
   await expect(dock.getByRole("link", { name: "Open on YouTube" })).toHaveAttribute(
@@ -144,7 +144,7 @@ test("R-03.11 the owner saves where the music starts, and it is there for the ne
   await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
   const address = new URL(page.url()).pathname;
 
-  await page.getByRole("button", { name: "Play the video" }).click();
+  await page.getByRole("button", { name: "Watch the video" }).click();
   const dock = page.getByRole("complementary", { name: "Video" });
   await dock.getByRole("button", { name: "Later" }).click();
   await dock.getByRole("button", { name: "Later" }).click();
@@ -154,7 +154,7 @@ test("R-03.11 the owner saves where the music starts, and it is there for the ne
   // A visitor opens the video: the bar starts where the owner said.
   await signOut(page);
   await page.goto(address);
-  await page.getByRole("button", { name: "Play the video" }).click();
+  await page.getByRole("button", { name: "Watch the video" }).click();
   await expect(page.getByRole("complementary", { name: "Video" })).toContainText(
     "Music starts at 0:01",
   );
@@ -176,7 +176,7 @@ test("R-03.11 the open video never hides the chart: its last bar scrolls above t
   });
   await page.setViewportSize({ width: 1180, height: 820 });
   await page.goto(`/versions/${id}`);
-  await page.getByRole("button", { name: "Play the video" }).click();
+  await page.getByRole("button", { name: "Watch the video" }).click();
   const dock = page.getByRole("complementary", { name: "Video" });
   await expect(dock).toBeVisible();
   const last = page.locator("section[id^='section-']").last().locator(".cd-chart__bar").last();

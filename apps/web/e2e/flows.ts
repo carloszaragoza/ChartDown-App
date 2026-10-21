@@ -95,6 +95,12 @@ export async function expectStatus(page: Page, text: string) {
   ).toBeVisible();
 }
 
+/** On a version's page, opens the "…" menu and chooses one of its actions (T-2806). */
+export async function moreAction(page: Page, name: string) {
+  await page.getByRole("button", { name: "More actions" }).click();
+  await page.getByRole("menuitem", { name }).click();
+}
+
 /** On a version's page, adds it to one of the MD's sets, chosen by its label (R-05.2). */
 export async function addToSet(page: Page, label: string) {
   await page.getByRole("combobox", { name: "Add to a set" }).click();

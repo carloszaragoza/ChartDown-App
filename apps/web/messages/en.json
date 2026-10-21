@@ -374,7 +374,7 @@
   },
   "version": {
     "newOfSong": "New version of this song",
-    "backToCatalog": "Back to the catalog",
+    "backToCatalog": "Catalog",
     "by": "Arrangement by {author}",
     "source": {
       "studio": "Studio recording",
@@ -1432,6 +1432,7 @@
     "later": "Later",
     "startHere": "Music starts here",
     "noTempo": "Add a tempo to the chart to place its sections on the video.",
+    "watch": "Watch the video",
     "play": "Play the video",
     "player": "Video",
     "openYouTube": "Open on YouTube",

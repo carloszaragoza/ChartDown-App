@@ -14,7 +14,7 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { MusicalNoteIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { audioProblem, audioType, MAX_AUDIO_BYTES, peaksFrom } from "../../../lib/audio/file";
 import { createClient } from "../../../lib/supabase/browser";
 import type { Chart } from "chartdown";
@@ -32,6 +32,14 @@ export interface BandRecording {
   canArrange: boolean;
 }
 
+// The band's MD adds a recording from the version's "…" menu (T-2806), which opens this dialog.
+const ADD_AUDIO = "cd:add-band-audio";
+
+/** Opens the dialog that adds the band's audio. */
+export function openAddAudio(): void {
+  window.dispatchEvent(new Event(ADD_AUDIO));
+}
+
 const minutes = (milliseconds: number) => {
   const seconds = Math.round(milliseconds / 1000);
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
@@ -39,7 +47,7 @@ const minutes = (milliseconds: number) => {
 
 /**
  * The bands' recordings of this version (R-06.7, T-2602): each band's members see theirs; the
- * band's MD adds one, replaces it or removes it. The browser checks the file (MP3 or M4A, at most
+ * band's MD adds one from the "…" menu, replaces it or removes it. The browser checks the file (MP3 or M4A, at most
  * 15 MB), reads its length and waveform, and uploads it to the band's private storage.
  */
 export function BandAudio({
@@ -64,6 +72,12 @@ export function BandAudio({
   const [state, setState] = useState<"idle" | "busy" | "failed" | "type" | "size" | "unreadable">(
     "idle",
   );
+
+  useEffect(() => {
+    const show = () => setOpen(true);
+    window.addEventListener(ADD_AUDIO, show);
+    return () => window.removeEventListener(ADD_AUDIO, show);
+  }, []);
 
   const choose = (picked: File | File[] | null) => {
     const one = Array.isArray(picked) ? (picked[0] ?? null) : picked;
@@ -146,17 +160,6 @@ export function BandAudio({
           )}
         </HStack>
       ))}
-      {bands.length > 0 && (
-        <HStack>
-          <Button
-            label={t("add")}
-            variant="ghost"
-            size="sm"
-            icon={<Icon icon={MusicalNoteIcon} />}
-            onClick={() => setOpen(true)}
-          />
-        </HStack>
-      )}
       <Dialog isOpen={open} onOpenChange={setOpen} padding={4}>
         <VStack gap={4}>
           <Heading level={2}>{t("addTitle")}</Heading>

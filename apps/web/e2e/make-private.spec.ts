@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { signOut, signUpAndConfirm, unique } from "./flows";
+import { moreAction, signOut, signUpAndConfirm, unique } from "./flows";
 
 test("R-02.4 making a version private keeps a frozen public version", async ({ page }) => {
   const title = `Salt Marsh ${Date.now()}`;
@@ -14,7 +14,8 @@ test("R-02.4 making a version private keeps a frozen public version", async ({ p
   await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
   const original = new URL(page.url()).pathname;
 
-  await page.getByRole("link", { name: "Make private" }).click();
+  // T-2806 Make private sits in the "…" menu.
+  await moreAction(page, "Make private");
   await expect(page.getByText("This cannot be undone.")).toBeVisible();
   await expect(page.getByText("under the name Ana Private")).toBeVisible();
   await page.getByRole("button", { name: "Make private" }).click();
@@ -26,12 +27,14 @@ test("R-02.4 making a version private keeps a frozen public version", async ({ p
   const copy = new URL(page.url()).pathname;
   await expect(page.getByText("Private", { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Outro" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Make private" })).toHaveCount(0);
+  await page.getByRole("button", { name: "More actions" }).click();
+  await expect(page.getByRole("menuitem", { name: "Make private" })).toHaveCount(0);
 
   // The public version is frozen: still the owner's, but nothing to change.
   await page.goto(original);
   await expect(page.getByText("Frozen public version")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Make private" })).toHaveCount(0);
+  await page.getByRole("button", { name: "More actions" }).click();
+  await expect(page.getByRole("menuitem", { name: "Make private" })).toHaveCount(0);
 
   // A visitor still reads the public version, never the private copy.
   await page.goto("/");

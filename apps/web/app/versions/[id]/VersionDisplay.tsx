@@ -72,7 +72,13 @@ export function StandLink({ base, label, icon }: { base: string; label: string; 
   const { chart, display } = useDisplay();
   if (!display) return null;
   return (
-    <Button label={label} variant="primary" href={displayHref(base, display, chart)} icon={icon} />
+    <Button
+      label={label}
+      variant="primary"
+      size="lg"
+      href={displayHref(base, display, chart)}
+      icon={icon}
+    />
   );
 }
 

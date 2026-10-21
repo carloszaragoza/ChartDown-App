@@ -169,7 +169,7 @@ test("R-02.2 the owner changes the version's source in the editor", async ({ pag
   // Only the source changed: back to the version, with no new revision.
   await expect(page).toHaveURL(new RegExp(`${address}$`));
   await expect(page.getByText("Acoustic · Album: Harbor Nights · 2024")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Play the video" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Watch the video" })).toBeVisible();
   await expect(page.getByRole("status").filter({ hasText: "Saved as revision" })).toHaveCount(0);
 });
 

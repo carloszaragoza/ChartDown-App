@@ -134,9 +134,9 @@ export function VideoLink({
   return (
     <>
       <Button
-        label={t("play")}
-        variant="ghost"
-        size={isIconOnly ? "md" : "sm"}
+        label={isIconOnly ? t("play") : t("watch")}
+        variant={isIconOnly ? "ghost" : "secondary"}
+        size={isIconOnly ? "md" : "lg"}
         icon={<Icon icon={PlayIcon} />}
         isIconOnly={isIconOnly}
         {...(isIconOnly ? { tooltip: t("play") } : {})}
