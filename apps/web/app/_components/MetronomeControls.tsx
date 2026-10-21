@@ -28,6 +28,7 @@ import { speedFor, tapTempo } from "../../lib/metronome/tapTempo";
 import {
   clampTempo,
   practiceTempo,
+  roundTempo,
   speedForTempo,
   TEMPO_MAX,
   TEMPO_MIN,
@@ -149,9 +150,9 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
   };
   const tempoHint = !written
     ? t("tempoNone")
-    : stepped === Math.round(written)
+    : stepped === roundTempo(written)
       ? t("tempoSame")
-      : t("tempoChart", { bpm: Math.round(written) });
+      : t("tempoChart", { bpm: roundTempo(written) });
   const soundControls = (
     <VStack gap={4}>
       {/* − and + at the touch size beside the field, which also takes a typed tempo (T-2808). */}
@@ -179,7 +180,6 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
               min={TEMPO_MIN}
               max={TEMPO_MAX}
               step={1}
-              isIntegerOnly
               isWheelEnabled={false}
               units="bpm"
               size="lg"
@@ -297,9 +297,9 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
   // plays, and its options beside it. The same control in stand mode, on the version page and on
   // a set's song.
   const shownTempo = written
-    ? Math.round((written * speed) / 100)
+    ? practiceTempo(written, speed)
     : tapped !== null
-      ? Math.round(tapped)
+      ? roundTempo(tapped)
       : null;
   const control = (
     <ButtonGroup label={t("metronome")} size="lg">

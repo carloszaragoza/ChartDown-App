@@ -2,14 +2,19 @@
 export const TEMPO_MIN = 30;
 export const TEMPO_MAX = 240;
 
-/** A practice tempo kept within the stepper's range, in whole beats per minute. */
+/** A tempo to a tenth of a beat per minute, as a chart may write it (tempo: 85.5). */
+export function roundTempo(bpm: number): number {
+  return Math.round(bpm * 10) / 10;
+}
+
+/** A practice tempo kept within the stepper's range, to a tenth of a beat per minute. */
 export function clampTempo(bpm: number): number {
-  return Math.min(TEMPO_MAX, Math.max(TEMPO_MIN, Math.round(bpm)));
+  return Math.min(TEMPO_MAX, Math.max(TEMPO_MIN, roundTempo(bpm)));
 }
 
 /** The tempo the metronome plays a chart written at `written` bpm at a speed in percent (R-11.9). */
 export function practiceTempo(written: number, speed: number): number {
-  return Math.round((written * speed) / 100);
+  return roundTempo((written * speed) / 100);
 }
 
 /** The practice speed, in percent, that plays a chart written at `written` bpm at `bpm`. */

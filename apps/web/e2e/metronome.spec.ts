@@ -238,6 +238,26 @@ test("R-11.9 T-2808 the tempo stepper plays at 74 while the chart still says 71"
   await expect(page.getByText(/Tempo 71/)).toBeVisible();
 });
 
+test("R-11.9 T-2808 a tempo with a decimal plays as written: 85.5, then 86.5", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, {
+    title: `Half Beat ${Date.now()}`,
+    content: "---\ntempo: 85.5\n---\n## Verse\n1 | 4 | 5 | 1\n",
+  });
+  await page.goto(`/versions/${id}/stand`);
+  const metronome = page.getByRole("group", { name: "Metronome" }).first();
+  await expect(metronome).toContainText("85.5");
+  await page.getByRole("button", { name: "Metronome options" }).click();
+  const sheet = page.getByRole("dialog");
+  await expect(sheet.getByRole("spinbutton", { name: "Tempo" })).toHaveValue("85.5");
+  await expect(sheet.getByText("Same as the chart tempo.")).toBeVisible();
+  await sheet.getByRole("button", { name: "Faster" }).click();
+  await expect(sheet.getByRole("spinbutton", { name: "Tempo" })).toHaveValue("86.5");
+  await expect(sheet.getByText("Chart tempo is 85.5.")).toBeVisible();
+});
+
 test("R-11.10 the space bar plays and stops; a pedal queues the next section while playing", async ({
   page,
   request,
