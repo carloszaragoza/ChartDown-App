@@ -79,7 +79,7 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
     taps.current = [...taps.current, performance.now()].slice(-12);
     const bpm = tapTempo(taps.current);
     if (bpm === null) return;
-    if (written) setSpeed(Math.min(200, Math.max(25, Math.round(speedFor(bpm, written) * 100))));
+    if (written) setSpeed(Math.min(200, Math.max(25, speedFor(bpm, written) * 100)));
     else setTapped(bpm);
   };
   const playFrom = (tempo?: number) =>

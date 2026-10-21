@@ -2,7 +2,7 @@
 export const TAP_RESET_MS = 2000;
 
 /**
- * The tempo of a run of taps, in beats per minute (R-11.9): the median of the last four gaps, so
+ * The tempo of a run of taps, in beats per minute to a tenth (R-11.9): the median of the last four gaps, so
  * one uneven tap doesn't throw it; null until there are two taps in a row.
  */
 export function tapTempo(taps: readonly number[]): number | null {
@@ -22,7 +22,8 @@ export function tapTempo(taps: readonly number[]): number | null {
   const median = Number.isInteger(middle)
     ? ((sorted[middle - 1] as number) + (sorted[middle] as number)) / 2
     : (sorted[Math.floor(middle)] as number);
-  return Math.round(Math.min(300, Math.max(20, 60000 / median)));
+  // To a tenth, as a chart may write it (85.5; owner's review, October 21, 2026).
+  return Math.round(Math.min(300, Math.max(20, 60000 / median)) * 10) / 10;
 }
 
 /** The practice speed that plays a chart written at `written` bpm at `wanted` bpm. */
