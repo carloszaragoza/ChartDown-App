@@ -11,7 +11,13 @@ import {
 
 describe("T-1505 the click", () => {
   it("R-11.7 the click is off by default, with no count-in", () => {
-    expect(DEFAULT_SOUND).toEqual({ click: false, volume: 70, countIn: false, beatLine: "steps" });
+    expect(DEFAULT_SOUND).toEqual({
+      click: false,
+      volume: 70,
+      countIn: false,
+      beatLine: "steps",
+      keepAwake: true,
+    });
     // Where nothing is stored (or storage is blocked), the defaults hold.
     expect(getSound()).toEqual(DEFAULT_SOUND);
   });
@@ -40,6 +46,7 @@ describe("T-2816 the beat line", () => {
       volume: 40,
       countIn: false,
       beatLine: "steps",
+      keepAwake: true,
     });
   });
 });
@@ -75,5 +82,13 @@ describe("T-2820 the speakers stay awake between clicks", () => {
     expect(AWAKE_HZ).toBeLessThanOrEqual(40);
     expect(20 * Math.log10(AWAKE_LEVEL)).toBeLessThan(-60);
     expect(AWAKE_LEVEL).toBeGreaterThan(0);
+  });
+});
+
+describe("T-2820 keeping the speakers awake is a choice", () => {
+  it("R-11.7 on by default and for settings saved before; off only when turned off", () => {
+    expect(parseSound(null).keepAwake).toBe(true);
+    expect(parseSound('{"click":true}').keepAwake).toBe(true);
+    expect(parseSound('{"keepAwake":false}').keepAwake).toBe(false);
   });
 });

@@ -85,7 +85,7 @@ export function useMetronome(chart: Chart) {
       // Asked for inside the tap, as Safari requires; the count waits for it below.
       const waking = audio.state === "running" ? null : audio.resume();
       // On from Play, so the speakers are already awake for the first click.
-      humming.current = keepSpeakersAwake(audio);
+      if (heard.current.keepAwake) humming.current = keepSpeakersAwake(audio);
       const list = clicks(bars, { from, countIn: heard.current.countIn, ...options });
       const metronome = new Metronome(list, audioClock(audio), (click, at) => {
         if (heard.current.click) {
@@ -144,6 +144,17 @@ export function useMetronome(chart: Chart) {
     },
     [],
   );
+
+  // Keep speakers awake turned on or off while it plays takes effect at once.
+  useEffect(() => {
+    const audio = context.current;
+    if (!isPlaying || !audio) return;
+    if (sound.keepAwake && !humming.current) humming.current = keepSpeakersAwake(audio);
+    if (!sound.keepAwake && humming.current) {
+      humming.current();
+      humming.current = null;
+    }
+  }, [isPlaying, sound.keepAwake]);
 
   /** The first bar of a section in the play order, to start there. */
   const firstBarOf = useCallback(

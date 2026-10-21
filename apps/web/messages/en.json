@@ -712,6 +712,8 @@
     "volume": "Volume",
     "countIn": "Count-in",
     "countInHint": "One bar of clicks before the first bar.",
+    "keepAwake": "Keep speakers awake",
+    "keepAwakeHint": "A hum too low to hear, so a monitor's or Bluetooth speakers never cut a click. Turn it off on studio monitors.",
     "beatLine": "Beat line",
     "beatLineSteps": "Steps",
     "beatLineSmooth": "Smooth",

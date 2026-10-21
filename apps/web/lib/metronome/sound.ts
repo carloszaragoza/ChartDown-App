@@ -11,6 +11,11 @@ export interface SoundSettings {
    * default, or smoothly from beat to beat.
    */
   beatLine: BeatLine;
+  /**
+   * A hum far below hearing while it plays, so speakers that sleep on silence (a display's,
+   * Bluetooth) never cut a click (T-2820). On by default; off for studio monitors.
+   */
+  keepAwake: boolean;
 }
 
 export type BeatLine = "steps" | "smooth";
@@ -20,6 +25,7 @@ export const DEFAULT_SOUND: SoundSettings = {
   volume: 70,
   countIn: false,
   beatLine: "steps",
+  keepAwake: true,
 };
 
 const KEY = "cd-metronome";
@@ -36,6 +42,7 @@ export function parseSound(raw: string | null): SoundSettings {
       volume: typeof saved.volume === "number" ? Math.min(100, Math.max(0, saved.volume)) : 70,
       countIn: saved.countIn === true,
       beatLine: saved.beatLine === "smooth" ? "smooth" : "steps",
+      keepAwake: saved.keepAwake !== false,
     };
   } catch {
     return DEFAULT_SOUND;
