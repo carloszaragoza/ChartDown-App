@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { authCookie } from "./cookie";
 import { cookies } from "next/headers";
 
 /** A Supabase client for this request, acting as the signed-in person through their cookies. */
@@ -8,6 +9,7 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL as string,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string,
     {
+      ...authCookie(),
       cookies: {
         getAll: () => store.getAll(),
         setAll: (cookiesToSet) => {
