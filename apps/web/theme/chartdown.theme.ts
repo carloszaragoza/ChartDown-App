@@ -16,9 +16,11 @@ export const chartdownTheme = defineTheme({
         when: { pointer: "coarse" },
         value: {
           tokens: {
-            "--size-element-sm": "36px",
+            // A tenth smaller than at first (owner's review, October 21, 2026); medium stays
+            // at the 44 px floor.
+            "--size-element-sm": "32px",
             "--size-element-md": "44px",
-            "--size-element-lg": "52px",
+            "--size-element-lg": "47px",
           },
           // The heading links home; it doesn't follow the element sizes.
           components: { "side-nav-heading": { base: { minHeight: "44px" } } },

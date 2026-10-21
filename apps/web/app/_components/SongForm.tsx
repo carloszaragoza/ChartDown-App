@@ -24,7 +24,7 @@ export interface SongFormItem {
 /**
  * A song's form: one button per section, each a link to it (Design Handoff 2.0, 1.5 and screen
  * 03). The current one is filled, never only underlined; a section played more than once says
- * which time it is (B1, B1², B1³). Stand mode uses the large size, 56 px on touch. On a phone it is
+ * which time it is (B1, B1², B1³). Stand mode uses the large size, 50 px on touch. On a phone it is
  * one strip that scrolls sideways inside itself, the current section kept in view (R-03.8).
  */
 export function SongForm({

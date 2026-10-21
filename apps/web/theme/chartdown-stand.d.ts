@@ -7,5 +7,5 @@
  */
 
 /// <reference path="./chartdown-stand.variants.d.ts" />
-import type { DefinedTheme } from "@astryxdesign/core/theme";
+import type { DefinedTheme } from '@astryxdesign/core/theme';
 export declare const chartdownStandTheme: DefinedTheme;

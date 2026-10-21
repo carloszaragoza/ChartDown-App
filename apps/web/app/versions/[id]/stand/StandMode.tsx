@@ -218,11 +218,22 @@ function StandModeView({
     standPreferences.server,
   );
   // Stand mode asks for full screen when it opens, where the browser allows it (R-03.12): most
-  // allow it only right after a tap, such as the one that opened it.
+  // allow it only right after a tap, such as the one that opened it. Not on a touch screen, where
+  // Safari draws its own close button over the way back (T-2813); View's Full screen asks there.
   useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) return;
     if (!document.fullscreenElement && root.current?.requestFullscreen)
       root.current.requestFullscreen().catch(() => {});
   }, []);
+  // In full screen on a touch screen the top bar moves down, below the browser's close button.
+  const isFullOnTouch = useSyncExternalStore(
+    (changed) => {
+      document.addEventListener("fullscreenchange", changed);
+      return () => document.removeEventListener("fullscreenchange", changed);
+    },
+    () => Boolean(document.fullscreenElement) && window.matchMedia("(pointer: coarse)").matches,
+    () => false,
+  );
   const atEdge = useRef({ first: true, last: false });
   const display: Display = { style, key: homeKey, beats };
   const formatter = chordFormatter(chart, { style, key: homeKey });
@@ -679,7 +690,7 @@ function StandModeView({
           data-stand={theme}
           style={{ background: "var(--color-background-body)", color: "var(--color-text-primary)" }}
         >
-          <VStack height="100dvh" gap={3} padding={4}>
+          <VStack height="100dvh" gap={3} padding={4} paddingBlockStart={isFullOnTouch ? 10 : 4}>
             {isPhone ? (
               // One line on a phone: back, the song and where we are, View, Previous and Next
               // (design handoff 5). The rest is in the View sheet.
