@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chart view controls, proposal</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&amp;family=Barlow+Condensed:wght@600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFFFFF}
+button{font:inherit;color:inherit}
+button:focus-visible,a:focus-visible{outline:2px solid #111113;outline-offset:2px}
+a{color:#111113;text-decoration:none}a:hover{color:#000000}
+</style>
+</helmet>
+<div style="background: #FFFFFF; color: #111113; font-family: 'Figtree', 'Helvetica Neue', sans-serif; font-size: 16px; line-height: 1.45; min-height: 100vh">
+
+<!-- prototype role switch (not part of the product) -->
+<div style="background: #F7F7F8; border-bottom: 1px dashed #C9C9CF">
+<div style="max-width: 1120px; margin: 0 auto; padding: 10px 32px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 14px; color: #55555D">
+<span style="font-weight: 600">Prototype only · view as</span>
+<div style="display: inline-flex; background: #ECECEF; border-radius: 10px; padding: 3px">
+<sc-for list="{{roles}}" as="r" hint-placeholder-count="2">
+<button type="button" onClick="{{r.pick}}" style="{{r.style}}">{{r.label}}</button>
+</sc-for>
+</div>
+<span>{{roleHint}}</span>
+</div>
+</div>
+
+<!-- HEADER -->
+<header style="max-width: 1120px; margin: 0 auto; padding: 28px 32px 24px; display: flex; flex-direction: column; gap: 18px">
+<a href="#top" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-weight: 500; color: #55555D">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+Catalog
+</a>
+
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 20px">
+<div style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 15px; color: #6B6B73">Charity Gale · Live</div>
+<h1 style="margin: 0; font-weight: 700; font-size: 40px; line-height: 1.05; letter-spacing: -0.02em">I Speak Jesus</h1>
+<div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 15px; font-weight: 500">
+<span style="background: #F4F4F5; border-radius: 8px; padding: 4px 10px">Key {{keyName}}</span>
+<span style="background: #F4F4F5; border-radius: 8px; padding: 4px 10px">Time 4/4</span>
+<span style="background: #F4F4F5; border-radius: 8px; padding: 4px 10px">Tempo 74</span>
+</div>
+<div style="font-size: 15px; color: #6B6B73">Arrangement by Carlos Zaragoza</div>
+</div>
+
+<!-- actions -->
+<div style="flex: 0 1 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; position: relative">
+<button type="button" style="display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; border: 0; border-radius: 12px; background: #111113; color: #FFFFFF; font-weight: 600; font-size: 16px; cursor: pointer">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg>
+Stand mode
+</button>
+<button type="button" style="display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; border: 0; border-radius: 12px; background: #F4F4F5; font-weight: 500; font-size: 16px; cursor: pointer">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"></path></svg>
+My notes
+</button>
+<sc-if value="{{isDirector}}" hint-placeholder-val="{{ true }}">
+<button type="button" style="display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; border: 0; border-radius: 12px; background: #F4F4F5; font-weight: 500; font-size: 16px; cursor: pointer">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg>
+Edit
+</button>
+</sc-if>
+<button type="button" onClick="{{toggleMore}}" aria-label="More actions" aria-expanded="{{moreOpen}}" style="width: 48px; min-height: 48px; border: 0; border-radius: 12px; background: {{moreBg}}; cursor: pointer; display: inline-flex; align-items: center; justify-content: center">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg>
+</button>
+<sc-if value="{{moreOpen}}" hint-placeholder-val="{{ false }}">
+<div role="menu" style="position: absolute; right: 0; top: 56px; z-index: 30; width: 260px; background: #FFFFFF; border: 1px solid #E4E4E8; border-radius: 14px; box-shadow: 0 12px 32px rgba(17,17,19,0.12); padding: 6px; display: flex; flex-direction: column">
+<button type="button" role="menuitem" onClick="{{closeMenus}}" style="text-align: left; min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; cursor: pointer; display: flex; align-items: center; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v5l3 2"></path><circle cx="12" cy="12" r="9"></circle></svg>History</button>
+<sc-if value="{{isDirector}}" hint-placeholder-val="{{ true }}">
+<button type="button" role="menuitem" onClick="{{closeMenus}}" style="text-align: left; min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; cursor: pointer; display: flex; align-items: center; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l11-2v12"></path><circle cx="6" cy="18" r="3"></circle><circle cx="17" cy="16" r="3"></circle></svg>Add the band's audio</button>
+<div style="height: 1px; background: #ECECEF; margin: 4px 6px"></div>
+<button type="button" role="menuitem" onClick="{{closeMenus}}" style="text-align: left; min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; cursor: pointer; display: flex; align-items: center; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>Make private</button>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</div>
+
+<!-- media -->
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid #E4E4E8; border-radius: 12px; background: #FFFFFF; font-weight: 500; font-size: 15px; cursor: pointer">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg>
+Watch the video
+</button>
+</div>
+</header>
+
+<!-- STICKY TOOLBAR -->
+<div style="position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,0.96); border-top: 1px solid #ECECEF; border-bottom: 1px solid #ECECEF">
+<div style="max-width: 1120px; margin: 0 auto; padding: 14px 32px; display: flex; flex-direction: column; gap: 14px">
+
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+<!-- numbers / letters -->
+<div role="radiogroup" aria-label="Chart view" style="display: inline-flex; background: #F4F4F5; border-radius: 12px; padding: 4px">
+<sc-for list="{{views}}" as="v" hint-placeholder-count="2">
+<button type="button" role="radio" aria-checked="{{v.on}}" onClick="{{v.pick}}" style="{{v.style}}">{{v.label}}</button>
+</sc-for>
+</div>
+
+<!-- key -->
+<div style="position: relative">
+<button type="button" onClick="{{toggleKey}}" aria-expanded="{{keyOpen}}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid #DADADF; border-radius: 12px; background: #FFFFFF; font-size: 15px; cursor: pointer">
+<span style="font-weight: 600">Key {{keyName}}</span><span style="color: #6B6B73">{{keyTag}}</span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<sc-if value="{{keyOpen}}" hint-placeholder-val="{{ false }}">
+<div role="listbox" style="position: absolute; left: 0; top: 52px; z-index: 30; width: 220px; background: #FFFFFF; border: 1px solid #E4E4E8; border-radius: 14px; box-shadow: 0 12px 32px rgba(17,17,19,0.12); padding: 6px; display: flex; flex-direction: column">
+<sc-for list="{{keys}}" as="k" hint-placeholder-count="5">
+<button type="button" role="option" aria-selected="{{k.on}}" onClick="{{k.pick}}" style="{{k.style}}"><span>{{k.label}}</span><span style="color: #6B6B73; font-size: 13px">{{k.tag}}</span></button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+
+<!-- beats -->
+<div style="display: inline-flex; align-items: center; gap: 8px">
+<button type="button" onClick="{{toggleBeatsInfo}}" aria-expanded="{{beatsInfo}}" style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 4px; border: 0; background: transparent; color: #55555D; font-size: 15px; cursor: pointer">
+Beat marks
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7.5v.5"></path></svg>
+</button>
+<div role="radiogroup" aria-label="Beat marks" style="display: inline-flex; background: #F4F4F5; border-radius: 12px; padding: 4px">
+<sc-for list="{{beatOpts}}" as="b" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{b.on}}" onClick="{{b.pick}}" style="{{b.style}}">{{b.label}}</button>
+</sc-for>
+</div>
+</div>
+
+<div style="flex: 1 1 auto"></div>
+
+<!-- add to set -->
+<div style="position: relative">
+<button type="button" onClick="{{toggleSet}}" aria-expanded="{{setOpen}}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid #DADADF; border-radius: 12px; background: #FFFFFF; font-weight: 600; font-size: 15px; cursor: pointer">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+Add to set
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<sc-if value="{{setOpen}}" hint-placeholder-val="{{ false }}">
+<div role="menu" style="position: absolute; right: 0; top: 52px; z-index: 30; width: 260px; background: #FFFFFF; border: 1px solid #E4E4E8; border-radius: 14px; box-shadow: 0 12px 32px rgba(17,17,19,0.12); padding: 6px; display: flex; flex-direction: column">
+<sc-for list="{{sets}}" as="s" hint-placeholder-count="2">
+<button type="button" role="menuitem" onClick="{{s.pick}}" style="text-align: left; min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; cursor: pointer; display: flex; flex-direction: column; justify-content: center"><span style="font-weight: 600">{{s.label}}</span><span style="font-size: 13px; color: #6B6B73">{{s.meta}}</span></button>
+</sc-for>
+<div style="height: 1px; background: #ECECEF; margin: 4px 6px"></div>
+<button type="button" role="menuitem" onClick="{{closeMenus}}" style="text-align: left; min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; cursor: pointer; font-weight: 500">+ New set</button>
+</div>
+</sc-if>
+</div>
+</div>
+
+<sc-if value="{{beatsInfo}}" hint-placeholder-val="{{ false }}">
+<div role="note" style="background: #F7F7F8; border-radius: 10px; padding: 10px 14px; font-size: 14px; color: #55555D">[Beat marks help text: explain what Off, Auto and Always show on the chart.]</div>
+</sc-if>
+
+<!-- roadmap + player -->
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+<nav aria-label="Song sections" style="flex: 1 1 520px; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{sections}}" as="sec" hint-placeholder-count="10">
+<button type="button" onClick="{{sec.pick}}" aria-current="{{sec.current}}" title="{{sec.full}}" style="{{sec.style}}">{{sec.label}}</button>
+</sc-for>
+</nav>
+<div style="position: relative; display: inline-flex; align-items: stretch">
+<button type="button" onClick="{{toggleClick}}" aria-pressed="{{clickOn}}" aria-label="{{clickAria}}" style="{{clickBtn}}">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l3.5 18h-13z"></path><path d="M12 15l5-8"></path></svg>
+<span>{{clickLabel}}</span>
+<sc-if value="{{clickOn}}" hint-placeholder-val="{{ false }}">
+<span aria-hidden="true" style="display: inline-flex; gap: 5px; margin-left: 2px"><sc-for list="{{beatDots}}" as="d" hint-placeholder-count="4"><span style="{{d.style}}"></span></sc-for></span>
+</sc-if>
+</button>
+<button type="button" onClick="{{toggleMetro}}" aria-expanded="{{metroOpen}}" aria-label="Metronome settings" style="{{metroSetBtn}}">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"></path><circle cx="16" cy="7" r="2"></circle><circle cx="8" cy="17" r="2"></circle></svg>
+</button>
+<sc-if value="{{metroOpen}}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-label="Metronome settings" style="{{metroPanel}}; right: 0; top: 56px">
+<div style="display: flex; justify-content: space-between; align-items: center"><div style="font-weight: 700; font-size: 18px">Metronome</div><button type="button" onClick="{{toggleMetro}}" style="{{doneBtn}}">Done</button></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="font-weight: 600; font-size: 14px">Tempo</div>
+<div style="display: flex; align-items: center; gap: 10px">
+<button type="button" onClick="{{bpmDown}}" aria-label="Slower" style="{{stepBtn}}">−</button>
+<div style="flex: 1 1 auto; text-align: center; font-weight: 800; font-size: 28px">{{bpm}} <span style="font-size: 15px; font-weight: 600; {{mutedInline}}">BPM</span></div>
+<button type="button" onClick="{{bpmUp}}" aria-label="Faster" style="{{stepBtn}}">+</button>
+</div>
+<div style="font-size: 13px; {{mutedInline}}">{{bpmNote}}</div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="font-weight: 600; font-size: 14px">Count-in</div>
+<div style="{{mTrack}}"><sc-for list="{{countOpts}}" as="o" hint-placeholder-count="3"><button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="{{o.style}}">{{o.label}}</button></sc-for></div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><div style="font-weight: 600; font-size: 14px">Sound</div>
+<div style="{{mTrack}}"><sc-for list="{{soundOpts}}" as="o" hint-placeholder-count="3"><button type="button" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="{{o.style}}">{{o.label}}</button></sc-for></div></div>
+</div>
+</sc-if>
+</div>
+</div>
+</div>
+</div>
+
+<!-- CHART PREVIEW -->
+<main style="max-width: 1120px; margin: 0 auto; padding: 24px 32px 80px; display: flex; flex-direction: column; gap: 20px">
+<section style="{{introCard}}">
+<div style="display: flex; align-items: baseline; gap: 10px"><h2 style="margin: 0; font-weight: 700; font-size: 24px">Intro</h2><span style="font-size: 14px; color: #6B6B73">4 bars</span></div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-left: 4px solid #111113; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 48px; text-align: center; line-height: 1">
+<sc-for list="{{introBars}}" as="bar" hint-placeholder-count="4">
+<div style="border-right: 4px solid #111113; padding: 24px 0">{{bar.main}}<sup style="font-size: 22px">{{bar.sup}}</sup></div>
+</sc-for>
+</div>
+</section>
+
+<section style="{{verseCard}}">
+<div style="display: flex; align-items: baseline; gap: 10px"><h2 style="margin: 0; font-weight: 700; font-size: 24px">Verse 1A</h2><span style="font-size: 14px; color: #6B6B73">8 bars</span></div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-left: 4px solid #111113; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 48px; text-align: center; line-height: 1">
+<div style="border-right: 4px solid #111113; padding: 24px 0">{{v1}}</div>
+<div style="border-right: 4px solid #111113; padding: 24px 0; display: flex; justify-content: space-around">
+<span>{{v2}}<sup style="font-size: 22px">sus</sup></span><span>{{v1}}</span>
+</div>
+</div>
+</section>
+</main>
+
+<!-- toast -->
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 40; background: #111113; color: #FFFFFF; border-radius: 12px; padding: 12px 18px; font-weight: 500; display: flex; align-items: center; gap: 14px; box-shadow: 0 12px 32px rgba(17,17,19,0.2)">
+{{toast}}
+<button type="button" onClick="{{dismissToast}}" style="border: 0; background: transparent; color: #FFFFFF; font-weight: 700; min-height: 36px; cursor: pointer; text-decoration: underline">Undo</button>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { role: 'director', view: 'numbers', key: 'E', keyOpen: false, moreOpen: false, setOpen: false, beats: 'auto', beatsInfo: false, active: 'V1', toast: '', clickOn: false, beat: 0, bpm: 74, countIn: '1', clickSound: 'click', metroOpen: false };
+  }
+
+  startTimer(bpm) {
+    var self = this;
+    if (this.timer) clearInterval(this.timer);
+    this.timer = setInterval(function () { self.setState(function (s) { return { beat: (s.beat % 4) + 1 }; }); }, Math.round(60000 / bpm));
+  }
+  stopTimer() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
+  componentWillUnmount() { this.stopTimer(); if (this.onKey) window.removeEventListener('keydown', this.onKey); }
+  metroVals(c) {
+    var self = this, st = this.state;
+    function seg(on) {
+      return 'flex: 1 1 0; min-height: 40px; padding: 0 10px; border: 0; border-radius: 9px; cursor: pointer; font-size: 15px; ' + (on ? 'background: ' + c.card + '; color: ' + c.text + '; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.12)' : 'background: transparent; color: ' + c.muted + '; font-weight: 500');
+    }
+    function setBpm(v) { v = Math.max(30, Math.min(240, v)); self.setState({ bpm: v }); if (st.clickOn) self.startTimer(v); }
+    var dots = [1, 2, 3, 4].map(function (n) {
+      var on = st.beat === n;
+      var col = on ? (n === 1 ? c.accent : c.dotOn) : c.dotOff;
+      return { style: 'width: 9px; height: 9px; border-radius: 50%; background: ' + col };
+    });
+    return {
+      clickOn: st.clickOn,
+      clickLabel: st.clickOn ? 'Stop' : 'Click ' + st.bpm,
+      clickAria: st.clickOn ? 'Stop metronome' : 'Start metronome at ' + st.bpm + ' BPM',
+      beatDots: dots,
+      toggleClick: function () {
+        if (st.clickOn) { self.stopTimer(); self.setState({ clickOn: false, beat: 0 }); }
+        else { self.setState({ clickOn: true, beat: 1 }); self.startTimer(st.bpm); }
+      },
+      clickBtn: 'display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px; border: 0; border-radius: 12px 0 0 12px; font-weight: 700; font-size: 16px; cursor: pointer; ' + (st.clickOn ? 'background: ' + c.runBg + '; color: ' + c.runText : 'background: ' + c.primary + '; color: ' + c.primaryText),
+      metroSetBtn: 'width: 46px; min-height: 48px; border: 0; border-left: 1px solid ' + c.split + '; border-radius: 0 12px 12px 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; ' + (st.clickOn ? 'background: ' + c.runBg + '; color: ' + c.runText : 'background: ' + c.primary + '; color: ' + c.primaryText),
+      metroOpen: st.metroOpen,
+      toggleMetro: function () { self.setState({ metroOpen: !st.metroOpen, settingsOpen: false, moreOpen: false, keyOpen: false, setOpen: false }); },
+      metroPanel: 'position: absolute; z-index: 40; width: 320px; background: ' + c.card + '; color: ' + c.text + '; border: 1px solid ' + c.soft + '; border-radius: 18px; box-shadow: 0 16px 40px rgba(0,0,0,0.25); padding: 18px; display: flex; flex-direction: column; gap: 16px',
+      doneBtn: 'min-height: 40px; padding: 0 14px; border: 0; border-radius: 10px; background: ' + c.soft + '; color: ' + c.text + '; font-weight: 600; cursor: pointer',
+      stepBtn: 'width: 48px; height: 48px; border: 0; border-radius: 12px; background: ' + c.soft + '; color: ' + c.text + '; font-size: 24px; font-weight: 700; cursor: pointer',
+      bpm: st.bpm,
+      bpmNote: st.bpm === 74 ? 'Same as the chart tempo.' : 'Chart tempo is 74.',
+      bpmDown: function () { setBpm(st.bpm - 1); },
+      bpmUp: function () { setBpm(st.bpm + 1); },
+      mutedInline: 'color: ' + c.muted,
+      mTrack: 'display: flex; background: ' + c.soft + '; border-radius: 12px; padding: 4px; gap: 2px',
+      countOpts: [['0', 'Off'], ['1', '1 bar'], ['2', '2 bars']].map(function (o) { var on = st.countIn === o[0]; return { label: o[1], on: on, style: seg(on), pick: function () { self.setState({ countIn: o[0] }); } }; }),
+      soundOpts: [['click', 'Click'], ['wood', 'Wood'], ['beep', 'Beep']].map(function (o) { var on = st.clickSound === o[0]; return { label: o[1], on: on, style: seg(on), pick: function () { self.setState({ clickSound: o[0] }); } }; })
+    };
+  }
+  renderVals() {
+    var self = this;
+    var st = this.state;
+    function seg(on) {
+      return on
+        ? 'min-height: 36px; padding: 0 14px; border: 0; border-radius: 9px; background: #FFFFFF; color: #111113; font-weight: 600; font-size: 15px; cursor: pointer; box-shadow: 0 1px 2px rgba(17,17,19,0.08)'
+        : 'min-height: 36px; padding: 0 14px; border: 0; border-radius: 9px; background: transparent; color: #6B6B73; font-weight: 500; font-size: 15px; cursor: pointer';
+    }
+    var roleList = [{ id: 'director', label: 'Music director' }, { id: 'musician', label: 'Musician' }];
+    var keyData = { D: ['D', 'Bm'], Eb: ['Eb', 'Cm'], E: ['E', 'C#m'], F: ['F', 'Dm'], G: ['G', 'Em'] };
+    var keyOrder = ['D', 'Eb', 'E', 'F', 'G'];
+    var root = keyData[st.key][0], rel = keyData[st.key][1];
+    var letters = st.view === 'letters';
+    var introBars = letters
+      ? [{ main: root, sup: '' }, { main: root, sup: '' }, { main: rel, sup: '7' }, { main: rel, sup: '7' }]
+      : [{ main: '1', sup: '' }, { main: '1', sup: '' }, { main: '6', sup: '-7' }, { main: '6', sup: '-7' }];
+    var secs = [
+      ['In', 'Intro'], ['V1', 'Verse 1A'], ['V2', 'Verse 2'], ['C1', 'Chorus 1'], ['V3', 'Verse 3'], ['C2', 'Chorus 2'],
+      ['V4', 'Verse 4'], ['V4²', 'Verse 4, 2nd time'], ['C3', 'Chorus 3'], ['V1²', 'Verse 1, 2nd time']
+    ];
+    var activeCard = 'border: 2px solid #111113; border-radius: 18px; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px';
+    var idleCard = 'border: 1px solid #ECECEF; border-radius: 18px; padding: 19px 21px; display: flex; flex-direction: column; gap: 14px';
+    var metro = this.metroVals({ card: '#FFFFFF', text: '#111113', muted: '#6B6B73', soft: '#F4F4F5', primary: '#111113', primaryText: '#FFFFFF', runBg: '#FDE8E8', runText: '#C93A3A', split: 'rgba(255,255,255,0.25)', accent: '#D93C3C', dotOn: '#C93A3A', dotOff: '#F3B7B7' });
+    return Object.assign(metro, {
+      roles: roleList.map(function (r) { return { label: r.label, style: seg(st.role === r.id).replace('min-height: 36px', 'min-height: 32px'), pick: function () { self.setState({ role: r.id, moreOpen: false }); } }; }),
+      roleHint: st.role === 'director' ? 'Directors see Edit, band audio and privacy.' : 'Musicians only see what helps them play.',
+      isDirector: st.role === 'director',
+      moreOpen: st.moreOpen,
+      moreBg: st.moreOpen ? '#E4E4E8' : '#F4F4F5',
+      toggleMore: function () { self.setState({ moreOpen: !st.moreOpen, keyOpen: false, setOpen: false }); },
+      closeMenus: function () { self.setState({ moreOpen: false, keyOpen: false, setOpen: false }); },
+      views: [{ id: 'numbers', label: 'Numbers' }, { id: 'letters', label: 'Letters' }].map(function (v) {
+        return { label: v.label, on: st.view === v.id, style: seg(st.view === v.id), pick: function () { self.setState({ view: v.id }); } };
+      }),
+      keyName: st.key,
+      keyTag: st.key === 'E' ? 'original' : 'transposed',
+      keyOpen: st.keyOpen,
+      toggleKey: function () { self.setState({ keyOpen: !st.keyOpen, moreOpen: false, setOpen: false }); },
+      keys: keyOrder.map(function (k) {
+        var on = st.key === k;
+        return {
+          label: 'Key ' + k, tag: k === 'E' ? 'original' : '', on: on,
+          style: 'min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 15px; ' + (on ? 'background: #F4F4F5; font-weight: 700' : 'background: transparent; font-weight: 500'),
+          pick: function () { self.setState({ key: k, keyOpen: false }); }
+        };
+      }),
+      beatsInfo: st.beatsInfo,
+      toggleBeatsInfo: function () { self.setState({ beatsInfo: !st.beatsInfo }); },
+      beatOpts: [{ id: 'off', label: 'Off' }, { id: 'auto', label: 'Auto' }, { id: 'always', label: 'Always' }].map(function (b) {
+        return { label: b.label, on: st.beats === b.id, style: seg(st.beats === b.id), pick: function () { self.setState({ beats: b.id }); } };
+      }),
+      setOpen: st.setOpen,
+      toggleSet: function () { self.setState({ setOpen: !st.setOpen, moreOpen: false, keyOpen: false }); },
+      sets: [{ label: '[Next Sunday set]', meta: '[date] · 6 songs' }, { label: '[Youth night]', meta: '[date] · 4 songs' }].map(function (s) {
+        return { label: s.label, meta: s.meta, pick: function () { self.setState({ setOpen: false, toast: 'Added to ' + s.label }); } };
+      }),
+      sections: secs.map(function (s) {
+        var on = st.active === s[0];
+        return {
+          label: s[0], full: s[1], current: on ? 'true' : 'false',
+          style: 'min-width: 52px; min-height: 48px; padding: 0 14px; border: 0; border-radius: 12px; font-weight: 700; font-size: 19px; cursor: pointer; ' + (on ? 'background: #111113; color: #FFFFFF' : 'background: #F4F4F5; color: #111113'),
+          pick: function () { self.setState({ active: s[0] }); }
+        };
+      }),
+      introBars: introBars,
+      v1: letters ? root : '1',
+      v2: letters ? root : '1',
+      introCard: st.active === 'In' ? activeCard : idleCard,
+      verseCard: st.active === 'V1' ? activeCard : idleCard,
+      hasToast: st.toast !== '',
+      toast: st.toast,
+      dismissToast: function () { self.setState({ toast: '' }); }
+    });
+  }
+}
+</script>
+</body>
+</html>
