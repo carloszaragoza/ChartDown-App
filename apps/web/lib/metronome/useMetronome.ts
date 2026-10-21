@@ -42,6 +42,10 @@ export function useMetronome(chart: Chart) {
   useEffect(() => {
     heard.current = sound;
   }, [sound]);
+  // The beat line's motion (T-2816) is drawn by the chart's styles from the page's choice.
+  useEffect(() => {
+    document.documentElement.dataset.beatLine = sound.beatLine;
+  }, [sound.beatLine]);
   // The tempo asked of the person and the practice speed, kept for what is queued later.
   const asked = useRef<{ tempo?: number; speed?: number }>({});
   // The section queued after the one that sounds (R-11.15), and the click it starts on.

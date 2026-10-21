@@ -1,4 +1,4 @@
-/** The metronome's sound, chosen on each device and kept there (R-11.7, R-11.8). */
+/** The metronome's sound and its beat line, chosen on each device and kept there (R-11.7, R-11.8). */
 export interface SoundSettings {
   /** The click, off by default: the pulse is the metronome, the sound is a choice. */
   click: boolean;
@@ -6,28 +6,45 @@ export interface SoundSettings {
   volume: number;
   /** One bar of clicks before the first bar. */
   countIn: boolean;
+  /**
+   * How the line along the playing bar moves (R-11.3, T-2816): in steps, a beat at a time, by
+   * default, or smoothly from beat to beat.
+   */
+  beatLine: BeatLine;
 }
 
-export const DEFAULT_SOUND: SoundSettings = { click: false, volume: 70, countIn: false };
+export type BeatLine = "steps" | "smooth";
+
+export const DEFAULT_SOUND: SoundSettings = {
+  click: false,
+  volume: 70,
+  countIn: false,
+  beatLine: "steps",
+};
 
 const KEY = "cd-metronome";
 const CHANGED = "cd-metronome-change";
 
 let cached: { raw: string | null; value: SoundSettings } = { raw: null, value: DEFAULT_SOUND };
 
-function read(raw: string | null): SoundSettings {
-  if (raw === cached.raw) return cached.value;
-  let value = DEFAULT_SOUND;
+/** Saved settings read back, each one checked; anything unknown falls back to its default. */
+export function parseSound(raw: string | null): SoundSettings {
   try {
     const saved = raw ? (JSON.parse(raw) as Partial<SoundSettings>) : {};
-    value = {
+    return {
       click: saved.click === true,
       volume: typeof saved.volume === "number" ? Math.min(100, Math.max(0, saved.volume)) : 70,
       countIn: saved.countIn === true,
+      beatLine: saved.beatLine === "smooth" ? "smooth" : "steps",
     };
   } catch {
-    value = DEFAULT_SOUND;
+    return DEFAULT_SOUND;
   }
+}
+
+function read(raw: string | null): SoundSettings {
+  if (raw === cached.raw) return cached.value;
+  const value = parseSound(raw);
   cached = { raw, value };
   return value;
 }
