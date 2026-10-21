@@ -433,6 +433,7 @@
     "songTitle": "Song title",
     "artists": "Artists",
     "artistsHint": "Separate several artists with commas.",
+    "artistsExample": "Artist one, Artist two",
     "chart": "Chart (ChartDown)",
     "author": "Arrangement by",
     "source": "Source",
