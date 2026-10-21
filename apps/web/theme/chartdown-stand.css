@@ -707,9 +707,9 @@
 @media (pointer: coarse) {
   @scope ([data-astryx-theme="chartdown-stand"]) to ([data-astryx-theme]) {
     :scope {
-    --size-element-sm: 36px;
+    --size-element-sm: 32px;
     --size-element-md: 44px;
-    --size-element-lg: 52px;
+    --size-element-lg: 47px;
   }
 
     .astryx-side-nav-heading {
@@ -733,7 +733,7 @@
 @media (pointer: coarse) {
   @scope ([data-astryx-theme="chartdown-stand"]) to ([data-astryx-theme]) {
     :scope {
-    --size-element-lg: 56px;
+    --size-element-lg: 50px;
   }
   }
 }

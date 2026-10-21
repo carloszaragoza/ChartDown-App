@@ -24,7 +24,6 @@ export default async function VersionPage({
     view?: string;
     key?: string;
     beats?: string;
-    set?: string;
     report?: string;
     saved?: string;
   }>;
@@ -43,7 +42,9 @@ export default async function VersionPage({
   if (!revision) notFound();
 
   const search = await searchParams;
-  const setChoices = auth.user ? await mySets(supabase, auth.user.id) : [];
+  const { sets: setChoices, bands: setBands } = auth.user
+    ? await mySets(supabase, auth.user.id)
+    : { sets: [], bands: [] };
   // The bands' recordings of this version: the database gives each person their bands' only.
   const a = await getTranslations("audio");
   const arranged = auth.user ? await bandsArranged(supabase, auth.user.id) : [];
@@ -100,7 +101,7 @@ export default async function VersionPage({
           : null
       }
       setChoices={setChoices}
-      setFailed={search.set === "failed"}
+      setBands={setBands}
       phone={await guessPhone()}
       {...(auth.user
         ? {
@@ -123,11 +124,14 @@ export default async function VersionPage({
   );
 }
 
-/** The sets of the bands where this person is the MD, to add the version to (R-05.2). */
+/**
+ * The sets of the bands where this person is the MD, to add the version to (R-05.2), and those
+ * bands, to start a new set in (T-2807).
+ */
 async function mySets(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
-): Promise<SetChoice[]> {
+): Promise<{ sets: SetChoice[]; bands: { id: string; name: string | null }[] }> {
   const { data: bands } = await supabase
     .from("band_members")
     .select("band_id, band:bands(name, is_personal)")
@@ -142,17 +146,21 @@ async function mySets(
       return [row.band_id as string, band?.is_personal ? null : (band?.name ?? "")];
     }),
   );
-  if (names.size === 0) return [];
+  const arranged = [...names].map(([id, name]) => ({ id, name }));
+  if (names.size === 0) return { sets: [], bands: arranged };
   const { data: sets } = await supabase
     .from("sets")
     .select("id, band_id, name, date")
     .in("band_id", [...names.keys()])
     .order("date", { ascending: true, nullsFirst: false });
-  return (sets ?? []).map((set) => ({
-    id: set.id as string,
-    band: names.get(set.band_id as string) ?? null,
-    name: set.name as string,
-  }));
+  return {
+    sets: (sets ?? []).map((set) => ({
+      id: set.id as string,
+      band: names.get(set.band_id as string) ?? null,
+      name: set.name as string,
+    })),
+    bands: arranged,
+  };
 }
 
 /** The bands this person arranges as their MD, whose recordings they add (R-06.7). */

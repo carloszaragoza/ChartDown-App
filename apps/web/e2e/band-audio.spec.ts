@@ -154,7 +154,6 @@ test("R-06.7 a downloaded set keeps its songs' recordings: stand mode plays them
   await expect(page.getByText(`${band}'s recording · 0:08`)).toBeVisible();
   // Adding the song opens the set's page.
   await addToSet(page, `${band} · ${set}`);
-  await expectStatus(page, "added at the end");
 
   await page.goto("/");
   await signOut(page);

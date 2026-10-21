@@ -72,7 +72,6 @@ test("R-08.2 R-08.4 R-11.11 in airplane mode every song opens with its notes, re
   for (const version of versions) {
     await page.goto(`/versions/${version}`);
     await addToSet(page, `${band} · ${set}`);
-    await expectStatus(page, "added at the end");
   }
   await page.goto(`/versions/${versions[0]}/notes`);
   await page.getByRole("radiogroup", { name: "Bands" }).getByRole("radio", { name: band }).click();

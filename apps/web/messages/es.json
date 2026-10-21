@@ -214,7 +214,7 @@
     "writtenIn": "(escrito en {key})",
     "nthTime": "{time, selectordinal, other {#.ª}} vez",
     "keyChange": "Cambio de tono: {key}",
-    "beatsLabel": "Pulsos",
+    "beatsLabel": "Marcas de pulso",
     "beatsName": "Diagonales de pulso",
     "beatsOff": "No",
     "beatsAuto": "Auto",
@@ -233,7 +233,9 @@
       "semi": "semifuerte",
       "weak": "débil"
     },
-    "queued": "sigue a continuación"
+    "queued": "sigue a continuación",
+    "beatsHelp": "No: sin marcas de pulso. Auto: solo en los compases donde dicen algo. Siempre: en todos los compases.",
+    "beatsAbout": "Sobre las marcas de pulso"
   },
   "auth": {
     "email": "Correo electrónico",
@@ -598,7 +600,9 @@
     "key": "Tono",
     "writtenOption": "{key} (escrito)",
     "apply": "Aplicar",
-    "written": "Volver al tono escrito, {key}"
+    "written": "Volver al tono escrito, {key}",
+    "original": "Tono {key} · original",
+    "transposed": "Tono {key} · transpuesto"
   },
   "notes": {
     "personal": "Mis notas (espacio personal)",
@@ -849,9 +853,7 @@
     "delete": "Borrar el set",
     "deleteConfirm": "Sí, borrar este set y sus canciones. Las versiones no cambian.",
     "deleteButton": "Borrar set",
-    "addTo": "Agregar a un set",
-    "chooseSet": "Elige un set",
-    "addButton": "Agregar",
+    "addTo": "Agregar a set",
     "addFailed": "No se pudo agregar la canción a ese set.",
     "status": {
       "created": "Se creó el set.",
@@ -940,7 +942,12 @@
     "timeLabel": "Hora",
     "createMissing": "Escribe un nombre y elige un tipo primero.",
     "personalHint": "Tus propios sets: nadie más los ve.",
-    "settings": "Ajustes"
+    "settings": "Ajustes",
+    "added": "Agregada a {set}",
+    "undo": "Deshacer",
+    "undone": "Quitada de {set}",
+    "newSet": "Nuevo set",
+    "newSetIn": "Nuevo set en {band}"
   },
   "offline": {
     "title": "Sin conexión",

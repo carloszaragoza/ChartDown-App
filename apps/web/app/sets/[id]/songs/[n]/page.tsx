@@ -20,7 +20,9 @@ import { createClient } from "../../../../../lib/supabase/server";
 import { StandIcon } from "../../../../_components/ActionIcons";
 import { BeatsControl } from "../../../../_components/BeatsControl";
 import { AudioButton } from "../../../../_components/AudioDock";
+import { ChartControlsSlot } from "../../../../_components/ChartControlsSlot";
 import { ChartPreview } from "../../../../_components/ChartPreview";
+import { ViewOptions } from "../../../../_components/ViewOptions";
 import { saveAudioStart } from "../../../../versions/[id]/audio";
 import { setRecording } from "../../../../../lib/sets/recording";
 import { LinkChoice } from "../../../../_components/LinkChoice";
@@ -134,62 +136,67 @@ export default async function SetSongPage({
       contentWidth={1040}
       header={
         <LayoutHeader hasDivider>
-          <HStack gap={4} vAlign="start" hAlign="between" wrap="wrap">
-            <VStack gap={1}>
-              <Breadcrumbs variant="supporting">
-                <BreadcrumbItem href={`/sets/${song.set_id}`}>{song.set_name}</BreadcrumbItem>
-                <BreadcrumbItem>{t("songOf", { position, total })}</BreadcrumbItem>
-              </Breadcrumbs>
-              <Heading level={1}>{song.title}</Heading>
-              <HStack gap={2} vAlign="center" wrap="wrap">
-                <Token label={`${c("key")} ${keyName(homeKey)}`} size="sm" />
-                {keyName(homeKey) !== keyName(chart.key) && (
-                  <Text type="supporting">{c("writtenIn", { key: keyName(chart.key) })}</Text>
-                )}
-                <Token label={`${c("time")} ${chart.header.meter ?? "4/4"}`} size="sm" />
-              </HStack>
-              <Text color="secondary">
-                {t("by", { author: song.author_name })} ·{" "}
-                {t("revision", { number: revision.number })} ·{" "}
-                {!leads || as
-                  ? t("notesForYou", { count: shown.forYou })
-                  : song.role === "md"
-                    ? t("allNotesMd")
-                    : t("allNotesTempMd")}
-              </Text>
-              {recording && (
-                <HStack gap={1} vAlign="center">
-                  <AudioButton
-                    recording={recording}
-                    chart={chart}
-                    save={
-                      leads
-                        ? saveAudioStart.bind(null, recording.bandId, recording.versionId)
-                        : undefined
-                    }
-                  />
-                  <Text type="supporting">{a("bandRecording", { band: recording.band })}</Text>
+          {/* The chart's metronome and View options at the header's end, on the actions' line;
+              on a phone they wrap under the actions (owner's review, October 21, 2026). */}
+          <HStack gap={4} vAlign="end" hAlign="between" wrap="wrap">
+            <VStack gap={4}>
+              <VStack gap={1}>
+                <Breadcrumbs variant="supporting">
+                  <BreadcrumbItem href={`/sets/${song.set_id}`}>{song.set_name}</BreadcrumbItem>
+                  <BreadcrumbItem>{t("songOf", { position, total })}</BreadcrumbItem>
+                </Breadcrumbs>
+                <Heading level={1}>{song.title}</Heading>
+                <HStack gap={2} vAlign="center" wrap="wrap">
+                  <Token label={`${c("key")} ${keyName(homeKey)}`} size="sm" />
+                  {keyName(homeKey) !== keyName(chart.key) && (
+                    <Text type="supporting">{c("writtenIn", { key: keyName(chart.key) })}</Text>
+                  )}
+                  <Token label={`${c("time")} ${chart.header.meter ?? "4/4"}`} size="sm" />
                 </HStack>
-              )}
+                <Text color="secondary">
+                  {t("by", { author: song.author_name })} ·{" "}
+                  {t("revision", { number: revision.number })} ·{" "}
+                  {!leads || as
+                    ? t("notesForYou", { count: shown.forYou })
+                    : song.role === "md"
+                      ? t("allNotesMd")
+                      : t("allNotesTempMd")}
+                </Text>
+                {recording && (
+                  <HStack gap={1} vAlign="center">
+                    <AudioButton
+                      recording={recording}
+                      chart={chart}
+                      save={
+                        leads
+                          ? saveAudioStart.bind(null, recording.bandId, recording.versionId)
+                          : undefined
+                      }
+                    />
+                    <Text type="supporting">{a("bandRecording", { band: recording.band })}</Text>
+                  </HStack>
+                )}
+              </VStack>
+              <HStack gap={2} vAlign="center" wrap="wrap">
+                <Button
+                  label={t("previousSong")}
+                  href={`/sets/${song.set_id}/songs/${position - 1}${keep}`}
+                  isDisabled={position <= 1}
+                />
+                <Button
+                  label={t("nextSong")}
+                  href={`/sets/${song.set_id}/songs/${position + 1}${keep}`}
+                  isDisabled={position >= total}
+                />
+                <Button
+                  label={t("startStand")}
+                  variant="primary"
+                  href={standHref}
+                  icon={<StandIcon />}
+                />
+              </HStack>
             </VStack>
-            <HStack gap={2} vAlign="center" wrap="wrap">
-              <Button
-                label={t("previousSong")}
-                href={`/sets/${song.set_id}/songs/${position - 1}${keep}`}
-                isDisabled={position <= 1}
-              />
-              <Button
-                label={t("nextSong")}
-                href={`/sets/${song.set_id}/songs/${position + 1}${keep}`}
-                isDisabled={position >= total}
-              />
-              <Button
-                label={t("startStand")}
-                variant="primary"
-                href={standHref}
-                icon={<StandIcon />}
-              />
-            </HStack>
+            <ChartControlsSlot />
           </HStack>
         </LayoutHeader>
       }
@@ -210,45 +217,6 @@ export default async function SetSongPage({
                 }
               />
             )}
-            <HStack gap={4} vAlign="center" wrap="wrap">
-              <LinkChoice
-                phone={phone}
-                label={v("style")}
-                current={style}
-                options={(["numbers", "letters"] as const).map((option) => ({
-                  value: option,
-                  label: v(option),
-                  href: withPreview(viewing(beats, option === "letters")),
-                }))}
-              />
-              <BeatsControl
-                value={beats}
-                hrefs={{
-                  off: withPreview(viewing("off")),
-                  auto: withPreview(viewing("auto")),
-                  always: withPreview(viewing("always")),
-                }}
-                words={{
-                  label: c("beatsLabel"),
-                  name: c("beatsName"),
-                  off: c("beatsOff"),
-                  auto: c("beatsAuto"),
-                  always: c("beatsAlways"),
-                }}
-              />
-              {leads && (
-                <LinkChoice
-                  phone={phone}
-                  label={s("viewAs")}
-                  current={as ?? "all"}
-                  options={[null, ...viewAsOptions(song, song.instruments)].map((option) => ({
-                    value: option ?? "all",
-                    label: option ? nameOf(option) : s("allNotes"),
-                    href: `${path}${query({ view: style === "letters" ? "letters" : "", beats: beats === "auto" ? "" : beats, as: option ?? "" })}`,
-                  }))}
-                />
-              )}
-            </HStack>
             {shown.unplaced.length > 0 && (
               <section aria-labelledby="unplaced">
                 <VStack gap={2}>
@@ -270,7 +238,52 @@ export default async function SetSongPage({
               homeKey={homeKey}
               isFramed
               hasForm
+              hasControlsInHeader
               beats={beats}
+              // Numbers / Letters, Beat marks and View as in one sheet beside the metronome, as on
+              // the version page and in stand mode (T-2807).
+              viewOptions={
+                <ViewOptions>
+                  <LinkChoice
+                    phone={phone}
+                    label={v("style")}
+                    current={style}
+                    options={(["numbers", "letters"] as const).map((option) => ({
+                      value: option,
+                      label: v(option),
+                      href: withPreview(viewing(beats, option === "letters")),
+                    }))}
+                  />
+                  <BeatsControl
+                    value={beats}
+                    hrefs={{
+                      off: withPreview(viewing("off")),
+                      auto: withPreview(viewing("auto")),
+                      always: withPreview(viewing("always")),
+                    }}
+                    words={{
+                      label: c("beatsLabel"),
+                      name: c("beatsName"),
+                      off: c("beatsOff"),
+                      auto: c("beatsAuto"),
+                      always: c("beatsAlways"),
+                      help: { about: c("beatsAbout"), text: c("beatsHelp") },
+                    }}
+                  />
+                  {leads && (
+                    <LinkChoice
+                      phone={phone}
+                      label={s("viewAs")}
+                      current={as ?? "all"}
+                      options={[null, ...viewAsOptions(song, song.instruments)].map((option) => ({
+                        value: option ?? "all",
+                        label: option ? nameOf(option) : s("allNotes"),
+                        href: `${path}${query({ view: style === "letters" ? "letters" : "", beats: beats === "auto" ? "" : beats, as: option ?? "" })}`,
+                      }))}
+                    />
+                  )}
+                </ViewOptions>
+              }
               notes={chart.sections.map((_, index) =>
                 (shown.sections[index] ?? []).map((note) => ({
                   md: note.md,

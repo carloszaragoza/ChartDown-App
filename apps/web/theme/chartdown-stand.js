@@ -531,9 +531,9 @@ export const chartdownStandTheme = {
         },
         "value": {
           "tokens": {
-            "--size-element-sm": "36px",
+            "--size-element-sm": "32px",
             "--size-element-md": "44px",
-            "--size-element-lg": "52px"
+            "--size-element-lg": "47px"
           },
           "components": {
             "side-nav-heading": {
@@ -567,7 +567,7 @@ export const chartdownStandTheme = {
         },
         "value": {
           "tokens": {
-            "--size-element-lg": "56px"
+            "--size-element-lg": "50px"
           }
         }
       },

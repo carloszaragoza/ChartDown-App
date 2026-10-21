@@ -64,6 +64,7 @@ test("R-05.2 a new revision from the author doesn't change the set until accepte
   const setAddress = new URL(page.url()).pathname;
   await page.goto(version);
   await addToSet(page, `${band} · ${set}`);
+  await page.goto(`${setAddress}/edit`);
   await expect(page.getByText("revision 1")).toBeVisible();
 
   // As the author, she saves revision 2: the set stays on revision 1.

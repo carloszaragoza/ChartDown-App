@@ -59,9 +59,11 @@ async function bandWithSet(
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
   await createSet(page, { name: set, type: "Rehearsal" });
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
+  const setAddress = new URL(page.url()).pathname;
   await page.goto(`/versions/${id}`);
   await addToSet(page, `${band} · ${set}`);
-  await expectStatus(page, "added at the end");
+  // Adding stays on the version (T-2807); the lineup is on the set's edit page.
+  await page.goto(`${setAddress}/edit`);
   return { set, title, luis };
 }
 

@@ -95,17 +95,27 @@ export async function expectStatus(page: Page, text: string) {
   ).toBeVisible();
 }
 
+/** On a page with a whole chart, opens View options, where its settings are (T-2807). */
+export async function openViewOptions(page: Page) {
+  await page.getByRole("button", { name: "View options" }).click();
+  await expect(page.getByRole("dialog", { name: "View options" })).toBeVisible();
+}
+
 /** On a version's page, opens the "…" menu and chooses one of its actions (T-2806). */
 export async function moreAction(page: Page, name: string) {
   await page.getByRole("button", { name: "More actions" }).click();
   await page.getByRole("menuitem", { name }).click();
 }
 
-/** On a version's page, adds it to one of the MD's sets, chosen by its label (R-05.2). */
+/**
+ * On a version's page, adds it to one of the MD's sets, chosen by its label ("Band · Set"), in
+ * one step: the page stays and a toast says so (R-05.2, T-2807).
+ */
 export async function addToSet(page: Page, label: string) {
-  await page.getByRole("combobox", { name: "Add to a set" }).click();
-  await page.getByRole("option", { name: label, exact: true }).click();
-  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByRole("button", { name: "Add to set" }).click();
+  await page.getByRole("menuitem", { name: label, exact: true }).click();
+  // The toast is also read out, so its words are on the page twice.
+  await expect(page.getByText(`Added to ${label.split(" · ").pop()}`).first()).toBeVisible();
 }
 
 /** In the layer editor, the row of a section in the list on the left, with its note count. */

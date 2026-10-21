@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { addToSet, createSet, expectStatus, signUpAndConfirm, unique } from "./flows";
+import { addToSet, createSet, signUpAndConfirm, unique } from "./flows";
 
 test("T-1308 Home grows from the new user's first steps to the director's view of their work", async ({
   page,
@@ -41,7 +41,6 @@ test("T-1308 Home grows from the new user's first steps to the director's view o
   await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
   await page.goto(version);
   await addToSet(page, `${band} · ${set}`);
-  await expectStatus(page, "added at the end");
 
   // Now Home is a music director's: the set next up, and how her public version is used.
   await page.goto("/");

@@ -96,7 +96,26 @@ for (const [orientation, viewport] of [
 test.describe("on an iPad, during a performance", () => {
   test.use({ viewport: { width: 1180, height: 820 }, hasTouch: true });
 
-  test("T-1302 the song form and Previous / Next are at least 56 px, with room between sections", async ({
+  test("T-2813 on a touch screen stand mode doesn't ask for full screen on its own", async ({
+    page,
+    request,
+  }) => {
+    const id = await createVersion(request, {
+      title: `Quiet Open ${Date.now()}`,
+      content: "## Intro\n1 | 4\n",
+    });
+    await page.addInitScript(() => {
+      (window as unknown as { asked: number }).asked = 0;
+      Element.prototype.requestFullscreen = async function () {
+        (window as unknown as { asked: number }).asked++;
+      };
+    });
+    await page.goto(`/versions/${id}/stand`);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Quiet Open");
+    expect(await page.evaluate(() => (window as unknown as { asked: number }).asked)).toBe(0);
+  });
+
+  test("T-1302 T-2813 the song form and Previous / Next are at least 50 px, with room between sections", async ({
     page,
     request,
   }) => {
@@ -111,8 +130,8 @@ test.describe("on an iPad, during a performance", () => {
     await expect(sections).toHaveCount(5);
     const boxes = await Promise.all((await sections.all()).map((link) => link.boundingBox()));
     for (const box of boxes) {
-      expect(Math.round(box?.width ?? 0)).toBeGreaterThanOrEqual(56);
-      expect(Math.round(box?.height ?? 0)).toBeGreaterThanOrEqual(56);
+      expect(Math.round(box?.width ?? 0)).toBeGreaterThanOrEqual(50);
+      expect(Math.round(box?.height ?? 0)).toBeGreaterThanOrEqual(50);
     }
     for (let index = 1; index < boxes.length; index++) {
       const [before, after] = [boxes[index - 1], boxes[index]];
@@ -124,7 +143,7 @@ test.describe("on an iPad, during a performance", () => {
     await expect(form.getByRole("link", { name: /Bridge 1.*2nd time/ })).toBeVisible();
     for (const name of ["Previous", "Next"]) {
       const box = await page.getByRole("link", { name, exact: true }).boundingBox();
-      expect(Math.round(box?.height ?? 0), name).toBeGreaterThanOrEqual(56);
+      expect(Math.round(box?.height ?? 0), name).toBeGreaterThanOrEqual(50);
     }
   });
 });
@@ -147,7 +166,7 @@ test("R-03.3 the clearer stand: one metronome control, the next section's notes,
   await expect(top.getByRole("link", { name: "Close" })).toHaveText("");
   expect(
     Math.round((await top.getByRole("link", { name: "Close" }).boundingBox())?.height ?? 0),
-  ).toBeGreaterThanOrEqual(56);
+  ).toBeGreaterThanOrEqual(50);
   await expect(top.getByRole("heading", { level: 1 })).toContainText("Clear Stand");
   const metronome = top.getByRole("group", { name: "Metronome" });
   const closeBox = await top.getByRole("link", { name: "Close" }).boundingBox();

@@ -46,7 +46,6 @@ test("R-08.3 a change made while offline appears as a notice", async ({
   const setId = new URL(page.url()).pathname.split("/")[2] ?? "";
   await page.goto(`/versions/${version}`);
   await addToSet(page, `${band} · ${set}`);
-  await expectStatus(page, "added at the end");
   await page.goto("/");
   await signOut(page);
   await signUpAndConfirm(page, ben, "Ben Sync");

@@ -34,6 +34,8 @@ import { useMetronomeControls } from "./MetronomeControls";
 import { SongForm } from "./SongForm";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { useChartControlsSlot } from "./ChartControlsSlot";
 import { barIn, usePlaybackBar } from "./usePlaybackBar";
 import { DockRoom, useDockRoomSize } from "./DockRoom";
 import { useChartLabels } from "./chartLabels";
@@ -140,6 +142,8 @@ export function ChartPreview({
   notes,
   beats = "auto",
   phone = false,
+  viewOptions,
+  hasControlsInHeader = false,
 }: {
   chart: Chart;
   style?: ChordStyle;
@@ -156,6 +160,10 @@ export function ChartPreview({
   beats?: BeatsMode;
   /** The server's guess that this is a phone, where the song form is one strip (R-03.8). */
   phone?: boolean;
+  /** The page's View options button, beside the metronome, as in stand mode (T-2807). */
+  viewOptions?: ReactNode;
+  /** The metronome and View options in the page header's ChartControlsSlot, not the pinned row. */
+  hasControlsInHeader?: boolean;
 }) {
   const isPhone = usePhone(phone);
   const labels = useChartLabels();
@@ -189,6 +197,7 @@ export function ChartPreview({
     chooseStart(Number(section) - 1, Number(bar.dataset.bar));
   };
   const root = useRef<HTMLDivElement>(null);
+  const slot = useChartControlsSlot(hasControlsInHeader);
   // An open player takes the screen's bottom: the bar being followed is centered above it (T-2505).
   const room = useDockRoomSize();
   const playingRow =
@@ -243,12 +252,15 @@ export function ChartPreview({
           >
             <Theme theme={chartdownStandTheme} mode="system">
               {/* On a phone the metronome sits on its own line, under the strip (R-03.9). */}
-              {isPhone ? (
+              {hasControlsInHeader ? (
+                form
+              ) : isPhone ? (
                 <VStack gap={2}>
                   {form}
                   <HStack gap={2} vAlign="center" hAlign="end">
                     {!isPlaying && counterText}
                     {control}
+                    {viewOptions}
                   </HStack>
                 </VStack>
               ) : (
@@ -256,12 +268,25 @@ export function ChartPreview({
                   <StackItem size="fill">{form}</StackItem>
                   {!isPlaying && counterText}
                   {control}
+                  {viewOptions}
                 </HStack>
               )}
               {tempoDialog}
             </Theme>
           </div>
         )}
+        {hasForm &&
+          slot &&
+          createPortal(
+            <Theme theme={chartdownStandTheme} mode="system">
+              <HStack gap={2} vAlign="center" wrap="wrap">
+                {!isPlaying && counterText}
+                {control}
+                {viewOptions}
+              </HStack>
+            </Theme>,
+            slot,
+          )}
         {hasForm && hasJump(chart) && (
           // Only a song that jumps (D.S., D.C.) needs its order spelled out (spec 10.1).
           <Text type="supporting">

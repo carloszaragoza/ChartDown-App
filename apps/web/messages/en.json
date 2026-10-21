@@ -214,7 +214,7 @@
     "writtenIn": "(written in {key})",
     "nthTime": "{time, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} time",
     "keyChange": "Key change: {key}",
-    "beatsLabel": "Beats",
+    "beatsLabel": "Beat marks",
     "beatsName": "Beat slashes",
     "beatsOff": "Off",
     "beatsAuto": "Auto",
@@ -233,7 +233,9 @@
       "semi": "semi-strong",
       "weak": "weak"
     },
-    "queued": "plays next"
+    "queued": "plays next",
+    "beatsHelp": "Off: no beat marks. Auto: only in bars where they tell something. Always: in every bar.",
+    "beatsAbout": "About beat marks"
   },
   "auth": {
     "email": "Email",
@@ -598,7 +600,9 @@
     "key": "Key",
     "writtenOption": "{key} (written)",
     "apply": "Apply",
-    "written": "Back to the written key, {key}"
+    "written": "Back to the written key, {key}",
+    "original": "Key {key} · original",
+    "transposed": "Key {key} · transposed"
   },
   "notes": {
     "personal": "My notes (personal space)",
@@ -849,9 +853,7 @@
     "delete": "Delete the set",
     "deleteConfirm": "Yes, delete this set and its songs. The versions are not affected.",
     "deleteButton": "Delete set",
-    "addTo": "Add to a set",
-    "chooseSet": "Choose a set",
-    "addButton": "Add",
+    "addTo": "Add to set",
     "addFailed": "The song could not be added to that set.",
     "status": {
       "created": "The set was created.",
@@ -940,7 +942,12 @@
     "timeLabel": "Time",
     "createMissing": "Write a name and choose a type first.",
     "personalHint": "Your own sets: nobody else sees them.",
-    "settings": "Settings"
+    "settings": "Settings",
+    "added": "Added to {set}",
+    "undo": "Undo",
+    "undone": "Taken out of {set}",
+    "newSet": "New set",
+    "newSetIn": "New set in {band}"
   },
   "offline": {
     "title": "You are offline",

@@ -60,7 +60,9 @@ test("R-02.10 a visitor searches the catalog and opens a version", async ({ page
   const versions = page.getByRole("list", { name: `Versions of ${title}` }).getByRole("listitem");
   await expect(versions).toHaveCount(2);
   await expect(versions.filter({ hasText: "Live" })).toContainText("Key C · 4/4");
-  await expect(versions.filter({ hasText: "Live" })).toContainText("Album: Night Sessions");
+  await expect(versions.filter({ hasText: "Live" })).toContainText("Live · Album: Night Sessions");
+  // T-2812 everything in the catalog is public: no row says so.
+  await expect(versions.filter({ hasText: "Public" })).toHaveCount(0);
   await expect(versions.first().getByRole("link", { name: `Fork ${title} by` })).toBeVisible();
   await expect(page.locator(`a[href="/versions/${hidden}"]`)).toHaveCount(0);
   await versions
