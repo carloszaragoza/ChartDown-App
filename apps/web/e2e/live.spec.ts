@@ -18,8 +18,10 @@ const FIRST = "## Verse\n1 | 4\n## Chorus\n4 | 5\n## Bridge\n6m | 4\n";
 const SECOND = "## Intro\n1 | 5\n## Outro\n4 | 1\n";
 const FOLLOW = { timeout: 10_000 };
 
+// Two devices side by side: the one acting comes to the front first, since a window behind gets
+// no animation frames and a click there never settles.
 async function pressOn(page: Page, key: string) {
-  await page.locator("body").click({ position: { x: 5, y: 400 } });
+  await page.bringToFront();
   await page.keyboard.press(key);
 }
 
@@ -102,6 +104,7 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 the band follows 
   );
 
   // R-12.4 Ana marks the Bridge next; Luis sees it before she moves.
+  await page.bringToFront();
   await page.getByRole("button", { name: "Live options" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Bridge" }).click();
   await page.keyboard.press("Escape");
@@ -116,6 +119,7 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 the band follows 
   await expectStandNow(page, "Verse");
   await luisPage.waitForTimeout(1500);
   await expectStandNow(luisPage, "Bridge");
+  await luisPage.bringToFront();
   await back.click();
   await expectStandNow(luisPage, "Verse");
 
@@ -129,6 +133,7 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 the band follows 
   await expectStandNow(luisPage, "Intro");
 
   // R-12.10 Ana ends live mode; Luis stays where he was and is told.
+  await page.bringToFront();
   await page.getByRole("button", { name: "Live options" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "End live mode" }).click();
   await expect(luisPage.getByText("Live mode ended. You stay where you were.")).toBeVisible(FOLLOW);
