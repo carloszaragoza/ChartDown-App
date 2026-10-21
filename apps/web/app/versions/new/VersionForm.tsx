@@ -193,7 +193,11 @@ export function VersionForm({
                     htmlName="artists"
                     value={artists}
                     onChange={setArtists}
-                    description={t("artistsHint")}
+                    isOptional
+                    // The hint in the label's info button and an example in the field, so the
+                    // field lines up with its row (owner's review, October 21, 2026).
+                    labelTooltip={t("artistsHint")}
+                    placeholder={t("artistsExample")}
                   />
                 </>
               )}

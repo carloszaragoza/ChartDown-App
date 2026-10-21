@@ -433,6 +433,7 @@
     "songTitle": "Título de la canción",
     "artists": "Artistas",
     "artistsHint": "Separa varios artistas con comas.",
+    "artistsExample": "Artista uno, Artista dos",
     "chart": "Cifrado (ChartDown)",
     "author": "Arreglo de",
     "source": "Fuente",
