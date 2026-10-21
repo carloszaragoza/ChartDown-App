@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { authCookie } from "./lib/supabase/cookie";
 import { NextResponse, type NextRequest } from "next/server";
 import { authEnabled } from "./lib/auth/enabled";
 
@@ -18,6 +19,7 @@ export async function proxy(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_URL as string,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string,
     {
+      ...authCookie(),
       cookies: {
         getAll: () => request.cookies.getAll(),
         setAll: (cookiesToSet) => {
