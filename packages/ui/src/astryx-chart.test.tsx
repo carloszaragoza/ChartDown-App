@@ -226,7 +226,7 @@ describe("T-1503 the metronome's pulse in a row", () => {
     );
   const css = readFileSync(join(__dirname, "chart.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   const rule = (selector: string) =>
-    new RegExp(`${selector.replace(/[.:()-]/g, "\\$&")} \\{([^}]*)\\}`).exec(css)?.[1] ?? "";
+    new RegExp(`${selector.replace(/[.:()[\]-]/g, "\\$&")} \\{([^}]*)\\}`).exec(css)?.[1] ?? "";
 
   it("R-11.3 the bar the metronome is on is marked, with the share of its beats counted", () => {
     const html = draw({ index: 1, progress: 0.5 });
@@ -252,15 +252,20 @@ describe("T-1503 the metronome's pulse in a row", () => {
     );
   });
 
-  it("R-11.3 the line grows into beat 1 of a new bar too, from nothing", () => {
-    expect(rule(".cd-chart__bar--now::after")).toMatch(/animation: cd-chart-beat-in /);
+  it("R-11.3 T-2816 the line moves in steps, a beat at a time, by default", () => {
+    expect(rule(".cd-chart__bar--now::after")).not.toMatch(/transition|animation/);
+  });
+
+  it("R-11.3 T-2816 with Smooth the line eases, and grows into beat 1 of a new bar from nothing", () => {
+    const smooth = rule('[data-beat-line="smooth"] .cd-chart__bar--now::after');
+    expect(smooth).toMatch(/transition:\s+inline-size/);
+    expect(smooth).toMatch(/animation: cd-chart-beat-in /);
     expect(css).toMatch(/@keyframes cd-chart-beat-in \{\s*from \{\s*inline-size: 0;/);
   });
 
-  it("R-11.13 the line eases from beat to beat, and moves in steps with reduced motion", () => {
-    expect(rule(".cd-chart__bar--now::after")).toMatch(/transition:\s+inline-size/);
+  it("R-11.13 with reduced motion even Smooth moves in steps", () => {
     expect(css).toMatch(
-      /@media \(prefers-reduced-motion: reduce\) \{\s*\.cd-chart__bar--now::after \{\s*transition: none;\s*animation: none;/,
+      /@media \(prefers-reduced-motion: reduce\) \{\s*\[data-beat-line="smooth"\] \.cd-chart__bar--now::after \{\s*transition: none;\s*animation: none;/,
     );
   });
 });

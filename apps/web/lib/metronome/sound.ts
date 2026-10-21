@@ -1,4 +1,4 @@
-/** The metronome's sound, chosen on each device and kept there (R-11.7, R-11.8). */
+/** The metronome's sound and its beat line, chosen on each device and kept there (R-11.7, R-11.8). */
 export interface SoundSettings {
   /** The click, off by default: the pulse is the metronome, the sound is a choice. */
   click: boolean;
@@ -6,28 +6,45 @@ export interface SoundSettings {
   volume: number;
   /** One bar of clicks before the first bar. */
   countIn: boolean;
+  /**
+   * How the line along the playing bar moves (R-11.3, T-2816): in steps, a beat at a time, by
+   * default, or smoothly from beat to beat.
+   */
+  beatLine: BeatLine;
 }
 
-export const DEFAULT_SOUND: SoundSettings = { click: false, volume: 70, countIn: false };
+export type BeatLine = "steps" | "smooth";
+
+export const DEFAULT_SOUND: SoundSettings = {
+  click: false,
+  volume: 70,
+  countIn: false,
+  beatLine: "steps",
+};
 
 const KEY = "cd-metronome";
 const CHANGED = "cd-metronome-change";
 
 let cached: { raw: string | null; value: SoundSettings } = { raw: null, value: DEFAULT_SOUND };
 
-function read(raw: string | null): SoundSettings {
-  if (raw === cached.raw) return cached.value;
-  let value = DEFAULT_SOUND;
+/** Saved settings read back, each one checked; anything unknown falls back to its default. */
+export function parseSound(raw: string | null): SoundSettings {
   try {
     const saved = raw ? (JSON.parse(raw) as Partial<SoundSettings>) : {};
-    value = {
+    return {
       click: saved.click === true,
       volume: typeof saved.volume === "number" ? Math.min(100, Math.max(0, saved.volume)) : 70,
       countIn: saved.countIn === true,
+      beatLine: saved.beatLine === "smooth" ? "smooth" : "steps",
     };
   } catch {
-    value = DEFAULT_SOUND;
+    return DEFAULT_SOUND;
   }
+}
+
+function read(raw: string | null): SoundSettings {
+  if (raw === cached.raw) return cached.value;
+  const value = parseSound(raw);
   cached = { raw, value };
   return value;
 }
@@ -60,14 +77,30 @@ export function subscribeSound(onChange: () => void): () => void {
   };
 }
 
-/** One click's tone: higher and louder on beat 1, softer on the others (R-11.7). */
-export function clickTone(accent: boolean, volume: number): { frequency: number; peak: number } {
-  return { frequency: accent ? 1600 : 1000, peak: (volume / 100) * (accent ? 1 : 0.55) };
+/** How a click sounds: beat 1, the start of a group of three in 6/8 or 12/8, or any other. */
+export type ClickLevel = "accent" | "group" | "beat";
+
+/**
+ * One click's tone (R-11.7): higher and louder on beat 1; in 6/8, 9/8 and 12/8 the first eighth
+ * of each group of three a step under it, so the groups are heard; softer on the others.
+ */
+export function clickTone(level: ClickLevel, volume: number): { frequency: number; peak: number } {
+  const tone = {
+    accent: { frequency: 1600, share: 1 },
+    group: { frequency: 1300, share: 0.8 },
+    beat: { frequency: 1000, share: 0.55 },
+  }[level];
+  return { frequency: tone.frequency, peak: (volume / 100) * tone.share };
 }
 
 /** Plays one click at a time on the audio clock: a short tone, 50 ms, with no pop. */
-export function playClick(audio: AudioContext, at: number, accent: boolean, volume: number): void {
-  const { frequency, peak } = clickTone(accent, volume);
+export function playClick(
+  audio: AudioContext,
+  at: number,
+  level: ClickLevel,
+  volume: number,
+): void {
+  const { frequency, peak } = clickTone(level, volume);
   if (peak <= 0) return;
   const tone = audio.createOscillator();
   const gain = audio.createGain();
