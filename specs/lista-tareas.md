@@ -390,7 +390,7 @@ Owner's decision, October 15, 2026: paste first, then PDF. The converter (T-1403
 
 ## E16 · Live mode (SPEC-12, phase 2)
 
-These tasks start after E15.
+These tasks start after E15. The owner approved the data model, its policies and the private Realtime channel (Technical Plan 4, 7.1 and 8.1) and asked for all of E16 in one delivery (October 21, 2026). The leader leads from stand mode; a musician follows in stand mode.
 
 | ID     | Task                                                                                                                    | Requirements                     | Depends on     | Size | Tests / evidence                                                          |
 | ------ | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------- | -------------- | ---- | ------------------------------------------------------------------------- |
