@@ -201,7 +201,7 @@ export function VersionView({
                   <BackToCatalog song={songId} label={t("backToCatalog")} />
                 </HStack>
               )}
-              <HStack gap={4} vAlign="start" hAlign="between" wrap="wrap">
+              <VStack gap={4}>
                 <VStack gap={1}>
                   <Text type="supporting">
                     {[artists.join(", "), ...facts].filter(Boolean).join(" · ")}
@@ -233,9 +233,9 @@ export function VersionView({
                     )}
                   </Text>
                 </VStack>
-                {/* The actions on the title's row, at the large touch size, wrapping; on a phone they
-                    fall under the title, on its start edge. */}
-                <VStack gap={2} hAlign={phone ? "start" : "end"}>
+                {/* The actions under the title, on its start edge, wrapping: on every size as on a
+                    phone (owner's review, October 21, 2026). */}
+                <VStack gap={2}>
                   <HStack gap={2} vAlign="center" wrap="wrap">
                     {reading && (
                       <StandLink
@@ -296,7 +296,7 @@ export function VersionView({
                   {canFork && <Text type="supporting">{t("forkCc0")}</Text>}
                   {!signedIn && <Text type="supporting">{t("forkHint")}</Text>}
                 </VStack>
-              </HStack>
+              </VStack>
               {/* The media: the video, then the bands' recordings. */}
               {(source.youtube || (audio && reading)) && (
                 <VStack gap={2}>
