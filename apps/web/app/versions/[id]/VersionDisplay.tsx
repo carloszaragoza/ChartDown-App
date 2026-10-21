@@ -171,6 +171,8 @@ export function DisplayedChart({
       beats={display?.beats ?? "auto"}
       phone={phone}
       viewOptions={viewOptions}
+      // With View options the page's header has the slot for the controls (VersionView).
+      hasControlsInHeader={Boolean(viewOptions)}
     />
   );
 }

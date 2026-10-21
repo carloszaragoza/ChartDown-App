@@ -19,6 +19,7 @@ import { VideoLink } from "../../_components/VideoDock";
 import { ViewOptions } from "../../_components/ViewOptions";
 import type { BasedOn } from "./load";
 import { AddToSet, ReportForm, VersionMenu, type VersionMenuItem } from "./VersionControls";
+import { ChartControlsSlot } from "../../_components/ChartControlsSlot";
 import { DisplayBar, DisplayedChart, ShownKey, StandLink, VersionDisplay } from "./VersionDisplay";
 
 export interface VersionSource {
@@ -201,102 +202,109 @@ export function VersionView({
                   <BackToCatalog song={songId} label={t("backToCatalog")} />
                 </HStack>
               )}
-              <VStack gap={4}>
-                <VStack gap={1}>
-                  <Text type="supporting">
-                    {[artists.join(", "), ...facts].filter(Boolean).join(" · ")}
-                  </Text>
-                  <Heading level={1}>{title}</Heading>
-                  <HStack gap={2} vAlign="center" wrap="wrap">
-                    {state && <Token label={state} size="sm" />}
-                    <ShownKey
-                      words={{ key: c("key"), writtenIn: c("writtenIn", { key: written }) }}
-                    />
-                    <Token label={`${c("time")} ${chart.header.meter ?? "4/4"}`} size="sm" />
-                    {chart.header.tempo && (
-                      <Token label={`${c("tempo")} ${chart.header.tempo}`} size="sm" />
-                    )}
-                  </HStack>
-                  <Text color="secondary">
-                    {t("by", { author })}
-                    {basedOn && (
-                      <>
-                        {" · "}
-                        {basedOn === "unknown" ? (
-                          t("basedOnUnknown")
-                        ) : (
-                          <Link href={`/versions/${basedOn.id}`}>
-                            {t("basedOn", { author: basedOn.author })}
-                          </Link>
-                        )}
-                      </>
-                    )}
-                  </Text>
-                </VStack>
-                {/* The actions under the title, on its start edge, wrapping: on every size as on a
+              {/* The chart's metronome and View options at the header's end, on the actions' line;
+                  on a phone they wrap under the actions (owner's review, October 21, 2026). */}
+              <HStack gap={4} vAlign="end" hAlign="between" wrap="wrap">
+                <VStack gap={4}>
+                  <VStack gap={1}>
+                    <Text type="supporting">
+                      {[artists.join(", "), ...facts].filter(Boolean).join(" · ")}
+                    </Text>
+                    <Heading level={1}>{title}</Heading>
+                    <HStack gap={2} vAlign="center" wrap="wrap">
+                      {state && <Token label={state} size="sm" />}
+                      <ShownKey
+                        words={{ key: c("key"), writtenIn: c("writtenIn", { key: written }) }}
+                      />
+                      <Token label={`${c("time")} ${chart.header.meter ?? "4/4"}`} size="sm" />
+                      {chart.header.tempo && (
+                        <Token label={`${c("tempo")} ${chart.header.tempo}`} size="sm" />
+                      )}
+                    </HStack>
+                    <Text color="secondary">
+                      {t("by", { author })}
+                      {basedOn && (
+                        <>
+                          {" · "}
+                          {basedOn === "unknown" ? (
+                            t("basedOnUnknown")
+                          ) : (
+                            <Link href={`/versions/${basedOn.id}`}>
+                              {t("basedOn", { author: basedOn.author })}
+                            </Link>
+                          )}
+                        </>
+                      )}
+                    </Text>
+                  </VStack>
+                  {/* The actions under the title, on its start edge, wrapping: on every size as on a
                     phone (owner's review, October 21, 2026). */}
-                <VStack gap={2}>
-                  <HStack gap={2} vAlign="center" wrap="wrap">
-                    {reading && (
-                      <StandLink
-                        base={`/versions/${id}/stand`}
-                        label={t("stand")}
-                        icon={<StandIcon />}
-                        size={size}
-                      />
-                    )}
-                    {signedIn && reading && (
-                      <Button label={t("myNotes")} href={`/versions/${id}/notes`} size={size} />
-                    )}
-                    {owner && status === "active" && (
-                      <Button
-                        label={t("edit")}
-                        href={`/versions/${id}/edit`}
-                        icon={<EditIcon />}
-                        size={size}
-                      />
-                    )}
-                    {owner && (
-                      <Button label={t("history")} href={`/versions/${id}/history`} size={size} />
-                    )}
-                    {canFork && (
-                      <form action={forkVersion}>
-                        <input type="hidden" name="versionId" value={id} />
-                        <Button type="submit" label={t("fork")} icon={<ForkIcon />} size={size} />
-                      </form>
-                    )}
-                    {!signedIn && (
-                      <Button
-                        label={t("fork")}
-                        href={`/auth/sign-in?next=${encodeURIComponent(`/versions/${id}`)}`}
-                        icon={<ForkIcon />}
-                        size={size}
-                      />
-                    )}
-                    {canAddToSet && reading && (
-                      <AddToSet
-                        size={size}
-                        versionId={id}
-                        choices={setChoices.map((choice) => ({
-                          value: choice.id,
-                          label: setChoiceLabel(choice, s("mySets")),
-                          name: choice.name,
-                        }))}
-                        newSets={setBands.map((band) => ({
-                          label:
-                            setBands.length === 1
-                              ? s("newSet")
-                              : s("newSetIn", { band: band.name ?? s("mySets") }),
-                          href: `/bands/${band.id}/sets`,
-                        }))}
-                      />
-                    )}
-                    {menu.length > 0 && <VersionMenu label={t("more")} items={menu} size={size} />}
-                  </HStack>
-                  {canFork && <Text type="supporting">{t("forkCc0")}</Text>}
-                  {!signedIn && <Text type="supporting">{t("forkHint")}</Text>}
+                  <VStack gap={2}>
+                    <HStack gap={2} vAlign="center" wrap="wrap">
+                      {reading && (
+                        <StandLink
+                          base={`/versions/${id}/stand`}
+                          label={t("stand")}
+                          icon={<StandIcon />}
+                          size={size}
+                        />
+                      )}
+                      {signedIn && reading && (
+                        <Button label={t("myNotes")} href={`/versions/${id}/notes`} size={size} />
+                      )}
+                      {owner && status === "active" && (
+                        <Button
+                          label={t("edit")}
+                          href={`/versions/${id}/edit`}
+                          icon={<EditIcon />}
+                          size={size}
+                        />
+                      )}
+                      {owner && (
+                        <Button label={t("history")} href={`/versions/${id}/history`} size={size} />
+                      )}
+                      {canFork && (
+                        <form action={forkVersion}>
+                          <input type="hidden" name="versionId" value={id} />
+                          <Button type="submit" label={t("fork")} icon={<ForkIcon />} size={size} />
+                        </form>
+                      )}
+                      {!signedIn && (
+                        <Button
+                          label={t("fork")}
+                          href={`/auth/sign-in?next=${encodeURIComponent(`/versions/${id}`)}`}
+                          icon={<ForkIcon />}
+                          size={size}
+                        />
+                      )}
+                      {canAddToSet && reading && (
+                        <AddToSet
+                          size={size}
+                          versionId={id}
+                          choices={setChoices.map((choice) => ({
+                            value: choice.id,
+                            label: setChoiceLabel(choice, s("mySets")),
+                            name: choice.name,
+                          }))}
+                          newSets={setBands.map((band) => ({
+                            label:
+                              setBands.length === 1
+                                ? s("newSet")
+                                : s("newSetIn", { band: band.name ?? s("mySets") }),
+                            href: `/bands/${band.id}/sets`,
+                          }))}
+                        />
+                      )}
+                      {menu.length > 0 && (
+                        <VersionMenu label={t("more")} items={menu} size={size} />
+                      )}
+                    </HStack>
+                    {canFork && <Text type="supporting">{t("forkCc0")}</Text>}
+                    {!signedIn && <Text type="supporting">{t("forkHint")}</Text>}
+                  </VStack>
                 </VStack>
-              </VStack>
+                {display && path && <ChartControlsSlot />}
+              </HStack>
               {/* The media: the video, then the bands' recordings. */}
               {(source.youtube || (audio && reading)) && (
                 <VStack gap={2}>

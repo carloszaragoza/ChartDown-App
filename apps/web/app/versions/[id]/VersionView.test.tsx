@@ -11,6 +11,7 @@ import {
   VersionView,
   type VersionViewProps,
 } from "./VersionView";
+import { DisplayBar, VersionDisplay } from "./VersionDisplay";
 
 vi.mock("./actions", () => ({
   forkVersion: () => undefined,
@@ -165,11 +166,41 @@ describe("R-03.2 the display bar", () => {
     });
     expect(html).toContain("Key A");
     expect(html).toContain("(written in G)");
-    expect(html).toContain("Back to the written key, G");
+    // T-2807 the header holds the slot the metronome and View options move into.
+    expect(html).toContain('id="cd-chart-controls"');
     // T-2807 the key says whether it is the written one; Beat marks has its help button.
-    expect(html).toContain("Key A · transposed");
-    expect(html).toContain("Beat marks");
-    expect(html).toContain('aria-label="About beat marks"');
+    const sheet = renderToString(
+      <NextIntlClientProvider locale="en" messages={en} timeZone="UTC">
+        <VersionDisplay
+          chart={openRoad}
+          initial={{ style: "letters", key: { root: "A", minor: false }, beats: "auto" }}
+          path="/versions/00000000-0000-0000-0000-0000000000f1"
+        >
+          <DisplayBar
+            words={{
+              label: en.viewer.label,
+              style: en.viewer.style,
+              numbers: en.viewer.numbers,
+              letters: en.viewer.letters,
+              key: en.viewer.key,
+              written: "Back to the written key, G",
+              beats: {
+                label: en.chart.beatsLabel,
+                name: en.chart.beatsName,
+                off: en.chart.beatsOff,
+                auto: en.chart.beatsAuto,
+                always: en.chart.beatsAlways,
+                help: { about: en.chart.beatsAbout, text: en.chart.beatsHelp },
+              },
+            }}
+          />
+        </VersionDisplay>
+      </NextIntlClientProvider>,
+    );
+    expect(sheet).toContain("Back to the written key, G");
+    expect(sheet).toContain("Key A · transposed");
+    expect(sheet).toContain("Beat marks");
+    expect(sheet).toContain('aria-label="About beat marks"');
     // Stand mode opens in the same view.
     expect(html).toMatch(/href="\/versions\/[^"]*\/stand\?[^"]*key=A/);
     expect(render("en")).not.toContain("written in");
