@@ -666,9 +666,7 @@
   "stand": {
     "noTempoShort": "– bpm",
     "view": "Vista",
-    "moreNotes": "+{count, plural, one {# nota más} other {# notas más}}",
     "turnPage": "Anterior y siguiente",
-    "pedalHint": "Toca Siguiente, o usa un pedal para pasar página.",
     "times": "{count} veces",
     "timeOf": "Vez {time} de {count}",
     "metronome": "Metrónomo",
@@ -708,7 +706,13 @@
     "speed": "Velocidad de práctica",
     "speedValue": "{speed}% · {bpm} bpm",
     "tapTempo": "Marcar el tempo",
-    "chartTempo": "Volver al tempo del chart"
+    "chartTempo": "Volver al tempo del chart",
+    "now": "Ahora",
+    "nowLive": "Ahora: {name}",
+    "nextUp": "Sigue:",
+    "hintIdle": "Desliza, toca Siguiente o usa un pedal",
+    "hintPlaying": "Siguiendo el metrónomo. Desliza cuando quieras para ver lo que viene.",
+    "fromTop": "Desde el inicio"
   },
   "bands": {
     "title": "Bandas",

@@ -653,3 +653,88 @@
     transition: none;
   }
 }
+
+/* Stand mode v2 (R-03.12, design handoff 03 Stand mode v2): the sections as a stack that scrolls
+   inside itself, each card snapping to the top, the active zone. Every card is one size, current
+   or not: the frame is always there, only its color changes, so nothing moves while scrolling. */
+.cd-stand-stack {
+  /* The focus color: the theme's strong blue, the same in light and Stage, since the pale
+     border blue doesn't mark the current section from across a stage (3:1 on either card). */
+  --stand-focus: var(--color-data-categorical-blue);
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: y mandatory;
+  /* Room for the current card's halo, which the scrolling area would clip. */
+  padding-inline: var(--spacing-1-5);
+}
+.cd-stand-stack__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cd-stand-stack__end {
+  block-size: 70dvh;
+}
+.cd-stand-card {
+  --stand-card-ring: var(--color-border);
+  box-sizing: border-box;
+  scroll-snap-align: start;
+  scroll-margin-block-start: var(--spacing-1-5);
+  padding: var(--spacing-3) var(--spacing-5) var(--spacing-4);
+  border: calc(var(--border-width) * 3) solid transparent;
+  border-radius: var(--radius-container);
+  background: transparent;
+  box-shadow: inset 0 0 0 var(--border-width) var(--stand-card-ring);
+  cursor: pointer;
+  transition:
+    background-color 0.45s ease,
+    border-color 0.45s ease,
+    box-shadow 0.45s ease,
+    opacity 0.45s ease;
+}
+/* The current section: the card's surface, a frame and a soft halo in the focus blue. */
+.cd-stand-card[data-state="current"] {
+  border-color: var(--stand-focus);
+  background: var(--color-background-card);
+  box-shadow: 0 0 0 calc(var(--border-width) * 5)
+    color-mix(in srgb, var(--stand-focus) 13%, transparent);
+  cursor: default;
+}
+/* The sections still to come and the ones played: their ink in the secondary color, quieter
+   bar lines; the played ones at half strength. */
+.cd-stand-card:not([data-state="current"]) .cd-chart {
+  --chart-ink: var(--color-text-secondary);
+  --chart-bar-line: calc(var(--border-width) * 3) solid var(--color-border-emphasized);
+  --chart-repeat-line: calc(var(--border-width) * 5) double var(--color-border-emphasized);
+}
+.cd-stand-card:not([data-state="current"]) h2 {
+  color: var(--color-text-secondary);
+}
+.cd-stand-card[data-state="past"] {
+  opacity: 0.45;
+}
+.cd-stand-card .cd-chart {
+  transition: color 0.45s ease;
+}
+/* The Now tag: white on the focus blue (4.8:1). */
+.cd-stand-card__now {
+  padding: var(--spacing-0-5) var(--spacing-2);
+  border-radius: var(--radius-inner);
+  background: var(--stand-focus);
+  color: var(--color-on-dark);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cd-stand-card,
+  .cd-stand-card .cd-chart {
+    transition: none;
+  }
+}

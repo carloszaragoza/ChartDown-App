@@ -666,9 +666,7 @@
   "stand": {
     "noTempoShort": "– bpm",
     "view": "View",
-    "moreNotes": "+{count, plural, one {# more note} other {# more notes}}",
     "turnPage": "Previous and next",
-    "pedalHint": "Tap Next, or use a page-turner pedal.",
     "times": "{count} times",
     "timeOf": "Time {time} of {count}",
     "metronome": "Metronome",
@@ -708,7 +706,13 @@
     "speed": "Practice speed",
     "speedValue": "{speed}% · {bpm} bpm",
     "tapTempo": "Tap tempo",
-    "chartTempo": "Back to the chart's tempo"
+    "chartTempo": "Back to the chart's tempo",
+    "now": "Now",
+    "nowLive": "Now: {name}",
+    "nextUp": "Next up:",
+    "hintIdle": "Scroll, tap Next or use a pedal",
+    "hintPlaying": "Following the metronome. Scroll anytime to look ahead.",
+    "fromTop": "From the top"
   },
   "bands": {
     "title": "Bands",

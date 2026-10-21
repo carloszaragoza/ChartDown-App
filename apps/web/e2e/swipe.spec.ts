@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { createVersion } from "./admin";
+import { standNow } from "./flows";
 
 const OPEN_ROAD = readFileSync(
   new URL("../../../fixtures/open-road.chartdown", import.meta.url),
@@ -24,10 +25,11 @@ async function drag(page: Page, from: { x: number; y: number }, to: { x: number;
 async function swipes(page: Page, request: Parameters<typeof createVersion>[0]) {
   const id = await createVersion(request, { title: "Open Road", content: OPEN_ROAD });
   await page.goto(`/versions/${id}/stand`);
-  const current = page.getByRole("main");
-  const section = (name: string) => current.getByRole("heading", { level: 2, name, exact: true });
+  // The section is the current one in the stack (R-03.12).
+  const section = (name: string) =>
+    standNow(page).getByRole("heading", { level: 2, name, exact: true });
   await expect(section("Intro")).toBeVisible();
-  const box = (await current.boundingBox())!;
+  const box = (await page.getByRole("main").boundingBox())!;
   const y = box.y + box.height / 2;
   const middle = box.x + box.width / 2;
 
@@ -38,7 +40,7 @@ async function swipes(page: Page, request: Parameters<typeof createVersion>[0]) 
   await drag(page, { x: middle - 100, y }, { x: middle + 100, y });
   await expect(section("Intro")).toBeVisible();
 
-  // A mostly vertical drag is a scroll, not a turn.
+  // A short, mostly vertical drag is a scroll, not a turn: the stack snaps back to the Intro.
   await drag(page, { x: middle, y: y + 60 }, { x: middle - 40, y: y - 60 });
   await expect(section("Intro")).toBeVisible();
 }

@@ -33,7 +33,7 @@ import { usePhone } from "../../lib/shell/phone";
 import { useMetronomeControls } from "./MetronomeControls";
 import { SongForm } from "./SongForm";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { barIn, usePlaybackBar } from "./usePlaybackBar";
 import { useChartLabels } from "./chartLabels";
 import { hasJump, playRuns } from "../../lib/chart/playRuns";
@@ -59,6 +59,8 @@ export interface ChartSectionProps {
   start?: { row: number; index: number } | undefined;
   /** A section played more than once: "3 times", or "Time 2 of 3" while it plays (T-2704). */
   times?: string | undefined;
+  /** Before the section's name, such as stand mode's Now tag (R-03.12). */
+  badge?: ReactNode;
 }
 
 /**
@@ -78,11 +80,13 @@ export function ChartSection({
   now,
   start,
   times,
+  badge,
 }: ChartSectionProps) {
   const body = (
     <section aria-label={section.name} {...(id ? { id } : {})}>
       <VStack gap={3}>
-        <HStack gap={2} vAlign="center">
+        <HStack gap={2} vAlign="center" wrap="wrap">
+          {badge}
           <Heading level={2}>{section.name}</Heading>
           <Text type="supporting">
             {labels.length(playedLength(section), { pickup: hasPickup(section) })}
