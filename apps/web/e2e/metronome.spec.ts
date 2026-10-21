@@ -214,6 +214,50 @@ test("R-11.9 the practice speed changes the tempo played, never the chart", asyn
   await expect(page.getByText(/Tempo 240/)).toBeVisible();
 });
 
+test("R-11.9 T-2808 the tempo stepper plays at 74 while the chart still says 71", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, {
+    title: `Steady Song ${Date.now()}`,
+    content: "---\ntempo: 71\n---\n## Verse\n1 | 4 | 5 | 1\n",
+  });
+  await page.goto(`/versions/${id}/stand`);
+  await page.getByRole("button", { name: "Metronome options" }).click();
+  const sheet = page.getByRole("dialog");
+  const tempo = sheet.getByRole("spinbutton", { name: "Tempo" });
+  await expect(tempo).toHaveValue("71");
+  await expect(sheet.getByText("Same as the chart tempo.")).toBeVisible();
+  for (let step = 0; step < 3; step++) await sheet.getByRole("button", { name: "Faster" }).click();
+  await expect(tempo).toHaveValue("74");
+  await expect(sheet.getByText("Chart tempo is 71.")).toBeVisible();
+  await expect(sheet.getByText("104% · 74 bpm")).toBeVisible();
+  await page.keyboard.press("Escape");
+  // The metronome plays at 74; the chart still says 71.
+  await expect(page.getByRole("group", { name: "Metronome" }).first()).toContainText("74");
+  await expect(page.getByText(/Tempo 71/)).toBeVisible();
+});
+
+test("R-11.9 T-2808 a tempo with a decimal plays as written: 85.5, then 86.5", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, {
+    title: `Half Beat ${Date.now()}`,
+    content: "---\ntempo: 85.5\n---\n## Verse\n1 | 4 | 5 | 1\n",
+  });
+  await page.goto(`/versions/${id}/stand`);
+  const metronome = page.getByRole("group", { name: "Metronome" }).first();
+  await expect(metronome).toContainText("85.5");
+  await page.getByRole("button", { name: "Metronome options" }).click();
+  const sheet = page.getByRole("dialog");
+  await expect(sheet.getByRole("spinbutton", { name: "Tempo" })).toHaveValue("85.5");
+  await expect(sheet.getByText("Same as the chart tempo.")).toBeVisible();
+  await sheet.getByRole("button", { name: "Faster" }).click();
+  await expect(sheet.getByRole("spinbutton", { name: "Tempo" })).toHaveValue("86.5");
+  await expect(sheet.getByText("Chart tempo is 85.5.")).toBeVisible();
+});
+
 test("R-11.10 the space bar plays and stops; a pedal queues the next section while playing", async ({
   page,
   request,
