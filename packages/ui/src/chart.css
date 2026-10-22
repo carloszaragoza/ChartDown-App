@@ -678,6 +678,8 @@
   min-block-size: 0;
   overflow: hidden;
   color: var(--color-text-secondary);
+  /* A little see-through, so it reads as part of the waveform rather than over it. */
+  opacity: 0.8;
   font-size: min(var(--font-size-sm), 70cqi);
   line-height: 1;
   text-overflow: ellipsis;
