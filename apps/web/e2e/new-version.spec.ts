@@ -157,7 +157,7 @@ test("R-03.11 T-2828 a YouTube link opens the video in a player across the botto
   await expect(dock).toHaveCount(0);
 });
 
-test("R-03.11 the owner saves where the music starts, and it is there for the next reader", async ({
+test("R-03.11 T-2830 the owner saves where the music starts and ends, and they are there for the next reader", async ({
   page,
 }) => {
   await signUpAndConfirm(page, unique("start"), "Stella Start");
@@ -172,6 +172,14 @@ test("R-03.11 the owner saves where the music starts, and it is there for the ne
   const dock = page.getByRole("complementary", { name: "Video" });
   await dock.getByRole("button", { name: "Later" }).click();
   await dock.getByRole("button", { name: "Later" }).click();
+  // T-2830 and where it ends: here, at the chorus.
+  await expect(dock).toContainText("No end set");
+  await dock
+    .getByRole("group", { name: "Sections" })
+    .getByRole("button", { name: "Go to Chorus" })
+    .click();
+  await dock.getByRole("button", { name: "Music ends here" }).click();
+  await expect(dock).toContainText(/Music ends at \d+:\d\d/);
   await dock.getByRole("button", { name: "Save for everyone" }).click();
   await expect(dock.getByRole("button", { name: "Save for everyone" })).toHaveCount(0);
 
@@ -181,6 +189,9 @@ test("R-03.11 the owner saves where the music starts, and it is there for the ne
   await page.getByRole("button", { name: "Watch the video" }).click();
   await expect(page.getByRole("complementary", { name: "Video" })).toContainText(
     "Music starts at 0:01",
+  );
+  await expect(page.getByRole("complementary", { name: "Video" })).toContainText(
+    /Music ends at \d+:\d\d/,
   );
   await expect(page.getByRole("button", { name: "Save for everyone" })).toHaveCount(0);
 });

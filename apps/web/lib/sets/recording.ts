@@ -18,7 +18,7 @@ export async function setRecording(
   if (!set) return null;
   const { data: row } = await supabase
     .from("band_audio")
-    .select("duration_ms, peaks, music_start_ms")
+    .select("duration_ms, peaks, music_start_ms, music_end_ms")
     .match({ band_id: set.band_id, version_id: versionId })
     .maybeSingle();
   if (!row) return null;
@@ -33,5 +33,6 @@ export async function setRecording(
     durationMs: row.duration_ms as number,
     peaks: (row.peaks as number[] | null) ?? [],
     musicStartMs: row.music_start_ms as number,
+    musicEndMs: (row.music_end_ms as number | null) ?? null,
   };
 }

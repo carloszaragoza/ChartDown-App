@@ -11,7 +11,7 @@ import { UUID } from "../../../../../versions/[id]/load";
 import { readSection } from "../../../../../versions/[id]/stand/standHref";
 import { StandMode } from "../../../../../versions/[id]/stand/StandMode";
 import { AudioButton } from "../../../../../_components/AudioDock";
-import { saveAudioStart } from "../../../../../versions/[id]/audio";
+import { saveAudioPoints } from "../../../../../versions/[id]/audio";
 import { setRecording } from "../../../../../../lib/sets/recording";
 
 type Search = Promise<{
@@ -159,7 +159,7 @@ export default async function SetStandPage({
                 chart={chart}
                 save={
                   leads
-                    ? saveAudioStart.bind(null, recording.bandId, recording.versionId)
+                    ? saveAudioPoints.bind(null, recording.bandId, recording.versionId)
                     : undefined
                 }
               />

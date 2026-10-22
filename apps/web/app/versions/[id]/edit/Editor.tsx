@@ -26,7 +26,7 @@ import { ChartPreview } from "../../../_components/ChartPreview";
 import { saveChart, type SaveState, type SourceValues } from "./actions";
 import { SOURCE_TYPES, type VersionError } from "../../../../lib/versions/validate";
 import { videoId } from "../../../../lib/video/youtube";
-import { saveVideoStart } from "../actions";
+import { saveVideoPoints } from "../actions";
 import { CancelButton, WriteLayout } from "../../../_components/WriteLayout";
 import { VideoLink } from "../../../_components/VideoDock";
 import { splitTitle, withTitle } from "../../../../lib/versions/title";
@@ -55,6 +55,7 @@ export interface EditorProps {
     youtube: string | null;
     /** Where the music starts in the video, in seconds, as saved (R-03.11). */
     videoStart?: number | null;
+    videoEnd?: number | null;
   };
 }
 
@@ -232,7 +233,8 @@ export function Editor({
                   url={youtube}
                   chart={chart}
                   saved={details?.videoStart}
-                  save={(milliseconds) => saveVideoStart(versionId, milliseconds)}
+                  savedEnd={details?.videoEnd}
+                  save={(points) => saveVideoPoints(versionId, points)}
                   isIconOnly
                 />
               )}

@@ -16,7 +16,7 @@ import { DisplayBar, VersionDisplay } from "./VersionDisplay";
 vi.mock("./actions", () => ({
   forkVersion: () => undefined,
   reportVersion: () => undefined,
-  saveVideoStart: async () => true,
+  saveVideoPoints: async () => true,
 }));
 vi.mock("../../sets/actions", () => ({
   addToSet: async () => null,

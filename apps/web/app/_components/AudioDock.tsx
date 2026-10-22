@@ -4,14 +4,7 @@ import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Text } from "@astryxdesign/core/Text";
-import {
-  MinusIcon,
-  MusicalNoteIcon,
-  PauseIcon,
-  PlayIcon,
-  PlusIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { MusicalNoteIcon, PauseIcon, PlayIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -22,7 +15,15 @@ import { videoClock } from "../../lib/video/clock";
 import { videoSections } from "../../lib/video/sections";
 import { windowWave } from "../../lib/video/wave";
 import { useDockRoom, useDockTarget } from "./DockRoom";
-import { PlayerVolume, SectionCells, useCanSetVolume, usePlayerStart } from "./PlayerBar";
+import {
+  MusicPointsControls,
+  PlayerVolume,
+  SectionCells,
+  useCanSetVolume,
+  useMusicEnd,
+  usePlayerStart,
+} from "./PlayerBar";
+import type { MusicPoints } from "../../lib/video/points";
 
 /** A band's recording of a version, as the player needs it (R-06.7). */
 export interface PlayerRecording {
@@ -33,6 +34,8 @@ export interface PlayerRecording {
   /** The waveform, 0 to 1000. */
   peaks: number[];
   musicStartMs: number;
+  /** Where the music ends, when the MD saved it (T-2830). */
+  musicEndMs?: number | null;
 }
 
 // The waveform is drawn with this many bars, whatever the recording's length.
@@ -55,7 +58,7 @@ export function AudioButton({
   recording: PlayerRecording;
   chart: Chart;
   /** For the band's MD: saves where the music starts, in milliseconds. */
-  save?: ((milliseconds: number) => Promise<boolean>) | undefined;
+  save?: ((points: MusicPoints) => Promise<boolean>) | undefined;
 }) {
   const t = useTranslations("audio");
   const [open, setOpen] = useState(false);
@@ -94,7 +97,7 @@ function AudioDock({
 }: {
   recording: PlayerRecording;
   chart: Chart;
-  save: ((milliseconds: number) => Promise<boolean>) | undefined;
+  save: ((points: MusicPoints) => Promise<boolean>) | undefined;
   onClose: () => void;
 }) {
   const t = useTranslations("audio");
@@ -116,6 +119,11 @@ function AudioDock({
   const [now, setNow] = useState(0);
   const [musicStart, setMusicStart] = useState(recording.musicStartMs / 1000);
   const [stored, setStored] = useState(recording.musicStartMs / 1000);
+  // Where the music ends, when it is set: the recording pauses there (T-2830).
+  const savedEnd = recording.musicEndMs == null ? null : recording.musicEndMs / 1000;
+  const [musicEnd, setMusicEnd] = useState(savedEnd);
+  const [storedEnd, setStoredEnd] = useState(savedEnd);
+  const keepWithin = useMusicEnd(musicEnd, musicStart);
   const [saving, setSaving] = useState<"idle" | "saving" | "failed">("idle");
   const duration = recording.durationMs / 1000;
   const sections = useMemo(() => videoSections(chart, musicStart), [chart, musicStart]);
@@ -168,9 +176,17 @@ function AudioDock({
       if (!element) return;
       setNow(element.currentTime);
       videoClock.set({ time: element.currentTime, musicStart, playing: !element.paused });
+      keepWithin(
+        element.currentTime,
+        !element.paused,
+        () => element.pause(),
+        (to) => {
+          element.currentTime = to;
+        },
+      );
     }, 100);
     return () => window.clearInterval(timer);
-  }, [musicStart]);
+  }, [musicStart, keepWithin]);
   useEffect(() => () => videoClock.set(null), []);
 
   const seek = (seconds: number) => {
@@ -194,51 +210,34 @@ function AudioDock({
     >
       {/* Every control in one row along the top (T-2828). */}
       <div className="cd-player__controls">
-        {sections ? (
-          <HStack gap={1} vAlign="center" wrap="wrap">
-            <Text type="supporting">{v("musicStarts", { time: clock(musicStart) })}</Text>
-            <Button
-              label={v("earlier")}
-              variant="ghost"
-              size="sm"
-              icon={<Icon icon={MinusIcon} />}
-              isIconOnly
-              tooltip={v("earlier")}
-              onClick={() => setMusicStart((at) => Math.max(0, at - 0.25))}
-            />
-            <Button
-              label={v("later")}
-              variant="ghost"
-              size="sm"
-              icon={<Icon icon={PlusIcon} />}
-              isIconOnly
-              tooltip={v("later")}
-              onClick={() => setMusicStart((at) => Math.min(duration, at + 0.25))}
-            />
-            <Button
-              label={v("startHere")}
-              variant="ghost"
-              size="sm"
-              onClick={() => setMusicStart(Math.round(now * 100) / 100)}
-            />
-            {save && musicStart !== stored && (
-              <Button
-                label={t("saveStart")}
-                size="sm"
-                isLoading={saving === "saving"}
-                onClick={() => {
-                  setSaving("saving");
-                  void save(Math.round(musicStart * 1000)).then((done) => {
-                    setSaving(done ? "idle" : "failed");
-                    if (done) setStored(musicStart);
-                  });
-                }}
-              />
-            )}
-          </HStack>
-        ) : (
-          <Text type="supporting">{v("noTempo")}</Text>
-        )}
+        <MusicPointsControls
+          start={musicStart}
+          end={musicEnd}
+          now={now}
+          step={0.25}
+          max={duration}
+          onStart={setMusicStart}
+          onEnd={setMusicEnd}
+          saveLabel={
+            save && (musicStart !== stored || musicEnd !== storedEnd) ? t("saveStart") : undefined
+          }
+          isSaving={saving === "saving"}
+          onSave={() => {
+            if (!save) return;
+            setSaving("saving");
+            void save({
+              startMs: Math.round(musicStart * 1000),
+              endMs: musicEnd === null ? null : Math.round(musicEnd * 1000),
+            }).then((done) => {
+              setSaving(done ? "idle" : "failed");
+              if (done) {
+                setStored(musicStart);
+                setStoredEnd(musicEnd);
+              }
+            });
+          }}
+        />
+        {!sections && <Text type="supporting">{v("noTempo")}</Text>}
         <HStack gap={1} vAlign="center">
           <Icon icon={MusicalNoteIcon} />
           <Text type="supporting" maxLines={1}>

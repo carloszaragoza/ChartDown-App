@@ -53,7 +53,9 @@ export default async function VersionPage({
   const { data: audioRows } = auth.user
     ? await supabase
         .from("band_audio")
-        .select("band_id, duration_ms, peaks, music_start_ms, band:bands(name, is_personal)")
+        .select(
+          "band_id, duration_ms, peaks, music_start_ms, music_end_ms, band:bands(name, is_personal)",
+        )
         .eq("version_id", version.id)
     : { data: [] };
   const recordings = (audioRows ?? []).map((row) => {
@@ -67,6 +69,7 @@ export default async function VersionPage({
       durationMs: row.duration_ms as number,
       peaks: (row.peaks as number[] | null) ?? [],
       musicStartMs: row.music_start_ms as number,
+      musicEndMs: (row.music_end_ms as number | null) ?? null,
       canArrange: arranged.some((one) => one.id === row.band_id),
     };
   });
@@ -79,6 +82,7 @@ export default async function VersionPage({
       id={version.id}
       songId={version.songId}
       videoStart={version.videoStart}
+      videoEnd={version.videoEnd}
       title={version.title}
       artists={version.artists}
       author={version.author}

@@ -1,10 +1,27 @@
 "use client";
 
+import { Button } from "@astryxdesign/core/Button";
+import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Slider } from "@astryxdesign/core/Slider";
-import { SpeakerWaveIcon, SpeakerXMarkIcon } from "@heroicons/react/24/outline";
+import { Text } from "@astryxdesign/core/Text";
+import {
+  MinusIcon,
+  PlusIcon,
+  SpeakerWaveIcon,
+  SpeakerXMarkIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import type { Chart } from "chartdown";
-import { useEffect, useState, useSyncExternalStore, type RefObject } from "react";
+import { useTranslations } from "next-intl";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type RefObject,
+} from "react";
 import { sectionAt, sectionLabels, type VideoSection } from "../../lib/video/sections";
 
 /**
@@ -165,5 +182,149 @@ export function useCanSetVolume(): boolean {
       return settable;
     },
     () => false,
+  );
+}
+
+const clock = (seconds: number) =>
+  `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+
+/**
+ * Where the music starts and ends (R-03.11, R-06.7, T-2830), in the player's top row: each moved
+ * by a step, or set to where the player is; the end is optional, and Play to the end clears it.
+ * The owner (or the band's MD) saves both together.
+ */
+export function MusicPointsControls({
+  start,
+  end,
+  now,
+  step,
+  max,
+  onStart,
+  onEnd,
+  saveLabel,
+  isSaving,
+  onSave,
+}: {
+  start: number;
+  end: number | null;
+  now: number;
+  /** How far Earlier and Later move a point, in seconds. */
+  step: number;
+  /** The recording's length, when it is known. */
+  max?: number;
+  onStart: (seconds: number) => void;
+  onEnd: (seconds: number | null) => void;
+  /** Offered when there is something to save and the person may. */
+  saveLabel?: string | undefined;
+  isSaving: boolean;
+  onSave: () => void;
+}) {
+  const t = useTranslations("video");
+  const last = max ?? Number.POSITIVE_INFINITY;
+  return (
+    <HStack gap={3} vAlign="center" wrap="wrap">
+      <HStack gap={1} vAlign="center">
+        <Text type="supporting">{t("musicStarts", { time: clock(start) })}</Text>
+        <Button
+          label={t("earlier")}
+          variant="ghost"
+          size="sm"
+          icon={<Icon icon={MinusIcon} />}
+          isIconOnly
+          tooltip={t("earlier")}
+          onClick={() => onStart(Math.max(0, start - step))}
+        />
+        <Button
+          label={t("later")}
+          variant="ghost"
+          size="sm"
+          icon={<Icon icon={PlusIcon} />}
+          isIconOnly
+          tooltip={t("later")}
+          isDisabled={end !== null && start + step >= end}
+          onClick={() => onStart(Math.min(last, start + step))}
+        />
+        <Button
+          label={t("startHere")}
+          variant="ghost"
+          size="sm"
+          isDisabled={end !== null && now >= end}
+          onClick={() => onStart(Math.round(now * 100) / 100)}
+        />
+      </HStack>
+      <HStack gap={1} vAlign="center">
+        <Text type="supporting">
+          {end === null ? t("musicEndsOpen") : t("musicEnds", { time: clock(end) })}
+        </Text>
+        {end !== null && (
+          <>
+            <Button
+              label={t("endSooner")}
+              variant="ghost"
+              size="sm"
+              icon={<Icon icon={MinusIcon} />}
+              isIconOnly
+              tooltip={t("endSooner")}
+              isDisabled={end - step <= start}
+              onClick={() => onEnd(end - step)}
+            />
+            <Button
+              label={t("endFurther")}
+              variant="ghost"
+              size="sm"
+              icon={<Icon icon={PlusIcon} />}
+              isIconOnly
+              tooltip={t("endFurther")}
+              onClick={() => onEnd(Math.min(last, end + step))}
+            />
+          </>
+        )}
+        <Button
+          label={t("endHere")}
+          variant="ghost"
+          size="sm"
+          isDisabled={now <= start}
+          onClick={() => onEnd(Math.round(now * 100) / 100)}
+        />
+        {end !== null && (
+          <Button
+            label={t("clearEnd")}
+            variant="ghost"
+            size="sm"
+            icon={<Icon icon={XMarkIcon} />}
+            isIconOnly
+            tooltip={t("clearEnd")}
+            onClick={() => onEnd(null)}
+          />
+        )}
+      </HStack>
+      {saveLabel && <Button label={saveLabel} size="sm" isLoading={isSaving} onClick={onSave} />}
+    </HStack>
+  );
+}
+
+/**
+ * Keeps a player within where the music ends (T-2830): it pauses there, and Play after it starts
+ * again where the music starts. Called on every tick with where the player is.
+ */
+export function useMusicEnd(end: number | null, start: number) {
+  const stopped = useRef(false);
+  return useCallback(
+    (time: number, playing: boolean, pause: () => void, seek: (to: number) => void) => {
+      if (end === null) {
+        stopped.current = false;
+        return;
+      }
+      const atEnd = time >= end - 0.25;
+      if (!playing) return;
+      if (stopped.current && atEnd) {
+        stopped.current = false;
+        seek(start);
+      } else if (atEnd) {
+        stopped.current = true;
+        pause();
+      } else stopped.current = false;
+    },
+    [end, start],
   );
 }

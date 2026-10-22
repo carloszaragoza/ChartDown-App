@@ -3,6 +3,7 @@
 import { authEnabled } from "../../../lib/auth/enabled";
 import { MAX_AUDIO_BYTES, PEAK_COUNT } from "../../../lib/audio/file";
 import { createClient } from "../../../lib/supabase/server";
+import { checkedPoints, type MusicPoints } from "../../../lib/video/points";
 import { UUID } from "./load";
 
 const TYPES = ["audio/mpeg", "audio/mp4"];
@@ -58,19 +59,19 @@ export async function removeAudio(bandId: string, versionId: string): Promise<bo
   return true;
 }
 
-/** Saves where the music starts in the band's recording, for the band (R-06.7). */
-export async function saveAudioStart(
+/** Saves where the music starts and ends in the band's recording, for the band (R-06.7, T-2830). */
+export async function saveAudioPoints(
   bandId: string,
   versionId: string,
-  milliseconds: number,
+  points: MusicPoints,
 ): Promise<boolean> {
   if (!authEnabled() || !UUID.test(bandId) || !UUID.test(versionId)) return false;
-  const value = Math.round(milliseconds);
-  if (!Number.isFinite(value) || value < 0 || value > 3_600_000) return false;
+  const value = checkedPoints(points);
+  if (!value) return false;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("band_audio")
-    .update({ music_start_ms: value })
+    .update({ music_start_ms: value.startMs, music_end_ms: value.endMs })
     .match({ band_id: bandId, version_id: versionId })
     .select("id");
   return !error && data?.length === 1;

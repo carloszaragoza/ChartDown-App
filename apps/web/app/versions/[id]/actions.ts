@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { authEnabled } from "../../../lib/auth/enabled";
 import { createClient } from "../../../lib/supabase/server";
+import { checkedPoints, type MusicPoints } from "../../../lib/video/points";
 import { UUID } from "./load";
 
 /** Makes the signed-in person's own public copy of a version, and opens it (R-02.6, R-02.7). */
@@ -55,17 +56,18 @@ export async function reportVersion(form: FormData): Promise<void> {
 }
 
 /**
- * Saves where the music starts in the version's video, for everyone (R-03.11, T-2503). Only the
- * owner of an active version can: the database's policy finds no other. True when it was saved.
+ * Saves where the music starts and ends in the version's video, for everyone (R-03.11, T-2503,
+ * T-2830). Only the owner of an active version can: the database's policy finds no other. True
+ * when it was saved.
  */
-export async function saveVideoStart(versionId: string, milliseconds: number): Promise<boolean> {
+export async function saveVideoPoints(versionId: string, points: MusicPoints): Promise<boolean> {
   if (!authEnabled() || !UUID.test(versionId)) return false;
-  const value = Math.round(milliseconds);
-  if (!Number.isFinite(value) || value < 0 || value > 3_600_000) return false;
+  const value = checkedPoints(points);
+  if (!value) return false;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("versions")
-    .update({ video_start_ms: value })
+    .update({ video_start_ms: value.startMs, video_end_ms: value.endMs })
     .eq("id", versionId)
     .select("id");
   return !error && (data?.length ?? 0) === 1;

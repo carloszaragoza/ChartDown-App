@@ -25,7 +25,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     set && songs.length > 0
       ? await supabase
           .from("band_audio")
-          .select("version_id, duration_ms, peaks, music_start_ms, added_at")
+          .select("version_id, duration_ms, peaks, music_start_ms, music_end_ms, added_at")
           .eq("band_id", set.band_id)
           .in(
             "version_id",
@@ -38,6 +38,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     durationMs: row.duration_ms as number,
     peaks: (row.peaks as number[] | null) ?? [],
     musicStartMs: row.music_start_ms as number,
+    musicEndMs: (row.music_end_ms as number | null) ?? null,
     addedAt: row.added_at as string,
   }));
   return NextResponse.json(

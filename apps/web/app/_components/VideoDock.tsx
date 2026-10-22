@@ -4,13 +4,7 @@ import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Text } from "@astryxdesign/core/Text";
-import {
-  ArrowTopRightOnSquareIcon,
-  MinusIcon,
-  PlayIcon,
-  PlusIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowTopRightOnSquareIcon, PlayIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
@@ -19,7 +13,14 @@ import { videoClock } from "../../lib/video/clock";
 import { videoSections } from "../../lib/video/sections";
 import { chartWave } from "../../lib/video/wave";
 import { useDockRoom, useDockTarget } from "./DockRoom";
-import { PlayerVolume, SectionCells, usePlayerStart } from "./PlayerBar";
+import {
+  MusicPointsControls,
+  PlayerVolume,
+  SectionCells,
+  useMusicEnd,
+  usePlayerStart,
+} from "./PlayerBar";
+import type { MusicPoints } from "../../lib/video/points";
 import { startSeconds, videoId } from "../../lib/video/youtube";
 
 /** The part of YouTube's IFrame API the dock uses. */
@@ -33,6 +34,7 @@ interface YouTubePlayer {
   getVolume?(): number;
   setVolume?(volume: number): void;
   isMuted?(): boolean;
+  pauseVideo?(): void;
   unMute?(): void;
   destroy(): void;
 }
@@ -99,6 +101,7 @@ export function VideoLink({
   url,
   chart,
   saved,
+  savedEnd,
   save,
   isIconOnly = false,
   size = "lg",
@@ -107,8 +110,10 @@ export function VideoLink({
   chart?: Chart | undefined;
   /** Where the music starts, in seconds, as the owner saved it (T-2503). */
   saved?: number | null | undefined;
+  /** Where it ends, in seconds, as the owner saved it (T-2830). */
+  savedEnd?: number | null | undefined;
   /** For the version's owner: saves where the music starts for everyone. */
-  save?: ((milliseconds: number) => Promise<boolean>) | undefined;
+  save?: ((points: MusicPoints) => Promise<boolean>) | undefined;
   /** Only the play icon, as beside the YouTube link's field. */
   isIconOnly?: boolean;
   /** The labelled button's size: large, medium on a phone (T-2811). */
@@ -156,6 +161,7 @@ export function VideoLink({
             url={url}
             chart={chart}
             saved={saved ?? null}
+            savedEnd={savedEnd ?? null}
             save={save}
             onClose={() => setOpen(false)}
           />,
@@ -171,6 +177,7 @@ function VideoDock({
   url,
   chart,
   saved: savedStart,
+  savedEnd,
   save,
   onClose,
 }: {
@@ -179,7 +186,8 @@ function VideoDock({
   url: string;
   chart: Chart | undefined;
   saved: number | null;
-  save: ((milliseconds: number) => Promise<boolean>) | undefined;
+  savedEnd: number | null;
+  save: ((points: MusicPoints) => Promise<boolean>) | undefined;
   onClose: () => void;
 }) {
   const t = useTranslations("video");
@@ -201,6 +209,14 @@ function VideoDock({
   // Where the first bar falls in the video; the reader moves it to match the recording.
   const [musicStart, setMusicStart] = useState(savedStart ?? start);
   const [stored, setStored] = useState(savedStart);
+  // Where the music ends, when it is set: the video pauses there (T-2830).
+  const [musicEnd, setMusicEnd] = useState(savedEnd);
+  const [storedEnd, setStoredEnd] = useState(savedEnd);
+  const keepWithin = useMusicEnd(musicEnd, musicStart);
+  const keepRef = useRef(keepWithin);
+  useEffect(() => {
+    keepRef.current = keepWithin;
+  }, [keepWithin]);
   const [saving, setSaving] = useState<"idle" | "saving" | "failed">("idle");
   const startRef = useRef(musicStart);
   useEffect(() => {
@@ -250,11 +266,17 @@ function VideoDock({
         seeking.current = null;
       }
       setNow(time);
-      videoClock.set({
+      const playing = player.current?.getPlayerState?.() === 1;
+      videoClock.set({ time, musicStart: startRef.current, playing });
+      keepRef.current(
         time,
-        musicStart: startRef.current,
-        playing: player.current?.getPlayerState?.() === 1,
-      });
+        playing,
+        () => player.current?.pauseVideo?.(),
+        (to) => {
+          seeking.current = { to, at: performance.now() };
+          player.current?.seekTo?.(to, true);
+        },
+      );
     }, 50);
     return () => {
       gone = true;
@@ -284,48 +306,33 @@ function VideoDock({
     >
       {/* Every control in one row along the top (T-2828). */}
       <div className="cd-player__controls">
-        {chart && sections && (
-          <HStack gap={1} vAlign="center" wrap="wrap">
-            <Text type="supporting">{t("musicStarts", { time: clock(musicStart) })}</Text>
-            <Button
-              label={t("earlier")}
-              variant="ghost"
-              size="sm"
-              icon={<Icon icon={MinusIcon} />}
-              isIconOnly
-              tooltip={t("earlier")}
-              onClick={() => setMusicStart((at) => Math.max(0, at - 0.5))}
-            />
-            <Button
-              label={t("later")}
-              variant="ghost"
-              size="sm"
-              icon={<Icon icon={PlusIcon} />}
-              isIconOnly
-              tooltip={t("later")}
-              onClick={() => setMusicStart((at) => at + 0.5)}
-            />
-            <Button
-              label={t("startHere")}
-              variant="ghost"
-              size="sm"
-              onClick={() => setMusicStart(Math.round(now * 10) / 10)}
-            />
-            {save && musicStart !== stored && (
-              <Button
-                label={t("saveStart")}
-                size="sm"
-                isLoading={saving === "saving"}
-                onClick={() => {
-                  setSaving("saving");
-                  void save(musicStart * 1000).then((done) => {
-                    setSaving(done ? "idle" : "failed");
-                    if (done) setStored(musicStart);
-                  });
-                }}
-              />
-            )}
-          </HStack>
+        {chart && (
+          <MusicPointsControls
+            start={musicStart}
+            end={musicEnd}
+            now={now}
+            step={0.5}
+            onStart={setMusicStart}
+            onEnd={setMusicEnd}
+            saveLabel={
+              save && (musicStart !== stored || musicEnd !== storedEnd) ? t("saveStart") : undefined
+            }
+            isSaving={saving === "saving"}
+            onSave={() => {
+              if (!save) return;
+              setSaving("saving");
+              void save({
+                startMs: musicStart * 1000,
+                endMs: musicEnd === null ? null : musicEnd * 1000,
+              }).then((done) => {
+                setSaving(done ? "idle" : "failed");
+                if (done) {
+                  setStored(musicStart);
+                  setStoredEnd(musicEnd);
+                }
+              });
+            }}
+          />
         )}
         {chart && !sections && <Text type="supporting">{t("noTempo")}</Text>}
         <HStack gap={1} vAlign="center">
