@@ -1,6 +1,6 @@
 import { parse } from "chartdown";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { clicks, continueWith, Metronome, sectionEnd, type Click } from "./engine";
+import { clicks, continueWith, Metronome, sectionEnd, START_DELAY, type Click } from "./engine";
 import { timeline } from "./timeline";
 
 // A 4-minute song: 76 bars of 4/4 at 76 bpm is exactly 240 seconds.
@@ -208,5 +208,57 @@ describe("T-2817 the metronome in 6/8 and 12/8", () => {
     expect(marks.join("")).toBe("1..g..1..g..");
     const four = clicks(timeline(parse("---\ntempo: 60\n---\n## A\n1\n")));
     expect(four.some((click) => click.group)).toBe(false);
+  });
+});
+
+describe("T-2822 Play starts at once", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it("R-11.12 the first click sounds 30 ms after Play, handed over at once", () => {
+    const clock = fakeClock();
+    clock.advance(5);
+    const sounded: number[] = [];
+    const list = clicks(timeline(parse("---\ntempo: 60\n---\n## A\n1\n")));
+    const metronome = new Metronome(list, clock, (_, at) => sounded.push(at));
+    metronome.start();
+    expect(sounded[0]).toBeCloseTo(5 + START_DELAY);
+    expect(START_DELAY).toBeLessThanOrEqual(0.03);
+    metronome.stop();
+  });
+});
+
+describe("T-2825 a tempo's beat unit (ChartDown 0.9)", () => {
+  const barLength = (source: string, options = {}) => {
+    const list = clicks(timeline(parse(source)), options);
+    const last = list.at(-1);
+    return (last?.time ?? 0) + (last?.duration ?? 0);
+  };
+
+  it("R-11.5 R-00.18 58 q., 87 q and 174 e in 6/8 play at the same speed", () => {
+    const sixEight = (tempo: string) =>
+      barLength(`---\nmeter: 6/8\ntempo: ${tempo}\n---\n## A\n1\n`);
+    // Six eighths at 174 a minute.
+    expect(sixEight("58 q.")).toBeCloseTo((6 * 60) / 174);
+    expect(sixEight("87 q")).toBeCloseTo((6 * 60) / 174);
+    expect(sixEight("174 e")).toBeCloseTo((6 * 60) / 174);
+    expect(sixEight("58")).toBeCloseTo((6 * 60) / 174);
+  });
+
+  it("R-11.5 a unit in 4/4 still clicks each quarter, at the speed the unit says", () => {
+    const list = clicks(timeline(parse("---\ntempo: 60 h\n---\n## A\n1\n")));
+    expect(list).toHaveLength(4);
+    // 60 half notes a minute: a quarter every half second.
+    expect(list[1]?.time).toBeCloseTo(0.5);
+  });
+
+  it("R-11.16 a tempo with ? plays only as the person chose", () => {
+    const bars = timeline(parse("---\nmeter: 6/8\ntempo: 58 ?\n---\n## A\n1\n"));
+    expect(bars[0]?.unconfirmed).toBe(true);
+    expect(bars[0]?.unit).toBeUndefined();
+    const dotted = clicks(bars, { unit: "q." });
+    const eighth = clicks(bars, { unit: "e" });
+    expect(dotted[1]?.time).toBeCloseTo(60 / 174);
+    expect(eighth[1]?.time).toBeCloseTo(60 / 58);
   });
 });

@@ -218,6 +218,14 @@
   .cd-chart__bar--repeat-start:nth-child(odd) {
     border-inline-start: var(--chart-repeat-line);
   }
+  /* The whole song on a phone (T-2823) keeps each row on one line, as on a printed sheet. */
+  .cd-stand-stack[data-layout="song"] .cd-chart__bars {
+    grid-template-columns: var(--chart-bar-columns, repeat(var(--chart-bars), minmax(0, 1fr)));
+  }
+  .cd-stand-stack[data-layout="song"]
+    .cd-chart__bar:nth-child(odd):not(:first-child):not(.cd-chart__bar--repeat-start) {
+    border-inline-start: none;
+  }
 }
 
 /* A pickup is a narrow bar: less room at its sides. */
@@ -761,10 +769,45 @@
   font-weight: var(--font-weight-bold);
   font-variant-numeric: tabular-nums;
 }
-/* Number size in stand mode's View (T-2805): Medium is the size above. */
+/* Number size in stand mode's View (T-2805, T-2824): Medium is the size above. */
+.cd-stand-stack[data-size="xs"] {
+  --stand-scale: 0.7;
+}
 .cd-stand-stack[data-size="sm"] {
   --stand-scale: 0.85;
 }
 .cd-stand-stack[data-size="lg"] {
   --stand-scale: 1.15;
+}
+/* The whole song on one screen (T-2823, owner's review, October 21, 2026): the sections flow in
+   as many columns as fit, like a printed sheet, each whole in its column; none is dimmed, the
+   current one keeps its frame. Stand mode shrinks --stand-scale until the song fits, and the
+   columns narrow with it, so a smaller song takes more of them. */
+.cd-stand-stack[data-layout="song"] {
+  scroll-snap-type: none;
+}
+.cd-stand-stack[data-layout="song"] .cd-stand-stack__list {
+  display: block;
+  column-width: calc(var(--spacing-12) * 9 * var(--stand-scale, 1));
+  column-gap: var(--spacing-3);
+}
+.cd-stand-stack[data-layout="song"] .cd-stand-card {
+  break-inside: avoid;
+  margin-block-end: var(--spacing-3);
+  padding: var(--spacing-2) var(--spacing-3) var(--spacing-3);
+  scroll-snap-align: none;
+}
+.cd-stand-stack[data-layout="song"] .cd-stand-card[data-state="past"] {
+  opacity: 1;
+}
+.cd-stand-stack[data-layout="song"] .cd-stand-card:not([data-state="current"]) .cd-chart {
+  --chart-ink: var(--color-text-primary);
+  --chart-bar-line: calc(var(--border-width) * 3) solid var(--chart-ink);
+  --chart-repeat-line: calc(var(--border-width) * 5) double var(--chart-ink);
+}
+.cd-stand-stack[data-layout="song"] .cd-stand-card:not([data-state="current"]) h2 {
+  color: var(--color-text-primary);
+}
+.cd-stand-stack[data-layout="song"] .cd-chart {
+  --chart-bar-min-width: calc(var(--spacing-12) * 1.5 * var(--stand-scale, 1));
 }

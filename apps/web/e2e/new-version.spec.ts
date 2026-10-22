@@ -129,6 +129,13 @@ test("R-03.11 a YouTube link opens the video in a mini player, and Close closes 
   await dock.getByRole("button", { name: "Later" }).click();
   await dock.getByRole("button", { name: "Later" }).click();
   await expect(dock).toContainText("Music starts at 0:01");
+  // T-2821 the video's volume is set from the dock, not only from YouTube's own slider.
+  await dock.getByRole("button", { name: "Video volume" }).click();
+  const volume = page.getByRole("dialog", { name: "Video volume" }).getByRole("slider");
+  await volume.focus();
+  await page.keyboard.press("ArrowLeft");
+  await expect(volume).toHaveAttribute("aria-valuenow", /^(95|[0-9]{1,2})$/);
+  await page.keyboard.press("Escape");
   await dock.getByRole("button", { name: "Close the video" }).click();
   await expect(dock).toHaveCount(0);
 });

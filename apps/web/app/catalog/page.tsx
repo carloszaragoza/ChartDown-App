@@ -21,6 +21,7 @@ import { CatalogSearch } from "./CatalogSearch";
 import { ActionRow } from "../_components/ActionRow";
 import { RememberCatalog } from "./RememberCatalog";
 import { guessPhone } from "../../lib/shell/guessPhone";
+import { tempoLabel, unitKey } from "../../lib/chart/tempo";
 
 type Search = Promise<{ q?: string; source?: string; page?: string; song?: string }>;
 interface Row {
@@ -220,7 +221,8 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
                                     ? [
                                         `${t("key")} ${chart.key}`,
                                         chart.meter,
-                                        chart.tempo && `${c("tempo")} ${chart.tempo}`,
+                                        chart.tempo &&
+                                          `${c("tempo")} ${tempoLabel(chart.tempo, (unit) => c(`beatUnit.${unitKey(unit)}`))}`,
                                       ]
                                         .filter(Boolean)
                                         .join(" · ")

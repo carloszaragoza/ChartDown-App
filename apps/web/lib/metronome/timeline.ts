@@ -1,5 +1,13 @@
 import { beatStrength, type BeatStrength } from "@chartdown/ui";
-import { layoutBeats, playOrder, type BarItem, type Chart, type Meter } from "chartdown";
+import {
+  layoutBeats,
+  playOrder,
+  rowBeatUnit,
+  type BarItem,
+  type BeatUnit,
+  type Chart,
+  type Meter,
+} from "chartdown";
 
 /** One beat the metronome counts: its number in the bar, how strong it is, what sounds on it. */
 export interface TimelineBeat {
@@ -21,28 +29,24 @@ export interface TimelineBar {
   number: number;
   pass: number;
   meter: Meter;
-  /**
-   * Beats per minute, counting the meter's own unit, or the dotted quarter in 6/8, 9/8 and 12/8
-   * (see `eighthsPerBeat`); undefined when the chart has none.
-   */
+  /** The tempo's number, as written; undefined when the chart has none. */
   tempo?: number;
+  /**
+   * What that number counts (ChartDown 0.9, R-00.18): the unit written in its row, or the row's
+   * meter's (the dotted quarter in 6/8, 9/8 and 12/8); undefined with no tempo or with `?`.
+   */
+  unit?: BeatUnit;
+  /** The tempo was written with `?`: the person says what it counts before Play (R-11.16). */
+  unconfirmed?: true;
   /** A fermata in the bar: playback waits there for a tap (R-11.6). */
   fermata: boolean;
   beats: TimelineBeat[];
 }
 
-/**
- * Eighths in one beat of the tempo (R-11.5, T-2817): 3 in 6/8, 9/8 and 12/8, whose tempo counts
- * the dotted quarter, as charts and click tracks give it; 1 in every other meter, whose tempo
- * counts the meter's own unit. The metronome still clicks every eighth of a compound bar.
- */
-export function eighthsPerBeat(meter: Meter): number {
-  return meter.unit === 8 && meter.beats > 3 && meter.beats % 3 === 0 ? 3 : 1;
-}
-
 /** The first eighth of each group of three in 6/8, 9/8 and 12/8, after beat 1 (R-11.7). */
 export function startsGroup(meter: Meter, beat: number): boolean {
-  return eighthsPerBeat(meter) === 3 && beat > 0 && beat % 3 === 0;
+  const isCompound = meter.unit === 8 && meter.beats > 3 && meter.beats % 3 === 0;
+  return isCompound && beat > 0 && beat % 3 === 0;
 }
 
 const isTimed = (item: BarItem) =>
@@ -79,6 +83,18 @@ export function timeline(chart: Chart, options: { tempo?: number } = {}): Timeli
         return { at, start, end };
       });
       const tempo = options.tempo ?? row.tempo ?? chart.tempo;
+      // The unit counts in the row's meter, so a one-bar meter keeps the eighth note's length.
+      const counted = {
+        meter: row.meter,
+        ...(tempo !== undefined ? { tempo } : {}),
+        ...((row.tempoUnit ?? chart.tempoUnit)
+          ? { tempoUnit: row.tempoUnit ?? chart.tempoUnit }
+          : {}),
+        ...(row.tempoUnconfirmed || (row.tempo === undefined && chart.tempoUnconfirmed)
+          ? { tempoUnconfirmed: true as const }
+          : {}),
+      };
+      const unit = rowBeatUnit(counted);
       return [
         {
           section: step.section,
@@ -88,6 +104,8 @@ export function timeline(chart: Chart, options: { tempo?: number } = {}): Timeli
           pass: step.pass,
           meter,
           ...(tempo !== undefined ? { tempo } : {}),
+          ...(unit ? { unit } : {}),
+          ...(counted.tempoUnconfirmed ? { unconfirmed: true as const } : {}),
           fermata: bar.items.some((item) => item.type === "chord" && item.fermata),
           beats: Array.from({ length: Math.max(1, Math.ceil(length)) }, (_, beat) => ({
             count: first + beat + 1,

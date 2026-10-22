@@ -172,13 +172,20 @@ test("R-11.7 with the click off no audio plays and the pulse still runs; on, it 
   page,
   request,
 }) => {
-  // Count the tones the page asks the audio clock for.
+  // Count the sounds the page asks the audio clock for: the clicks, drawn once and played from
+  // their samples (T-2820), and the hum that keeps the speakers awake.
   await page.addInitScript(() => {
-    const create = AudioContext.prototype.createOscillator;
+    const tone = AudioContext.prototype.createOscillator;
+    const sample = AudioContext.prototype.createBufferSource;
     Object.assign(window, { tones: 0 });
+    const count = () => (window as unknown as { tones: number }).tones++;
     AudioContext.prototype.createOscillator = function (this: AudioContext) {
-      (window as unknown as { tones: number }).tones++;
-      return create.call(this);
+      count();
+      return tone.call(this);
+    };
+    AudioContext.prototype.createBufferSource = function (this: AudioContext) {
+      count();
+      return sample.call(this);
     };
   });
   const id = await createVersion(request, { title: "Fast Song", content: FAST });
@@ -211,7 +218,7 @@ test("R-11.9 the practice speed changes the tempo played, never the chart", asyn
   await expect(page.getByRole("dialog").getByText("80% · 192 bpm")).toBeVisible();
   await page.keyboard.press("Escape");
   // The chart still says 240.
-  await expect(page.getByText(/Tempo 240/)).toBeVisible();
+  await expect(page.getByText(/Tempo 240/).first()).toBeVisible();
 });
 
 test("R-11.9 T-2808 the tempo stepper plays at 74 while the chart still says 71", async ({
@@ -235,7 +242,7 @@ test("R-11.9 T-2808 the tempo stepper plays at 74 while the chart still says 71"
   await page.keyboard.press("Escape");
   // The metronome plays at 74; the chart still says 71.
   await expect(page.getByRole("group", { name: "Metronome" }).first()).toContainText("74");
-  await expect(page.getByText(/Tempo 71/)).toBeVisible();
+  await expect(page.getByText(/Tempo 71/).first()).toBeVisible();
 });
 
 test("R-11.9 T-2808 a tempo with a decimal plays as written: 85.5, then 86.5", async ({
@@ -315,6 +322,38 @@ test("R-11.3 T-2816 the beat line moves in steps, or smoothly when Metronome opt
   await expect(page.getByRole("main").locator('[aria-current="step"]')).toHaveCount(1);
   expect(await line()).toBeGreaterThan(0);
   await page.getByRole("button", { name: "Stop" }).click();
+});
+
+test("R-11.16 T-2825 a tempo written with ? says so, and Play asks what it counts first", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, {
+    title: "Low Tide",
+    content: "---\nmeter: 6/8\ntempo: 58 ?\n---\n## Verse\n1 | 4\n## Chorus\n5 | 1\n",
+  });
+  await page.goto(`/versions/${id}`);
+  await expect(page.getByText("Tempo 58, unit to confirm")).toBeVisible();
+  await page.goto(`/versions/${id}/stand`);
+  await page.getByRole("button", { name: "Play" }).click();
+  const ask = page.getByRole("dialog").filter({ hasText: "What does 58 count?" });
+  await expect(ask).toBeVisible();
+  await ask.getByRole("button", { name: /dotted quarter: eighth notes at 174 a minute/i }).click();
+  await expect(page.getByRole("main").locator('[aria-current="step"]')).toHaveCount(1);
+  await page.getByRole("button", { name: "Stop" }).click();
+  // Asked once on this page: Play again plays at once.
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(page.getByRole("dialog").filter({ hasText: "What does 58 count?" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Stop" }).click();
+});
+
+test("R-11.5 T-2825 a tempo with its unit shows it in words", async ({ page, request }) => {
+  const id = await createVersion(request, {
+    title: "High Tide",
+    content: "---\nmeter: 6/8\ntempo: 58 q.\n---\n## Verse\n1 | 4\n",
+  });
+  await page.goto(`/versions/${id}`);
+  await expect(page.getByText("Tempo 58, dotted quarter")).toBeVisible();
 });
 
 test.describe("with reduced motion", () => {

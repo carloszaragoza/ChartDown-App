@@ -31,6 +31,7 @@ import { useTranslations } from "next-intl";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -55,7 +56,9 @@ import {
   upcomingSections,
   type ComingUp,
   type NumberSize,
+  type StandLayout,
 } from "../../../../lib/stand/preferences";
+import { fitScale, pinchLayout } from "../../../../lib/stand/fit";
 import { useChartLabels } from "../../../_components/chartLabels";
 import { DockRoom } from "../../../_components/DockRoom";
 import type { Display } from "../display";
@@ -68,6 +71,7 @@ import {
   type StandTheme,
   type StandView,
 } from "./standHref";
+import { tempoLabel, unitKey } from "../../../../lib/chart/tempo";
 
 export interface StandModeProps {
   versionId: string;
@@ -455,10 +459,14 @@ function StandModeView({
   // The cards in the order they will be played: the played ones, the current one, then what comes
   // next, from the queued section when there is one (T-2804, R-11.15); Coming up keeps one, two
   // or all of them (T-2805).
-  const cards = [
-    ...Array.from({ length: current + 1 }, (_, index) => index),
-    ...upcomingSections(current, last, queued, preferences.comingUp),
-  ];
+  // The whole song (T-2823): every section once, in the order written, on one screen.
+  const isSong = preferences.layout === "song";
+  const cards = isSong
+    ? chart.sections.map((_, index) => index)
+    : [
+        ...Array.from({ length: current + 1 }, (_, index) => index),
+        ...upcomingSections(current, last, queued, preferences.comingUp),
+      ];
   // While the metronome plays, which bar of the current section sounds (T-2804).
   const progress =
     playingAt !== undefined && playingSection === current
@@ -466,6 +474,10 @@ function StandModeView({
       : undefined;
   const written = keyName(chart.key);
   const shown = keyName(homeKey);
+  // The tempo with its unit in words, or that it is still to confirm (R-11.5, R-11.16).
+  const tempoText = chart.header.tempo
+    ? tempoLabel(chart.header.tempo, (unit) => c(`beatUnit.${unitKey(unit)}`))
+    : "";
 
   const chooseView = (label: string) => {
     const option = viewAs?.options.find((item) => item.label === label);
@@ -479,7 +491,7 @@ function StandModeView({
       <Token label={`${c("key")} ${shown}`} size="sm" />
       {shown !== written && <Token label={c("writtenIn", { key: written })} size="sm" />}
       {chart.header.meter && <Token label={chart.header.meter} size="sm" />}
-      {chart.header.tempo && <Token label={`${chart.header.tempo} bpm`} size="sm" />}
+      {chart.header.tempo && <Token label={`${c("tempo")} ${tempoText}`} size="sm" />}
     </>
   );
   // View as: a segmented control in the phone's View sheet; a compact menu on the top line of an
@@ -551,25 +563,27 @@ function StandModeView({
           help: { about: c("beatsAbout"), text: c("beatsHelp") },
         }}
       />
-      {choice(
-        t("comingUp"),
-        preferences.comingUp,
-        [
-          ["1", t("comingUpOne")],
-          ["2", t("comingUpTwo")],
-          ["fill", t("comingUpFill")],
-        ],
-        (chosen) => standPreferences.set({ comingUp: chosen as ComingUp }),
-      )}
-      {choice(
-        t("motion"),
-        preferences.motion,
-        [
-          ["calm", t("motionCalm")],
-          ["bounce", t("motionBounce")],
-        ],
-        (chosen) => standPreferences.set({ motion: chosen as StandMotion }),
-      )}
+      {!isSong &&
+        choice(
+          t("comingUp"),
+          preferences.comingUp,
+          [
+            ["1", t("comingUpOne")],
+            ["2", t("comingUpTwo")],
+            ["fill", t("comingUpFill")],
+          ],
+          (chosen) => standPreferences.set({ comingUp: chosen as ComingUp }),
+        )}
+      {!isSong &&
+        choice(
+          t("motion"),
+          preferences.motion,
+          [
+            ["calm", t("motionCalm")],
+            ["bounce", t("motionBounce")],
+          ],
+          (chosen) => standPreferences.set({ motion: chosen as StandMotion }),
+        )}
       {choice(
         t("screen"),
         theme,
@@ -583,6 +597,7 @@ function StandModeView({
         t("numberSize"),
         preferences.size,
         [
+          ["xs", t("sizeExtraSmall")],
           ["sm", t("sizeSmall")],
           ["md", t("sizeMedium")],
           ["lg", t("sizeLarge")],
@@ -649,14 +664,20 @@ function StandModeView({
   const settledOn = useRef<number | null>(null);
   const hasGlided = useRef(false);
   const settleTimer = useRef(0);
-  const live = useRef({ current, isPlaying, motion: preferences.motion });
+  const live = useRef({ current, isPlaying, isSong, motion: preferences.motion });
   useEffect(() => {
-    live.current = { current, isPlaying, motion: preferences.motion };
-  }, [current, isPlaying, preferences.motion]);
+    live.current = { current, isPlaying, isSong, motion: preferences.motion };
+  }, [current, isPlaying, isSong, preferences.motion]);
   useEffect(() => {
     const box = stack.current;
     const card = box?.querySelector<HTMLElement>(`[data-card="${current}"]`);
     if (!box || !card) return;
+    // The whole song stays still: the current section is only brought into view if it is not.
+    if (isSong) {
+      stopGlide.current?.();
+      card.scrollIntoView({ block: "nearest" });
+      return;
+    }
     if (settledOn.current === current) {
       settledOn.current = null;
       return;
@@ -680,7 +701,7 @@ function StandModeView({
         isGliding.current = false;
       },
     });
-  }, [current]);
+  }, [current, isSong]);
   useEffect(
     () => () => {
       stopGlide.current?.();
@@ -693,7 +714,7 @@ function StandModeView({
     window.clearTimeout(settleTimer.current);
     settleTimer.current = window.setTimeout(() => {
       const box = stack.current;
-      if (!box || isGliding.current || live.current.isPlaying) return;
+      if (!box || isGliding.current || live.current.isPlaying || live.current.isSong) return;
       const cards = [...box.querySelectorAll<HTMLElement>("[data-card]")];
       const first = cards[0];
       const zone =
@@ -713,6 +734,79 @@ function StandModeView({
       }
     }, 120);
   };
+  // The whole song fits the screen (T-2823): its numbers shrink from the chosen size, step by step,
+  // until every section is in view, never below a size that reads from the stand.
+  useLayoutEffect(() => {
+    const box = stack.current;
+    const list = box?.firstElementChild as HTMLElement | null | undefined;
+    if (!box || !list) return;
+    if (!isSong) {
+      box.style.removeProperty("--stand-scale");
+      return;
+    }
+    const start = { xs: 0.7, sm: 0.85, md: 1, lg: 1.15 }[preferences.size];
+    // A phone keeps the chosen size: smaller would not read; its rows stay whole and it scrolls.
+    if (isPhone) {
+      box.style.setProperty("--stand-scale", String(start));
+      return;
+    }
+    const fit = () => {
+      const scale = fitScale(start, (each) => {
+        box.style.setProperty("--stand-scale", String(each));
+        return list.scrollHeight <= box.clientHeight;
+      });
+      box.style.setProperty("--stand-scale", String(scale));
+    };
+    fit();
+    const resized = new ResizeObserver(fit);
+    resized.observe(box);
+    return () => resized.disconnect();
+  }, [isSong, isPhone, preferences.size, cards.length, style, beats, notes]);
+  // Two fingers closing show the whole song, opening one section at a time (T-2823), on the
+  // stack only, instead of the browser's zoom.
+  useEffect(() => {
+    const box = stack.current;
+    if (!box) return;
+    let from = 0;
+    let ratio = 1;
+    const apart = (touches: globalThis.TouchList) => {
+      const [a, b] = [touches[0], touches[1]];
+      return a && b ? Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) : 0;
+    };
+    const begin = (event: globalThis.TouchEvent) => {
+      if (event.touches.length !== 2) return;
+      from = apart(event.touches);
+      ratio = 1;
+    };
+    const pinch = (event: globalThis.TouchEvent) => {
+      if (!from || event.touches.length !== 2) return;
+      event.preventDefault();
+      ratio = apart(event.touches) / from;
+    };
+    const end = () => {
+      if (!from) return;
+      from = 0;
+      const layout: StandLayout = live.current.isSong ? "song" : "sections";
+      const next = pinchLayout(ratio, layout);
+      if (next !== layout) standPreferences.set({ layout: next });
+    };
+    // Safari zooms the page on its own gesture events: it is the stack's pinch here.
+    const still = (event: Event) => event.preventDefault();
+    box.addEventListener("touchstart", begin, { passive: true });
+    box.addEventListener("touchmove", pinch, { passive: false });
+    box.addEventListener("touchend", end);
+    box.addEventListener("touchcancel", end);
+    box.addEventListener("gesturestart", still);
+    box.addEventListener("gesturechange", still);
+    return () => {
+      box.removeEventListener("touchstart", begin);
+      box.removeEventListener("touchmove", pinch);
+      box.removeEventListener("touchend", end);
+      box.removeEventListener("touchcancel", end);
+      box.removeEventListener("gesturestart", still);
+      box.removeEventListener("gesturechange", still);
+    };
+  }, []);
   // A tap on another section makes it current, or queues it while the metronome plays; on the
   // current one a tapped bar is where Play starts (R-11.2), and after a fermata it goes on (R-11.6).
   const onCard = (index: number, event: MouseEvent<HTMLElement>) => {
@@ -823,7 +917,7 @@ function StandModeView({
                             `${c("key")} ${shown}`,
                             shown !== written ? c("writtenIn", { key: written }) : null,
                             chart.header.meter,
-                            chart.header.tempo ? `${c("tempo")} ${chart.header.tempo}` : null,
+                            chart.header.tempo ? `${c("tempo")} ${tempoText}` : null,
                             position,
                           ]
                             .filter(Boolean)
@@ -865,6 +959,7 @@ function StandModeView({
               ref={stack}
               className="cd-stand-stack"
               data-size={preferences.size}
+              data-layout={preferences.layout}
               onScroll={onStackScroll}
               onTouchStart={onTouchStart}
               onTouchEnd={onTouchEnd}
@@ -915,7 +1010,7 @@ function StandModeView({
                 })}
               </ol>
               {/* Room after the last section, so the last ones can reach the top. */}
-              <div className="cd-stand-stack__end" aria-hidden="true" />
+              {!isSong && <div className="cd-stand-stack__end" aria-hidden="true" />}
             </main>
             <VisuallyHidden as="div" aria-live="polite">
               {now ? t("nowLive", { name: now.name }) : ""}

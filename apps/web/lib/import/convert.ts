@@ -15,7 +15,13 @@ export interface ImportOptions {
 }
 
 export type ReviewKind =
-  "key-guessed" | "bars-proposed" | "unknown-chord" | "unmapped" | "no-sections" | "chart-warning";
+  | "key-guessed"
+  | "bars-proposed"
+  | "unknown-chord"
+  | "unmapped"
+  | "no-sections"
+  | "chart-warning"
+  | "tempo-unit";
 
 /** One assumption the import made, for the review panel (R-10.8). */
 export interface ReviewItem {
@@ -211,10 +217,18 @@ export function importSheet(text: string, options: ImportOptions): ImportResult 
   const out: string[] = ["---"];
   if (title) out.push(`title: ${title}`);
   out.push(`key: ${keyText(key)}`);
-  const tempo = Number.parseInt(fields.tempo ?? fields.bpm ?? "", 10);
-  if (tempo > 0) out.push(`tempo: ${tempo}`);
+  // The tempo keeps its decimals. In 6/8, 9/8 or 12/8 a sheet doesn't say what it counts, so it
+  // is written with `?` and asked about, never guessed (ChartDown 0.9, R-10.2).
+  const tempo = Number.parseFloat(fields.tempo ?? fields.bpm ?? "");
   const meter = fields["time signature"] ?? fields.time ?? fields.meter;
-  if (meter && /^\d{1,2}\/\d{1,2}$/.test(meter)) out.push(`meter: ${meter}`);
+  const readMeter = meter && /^\d{1,2}\/\d{1,2}$/.test(meter) ? meter : null;
+  const [top, bottom] = (readMeter ?? "4/4").split("/").map(Number) as [number, number];
+  const compound = bottom === 8 && top > 3 && top % 3 === 0;
+  if (tempo > 0) {
+    out.push(`tempo: ${tempo}${compound ? " ?" : ""}`);
+    if (compound) review.push({ kind: "tempo-unit", line: out.length, detail: String(tempo) });
+  }
+  if (readMeter) out.push(`meter: ${readMeter}`);
   out.push("---");
   for (const section of sections) {
     out.push(`## ${section.name}`);

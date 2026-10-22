@@ -22,7 +22,7 @@ import {
   SpeakerWaveIcon,
   StopIcon,
 } from "@heroicons/react/24/outline";
-import type { Chart } from "chartdown";
+import { EIGHTHS_PER_BEAT, meterBeat, type BeatUnit, type Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { speedFor, tapTempo } from "../../lib/metronome/tapTempo";
@@ -35,6 +35,7 @@ import {
   TEMPO_MIN,
 } from "../../lib/metronome/practiceTempo";
 import { MetronomeIcon } from "./MetronomeIcon";
+import { unitKey } from "../../lib/chart/tempo";
 import type { BeatLine } from "../../lib/metronome/sound";
 import { useMetronome } from "../../lib/metronome/useMetronome";
 
@@ -63,6 +64,7 @@ export interface StartBar {
  */
 export function useMetronomeControls(chart: Chart, section: number | null) {
   const t = useTranslations("stand");
+  const c = useTranslations("chart");
   const metronome = useMetronome(chart);
   const { bars } = metronome;
   const [isTempoOpen, setTempoOpen] = useState(false);
@@ -84,9 +86,19 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
     if (written) setSpeed(Math.min(200, Math.max(25, speedFor(bpm, written) * 100)));
     else setTapped(bpm);
   };
-  const playFrom = (tempo?: number) =>
+  // What a tempo written with `?` counts, as the person chose before Play (R-11.16): the meter's
+  // readings, the dotted quarter or the eighth in 6/8, 9/8 and 12/8, the beat or the dotted
+  // quarter otherwise. It holds until the page is left; the chart never changes.
+  const [unit, setUnit] = useState<BeatUnit | null>(null);
+  const [isUnitOpen, setUnitOpen] = useState(false);
+  const meter = bars[0]?.meter ?? { beats: 4, unit: 4 };
+  const beat = meterBeat(meter) ?? "q";
+  const readings: BeatUnit[] = beat === "q." ? ["q.", "e"] : [beat, "q."];
+  const unitWords = (each: BeatUnit | "?") => c(`beatUnit.${unitKey(each)}`);
+  const playFrom = (tempo?: number, counted: BeatUnit | null = unit) =>
     metronome.play(start ?? metronome.firstBarOf(section ?? 0), {
       ...(tempo !== undefined ? { tempo } : {}),
+      ...(counted ? { unit: counted } : {}),
       speed: speed / 100,
     });
   /** A tap on a bar: start there, or, tapped again, from the top as before (R-11.2). */
@@ -103,6 +115,7 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
   const toggle = () => {
     if (metronome.isPlaying) metronome.stop();
     else if (metronome.needsTempo && tapped === null) setTempoOpen(true);
+    else if (metronome.needsUnit && unit === null) setUnitOpen(true);
     else playFrom(tapped ?? undefined);
   };
   const playButton = (
@@ -141,6 +154,34 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
     </Dialog>
   );
 
+  const unitDialog = (
+    <Dialog isOpen={isUnitOpen} onOpenChange={setUnitOpen} padding={4}>
+      <VStack gap={4}>
+        <Heading level={2}>{t("unitTitle", { bpm: written ?? 0 })}</Heading>
+        <Text>{t("unitAsk", { bpm: written ?? 0 })}</Text>
+        <VStack gap={2}>
+          {readings.map((reading) => (
+            <Button
+              key={reading}
+              label={t("unitReading", {
+                unit: unitWords(reading),
+                eighths: Math.round((written ?? 0) * EIGHTHS_PER_BEAT[reading]),
+              })}
+              variant={reading === readings[0] ? "primary" : "secondary"}
+              icon={<Icon icon={PlayIcon} />}
+              onClick={() => {
+                setUnit(reading);
+                setUnitOpen(false);
+                playFrom(tapped ?? undefined, reading);
+              }}
+            />
+          ))}
+        </VStack>
+        <Text type="supporting">{t("unitTap")}</Text>
+      </VStack>
+    </Dialog>
+  );
+
   // The click (off by default), its volume and the count-in, kept on this device (R-11.7, R-11.8).
   const { sound, setSound } = metronome;
   // The tempo stepper (T-2808): the practice tempo in beats per minute, from the chart's own; on a
@@ -150,11 +191,15 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
     if (written) setSpeed(speedForTempo(bpm, written));
     else setTapped(clampTempo(bpm));
   };
-  const tempoHint = !written
-    ? t("tempoNone")
-    : stepped === roundTempo(written)
-      ? t("tempoSame")
-      : t("tempoChart", { bpm: roundTempo(written) });
+  const tempoHint = metronome.needsUnit
+    ? unit
+      ? t("unitChosen", { unit: unitWords(unit) })
+      : t("unitPending")
+    : !written
+      ? t("tempoNone")
+      : stepped === roundTempo(written)
+        ? t("tempoSame")
+        : t("tempoChart", { bpm: roundTempo(written) });
   const soundControls = (
     <VStack gap={4}>
       {/* − and + at the touch size beside the field, which also takes a typed tempo (T-2808). */}
@@ -251,6 +296,12 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
         description={t("countInHint")}
         value={sound.countIn}
         onChange={(countIn) => setSound({ ...sound, countIn })}
+      />
+      <Switch
+        label={t("keepAwake")}
+        description={t("keepAwakeHint")}
+        value={sound.keepAwake}
+        onChange={(keepAwake) => setSound({ ...sound, keepAwake })}
       />
       <VStack gap={1}>
         <Text type="label">{t("beatLine")}</Text>
@@ -357,6 +408,7 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
     tempoDialog: (
       <>
         {tempoDialog}
+        {unitDialog}
         {soundDialog}
       </>
     ),

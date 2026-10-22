@@ -4,6 +4,7 @@ import { audioClock, clicks, continueWith, Metronome, sectionEnd, type Click } f
 import {
   DEFAULT_SOUND,
   getSound,
+  keepSpeakersAwake,
   playClick,
   respectSilentMode,
   saveSound,
@@ -11,6 +12,7 @@ import {
 } from "./sound";
 import { timeline, type TimelineBar } from "./timeline";
 import { keepAwake } from "./wakeLock";
+import type { BeatUnit } from "chartdown";
 
 /** Where the metronome is: the click it reached and its bar in the timeline (none in count-in). */
 export interface MetronomePosition {
@@ -26,9 +28,14 @@ export interface MetronomePosition {
 /** How long Play waits at most for the audio clock to wake before counting anyway. */
 const WAKE_WAIT_MS = 500;
 
+/** How long the hum keeps the speakers awake after Stop, so playing again is heard at once. */
+const HUM_AFTER_STOP_MS = 30_000;
+
 export function useMetronome(chart: Chart) {
   const bars = useMemo(() => timeline(chart), [chart]);
   const needsTempo = bars.some((bar) => bar.tempo === undefined);
+  // A tempo written with `?` (R-11.16): what it counts is asked before Play.
+  const needsUnit = bars.some((bar) => bar.unconfirmed);
   const [position, setPosition] = useState<MetronomePosition | null>(null);
   const [isPlaying, setPlaying] = useState(false);
   // Holding on a fermata until a tap (R-11.6).
@@ -38,6 +45,8 @@ export function useMetronome(chart: Chart) {
   const frame = useRef(0);
   // The screen stays on while it plays (R-11.11).
   const awake = useRef<(() => void) | null>(null);
+  // The low hum that keeps the speakers from sleeping between clicks (T-2820), while it plays.
+  const humming = useRef<(() => void) | null>(null);
   // The click, its volume and the count-in, kept on this device (R-11.7, R-11.8). The scheduler
   // reads the latest, so turning the click on while playing is heard on the next beat.
   const sound = useSyncExternalStore(subscribeSound, getSound, () => DEFAULT_SOUND);
@@ -50,14 +59,25 @@ export function useMetronome(chart: Chart) {
     document.documentElement.dataset.beatLine = sound.beatLine;
   }, [sound.beatLine]);
   // The tempo asked of the person and the practice speed, kept for what is queued later.
-  const asked = useRef<{ tempo?: number; speed?: number }>({});
+  const asked = useRef<{ tempo?: number; speed?: number; unit?: BeatUnit }>({});
   // The section queued after the one that sounds (R-11.15), and the click it starts on.
   const [queued, setQueued] = useState<number | null>(null);
   const queuedAt = useRef(-1);
 
+  // The hum goes on a while after Stop (T-2822), unless the click is off; Play again keeps it.
+  const humTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const endHum = useCallback(() => {
+    clearTimeout(humTimer.current);
+    humming.current?.();
+    humming.current = null;
+  }, []);
   const stop = useCallback(() => {
     awake.current?.();
     awake.current = null;
+    clearTimeout(humTimer.current);
+    if (heard.current.click && humming.current)
+      humTimer.current = setTimeout(endHum, HUM_AFTER_STOP_MS);
+    else endHum();
     engine.current?.stop();
     engine.current = null;
     cancelAnimationFrame(frame.current);
@@ -66,19 +86,45 @@ export function useMetronome(chart: Chart) {
     setWaiting(false);
     setQueued(null);
     queuedAt.current = -1;
+  }, [endHum]);
+
+  // The audio wakes at the person's first tap or key on the page (T-2822), silently, so Play
+  // does not wait for it: a browser lets sound start only from a gesture, and waking takes a moment.
+  useEffect(() => {
+    const wake = () => {
+      respectSilentMode();
+      const audio = (context.current ??= new AudioContext());
+      if (audio.state !== "running") void audio.resume().catch(() => {});
+    };
+    // The events a browser lets sound start from: on an iPhone or an iPad a finger landing is
+    // not one (the context would stay muted), lifting it is.
+    const events = ["touchend", "click", "keydown"] as const;
+    for (const event of events)
+      document.addEventListener(event, wake, { capture: true, once: true });
+    return () => {
+      for (const event of events) document.removeEventListener(event, wake, { capture: true });
+    };
   }, []);
 
   const play = useCallback(
-    (from: number, options: { tempo?: number; speed?: number; countIn?: boolean } = {}) => {
+    (
+      from: number,
+      options: { tempo?: number; speed?: number; countIn?: boolean; unit?: BeatUnit } = {},
+    ) => {
       stop();
       asked.current = {
         ...(options.tempo !== undefined ? { tempo: options.tempo } : {}),
         ...(options.speed !== undefined ? { speed: options.speed } : {}),
+        ...(options.unit !== undefined ? { unit: options.unit } : {}),
       };
       respectSilentMode();
       const audio = (context.current ??= new AudioContext());
       // Asked for inside the tap, as Safari requires; the count waits for it below.
       const waking = audio.state === "running" ? null : audio.resume();
+      // On from Play, so the speakers are already awake for the first click.
+      clearTimeout(humTimer.current);
+      if (heard.current.click && heard.current.keepAwake && !humming.current)
+        humming.current = keepSpeakersAwake(audio);
       const list = clicks(bars, { from, countIn: heard.current.countIn, ...options });
       const metronome = new Metronome(list, audioClock(audio), (click, at) => {
         if (heard.current.click) {
@@ -130,12 +176,22 @@ export function useMetronome(chart: Chart) {
   useEffect(
     () => () => {
       awake.current?.();
+      endHum();
       engine.current?.stop();
       cancelAnimationFrame(frame.current);
       void context.current?.close();
     },
-    [],
+    [endHum],
   );
+
+  // The hum is only for a click that sounds: turning the click or Keep speakers awake on or off
+  // while it plays takes effect at once.
+  const wantsHum = sound.click && sound.keepAwake;
+  useEffect(() => {
+    const audio = context.current;
+    if (!wantsHum) return endHum();
+    if (isPlaying && audio && !humming.current) humming.current = keepSpeakersAwake(audio);
+  }, [isPlaying, wantsHum, endHum]);
 
   /** The first bar of a section in the play order, to start there. */
   const firstBarOf = useCallback(
@@ -178,6 +234,7 @@ export function useMetronome(chart: Chart) {
   return {
     bars,
     needsTempo,
+    needsUnit,
     position,
     isPlaying,
     isWaiting,

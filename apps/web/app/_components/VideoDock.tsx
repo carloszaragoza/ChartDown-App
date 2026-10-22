@@ -3,6 +3,8 @@
 import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
+import { Popover } from "@astryxdesign/core/Popover";
+import { Slider } from "@astryxdesign/core/Slider";
 import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -11,6 +13,8 @@ import {
   MinusIcon,
   PlayIcon,
   PlusIcon,
+  SpeakerWaveIcon,
+  SpeakerXMarkIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import type { Chart } from "chartdown";
@@ -34,6 +38,11 @@ interface YouTubePlayer {
   getPlayerState?(): number;
   /** Only once the player is ready. */
   seekTo?(seconds: number, allowSeekAhead: boolean): void;
+  /** 0 to 100. */
+  getVolume?(): number;
+  setVolume?(volume: number): void;
+  isMuted?(): boolean;
+  unMute?(): void;
   destroy(): void;
 }
 interface YouTubeApi {
@@ -187,6 +196,15 @@ function VideoDock({
   const player = useRef<YouTubePlayer | null>(null);
   const seeking = useRef<{ to: number; at: number } | null>(null);
   const [now, setNow] = useState(0);
+  // The video's volume, set here (T-2821): YouTube's own slider is hard to drag in the small
+  // player. Read from the player once it is ready.
+  const [volume, setVolume] = useState(100);
+  const [isVolumeOpen, setVolumeOpen] = useState(false);
+  const changeVolume = (to: number) => {
+    setVolume(to);
+    player.current?.setVolume?.(to);
+    if (to > 0 && player.current?.isMuted?.()) player.current.unMute?.();
+  };
   // Where the first bar falls in the video; the reader moves it to match the recording.
   const [musicStart, setMusicStart] = useState(savedStart ?? start);
   const [stored, setStored] = useState(savedStart);
@@ -213,6 +231,8 @@ function VideoDock({
         // A section chosen while the player was still loading is played once it is ready.
         events: {
           onReady: () => {
+            const heard = player.current?.isMuted?.() ? 0 : player.current?.getVolume?.();
+            if (typeof heard === "number") setVolume(heard);
             const target = seeking.current;
             if (target) {
               seeking.current = { to: target.to, at: performance.now() };
@@ -266,6 +286,34 @@ function VideoDock({
           <StackItem size="fill">
             <Text type="supporting">{t("player")}</Text>
           </StackItem>
+          <Popover
+            label={t("volume")}
+            isOpen={isVolumeOpen}
+            onOpenChange={setVolumeOpen}
+            placement="below"
+            alignment="end"
+            content={
+              <Slider
+                label={t("volume")}
+                value={volume}
+                min={0}
+                max={100}
+                step={5}
+                valueDisplay="text"
+                formatValue={(value) => `${Math.round(value)}%`}
+                onChange={(value: number) => changeVolume(value)}
+              />
+            }
+          >
+            <Button
+              label={t("volume")}
+              variant="ghost"
+              size="sm"
+              icon={<Icon icon={volume === 0 ? SpeakerXMarkIcon : SpeakerWaveIcon} />}
+              isIconOnly
+              tooltip={t("volume")}
+            />
+          </Popover>
           <Button
             label={t("openYouTube")}
             href={url}

@@ -148,7 +148,8 @@
     "layer-line": "A layer holds only sections, bar headings and notes",
     "bad-bar-heading": "Bar headings look like <code>### Bar 3</code>",
     "bad-meter-directive": "Write a meter change like <code>@meter 3/4</code>",
-    "bad-tempo-directive": "Write a tempo change like <code>@tempo 96</code>",
+    "bad-tempo-directive": "Write a tempo change like <code>@tempo 96</code> or <code>@tempo 58 q.</code>",
+    "bad-tempo": "Write a tempo like <code>72</code> or <code>58 q.</code> (h, h., q, q., e, e., s or ?)",
     "pickup-and-meter": "A bar can’t have both a pickup and a one-bar meter",
     "pickup-length": "A pickup needs more than 0 and fewer than {beats} beats",
     "pickup-not-first": "A pickup must be the first bar of a section",
@@ -235,7 +236,17 @@
     },
     "queued": "plays next",
     "beatsHelp": "Off: no beat marks. Auto: only in bars where they tell something. Always: in every bar.",
-    "beatsAbout": "About beat marks"
+    "beatsAbout": "About beat marks",
+    "beatUnit": {
+      "h": "half note",
+      "hDotted": "dotted half",
+      "q": "quarter",
+      "qDotted": "dotted quarter",
+      "e": "eighth",
+      "eDotted": "dotted eighth",
+      "s": "sixteenth",
+      "unconfirmed": "unit to confirm"
+    }
   },
   "auth": {
     "email": "Email",
@@ -498,7 +509,8 @@
           "unmapped": "{count, plural, one {# instruction couldn't be turned into the chart} other {# instructions couldn't be turned into the chart}}, like a repeat. It's kept as a comment.",
           "no-sections": "No section names were found, so the chords start without sections.",
           "chart-warning": "{count, plural, one {# line has a warning} other {# lines have warnings}}.",
-          "key-guessed": "The key was guessed."
+          "key-guessed": "The key was guessed.",
+          "tempo-unit": "The tempo's unit isn't known: in this meter it can count dotted quarters or eighths. It's written with ?, and Play asks."
         },
         "existing": "“{title}” is already in the catalog.",
         "existingHint": "You can add your version to that song instead of starting a new one.",
@@ -712,6 +724,8 @@
     "volume": "Volume",
     "countIn": "Count-in",
     "countInHint": "One bar of clicks before the first bar.",
+    "keepAwake": "Keep speakers awake",
+    "keepAwakeHint": "A hum too low to hear, so a monitor's or Bluetooth speakers never cut a click. Turn it off on studio monitors.",
     "beatLine": "Beat line",
     "beatLineSteps": "Steps",
     "beatLineSmooth": "Smooth",
@@ -737,9 +751,16 @@
     "motionBounce": "Soft bounce",
     "screen": "Screen",
     "numberSize": "Number size",
+    "sizeExtraSmall": "Extra small",
     "sizeSmall": "Small",
     "sizeMedium": "Medium",
-    "sizeLarge": "Large"
+    "sizeLarge": "Large",
+    "unitTitle": "What does {bpm} count?",
+    "unitAsk": "The chart doesn't say what one beat of {bpm} is. Choose how to play it; the chart stays as written.",
+    "unitReading": "{unit}: eighth notes at {eighths} a minute",
+    "unitTap": "Not sure? Tap tempo in Metronome options while the recording plays, and compare.",
+    "unitChosen": "Counting the {unit}, as you chose. The chart doesn't say.",
+    "unitPending": "The chart doesn't say what one beat is: Play asks."
   },
   "bands": {
     "title": "Bands",
@@ -844,11 +865,11 @@
     "emptyMd": "Add songs from their version pages.",
     "by": "Arrangement by {author}",
     "revision": "revision {number}",
-    "up": "Up",
-    "down": "Down",
+    "up": "Move up",
+    "down": "Move down",
     "upName": "Move {title} up",
     "downName": "Move {title} down",
-    "remove": "Remove",
+    "remove": "Remove from the set",
     "removeName": "Remove {title} from the set",
     "addHint": "To add a song, open its version and choose Add to a set.",
     "catalog": "Open the catalog",
@@ -1456,6 +1477,7 @@
     "play": "Play the video",
     "player": "Video",
     "openYouTube": "Open on YouTube",
+    "volume": "Video volume",
     "close": "Close the video"
   },
   "audio": {
