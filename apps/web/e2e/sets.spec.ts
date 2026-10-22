@@ -78,6 +78,9 @@ test("R-05.1 a set's name is unique in the band; songs are added, ordered and du
   ]);
   release();
   await expectStatus(page, "The order was saved.");
+  // T-2819 every row has Up and Down; the first song's Up and the last one's Down are off.
+  await expect(page.getByRole("button", { name: `Move ${titles[0]} up` })).toBeDisabled();
+  await expect(page.getByRole("button", { name: `Move ${titles[1]} down` })).toBeDisabled();
   await page.unroute(saving);
   await expect(songs(page)).toHaveText([
     new RegExp(`^1${titles[0]}`),
