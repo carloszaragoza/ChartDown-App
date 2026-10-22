@@ -113,3 +113,35 @@ test.describe("on an iPad", () => {
     }
   });
 });
+
+test.describe("on an iPad", () => {
+  test.use({ viewport: { width: 1180, height: 820 }, hasTouch: true });
+
+  test("R-03.12 T-2827 a fixed strip spans the top edge in the content's color, past the side navigation", async ({
+    page,
+  }) => {
+    await page.goto("/catalog");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    const edge = page.locator("[data-top-edge]");
+    await expect(edge).toBeAttached();
+    const strip = await edge.evaluate((strip) => {
+      const box = strip.getBoundingClientRect();
+      const style = getComputedStyle(strip);
+      return {
+        top: box.top,
+        width: box.width,
+        height: box.height,
+        position: style.position,
+        color: style.backgroundColor,
+      };
+    });
+    expect(strip).toMatchObject({ top: 0, width: 1180, position: "fixed" });
+    expect(strip.height).toBeGreaterThanOrEqual(6);
+    await expect
+      .poll(() => page.locator('meta[name="theme-color"]').first().getAttribute("content"))
+      .toBe(strip.color);
+    // Taps pass through it: the side navigation's top is still what a finger reaches there.
+    const reached = await page.evaluate(() => !!document.elementFromPoint(40, 2)?.closest("nav"));
+    expect(reached).toBe(true);
+  });
+});
