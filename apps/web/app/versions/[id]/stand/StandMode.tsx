@@ -71,6 +71,7 @@ import {
   type StandTheme,
   type StandView,
 } from "./standHref";
+import { tempoLabel, unitKey } from "../../../../lib/chart/tempo";
 
 export interface StandModeProps {
   versionId: string;
@@ -473,6 +474,10 @@ function StandModeView({
       : undefined;
   const written = keyName(chart.key);
   const shown = keyName(homeKey);
+  // The tempo with its unit in words, or that it is still to confirm (R-11.5, R-11.16).
+  const tempoText = chart.header.tempo
+    ? tempoLabel(chart.header.tempo, (unit) => c(`beatUnit.${unitKey(unit)}`))
+    : "";
 
   const chooseView = (label: string) => {
     const option = viewAs?.options.find((item) => item.label === label);
@@ -486,7 +491,7 @@ function StandModeView({
       <Token label={`${c("key")} ${shown}`} size="sm" />
       {shown !== written && <Token label={c("writtenIn", { key: written })} size="sm" />}
       {chart.header.meter && <Token label={chart.header.meter} size="sm" />}
-      {chart.header.tempo && <Token label={`${chart.header.tempo} bpm`} size="sm" />}
+      {chart.header.tempo && <Token label={`${c("tempo")} ${tempoText}`} size="sm" />}
     </>
   );
   // View as: a segmented control in the phone's View sheet; a compact menu on the top line of an
@@ -912,7 +917,7 @@ function StandModeView({
                             `${c("key")} ${shown}`,
                             shown !== written ? c("writtenIn", { key: written }) : null,
                             chart.header.meter,
-                            chart.header.tempo ? `${c("tempo")} ${chart.header.tempo}` : null,
+                            chart.header.tempo ? `${c("tempo")} ${tempoText}` : null,
                             position,
                           ]
                             .filter(Boolean)

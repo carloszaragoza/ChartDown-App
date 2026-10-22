@@ -148,7 +148,8 @@
     "layer-line": "Una capa solo contiene secciones, encabezados de compás y notas",
     "bad-bar-heading": "Los encabezados de compás tienen la forma <code>### Bar 3</code>",
     "bad-meter-directive": "Escribe un cambio de compás así: <code>@meter 3/4</code>",
-    "bad-tempo-directive": "Escribe un cambio de tempo así: <code>@tempo 96</code>",
+    "bad-tempo-directive": "Escribe un cambio de tempo así: <code>@tempo 96</code> o <code>@tempo 58 q.</code>",
+    "bad-tempo": "Escribe un tempo así: <code>72</code> o <code>58 q.</code> (h, h., q, q., e, e., s o ?)",
     "pickup-and-meter": "Un compás no puede tener a la vez anacrusa y compás propio",
     "pickup-length": "Una anacrusa necesita más de 0 y menos de {beats} tiempos",
     "pickup-not-first": "La anacrusa debe ser el primer compás de una sección",
@@ -235,7 +236,17 @@
     },
     "queued": "sigue a continuación",
     "beatsHelp": "No: sin marcas de pulso. Auto: solo en los compases donde dicen algo. Siempre: en todos los compases.",
-    "beatsAbout": "Sobre las marcas de pulso"
+    "beatsAbout": "Sobre las marcas de pulso",
+    "beatUnit": {
+      "h": "blanca",
+      "hDotted": "blanca con puntillo",
+      "q": "negra",
+      "qDotted": "negra con puntillo",
+      "e": "corchea",
+      "eDotted": "corchea con puntillo",
+      "s": "semicorchea",
+      "unconfirmed": "figura por confirmar"
+    }
   },
   "auth": {
     "email": "Correo electrónico",
@@ -498,7 +509,8 @@
           "unmapped": "{count, plural, one {# indicación no se pudo pasar al chart} other {# indicaciones no se pudieron pasar al chart}}, como una repetición. Quedó como comentario.",
           "no-sections": "No se encontraron nombres de sección, así que los acordes empiezan sin secciones.",
           "chart-warning": "{count, plural, one {# línea tiene una advertencia} other {# líneas tienen advertencias}}.",
-          "key-guessed": "El tono se dedujo."
+          "key-guessed": "El tono se dedujo.",
+          "tempo-unit": "No se sabe qué figura cuenta el tempo: en este compás puede ser la negra con puntillo o la corchea. Se escribió con ? y Play lo pregunta."
         },
         "existing": "“{title}” ya está en el catálogo.",
         "existingHint": "Puedes agregar tu versión a esa canción en lugar de empezar una nueva.",
@@ -742,7 +754,13 @@
     "sizeExtraSmall": "Extra pequeño",
     "sizeSmall": "Pequeño",
     "sizeMedium": "Mediano",
-    "sizeLarge": "Grande"
+    "sizeLarge": "Grande",
+    "unitTitle": "¿Qué cuenta {bpm}?",
+    "unitAsk": "El chart no dice qué figura es un pulso de {bpm}. Elige cómo tocarlo; el chart queda como está.",
+    "unitReading": "{unit}: corcheas a {eighths} por minuto",
+    "unitTap": "¿No estás seguro? Usa Tap tempo en Opciones del metrónomo con la grabación y compara.",
+    "unitChosen": "Contando la {unit}, como elegiste. El chart no lo dice.",
+    "unitPending": "El chart no dice qué figura es un pulso: Play te lo pregunta."
   },
   "bands": {
     "title": "Bandas",

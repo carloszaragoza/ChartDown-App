@@ -1,5 +1,6 @@
 import type { BeatStrength } from "@chartdown/ui";
-import { eighthsPerBeat, startsGroup, type TimelineBar } from "./timeline";
+import { EIGHTHS_PER_BEAT, meterBeat, type BeatUnit } from "chartdown";
+import { startsGroup, type TimelineBar } from "./timeline";
 
 /** One click of the metronome: when it sounds, from the start, and where it is in the song. */
 export interface Click {
@@ -31,6 +32,11 @@ export interface ClickOptions {
   countIn?: boolean;
   /** The tempo for a chart that has none, asked of the person (R-11.1). */
   tempo?: number;
+  /**
+   * What an unconfirmed tempo (`?`) counts, as the person chose before Play (R-11.16); also
+   * what an asked tempo counts. The meter's beat when not given.
+   */
+  unit?: BeatUnit;
   /** A share of the tempo for practice, such as 0.8 (R-11.9); the chart never changes. */
   speed?: number;
 }
@@ -41,15 +47,19 @@ export interface ClickOptions {
  * then handed to the audio clock, which keeps them (R-11.12).
  */
 export function clicks(bars: readonly TimelineBar[], options: ClickOptions = {}): Click[] {
-  const { from = 0, countIn = false, tempo: asked, speed = 1 } = options;
+  const { from = 0, countIn = false, tempo: asked, speed = 1, unit: chosen } = options;
   const start = bars[from];
   if (!start) return [];
+  // Seconds per counted beat (R-11.5, R-00.18): the tempo in eighth notes per minute, whatever
+  // unit it names, and the beat of the bar's meter in eighths (a quarter note is 2).
   const length = (bar: TimelineBar) => {
     const bpm = bar.tempo ?? asked;
     if (!bpm || bpm <= 0) throw new Error("The chart has no tempo: ask the person for one");
-    // One click per counted beat: an eighth in 6/8, 9/8 and 12/8, whose tempo is the dotted quarter.
-    return 60 / (bpm * speed * eighthsPerBeat(bar.meter));
+    const unit = bar.unit ?? chosen ?? meterBeat(bar.meter) ?? "q";
+    const eighthsPerMinute = bpm * EIGHTHS_PER_BEAT[unit] * speed;
+    return (60 * (8 / bar.meter.unit)) / eighthsPerMinute;
   };
+
   const out: Click[] = [];
   let time = 0;
   if (countIn) {

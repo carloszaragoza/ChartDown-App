@@ -156,3 +156,21 @@ describe("T-1407 lyrics", () => {
     expect(none.source).not.toMatch(/Morning comes|Sing it out/);
   });
 });
+
+describe("T-2825 an imported tempo and its unit (ChartDown 0.9)", () => {
+  const imported = (details: string) =>
+    importSheet(`${details}\n\nVerse 1\nE A B E\n\nChorus\nA E B E\n`, numbers);
+
+  it("R-10.2 a tempo in 6/8, 9/8 or 12/8 is written with ? and asked about, never guessed", () => {
+    const result = imported("Title: Low Tide\nKey: E\nTempo: 58\nTime: 6/8");
+    expect(result.source).toMatch(/\ntempo: 58 \?\nmeter: 6\/8\n/);
+    expect(result.review.some((item) => item.kind === "tempo-unit")).toBe(true);
+    expect(parse(result.source).warnings).toEqual([]);
+  });
+
+  it("R-10.2 other meters keep the number alone, with its decimals", () => {
+    const result = imported("Title: Low Tide\nKey: E\nTempo: 74.5\nTime: 4/4");
+    expect(result.source).toMatch(/\ntempo: 74\.5\nmeter: 4\/4\n/);
+    expect(result.review.some((item) => item.kind === "tempo-unit")).toBe(false);
+  });
+});

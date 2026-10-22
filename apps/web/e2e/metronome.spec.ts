@@ -324,6 +324,38 @@ test("R-11.3 T-2816 the beat line moves in steps, or smoothly when Metronome opt
   await page.getByRole("button", { name: "Stop" }).click();
 });
 
+test("R-11.16 T-2825 a tempo written with ? says so, and Play asks what it counts first", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, {
+    title: "Low Tide",
+    content: "---\nmeter: 6/8\ntempo: 58 ?\n---\n## Verse\n1 | 4\n## Chorus\n5 | 1\n",
+  });
+  await page.goto(`/versions/${id}`);
+  await expect(page.getByText("Tempo 58, unit to confirm")).toBeVisible();
+  await page.goto(`/versions/${id}/stand`);
+  await page.getByRole("button", { name: "Play" }).click();
+  const ask = page.getByRole("dialog").filter({ hasText: "What does 58 count?" });
+  await expect(ask).toBeVisible();
+  await ask.getByRole("button", { name: /dotted quarter: eighth notes at 174 a minute/i }).click();
+  await expect(page.getByRole("main").locator('[aria-current="step"]')).toHaveCount(1);
+  await page.getByRole("button", { name: "Stop" }).click();
+  // Asked once on this page: Play again plays at once.
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(page.getByRole("dialog").filter({ hasText: "What does 58 count?" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Stop" }).click();
+});
+
+test("R-11.5 T-2825 a tempo with its unit shows it in words", async ({ page, request }) => {
+  const id = await createVersion(request, {
+    title: "High Tide",
+    content: "---\nmeter: 6/8\ntempo: 58 q.\n---\n## Verse\n1 | 4\n",
+  });
+  await page.goto(`/versions/${id}`);
+  await expect(page.getByText("Tempo 58, dotted quarter")).toBeVisible();
+});
+
 test.describe("with reduced motion", () => {
   test.use({ reducedMotion: "reduce" });
 

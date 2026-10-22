@@ -21,6 +21,7 @@ import type { BasedOn } from "./load";
 import { AddToSet, ReportForm, VersionMenu, type VersionMenuItem } from "./VersionControls";
 import { ChartControlsSlot } from "../../_components/ChartControlsSlot";
 import { DisplayBar, DisplayedChart, ShownKey, StandLink, VersionDisplay } from "./VersionDisplay";
+import { tempoLabel, unitKey } from "../../../lib/chart/tempo";
 
 export interface VersionSource {
   type: "studio" | "live" | "acoustic" | "own_arrangement";
@@ -218,7 +219,10 @@ export function VersionView({
                       />
                       <Token label={`${c("time")} ${chart.header.meter ?? "4/4"}`} size="sm" />
                       {chart.header.tempo && (
-                        <Token label={`${c("tempo")} ${chart.header.tempo}`} size="sm" />
+                        <Token
+                          label={`${c("tempo")} ${tempoLabel(chart.header.tempo, (unit) => c(`beatUnit.${unitKey(unit)}`))}`}
+                          size="sm"
+                        />
                       )}
                     </HStack>
                     <Text color="secondary">

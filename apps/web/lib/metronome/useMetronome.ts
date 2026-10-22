@@ -12,6 +12,7 @@ import {
 } from "./sound";
 import { timeline, type TimelineBar } from "./timeline";
 import { keepAwake } from "./wakeLock";
+import type { BeatUnit } from "chartdown";
 
 /** Where the metronome is: the click it reached and its bar in the timeline (none in count-in). */
 export interface MetronomePosition {
@@ -33,6 +34,8 @@ const HUM_AFTER_STOP_MS = 30_000;
 export function useMetronome(chart: Chart) {
   const bars = useMemo(() => timeline(chart), [chart]);
   const needsTempo = bars.some((bar) => bar.tempo === undefined);
+  // A tempo written with `?` (R-11.16): what it counts is asked before Play.
+  const needsUnit = bars.some((bar) => bar.unconfirmed);
   const [position, setPosition] = useState<MetronomePosition | null>(null);
   const [isPlaying, setPlaying] = useState(false);
   // Holding on a fermata until a tap (R-11.6).
@@ -56,7 +59,7 @@ export function useMetronome(chart: Chart) {
     document.documentElement.dataset.beatLine = sound.beatLine;
   }, [sound.beatLine]);
   // The tempo asked of the person and the practice speed, kept for what is queued later.
-  const asked = useRef<{ tempo?: number; speed?: number }>({});
+  const asked = useRef<{ tempo?: number; speed?: number; unit?: BeatUnit }>({});
   // The section queued after the one that sounds (R-11.15), and the click it starts on.
   const [queued, setQueued] = useState<number | null>(null);
   const queuedAt = useRef(-1);
@@ -104,11 +107,15 @@ export function useMetronome(chart: Chart) {
   }, []);
 
   const play = useCallback(
-    (from: number, options: { tempo?: number; speed?: number; countIn?: boolean } = {}) => {
+    (
+      from: number,
+      options: { tempo?: number; speed?: number; countIn?: boolean; unit?: BeatUnit } = {},
+    ) => {
       stop();
       asked.current = {
         ...(options.tempo !== undefined ? { tempo: options.tempo } : {}),
         ...(options.speed !== undefined ? { speed: options.speed } : {}),
+        ...(options.unit !== undefined ? { unit: options.unit } : {}),
       };
       respectSilentMode();
       const audio = (context.current ??= new AudioContext());
@@ -227,6 +234,7 @@ export function useMetronome(chart: Chart) {
   return {
     bars,
     needsTempo,
+    needsUnit,
     position,
     isPlaying,
     isWaiting,
