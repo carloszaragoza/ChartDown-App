@@ -730,9 +730,6 @@
     "countInTag": "Count-in",
     "barOf": "Bar {bar} of {of}",
     "chartChoice": "Chart",
-    "layout": "View",
-    "layoutSections": "One section at a time",
-    "layoutSong": "Whole song",
     "comingUp": "Coming up",
     "comingUpOne": "1 section",
     "comingUpTwo": "2 sections",
@@ -742,6 +739,7 @@
     "motionBounce": "Soft bounce",
     "screen": "Screen",
     "numberSize": "Number size",
+    "sizeExtraSmall": "Extra small",
     "sizeSmall": "Small",
     "sizeMedium": "Medium",
     "sizeLarge": "Large"

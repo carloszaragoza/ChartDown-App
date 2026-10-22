@@ -4,8 +4,11 @@
 import type { StandMotion } from "./motion";
 
 export type ComingUp = "1" | "2" | "fill";
-export type NumberSize = "sm" | "md" | "lg";
-/** The stack of sections, one at the top at a time, or the whole song on one screen (T-2823). */
+export type NumberSize = "xs" | "sm" | "md" | "lg";
+/**
+ * The stack of sections, one at the top at a time, or the whole song on one screen (T-2823),
+ * which two fingers closing or opening on the sections choose.
+ */
 export type StandLayout = "sections" | "song";
 
 export interface StandPreferences {
@@ -33,7 +36,7 @@ export function readPreferences(saved: unknown): StandPreferences {
     layout: pick(value.layout, ["sections", "song"], DEFAULT_PREFERENCES.layout),
     comingUp: pick(value.comingUp, ["1", "2", "fill"], DEFAULT_PREFERENCES.comingUp),
     motion: pick(value.motion, ["calm", "bounce"], DEFAULT_PREFERENCES.motion),
-    size: pick(value.size, ["sm", "md", "lg"], DEFAULT_PREFERENCES.size),
+    size: pick(value.size, ["xs", "sm", "md", "lg"], DEFAULT_PREFERENCES.size),
   };
 }
 

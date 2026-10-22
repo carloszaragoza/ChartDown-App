@@ -533,15 +533,6 @@ function StandModeView({
     <VStack gap={4}>
       {set && <GoLive />}
       {choice(
-        t("layout"),
-        preferences.layout,
-        [
-          ["sections", t("layoutSections")],
-          ["song", t("layoutSong")],
-        ],
-        (chosen) => standPreferences.set({ layout: chosen as StandLayout }),
-      )}
-      {choice(
         t("chartChoice"),
         style,
         [
@@ -601,6 +592,7 @@ function StandModeView({
         t("numberSize"),
         preferences.size,
         [
+          ["xs", t("sizeExtraSmall")],
           ["sm", t("sizeSmall")],
           ["md", t("sizeMedium")],
           ["lg", t("sizeLarge")],
@@ -747,7 +739,7 @@ function StandModeView({
       box.style.removeProperty("--stand-scale");
       return;
     }
-    const start = { sm: 0.85, md: 1, lg: 1.15 }[preferences.size];
+    const start = { xs: 0.7, sm: 0.85, md: 1, lg: 1.15 }[preferences.size];
     // A phone keeps the chosen size: smaller would not read; its rows stay whole and it scrolls.
     if (isPhone) {
       box.style.setProperty("--stand-scale", String(start));

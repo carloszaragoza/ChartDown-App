@@ -39,3 +39,9 @@ describe("T-2823 the whole song on one screen", () => {
     expect(readPreferences({ layout: "poster" }).layout).toBe("sections");
   });
 });
+
+describe("T-2824 an extra small number size", () => {
+  it("R-03.12 Extra small is kept like the other sizes", () => {
+    expect(readPreferences({ size: "xs" }).size).toBe("xs");
+  });
+});

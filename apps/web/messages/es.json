@@ -730,9 +730,6 @@
     "countInTag": "Entrada",
     "barOf": "Compás {bar} de {of}",
     "chartChoice": "Partitura",
-    "layout": "Vista",
-    "layoutSections": "Una sección a la vez",
-    "layoutSong": "Canción completa",
     "comingUp": "Lo que sigue",
     "comingUpOne": "1 sección",
     "comingUpTwo": "2 secciones",
@@ -742,6 +739,7 @@
     "motionBounce": "Con rebote",
     "screen": "Pantalla",
     "numberSize": "Tamaño de los números",
+    "sizeExtraSmall": "Extra pequeño",
     "sizeSmall": "Pequeño",
     "sizeMedium": "Mediano",
     "sizeLarge": "Grande"

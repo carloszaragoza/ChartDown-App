@@ -85,7 +85,7 @@ export function useMetronome(chart: Chart) {
     queuedAt.current = -1;
   }, [endHum]);
 
-  // The audio wakes at the person's first touch or key on the page (T-2822), silently, so Play
+  // The audio wakes at the person's first tap or key on the page (T-2822), silently, so Play
   // does not wait for it: a browser lets sound start only from a gesture, and waking takes a moment.
   useEffect(() => {
     const wake = () => {
@@ -93,11 +93,13 @@ export function useMetronome(chart: Chart) {
       const audio = (context.current ??= new AudioContext());
       if (audio.state !== "running") void audio.resume().catch(() => {});
     };
-    document.addEventListener("pointerdown", wake, { capture: true, once: true });
-    document.addEventListener("keydown", wake, { capture: true, once: true });
+    // The events a browser lets sound start from: on an iPhone or an iPad a finger landing is
+    // not one (the context would stay muted), lifting it is.
+    const events = ["touchend", "click", "keydown"] as const;
+    for (const event of events)
+      document.addEventListener(event, wake, { capture: true, once: true });
     return () => {
-      document.removeEventListener("pointerdown", wake, { capture: true });
-      document.removeEventListener("keydown", wake, { capture: true });
+      for (const event of events) document.removeEventListener(event, wake, { capture: true });
     };
   }, []);
 

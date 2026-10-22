@@ -286,7 +286,7 @@ test("R-03.12 Next, a pedal, a tap on a card and a settled scroll each make a se
   await expect(page).toHaveURL(/\?s=3$/);
 });
 
-test("R-03.12 T-2823 Whole song shows every section on one screen, and a tap makes one current", async ({
+test("R-03.12 T-2823 the whole song, which a pinch chose, shows every section on one screen", async ({
   page,
   request,
 }) => {
@@ -295,24 +295,23 @@ test("R-03.12 T-2823 Whole song shows every section on one screen, and a tap mak
     title: `One Sheet ${Date.now()}`,
     content: names.map((name) => `## ${name}\n1 | 4 | 5 | 1\n`).join("\n"),
   });
+  // Two fingers closing on the sections keep the whole song on the device (unit tested).
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "chartdown:stand-view",
+      JSON.stringify({ layout: "song", comingUp: "fill", motion: "calm", size: "md" }),
+    ),
+  );
   await page.goto(`/versions/${id}/stand`);
-  await page.getByRole("button", { name: "View options" }).click();
-  const sheet = page.getByRole("dialog");
-  await expect(sheet.getByText("Coming up", { exact: true })).toBeVisible();
-  await sheet.getByText("Whole song", { exact: true }).click();
-  // One section at a time's own choices go: the whole song has nothing coming up or gliding.
-  await expect(sheet.getByText("Coming up", { exact: true })).toHaveCount(0);
-  await page.keyboard.press("Escape");
   const stack = page.getByRole("main");
   for (const name of names)
     await expect(stack.getByRole("heading", { level: 2, name, exact: true })).toBeInViewport();
   await stack.getByRole("heading", { level: 2, name: "Bridge", exact: true }).click();
   await expect(standNow(page).getByRole("heading", { level: 2 })).toHaveText(/Bridge/);
-  // The device keeps it.
-  await page.reload();
-  await expect(
-    stack.getByRole("heading", { level: 2, name: "Outro", exact: true }),
-  ).toBeInViewport();
+  // View has no layout choice, and nothing for one section at a time.
+  await page.getByRole("button", { name: "View options" }).click();
+  await expect(page.getByRole("dialog").getByText("Coming up", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("dialog").getByText("Extra small", { exact: true })).toBeVisible();
 });
 
 test.describe("R-03.12 with reduced motion", () => {

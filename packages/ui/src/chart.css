@@ -769,7 +769,10 @@
   font-weight: var(--font-weight-bold);
   font-variant-numeric: tabular-nums;
 }
-/* Number size in stand mode's View (T-2805): Medium is the size above. */
+/* Number size in stand mode's View (T-2805, T-2824): Medium is the size above. */
+.cd-stand-stack[data-size="xs"] {
+  --stand-scale: 0.7;
+}
 .cd-stand-stack[data-size="sm"] {
   --stand-scale: 0.85;
 }
