@@ -18,10 +18,10 @@ import { useTranslations } from "next-intl";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   useSyncExternalStore,
-  type CSSProperties,
   type RefObject,
 } from "react";
 import { sectionAt, sectionLabels, type VideoSection } from "../../lib/video/sections";
@@ -56,8 +56,8 @@ export function usePlayerStart(dock: RefObject<HTMLElement | null>): number {
 
 /**
  * The song's sections in the order the chart plays them, as tall cells as wide as each lasts
- * (T-2828): the song-form name bold at the top (V1, then V1² the second time), as large as fits
- * the cell, and the section's full name turned on its side, faint, in the room under it (T-2832); the one playing in the selection color, with a line that fills as it
+ * (T-2828): the song-form name bold at the top (V1, then V1² the second time), one size for all,
+ * as large as lets every one fit its cell, and the section's full name turned on its side, faint, in the room under it (T-2832); the one playing in the selection color, with a line that fills as it
  * plays. Choosing one takes the player there. A waveform lies across their lower part (T-2829): the
  * recording's, or for a video one drawn from the chart.
  */
@@ -87,8 +87,47 @@ export function SectionCells({
   const first = sections[0]?.start ?? 0;
   const span = Math.max((sections.at(-1)?.end ?? first) - first, 0.001);
   const heard = (now - first) / span;
+  const cells = useRef<HTMLDivElement>(null);
+  // One size for every song-form name (T-2832): the largest that lets the narrowest fit whole,
+  // measured from the cells as they are drawn, and again as they change size.
+  const labels = names.map(({ abbreviation = "", time = 1, of = 1 }) =>
+    of > 1 && time > 1 ? `${abbreviation}^${time}` : abbreviation,
+  );
+  const key = labels.join(" ") + sections.map((section) => section.end - section.start).join(" ");
+  useLayoutEffect(() => {
+    const element = cells.current;
+    if (!element) return;
+    const fit = () => {
+      element.style.removeProperty("--cd-short-size");
+      let scale = 1;
+      let full = 0;
+      for (const cell of element.querySelectorAll<HTMLElement>(".cd-player-cells__cell")) {
+        const short = cell.querySelector<HTMLElement>(".cd-player-cells__short");
+        if (!short) continue;
+        const style = getComputedStyle(cell);
+        const room =
+          cell.clientWidth -
+          parseFloat(style.paddingInlineStart) -
+          parseFloat(style.paddingInlineEnd);
+        const width = short.getBoundingClientRect().width;
+        full = parseFloat(getComputedStyle(short).fontSize);
+        if (width > 0) scale = Math.min(scale, room / width);
+      }
+      // Never smaller than the full names on their side: past that a very narrow cell clips it.
+      const least = parseFloat(getComputedStyle(element).fontSize) * 0.75;
+      if (full > 0 && scale < 1)
+        element.style.setProperty(
+          "--cd-short-size",
+          `${Math.max(Math.floor(full * scale * 10) / 10, least)}px`,
+        );
+    };
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [key]);
   return (
-    <div className="cd-player-cells" role="group" aria-label={label}>
+    <div ref={cells} className="cd-player-cells" role="group" aria-label={label}>
       {end !== null && end < first + span && (
         <div
           className="cd-player-cells__after"
@@ -119,13 +158,7 @@ export function SectionCells({
             key={`${section.section}-${index}`}
             type="button"
             className="cd-player-cells__cell"
-            style={
-              {
-                flexGrow: section.end - section.start,
-                // How many characters the song-form name has, for its size to fit the cell.
-                "--cd-chars": Math.max(abbreviation.length + (of > 1 && time > 1 ? 0.7 : 0), 1),
-              } as CSSProperties
-            }
+            style={{ flexGrow: section.end - section.start }}
             aria-label={goTo(section.name)}
             aria-current={index === playing ? "true" : undefined}
             title={section.name}

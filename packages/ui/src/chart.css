@@ -662,12 +662,12 @@
   background: var(--color-background-blue);
   color: var(--color-text-primary);
 }
-/* The song-form name, bold at the top, always whole: as large as the cell's width lets it be
-   (T-2832). */
+/* The song-form name, bold at the top, always whole: one size for every cell, the largest that
+   lets the narrowest fit, set from the page (T-2832). */
 .cd-player-cells__short {
   flex: none;
   color: var(--color-text-primary);
-  font-size: min(calc(var(--font-size-3xl) * 0.8), calc(100cqi / (var(--cd-chars, 2) * 0.62)));
+  font-size: var(--cd-short-size, calc(var(--font-size-3xl) * 0.8));
   font-weight: var(--font-weight-bold);
   line-height: 1;
   white-space: nowrap;
@@ -758,7 +758,7 @@
   }
   .cd-player-cells__short {
     margin-block: auto;
-    font-size: min(calc(var(--font-size-2xl) * 0.8), calc(100cqi / (var(--cd-chars, 2) * 0.62)));
+    font-size: var(--cd-short-size, calc(var(--font-size-2xl) * 0.8));
   }
 }
 

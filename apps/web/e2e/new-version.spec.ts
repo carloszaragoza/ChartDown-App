@@ -129,6 +129,11 @@ test("R-03.11 T-2828 T-2832 a YouTube link opens the video in a player across th
     }),
   );
   expect(fits).toEqual([true, true]);
+  // One size for all of them.
+  const sizes = await bar
+    .locator(".cd-player-cells__short")
+    .evaluateAll((names) => [...new Set(names.map((name) => getComputedStyle(name).fontSize))]);
+  expect(sizes).toHaveLength(1);
   // R-03.11 T-2828 the player is a bar across the bottom, from the side navigation to the edge.
   const edges = await dock.evaluate((player) => {
     const box = player.getBoundingClientRect();
