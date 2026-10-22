@@ -19,7 +19,7 @@ import { audioProblem, audioType, MAX_AUDIO_BYTES, peaksFrom } from "../../../li
 import { createClient } from "../../../lib/supabase/browser";
 import type { Chart } from "chartdown";
 import { AudioButton } from "../../_components/AudioDock";
-import { recordAudio, removeAudio, saveAudioStart } from "./audio";
+import { recordAudio, removeAudio, saveAudioPoints } from "./audio";
 
 /** A band's recording of this version, as its members see it. */
 export interface BandRecording {
@@ -28,6 +28,8 @@ export interface BandRecording {
   durationMs: number;
   peaks: number[];
   musicStartMs: number;
+  /** Where the music ends, when the MD saved it (T-2830). */
+  musicEndMs: number | null;
   /** The person can replace or remove it: the band's MD. */
   canArrange: boolean;
 }
@@ -141,7 +143,7 @@ export function BandAudio({
             chart={chart}
             save={
               recording.canArrange
-                ? (milliseconds) => saveAudioStart(recording.bandId, versionId, milliseconds)
+                ? (points) => saveAudioPoints(recording.bandId, versionId, points)
                 : undefined
             }
           />

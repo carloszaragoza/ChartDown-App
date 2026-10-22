@@ -26,6 +26,8 @@ export interface OfflineRecording {
   durationMs: number;
   peaks: number[];
   musicStartMs: number;
+  /** Where the music ends (T-2830); absent in a set downloaded before it was kept. */
+  musicEndMs?: number | null;
   /** When it was added: a replaced recording is downloaded again. */
   addedAt: string;
 }

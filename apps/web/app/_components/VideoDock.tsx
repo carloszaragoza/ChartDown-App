@@ -3,32 +3,24 @@
 import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
-import { Popover } from "@astryxdesign/core/Popover";
-import { Slider } from "@astryxdesign/core/Slider";
-import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
-import { VStack } from "@astryxdesign/core/VStack";
-import {
-  ArrowTopRightOnSquareIcon,
-  MinusIcon,
-  PlayIcon,
-  PlusIcon,
-  SpeakerWaveIcon,
-  SpeakerXMarkIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowTopRightOnSquareIcon, PlayIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { videoClock } from "../../lib/video/clock";
-import {
-  sectionAt,
-  sectionLabels,
-  videoSections,
-  type VideoSection,
-} from "../../lib/video/sections";
+import { videoSections } from "../../lib/video/sections";
+import { chartWave } from "../../lib/video/wave";
 import { useDockRoom, useDockTarget } from "./DockRoom";
+import {
+  MusicPointsControls,
+  PlayerVolume,
+  SectionCells,
+  useMusicEnd,
+  usePlayerStart,
+} from "./PlayerBar";
+import type { MusicPoints } from "../../lib/video/points";
 import { startSeconds, videoId } from "../../lib/video/youtube";
 
 /** The part of YouTube's IFrame API the dock uses. */
@@ -42,6 +34,7 @@ interface YouTubePlayer {
   getVolume?(): number;
   setVolume?(volume: number): void;
   isMuted?(): boolean;
+  pauseVideo?(): void;
   unMute?(): void;
   destroy(): void;
 }
@@ -94,18 +87,21 @@ const online = (onChange: () => void) => {
 // The smallest player YouTube allows (R-03.11).
 const WIDTH = 356;
 const HEIGHT = 200;
+// The waveform under the sections is drawn with this many bars.
+const WAVE_BARS = 160;
 
 /**
  * A version's YouTube link (R-03.11, T-2501): it opens the video in a mini player docked at the
  * bottom of the page, small and closable, so the chart stays in view while it plays; the dock also
  * links to the video on YouTube. Embedded from youtube-nocookie.com. With no connection only the
  * link is offered. Given the chart, the dock shows its sections as a bar that follows the video
- * (T-2502).
+ * (T-2502); since T-2828 the player is a bar across the bottom of the page.
  */
 export function VideoLink({
   url,
   chart,
   saved,
+  savedEnd,
   save,
   isIconOnly = false,
   size = "lg",
@@ -114,8 +110,10 @@ export function VideoLink({
   chart?: Chart | undefined;
   /** Where the music starts, in seconds, as the owner saved it (T-2503). */
   saved?: number | null | undefined;
+  /** Where it ends, in seconds, as the owner saved it (T-2830). */
+  savedEnd?: number | null | undefined;
   /** For the version's owner: saves where the music starts for everyone. */
-  save?: ((milliseconds: number) => Promise<boolean>) | undefined;
+  save?: ((points: MusicPoints) => Promise<boolean>) | undefined;
   /** Only the play icon, as beside the YouTube link's field. */
   isIconOnly?: boolean;
   /** The labelled button's size: large, medium on a phone (T-2811). */
@@ -163,6 +161,7 @@ export function VideoLink({
             url={url}
             chart={chart}
             saved={saved ?? null}
+            savedEnd={savedEnd ?? null}
             save={save}
             onClose={() => setOpen(false)}
           />,
@@ -178,6 +177,7 @@ function VideoDock({
   url,
   chart,
   saved: savedStart,
+  savedEnd,
   save,
   onClose,
 }: {
@@ -186,12 +186,14 @@ function VideoDock({
   url: string;
   chart: Chart | undefined;
   saved: number | null;
-  save: ((milliseconds: number) => Promise<boolean>) | undefined;
+  savedEnd: number | null;
+  save: ((points: MusicPoints) => Promise<boolean>) | undefined;
   onClose: () => void;
 }) {
   const t = useTranslations("video");
   const dock = useRef<HTMLElement>(null);
   useDockRoom(dock);
+  const playerStart = usePlayerStart(dock);
   const frame = useRef<HTMLDivElement>(null);
   const player = useRef<YouTubePlayer | null>(null);
   const seeking = useRef<{ to: number; at: number } | null>(null);
@@ -199,7 +201,6 @@ function VideoDock({
   // The video's volume, set here (T-2821): YouTube's own slider is hard to drag in the small
   // player. Read from the player once it is ready.
   const [volume, setVolume] = useState(100);
-  const [isVolumeOpen, setVolumeOpen] = useState(false);
   const changeVolume = (to: number) => {
     setVolume(to);
     player.current?.setVolume?.(to);
@@ -208,6 +209,14 @@ function VideoDock({
   // Where the first bar falls in the video; the reader moves it to match the recording.
   const [musicStart, setMusicStart] = useState(savedStart ?? start);
   const [stored, setStored] = useState(savedStart);
+  // Where the music ends, when it is set: the video pauses there (T-2830).
+  const [musicEnd, setMusicEnd] = useState(savedEnd);
+  const [storedEnd, setStoredEnd] = useState(savedEnd);
+  const keepWithin = useMusicEnd(musicEnd, musicStart);
+  const keepRef = useRef(keepWithin);
+  useEffect(() => {
+    keepRef.current = keepWithin;
+  }, [keepWithin]);
   const [saving, setSaving] = useState<"idle" | "saving" | "failed">("idle");
   const startRef = useRef(musicStart);
   useEffect(() => {
@@ -217,6 +226,8 @@ function VideoDock({
     () => (chart ? videoSections(chart, musicStart) : null),
     [chart, musicStart],
   );
+  // The video's sound can't be read: its waveform is drawn from the chart (T-2829).
+  const wave = useMemo(() => (chart ? chartWave(chart, WAVE_BARS) : []), [chart]);
 
   useEffect(() => {
     let gone = false;
@@ -255,11 +266,17 @@ function VideoDock({
         seeking.current = null;
       }
       setNow(time);
-      videoClock.set({
+      const playing = player.current?.getPlayerState?.() === 1;
+      videoClock.set({ time, musicStart: startRef.current, playing });
+      keepRef.current(
         time,
-        musicStart: startRef.current,
-        playing: player.current?.getPlayerState?.() === 1,
-      });
+        playing,
+        () => player.current?.pauseVideo?.(),
+        (to) => {
+          seeking.current = { to, at: performance.now() };
+          player.current?.seekTo?.(to, true);
+        },
+      );
     }, 50);
     return () => {
       gone = true;
@@ -280,40 +297,48 @@ function VideoDock({
     `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
   return (
-    <aside ref={dock} className="cd-video-dock" aria-label={t("player")}>
-      <VStack gap={2}>
-        <HStack gap={1} vAlign="center">
-          <StackItem size="fill">
-            <Text type="supporting">{t("player")}</Text>
-          </StackItem>
-          <Popover
-            label={t("volume")}
-            isOpen={isVolumeOpen}
-            onOpenChange={setVolumeOpen}
-            placement="below"
-            alignment="end"
-            content={
-              <Slider
-                label={t("volume")}
-                value={volume}
-                min={0}
-                max={100}
-                step={5}
-                valueDisplay="text"
-                formatValue={(value) => `${Math.round(value)}%`}
-                onChange={(value: number) => changeVolume(value)}
-              />
+    <aside
+      ref={dock}
+      className="cd-player"
+      style={{ insetInlineStart: playerStart }}
+      data-compact={chart ? undefined : ""}
+      aria-label={t("player")}
+    >
+      {/* Every control in one row along the top (T-2828). */}
+      <div className="cd-player__controls">
+        {chart && (
+          <MusicPointsControls
+            start={musicStart}
+            end={musicEnd}
+            now={now}
+
+            onStart={setMusicStart}
+            onEnd={setMusicEnd}
+            saveLabel={
+              save && (musicStart !== stored || musicEnd !== storedEnd) ? t("saveStart") : undefined
             }
-          >
-            <Button
-              label={t("volume")}
-              variant="ghost"
-              size="sm"
-              icon={<Icon icon={volume === 0 ? SpeakerXMarkIcon : SpeakerWaveIcon} />}
-              isIconOnly
-              tooltip={t("volume")}
-            />
-          </Popover>
+            isSaving={saving === "saving"}
+            onSave={() => {
+              if (!save) return;
+              setSaving("saving");
+              void save({
+                startMs: musicStart * 1000,
+                endMs: musicEnd === null ? null : musicEnd * 1000,
+              }).then((done) => {
+                setSaving(done ? "idle" : "failed");
+                if (done) {
+                  setStored(musicStart);
+                  setStoredEnd(musicEnd);
+                }
+              });
+            }}
+          />
+        )}
+        {chart && !sections && <Text type="supporting">{t("noTempo")}</Text>}
+        <HStack gap={1} vAlign="center">
+          <Text type="supporting">
+            {t("player")} · {clock(now)}
+          </Text>
           <Button
             label={t("openYouTube")}
             href={url}
@@ -334,158 +359,32 @@ function VideoDock({
             onClick={onClose}
           />
         </HStack>
-        {chart &&
-          (sections ? (
-            <>
-              <SectionsBar
-                chart={chart}
-                sections={sections}
-                now={now}
-                onSeek={seek}
-                label={t("sections")}
-                goTo={(name) => t("goTo", { name })}
-              />
-              <HStack gap={1} vAlign="center" wrap="wrap">
-                <StackItem size="fill">
-                  <Text type="supporting">{t("musicStarts", { time: clock(musicStart) })}</Text>
-                </StackItem>
-                <Button
-                  label={t("earlier")}
-                  variant="ghost"
-                  size="sm"
-                  icon={<Icon icon={MinusIcon} />}
-                  isIconOnly
-                  tooltip={t("earlier")}
-                  onClick={() => setMusicStart((at) => Math.max(0, at - 0.5))}
-                />
-                <Button
-                  label={t("later")}
-                  variant="ghost"
-                  size="sm"
-                  icon={<Icon icon={PlusIcon} />}
-                  isIconOnly
-                  tooltip={t("later")}
-                  onClick={() => setMusicStart((at) => at + 0.5)}
-                />
-                <Button
-                  label={t("startHere")}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setMusicStart(Math.round(now * 10) / 10)}
-                />
-              </HStack>
-              {save && musicStart !== stored && (
-                <HStack gap={2} vAlign="center" wrap="wrap">
-                  <Button
-                    label={t("saveStart")}
-                    size="sm"
-                    isLoading={saving === "saving"}
-                    onClick={() => {
-                      setSaving("saving");
-                      void save(musicStart * 1000).then((done) => {
-                        setSaving(done ? "idle" : "failed");
-                        if (done) setStored(musicStart);
-                      });
-                    }}
-                  />
-                  {saving === "failed" && (
-                    <div role="alert">
-                      <Text type="supporting">{t("saveFailed")}</Text>
-                    </div>
-                  )}
-                </HStack>
-              )}
-            </>
-          ) : (
-            <Text type="supporting">{t("noTempo")}</Text>
-          ))}
+      </div>
+      {saving === "failed" && (
+        <div role="alert">
+          <Text type="supporting">{t("saveFailed")}</Text>
+        </div>
+      )}
+      <div className="cd-player__body">
         <div className="cd-video-dock__frame">
           <div ref={frame} />
         </div>
-      </VStack>
-    </aside>
-  );
-}
-
-/**
- * The song's sections in the order the chart plays them, each as wide as it lasts and named as in
- * the song form (T-2505); the one playing is marked (selection blue, and its full name written
- * above the bar), and choosing one takes the video there.
- */
-function SectionsBar({
-  chart,
-  sections,
-  now,
-  onSeek,
-  label,
-  goTo,
-}: {
-  chart: Chart;
-  sections: VideoSection[];
-  now: number;
-  onSeek: (seconds: number) => void;
-  label: string;
-  goTo: (name: string) => string;
-}) {
-  const playing = sectionAt(sections, now);
-  const names = sectionLabels(chart, sections);
-  const first = sections[0]?.start ?? 0;
-  const last = sections.at(-1)?.end ?? first;
-  const span = Math.max(last - first, 1);
-  const at = Math.min(Math.max((now - first) / span, 0), 1);
-  return (
-    <VStack gap={1}>
-      <PlayingName name={sections[playing]?.name} />
-      <div className="cd-video-bar" role="group" aria-label={label}>
-        {sections.map((section, index) => (
-          <button
-            key={`${section.section}-${index}`}
-            type="button"
-            className="cd-video-bar__section"
-            style={{ flexGrow: section.end - section.start }}
-            aria-label={goTo(section.name)}
-            aria-current={index === playing ? "true" : undefined}
-            title={section.name}
-            onClick={() => onSeek(section.start)}
-          >
-            <SectionName {...names[index]} />
-          </button>
-        ))}
-        {now >= first && now <= last && (
-          <span
-            className="cd-video-bar__mark"
-            aria-hidden="true"
-            style={{ insetInlineStart: `${at * 100}%` }}
-          />
+        <PlayerVolume label={t("volume")} value={volume} onChange={changeVolume} />
+        {chart && sections && (
+          <div className="cd-player__main">
+            <SectionCells
+              chart={chart}
+              sections={sections}
+              now={now}
+              onSeek={seek}
+              label={t("sections")}
+              goTo={(name) => t("goTo", { name })}
+              wave={wave}
+              end={musicEnd}
+            />
+          </div>
         )}
       </div>
-    </VStack>
-  );
-}
-
-/** A section in a player's bar, as the song form names it: B1, then B1² the second time. */
-export function SectionName({
-  abbreviation = "",
-  time = 1,
-  of = 1,
-}: {
-  abbreviation?: string;
-  time?: number;
-  of?: number;
-}) {
-  return (
-    <span aria-hidden="true">
-      {abbreviation}
-      {of > 1 && time > 1 && <sup>{time}</sup>}
-    </span>
-  );
-}
-
-/** The full name of the section playing, above a player's bar; a line kept empty between them. */
-export function PlayingName({ name }: { name: string | undefined }) {
-  return (
-    <Text type="large" weight="semibold" maxLines={1}>
-      {name ?? "\u00a0"}
-    </Text>
+    </aside>
   );
 }

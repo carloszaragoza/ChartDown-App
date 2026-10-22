@@ -102,7 +102,7 @@ test("R-02.1 a new version from a version's page starts from that version's char
   await expect(page).toHaveURL(new RegExp(`/versions/${first}$`));
 });
 
-test("R-03.11 a YouTube link opens the video in a mini player, and Close closes it", async ({
+test("R-03.11 T-2828 a YouTube link opens the video in a player across the bottom, and Close closes it", async ({
   page,
 }) => {
   await signUpAndConfirm(page, unique("video"), "Vera Video");
@@ -117,30 +117,51 @@ test("R-03.11 a YouTube link opens the video in a mini player, and Close closes 
   );
   // The chart's sections as a bar over the video; choosing one goes there (T-2502).
   const bar = dock.getByRole("group", { name: "Sections" });
-  // Named as in the song form, the one playing in full above the bar (T-2505).
-  await expect(bar.getByRole("button")).toHaveText(["V", "C"]);
+  // Named as in the song form (T-2505), large, under each section's full name (T-2828).
+  await expect(bar.locator(".cd-player-cells__short")).toHaveText(["V", "C"]);
+  await expect(bar.locator(".cd-player-cells__name")).toHaveText(["Verse", "Chorus"]);
+  // R-03.11 T-2828 the player is a bar across the bottom, from the side navigation to the edge.
+  const edges = await dock.evaluate((player) => {
+    const box = player.getBoundingClientRect();
+    const nav = document.querySelector(".astryx-side-nav")?.closest(".astryx-layout-panel");
+    return {
+      start: Math.round(box.left),
+      end: Math.round(box.right),
+      bottom: Math.round(box.bottom),
+      nav: Math.round(nav?.getBoundingClientRect().right ?? 0),
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
+  });
+  expect(edges.start).toBe(edges.nav);
+  expect(edges.end).toBe(edges.width);
+  expect(edges.bottom).toBe(edges.height);
   await bar.getByRole("button", { name: "Go to Chorus" }).click();
   await expect(bar.getByRole("button", { name: "Go to Chorus" })).toHaveAttribute(
     "aria-current",
     "true",
   );
   await expect(dock.getByText("Chorus", { exact: true })).toBeVisible();
-  await expect(dock).toContainText("Music starts at 0:00");
-  await dock.getByRole("button", { name: "Later" }).click();
-  await dock.getByRole("button", { name: "Later" }).click();
-  await expect(dock).toContainText("Music starts at 0:01");
-  // T-2821 the video's volume is set from the dock, not only from YouTube's own slider.
-  await dock.getByRole("button", { name: "Video volume" }).click();
-  const volume = page.getByRole("dialog", { name: "Video volume" }).getByRole("slider");
+  // T-2831 where the music starts and ends, opened from the top row; each step says its size.
+  const points = dock.getByRole("button", { name: /^Start and end/ });
+  await expect(points).toHaveAccessibleName("Start and end · from 0:00");
+  await points.click();
+  const start = dock.getByRole("group", { name: "Start", exact: true });
+  // Five steps of 0.2 s: a second.
+  for (let step = 0; step < 5; step++) await start.getByRole("button", { name: "+0.2 s" }).click();
+  await expect(points).toHaveAccessibleName("Start and end · from 0:01");
+  // T-2821 the video's volume is set from the dock, not only from YouTube's own slider; since
+  // T-2828 a vertical slider always in view.
+  const volume = dock.getByRole("slider", { name: "Video volume" });
+  await expect(volume).toHaveAttribute("aria-orientation", "vertical");
   await volume.focus();
-  await page.keyboard.press("ArrowLeft");
+  await page.keyboard.press("ArrowDown");
   await expect(volume).toHaveAttribute("aria-valuenow", /^(95|[0-9]{1,2})$/);
-  await page.keyboard.press("Escape");
   await dock.getByRole("button", { name: "Close the video" }).click();
   await expect(dock).toHaveCount(0);
 });
 
-test("R-03.11 the owner saves where the music starts, and it is there for the next reader", async ({
+test("R-03.11 T-2830 T-2831 the owner saves where the music starts and ends, and they are there for the next reader", async ({
   page,
 }) => {
   await signUpAndConfirm(page, unique("start"), "Stella Start");
@@ -153,8 +174,20 @@ test("R-03.11 the owner saves where the music starts, and it is there for the ne
 
   await page.getByRole("button", { name: "Watch the video" }).click();
   const dock = page.getByRole("complementary", { name: "Video" });
-  await dock.getByRole("button", { name: "Later" }).click();
-  await dock.getByRole("button", { name: "Later" }).click();
+  const points = dock.getByRole("button", { name: /^Start and end/ });
+  await points.click();
+  const start = dock.getByRole("group", { name: "Start", exact: true });
+  // Five steps of 0.2 s: a second.
+  for (let step = 0; step < 5; step++) await start.getByRole("button", { name: "+0.2 s" }).click();
+  // T-2830 and where it ends: here, at the chorus.
+  const end = dock.getByRole("group", { name: "End", exact: true });
+  await expect(end).toContainText("Plays to the end");
+  await dock
+    .getByRole("group", { name: "Sections" })
+    .getByRole("button", { name: "Go to Chorus" })
+    .click();
+  await end.getByRole("button", { name: /^End at / }).click();
+  await expect(points).toHaveAccessibleName(/^Start and end · 0:01 – \d+:\d\d$/);
   await dock.getByRole("button", { name: "Save for everyone" }).click();
   await expect(dock.getByRole("button", { name: "Save for everyone" })).toHaveCount(0);
 
@@ -162,9 +195,11 @@ test("R-03.11 the owner saves where the music starts, and it is there for the ne
   await signOut(page);
   await page.goto(address);
   await page.getByRole("button", { name: "Watch the video" }).click();
-  await expect(page.getByRole("complementary", { name: "Video" })).toContainText(
-    "Music starts at 0:01",
-  );
+  await expect(
+    page
+      .getByRole("complementary", { name: "Video" })
+      .getByRole("button", { name: /^Start and end/ }),
+  ).toHaveAccessibleName(/^Start and end · 0:01 – \d+:\d\d$/);
   await expect(page.getByRole("button", { name: "Save for everyone" })).toHaveCount(0);
 });
 

@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { EditIcon, ForkIcon, StandIcon } from "../../_components/ActionIcons";
-import { forkVersion, saveVideoStart } from "./actions";
+import { forkVersion, saveVideoPoints } from "./actions";
 import type { Display } from "./display";
 import { BackToCatalog } from "./BackToCatalog";
 import { BandAudio, type BandRecording } from "./BandAudio";
@@ -74,6 +74,8 @@ export interface VersionViewProps {
   songId?: string;
   /** Where the music starts in the video, in seconds, as the owner saved it (R-03.11). */
   videoStart?: number | null;
+  /** Where it ends, in seconds, as the owner saved it (T-2830). */
+  videoEnd?: number | null;
   /** The bands' recordings of this version, and the bands this person adds one for (R-06.7). */
   audio?: { recordings: BandRecording[]; bands: { id: string; name: string }[] };
 }
@@ -147,6 +149,7 @@ export function VersionView({
   phone = false,
   songId,
   videoStart = null,
+  videoEnd = null,
   audio,
 }: VersionViewProps) {
   const t = useTranslations("version");
@@ -319,9 +322,10 @@ export function VersionView({
                         url={source.youtube}
                         chart={chart}
                         saved={videoStart}
+                        savedEnd={videoEnd}
                         save={
                           owner && reading && status === "active"
-                            ? saveVideoStart.bind(null, id)
+                            ? saveVideoPoints.bind(null, id)
                             : undefined
                         }
                       />

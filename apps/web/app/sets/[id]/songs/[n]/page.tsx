@@ -23,7 +23,7 @@ import { AudioButton } from "../../../../_components/AudioDock";
 import { ChartControlsSlot } from "../../../../_components/ChartControlsSlot";
 import { ChartPreview } from "../../../../_components/ChartPreview";
 import { ViewOptions } from "../../../../_components/ViewOptions";
-import { saveAudioStart } from "../../../../versions/[id]/audio";
+import { saveAudioPoints } from "../../../../versions/[id]/audio";
 import { setRecording } from "../../../../../lib/sets/recording";
 import { LinkChoice } from "../../../../_components/LinkChoice";
 import { UUID } from "../../../../versions/[id]/load";
@@ -169,7 +169,7 @@ export default async function SetSongPage({
                       chart={chart}
                       save={
                         leads
-                          ? saveAudioStart.bind(null, recording.bandId, recording.versionId)
+                          ? saveAudioPoints.bind(null, recording.bandId, recording.versionId)
                           : undefined
                       }
                     />

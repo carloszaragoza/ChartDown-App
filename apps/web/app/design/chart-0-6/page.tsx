@@ -22,7 +22,8 @@ export default async function ChartZeroSixPage({
 }) {
   if (process.env.VERCEL_ENV === "production") notFound();
   const beats = readBeatsMode((await searchParams).beats);
-  const at = (mode: string) => (mode === "auto" ? "/design/chart-0-6" : `/design/chart-0-6?beats=${mode}`);
+  const at = (mode: string) =>
+    mode === "auto" ? "/design/chart-0-6" : `/design/chart-0-6?beats=${mode}`;
   return (
     <Layout padding={8}>
       <LayoutContent>
@@ -30,7 +31,8 @@ export default async function ChartZeroSixPage({
           <VStack gap={2}>
             <Heading level={1}>ChartDown 0.6</Heading>
             <Text type="supporting">
-              Northbound and the Syntax Tour, drawn by the viewer (design/chart-viewer, sections 5 and 10). Beats: Off, Auto or Always.
+              Northbound and the Syntax Tour, drawn by the viewer (design/chart-viewer, sections 5
+              and 10). Beats: Off, Auto or Always.
             </Text>
           </VStack>
           <BeatsControl

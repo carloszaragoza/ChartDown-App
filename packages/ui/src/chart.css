@@ -506,23 +506,110 @@
   overflow-x: auto;
 }
 
-/* The mini player (R-03.11): docked at the bottom of the page, over the content, at YouTube's
-   smallest size, so the chart stays in view while the video plays. */
-.cd-video-dock {
+/* The player as a bar across the bottom (R-03.11, R-06.7, T-2828): from the side navigation's edge
+   (set from the page) to the screen's; every control in one row along the top, and under it the
+   sections as tall as the video, the volume, then the video or the recording's Play. The body is
+   written video first and laid out from the end, so where the sections don't fit beside them (a
+   phone, an iPad held upright) the video and the volume stay on top and the sections take the
+   whole width under them. */
+.cd-player {
   position: fixed;
   z-index: 20;
-  inset-inline-end: var(--spacing-4);
-  inset-block-end: calc(var(--spacing-4) + env(safe-area-inset-bottom, 0px));
+  inset-inline: 0;
+  inset-block-end: 0;
   box-sizing: border-box;
-  inline-size: calc(356px + var(--spacing-2) * 2);
-  max-inline-size: calc(100vw - var(--spacing-4) * 2);
-  padding: var(--spacing-2);
-  border: var(--border-width) solid var(--color-border-emphasized);
-  border-radius: var(--radius-container);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4)
+    calc(var(--spacing-3) + env(safe-area-inset-bottom, 0px));
+  border-block-start: var(--border-width) solid var(--color-border-emphasized);
   background: var(--color-background-card);
   box-shadow: var(--shadow-high);
 }
+/* With no chart to place, only the video, in the corner. */
+.cd-player[data-compact] {
+  inset-inline-start: auto !important;
+  inset-inline-end: var(--spacing-4);
+  inset-block-end: calc(var(--spacing-4) + env(safe-area-inset-bottom, 0px));
+  inline-size: calc(356px + var(--spacing-12) + var(--spacing-4) * 2);
+  max-inline-size: calc(100vw - var(--spacing-4) * 2);
+  border: var(--border-width) solid var(--color-border-emphasized);
+  border-radius: var(--radius-container);
+}
+.cd-player__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-1) var(--spacing-3);
+}
+/* Where the music starts and ends, opened from the top row (T-2831): a row of its own under it,
+   each point a framed group with its name, its time and its buttons. */
+.cd-player__points {
+  order: 1;
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-2) var(--spacing-3);
+}
+.cd-player__point {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-2) var(--spacing-1) var(--spacing-3);
+  border: var(--border-width) solid var(--color-border-emphasized);
+  border-radius: var(--radius-container);
+}
+.cd-player__time {
+  min-inline-size: 4ch;
+  font-size: var(--font-size-lg);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-semibold);
+}
+.cd-player__body {
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: var(--spacing-3);
+}
+.cd-player__main {
+  display: flex;
+  flex: 1 1 26rem;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  min-inline-size: 0;
+}
+.cd-player__volume {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--color-text-secondary);
+}
+/* The slider takes the body's height, whatever sets it: the video or the cells. */
+.cd-player__volume > :first-child {
+  flex: 1 1 0;
+  min-block-size: 0;
+}
+.cd-player__volume .astryx-slider,
+.cd-player__volume .astryx-slider-control {
+  block-size: 100%;
+  min-block-size: 0;
+}
+.cd-player__play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: calc(var(--spacing-12) * 2);
+}
 .cd-video-dock__frame {
+  flex: none;
+  inline-size: 356px;
   overflow: hidden;
   border-radius: var(--radius-inner);
   aspect-ratio: 356 / 200;
@@ -533,128 +620,139 @@
   inline-size: 100%;
   block-size: 100%;
 }
-/* The sections bar over the video (R-03.11): each section as wide as it lasts, the one playing in
-   the selection color, and a mark where the video is. */
-.cd-video-bar {
+/* The sections as tall cells, each as wide as it lasts: the full name small at the top, the
+   song-form name large under it, the one playing in the selection color with a line that fills
+   as it plays. */
+.cd-player-cells {
+  display: flex;
+  flex: 1;
+  gap: var(--border-width);
+  min-block-size: calc(var(--spacing-12) * 3);
+}
+.cd-player-cells__cell {
   position: relative;
   display: flex;
-  gap: var(--border-width);
-  min-block-size: var(--spacing-12);
-}
-.cd-video-bar__section {
   flex-basis: 0;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: var(--spacing-6);
   min-inline-size: 0;
   overflow: hidden;
   margin: 0;
-  padding: 0 var(--spacing-1);
+  padding: var(--spacing-2) var(--spacing-1);
   border: 0;
   background: var(--color-background-muted);
   color: var(--color-text-secondary);
   cursor: pointer;
   font: inherit;
-  /* Named as in the song form (V1, C2), large and bold enough to read while playing (T-2505). */
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  text-overflow: clip;
-  white-space: nowrap;
+  text-align: center;
 }
-.cd-video-bar__section:first-child {
+.cd-player-cells__cell:first-child {
   border-start-start-radius: var(--radius-inner);
   border-end-start-radius: var(--radius-inner);
 }
-.cd-video-bar__section:last-of-type {
+.cd-player-cells__cell:last-child {
   border-start-end-radius: var(--radius-inner);
   border-end-end-radius: var(--radius-inner);
 }
-.cd-video-bar__section[aria-current="true"] {
+.cd-player-cells__cell[aria-current="true"] {
   background: var(--color-background-blue);
   color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
 }
-.cd-video-bar__mark {
+.cd-player-cells__name {
+  overflow: hidden;
+  font-size: calc(var(--font-size-sm) * 0.8);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cd-player-cells__short {
+  overflow: hidden;
+  font-size: calc(var(--font-size-3xl) * 0.8);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+.cd-player-cells__played {
   position: absolute;
-  inset-block: 0;
-  inline-size: calc(var(--border-width) * 2);
+  z-index: 2;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  block-size: var(--spacing-1);
   background: var(--color-text-primary);
   pointer-events: none;
+}
+/* A waveform across the cells' lower part (T-2829): the band's recording, or for a video one drawn
+   from the chart; the part already heard in the ink color. Over the cells' color, under their
+   names. */
+.cd-player-cells {
+  position: relative;
+  isolation: isolate;
+}
+.cd-player-cells__wave {
+  position: absolute;
+  z-index: 1;
+  inset: auto 0 var(--spacing-2);
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  block-size: 38%;
+  pointer-events: none;
+}
+.cd-player-cells__wave > span {
+  flex: 1;
+  border-radius: 1px;
+  background: var(--color-border-emphasized);
+}
+.cd-player-cells__wave > span[data-played] {
+  background: var(--color-text-secondary);
+}
+/* After where the music ends: dimmed, from a line where it ends. */
+.cd-player-cells__after {
+  position: absolute;
+  z-index: 3;
+  inset-block: 0;
+  inset-inline-end: 0;
+  border-inline-start: calc(var(--border-width) * 2) solid var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-background-card) 65%, transparent);
+  pointer-events: none;
+}
+.cd-player-cells__name,
+.cd-player-cells__short {
+  position: relative;
+  z-index: 2;
+}
+
+/* On a phone: a smaller video, and shorter cells with their song-form names only. */
+@media (max-width: 47.99rem) {
+  .cd-player:not([data-compact]) {
+    padding-inline: var(--spacing-2);
+  }
+  .cd-player__body {
+    gap: var(--spacing-2);
+  }
+  .cd-player__main {
+    flex-basis: 0;
+  }
+  .cd-player:not([data-compact]) .cd-video-dock__frame {
+    inline-size: min(356px, 100%);
+    max-block-size: 30dvh;
+  }
+  .cd-player-cells {
+    min-block-size: calc(var(--spacing-12) * 1.5);
+  }
+  .cd-player-cells__name {
+    display: none;
+  }
+  .cd-player-cells__short {
+    margin-block: auto;
+    font-size: calc(var(--font-size-2xl) * 0.8);
+  }
 }
 
 /* With a player open, the bar being followed is centered in what the player leaves (T-2505). */
 .cd-chart__bar[aria-current="step"] {
   scroll-margin-block-end: var(--cd-dock-room, 0px);
-}
-
-/* The band's audio player (R-06.7): a thin bar docked at the bottom, the recording's waveform with
-   the song's sections over it, the part already played in the ink color and a mark where it is. */
-.cd-audio-dock {
-  position: fixed;
-  z-index: 20;
-  inset-inline-end: var(--spacing-4);
-  inset-block-end: calc(var(--spacing-4) + env(safe-area-inset-bottom, 0px));
-  box-sizing: border-box;
-  inline-size: min(calc(var(--spacing-12) * 12), calc(100vw - var(--spacing-4) * 2));
-  padding: var(--spacing-2) var(--spacing-3);
-  border: var(--border-width) solid var(--color-border-emphasized);
-  border-radius: var(--radius-container);
-  background: var(--color-background-card);
-  box-shadow: var(--shadow-high);
-}
-.cd-audio-wave {
-  position: relative;
-  block-size: var(--spacing-12);
-}
-.cd-audio-wave__bars {
-  position: absolute;
-  inset: var(--spacing-5) 0 0;
-  display: flex;
-  align-items: center;
-  gap: 1px;
-}
-.cd-audio-wave__bar {
-  flex: 1;
-  border-radius: 1px;
-  background: var(--color-border-emphasized);
-}
-.cd-audio-wave__bar[data-played] {
-  background: var(--color-text-secondary);
-}
-.cd-audio-wave__sections {
-  position: absolute;
-  inset: 0;
-}
-.cd-audio-wave__section {
-  position: absolute;
-  inset-block: 0;
-  box-sizing: border-box;
-  overflow: hidden;
-  margin: 0;
-  padding: 0 var(--spacing-1);
-  border: 0;
-  border-inline-start: var(--border-width) solid var(--color-border-emphasized);
-  background: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--spacing-5);
-  text-align: start;
-  text-overflow: ellipsis;
-  vertical-align: top;
-  white-space: nowrap;
-  align-content: start;
-}
-.cd-audio-wave__section[aria-current="true"] {
-  background: color-mix(in srgb, var(--color-background-blue) 45%, transparent);
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
-}
-.cd-audio-wave__mark {
-  position: absolute;
-  inset-block: 0;
-  inline-size: calc(var(--border-width) * 2);
-  background: var(--color-text-primary);
-  pointer-events: none;
 }
 
 /* The metronome control's tempo or count (T-2701): one width for "74" and "3 / 4", so the control

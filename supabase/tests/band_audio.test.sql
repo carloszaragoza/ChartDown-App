@@ -2,7 +2,7 @@
 -- Run with: supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(16);
+select plan(18);
 
 create function pg_temp.login(person uuid) returns void language plpgsql as $$
 begin
@@ -63,6 +63,10 @@ select lives_ok(
   $$update public.band_audio set music_start_ms = 7000 where band_id = '00000000-0000-0000-0000-00000000b001'$$,
   'R-06.7 the MD saves where the music starts'
 );
+select lives_ok(
+  $$update public.band_audio set music_end_ms = 200000 where band_id = '00000000-0000-0000-0000-00000000b001'$$,
+  'R-06.7 T-2830 the MD saves where the music ends'
+);
 select throws_ok(
   $$update public.band_audio set size_bytes = 1 where band_id = '00000000-0000-0000-0000-00000000b001'$$,
   '42501', null, 'R-06.7 nothing else of a recording is changed: it is replaced whole'
@@ -97,7 +101,12 @@ select is(
 );
 delete from public.band_audio;
 update public.band_audio set music_start_ms = 1;
+update public.band_audio set music_end_ms = 1;
 do $$ begin perform pg_temp.admin(); end $$;
+select is(
+  (select music_end_ms from public.band_audio where band_id = '00000000-0000-0000-0000-00000000b001'),
+  200000, 'R-06.7 T-2830 a musician never moves where it ends'
+);
 select is(
   (select music_start_ms from public.band_audio where band_id = '00000000-0000-0000-0000-00000000b001'),
   7000, 'R-06.7 a musician neither removes it nor moves its start'

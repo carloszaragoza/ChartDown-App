@@ -1,8 +1,9 @@
--- T-2503 tests (pgTAP): where the music starts in a version's video, saved by its owner only.
+-- T-2503 tests (pgTAP): where the music starts in a version's video, saved by its owner only;
+-- T-2830: and where it ends.
 -- Run with: supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(6);
+select plan(9);
 
 create function pg_temp.login(person uuid) returns void language plpgsql as $$
 begin
@@ -44,10 +45,29 @@ select throws_ok(
   'R-03.11 it is never negative'
 );
 
+update public.versions set video_end_ms = 245000 where id = current_setting('test.version')::uuid;
+select is(
+  (select video_end_ms from public.versions where id = current_setting('test.version')::uuid),
+  245000,
+  'R-03.11 T-2830 the owner saves where the music ends'
+);
+select throws_ok(
+  $$update public.versions set video_end_ms = 0 where id = current_setting('test.version')::uuid$$,
+  '23514',
+  null,
+  'R-03.11 T-2830 the end is after the video starts and within an hour'
+);
+
 -- Ben is signed in but is not the owner: his update finds nothing.
 do $$ begin perform pg_temp.login('00000000-0000-0000-0000-0000000000b1'); end $$;
 update public.versions set video_start_ms = 1000 where id = current_setting('test.version')::uuid;
+update public.versions set video_end_ms = 1000 where id = current_setting('test.version')::uuid;
 do $$ begin perform pg_temp.visitor(); end $$;
+select is(
+  (select video_end_ms from public.versions where id = current_setting('test.version')::uuid),
+  245000,
+  'R-03.11 T-2830 only the owner saves where it ends'
+);
 select is(
   (select video_start_ms from public.versions where id = current_setting('test.version')::uuid),
   7000,
