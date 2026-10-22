@@ -5,7 +5,6 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
-import { VStack } from "@astryxdesign/core/VStack";
 import {
   MinusIcon,
   MusicalNoteIcon,
@@ -21,9 +20,9 @@ import { createPortal } from "react-dom";
 import { storedAudio } from "../../lib/offline/store";
 import { createClient } from "../../lib/supabase/browser";
 import { videoClock } from "../../lib/video/clock";
-import { sectionAt, sectionLabels, videoSections } from "../../lib/video/sections";
+import { videoSections } from "../../lib/video/sections";
 import { useDockRoom, useDockTarget } from "./DockRoom";
-import { PlayingName, SectionName } from "./VideoDock";
+import { PlayerVolume, SectionCells, useCanSetVolume, usePlayerStart } from "./PlayerBar";
 
 /** A band's recording of a version, as the player needs it (R-06.7). */
 export interface PlayerRecording {
@@ -43,8 +42,8 @@ const clock = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
 /**
- * Plays the band's recording (R-06.7, T-2603): the button opens a thin player at the bottom of the
- * page with the recording's waveform and the song's sections over it; the mark follows the audio,
+ * Plays the band's recording (R-06.7, T-2603): the button opens a player across the bottom of the
+ * page (T-2828) with the song's sections and the recording's waveform under them; the mark follows the audio,
  * a section takes it there, and the chart on the page follows it bar by bar, as with the video
  * (R-03.11). The MD adjusts where the music starts and saves it for the band.
  */
@@ -103,6 +102,14 @@ function AudioDock({
   const audio = useRef<HTMLAudioElement>(null);
   const dock = useRef<HTMLElement>(null);
   useDockRoom(dock);
+  const playerStart = usePlayerStart(dock);
+  // The recording's volume (T-2828), where the browser lets a page set it.
+  const canSetVolume = useCanSetVolume();
+  const [volume, setVolume] = useState(100);
+  const changeVolume = (to: number) => {
+    setVolume(to);
+    if (audio.current) audio.current.volume = to / 100;
+  };
   const [source, setSource] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -172,26 +179,20 @@ function AudioDock({
     if (element.paused) void element.play();
     else element.pause();
   };
-  const playingSection = sections ? sectionAt(sections, now) : -1;
-  const names = sections ? sectionLabels(chart, sections) : [];
-
   return (
-    <aside ref={dock} className="cd-audio-dock" aria-label={t("player")}>
-      <VStack gap={2}>
-        <HStack gap={2} vAlign="center">
-          <Button
-            label={playing ? t("pause") : t("playShort")}
-            variant="primary"
-            icon={<Icon icon={playing ? PauseIcon : PlayIcon} />}
-            isIconOnly
-            isDisabled={!source}
-            onClick={toggle}
-          />
+    <aside
+      ref={dock}
+      className="cd-player"
+      style={{ insetInlineStart: playerStart }}
+      aria-label={t("player")}
+    >
+      <div className="cd-player__media">
+        <HStack gap={1} vAlign="center">
           <StackItem size="fill">
             <HStack gap={1} vAlign="center">
               <Icon icon={MusicalNoteIcon} />
-              <Text type="supporting">
-                {recording.band} · {clock(now)} / {clock(duration)}
+              <Text type="supporting" maxLines={1}>
+                {recording.band}
               </Text>
             </HStack>
           </StackItem>
@@ -205,49 +206,57 @@ function AudioDock({
             onClick={onClose}
           />
         </HStack>
+        <div className="cd-player__play">
+          <Button
+            label={playing ? t("pause") : t("playShort")}
+            variant="primary"
+            size="lg"
+            icon={<Icon icon={playing ? PauseIcon : PlayIcon} />}
+            isIconOnly
+            isDisabled={!source}
+            onClick={toggle}
+          />
+          <Text type="supporting">
+            {clock(now)} / {clock(duration)}
+          </Text>
+        </div>
+        {source && (
+          <audio
+            ref={audio}
+            src={source}
+            preload="auto"
+            onPlay={() => setPlaying(true)}
+            onPause={() => setPlaying(false)}
+            onEnded={() => setPlaying(false)}
+          />
+        )}
+      </div>
+      {canSetVolume && <PlayerVolume label={t("volume")} value={volume} onChange={changeVolume} />}
+      <div className="cd-player__main">
         {failed && (
           <div role="alert">
             <Text type="supporting">{t("errors.unavailable")}</Text>
           </div>
         )}
-        {sections && <PlayingName name={sections[playingSection]?.name} />}
-        <div className="cd-audio-wave">
-          <div className="cd-audio-wave__bars" aria-hidden="true">
-            {bars.map((height, index) => (
-              <span
-                key={index}
-                className="cd-audio-wave__bar"
-                data-played={(index + 0.5) / BARS <= now / duration ? "" : undefined}
-                style={{ blockSize: `${Math.max(height, 0.04) * 100}%` }}
-              />
-            ))}
-          </div>
-          {sections && (
-            <div className="cd-audio-wave__sections" role="group" aria-label={v("sections")}>
-              {sections.map((section, index) => (
-                <button
-                  key={`${section.section}-${index}`}
-                  type="button"
-                  className="cd-audio-wave__section"
-                  style={{
-                    insetInlineStart: `${(section.start / duration) * 100}%`,
-                    inlineSize: `${((section.end - section.start) / duration) * 100}%`,
-                  }}
-                  aria-label={v("goTo", { name: section.name })}
-                  aria-current={index === playingSection ? "true" : undefined}
-                  title={section.name}
-                  onClick={() => seek(section.start)}
-                >
-                  <SectionName {...names[index]} />
-                </button>
-              ))}
-            </div>
-          )}
-          <span
-            className="cd-audio-wave__mark"
-            aria-hidden="true"
-            style={{ insetInlineStart: `${Math.min(now / duration, 1) * 100}%` }}
+        {sections && (
+          <SectionCells
+            chart={chart}
+            sections={sections}
+            now={now}
+            onSeek={seek}
+            label={v("sections")}
+            goTo={(name) => v("goTo", { name })}
           />
+        )}
+        <div className="cd-player-wave" aria-hidden="true">
+          {bars.map((height, index) => (
+            <span
+              key={index}
+              className="cd-player-wave__bar"
+              data-played={(index + 0.5) / BARS <= now / duration ? "" : undefined}
+              style={{ blockSize: `${Math.max(height, 0.04) * 100}%` }}
+            />
+          ))}
         </div>
         {sections ? (
           <HStack gap={1} vAlign="center" wrap="wrap">
@@ -301,17 +310,7 @@ function AudioDock({
             <Text type="supporting">{v("saveFailed")}</Text>
           </div>
         )}
-        {source && (
-          <audio
-            ref={audio}
-            src={source}
-            preload="auto"
-            onPlay={() => setPlaying(true)}
-            onPause={() => setPlaying(false)}
-            onEnded={() => setPlaying(false)}
-          />
-        )}
-      </VStack>
+      </div>
     </aside>
   );
 }

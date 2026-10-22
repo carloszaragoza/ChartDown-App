@@ -3,18 +3,13 @@
 import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
-import { Popover } from "@astryxdesign/core/Popover";
-import { Slider } from "@astryxdesign/core/Slider";
 import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
-import { VStack } from "@astryxdesign/core/VStack";
 import {
   ArrowTopRightOnSquareIcon,
   MinusIcon,
   PlayIcon,
   PlusIcon,
-  SpeakerWaveIcon,
-  SpeakerXMarkIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import type { Chart } from "chartdown";
@@ -22,13 +17,9 @@ import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { videoClock } from "../../lib/video/clock";
-import {
-  sectionAt,
-  sectionLabels,
-  videoSections,
-  type VideoSection,
-} from "../../lib/video/sections";
+import { videoSections } from "../../lib/video/sections";
 import { useDockRoom, useDockTarget } from "./DockRoom";
+import { PlayerVolume, SectionCells, usePlayerStart } from "./PlayerBar";
 import { startSeconds, videoId } from "../../lib/video/youtube";
 
 /** The part of YouTube's IFrame API the dock uses. */
@@ -100,7 +91,7 @@ const HEIGHT = 200;
  * bottom of the page, small and closable, so the chart stays in view while it plays; the dock also
  * links to the video on YouTube. Embedded from youtube-nocookie.com. With no connection only the
  * link is offered. Given the chart, the dock shows its sections as a bar that follows the video
- * (T-2502).
+ * (T-2502); since T-2828 the player is a bar across the bottom of the page.
  */
 export function VideoLink({
   url,
@@ -192,6 +183,7 @@ function VideoDock({
   const t = useTranslations("video");
   const dock = useRef<HTMLElement>(null);
   useDockRoom(dock);
+  const playerStart = usePlayerStart(dock);
   const frame = useRef<HTMLDivElement>(null);
   const player = useRef<YouTubePlayer | null>(null);
   const seeking = useRef<{ to: number; at: number } | null>(null);
@@ -199,7 +191,6 @@ function VideoDock({
   // The video's volume, set here (T-2821): YouTube's own slider is hard to drag in the small
   // player. Read from the player once it is ready.
   const [volume, setVolume] = useState(100);
-  const [isVolumeOpen, setVolumeOpen] = useState(false);
   const changeVolume = (to: number) => {
     setVolume(to);
     player.current?.setVolume?.(to);
@@ -280,40 +271,20 @@ function VideoDock({
     `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
   return (
-    <aside ref={dock} className="cd-video-dock" aria-label={t("player")}>
-      <VStack gap={2}>
+    <aside
+      ref={dock}
+      className="cd-player"
+      style={{ insetInlineStart: playerStart }}
+      data-compact={chart ? undefined : ""}
+      aria-label={t("player")}
+    >
+      <div className="cd-player__media">
         <HStack gap={1} vAlign="center">
           <StackItem size="fill">
-            <Text type="supporting">{t("player")}</Text>
+            <Text type="supporting">
+              {t("player")} · {clock(now)}
+            </Text>
           </StackItem>
-          <Popover
-            label={t("volume")}
-            isOpen={isVolumeOpen}
-            onOpenChange={setVolumeOpen}
-            placement="below"
-            alignment="end"
-            content={
-              <Slider
-                label={t("volume")}
-                value={volume}
-                min={0}
-                max={100}
-                step={5}
-                valueDisplay="text"
-                formatValue={(value) => `${Math.round(value)}%`}
-                onChange={(value: number) => changeVolume(value)}
-              />
-            }
-          >
-            <Button
-              label={t("volume")}
-              variant="ghost"
-              size="sm"
-              icon={<Icon icon={volume === 0 ? SpeakerXMarkIcon : SpeakerWaveIcon} />}
-              isIconOnly
-              tooltip={t("volume")}
-            />
-          </Popover>
           <Button
             label={t("openYouTube")}
             href={url}
@@ -334,10 +305,16 @@ function VideoDock({
             onClick={onClose}
           />
         </HStack>
-        {chart &&
-          (sections ? (
+        <div className="cd-video-dock__frame">
+          <div ref={frame} />
+        </div>
+      </div>
+      <PlayerVolume label={t("volume")} value={volume} onChange={changeVolume} />
+      {chart && (
+        <div className="cd-player__main">
+          {sections ? (
             <>
-              <SectionsBar
+              <SectionCells
                 chart={chart}
                 sections={sections}
                 now={now}
@@ -373,9 +350,7 @@ function VideoDock({
                   size="sm"
                   onClick={() => setMusicStart(Math.round(now * 10) / 10)}
                 />
-              </HStack>
-              {save && musicStart !== stored && (
-                <HStack gap={2} vAlign="center" wrap="wrap">
+                {save && musicStart !== stored && (
                   <Button
                     label={t("saveStart")}
                     size="sm"
@@ -388,104 +363,19 @@ function VideoDock({
                       });
                     }}
                   />
-                  {saving === "failed" && (
-                    <div role="alert">
-                      <Text type="supporting">{t("saveFailed")}</Text>
-                    </div>
-                  )}
-                </HStack>
+                )}
+              </HStack>
+              {saving === "failed" && (
+                <div role="alert">
+                  <Text type="supporting">{t("saveFailed")}</Text>
+                </div>
               )}
             </>
           ) : (
             <Text type="supporting">{t("noTempo")}</Text>
-          ))}
-        <div className="cd-video-dock__frame">
-          <div ref={frame} />
+          )}
         </div>
-      </VStack>
+      )}
     </aside>
-  );
-}
-
-/**
- * The song's sections in the order the chart plays them, each as wide as it lasts and named as in
- * the song form (T-2505); the one playing is marked (selection blue, and its full name written
- * above the bar), and choosing one takes the video there.
- */
-function SectionsBar({
-  chart,
-  sections,
-  now,
-  onSeek,
-  label,
-  goTo,
-}: {
-  chart: Chart;
-  sections: VideoSection[];
-  now: number;
-  onSeek: (seconds: number) => void;
-  label: string;
-  goTo: (name: string) => string;
-}) {
-  const playing = sectionAt(sections, now);
-  const names = sectionLabels(chart, sections);
-  const first = sections[0]?.start ?? 0;
-  const last = sections.at(-1)?.end ?? first;
-  const span = Math.max(last - first, 1);
-  const at = Math.min(Math.max((now - first) / span, 0), 1);
-  return (
-    <VStack gap={1}>
-      <PlayingName name={sections[playing]?.name} />
-      <div className="cd-video-bar" role="group" aria-label={label}>
-        {sections.map((section, index) => (
-          <button
-            key={`${section.section}-${index}`}
-            type="button"
-            className="cd-video-bar__section"
-            style={{ flexGrow: section.end - section.start }}
-            aria-label={goTo(section.name)}
-            aria-current={index === playing ? "true" : undefined}
-            title={section.name}
-            onClick={() => onSeek(section.start)}
-          >
-            <SectionName {...names[index]} />
-          </button>
-        ))}
-        {now >= first && now <= last && (
-          <span
-            className="cd-video-bar__mark"
-            aria-hidden="true"
-            style={{ insetInlineStart: `${at * 100}%` }}
-          />
-        )}
-      </div>
-    </VStack>
-  );
-}
-
-/** A section in a player's bar, as the song form names it: B1, then B1² the second time. */
-export function SectionName({
-  abbreviation = "",
-  time = 1,
-  of = 1,
-}: {
-  abbreviation?: string;
-  time?: number;
-  of?: number;
-}) {
-  return (
-    <span aria-hidden="true">
-      {abbreviation}
-      {of > 1 && time > 1 && <sup>{time}</sup>}
-    </span>
-  );
-}
-
-/** The full name of the section playing, above a player's bar; a line kept empty between them. */
-export function PlayingName({ name }: { name: string | undefined }) {
-  return (
-    <Text type="large" weight="semibold" maxLines={1}>
-      {name ?? "\u00a0"}
-    </Text>
   );
 }

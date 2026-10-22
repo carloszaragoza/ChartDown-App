@@ -1485,6 +1485,7 @@
     "play": "Play {band}'s recording",
     "playShort": "Play",
     "pause": "Pause",
+    "volume": "Recording volume",
     "close": "Close the player",
     "player": "Band audio",
     "saveStart": "Save for the band",

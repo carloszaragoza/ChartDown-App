@@ -1485,6 +1485,7 @@
     "play": "Escuchar la grabación de {band}",
     "playShort": "Escuchar",
     "pause": "Pausa",
+    "volume": "Volumen de la grabación",
     "close": "Cerrar el reproductor",
     "player": "Audio de la banda",
     "saveStart": "Guardar para la banda",

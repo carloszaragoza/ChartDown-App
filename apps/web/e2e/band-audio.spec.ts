@@ -96,8 +96,11 @@ test("R-06.7 the MD adds the band's audio; its musicians hear it, nobody else", 
   await play.click();
   await expect(player.getByRole("button", { name: "Pause" })).toBeVisible();
   const sections = player.getByRole("group", { name: "Sections" });
-  // Named as in the song form (T-2505).
-  await expect(sections.getByRole("button")).toHaveText(["V", "C"]);
+  // Named as in the song form (T-2505), under each section's full name (T-2828).
+  await expect(sections.locator(".cd-player-cells__short")).toHaveText(["V", "C"]);
+  await expect(sections.locator(".cd-player-cells__name")).toHaveText(["Verse", "Chorus"]);
+  // R-06.7 T-2828 the recording's volume, where the browser lets a page set it.
+  await expect(player.getByRole("slider", { name: "Recording volume" })).toBeVisible();
   await sections.getByRole("button", { name: "Go to Chorus" }).click();
   await expect(sections.getByRole("button", { name: "Go to Chorus" })).toHaveAttribute(
     "aria-current",

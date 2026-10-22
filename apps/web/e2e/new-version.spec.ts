@@ -102,7 +102,7 @@ test("R-02.1 a new version from a version's page starts from that version's char
   await expect(page).toHaveURL(new RegExp(`/versions/${first}$`));
 });
 
-test("R-03.11 a YouTube link opens the video in a mini player, and Close closes it", async ({
+test("R-03.11 T-2828 a YouTube link opens the video in a player across the bottom, and Close closes it", async ({
   page,
 }) => {
   await signUpAndConfirm(page, unique("video"), "Vera Video");
@@ -117,8 +117,25 @@ test("R-03.11 a YouTube link opens the video in a mini player, and Close closes 
   );
   // The chart's sections as a bar over the video; choosing one goes there (T-2502).
   const bar = dock.getByRole("group", { name: "Sections" });
-  // Named as in the song form, the one playing in full above the bar (T-2505).
-  await expect(bar.getByRole("button")).toHaveText(["V", "C"]);
+  // Named as in the song form (T-2505), large, under each section's full name (T-2828).
+  await expect(bar.locator(".cd-player-cells__short")).toHaveText(["V", "C"]);
+  await expect(bar.locator(".cd-player-cells__name")).toHaveText(["Verse", "Chorus"]);
+  // R-03.11 T-2828 the player is a bar across the bottom, from the side navigation to the edge.
+  const edges = await dock.evaluate((player) => {
+    const box = player.getBoundingClientRect();
+    const nav = document.querySelector(".astryx-side-nav")?.closest(".astryx-layout-panel");
+    return {
+      start: Math.round(box.left),
+      end: Math.round(box.right),
+      bottom: Math.round(box.bottom),
+      nav: Math.round(nav?.getBoundingClientRect().right ?? 0),
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
+  });
+  expect(edges.start).toBe(edges.nav);
+  expect(edges.end).toBe(edges.width);
+  expect(edges.bottom).toBe(edges.height);
   await bar.getByRole("button", { name: "Go to Chorus" }).click();
   await expect(bar.getByRole("button", { name: "Go to Chorus" })).toHaveAttribute(
     "aria-current",
@@ -129,13 +146,13 @@ test("R-03.11 a YouTube link opens the video in a mini player, and Close closes 
   await dock.getByRole("button", { name: "Later" }).click();
   await dock.getByRole("button", { name: "Later" }).click();
   await expect(dock).toContainText("Music starts at 0:01");
-  // T-2821 the video's volume is set from the dock, not only from YouTube's own slider.
-  await dock.getByRole("button", { name: "Video volume" }).click();
-  const volume = page.getByRole("dialog", { name: "Video volume" }).getByRole("slider");
+  // T-2821 the video's volume is set from the dock, not only from YouTube's own slider; since
+  // T-2828 a vertical slider always in view.
+  const volume = dock.getByRole("slider", { name: "Video volume" });
+  await expect(volume).toHaveAttribute("aria-orientation", "vertical");
   await volume.focus();
-  await page.keyboard.press("ArrowLeft");
+  await page.keyboard.press("ArrowDown");
   await expect(volume).toHaveAttribute("aria-valuenow", /^(95|[0-9]{1,2})$/);
-  await page.keyboard.press("Escape");
   await dock.getByRole("button", { name: "Close the video" }).click();
   await expect(dock).toHaveCount(0);
 });
