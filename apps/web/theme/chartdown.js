@@ -315,6 +315,9 @@ export const chartdownTheme = {
         "color": "var(--color-error)",
         "--color-overlay-hover": "var(--astryx-theme-neutral-color-destructive-overlay-hover)",
         "--color-overlay-pressed": "var(--astryx-theme-neutral-color-destructive-overlay-pressed)"
+      },
+      "size:md": {
+        "minWidth": "var(--size-element-md)"
       }
     },
     "badge": {

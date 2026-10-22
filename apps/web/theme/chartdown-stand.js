@@ -316,6 +316,9 @@ export const chartdownStandTheme = {
         "--color-overlay-hover": "var(--astryx-theme-neutral-color-destructive-overlay-hover)",
         "--color-overlay-pressed": "var(--astryx-theme-neutral-color-destructive-overlay-pressed)"
       },
+      "size:md": {
+        "minWidth": "var(--size-element-md)"
+      },
       "size:lg": {
         "minWidth": "var(--size-element-lg)",
         "fontSize": "var(--font-size-xl)",

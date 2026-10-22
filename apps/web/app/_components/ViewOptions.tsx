@@ -8,21 +8,24 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
 import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
+import { usePhone } from "../../lib/shell/phone";
 
 /**
  * The page's settings in one place, as in stand mode (T-2807; owner's review, October 21, 2026):
  * an icon button beside the metronome that opens them from the bottom, as the metronome's own
- * options do. What it holds is the page's: Numbers / Letters, the key, Beat marks, View as.
+ * options do. What it holds is the page's: Numbers / Letters, the key, Beat marks, View as. The
+ * medium size beside the metronome, stand mode's 40 px on a phone (T-2833).
  */
-export function ViewOptions({ children }: { children: ReactNode }) {
+export function ViewOptions({ children, phone = false }: { children: ReactNode; phone?: boolean }) {
   const t = useTranslations("stand");
+  const isPhone = usePhone(phone);
   const [isOpen, setOpen] = useState(false);
   return (
     <>
       <Button
         label={t("viewOptions")}
         tooltip={t("viewOptions")}
-        size="lg"
+        size={isPhone ? "lg" : "md"}
         variant="secondary"
         isIconOnly
         icon={<Icon icon={AdjustmentsHorizontalIcon} />}

@@ -446,6 +446,10 @@
     --color-overlay-pressed: var(--astryx-theme-neutral-color-destructive-overlay-pressed);
   }
 
+  .astryx-button[data-size="md"] {
+    min-width: var(--size-element-md);
+  }
+
   .astryx-button[data-size="lg"] {
     min-width: var(--size-element-lg);
     font-size: var(--font-size-xl);

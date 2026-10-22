@@ -446,6 +446,10 @@
     --color-overlay-pressed: var(--astryx-theme-neutral-color-destructive-overlay-pressed);
   }
 
+  .astryx-button[data-size="md"] {
+    min-width: var(--size-element-md);
+  }
+
   .astryx-badge[data-variant="info"] {
     background-color: var(--astryx-theme-neutral-color-status-fill-accent);
     color: var(--color-on-accent);

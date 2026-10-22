@@ -55,3 +55,32 @@ test("R-01.4 a version that does not exist is not found", async ({ page }) => {
   const response = await page.goto("/versions/00000000-0000-0000-0000-000000000000");
   expect(response?.status()).toBe(404);
 });
+
+test.describe("on an iPad", () => {
+  test.use({ viewport: { width: 1180, height: 820 }, hasTouch: true });
+
+  test("T-2833 a page that is read has the side navigation's size: actions, metronome and song form at 44 px", async ({
+    page,
+    request,
+  }) => {
+    const id = await createVersion(request, {
+      title: `Low Tide ${Date.now()}`,
+      content: "---\ntempo: 80\n---\n## Intro\n1 | 4\n\n## Verse\n1 | 4 | 5 | 1\n",
+    });
+    await page.goto(`/versions/${id}`);
+    const main = page.getByRole("main");
+    const controls = [
+      main.getByRole("link", { name: "Stand mode" }),
+      main.getByRole("group", { name: "Metronome" }).getByRole("button").first(),
+      main.getByRole("button", { name: "View options" }),
+      ...(await page.getByRole("navigation", { name: "Song form" }).getByRole("link").all()),
+    ];
+    for (const control of controls) {
+      const box = await control.boundingBox();
+      const name = await control.getAttribute("aria-label");
+      expect(Math.round(box?.height ?? 0), name ?? "").toBe(44);
+      // A one-letter section ("I") is still a whole touch target.
+      expect(Math.round(box?.width ?? 0), name ?? "").toBeGreaterThanOrEqual(44);
+    }
+  });
+});

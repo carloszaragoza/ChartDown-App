@@ -10,6 +10,13 @@ import { neutralTheme } from "@astryxdesign/theme-neutral";
 export const chartdownTheme = defineTheme({
   name: "chartdown",
   extends: neutralTheme,
+  components: {
+    button: {
+      // Square at least, so a one-letter section in the song form ("I") is a whole touch target
+      // (T-2833).
+      "size:md": { minWidth: "var(--size-element-md)" },
+    },
+  },
   adaptations: {
     rules: [
       {

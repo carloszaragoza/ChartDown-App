@@ -167,8 +167,9 @@ export function VersionView({
   const canReport = canFork && status !== "hidden";
   const canAddToSet = setChoices.length > 0 || setBands.length > 0;
   const a = useTranslations("audio");
-  // The header's actions: the large touch size, the medium one on a phone (T-2811).
-  const size = phone ? "md" : "lg";
+  // The header's actions at the medium size, as the side navigation's items: 44 px on an iPad,
+  // 32 px on a phone (T-2811; owner's review, October 22, 2026, T-2833).
+  const size = "md";
   // A new version of the song starts from this chart (R-02.1, T-2405).
   const menu = versionMenuItems({
     id,
@@ -372,7 +373,7 @@ export function VersionView({
                 viewOptions={
                   display &&
                   path && (
-                    <ViewOptions>
+                    <ViewOptions phone={phone}>
                       <DisplayBar
                         words={{
                           label: v("label"),

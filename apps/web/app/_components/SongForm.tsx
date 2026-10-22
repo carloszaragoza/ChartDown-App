@@ -5,6 +5,7 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { StackItem } from "@astryxdesign/core/Stack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
+import { Text } from "@astryxdesign/core/Text";
 import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
@@ -24,7 +25,8 @@ export interface SongFormItem {
 /**
  * A song's form: one button per section, each a link to it (Design Handoff 2.0, 1.5 and screen
  * 03). The current one is filled, never only underlined; a section played more than once says
- * which time it is (B1, B1², B1³). Stand mode uses the large size, 50 px on touch. On a phone it is
+ * which time it is (B1, B1², B1³). Stand mode uses the large size, 50 px on touch; the pages that
+ * show a whole chart the medium one, 44 px, as the side navigation (T-2833). On a phone it is
  * one strip that scrolls sideways inside itself, the current section kept in view (R-03.8).
  */
 export function SongForm({
@@ -57,6 +59,12 @@ export function SongForm({
         {items.map((item, index) => {
           const { time, of } = times[index] ?? { time: 1, of: 1 };
           const isCurrent = index === current;
+          const name = (
+            <>
+              {item.abbreviation}
+              {of > 1 && time > 1 && <sup>{time}</sup>}
+            </>
+          );
           // In a strip each section keeps its whole name and the strip scrolls; a button left
           // to the row would shrink and cut it short ("V…").
           return (
@@ -64,7 +72,7 @@ export function SongForm({
               <Button
                 href={item.href}
                 size={size}
-                variant={isCurrent ? "primary" : size === "lg" ? "secondary" : "ghost"}
+                variant={isCurrent ? "primary" : "secondary"}
                 label={[
                   item.description,
                   of > 1 ? c("nthTime", { time }) : "",
@@ -80,8 +88,14 @@ export function SongForm({
                     : {})}
               >
                 <span aria-hidden="true">
-                  {item.abbreviation}
-                  {of > 1 && time > 1 && <sup>{time}</sup>}
+                  {size === "md" ? (
+                    // A size above the label, bold, the button's own color (T-2833).
+                    <Text type="large" weight="bold" color="inherit">
+                      {name}
+                    </Text>
+                  ) : (
+                    name
+                  )}
                 </span>
               </Button>
             </StackItem>

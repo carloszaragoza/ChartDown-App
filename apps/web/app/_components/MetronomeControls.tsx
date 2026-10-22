@@ -60,9 +60,14 @@ export interface StartBar {
  * Play / Stop, the "2 / 4" counter, the question for a tempo when the chart has none (R-11.1),
  * and where the metronome is, section by section. Play starts on a tapped bar (R-11.2), or at
  * the first bar of `section` (stand mode's own) or of the song (null). A fermata waits for a tap
- * on the chart (R-11.6).
+ * on the chart (R-11.6). The control is stand mode's large size there, and the medium one on the
+ * pages that show a whole chart (owner's review, October 22, 2026, T-2833).
  */
-export function useMetronomeControls(chart: Chart, section: number | null) {
+export function useMetronomeControls(
+  chart: Chart,
+  section: number | null,
+  size: "md" | "lg" = "lg",
+) {
   const t = useTranslations("stand");
   const c = useTranslations("chart");
   const metronome = useMetronome(chart);
@@ -366,7 +371,7 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
       ? roundTempo(tapped)
       : null;
   const control = (
-    <ButtonGroup label={t("metronome")} size="lg">
+    <ButtonGroup label={t("metronome")} size={size}>
       <Button
         label={metronome.isPlaying ? t("stop") : t("play")}
         variant={metronome.isPlaying ? "primary" : "secondary"}
