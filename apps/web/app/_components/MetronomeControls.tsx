@@ -252,6 +252,12 @@ export function useMetronomeControls(chart: Chart, section: number | null) {
         value={sound.countIn}
         onChange={(countIn) => setSound({ ...sound, countIn })}
       />
+      <Switch
+        label={t("keepAwake")}
+        description={t("keepAwakeHint")}
+        value={sound.keepAwake}
+        onChange={(keepAwake) => setSound({ ...sound, keepAwake })}
+      />
       <VStack gap={1}>
         <Text type="label">{t("beatLine")}</Text>
         <SegmentedControl

@@ -4,6 +4,7 @@ import { audioClock, clicks, continueWith, Metronome, sectionEnd, type Click } f
 import {
   DEFAULT_SOUND,
   getSound,
+  keepSpeakersAwake,
   playClick,
   respectSilentMode,
   saveSound,
@@ -38,6 +39,8 @@ export function useMetronome(chart: Chart) {
   const frame = useRef(0);
   // The screen stays on while it plays (R-11.11).
   const awake = useRef<(() => void) | null>(null);
+  // The low hum that keeps the speakers from sleeping between clicks (T-2820), while it plays.
+  const humming = useRef<(() => void) | null>(null);
   // The click, its volume and the count-in, kept on this device (R-11.7, R-11.8). The scheduler
   // reads the latest, so turning the click on while playing is heard on the next beat.
   const sound = useSyncExternalStore(subscribeSound, getSound, () => DEFAULT_SOUND);
@@ -58,6 +61,8 @@ export function useMetronome(chart: Chart) {
   const stop = useCallback(() => {
     awake.current?.();
     awake.current = null;
+    humming.current?.();
+    humming.current = null;
     engine.current?.stop();
     engine.current = null;
     cancelAnimationFrame(frame.current);
@@ -79,6 +84,9 @@ export function useMetronome(chart: Chart) {
       const audio = (context.current ??= new AudioContext());
       // Asked for inside the tap, as Safari requires; the count waits for it below.
       const waking = audio.state === "running" ? null : audio.resume();
+      // On from Play, so the speakers are already awake for the first click.
+      if (heard.current.click && heard.current.keepAwake)
+        humming.current = keepSpeakersAwake(audio);
       const list = clicks(bars, { from, countIn: heard.current.countIn, ...options });
       const metronome = new Metronome(list, audioClock(audio), (click, at) => {
         if (heard.current.click) {
@@ -130,12 +138,26 @@ export function useMetronome(chart: Chart) {
   useEffect(
     () => () => {
       awake.current?.();
+      humming.current?.();
       engine.current?.stop();
       cancelAnimationFrame(frame.current);
       void context.current?.close();
     },
     [],
   );
+
+  // The hum is only for a click that sounds: turning the click or Keep speakers awake on or off
+  // while it plays takes effect at once.
+  const wantsHum = sound.click && sound.keepAwake;
+  useEffect(() => {
+    const audio = context.current;
+    if (!isPlaying || !audio) return;
+    if (wantsHum && !humming.current) humming.current = keepSpeakersAwake(audio);
+    if (!wantsHum && humming.current) {
+      humming.current();
+      humming.current = null;
+    }
+  }, [isPlaying, wantsHum]);
 
   /** The first bar of a section in the play order, to start there. */
   const firstBarOf = useCallback(

@@ -172,13 +172,20 @@ test("R-11.7 with the click off no audio plays and the pulse still runs; on, it 
   page,
   request,
 }) => {
-  // Count the tones the page asks the audio clock for.
+  // Count the sounds the page asks the audio clock for: the clicks, drawn once and played from
+  // their samples (T-2820), and the hum that keeps the speakers awake.
   await page.addInitScript(() => {
-    const create = AudioContext.prototype.createOscillator;
+    const tone = AudioContext.prototype.createOscillator;
+    const sample = AudioContext.prototype.createBufferSource;
     Object.assign(window, { tones: 0 });
+    const count = () => (window as unknown as { tones: number }).tones++;
     AudioContext.prototype.createOscillator = function (this: AudioContext) {
-      (window as unknown as { tones: number }).tones++;
-      return create.call(this);
+      count();
+      return tone.call(this);
+    };
+    AudioContext.prototype.createBufferSource = function (this: AudioContext) {
+      count();
+      return sample.call(this);
     };
   });
   const id = await createVersion(request, { title: "Fast Song", content: FAST });
