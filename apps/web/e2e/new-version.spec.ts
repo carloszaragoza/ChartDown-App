@@ -102,7 +102,7 @@ test("R-02.1 a new version from a version's page starts from that version's char
   await expect(page).toHaveURL(new RegExp(`/versions/${first}$`));
 });
 
-test("R-03.11 T-2828 a YouTube link opens the video in a player across the bottom, and Close closes it", async ({
+test("R-03.11 T-2828 T-2832 a YouTube link opens the video in a player across the bottom, and Close closes it", async ({
   page,
 }) => {
   await signUpAndConfirm(page, unique("video"), "Vera Video");
@@ -120,6 +120,20 @@ test("R-03.11 T-2828 a YouTube link opens the video in a player across the botto
   // Named as in the song form (T-2505), large, under each section's full name (T-2828).
   await expect(bar.locator(".cd-player-cells__short")).toHaveText(["V", "C"]);
   await expect(bar.locator(".cd-player-cells__name")).toHaveText(["Verse", "Chorus"]);
+  // T-2832 every song-form name fits whole inside its cell.
+  const fits = await bar.locator(".cd-player-cells__cell").evaluateAll((cells) =>
+    cells.map((cell) => {
+      const name = cell.querySelector(".cd-player-cells__short")?.getBoundingClientRect();
+      const box = cell.getBoundingClientRect();
+      return !!name && name.width > 0 && name.left >= box.left && name.right <= box.right;
+    }),
+  );
+  expect(fits).toEqual([true, true]);
+  // One size for all of them.
+  const sizes = await bar
+    .locator(".cd-player-cells__short")
+    .evaluateAll((names) => [...new Set(names.map((name) => getComputedStyle(name).fontSize))]);
+  expect(sizes).toHaveLength(1);
   // R-03.11 T-2828 the player is a bar across the bottom, from the side navigation to the edge.
   const edges = await dock.evaluate((player) => {
     const box = player.getBoundingClientRect();
