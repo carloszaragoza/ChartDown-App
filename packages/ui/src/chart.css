@@ -634,9 +634,12 @@
   display: flex;
   flex-basis: 0;
   flex-direction: column;
+  align-items: center;
   justify-content: flex-start;
-  gap: var(--spacing-6);
+  gap: var(--spacing-2);
   min-inline-size: 0;
+  /* The names are sized from the cell's width (T-2832). */
+  container-type: inline-size;
   overflow: hidden;
   margin: 0;
   padding: var(--spacing-2) var(--spacing-1);
@@ -659,19 +662,28 @@
   background: var(--color-background-blue);
   color: var(--color-text-primary);
 }
-.cd-player-cells__name {
-  overflow: hidden;
-  font-size: calc(var(--font-size-sm) * 0.8);
-  text-overflow: ellipsis;
+/* The song-form name, bold at the top, always whole: as large as the cell's width lets it be
+   (T-2832). */
+.cd-player-cells__short {
+  flex: none;
+  color: var(--color-text-primary);
+  font-size: min(calc(var(--font-size-3xl) * 0.8), calc(100cqi / (var(--cd-chars, 2) * 0.62)));
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
   white-space: nowrap;
 }
-.cd-player-cells__short {
+/* The section's full name on its side, faint, in the room under it, read from the bottom up. */
+.cd-player-cells__name {
+  flex: 1;
+  min-block-size: 0;
   overflow: hidden;
-  font-size: calc(var(--font-size-3xl) * 0.8);
-  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  font-size: min(var(--font-size-sm), 70cqi);
   line-height: 1;
-  text-overflow: clip;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
 }
 .cd-player-cells__played {
   position: absolute;
@@ -746,7 +758,7 @@
   }
   .cd-player-cells__short {
     margin-block: auto;
-    font-size: calc(var(--font-size-2xl) * 0.8);
+    font-size: min(calc(var(--font-size-2xl) * 0.8), calc(100cqi / (var(--cd-chars, 2) * 0.62)));
   }
 }
 

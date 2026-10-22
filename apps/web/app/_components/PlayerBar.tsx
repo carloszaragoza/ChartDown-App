@@ -21,6 +21,7 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type CSSProperties,
   type RefObject,
 } from "react";
 import { sectionAt, sectionLabels, type VideoSection } from "../../lib/video/sections";
@@ -55,8 +56,8 @@ export function usePlayerStart(dock: RefObject<HTMLElement | null>): number {
 
 /**
  * The song's sections in the order the chart plays them, as tall cells as wide as each lasts
- * (T-2828): the section's full name small at the top and its song-form name large under it (V1,
- * then V1² the second time); the one playing in the selection color, with a line that fills as it
+ * (T-2828): the song-form name bold at the top (V1, then V1² the second time), as large as fits
+ * the cell, and the section's full name turned on its side, faint, in the room under it (T-2832); the one playing in the selection color, with a line that fills as it
  * plays. Choosing one takes the player there. A waveform lies across their lower part (T-2829): the
  * recording's, or for a video one drawn from the chart.
  */
@@ -118,18 +119,24 @@ export function SectionCells({
             key={`${section.section}-${index}`}
             type="button"
             className="cd-player-cells__cell"
-            style={{ flexGrow: section.end - section.start }}
+            style={
+              {
+                flexGrow: section.end - section.start,
+                // How many characters the song-form name has, for its size to fit the cell.
+                "--cd-chars": Math.max(abbreviation.length + (of > 1 && time > 1 ? 0.7 : 0), 1),
+              } as CSSProperties
+            }
             aria-label={goTo(section.name)}
             aria-current={index === playing ? "true" : undefined}
             title={section.name}
             onClick={() => onSeek(section.start)}
           >
-            <span className="cd-player-cells__name" aria-hidden="true">
-              {section.name}
-            </span>
             <span className="cd-player-cells__short" aria-hidden="true">
               {abbreviation}
               {of > 1 && time > 1 && <sup>{time}</sup>}
+            </span>
+            <span className="cd-player-cells__name" aria-hidden="true">
+              {section.name}
             </span>
             {isPlaying && (
               <span
