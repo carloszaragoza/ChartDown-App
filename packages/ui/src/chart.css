@@ -636,13 +636,13 @@
 }
 .cd-player-cells__name {
   overflow: hidden;
-  font-size: var(--font-size-sm);
+  font-size: calc(var(--font-size-sm) * 0.8);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .cd-player-cells__short {
   overflow: hidden;
-  font-size: var(--font-size-3xl);
+  font-size: calc(var(--font-size-3xl) * 0.8);
   font-weight: var(--font-weight-semibold);
   line-height: 1;
   text-overflow: clip;
@@ -711,7 +711,7 @@
   }
   .cd-player-cells__short {
     margin-block: auto;
-    font-size: var(--font-size-2xl);
+    font-size: calc(var(--font-size-2xl) * 0.8);
   }
 }
 
