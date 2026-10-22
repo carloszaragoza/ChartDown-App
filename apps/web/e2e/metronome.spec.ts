@@ -218,7 +218,7 @@ test("R-11.9 the practice speed changes the tempo played, never the chart", asyn
   await expect(page.getByRole("dialog").getByText("80% · 192 bpm")).toBeVisible();
   await page.keyboard.press("Escape");
   // The chart still says 240.
-  await expect(page.getByText(/Tempo 240/)).toBeVisible();
+  await expect(page.getByText(/Tempo 240/).first()).toBeVisible();
 });
 
 test("R-11.9 T-2808 the tempo stepper plays at 74 while the chart still says 71", async ({
@@ -242,7 +242,7 @@ test("R-11.9 T-2808 the tempo stepper plays at 74 while the chart still says 71"
   await page.keyboard.press("Escape");
   // The metronome plays at 74; the chart still says 71.
   await expect(page.getByRole("group", { name: "Metronome" }).first()).toContainText("74");
-  await expect(page.getByText(/Tempo 71/)).toBeVisible();
+  await expect(page.getByText(/Tempo 71/).first()).toBeVisible();
 });
 
 test("R-11.9 T-2808 a tempo with a decimal plays as written: 85.5, then 86.5", async ({
