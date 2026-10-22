@@ -214,7 +214,7 @@ function AudioDock({
           start={musicStart}
           end={musicEnd}
           now={now}
-          step={0.25}
+
           max={duration}
           onStart={setMusicStart}
           onEnd={setMusicEnd}

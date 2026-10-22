@@ -311,7 +311,7 @@ function VideoDock({
             start={musicStart}
             end={musicEnd}
             now={now}
-            step={0.5}
+
             onStart={setMusicStart}
             onEnd={setMusicEnd}
             saveLabel={

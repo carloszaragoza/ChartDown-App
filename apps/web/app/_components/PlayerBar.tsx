@@ -196,6 +196,11 @@ export function useCanSetVolume(): boolean {
   );
 }
 
+/** How far a step moves where the music starts or ends, in seconds: within a beat (T-2831). */
+const step = 0.2;
+// Steps of 0.2 s add up in tenths, kept exact.
+const tenths = (seconds: number) => Math.round(seconds * 10) / 10;
+
 const clock = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
@@ -210,7 +215,6 @@ export function MusicPointsControls({
   start,
   end,
   now,
-  step,
   max,
   onStart,
   onEnd,
@@ -221,8 +225,6 @@ export function MusicPointsControls({
   start: number;
   end: number | null;
   now: number;
-  /** How far a step moves a point, in seconds. */
-  step: number;
   /** The recording's length, when it is known. */
   max?: number;
   onStart: (seconds: number) => void;
@@ -260,13 +262,13 @@ export function MusicPointsControls({
                 label={t("back", { step: size })}
                 variant="secondary"
                 isDisabled={start <= 0}
-                onClick={() => onStart(Math.max(0, start - step))}
+                onClick={() => onStart(tenths(Math.max(0, start - step)))}
               />
               <Button
                 label={t("forward", { step: size })}
                 variant="secondary"
                 isDisabled={end !== null && start + step >= end}
-                onClick={() => onStart(Math.min(last, start + step))}
+                onClick={() => onStart(tenths(Math.min(last, start + step)))}
               />
             </ButtonGroup>
             <Button
@@ -298,12 +300,12 @@ export function MusicPointsControls({
                     label={t("back", { step: size })}
                     variant="secondary"
                     isDisabled={end - step <= start}
-                    onClick={() => onEnd(end - step)}
+                    onClick={() => onEnd(tenths(end - step))}
                   />
                   <Button
                     label={t("forward", { step: size })}
                     variant="secondary"
-                    onClick={() => onEnd(Math.min(last, end + step))}
+                    onClick={() => onEnd(tenths(Math.min(last, end + step)))}
                   />
                 </ButtonGroup>
                 <Button

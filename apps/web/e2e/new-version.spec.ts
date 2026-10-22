@@ -147,8 +147,8 @@ test("R-03.11 T-2828 a YouTube link opens the video in a player across the botto
   await expect(points).toHaveAccessibleName("Start and end · from 0:00");
   await points.click();
   const start = dock.getByRole("group", { name: "Start", exact: true });
-  await start.getByRole("button", { name: "+0.5 s" }).click();
-  await start.getByRole("button", { name: "+0.5 s" }).click();
+  // Five steps of 0.2 s: a second.
+  for (let step = 0; step < 5; step++) await start.getByRole("button", { name: "+0.2 s" }).click();
   await expect(points).toHaveAccessibleName("Start and end · from 0:01");
   // T-2821 the video's volume is set from the dock, not only from YouTube's own slider; since
   // T-2828 a vertical slider always in view.
@@ -177,8 +177,8 @@ test("R-03.11 T-2830 T-2831 the owner saves where the music starts and ends, and
   const points = dock.getByRole("button", { name: /^Start and end/ });
   await points.click();
   const start = dock.getByRole("group", { name: "Start", exact: true });
-  await start.getByRole("button", { name: "+0.5 s" }).click();
-  await start.getByRole("button", { name: "+0.5 s" }).click();
+  // Five steps of 0.2 s: a second.
+  for (let step = 0; step < 5; step++) await start.getByRole("button", { name: "+0.2 s" }).click();
   // T-2830 and where it ends: here, at the chorus.
   const end = dock.getByRole("group", { name: "End", exact: true });
   await expect(end).toContainText("Plays to the end");

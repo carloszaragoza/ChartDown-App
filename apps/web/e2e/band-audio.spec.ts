@@ -111,7 +111,7 @@ test("R-06.7 the MD adds the band's audio; its musicians hear it, nobody else", 
   await player.getByRole("button", { name: /^Start and end/ }).click();
   await player
     .getByRole("group", { name: "Start", exact: true })
-    .getByRole("button", { name: "+0.25 s" })
+    .getByRole("button", { name: "+0.2 s" })
     .click();
   await expect(player.getByRole("button", { name: "Save for the band" })).toHaveCount(0);
   await player.getByRole("button", { name: "Close the player" }).click();
