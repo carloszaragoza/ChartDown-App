@@ -183,7 +183,7 @@ export function ChartPreview({
     resume,
     chooseStart,
     startIn,
-  } = useMetronomeControls(chart, null);
+  } = useMetronomeControls(chart, null, isPhone ? "lg" : "md");
   // The open video or band recording, when it plays, moves the chart as the metronome does.
   const videoBar = usePlaybackBar(chart, isPlaying);
   const nowAt = (index: number) => nowIn(index) ?? barIn(videoBar, index);
@@ -213,10 +213,21 @@ export function ChartPreview({
       ?.querySelector('[aria-current="step"]')
       ?.scrollIntoView({ block: "center", behavior: still ? "auto" : "smooth" });
   }, [playingRow]);
+  // The song form and the metronome at the medium size, as the side navigation's items, so a
+  // page that is read is not stand mode's (owner's review, October 22, 2026, T-2833); a phone
+  // keeps stand mode's 40 px (R-03.9).
+  const reading = (node: ReactNode) =>
+    isPhone ? (
+      <Theme theme={chartdownStandTheme} mode="system">
+        {node}
+      </Theme>
+    ) : (
+      node
+    );
   const form = (
     <SongForm
       label={c("songForm")}
-      size="lg"
+      size={isPhone ? "lg" : "md"}
       isStrip={isPhone}
       items={formStripItems(chart, -1, () => false).map((item, index) => ({
         abbreviation: item.abbreviation,
@@ -238,8 +249,8 @@ export function ChartPreview({
     >
       <VStack gap={6}>
         {hasForm && (
-          // The song form stays pinned at the top while the chart scrolls, at stand mode's size,
-          // so any section is one tap away (Design Handoff 2.0, 1.5).
+          // The song form stays pinned at the top while the chart scrolls, so any section is one
+          // tap away (Design Handoff 2.0, 1.5).
           <div
             style={{
               position: "sticky",
@@ -250,41 +261,43 @@ export function ChartPreview({
               paddingBlock: "var(--spacing-2)",
             }}
           >
-            <Theme theme={chartdownStandTheme} mode="system">
-              {/* On a phone the metronome sits on its own line, under the strip (R-03.9). */}
-              {hasControlsInHeader ? (
-                form
-              ) : isPhone ? (
-                <VStack gap={2}>
-                  {form}
-                  <HStack gap={2} vAlign="center" hAlign="end">
+            {reading(
+              <>
+                {/* On a phone the metronome sits on its own line, under the strip (R-03.9). */}
+                {hasControlsInHeader ? (
+                  form
+                ) : isPhone ? (
+                  <VStack gap={2}>
+                    {form}
+                    <HStack gap={2} vAlign="center" hAlign="end">
+                      {!isPlaying && counterText}
+                      {control}
+                      {viewOptions}
+                    </HStack>
+                  </VStack>
+                ) : (
+                  <HStack gap={2} vAlign="center">
+                    <StackItem size="fill">{form}</StackItem>
                     {!isPlaying && counterText}
                     {control}
                     {viewOptions}
                   </HStack>
-                </VStack>
-              ) : (
-                <HStack gap={2} vAlign="center">
-                  <StackItem size="fill">{form}</StackItem>
-                  {!isPlaying && counterText}
-                  {control}
-                  {viewOptions}
-                </HStack>
-              )}
-              {tempoDialog}
-            </Theme>
+                )}
+                {tempoDialog}
+              </>,
+            )}
           </div>
         )}
         {hasForm &&
           slot &&
           createPortal(
-            <Theme theme={chartdownStandTheme} mode="system">
+            reading(
               <HStack gap={2} vAlign="center" wrap="wrap">
                 {!isPlaying && counterText}
                 {control}
                 {viewOptions}
-              </HStack>
-            </Theme>,
+              </HStack>,
+            ),
             slot,
           )}
         {hasForm && hasJump(chart) && (

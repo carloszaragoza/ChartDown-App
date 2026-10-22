@@ -243,7 +243,7 @@ export default async function SetSongPage({
               // Numbers / Letters, Beat marks and View as in one sheet beside the metronome, as on
               // the version page and in stand mode (T-2807).
               viewOptions={
-                <ViewOptions>
+                <ViewOptions phone={phone}>
                   <LinkChoice
                     phone={phone}
                     label={v("style")}
