@@ -4,6 +4,7 @@ import { DEFAULT_PREFERENCES, readPreferences, upcomingSections } from "./prefer
 describe("T-2805 stand mode's View choices kept on the device", () => {
   it("R-03.12 saved choices come back, and anything unknown falls back to its default", () => {
     expect(readPreferences({ comingUp: "1", motion: "bounce", size: "lg" })).toEqual({
+      layout: "sections",
       comingUp: "1",
       motion: "bounce",
       size: "lg",
@@ -28,5 +29,13 @@ describe("T-2805 stand mode's View choices kept on the device", () => {
     expect(upcomingSections(2, 6, 5, "1")).toEqual([5]);
     // The same section again.
     expect(upcomingSections(2, 3, 2, "2")).toEqual([2, 3]);
+  });
+});
+
+describe("T-2823 the whole song on one screen", () => {
+  it("R-03.12 stand mode shows one section at a time unless the device chose the whole song", () => {
+    expect(readPreferences(null).layout).toBe("sections");
+    expect(readPreferences({ layout: "song" }).layout).toBe("song");
+    expect(readPreferences({ layout: "poster" }).layout).toBe("sections");
   });
 });

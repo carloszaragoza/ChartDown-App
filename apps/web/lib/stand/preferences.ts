@@ -1,18 +1,22 @@
-// Stand mode's View choices that belong to the device, not the address (R-03.12, T-2805): how many
-// sections follow the current one, the motion and the number size. Storage can be missing or
+// Stand mode's View choices that belong to the device, not the address (R-03.12, T-2805): the
+// layout (T-2823), how many sections follow the current one, the motion and the number size. Storage can be missing or
 // blocked: the defaults are used then, and nothing is required.
 import type { StandMotion } from "./motion";
 
 export type ComingUp = "1" | "2" | "fill";
 export type NumberSize = "sm" | "md" | "lg";
+/** The stack of sections, one at the top at a time, or the whole song on one screen (T-2823). */
+export type StandLayout = "sections" | "song";
 
 export interface StandPreferences {
+  layout: StandLayout;
   comingUp: ComingUp;
   motion: StandMotion;
   size: NumberSize;
 }
 
 export const DEFAULT_PREFERENCES: StandPreferences = {
+  layout: "sections",
   comingUp: "fill",
   motion: "calm",
   size: "md",
@@ -26,6 +30,7 @@ export function readPreferences(saved: unknown): StandPreferences {
   const pick = <T extends string>(given: unknown, options: readonly T[], fallback: T): T =>
     options.includes(given as T) ? (given as T) : fallback;
   return {
+    layout: pick(value.layout, ["sections", "song"], DEFAULT_PREFERENCES.layout),
     comingUp: pick(value.comingUp, ["1", "2", "fill"], DEFAULT_PREFERENCES.comingUp),
     motion: pick(value.motion, ["calm", "bounce"], DEFAULT_PREFERENCES.motion),
     size: pick(value.size, ["sm", "md", "lg"], DEFAULT_PREFERENCES.size),
