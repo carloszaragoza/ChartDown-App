@@ -284,6 +284,7 @@ function AudioDock({
               label={v("sections")}
               goTo={(name) => v("goTo", { name })}
               wave={wave}
+              end={musicEnd}
             />
           )}
         </div>

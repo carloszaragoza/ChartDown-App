@@ -30,6 +30,8 @@ const SAME_IN_BOTH = new Set([
   "stand.noTempoShort",
   "stand.tempoShort",
   "video.player",
+  "video.back",
+  "video.forward",
   "home.title",
   "language.en",
   "language.es",

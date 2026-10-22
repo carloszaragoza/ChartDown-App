@@ -380,6 +380,7 @@ function VideoDock({
               label={t("sections")}
               goTo={(name) => t("goTo", { name })}
               wave={wave}
+              end={musicEnd}
             />
           </div>
         )}

@@ -1,16 +1,17 @@
 "use client";
 
 import { Button } from "@astryxdesign/core/Button";
-import { HStack } from "@astryxdesign/core/HStack";
+import { ButtonGroup } from "@astryxdesign/core/ButtonGroup";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Slider } from "@astryxdesign/core/Slider";
 import { Text } from "@astryxdesign/core/Text";
+import { ToggleButton } from "@astryxdesign/core/ToggleButton";
 import {
-  MinusIcon,
-  PlusIcon,
+  AdjustmentsHorizontalIcon,
+  FlagIcon,
   SpeakerWaveIcon,
   SpeakerXMarkIcon,
-  XMarkIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
@@ -67,11 +68,14 @@ export function SectionCells({
   label,
   goTo,
   wave = [],
+  end = null,
 }: {
   chart: Chart;
   sections: VideoSection[];
   /** Heights from 0 to 1 from the first section's start to the last one's end. */
   wave?: readonly number[];
+  /** Where the music ends, when it is set: what lies after it is dimmed (T-2831). */
+  end?: number | null;
   now: number;
   onSeek: (seconds: number) => void;
   label: string;
@@ -84,6 +88,13 @@ export function SectionCells({
   const heard = (now - first) / span;
   return (
     <div className="cd-player-cells" role="group" aria-label={label}>
+      {end !== null && end < first + span && (
+        <div
+          className="cd-player-cells__after"
+          aria-hidden="true"
+          style={{ insetInlineStart: `${(Math.max(end - first, 0) / span) * 100}%` }}
+        />
+      )}
       {wave.length > 0 && (
         <div className="cd-player-cells__wave" aria-hidden="true">
           {wave.map((height, index) => (
@@ -189,9 +200,11 @@ const clock = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
 /**
- * Where the music starts and ends (R-03.11, R-06.7, T-2830), in the player's top row: each moved
- * by a step, or set to where the player is; the end is optional, and Play to the end clears it.
- * The owner (or the band's MD) saves both together.
+ * Where the music starts and ends (R-03.11, R-06.7, T-2830, T-2831): a quiet button in the
+ * player's top row says both, and opens their controls under it. Each point is named and its time
+ * written; framed buttons move it by a step that says its size, and "Set to 3:55" puts it where
+ * the player is, naming that time; the end is optional, and Remove the end clears it. The owner
+ * (or the band's MD) saves both together.
  */
 export function MusicPointsControls({
   start,
@@ -208,7 +221,7 @@ export function MusicPointsControls({
   start: number;
   end: number | null;
   now: number;
-  /** How far Earlier and Later move a point, in seconds. */
+  /** How far a step moves a point, in seconds. */
   step: number;
   /** The recording's length, when it is known. */
   max?: number;
@@ -220,86 +233,103 @@ export function MusicPointsControls({
   onSave: () => void;
 }) {
   const t = useTranslations("video");
+  const [isOpen, setOpen] = useState(false);
   const last = max ?? Number.POSITIVE_INFINITY;
+  const here = Math.round(now * 100) / 100;
+  const size = String(step);
   return (
-    <HStack gap={3} vAlign="center" wrap="wrap">
-      <HStack gap={1} vAlign="center">
-        <Text type="supporting">{t("musicStarts", { time: clock(start) })}</Text>
-        <Button
-          label={t("earlier")}
-          variant="ghost"
-          size="sm"
-          icon={<Icon icon={MinusIcon} />}
-          isIconOnly
-          tooltip={t("earlier")}
-          onClick={() => onStart(Math.max(0, start - step))}
-        />
-        <Button
-          label={t("later")}
-          variant="ghost"
-          size="sm"
-          icon={<Icon icon={PlusIcon} />}
-          isIconOnly
-          tooltip={t("later")}
-          isDisabled={end !== null && start + step >= end}
-          onClick={() => onStart(Math.min(last, start + step))}
-        />
-        <Button
-          label={t("startHere")}
-          variant="ghost"
-          size="sm"
-          isDisabled={end !== null && now >= end}
-          onClick={() => onStart(Math.round(now * 100) / 100)}
-        />
-      </HStack>
-      <HStack gap={1} vAlign="center">
-        <Text type="supporting">
-          {end === null ? t("musicEndsOpen") : t("musicEnds", { time: clock(end) })}
-        </Text>
-        {end !== null && (
-          <>
+    <>
+      <ToggleButton
+        label={
+          end === null
+            ? t("pointsFrom", { start: clock(start) })
+            : t("points", { start: clock(start), end: clock(end) })
+        }
+        icon={<Icon icon={AdjustmentsHorizontalIcon} />}
+        size="sm"
+        isPressed={isOpen}
+        onPressedChange={setOpen}
+      />
+      {isOpen && (
+        <div className="cd-player__points">
+          <div className="cd-player__point" role="group" aria-label={t("start")}>
+            <Text type="label">{t("start")}</Text>
+            <span className="cd-player__time">{clock(start)}</span>
+            <ButtonGroup label={t("moveStart")}>
+              <Button
+                label={t("back", { step: size })}
+                variant="secondary"
+                isDisabled={start <= 0}
+                onClick={() => onStart(Math.max(0, start - step))}
+              />
+              <Button
+                label={t("forward", { step: size })}
+                variant="secondary"
+                isDisabled={end !== null && start + step >= end}
+                onClick={() => onStart(Math.min(last, start + step))}
+              />
+            </ButtonGroup>
             <Button
-              label={t("endSooner")}
-              variant="ghost"
-              size="sm"
-              icon={<Icon icon={MinusIcon} />}
-              isIconOnly
-              tooltip={t("endSooner")}
-              isDisabled={end - step <= start}
-              onClick={() => onEnd(end - step)}
+              label={t("setTo", { time: clock(here) })}
+              variant="secondary"
+              icon={<Icon icon={FlagIcon} />}
+              isDisabled={end !== null && here >= end}
+              onClick={() => onStart(here)}
             />
-            <Button
-              label={t("endFurther")}
-              variant="ghost"
-              size="sm"
-              icon={<Icon icon={PlusIcon} />}
-              isIconOnly
-              tooltip={t("endFurther")}
-              onClick={() => onEnd(Math.min(last, end + step))}
-            />
-          </>
-        )}
-        <Button
-          label={t("endHere")}
-          variant="ghost"
-          size="sm"
-          isDisabled={now <= start}
-          onClick={() => onEnd(Math.round(now * 100) / 100)}
-        />
-        {end !== null && (
-          <Button
-            label={t("clearEnd")}
-            variant="ghost"
-            size="sm"
-            icon={<Icon icon={XMarkIcon} />}
-            isIconOnly
-            tooltip={t("clearEnd")}
-            onClick={() => onEnd(null)}
-          />
-        )}
-      </HStack>
-      {saveLabel && <Button label={saveLabel} size="sm" isLoading={isSaving} onClick={onSave} />}
-    </HStack>
+          </div>
+          <div className="cd-player__point" role="group" aria-label={t("end")}>
+            <Text type="label">{t("end")}</Text>
+            {end === null ? (
+              <>
+                <Text type="supporting">{t("noEnd")}</Text>
+                <Button
+                  label={t("endAt", { time: clock(here) })}
+                  variant="secondary"
+                  icon={<Icon icon={FlagIcon} />}
+                  isDisabled={here <= start}
+                  onClick={() => onEnd(here)}
+                />
+              </>
+            ) : (
+              <>
+                <span className="cd-player__time">{clock(end)}</span>
+                <ButtonGroup label={t("moveEnd")}>
+                  <Button
+                    label={t("back", { step: size })}
+                    variant="secondary"
+                    isDisabled={end - step <= start}
+                    onClick={() => onEnd(end - step)}
+                  />
+                  <Button
+                    label={t("forward", { step: size })}
+                    variant="secondary"
+                    onClick={() => onEnd(Math.min(last, end + step))}
+                  />
+                </ButtonGroup>
+                <Button
+                  label={t("setTo", { time: clock(here) })}
+                  variant="secondary"
+                  icon={<Icon icon={FlagIcon} />}
+                  isDisabled={here <= start}
+                  onClick={() => onEnd(here)}
+                />
+                <Button
+                  label={t("removeEnd")}
+                  variant="ghost"
+                  icon={<Icon icon={TrashIcon} />}
+                  isIconOnly
+                  tooltip={t("removeEnd")}
+                  onClick={() => onEnd(null)}
+                />
+              </>
+            )}
+          </div>
+          {saveLabel && (
+            <Button label={saveLabel} variant="primary" isLoading={isSaving} onClick={onSave} />
+          )}
+        </div>
+      )}
+    </>
   );
 }
 

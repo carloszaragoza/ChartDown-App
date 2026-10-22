@@ -142,10 +142,14 @@ test("R-03.11 T-2828 a YouTube link opens the video in a player across the botto
     "true",
   );
   await expect(dock.getByText("Chorus", { exact: true })).toBeVisible();
-  await expect(dock).toContainText("Music starts at 0:00");
-  await dock.getByRole("button", { name: "Later" }).click();
-  await dock.getByRole("button", { name: "Later" }).click();
-  await expect(dock).toContainText("Music starts at 0:01");
+  // T-2831 where the music starts and ends, opened from the top row; each step says its size.
+  const points = dock.getByRole("button", { name: /^Start and end/ });
+  await expect(points).toHaveAccessibleName("Start and end · from 0:00");
+  await points.click();
+  const start = dock.getByRole("group", { name: "Start", exact: true });
+  await start.getByRole("button", { name: "+0.5 s" }).click();
+  await start.getByRole("button", { name: "+0.5 s" }).click();
+  await expect(points).toHaveAccessibleName("Start and end · from 0:01");
   // T-2821 the video's volume is set from the dock, not only from YouTube's own slider; since
   // T-2828 a vertical slider always in view.
   const volume = dock.getByRole("slider", { name: "Video volume" });
@@ -157,7 +161,7 @@ test("R-03.11 T-2828 a YouTube link opens the video in a player across the botto
   await expect(dock).toHaveCount(0);
 });
 
-test("R-03.11 T-2830 the owner saves where the music starts and ends, and they are there for the next reader", async ({
+test("R-03.11 T-2830 T-2831 the owner saves where the music starts and ends, and they are there for the next reader", async ({
   page,
 }) => {
   await signUpAndConfirm(page, unique("start"), "Stella Start");
@@ -170,16 +174,20 @@ test("R-03.11 T-2830 the owner saves where the music starts and ends, and they a
 
   await page.getByRole("button", { name: "Watch the video" }).click();
   const dock = page.getByRole("complementary", { name: "Video" });
-  await dock.getByRole("button", { name: "Later" }).click();
-  await dock.getByRole("button", { name: "Later" }).click();
+  const points = dock.getByRole("button", { name: /^Start and end/ });
+  await points.click();
+  const start = dock.getByRole("group", { name: "Start", exact: true });
+  await start.getByRole("button", { name: "+0.5 s" }).click();
+  await start.getByRole("button", { name: "+0.5 s" }).click();
   // T-2830 and where it ends: here, at the chorus.
-  await expect(dock).toContainText("No end set");
+  const end = dock.getByRole("group", { name: "End", exact: true });
+  await expect(end).toContainText("Plays to the end");
   await dock
     .getByRole("group", { name: "Sections" })
     .getByRole("button", { name: "Go to Chorus" })
     .click();
-  await dock.getByRole("button", { name: "Music ends here" }).click();
-  await expect(dock).toContainText(/Music ends at \d+:\d\d/);
+  await end.getByRole("button", { name: /^End at / }).click();
+  await expect(points).toHaveAccessibleName(/^Start and end · 0:01 – \d+:\d\d$/);
   await dock.getByRole("button", { name: "Save for everyone" }).click();
   await expect(dock.getByRole("button", { name: "Save for everyone" })).toHaveCount(0);
 
@@ -187,12 +195,11 @@ test("R-03.11 T-2830 the owner saves where the music starts and ends, and they a
   await signOut(page);
   await page.goto(address);
   await page.getByRole("button", { name: "Watch the video" }).click();
-  await expect(page.getByRole("complementary", { name: "Video" })).toContainText(
-    "Music starts at 0:01",
-  );
-  await expect(page.getByRole("complementary", { name: "Video" })).toContainText(
-    /Music ends at \d+:\d\d/,
-  );
+  await expect(
+    page
+      .getByRole("complementary", { name: "Video" })
+      .getByRole("button", { name: /^Start and end/ }),
+  ).toHaveAccessibleName(/^Start and end · 0:01 – \d+:\d\d$/);
   await expect(page.getByRole("button", { name: "Save for everyone" })).toHaveCount(0);
 });
 
