@@ -507,10 +507,11 @@
 }
 
 /* The player as a bar across the bottom (R-03.11, R-06.7, T-2828): from the side navigation's edge
-   (set from the page) to the screen's, the sections filling most of it, then the volume, then the
-   video or the recording's Play. Written video first and laid out from the end, so where the
-   sections don't fit beside them (a phone, an iPad held upright) the video and the volume stay on
-   top and the sections take the whole width under them. */
+   (set from the page) to the screen's; every control in one row along the top, and under it the
+   sections as tall as the video, the volume, then the video or the recording's Play. The body is
+   written video first and laid out from the end, so where the sections don't fit beside them (a
+   phone, an iPad held upright) the video and the volume stay on top and the sections take the
+   whole width under them. */
 .cd-player {
   position: fixed;
   z-index: 20;
@@ -518,12 +519,9 @@
   inset-block-end: 0;
   box-sizing: border-box;
   display: flex;
-  flex-direction: row-reverse;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: stretch;
-  gap: var(--spacing-3);
-  padding: var(--spacing-3) var(--spacing-4)
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4)
     calc(var(--spacing-3) + env(safe-area-inset-bottom, 0px));
   border-block-start: var(--border-width) solid var(--color-border-emphasized);
   background: var(--color-background-card);
@@ -534,14 +532,30 @@
   inset-inline-start: auto !important;
   inset-inline-end: var(--spacing-4);
   inset-block-end: calc(var(--spacing-4) + env(safe-area-inset-bottom, 0px));
+  inline-size: calc(356px + var(--spacing-12) + var(--spacing-4) * 2);
+  max-inline-size: calc(100vw - var(--spacing-4) * 2);
   border: var(--border-width) solid var(--color-border-emphasized);
   border-radius: var(--radius-container);
+}
+.cd-player__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-1) var(--spacing-3);
+}
+.cd-player__body {
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: var(--spacing-3);
 }
 .cd-player__main {
   display: flex;
   flex: 1 1 26rem;
   flex-direction: column;
-  justify-content: center;
   gap: var(--spacing-2);
   min-inline-size: 0;
 }
@@ -550,10 +564,9 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-2);
-  padding-block: var(--spacing-2);
   color: var(--color-text-secondary);
 }
-/* The slider takes the bar's height, whatever sets it: the cells or the video. */
+/* The slider takes the body's height, whatever sets it: the video or the cells. */
 .cd-player__volume > :first-child {
   flex: 1 1 0;
   min-block-size: 0;
@@ -563,26 +576,15 @@
   block-size: 100%;
   min-block-size: 0;
 }
-.cd-player__media {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1);
-  inline-size: 356px;
-  max-inline-size: 100%;
-}
 .cd-player__play {
   display: flex;
-  flex: 1;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-2);
-  min-inline-size: calc(var(--spacing-12) * 3);
-}
-.cd-player:has(.cd-player__play) .cd-player__media {
-  inline-size: auto;
+  min-inline-size: calc(var(--spacing-12) * 2);
 }
 .cd-video-dock__frame {
+  flex: none;
+  inline-size: 356px;
   overflow: hidden;
   border-radius: var(--radius-inner);
   aspect-ratio: 356 / 200;
@@ -598,15 +600,17 @@
    as it plays. */
 .cd-player-cells {
   display: flex;
+  flex: 1;
   gap: var(--border-width);
-  min-block-size: calc(var(--spacing-12) * 2);
+  min-block-size: calc(var(--spacing-12) * 3);
 }
 .cd-player-cells__cell {
   position: relative;
   display: flex;
   flex-basis: 0;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: var(--spacing-6);
   min-inline-size: 0;
   overflow: hidden;
   margin: 0;
@@ -638,7 +642,7 @@
 }
 .cd-player-cells__short {
   overflow: hidden;
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-semibold);
   line-height: 1;
   text-overflow: clip;
@@ -646,49 +650,68 @@
 }
 .cd-player-cells__played {
   position: absolute;
+  z-index: 2;
   inset-block-end: 0;
   inset-inline-start: 0;
-  block-size: calc(var(--border-width) * 3);
+  block-size: var(--spacing-1);
   background: var(--color-text-primary);
   pointer-events: none;
 }
-/* The band's recording as a thin waveform under the cells, the part already played in the ink. */
-.cd-player-wave {
+/* A waveform across the cells' lower part (T-2829): the band's recording, or for a video one drawn
+   from the chart; the part already heard in the ink color. Over the cells' color, under their
+   names. */
+.cd-player-cells {
+  position: relative;
+  isolation: isolate;
+}
+.cd-player-cells__wave {
+  position: absolute;
+  z-index: 1;
+  inset: auto 0 var(--spacing-2);
   display: flex;
   align-items: center;
   gap: 1px;
-  block-size: var(--spacing-6);
+  block-size: 38%;
+  pointer-events: none;
 }
-.cd-player-wave__bar {
+.cd-player-cells__wave > span {
   flex: 1;
   border-radius: 1px;
   background: var(--color-border-emphasized);
 }
-.cd-player-wave__bar[data-played] {
+.cd-player-cells__wave > span[data-played] {
   background: var(--color-text-secondary);
 }
-/* On a phone: a smaller video, and the cells with their song-form names only. */
+.cd-player-cells__name,
+.cd-player-cells__short {
+  position: relative;
+  z-index: 2;
+}
+
+/* On a phone: a smaller video, and shorter cells with their song-form names only. */
 @media (max-width: 47.99rem) {
   .cd-player:not([data-compact]) {
     padding-inline: var(--spacing-2);
+  }
+  .cd-player__body {
     gap: var(--spacing-2);
   }
   .cd-player__main {
     flex-basis: 0;
   }
   .cd-player:not([data-compact]) .cd-video-dock__frame {
+    inline-size: min(356px, 100%);
     max-block-size: 30dvh;
-    margin-inline: auto;
   }
   .cd-player-cells {
-    min-block-size: var(--spacing-12);
+    min-block-size: calc(var(--spacing-12) * 1.5);
   }
   .cd-player-cells__name {
     display: none;
   }
   .cd-player-cells__short {
     margin-block: auto;
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-2xl);
   }
 }
 

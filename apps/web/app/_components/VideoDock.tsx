@@ -3,7 +3,6 @@
 import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
-import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import {
   ArrowTopRightOnSquareIcon,
@@ -18,6 +17,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "reac
 import { createPortal } from "react-dom";
 import { videoClock } from "../../lib/video/clock";
 import { videoSections } from "../../lib/video/sections";
+import { chartWave } from "../../lib/video/wave";
 import { useDockRoom, useDockTarget } from "./DockRoom";
 import { PlayerVolume, SectionCells, usePlayerStart } from "./PlayerBar";
 import { startSeconds, videoId } from "../../lib/video/youtube";
@@ -85,6 +85,8 @@ const online = (onChange: () => void) => {
 // The smallest player YouTube allows (R-03.11).
 const WIDTH = 356;
 const HEIGHT = 200;
+// The waveform under the sections is drawn with this many bars.
+const WAVE_BARS = 160;
 
 /**
  * A version's YouTube link (R-03.11, T-2501): it opens the video in a mini player docked at the
@@ -208,6 +210,8 @@ function VideoDock({
     () => (chart ? videoSections(chart, musicStart) : null),
     [chart, musicStart],
   );
+  // The video's sound can't be read: its waveform is drawn from the chart (T-2829).
+  const wave = useMemo(() => (chart ? chartWave(chart, WAVE_BARS) : []), [chart]);
 
   useEffect(() => {
     let gone = false;
@@ -278,13 +282,56 @@ function VideoDock({
       data-compact={chart ? undefined : ""}
       aria-label={t("player")}
     >
-      <div className="cd-player__media">
+      {/* Every control in one row along the top (T-2828). */}
+      <div className="cd-player__controls">
+        {chart && sections && (
+          <HStack gap={1} vAlign="center" wrap="wrap">
+            <Text type="supporting">{t("musicStarts", { time: clock(musicStart) })}</Text>
+            <Button
+              label={t("earlier")}
+              variant="ghost"
+              size="sm"
+              icon={<Icon icon={MinusIcon} />}
+              isIconOnly
+              tooltip={t("earlier")}
+              onClick={() => setMusicStart((at) => Math.max(0, at - 0.5))}
+            />
+            <Button
+              label={t("later")}
+              variant="ghost"
+              size="sm"
+              icon={<Icon icon={PlusIcon} />}
+              isIconOnly
+              tooltip={t("later")}
+              onClick={() => setMusicStart((at) => at + 0.5)}
+            />
+            <Button
+              label={t("startHere")}
+              variant="ghost"
+              size="sm"
+              onClick={() => setMusicStart(Math.round(now * 10) / 10)}
+            />
+            {save && musicStart !== stored && (
+              <Button
+                label={t("saveStart")}
+                size="sm"
+                isLoading={saving === "saving"}
+                onClick={() => {
+                  setSaving("saving");
+                  void save(musicStart * 1000).then((done) => {
+                    setSaving(done ? "idle" : "failed");
+                    if (done) setStored(musicStart);
+                  });
+                }}
+              />
+            )}
+          </HStack>
+        )}
+        {chart && !sections && <Text type="supporting">{t("noTempo")}</Text>}
         <HStack gap={1} vAlign="center">
-          <StackItem size="fill">
-            <Text type="supporting">
-              {t("player")} · {clock(now)}
-            </Text>
-          </StackItem>
+          <Text type="supporting">
+            {t("player")} · {clock(now)}
+          </Text>
           <Button
             label={t("openYouTube")}
             href={url}
@@ -305,77 +352,31 @@ function VideoDock({
             onClick={onClose}
           />
         </HStack>
+      </div>
+      {saving === "failed" && (
+        <div role="alert">
+          <Text type="supporting">{t("saveFailed")}</Text>
+        </div>
+      )}
+      <div className="cd-player__body">
         <div className="cd-video-dock__frame">
           <div ref={frame} />
         </div>
+        <PlayerVolume label={t("volume")} value={volume} onChange={changeVolume} />
+        {chart && sections && (
+          <div className="cd-player__main">
+            <SectionCells
+              chart={chart}
+              sections={sections}
+              now={now}
+              onSeek={seek}
+              label={t("sections")}
+              goTo={(name) => t("goTo", { name })}
+              wave={wave}
+            />
+          </div>
+        )}
       </div>
-      <PlayerVolume label={t("volume")} value={volume} onChange={changeVolume} />
-      {chart && (
-        <div className="cd-player__main">
-          {sections ? (
-            <>
-              <SectionCells
-                chart={chart}
-                sections={sections}
-                now={now}
-                onSeek={seek}
-                label={t("sections")}
-                goTo={(name) => t("goTo", { name })}
-              />
-              <HStack gap={1} vAlign="center" wrap="wrap">
-                <StackItem size="fill">
-                  <Text type="supporting">{t("musicStarts", { time: clock(musicStart) })}</Text>
-                </StackItem>
-                <Button
-                  label={t("earlier")}
-                  variant="ghost"
-                  size="sm"
-                  icon={<Icon icon={MinusIcon} />}
-                  isIconOnly
-                  tooltip={t("earlier")}
-                  onClick={() => setMusicStart((at) => Math.max(0, at - 0.5))}
-                />
-                <Button
-                  label={t("later")}
-                  variant="ghost"
-                  size="sm"
-                  icon={<Icon icon={PlusIcon} />}
-                  isIconOnly
-                  tooltip={t("later")}
-                  onClick={() => setMusicStart((at) => at + 0.5)}
-                />
-                <Button
-                  label={t("startHere")}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setMusicStart(Math.round(now * 10) / 10)}
-                />
-                {save && musicStart !== stored && (
-                  <Button
-                    label={t("saveStart")}
-                    size="sm"
-                    isLoading={saving === "saving"}
-                    onClick={() => {
-                      setSaving("saving");
-                      void save(musicStart * 1000).then((done) => {
-                        setSaving(done ? "idle" : "failed");
-                        if (done) setStored(musicStart);
-                      });
-                    }}
-                  />
-                )}
-              </HStack>
-              {saving === "failed" && (
-                <div role="alert">
-                  <Text type="supporting">{t("saveFailed")}</Text>
-                </div>
-              )}
-            </>
-          ) : (
-            <Text type="supporting">{t("noTempo")}</Text>
-          )}
-        </div>
-      )}
     </aside>
   );
 }

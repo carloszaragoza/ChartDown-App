@@ -3,7 +3,6 @@
 import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
-import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import {
   MinusIcon,
@@ -21,6 +20,7 @@ import { storedAudio } from "../../lib/offline/store";
 import { createClient } from "../../lib/supabase/browser";
 import { videoClock } from "../../lib/video/clock";
 import { videoSections } from "../../lib/video/sections";
+import { windowWave } from "../../lib/video/wave";
 import { useDockRoom, useDockTarget } from "./DockRoom";
 import { PlayerVolume, SectionCells, useCanSetVolume, usePlayerStart } from "./PlayerBar";
 
@@ -119,15 +119,21 @@ function AudioDock({
   const [saving, setSaving] = useState<"idle" | "saving" | "failed">("idle");
   const duration = recording.durationMs / 1000;
   const sections = useMemo(() => videoSections(chart, musicStart), [chart, musicStart]);
-  const bars = useMemo(() => {
-    const peaks = recording.peaks;
-    if (peaks.length === 0) return [];
-    return Array.from({ length: BARS }, (_, bar) => {
-      const from = Math.floor((bar * peaks.length) / BARS);
-      const to = Math.max(from + 1, Math.floor(((bar + 1) * peaks.length) / BARS));
-      return Math.max(...peaks.slice(from, to)) / 1000;
-    });
-  }, [recording.peaks]);
+  // The recording's waveform across the sections, from the first one's start to the last one's
+  // end (T-2829).
+  const wave = useMemo(
+    () =>
+      sections
+        ? windowWave(
+            recording.peaks,
+            duration,
+            sections[0]?.start ?? 0,
+            sections.at(-1)?.end ?? duration,
+            BARS,
+          )
+        : [],
+    [recording.peaks, duration, sections],
+  );
 
   // The file kept with a downloaded set plays with no connection (T-2604); otherwise it comes
   // from the band's private storage, readable by its members only.
@@ -186,83 +192,11 @@ function AudioDock({
       style={{ insetInlineStart: playerStart }}
       aria-label={t("player")}
     >
-      <div className="cd-player__media">
-        <HStack gap={1} vAlign="center">
-          <StackItem size="fill">
-            <HStack gap={1} vAlign="center">
-              <Icon icon={MusicalNoteIcon} />
-              <Text type="supporting" maxLines={1}>
-                {recording.band}
-              </Text>
-            </HStack>
-          </StackItem>
-          <Button
-            label={t("close")}
-            variant="ghost"
-            size="sm"
-            icon={<Icon icon={XMarkIcon} />}
-            isIconOnly
-            tooltip={t("close")}
-            onClick={onClose}
-          />
-        </HStack>
-        <div className="cd-player__play">
-          <Button
-            label={playing ? t("pause") : t("playShort")}
-            variant="primary"
-            size="lg"
-            icon={<Icon icon={playing ? PauseIcon : PlayIcon} />}
-            isIconOnly
-            isDisabled={!source}
-            onClick={toggle}
-          />
-          <Text type="supporting">
-            {clock(now)} / {clock(duration)}
-          </Text>
-        </div>
-        {source && (
-          <audio
-            ref={audio}
-            src={source}
-            preload="auto"
-            onPlay={() => setPlaying(true)}
-            onPause={() => setPlaying(false)}
-            onEnded={() => setPlaying(false)}
-          />
-        )}
-      </div>
-      {canSetVolume && <PlayerVolume label={t("volume")} value={volume} onChange={changeVolume} />}
-      <div className="cd-player__main">
-        {failed && (
-          <div role="alert">
-            <Text type="supporting">{t("errors.unavailable")}</Text>
-          </div>
-        )}
-        {sections && (
-          <SectionCells
-            chart={chart}
-            sections={sections}
-            now={now}
-            onSeek={seek}
-            label={v("sections")}
-            goTo={(name) => v("goTo", { name })}
-          />
-        )}
-        <div className="cd-player-wave" aria-hidden="true">
-          {bars.map((height, index) => (
-            <span
-              key={index}
-              className="cd-player-wave__bar"
-              data-played={(index + 0.5) / BARS <= now / duration ? "" : undefined}
-              style={{ blockSize: `${Math.max(height, 0.04) * 100}%` }}
-            />
-          ))}
-        </div>
+      {/* Every control in one row along the top (T-2828). */}
+      <div className="cd-player__controls">
         {sections ? (
           <HStack gap={1} vAlign="center" wrap="wrap">
-            <StackItem size="fill">
-              <Text type="supporting">{v("musicStarts", { time: clock(musicStart) })}</Text>
-            </StackItem>
+            <Text type="supporting">{v("musicStarts", { time: clock(musicStart) })}</Text>
             <Button
               label={v("earlier")}
               variant="ghost"
@@ -305,12 +239,66 @@ function AudioDock({
         ) : (
           <Text type="supporting">{v("noTempo")}</Text>
         )}
-        {saving === "failed" && (
-          <div role="alert">
-            <Text type="supporting">{v("saveFailed")}</Text>
-          </div>
-        )}
+        <HStack gap={1} vAlign="center">
+          <Icon icon={MusicalNoteIcon} />
+          <Text type="supporting" maxLines={1}>
+            {recording.band} · {clock(now)} / {clock(duration)}
+          </Text>
+          <Button
+            label={t("close")}
+            variant="ghost"
+            size="sm"
+            icon={<Icon icon={XMarkIcon} />}
+            isIconOnly
+            tooltip={t("close")}
+            onClick={onClose}
+          />
+        </HStack>
       </div>
+      {(failed || saving === "failed") && (
+        <div role="alert">
+          <Text type="supporting">{failed ? t("errors.unavailable") : v("saveFailed")}</Text>
+        </div>
+      )}
+      <div className="cd-player__body">
+        <div className="cd-player__play">
+          <Button
+            label={playing ? t("pause") : t("playShort")}
+            variant="primary"
+            size="lg"
+            icon={<Icon icon={playing ? PauseIcon : PlayIcon} />}
+            isIconOnly
+            isDisabled={!source}
+            onClick={toggle}
+          />
+        </div>
+        {canSetVolume && (
+          <PlayerVolume label={t("volume")} value={volume} onChange={changeVolume} />
+        )}
+        <div className="cd-player__main">
+          {sections && (
+            <SectionCells
+              chart={chart}
+              sections={sections}
+              now={now}
+              onSeek={seek}
+              label={v("sections")}
+              goTo={(name) => v("goTo", { name })}
+              wave={wave}
+            />
+          )}
+        </div>
+      </div>
+      {source && (
+        <audio
+          ref={audio}
+          src={source}
+          preload="auto"
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          onEnded={() => setPlaying(false)}
+        />
+      )}
     </aside>
   );
 }

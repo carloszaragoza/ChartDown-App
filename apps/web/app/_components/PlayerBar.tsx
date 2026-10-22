@@ -39,7 +39,8 @@ export function usePlayerStart(dock: RefObject<HTMLElement | null>): number {
  * The song's sections in the order the chart plays them, as tall cells as wide as each lasts
  * (T-2828): the section's full name small at the top and its song-form name large under it (V1,
  * then V1² the second time); the one playing in the selection color, with a line that fills as it
- * plays. Choosing one takes the player there.
+ * plays. Choosing one takes the player there. A waveform lies across their lower part (T-2829): the
+ * recording's, or for a video one drawn from the chart.
  */
 export function SectionCells({
   chart,
@@ -48,9 +49,12 @@ export function SectionCells({
   onSeek,
   label,
   goTo,
+  wave = [],
 }: {
   chart: Chart;
   sections: VideoSection[];
+  /** Heights from 0 to 1 from the first section's start to the last one's end. */
+  wave?: readonly number[];
   now: number;
   onSeek: (seconds: number) => void;
   label: string;
@@ -58,8 +62,22 @@ export function SectionCells({
 }) {
   const playing = sectionAt(sections, now);
   const names = sectionLabels(chart, sections);
+  const first = sections[0]?.start ?? 0;
+  const span = Math.max((sections.at(-1)?.end ?? first) - first, 0.001);
+  const heard = (now - first) / span;
   return (
     <div className="cd-player-cells" role="group" aria-label={label}>
+      {wave.length > 0 && (
+        <div className="cd-player-cells__wave" aria-hidden="true">
+          {wave.map((height, index) => (
+            <span
+              key={index}
+              data-played={(index + 0.5) / wave.length <= heard ? "" : undefined}
+              style={{ blockSize: `${Math.max(height, 0.04) * 100}%` }}
+            />
+          ))}
+        </div>
+      )}
       {sections.map((section, index) => {
         const { abbreviation = "", time = 1, of = 1 } = names[index] ?? {};
         const isPlaying = index === playing && now >= section.start;
