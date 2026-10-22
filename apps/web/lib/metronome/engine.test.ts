@@ -1,6 +1,6 @@
 import { parse } from "chartdown";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { clicks, continueWith, Metronome, sectionEnd, type Click } from "./engine";
+import { clicks, continueWith, Metronome, sectionEnd, START_DELAY, type Click } from "./engine";
 import { timeline } from "./timeline";
 
 // A 4-minute song: 76 bars of 4/4 at 76 bpm is exactly 240 seconds.
@@ -208,5 +208,22 @@ describe("T-2817 the metronome in 6/8 and 12/8", () => {
     expect(marks.join("")).toBe("1..g..1..g..");
     const four = clicks(timeline(parse("---\ntempo: 60\n---\n## A\n1\n")));
     expect(four.some((click) => click.group)).toBe(false);
+  });
+});
+
+describe("T-2822 Play starts at once", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it("R-11.12 the first click sounds 30 ms after Play, handed over at once", () => {
+    const clock = fakeClock();
+    clock.advance(5);
+    const sounded: number[] = [];
+    const list = clicks(timeline(parse("---\ntempo: 60\n---\n## A\n1\n")));
+    const metronome = new Metronome(list, clock, (_, at) => sounded.push(at));
+    metronome.start();
+    expect(sounded[0]).toBeCloseTo(5 + START_DELAY);
+    expect(START_DELAY).toBeLessThanOrEqual(0.03);
+    metronome.stop();
   });
 });

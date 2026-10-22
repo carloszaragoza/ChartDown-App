@@ -27,6 +27,9 @@ export interface MetronomePosition {
 /** How long Play waits at most for the audio clock to wake before counting anyway. */
 const WAKE_WAIT_MS = 500;
 
+/** How long the hum keeps the speakers awake after Stop, so playing again is heard at once. */
+const HUM_AFTER_STOP_MS = 30_000;
+
 export function useMetronome(chart: Chart) {
   const bars = useMemo(() => timeline(chart), [chart]);
   const needsTempo = bars.some((bar) => bar.tempo === undefined);
@@ -58,11 +61,20 @@ export function useMetronome(chart: Chart) {
   const [queued, setQueued] = useState<number | null>(null);
   const queuedAt = useRef(-1);
 
+  // The hum goes on a while after Stop (T-2822), unless the click is off; Play again keeps it.
+  const humTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const endHum = useCallback(() => {
+    clearTimeout(humTimer.current);
+    humming.current?.();
+    humming.current = null;
+  }, []);
   const stop = useCallback(() => {
     awake.current?.();
     awake.current = null;
-    humming.current?.();
-    humming.current = null;
+    clearTimeout(humTimer.current);
+    if (heard.current.click && humming.current)
+      humTimer.current = setTimeout(endHum, HUM_AFTER_STOP_MS);
+    else endHum();
     engine.current?.stop();
     engine.current = null;
     cancelAnimationFrame(frame.current);
@@ -71,6 +83,22 @@ export function useMetronome(chart: Chart) {
     setWaiting(false);
     setQueued(null);
     queuedAt.current = -1;
+  }, [endHum]);
+
+  // The audio wakes at the person's first touch or key on the page (T-2822), silently, so Play
+  // does not wait for it: a browser lets sound start only from a gesture, and waking takes a moment.
+  useEffect(() => {
+    const wake = () => {
+      respectSilentMode();
+      const audio = (context.current ??= new AudioContext());
+      if (audio.state !== "running") void audio.resume().catch(() => {});
+    };
+    document.addEventListener("pointerdown", wake, { capture: true, once: true });
+    document.addEventListener("keydown", wake, { capture: true, once: true });
+    return () => {
+      document.removeEventListener("pointerdown", wake, { capture: true });
+      document.removeEventListener("keydown", wake, { capture: true });
+    };
   }, []);
 
   const play = useCallback(
@@ -85,7 +113,8 @@ export function useMetronome(chart: Chart) {
       // Asked for inside the tap, as Safari requires; the count waits for it below.
       const waking = audio.state === "running" ? null : audio.resume();
       // On from Play, so the speakers are already awake for the first click.
-      if (heard.current.click && heard.current.keepAwake)
+      clearTimeout(humTimer.current);
+      if (heard.current.click && heard.current.keepAwake && !humming.current)
         humming.current = keepSpeakersAwake(audio);
       const list = clicks(bars, { from, countIn: heard.current.countIn, ...options });
       const metronome = new Metronome(list, audioClock(audio), (click, at) => {
@@ -138,12 +167,12 @@ export function useMetronome(chart: Chart) {
   useEffect(
     () => () => {
       awake.current?.();
-      humming.current?.();
+      endHum();
       engine.current?.stop();
       cancelAnimationFrame(frame.current);
       void context.current?.close();
     },
-    [],
+    [endHum],
   );
 
   // The hum is only for a click that sounds: turning the click or Keep speakers awake on or off
@@ -151,13 +180,9 @@ export function useMetronome(chart: Chart) {
   const wantsHum = sound.click && sound.keepAwake;
   useEffect(() => {
     const audio = context.current;
-    if (!isPlaying || !audio) return;
-    if (wantsHum && !humming.current) humming.current = keepSpeakersAwake(audio);
-    if (!wantsHum && humming.current) {
-      humming.current();
-      humming.current = null;
-    }
-  }, [isPlaying, wantsHum]);
+    if (!wantsHum) return endHum();
+    if (isPlaying && audio && !humming.current) humming.current = keepSpeakersAwake(audio);
+  }, [isPlaying, wantsHum, endHum]);
 
   /** The first bar of a section in the play order, to start there. */
   const firstBarOf = useCallback(

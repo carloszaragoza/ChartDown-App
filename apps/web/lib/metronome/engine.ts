@@ -144,6 +144,12 @@ export function audioClock(context: Pick<AudioContext, "currentTime">): Clock {
 
 /** How far ahead clicks are handed to the audio clock, and how often the queue is filled. */
 export const LOOKAHEAD = 0.1;
+/**
+ * How soon after Play (or the tap after a fermata) the first click sounds (T-2822): a moment, so
+ * it is never late, short enough to feel instant. The clicks after it are still handed over
+ * LOOKAHEAD ahead.
+ */
+export const START_DELAY = 0.03;
 export const FILL_EVERY_MS = 25;
 
 /**
@@ -187,7 +193,7 @@ export class Metronome {
     this.stop();
     this.next = 0;
     this.waiting = false;
-    this.startedAt = this.clock.now() + LOOKAHEAD;
+    this.startedAt = this.clock.now() + START_DELAY;
     this.fill();
     this.timer = setInterval(() => this.fill(), FILL_EVERY_MS);
   }
@@ -222,7 +228,7 @@ export class Metronome {
     if (!this.waiting) return;
     this.waiting = false;
     const next = this.list[this.next];
-    if (next) this.startedAt = this.clock.now() + LOOKAHEAD - next.time;
+    if (next) this.startedAt = this.clock.now() + START_DELAY - next.time;
     this.fill();
   }
 
