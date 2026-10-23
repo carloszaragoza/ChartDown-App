@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../lib/auth/enabled";
 import { createClient, readUser } from "../../../../lib/supabase/server";
 import { loadVersion } from "../load";
+import { loadRecordings } from "../recordings";
 import { Editor } from "./Editor";
 import { guessPhone } from "../../../../lib/shell/guessPhone";
 
@@ -29,6 +30,8 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
     .maybeSingle();
   if (!revision) notFound();
   const sources = await getTranslations("version.source");
+  // The bands' recordings, to write along with (T-2834).
+  const { recordings } = await loadRecordings(supabase, version.id, auth.user.id);
 
   return (
     <Editor
@@ -51,6 +54,7 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
         videoStart: version.videoStart,
         videoEnd: version.videoEnd,
       }}
+      recordings={recordings}
     />
   );
 }
