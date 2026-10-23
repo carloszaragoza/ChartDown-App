@@ -498,7 +498,18 @@
 }
 /* The page's job is the chart: the text fills the screen's height, below the page's header. */
 .cd-lines--tall textarea {
-  block-size: max(calc(100dvh - var(--spacing-12) * 2), 18rem);
+  /* The screen's height less the page's gutters, the label and the warnings line, so the pinned
+     text fits whole beside the chart (T-2837). */
+  block-size: max(calc(100dvh - var(--spacing-12) * 2.75 - var(--cd-dock-room, 0px)), 18rem);
+}
+/* The chart's text beside its preview: pinned in view while the page follows the chart as it
+   plays, so it can be written at any moment (T-2837). */
+.cd-write-text {
+  position: sticky;
+  inset-block-start: var(--spacing-4);
+  flex: none;
+  align-self: flex-start;
+  min-inline-size: 0;
 }
 .cd-lines textarea {
   white-space: pre;

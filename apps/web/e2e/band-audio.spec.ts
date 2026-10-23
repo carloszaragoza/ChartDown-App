@@ -107,6 +107,11 @@ test("R-06.7 the MD adds the band's audio; its musicians hear it, nobody else", 
     "true",
   );
   await expect(page.locator('#section-2 [aria-current="step"]')).toHaveCount(1);
+  // T-2836: a bar tapped on the chart takes the recording there.
+  await page.locator('#section-1 .cd-chart__bar[data-bar="2"]').click();
+  await expect(
+    page.locator('#section-1 .cd-chart__bar[data-bar="2"][aria-current="step"]'),
+  ).toHaveCount(1);
   // A musician moves where the music starts for himself but can't save it for the band.
   await player.getByRole("button", { name: /^Start and end/ }).click();
   await player
@@ -245,4 +250,9 @@ test("R-06.7 T-2834 the chart editor plays the band's audio, and its preview fol
     .click();
   const preview = page.getByRole("region", { name: "Preview" });
   await expect(preview.locator('#section-2 [aria-current="step"]')).toHaveCount(1);
+  // T-2836: a bar tapped in the preview takes the recording there, as on the version page.
+  await preview.locator('#section-1 .cd-chart__bar[data-bar="2"]').click();
+  await expect(
+    preview.locator('#section-1 .cd-chart__bar[data-bar="2"][aria-current="step"]'),
+  ).toHaveCount(1);
 });

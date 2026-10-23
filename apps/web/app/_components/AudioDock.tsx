@@ -11,8 +11,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { storedAudio } from "../../lib/offline/store";
 import { createClient } from "../../lib/supabase/browser";
-import { videoClock } from "../../lib/video/clock";
-import { videoSections } from "../../lib/video/sections";
+import { barSeek, videoClock } from "../../lib/video/clock";
+import { barStart, videoSections } from "../../lib/video/sections";
 import { shapedWave, windowWave } from "../../lib/video/wave";
 import { useDockRoom, useDockTarget } from "./DockRoom";
 import {
@@ -190,6 +190,19 @@ function AudioDock({
     return () => window.clearInterval(timer);
   }, [musicStart, keepWithin]);
   useEffect(() => () => videoClock.set(null), []);
+  // A bar tapped on the chart: the recording moves to where it starts (T-2836).
+  useEffect(
+    () =>
+      barSeek.subscribe(({ section, number }) => {
+        const at = barStart(chart, section, number);
+        const element = audio.current;
+        if (at === null || !element) return;
+        const to = Math.min(Math.max(0, musicStart + at), duration);
+        element.currentTime = to;
+        setNow(to);
+      }),
+    [chart, musicStart, duration],
+  );
 
   const seek = (seconds: number) => {
     const element = audio.current;

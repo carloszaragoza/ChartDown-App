@@ -197,3 +197,31 @@ test("R-03.1 the separator between the text and the chart gives either more widt
     .poll(async () => Math.round((await text.boundingBox())?.width ?? 0))
     .toBe(Math.round(widened));
 });
+
+test("R-03.1 T-2837 the chart's text stays in view while the page scrolls down the preview", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const title = `Long Shore ${Date.now()}`;
+  await signUpAndConfirm(page, unique("sticky"), "Sol Sticky");
+  await page.getByRole("main").getByRole("link", { name: "New version" }).click();
+  await page.getByLabel("Find the song by title").fill(title);
+  await page.getByRole("button", { name: "Search" }).click();
+  await page.getByRole("link", { name: "Create a new song" }).click();
+  const sections = Array.from(
+    { length: 12 },
+    (_, index) => `## Part ${index + 1}\n1 | 4 | 5 | 1\n4 | 5 | 1 | 1\n`,
+  );
+  await page.getByLabel("Chart (ChartDown)").fill(sections.join("\n"));
+  await page.getByLabel("Studio recording").check();
+  await page.getByRole("button", { name: "Publish version" }).click();
+  await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
+  await page.getByRole("main").getByRole("link", { name: "Edit", exact: true }).click();
+
+  const preview = page.getByRole("region", { name: "Preview" });
+  await preview.getByRole("heading", { name: "Part 12" }).scrollIntoViewIfNeeded();
+  await expect(preview.getByRole("heading", { name: "Part 12" })).toBeInViewport();
+  // The text is still on screen, whole, beside the end of the chart.
+  const text = page.getByLabel("Chart (ChartDown)");
+  await expect(text).toBeInViewport({ ratio: 0.9 });
+});

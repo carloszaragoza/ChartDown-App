@@ -34,3 +34,27 @@ export const videoClock = {
     };
   },
 };
+
+/** A bar of the chart, by its section and its number there, as the page draws it. */
+export interface ChartBar {
+  section: number;
+  number: number;
+}
+
+const seekListeners = new Set<(bar: ChartBar) => void>();
+
+/**
+ * A bar tapped on the chart while a player is open (T-2836): the open player moves to where that
+ * bar starts in it, so Play starts there, or goes on from there when it plays.
+ */
+export const barSeek = {
+  request(bar: ChartBar) {
+    for (const listener of seekListeners) listener(bar);
+  },
+  subscribe(listener: (bar: ChartBar) => void) {
+    seekListeners.add(listener);
+    return () => {
+      seekListeners.delete(listener);
+    };
+  },
+};

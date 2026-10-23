@@ -30,6 +30,7 @@ import {
 import { Theme } from "@astryxdesign/core";
 import { chartdownStandTheme } from "../../theme/chartdown-stand";
 import { usePhone } from "../../lib/shell/phone";
+import { barSeek, videoClock } from "../../lib/video/clock";
 import { useMetronomeControls } from "./MetronomeControls";
 import { SongForm } from "./SongForm";
 import { useTranslations } from "next-intl";
@@ -40,6 +41,7 @@ import { barIn, usePlaybackBar } from "./usePlaybackBar";
 import { DockRoom, useDockRoomSize } from "./DockRoom";
 import { useChartLabels } from "./chartLabels";
 import { hasJump, playRuns } from "../../lib/chart/playRuns";
+import { drawnRows } from "../../lib/chart/copies";
 
 export interface ChartSectionProps {
   section: Section;
@@ -101,7 +103,7 @@ export function ChartSection({
           {after}
         </HStack>
         <MDNotes notes={notes ?? section.notes} instrumentName={labels.bar.instrument} />
-        {section.rows.map((row, index) => (
+        {drawnRows(section).map((row, index) => (
           <BarRow
             key={index}
             row={row}
@@ -187,14 +189,18 @@ export function ChartPreview({
   // The open video or band recording, when it plays, moves the chart as the metronome does.
   const videoBar = usePlaybackBar(chart, isPlaying);
   const nowAt = (index: number) => nowIn(index) ?? barIn(videoBar, index);
-  // A tap on the chart: on after a fermata (R-11.6), or, stopped, the bar to start on (R-11.2).
+  // A tap on the chart: on after a fermata (R-11.6), or, stopped, the bar to start on (R-11.2);
+  // with a player open, the player moves there too, so its Play starts on that bar (T-2836),
+  // also in the chart editor's preview, which has no metronome of its own.
   const onTap = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!hasForm) return;
+    if (!hasForm && !videoClock.get()) return;
     if (isWaiting) return resume();
     const bar = (event.target as HTMLElement).closest<HTMLElement>(".cd-chart__bar");
     const section = bar?.closest("section[id^='section-']")?.id.replace("section-", "");
     if (isPlaying || !bar || !section) return;
     chooseStart(Number(section) - 1, Number(bar.dataset.bar));
+    if (videoClock.get())
+      barSeek.request({ section: Number(section) - 1, number: Number(bar.dataset.bar) });
   };
   const root = useRef<HTMLDivElement>(null);
   const slot = useChartControlsSlot(hasControlsInHeader);
