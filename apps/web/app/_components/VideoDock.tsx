@@ -11,7 +11,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "reac
 import { createPortal } from "react-dom";
 import { videoClock } from "../../lib/video/clock";
 import { videoSections } from "../../lib/video/sections";
-import { chartWave } from "../../lib/video/wave";
+import { chartWave, shapedWave } from "../../lib/video/wave";
 import { useDockRoom, useDockTarget } from "./DockRoom";
 import {
   MusicPointsControls,
@@ -88,7 +88,7 @@ const online = (onChange: () => void) => {
 const WIDTH = 356;
 const HEIGHT = 200;
 // The waveform under the sections is drawn with this many bars.
-const WAVE_BARS = 160;
+const WAVE_BARS = 240;
 
 /**
  * A version's YouTube link (R-03.11, T-2501): it opens the video in a mini player docked at the
@@ -227,7 +227,7 @@ function VideoDock({
     [chart, musicStart],
   );
   // The video's sound can't be read: its waveform is drawn from the chart (T-2829).
-  const wave = useMemo(() => (chart ? chartWave(chart, WAVE_BARS) : []), [chart]);
+  const wave = useMemo(() => (chart ? shapedWave(chartWave(chart, WAVE_BARS)) : []), [chart]);
 
   useEffect(() => {
     let gone = false;
