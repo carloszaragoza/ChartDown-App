@@ -10,8 +10,9 @@ import { StackItem } from "@astryxdesign/core/Stack";
 import { VStack } from "@astryxdesign/core/VStack";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { usePhone } from "../../lib/shell/phone";
+import { useDockRoomSize } from "./DockRoom";
 import { PageLayout } from "./PageLayout";
 
 /**
@@ -72,11 +73,14 @@ const SPLIT_KEY = "chartdown:write-split";
 
 /**
  * The chart's text and the drawn chart side by side, with a separator to drag; each keeps at
- * least a quarter of the row. On a phone, one above the other.
+ * least a quarter of the row. The text stays in view, as tall as the screen above an open player,
+ * while the page follows the chart as it plays (owner's request, October 23, 2026, T-2837); its
+ * own scroll never moves the chart. On a phone, one above the other.
  */
 function Split({ phone, text, preview }: { phone: boolean; text: ReactNode; preview: ReactNode }) {
   const t = useTranslations("editor");
   const isPhone = usePhone(phone);
+  const room = useDockRoomSize();
   const row = useRef<HTMLDivElement>(null);
   const textWidth = useResizable({
     containerRef: row,
@@ -115,7 +119,17 @@ function Split({ phone, text, preview }: { phone: boolean; text: ReactNode; prev
     );
   return (
     <HStack ref={row} gap={2} vAlign="stretch">
-      <div style={{ flex: "none", inlineSize: textWidth.size, minInlineSize: 0 }}>{text}</div>
+      <div
+        className="cd-write-text"
+        style={
+          {
+            inlineSize: textWidth.size,
+            "--cd-dock-room": `${room}px`,
+          } as CSSProperties
+        }
+      >
+        {text}
+      </div>
       {/* Stretched to the row's height, so the handle can be grabbed all along it. */}
       <div
         style={{ display: "flex", flex: "none" }}
