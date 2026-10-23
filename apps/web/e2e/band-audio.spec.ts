@@ -201,3 +201,43 @@ test("R-06.7 a downloaded set keeps its songs' recordings: stand mode plays them
   await expect(player).not.toContainText("can't be loaded");
   await context.setOffline(false);
 });
+
+test("R-06.7 T-2834 the chart editor plays the band's audio, and its preview follows it", async ({
+  page,
+}) => {
+  test.slow();
+  const title = `Salt Road ${Date.now()}`;
+  await signUpAndConfirm(page, unique("audioeditor"), "Eda Editor");
+  await page.getByRole("main").getByRole("link", { name: "New version" }).click();
+  await page.getByLabel("Find the song by title").fill(title);
+  await page.getByRole("button", { name: "Search" }).click();
+  await page.getByRole("link", { name: "Create a new song" }).click();
+  await page
+    .getByLabel("Chart (ChartDown)")
+    .fill("---\ntempo: 120\n---\n## Verse\n1 | 4\n## Chorus\n4 | 1\n");
+  await page.getByLabel("Studio recording").check();
+  await page.getByRole("button", { name: "Publish version" }).click();
+  await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
+
+  // Her own recording, in her personal space.
+  await moreAction(page, "Add the band's audio");
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toContainText("For Just me");
+  await dialog.locator("input[type=file]").setInputFiles(TONE);
+  await dialog.getByText("The band has the right to use this recording.").click();
+  await dialog.getByRole("button", { name: "Upload" }).click();
+  await expect(page.getByText("Just me's recording · 0:08")).toBeVisible();
+
+  await page.getByRole("main").getByRole("link", { name: "Edit", exact: true }).click();
+  await page.getByRole("button", { name: "Play Just me's recording" }).click();
+  const player = page.getByRole("complementary", { name: "Band audio" });
+  await expect(
+    player.getByRole("group", { name: "Sections" }).locator(".cd-player-cells__short"),
+  ).toHaveText(["V", "C"]);
+  await player
+    .getByRole("group", { name: "Sections" })
+    .getByRole("button", { name: "Go to Chorus" })
+    .click();
+  const preview = page.getByRole("region", { name: "Preview" });
+  await expect(preview.locator('#section-2 [aria-current="step"]')).toHaveCount(1);
+});

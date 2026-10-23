@@ -29,6 +29,7 @@ import { videoId } from "../../../../lib/video/youtube";
 import { saveVideoPoints } from "../actions";
 import { CancelButton, WriteLayout } from "../../../_components/WriteLayout";
 import { VideoLink } from "../../../_components/VideoDock";
+import { BandAudio, type BandRecording } from "../BandAudio";
 import { splitTitle, withTitle } from "../../../../lib/versions/title";
 
 export interface EditorProps {
@@ -57,6 +58,8 @@ export interface EditorProps {
     videoStart?: number | null;
     videoEnd?: number | null;
   };
+  /** The bands' recordings of this version, to write along with as with the video (T-2834). */
+  recordings?: BandRecording[];
 }
 
 /**
@@ -78,6 +81,7 @@ export function Editor({
   revisionNumber,
   savedAt,
   details,
+  recordings = [],
 }: EditorProps) {
   const t = useTranslations("editor");
   const v = useTranslations("version");
@@ -248,6 +252,13 @@ export function Editor({
                 />
               </StackItem>
             </HStack>
+            {recordings.length > 0 && (
+              // The band's audio plays here as on the version page, in the bar across the bottom,
+              // and the preview follows it (T-2834); adding one stays in the version's "…" menu.
+              <GridSpan columns="full">
+                <BandAudio versionId={versionId} recordings={recordings} bands={[]} chart={chart} />
+              </GridSpan>
+            )}
             <GridSpan columns="full">
               <RadioList
                 label={n("source")}
