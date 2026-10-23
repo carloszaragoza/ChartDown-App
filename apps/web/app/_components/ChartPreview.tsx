@@ -30,6 +30,7 @@ import {
 import { Theme } from "@astryxdesign/core";
 import { chartdownStandTheme } from "../../theme/chartdown-stand";
 import { usePhone } from "../../lib/shell/phone";
+import { barSeek, videoClock } from "../../lib/video/clock";
 import { useMetronomeControls } from "./MetronomeControls";
 import { SongForm } from "./SongForm";
 import { useTranslations } from "next-intl";
@@ -187,7 +188,8 @@ export function ChartPreview({
   // The open video or band recording, when it plays, moves the chart as the metronome does.
   const videoBar = usePlaybackBar(chart, isPlaying);
   const nowAt = (index: number) => nowIn(index) ?? barIn(videoBar, index);
-  // A tap on the chart: on after a fermata (R-11.6), or, stopped, the bar to start on (R-11.2).
+  // A tap on the chart: on after a fermata (R-11.6), or, stopped, the bar to start on (R-11.2);
+  // with a player open, the player moves there too, so its Play starts on that bar (T-2836).
   const onTap = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!hasForm) return;
     if (isWaiting) return resume();
@@ -195,6 +197,8 @@ export function ChartPreview({
     const section = bar?.closest("section[id^='section-']")?.id.replace("section-", "");
     if (isPlaying || !bar || !section) return;
     chooseStart(Number(section) - 1, Number(bar.dataset.bar));
+    if (videoClock.get())
+      barSeek.request({ section: Number(section) - 1, number: Number(bar.dataset.bar) });
   };
   const root = useRef<HTMLDivElement>(null);
   const slot = useChartControlsSlot(hasControlsInHeader);

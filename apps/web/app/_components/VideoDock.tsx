@@ -9,8 +9,8 @@ import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { videoClock } from "../../lib/video/clock";
-import { videoSections } from "../../lib/video/sections";
+import { barSeek, videoClock } from "../../lib/video/clock";
+import { barStart, videoSections } from "../../lib/video/sections";
 import { chartWave } from "../../lib/video/wave";
 import { useDockRoom, useDockTarget } from "./DockRoom";
 import {
@@ -286,6 +286,20 @@ function VideoDock({
       player.current = null;
     };
   }, [id, start]);
+
+  // A bar tapped on the chart: the video moves to where it starts (T-2836).
+  useEffect(
+    () =>
+      barSeek.subscribe(({ section, number }) => {
+        const at = chart ? barStart(chart, section, number) : null;
+        if (at === null) return;
+        const to = Math.max(0, startRef.current + at);
+        seeking.current = { to, at: performance.now() };
+        player.current?.seekTo?.(to, true);
+        setNow(to);
+      }),
+    [chart],
+  );
 
   const seek = (seconds: number) => {
     const to = Math.max(0, seconds);
