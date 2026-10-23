@@ -21,4 +21,17 @@ describe("T-2815 the screen's top edge", () => {
     expect(surfaceColor(box("rgba(0, 0, 0, 0)"), (surface) => surface.color)).toBeNull();
     expect(surfaceColor(null, (surface: Box) => surface.color)).toBeNull();
   });
+
+  it("R-03.12 T-2840 passes over a small thing under the top, such as an MD note's tag", () => {
+    const page = { ...box("rgb(255, 255, 255)"), width: 1000 };
+    const tag = { ...box("rgb(255, 214, 214)", page), width: 60 };
+    const label = { ...box("transparent", tag), width: 40 };
+    expect(
+      surfaceColor(
+        label,
+        (surface) => surface.color,
+        (surface) => surface.width >= 500,
+      ),
+    ).toBe("rgb(255, 255, 255)");
+  });
 });
