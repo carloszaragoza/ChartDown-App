@@ -248,12 +248,13 @@ test("R-06.7 T-2834 the chart editor plays the band's audio, and its preview fol
     .getByRole("group", { name: "Sections" })
     .getByRole("button", { name: "Go to Chorus" })
     .click();
+  // T-2838: the text marks the heading of the section playing, "## Chorus" on line 6, at once,
+  // while the short recording is still in it.
+  await expect(
+    page.locator('.cd-lines__mark[data-flag="playing"][style*="--cd-lines-at: 5"]'),
+  ).toHaveCount(1);
   const preview = page.getByRole("region", { name: "Preview" });
   await expect(preview.locator('#section-2 [aria-current="step"]')).toHaveCount(1);
-  // T-2838: the text marks the heading of the section playing, "## Chorus" on line 6.
-  const playing = page.locator('.cd-lines__mark[data-flag="playing"]');
-  await expect(playing).toHaveCount(1);
-  await expect(playing).toHaveAttribute("style", /--cd-lines-at: 5/);
   // T-2836: a bar tapped in the preview takes the recording there, as on the version page.
   await preview.locator('#section-1 .cd-chart__bar[data-bar="2"]').click();
   await expect(
