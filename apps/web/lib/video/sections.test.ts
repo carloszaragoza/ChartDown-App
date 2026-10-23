@@ -1,6 +1,6 @@
 import { parse } from "chartdown";
 import { describe, expect, it } from "vitest";
-import { barAt, chartClicks, sectionAt, sectionLabels, videoSections } from "./sections";
+import { barAt, barStart, chartClicks, sectionAt, sectionLabels, videoSections } from "./sections";
 
 const SONG = "---\ntempo: 120\n---\n## Intro\n1 | 4\n## Verse\n|: 1 | 5 :|\n## Chorus\n4 | 1\n";
 
@@ -86,5 +86,16 @@ describe("T-2505 the sections bar names sections as the song form does", () => {
       { abbreviation: "C", time: 1, of: 1 },
       { abbreviation: "B1", time: 2, of: 2 },
     ]);
+  });
+});
+
+describe("T-2836 a bar tapped on the chart moves the open player there", () => {
+  it("R-03.11 R-06.7 a bar starts at its first time in the play order, counted by tempo and meter", () => {
+    const chart = parse("---\ntempo: 60\n---\n## Verse\n1 | 4 | 5 | 1\n## Chorus\n4 | 5\n");
+    expect(barStart(chart, 0, 1)).toBe(0);
+    expect(barStart(chart, 0, 3)).toBe(8);
+    expect(barStart(chart, 1, 2)).toBe(20);
+    expect(barStart(chart, 1, 9)).toBeNull();
+    expect(barStart(parse("## Verse\n1 | 4\n"), 0, 1)).toBeNull();
   });
 });
