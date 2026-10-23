@@ -189,9 +189,10 @@ export function ChartPreview({
   const videoBar = usePlaybackBar(chart, isPlaying);
   const nowAt = (index: number) => nowIn(index) ?? barIn(videoBar, index);
   // A tap on the chart: on after a fermata (R-11.6), or, stopped, the bar to start on (R-11.2);
-  // with a player open, the player moves there too, so its Play starts on that bar (T-2836).
+  // with a player open, the player moves there too, so its Play starts on that bar (T-2836),
+  // also in the chart editor's preview, which has no metronome of its own.
   const onTap = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!hasForm) return;
+    if (!hasForm && !videoClock.get()) return;
     if (isWaiting) return resume();
     const bar = (event.target as HTMLElement).closest<HTMLElement>(".cd-chart__bar");
     const section = bar?.closest("section[id^='section-']")?.id.replace("section-", "");
