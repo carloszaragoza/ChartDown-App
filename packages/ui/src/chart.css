@@ -697,7 +697,7 @@
   inset-block-end: 0;
   inset-inline-start: 0;
   block-size: var(--spacing-1);
-  background: var(--color-text-primary);
+  background: var(--color-text-blue);
   pointer-events: none;
 }
 /* A waveform along the cells' foot (T-2829): the band's recording, or for a video one drawn from
@@ -726,6 +726,17 @@
 }
 .cd-player-cells__wave > span[data-played] {
   background: var(--color-text-secondary);
+}
+/* Over the current section's blue the waveform is blue too, a light tint ahead and the deep blue
+   heard, so the cell reads as one color (owner's review, October 23, 2026). */
+.cd-player-cells__cell[aria-current="true"] .cd-player-cells__name {
+  color: var(--color-text-blue);
+}
+.cd-player-cells__wave > span[data-current] {
+  background: var(--color-border-blue);
+}
+.cd-player-cells__wave > span[data-current][data-played] {
+  background: var(--color-text-blue);
 }
 /* After where the music ends: dimmed, from a line where it ends. */
 .cd-player-cells__after {
