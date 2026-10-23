@@ -231,6 +231,11 @@ test("R-06.7 T-2834 the chart editor plays the band's audio, and its preview fol
   await page.getByRole("main").getByRole("link", { name: "Edit", exact: true }).click();
   await page.getByRole("button", { name: "Play Just me's recording" }).click();
   const player = page.getByRole("complementary", { name: "Band audio" });
+  // The preview follows the recording while it plays, as the version page does.
+  const play = player.getByRole("button", { name: "Play", exact: true });
+  await expect(play).toBeEnabled();
+  await play.click();
+  await expect(player.getByRole("button", { name: "Pause" })).toBeVisible();
   await expect(
     player.getByRole("group", { name: "Sections" }).locator(".cd-player-cells__short"),
   ).toHaveText(["V", "C"]);
