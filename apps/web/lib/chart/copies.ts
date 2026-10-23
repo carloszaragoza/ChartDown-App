@@ -1,3 +1,4 @@
+import type { Row, Section } from "chartdown";
 import type { TimelineBar } from "../metronome/timeline";
 
 /**
@@ -17,4 +18,32 @@ export function copyAt(bars: readonly TimelineBar[], at: number): number {
     if (here.number <= before.number && here.pass === before.pass) copy += 1;
   }
   return copy;
+}
+
+/**
+ * A section reused with a count, drawn as a written repeat (owner's review, October 23, 2026,
+ * T-2839): its bars between repeat signs with "×3" at the end, so the count is read where the
+ * music is, not only in the heading. One already a repeat from its first bar to its last says
+ * every time it plays (a repeat ×2 used 2x reads ×4); one with a repeat over only part of it keeps
+ * its bars as written.
+ */
+export function drawnRows(section: Section): Row[] {
+  const times = section.use?.times ?? 1;
+  const bars = section.rows.flatMap((row) => row.bars);
+  const opens = bars.filter((bar) => bar.repeatStart).length;
+  const closes = bars.filter((bar) => bar.repeatEnd).length;
+  const own = bars.at(-1)?.repeatEnd?.times;
+  const whole = opens === 1 && closes === 1 && bars[0]?.repeatStart === true && own !== undefined;
+  if (times <= 1 || bars.length === 0 || ((opens > 0 || closes > 0) && !whole)) return section.rows;
+  const last = section.rows.length - 1;
+  return section.rows.map((row, index) => ({
+    ...row,
+    bars: row.bars.map((bar, place) => ({
+      ...bar,
+      ...(index === 0 && place === 0 ? { repeatStart: true as const } : {}),
+      ...(index === last && place === row.bars.length - 1
+        ? { repeatEnd: { times: (own ?? 1) * times } }
+        : {}),
+    })),
+  }));
 }

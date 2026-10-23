@@ -87,6 +87,13 @@ export function SectionCells({
   const first = sections[0]?.start ?? 0;
   const span = Math.max((sections.at(-1)?.end ?? first) - first, 0.001);
   const heard = (now - first) / span;
+  // The current section's share of the bar, where its waveform takes the cell's blue (T-2835).
+  const current = sections[playing];
+  const inCurrent = (place: number) => {
+    if (!current) return false;
+    const at = first + place * span;
+    return at >= current.start && at < current.end;
+  };
   const cells = useRef<HTMLDivElement>(null);
   // One size for every song-form name (T-2832): the largest that lets the narrowest fit whole,
   // measured from the cells as they are drawn, and again as they change size.
@@ -141,6 +148,7 @@ export function SectionCells({
             <span
               key={index}
               data-played={(index + 0.5) / wave.length <= heard ? "" : undefined}
+              data-current={inCurrent((index + 0.5) / wave.length) ? "" : undefined}
               style={{ blockSize: `${Math.max(height, 0.04) * 100}%` }}
             />
           ))}

@@ -645,7 +645,10 @@
   display: flex;
   flex: 1;
   gap: var(--border-width);
-  min-block-size: calc(var(--spacing-12) * 3);
+  min-block-size: calc(var(--spacing-12) * 3.5);
+  /* The waveform's band along the cells' foot; the names end above it, so they are never under
+     its bars (T-2835). */
+  --cd-wave-size: calc(var(--spacing-12) * 1.1);
 }
 .cd-player-cells__cell {
   position: relative;
@@ -660,7 +663,8 @@
   container-type: inline-size;
   overflow: hidden;
   margin: 0;
-  padding: var(--spacing-2) var(--spacing-1);
+  padding: var(--spacing-2) var(--spacing-1)
+    calc(var(--cd-wave-size) + var(--spacing-2) + var(--spacing-2));
   border: 0;
   background: var(--color-background-muted);
   color: var(--color-text-secondary);
@@ -711,12 +715,12 @@
   inset-block-end: 0;
   inset-inline-start: 0;
   block-size: var(--spacing-1);
-  background: var(--color-text-primary);
+  background: var(--color-text-blue);
   pointer-events: none;
 }
-/* A waveform across the cells' lower part (T-2829): the band's recording, or for a video one drawn
-   from the chart; the part already heard in the ink color. Over the cells' color, under their
-   names. */
+/* A waveform along the cells' foot (T-2829): the band's recording, or for a video one drawn from
+   the chart; the part already heard in the ink color. Thin bars with room between them, so it
+   reads as sound rather than a block (T-2835). */
 .cd-player-cells {
   position: relative;
   isolation: isolate;
@@ -727,17 +731,30 @@
   inset: auto 0 var(--spacing-2);
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1px;
-  block-size: 38%;
+  block-size: var(--cd-wave-size);
   pointer-events: none;
 }
 .cd-player-cells__wave > span {
-  flex: 1;
+  flex: 1 1 0;
+  max-inline-size: 3px;
   border-radius: 1px;
   background: var(--color-border-emphasized);
 }
 .cd-player-cells__wave > span[data-played] {
   background: var(--color-text-secondary);
+}
+/* Over the current section's blue the waveform is blue too, a light tint ahead and the deep blue
+   heard, so the cell reads as one color (owner's review, October 23, 2026). */
+.cd-player-cells__cell[aria-current="true"] .cd-player-cells__name {
+  color: var(--color-text-blue);
+}
+.cd-player-cells__wave > span[data-current] {
+  background: var(--color-border-blue);
+}
+.cd-player-cells__wave > span[data-current][data-played] {
+  background: var(--color-text-blue);
 }
 /* After where the music ends: dimmed, from a line where it ends. */
 .cd-player-cells__after {
@@ -772,6 +789,11 @@
   }
   .cd-player-cells {
     min-block-size: calc(var(--spacing-12) * 1.5);
+    --cd-wave-size: calc(var(--spacing-12) * 0.6);
+  }
+  /* Only the song-form name, over the waveform's middle as before. */
+  .cd-player-cells__cell {
+    padding-block-end: var(--spacing-2);
   }
   .cd-player-cells__name {
     display: none;
