@@ -26,6 +26,7 @@ export function TopEdge() {
         const color = surfaceColor(
           document.elementFromPoint(window.innerWidth / 2, 1) as HTMLElement | null,
           (surface) => getComputedStyle(surface).backgroundColor,
+          (surface) => surface.getBoundingClientRect().width >= window.innerWidth / 2,
         );
         if (!color) return;
         setEdge(navigator.maxTouchPoints > 0 ? color : null);
