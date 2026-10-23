@@ -14,8 +14,12 @@ import { lineRange } from "../../lib/versions/lines";
 /** A line of the chart to point at: a parser warning, or something an import asks to check. */
 export interface LineFlag {
   line: number;
-  kind: "warning" | "review";
+  /** "playing": the heading of the section the video or the band's audio is in (T-2838). */
+  kind: "warning" | "review" | "playing";
 }
+
+// A line with more than one flag shows the one that matters most.
+const WEIGHT: Record<LineFlag["kind"], number> = { warning: 3, review: 2, playing: 1 };
 
 export interface ChartTextAreaHandle {
   /** Selects a line of the text and brings it into view. */
@@ -69,8 +73,12 @@ export function ChartTextArea({
   } | null>(null);
   const count = value.split("\n").length;
   const flagOf = new Map<number, LineFlag["kind"]>();
-  for (const flag of flags)
-    if (flag.line <= count && flagOf.get(flag.line) !== "warning") flagOf.set(flag.line, flag.kind);
+  for (const flag of flags) {
+    const before = flagOf.get(flag.line);
+    if (flag.line <= count && (!before || WEIGHT[flag.kind] > WEIGHT[before]))
+      flagOf.set(flag.line, flag.kind);
+  }
+  const playingLine = flags.find((flag) => flag.kind === "playing")?.line;
 
   const goTo = (line: number) => {
     const field = area.current;
@@ -83,6 +91,18 @@ export function ChartTextArea({
     if (marks.current) marks.current.scrollTop = field.scrollTop;
   };
   useImperativeHandle(handle, () => ({ goTo }));
+
+  // The section playing kept in view as the song goes on, unless the person is writing (T-2838).
+  useEffect(() => {
+    const field = area.current;
+    if (!field || playingLine === undefined || document.activeElement === field) return;
+    const height = Number.parseFloat(getComputedStyle(field).lineHeight) || 20;
+    const top = (playingLine - 1) * height;
+    if (top < field.scrollTop || top > field.scrollTop + field.clientHeight - height * 2) {
+      field.scrollTop = Math.max(0, top - height * 2);
+      if (marks.current) marks.current.scrollTop = field.scrollTop;
+    }
+  }, [playingLine]);
 
   // The marks lie over the text's box: the same line height and top padding, and the same scroll.
   useEffect(() => {
@@ -164,14 +184,16 @@ export function ChartTextArea({
                 data-flag={kind}
                 style={{ "--cd-lines-at": line - 1 } as CSSProperties}
               >
-                <button
-                  type="button"
-                  className="cd-lines__number"
-                  aria-label={goToLabel(line)}
-                  onClick={() => goTo(line)}
-                >
-                  {line}
-                </button>
+                {kind !== "playing" && (
+                  <button
+                    type="button"
+                    className="cd-lines__number"
+                    aria-label={goToLabel(line)}
+                    onClick={() => goTo(line)}
+                  >
+                    {line}
+                  </button>
+                )}
               </div>
             ))}
           </div>
