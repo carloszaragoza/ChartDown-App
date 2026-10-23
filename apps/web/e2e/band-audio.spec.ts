@@ -248,10 +248,13 @@ test("R-06.7 T-2834 the chart editor plays the band's audio, and its preview fol
     .getByRole("group", { name: "Sections" })
     .getByRole("button", { name: "Go to Chorus" })
     .click();
-  // T-2838: the text marks the heading of the section playing, "## Chorus" on line 6, at once,
-  // while the short recording is still in it.
+  // T-2838: the text marks the heading of the section playing, "## Chorus", at once, while the
+  // short recording is still in it.
+  const chorusAt = (await page.getByLabel("Chart (ChartDown)").inputValue())
+    .split("\n")
+    .indexOf("## Chorus");
   await expect(
-    page.locator('.cd-lines__mark[data-flag="playing"][style*="--cd-lines-at: 5"]'),
+    page.locator(`.cd-lines__mark[data-flag="playing"][style*="--cd-lines-at: ${chorusAt};"]`),
   ).toHaveCount(1);
   const preview = page.getByRole("region", { name: "Preview" });
   await expect(preview.locator('#section-2 [aria-current="step"]')).toHaveCount(1);
