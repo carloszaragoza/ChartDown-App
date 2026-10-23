@@ -67,8 +67,6 @@ export interface ChartSectionProps {
   badge?: ReactNode;
   /** After the section's length, such as stand mode's "Bar 3 of 8" (R-03.12). */
   after?: ReactNode;
-  /** The section sounding, in the player's selection blue, so the reader sees where the song is (T-2838). */
-  isPlaying?: boolean;
 }
 
 /**
@@ -90,15 +88,9 @@ export function ChartSection({
   times,
   badge,
   after,
-  isPlaying = false,
 }: ChartSectionProps) {
   const body = (
-    <section
-      aria-label={section.name}
-      {...(id ? { id } : {})}
-      className="cd-chart-section"
-      {...(isPlaying && !isFramed ? { "data-playing": "" } : {})}
-    >
+    <section aria-label={section.name} {...(id ? { id } : {})}>
       <VStack gap={3}>
         <HStack gap={2} vAlign="center" wrap="wrap">
           {badge}
@@ -134,7 +126,7 @@ export function ChartSection({
       </VStack>
     </section>
   );
-  return isFramed ? <Card variant={isPlaying ? "blue" : "default"}>{body}</Card> : body;
+  return isFramed ? <Card>{body}</Card> : body;
 }
 
 /**
@@ -339,7 +331,6 @@ export function ChartPreview({
             beats={beats}
             {...(notes ? { notes: notes[index] ?? [] } : {})}
             now={nowAt(index)}
-            isPlaying={nowAt(index) !== undefined}
             start={startIn(index)}
           />
         ))}

@@ -107,9 +107,6 @@ test("R-06.7 the MD adds the band's audio; its musicians hear it, nobody else", 
     "true",
   );
   await expect(page.locator('#section-2 [aria-current="step"]')).toHaveCount(1);
-  // T-2838: the section sounding is drawn in the player's blue.
-  await expect(page.locator('.astryx-card[data-variant="blue"] #section-2')).toHaveCount(1);
-  await expect(page.locator('.astryx-card[data-variant="blue"]')).toHaveCount(1);
   // T-2836: a bar tapped on the chart takes the recording there.
   await page.locator('#section-1 .cd-chart__bar[data-bar="2"]').click();
   await expect(
@@ -253,7 +250,6 @@ test("R-06.7 T-2834 the chart editor plays the band's audio, and its preview fol
     .click();
   const preview = page.getByRole("region", { name: "Preview" });
   await expect(preview.locator('#section-2 [aria-current="step"]')).toHaveCount(1);
-  await expect(preview.locator("#section-2[data-playing]")).toHaveCount(1);
   // T-2836: a bar tapped in the preview takes the recording there, as on the version page.
   await preview.locator('#section-1 .cd-chart__bar[data-bar="2"]').click();
   await expect(

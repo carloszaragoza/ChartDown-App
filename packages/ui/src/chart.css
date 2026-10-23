@@ -502,13 +502,6 @@
      text fits whole beside the chart (T-2837). */
   block-size: max(calc(100dvh - var(--spacing-12) * 2.75 - var(--cd-dock-room, 0px)), 18rem);
 }
-/* The section sounding, unframed as in the editors' previews: the player's selection blue, spread
-   around it so nothing moves (T-2838). */
-.cd-chart-section[data-playing] {
-  border-radius: var(--radius-inner);
-  background: var(--color-background-blue);
-  box-shadow: 0 0 0 var(--spacing-2) var(--color-background-blue);
-}
 /* The chart's text beside its preview: pinned in view while the page follows the chart as it
    plays, so it can be written at any moment (T-2837). */
 .cd-write-text {
