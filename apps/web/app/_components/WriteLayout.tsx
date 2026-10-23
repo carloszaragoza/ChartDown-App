@@ -46,6 +46,8 @@ export function WriteLayout({
     <PageLayout
       phone={phone}
       height="auto"
+      // The app's own area scrolls the page, so the text can stay pinned in it (T-2837).
+      contentProps={{ isScrollable: false }}
       // One gutter on every page: 32 px around the content (Design Handoff 2.0, 1.6).
       padding={8}
       header={header}
