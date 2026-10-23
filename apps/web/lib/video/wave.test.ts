@@ -1,6 +1,6 @@
 import { parse } from "chartdown";
 import { describe, expect, it } from "vitest";
-import { chartWave, sectionLoudness, windowWave } from "./wave";
+import { chartWave, sectionLoudness, shapedWave, windowWave } from "./wave";
 
 const average = (values: readonly number[]) =>
   values.reduce((sum, value) => sum + value, 0) / Math.max(values.length, 1);
@@ -33,5 +33,16 @@ describe("T-2829 the waveform under a player's sections", () => {
     const peaks = [...Array<number>(50).fill(100), ...Array<number>(50).fill(900)];
     expect(windowWave(peaks, 10, 5, 10, 4)).toEqual([0.9, 0.9, 0.9, 0.9]);
     expect(windowWave(peaks, 10, 0, 4, 2)).toEqual([0.1, 0.1]);
+  });
+
+  it("R-06.7 T-2835 a loud master's waveform still shows its soft and loud parts; silence stays low", () => {
+    const wave = shapedWave([0, 0.9, 0.92, 0.94, 0.96, 0.98, 1, 0.9, 0.01]);
+    expect(wave[0]).toBe(0);
+    expect(wave[8]).toBeLessThan(0.05);
+    expect(wave[1]).toBeCloseTo(0.12);
+    expect(wave[6]).toBe(1);
+    expect((wave[3] ?? 0) - (wave[1] ?? 0)).toBeGreaterThan(0.3);
+    expect(shapedWave([0.5, 0.5])).toEqual([1, 1]);
+    expect(shapedWave([0, 0])).toEqual([0, 0]);
   });
 });

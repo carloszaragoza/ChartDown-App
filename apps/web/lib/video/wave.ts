@@ -113,3 +113,22 @@ export function windowWave(
     return Math.max(...peaks.slice(first, last)) / 1000;
   });
 }
+
+/**
+ * A recording's waveform with its loud and soft parts told apart (T-2835): a mastered song peaks
+ * near full almost everywhere, so its heights are stretched from the quieter music (the 10th
+ * percentile) to the loudest, while silence stays low.
+ */
+export function shapedWave(wave: readonly number[]): number[] {
+  const top = Math.max(0, ...wave);
+  if (top <= 0) return wave.map(() => 0);
+  const silence = top * 0.05;
+  const music = wave.filter((height) => height > silence).sort((a, b) => a - b);
+  const low = music[Math.floor(music.length * 0.1)] ?? 0;
+  if (top - low < top * 0.02) return wave.map((height) => height / top);
+  return wave.map((height) =>
+    height <= silence
+      ? height / top
+      : 0.12 + 0.88 * Math.min(1, Math.max(0, (height - low) / (top - low))),
+  );
+}

@@ -13,7 +13,7 @@ import { storedAudio } from "../../lib/offline/store";
 import { createClient } from "../../lib/supabase/browser";
 import { barSeek, videoClock } from "../../lib/video/clock";
 import { barStart, videoSections } from "../../lib/video/sections";
-import { windowWave } from "../../lib/video/wave";
+import { shapedWave, windowWave } from "../../lib/video/wave";
 import { useDockRoom, useDockTarget } from "./DockRoom";
 import {
   MusicPointsControls,
@@ -39,7 +39,7 @@ export interface PlayerRecording {
 }
 
 // The waveform is drawn with this many bars, whatever the recording's length.
-const BARS = 160;
+const BARS = 240;
 
 const clock = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
@@ -132,12 +132,14 @@ function AudioDock({
   const wave = useMemo(
     () =>
       sections
-        ? windowWave(
-            recording.peaks,
-            duration,
-            sections[0]?.start ?? 0,
-            sections.at(-1)?.end ?? duration,
-            BARS,
+        ? shapedWave(
+            windowWave(
+              recording.peaks,
+              duration,
+              sections[0]?.start ?? 0,
+              sections.at(-1)?.end ?? duration,
+              BARS,
+            ),
           )
         : [],
     [recording.peaks, duration, sections],
