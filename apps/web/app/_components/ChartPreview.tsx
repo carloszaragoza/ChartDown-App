@@ -41,6 +41,7 @@ import { barIn, usePlaybackBar } from "./usePlaybackBar";
 import { DockRoom, useDockRoomSize } from "./DockRoom";
 import { useChartLabels } from "./chartLabels";
 import { hasJump, playRuns } from "../../lib/chart/playRuns";
+import { drawnRows } from "../../lib/chart/copies";
 
 export interface ChartSectionProps {
   section: Section;
@@ -102,7 +103,7 @@ export function ChartSection({
           {after}
         </HStack>
         <MDNotes notes={notes ?? section.notes} instrumentName={labels.bar.instrument} />
-        {section.rows.map((row, index) => (
+        {drawnRows(section).map((row, index) => (
           <BarRow
             key={index}
             row={row}
