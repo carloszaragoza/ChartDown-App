@@ -30,6 +30,7 @@ import { saveVideoPoints } from "../actions";
 import { CancelButton, WriteLayout } from "../../../_components/WriteLayout";
 import { VideoLink } from "../../../_components/VideoDock";
 import { BandAudio, type BandRecording } from "../BandAudio";
+import { usePlayingSection } from "../../../_components/usePlaybackBar";
 import { splitTitle, withTitle } from "../../../../lib/versions/title";
 
 export interface EditorProps {
@@ -121,8 +122,12 @@ export function Editor({
   // The preview may lag a keystroke behind so typing never waits for it.
   const shown = useDeferredValue(text);
   const chart = useMemo(() => parse(withTitle(shown, title)), [shown, title]);
-  // The warnings name the lines of the text on screen, which has no title line.
-  const warnings = useMemo(() => parse(shown).warnings, [shown]);
+  // The warnings name the lines of the text on screen, which has no title line, and so does the
+  // heading of the section the player is in (T-2838).
+  const onScreen = useMemo(() => parse(shown), [shown]);
+  const warnings = onScreen.warnings;
+  const playingSection = usePlayingSection(chart);
+  const playingLine = playingSection !== null ? onScreen.sections[playingSection]?.line : undefined;
   const lines = useRef<ChartTextAreaHandle>(null);
   const page = `/versions/${versionId}`;
 
@@ -295,7 +300,12 @@ export function Editor({
             onChange={setText}
             rows={18}
             isTall
-            flags={warnings.map((warning) => ({ line: warning.line, kind: "warning" as const }))}
+            flags={[
+              ...warnings.map((warning) => ({ line: warning.line, kind: "warning" as const })),
+              ...(playingLine !== undefined
+                ? [{ line: playingLine, kind: "playing" as const }]
+                : []),
+            ]}
             goToLabel={(line) => t("goToLine", { line })}
           />
           <Warnings warnings={warnings} onSelect={goTo} />

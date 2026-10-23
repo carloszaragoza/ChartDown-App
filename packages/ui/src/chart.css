@@ -482,6 +482,13 @@
   --cd-lines-ink: var(--color-error);
   --cd-lines-tint: var(--color-error-muted);
 }
+/* The heading of the section the player is in: the player's selection blue (T-2838). */
+.cd-lines__mark[data-flag="playing"] {
+  --cd-lines-ink: var(--color-text-blue);
+  --cd-lines-tint: var(--color-background-blue);
+  /* Over the text, so see-through enough to read the heading. */
+  background: color-mix(in srgb, var(--cd-lines-tint) 50%, transparent);
+}
 .cd-lines__number {
   pointer-events: auto;
   margin: 0;

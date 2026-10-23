@@ -22,3 +22,20 @@ export function barIn(bar: VideoBar | null, section: number) {
     ? { row: bar.row, index: bar.index, progress: bar.progress, downbeat: bar.downbeat }
     : undefined;
 }
+
+/**
+ * The section the open video or band recording is in, by its index in the chart, or null with no
+ * player or outside the music (T-2838). Only a new section renders again, not every beat.
+ */
+export function usePlayingSection(chart: Chart): number | null {
+  const placed = useMemo(() => chartClicks(chart), [chart]);
+  return useSyncExternalStore(
+    videoClock.subscribe,
+    () => {
+      const clock = videoClock.get();
+      if (!clock || !placed) return null;
+      return barAt(placed.bars, placed.list, clock.time, clock.musicStart)?.section ?? null;
+    },
+    () => null,
+  );
+}
