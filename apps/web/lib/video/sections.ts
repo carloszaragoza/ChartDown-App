@@ -118,3 +118,14 @@ export function chartClicks(chart: Chart): { bars: TimelineBar[]; list: Click[] 
   if (bars.length === 0 || bars.some((bar) => bar.tempo === undefined)) return null;
   return { bars, list: clicks(bars) };
 }
+
+/**
+ * Where a bar starts, in seconds after the music starts (T-2836): its first time in the play
+ * order, or null when the chart has no tempo or no such bar.
+ */
+export function barStart(chart: Chart, section: number, number: number): number | null {
+  const placed = chartClicks(chart);
+  if (!placed) return null;
+  const at = placed.bars.findIndex((bar) => bar.section === section && bar.number === number);
+  return placed.list.find((click) => click.bar === at)?.time ?? null;
+}
