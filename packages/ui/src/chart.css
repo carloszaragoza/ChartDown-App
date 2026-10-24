@@ -820,8 +820,12 @@
 }
 
 /* The video on a phone (T-2841): YouTube's minimum, a 200 px square, with its controls beside it
-   (the time, the section playing, Start and end) and the sections one thin strip of song-form
-   names under them all. The volume is left to the device's buttons. */
+   (the time, the section playing, Start and end, and the handle that moves it) and the sections
+   one thin strip of song-form names under them all, in a card that floats over the page at the
+   bottom or the top. The volume is left to the device's buttons. */
+.cd-player__grip {
+  display: none;
+}
 @media (max-width: 47.99rem), (orientation: landscape) and (max-height: 31.99rem) {
   .cd-player[data-video]:not([data-compact]) {
     display: grid;
@@ -831,12 +835,32 @@
       "frame end"
       "frame now"
       "frame set"
-      "frame ."
+      "frame grip"
       "points points"
       "alert alert"
       "cells cells";
     gap: var(--spacing-2) var(--spacing-3);
-    padding-inline: var(--spacing-3);
+    inset-inline: var(--spacing-2) !important;
+    inset-block-end: calc(var(--spacing-2) + env(safe-area-inset-bottom, 0px));
+    padding: var(--spacing-3);
+    border: var(--border-width) solid var(--color-border-emphasized);
+    border-radius: var(--radius-container);
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player__grip {
+    display: flex;
+    grid-area: grip;
+    align-items: center;
+    justify-content: center;
+    min-block-size: var(--spacing-12);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-inner);
+    background: var(--color-background-muted);
+    color: var(--color-text-secondary);
+    cursor: grab;
+    font: inherit;
+    touch-action: none;
   }
   .cd-player[data-video]:not([data-compact]) :is(.cd-player__controls, .cd-player__body) {
     display: contents;
@@ -904,20 +928,29 @@
     font-size: var(--cd-short-size, var(--font-size-base));
   }
 }
-/* Turned on its side, the same card at the bottom right and the chart in the room to its left. */
+/* Upright, moved to the top: it takes no room below the chart. */
+@media (max-width: 47.99rem) and (not ((orientation: landscape) and (max-height: 31.99rem))) {
+  .cd-player[data-video][data-top]:not([data-compact]) {
+    --cd-player-below: 0;
+    inset-block: calc(var(--spacing-2) + env(safe-area-inset-top, 0px)) auto;
+  }
+}
+/* Turned on its side, the same card at the bottom right, or moved to the left, and the chart in
+   the room on the other side. */
 @media (orientation: landscape) and (max-height: 31.99rem) {
   .cd-player[data-video]:not([data-compact]) {
-    --cd-player-side: 1;
-    inset-inline-start: auto !important;
-    inset-inline-end: calc(var(--spacing-3) + env(safe-area-inset-right, 0px));
-    inset-block-end: calc(var(--spacing-2) + env(safe-area-inset-bottom, 0px));
+    --cd-player-below: 0;
+    inset-inline: auto calc(var(--spacing-3) + env(safe-area-inset-right, 0px)) !important;
     inline-size: 24rem;
-    padding-block-end: var(--spacing-3);
-    border: var(--border-width) solid var(--color-border-emphasized);
-    border-radius: var(--radius-container);
   }
-  body:has(> .cd-player[data-video]:not([data-compact])) {
+  .cd-player[data-video][data-start]:not([data-compact]) {
+    inset-inline: calc(var(--spacing-3) + env(safe-area-inset-left, 0px)) auto !important;
+  }
+  body:has(> .cd-player[data-video]:not([data-compact], [data-start])) {
     padding-inline-end: calc(24rem + var(--spacing-3) + env(safe-area-inset-right, 0px));
+  }
+  body:has(> .cd-player[data-video][data-start]:not([data-compact])) {
+    padding-inline-start: calc(24rem + var(--spacing-3) + env(safe-area-inset-left, 0px));
   }
 }
 

@@ -1479,6 +1479,7 @@
     "pointsFrom": "Inicio y final · desde {start}",
     "pointsShort": "{start} – {end}",
     "pointsShortFrom": "Desde {start}",
+    "move": "Mover el reproductor",
     "start": "Inicio",
     "end": "Final",
     "moveStart": "Mover el inicio",

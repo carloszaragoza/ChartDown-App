@@ -3,7 +3,13 @@
 import { Button } from "@astryxdesign/core/Button";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Text } from "@astryxdesign/core/Text";
-import { ArrowTopRightOnSquareIcon, PlayIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowTopRightOnSquareIcon,
+  ArrowsRightLeftIcon,
+  ArrowsUpDownIcon,
+  PlayIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
@@ -19,6 +25,7 @@ import {
   useMusicEnd,
   usePhonePlayer,
   usePlayerStart,
+  useSidePlayer,
 } from "./PlayerBar";
 import type { MusicPoints } from "../../lib/video/points";
 import { startSeconds, videoId } from "../../lib/video/youtube";
@@ -192,7 +199,13 @@ function VideoDock({
 }) {
   const t = useTranslations("video");
   const isPhone = usePhonePlayer();
+  const isSide = useSidePlayer();
   const dock = useRef<HTMLElement>(null);
+  // On a phone the player floats (T-2841): its handle drags it to the top or the bottom, or turned
+  // on its side to the left or the right, where it settles on release; a tap moves it across.
+  const [place, setPlace] = useState({ top: false, start: false });
+  const drag = useRef<{ x: number; y: number; moved: boolean } | null>(null);
+  const dragged = useRef(false);
   useDockRoom(dock);
   const playerStart = usePlayerStart(dock);
   const frame = useRef<HTMLDivElement>(null);
@@ -320,6 +333,8 @@ function VideoDock({
       style={{ insetInlineStart: playerStart }}
       data-compact={chart ? undefined : ""}
       data-video=""
+      data-top={place.top ? "" : undefined}
+      data-start={place.start ? "" : undefined}
       aria-label={t("player")}
     >
       {/* Every control in one row along the top (T-2828). */}
@@ -392,6 +407,54 @@ function VideoDock({
         <div role="alert" className="cd-player__alert">
           <Text type="supporting">{t("saveFailed")}</Text>
         </div>
+      )}
+      {isPhone && (
+        <button
+          type="button"
+          className="cd-player__grip"
+          aria-label={t("move")}
+          title={t("move")}
+          onPointerDown={(event) => {
+            event.currentTarget.setPointerCapture(event.pointerId);
+            drag.current = { x: event.clientX, y: event.clientY, moved: false };
+          }}
+          onPointerMove={(event) => {
+            const from = drag.current;
+            const card = dock.current;
+            if (!from || !card) return;
+            const x = event.clientX - from.x;
+            const y = event.clientY - from.y;
+            if (Math.hypot(x, y) > 8) from.moved = true;
+            if (from.moved) card.style.translate = `${x}px ${y}px`;
+          }}
+          onPointerUp={() => {
+            const from = drag.current;
+            const card = dock.current;
+            drag.current = null;
+            if (!from?.moved || !card) return;
+            dragged.current = true;
+            const box = card.getBoundingClientRect();
+            card.style.translate = "";
+            const left = box.left + box.width / 2 < window.innerWidth / 2;
+            setPlace({
+              top: box.top + box.height / 2 < window.innerHeight / 2,
+              start: getComputedStyle(card).direction === "rtl" ? !left : left,
+            });
+          }}
+          onPointerCancel={() => {
+            drag.current = null;
+            if (dock.current) dock.current.style.translate = "";
+          }}
+          onClick={() => {
+            if (dragged.current) {
+              dragged.current = false;
+              return;
+            }
+            setPlace((at) => (isSide ? { ...at, start: !at.start } : { ...at, top: !at.top }));
+          }}
+        >
+          <Icon icon={isSide ? ArrowsRightLeftIcon : ArrowsUpDownIcon} />
+        </button>
       )}
       <div className="cd-player__body">
         <div className="cd-video-dock__frame">

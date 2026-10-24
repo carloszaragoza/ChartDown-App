@@ -13,17 +13,22 @@ export function useDockRoom(dock: RefObject<HTMLElement | null>) {
     if (!element) return;
     const measure = () =>
       dockRoom.set(
-        // A player beside the chart, on a phone turned on its side (T-2841), takes no room below.
-        getComputedStyle(element).getPropertyValue("--cd-player-side").trim() === "1"
+        // A player beside the chart, on a phone turned on its side, or moved to the top (T-2841),
+        // takes no room below.
+        getComputedStyle(element).getPropertyValue("--cd-player-below").trim() === "0"
           ? 0
           : Math.max(0, Math.ceil(window.innerHeight - element.getBoundingClientRect().top)),
       );
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(element);
+    // Moved on a phone, it may change place without changing size.
+    const moved = new MutationObserver(measure);
+    moved.observe(element, { attributes: true, attributeFilter: ["data-top", "data-start"] });
     window.addEventListener("resize", measure);
     return () => {
       observer.disconnect();
+      moved.disconnect();
       window.removeEventListener("resize", measure);
       dockRoom.set(0);
     };

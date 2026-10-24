@@ -1479,6 +1479,7 @@
     "pointsFrom": "Start and end · from {start}",
     "pointsShort": "{start} – {end}",
     "pointsShortFrom": "From {start}",
+    "move": "Move the player",
     "start": "Start",
     "end": "End",
     "moveStart": "Move the start",

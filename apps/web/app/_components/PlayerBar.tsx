@@ -54,18 +54,26 @@ export function usePlayerStart(dock: RefObject<HTMLElement | null>): number {
   return start;
 }
 
-/** Where the video's player is laid out for a phone, upright or turned (T-2841). */
-const PHONE_PLAYER = "(max-width: 47.99rem), (orientation: landscape) and (max-height: 31.99rem)";
-export function usePhonePlayer(): boolean {
+function useMedia(query: string): boolean {
   return useSyncExternalStore(
     (onChange) => {
-      const query = window.matchMedia(PHONE_PLAYER);
-      query.addEventListener("change", onChange);
-      return () => query.removeEventListener("change", onChange);
+      const list = window.matchMedia(query);
+      list.addEventListener("change", onChange);
+      return () => list.removeEventListener("change", onChange);
     },
-    () => window.matchMedia(PHONE_PLAYER).matches,
+    () => window.matchMedia(query).matches,
     () => false,
   );
+}
+
+/** Where the video's player is laid out for a phone, upright or turned (T-2841). */
+export function usePhonePlayer(): boolean {
+  return useMedia("(max-width: 47.99rem), (orientation: landscape) and (max-height: 31.99rem)");
+}
+
+/** A phone turned on its side, where the player sits beside the chart (T-2841). */
+export function useSidePlayer(): boolean {
+  return useMedia("(orientation: landscape) and (max-height: 31.99rem)");
 }
 
 /**
