@@ -804,6 +804,123 @@
   }
 }
 
+.cd-player__end {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+.cd-player__clock {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+/* Named beside the video on a phone only, where the strip shows only song-form names. */
+.cd-player__now {
+  display: none;
+}
+
+/* The video on a phone (T-2841): YouTube's minimum, a 200 px square, with its controls beside it
+   (the time, the section playing, Start and end) and the sections one thin strip of song-form
+   names under them all. The volume is left to the device's buttons. */
+@media (max-width: 47.99rem), (orientation: landscape) and (max-height: 31.99rem) {
+  .cd-player[data-video]:not([data-compact]) {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr;
+    grid-template-areas:
+      "frame end"
+      "frame now"
+      "frame set"
+      "frame ."
+      "points points"
+      "alert alert"
+      "cells cells";
+    gap: var(--spacing-2) var(--spacing-3);
+    padding-inline: var(--spacing-3);
+  }
+  .cd-player[data-video]:not([data-compact]) :is(.cd-player__controls, .cd-player__body) {
+    display: contents;
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player__controls > :first-child {
+    grid-area: set;
+    justify-self: start;
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player__end {
+    grid-area: end;
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player__clock {
+    margin-inline-end: auto;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player__kind {
+    display: none;
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player__now {
+    display: block;
+    grid-area: now;
+    overflow: hidden;
+    margin: 0;
+    color: var(--color-text-blue);
+    font-weight: var(--font-weight-semibold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player__note {
+    grid-area: now;
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player__points {
+    grid-area: points;
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player__alert {
+    grid-area: alert;
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-video-dock__frame {
+    grid-area: frame;
+    inline-size: 200px;
+    block-size: 200px;
+    max-block-size: none;
+    aspect-ratio: auto;
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player__volume {
+    display: none;
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player__main {
+    grid-area: cells;
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player-cells {
+    min-block-size: var(--spacing-12);
+    --cd-wave-size: calc(var(--spacing-12) * 0.5);
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player-cells__cell {
+    padding-block-end: var(--spacing-1);
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player-cells__name {
+    display: none;
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player-cells__short {
+    margin-block: auto;
+    font-size: var(--cd-short-size, var(--font-size-base));
+  }
+}
+/* Turned on its side, the same card at the bottom right and the chart in the room to its left. */
+@media (orientation: landscape) and (max-height: 31.99rem) {
+  .cd-player[data-video]:not([data-compact]) {
+    --cd-player-side: 1;
+    inset-inline-start: auto !important;
+    inset-inline-end: calc(var(--spacing-3) + env(safe-area-inset-right, 0px));
+    inset-block-end: calc(var(--spacing-2) + env(safe-area-inset-bottom, 0px));
+    inline-size: 24rem;
+    padding-block-end: var(--spacing-3);
+    border: var(--border-width) solid var(--color-border-emphasized);
+    border-radius: var(--radius-container);
+  }
+  body:has(> .cd-player[data-video]:not([data-compact])) {
+    padding-inline-end: calc(24rem + var(--spacing-3) + env(safe-area-inset-right, 0px));
+  }
+}
+
 /* With a player open, the bar being followed is centered in what the player leaves (T-2505). */
 .cd-chart__bar[aria-current="step"] {
   scroll-margin-block-end: var(--cd-dock-room, 0px);

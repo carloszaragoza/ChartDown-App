@@ -1477,6 +1477,8 @@
     "close": "Close the video",
     "points": "Start and end · {start} – {end}",
     "pointsFrom": "Start and end · from {start}",
+    "pointsShort": "{start} – {end}",
+    "pointsShortFrom": "From {start}",
     "start": "Start",
     "end": "End",
     "moveStart": "Move the start",

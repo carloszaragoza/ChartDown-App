@@ -62,6 +62,8 @@ const SAME_IN_BOTH = new Set([
   "sets.allSets",
   "nav.sets",
   "nav.roleAdmin",
+  // Only the player's two times, beside the video on a phone (T-2841).
+  "video.pointsShort",
   // Brand names of the sign-in providers (T-1306).
   "profile.signIn.google",
   "profile.signIn.apple",

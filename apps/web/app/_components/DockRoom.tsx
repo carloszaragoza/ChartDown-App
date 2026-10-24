@@ -13,7 +13,10 @@ export function useDockRoom(dock: RefObject<HTMLElement | null>) {
     if (!element) return;
     const measure = () =>
       dockRoom.set(
-        Math.max(0, Math.ceil(window.innerHeight - element.getBoundingClientRect().top)),
+        // A player beside the chart, on a phone turned on its side (T-2841), takes no room below.
+        getComputedStyle(element).getPropertyValue("--cd-player-side").trim() === "1"
+          ? 0
+          : Math.max(0, Math.ceil(window.innerHeight - element.getBoundingClientRect().top)),
       );
     measure();
     const observer = new ResizeObserver(measure);

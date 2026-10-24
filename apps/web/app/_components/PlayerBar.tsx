@@ -54,6 +54,20 @@ export function usePlayerStart(dock: RefObject<HTMLElement | null>): number {
   return start;
 }
 
+/** Where the video's player is laid out for a phone, upright or turned (T-2841). */
+const PHONE_PLAYER = "(max-width: 47.99rem), (orientation: landscape) and (max-height: 31.99rem)";
+export function usePhonePlayer(): boolean {
+  return useSyncExternalStore(
+    (onChange) => {
+      const query = window.matchMedia(PHONE_PLAYER);
+      query.addEventListener("change", onChange);
+      return () => query.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia(PHONE_PLAYER).matches,
+    () => false,
+  );
+}
+
 /**
  * The song's sections in the order the chart plays them, as tall cells as wide as each lasts
  * (T-2828): the song-form name bold at the top (V1, then V1² the second time), one size for all,
@@ -269,6 +283,7 @@ export function MusicPointsControls({
   saveLabel,
   isSaving,
   onSave,
+  isCompact = false,
 }: {
   start: number;
   end: number | null;
@@ -281,6 +296,8 @@ export function MusicPointsControls({
   saveLabel?: string | undefined;
   isSaving: boolean;
   onSave: () => void;
+  /** Beside the video on a phone: the button says only the times (T-2841). */
+  isCompact?: boolean;
 }) {
   const t = useTranslations("video");
   const [isOpen, setOpen] = useState(false);
@@ -292,8 +309,8 @@ export function MusicPointsControls({
       <ToggleButton
         label={
           end === null
-            ? t("pointsFrom", { start: clock(start) })
-            : t("points", { start: clock(start), end: clock(end) })
+            ? t(isCompact ? "pointsShortFrom" : "pointsFrom", { start: clock(start) })
+            : t(isCompact ? "pointsShort" : "points", { start: clock(start), end: clock(end) })
         }
         icon={<Icon icon={AdjustmentsHorizontalIcon} />}
         size="sm"

@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@astryxdesign/core/Button";
-import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Text } from "@astryxdesign/core/Text";
 import { ArrowTopRightOnSquareIcon, PlayIcon, XMarkIcon } from "@heroicons/react/24/outline";
@@ -10,7 +9,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { barSeek, videoClock } from "../../lib/video/clock";
-import { barStart, videoSections } from "../../lib/video/sections";
+import { barStart, sectionAt, videoSections } from "../../lib/video/sections";
 import { chartWave, shapedWave } from "../../lib/video/wave";
 import { useDockRoom, useDockTarget } from "./DockRoom";
 import {
@@ -18,6 +17,7 @@ import {
   PlayerVolume,
   SectionCells,
   useMusicEnd,
+  usePhonePlayer,
   usePlayerStart,
 } from "./PlayerBar";
 import type { MusicPoints } from "../../lib/video/points";
@@ -191,6 +191,7 @@ function VideoDock({
   onClose: () => void;
 }) {
   const t = useTranslations("video");
+  const isPhone = usePhonePlayer();
   const dock = useRef<HTMLElement>(null);
   useDockRoom(dock);
   const playerStart = usePlayerStart(dock);
@@ -309,6 +310,8 @@ function VideoDock({
   };
   const clock = (seconds: number) =>
     `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+  // On a phone the strip shows only song-form names, so the one playing is named beside the video.
+  const playing = sections ? sections[sectionAt(sections, now)] : undefined;
 
   return (
     <aside
@@ -316,6 +319,7 @@ function VideoDock({
       className="cd-player"
       style={{ insetInlineStart: playerStart }}
       data-compact={chart ? undefined : ""}
+      data-video=""
       aria-label={t("player")}
     >
       {/* Every control in one row along the top (T-2828). */}
@@ -325,7 +329,7 @@ function VideoDock({
             start={musicStart}
             end={musicEnd}
             now={now}
-
+            isCompact={isPhone}
             onStart={setMusicStart}
             onEnd={setMusicEnd}
             saveLabel={
@@ -348,11 +352,21 @@ function VideoDock({
             }}
           />
         )}
-        {chart && !sections && <Text type="supporting">{t("noTempo")}</Text>}
-        <HStack gap={1} vAlign="center">
-          <Text type="supporting">
-            {t("player")} · {clock(now)}
-          </Text>
+        {chart && !sections && (
+          <span className="cd-player__note">
+            <Text type="supporting">{t("noTempo")}</Text>
+          </span>
+        )}
+        {playing && (
+          <p className="cd-player__now" aria-hidden="true">
+            {playing.name}
+          </p>
+        )}
+        <div className="cd-player__end">
+          <span className="cd-player__clock">
+            <span className="cd-player__kind">{t("player")} · </span>
+            {clock(now)}
+          </span>
           <Button
             label={t("openYouTube")}
             href={url}
@@ -372,10 +386,10 @@ function VideoDock({
             tooltip={t("close")}
             onClick={onClose}
           />
-        </HStack>
+        </div>
       </div>
       {saving === "failed" && (
-        <div role="alert">
+        <div role="alert" className="cd-player__alert">
           <Text type="supporting">{t("saveFailed")}</Text>
         </div>
       )}
