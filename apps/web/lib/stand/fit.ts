@@ -16,6 +16,16 @@ export function fitScale(start: number, fits: (scale: number) => boolean): numbe
   return SONG_MIN_SCALE;
 }
 
+/**
+ * On a phone, one section at a time (R-03.12, T-2842): how much a section is drawn smaller so the
+ * whole of it fits the room, given its height at the chosen size; never larger than chosen, never
+ * under the song's smallest, below which it reads poorly and scrolls instead.
+ */
+export function sectionZoom(height: number, room: number): number {
+  if (height <= 0 || height <= room) return 1;
+  return Math.max(SONG_MIN_SCALE, Math.floor((room / height) * 100) / 100);
+}
+
 /** How far apart two fingers must close or open, as a share of where they began. */
 const PINCH_IN = 0.8;
 const PINCH_OUT = 1.25;
