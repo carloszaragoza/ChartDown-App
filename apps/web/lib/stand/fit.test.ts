@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fitScale, pinchLayout, SONG_MIN_SCALE } from "./fit";
+import { fitScale, pinchLayout, sectionZoom, SONG_MIN_SCALE } from "./fit";
 
 describe("T-2823 the whole song fits the screen", () => {
   it("R-03.12 the numbers stay at the chosen size when the song fits", () => {
@@ -20,5 +20,20 @@ describe("T-2823 the whole song fits the screen", () => {
     expect(pinchLayout(1.5, "song")).toBe("sections");
     expect(pinchLayout(0.95, "sections")).toBe("sections");
     expect(pinchLayout(1.1, "song")).toBe("song");
+  });
+});
+
+describe("R-03.12 a section in one screen on a phone (T-2842)", () => {
+  it("R-03.12 a section taller than the room is drawn small enough to fit it", () => {
+    expect(sectionZoom(800, 600)).toBe(0.75);
+    expect(sectionZoom(700, 600) * 700).toBeLessThanOrEqual(600);
+  });
+  it("R-03.12 a section that fits keeps the chosen size, never larger", () => {
+    expect(sectionZoom(400, 600)).toBe(1);
+    expect(sectionZoom(600, 600)).toBe(1);
+    expect(sectionZoom(0, 600)).toBe(1);
+  });
+  it("R-03.12 a section never shrinks under 60 %: past that it scrolls", () => {
+    expect(sectionZoom(2000, 600)).toBe(SONG_MIN_SCALE);
   });
 });

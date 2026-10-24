@@ -58,7 +58,7 @@ import {
   type NumberSize,
   type StandLayout,
 } from "../../../../lib/stand/preferences";
-import { fitScale, pinchLayout } from "../../../../lib/stand/fit";
+import { fitScale, pinchLayout, sectionZoom } from "../../../../lib/stand/fit";
 import { useChartLabels } from "../../../_components/chartLabels";
 import { DockRoom } from "../../../_components/DockRoom";
 import type { Display } from "../display";
@@ -761,6 +761,45 @@ function StandModeView({
     const resized = new ResizeObserver(fit);
     resized.observe(box);
     return () => resized.disconnect();
+  }, [isSong, isPhone, preferences.size, cards.length, style, beats, notes]);
+  // On a phone, one section at a time (T-2842): each section is drawn small enough that the whole
+  // of it fits the stack, so it is read whole before the next one slides in; each keeps its size,
+  // current or not.
+  useLayoutEffect(() => {
+    const box = stack.current;
+    if (!box) return;
+    const sections = () =>
+      [...box.querySelectorAll<HTMLElement>(".cd-stand-card")].flatMap((card) => {
+        const inner = card.firstElementChild;
+        return inner instanceof HTMLElement ? [{ card, inner }] : [];
+      });
+    if (!isPhone || isSong) {
+      for (const { inner } of sections()) inner.style.removeProperty("zoom");
+      return;
+    }
+    const fit = () => {
+      for (const { card, inner } of sections()) {
+        inner.style.removeProperty("zoom");
+        // The card's frame and its snap margin above and below stay at their size.
+        const frame =
+          card.offsetHeight -
+          inner.offsetHeight +
+          parseFloat(getComputedStyle(card).scrollMarginBlockStart || "0") * 2;
+        const zoom = sectionZoom(inner.offsetHeight, box.clientHeight - frame);
+        if (zoom < 1) inner.style.setProperty("zoom", String(zoom));
+      }
+    };
+    fit();
+    let gone = false;
+    void document.fonts?.ready.then(() => {
+      if (!gone) fit();
+    });
+    const resized = new ResizeObserver(fit);
+    resized.observe(box);
+    return () => {
+      gone = true;
+      resized.disconnect();
+    };
   }, [isSong, isPhone, preferences.size, cards.length, style, beats, notes]);
   // Two fingers closing show the whole song, opening one section at a time (T-2823), on the
   // stack only, instead of the browser's zoom.
