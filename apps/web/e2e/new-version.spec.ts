@@ -178,8 +178,9 @@ test("R-03.11 T-2828 T-2832 a YouTube link opens the video in a player across th
 test("R-03.11 T-2841 on a phone the video is only heard: one row with Play, and the sections as a strip", async ({
   page,
 }) => {
-  await page.setViewportSize({ width: 390, height: 760 });
   await signUpAndConfirm(page, unique("phone"), "Pia Phone");
+  // Signed in at the desktop size, where the profile shows in the side navigation; then a phone.
+  await page.setViewportSize({ width: 390, height: 760 });
   await page.goto("/versions/new?song=new&q=Tide%20Lamp");
   await page.getByLabel("YouTube link").fill("https://www.youtube.com/watch?v=hBL9EBKB5DI");
   await page.getByRole("button", { name: "Play the video" }).click();
