@@ -41,6 +41,8 @@ import {
   type TouchEvent,
 } from "react";
 import { ChartSection } from "../../../_components/ChartPreview";
+import { NotesSwitch } from "../../../_components/NotesSwitch";
+import { useHiddenNotes } from "../../../../lib/view/notes";
 import { useMetronomeControls } from "../../../_components/MetronomeControls";
 import { SongForm } from "../../../_components/SongForm";
 import { BeatsControl } from "../../../_components/BeatsControl";
@@ -171,6 +173,8 @@ function StandModeView({
   const isPhone = usePhone(phoneGuess);
   // Held sideways, the song form joins the top bar, so the bars get the height (R-03.8).
   const isSideways = useShortScreen() && isPhone;
+  // View's Show notes, kept on the device (T-2843).
+  const hideNotes = useHiddenNotes();
   const [isSheetOpen, setSheetOpen] = useState(false);
   const [current, setCurrent] = useState(() => readSection(chart, String(initial + 1)));
   // The visual metronome (R-11.1 to R-11.5): it plays from the section being read, and the
@@ -563,6 +567,7 @@ function StandModeView({
           help: { about: c("beatsAbout"), text: c("beatsHelp") },
         }}
       />
+      <NotesSwitch />
       {!isSong &&
         choice(
           t("comingUp"),
@@ -628,7 +633,7 @@ function StandModeView({
         abbreviation: item.abbreviation,
         description: describe(item),
         href: item.href,
-        hasNotes: item.hasNotes,
+        hasNotes: item.hasNotes && !hideNotes,
         isQueued: index === queued,
       }))}
     />
@@ -761,7 +766,7 @@ function StandModeView({
     const resized = new ResizeObserver(fit);
     resized.observe(box);
     return () => resized.disconnect();
-  }, [isSong, isPhone, preferences.size, cards.length, style, beats, notes]);
+  }, [isSong, isPhone, preferences.size, cards.length, style, beats, notes, hideNotes]);
   // On a phone, one section at a time (T-2842): each section is drawn small enough that the whole
   // of it fits the stack, so it is read whole before the next one slides in; each keeps its size,
   // current or not.
@@ -800,7 +805,7 @@ function StandModeView({
       gone = true;
       resized.disconnect();
     };
-  }, [isSong, isPhone, preferences.size, cards.length, style, beats, notes]);
+  }, [isSong, isPhone, preferences.size, cards.length, style, beats, notes, hideNotes]);
   // Two fingers closing show the whole song, opening one section at a time (T-2823), on the
   // stack only, instead of the browser's zoom.
   useEffect(() => {
@@ -1024,6 +1029,7 @@ function StandModeView({
                         formatter={formatter}
                         labels={labels}
                         notes={notes ? (notes[index] ?? []) : section.notes}
+                        hideNotes={hideNotes}
                         {...(isCurrent ? { id: "current-section" } : {})}
                         meter={chart.meter}
                         beats={beats}

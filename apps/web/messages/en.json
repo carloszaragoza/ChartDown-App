@@ -681,6 +681,8 @@
     "textPlaceholder": "Short and direct, like “Out on the first pass.”"
   },
   "stand": {
+    "showNotes": "Show notes",
+    "showNotesHelp": "The MD's and the instruments' notes on each section.",
     "noTempoShort": "– bpm",
     "view": "View",
     "turnPage": "Previous and next",

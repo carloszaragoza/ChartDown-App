@@ -369,3 +369,32 @@ test("R-03.12 View's Coming up and Number size are kept on the device", async ({
   await expect(page.locator(".cd-stand-card")).toHaveCount(2);
   expect(await chord()).toBeGreaterThan(medium);
 });
+
+test("R-03.12 T-2843 Show notes off hides the sections' notes, in stand mode and on the version page", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, {
+    title: `Quiet Notes ${Date.now()}`,
+    content:
+      "## Verse\n> MD: Build a little more each time.\n1 | 4 | 5 | 1\n## Chorus\n4 | 5 | 6m | 1\n",
+  });
+  await page.goto(`/versions/${id}/stand`);
+  await expectStandNow(page, "Verse");
+  const note = page.getByText("Build a little more each time.");
+  await expect(note).toBeVisible();
+  await page.getByRole("button", { name: "View options" }).click();
+  const shown = page.getByRole("dialog").getByRole("switch", { name: "Show notes" });
+  await expect(shown).toBeChecked();
+  await shown.click();
+  await page.keyboard.press("Escape");
+  await expect(note).toHaveCount(0);
+  // Kept on the device: the version page hides them too, and its View turns them back on.
+  await page.goto(`/versions/${id}`);
+  await expect(page.getByRole("heading", { name: "Verse", level: 2 })).toBeVisible();
+  await expect(note).toHaveCount(0);
+  await page.getByRole("button", { name: "View options" }).click();
+  await page.getByRole("dialog").getByRole("switch", { name: "Show notes" }).click();
+  await page.keyboard.press("Escape");
+  await expect(note).toBeVisible();
+});

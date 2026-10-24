@@ -168,6 +168,7 @@ export function DisplayedChart({
       homeKey={display?.key ?? chart.key}
       isFramed
       hasForm
+      canHideNotes
       beats={display?.beats ?? "auto"}
       phone={phone}
       viewOptions={viewOptions}
