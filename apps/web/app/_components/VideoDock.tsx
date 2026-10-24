@@ -373,7 +373,7 @@ function VideoDock({
             <Text type="supporting">{t("noTempo")}</Text>
           </span>
         )}
-        {playing && (
+        {isPhone && playing && (
           <p className="cd-player__now" aria-hidden="true">
             {playing.name}
           </p>
