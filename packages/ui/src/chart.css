@@ -819,64 +819,49 @@
   display: none;
 }
 
-/* The video on a phone (T-2841): YouTube's minimum, a 200 px square, with its controls beside it
-   (the time, the section playing, Start and end, and the handle that moves it) and the sections
-   one thin strip of song-form names under them all, in a card that floats over the page at the
-   bottom or the top. The volume is left to the device's buttons. */
-.cd-player__grip {
+/* The video on a phone (T-2841): only heard, by the owner's decision. One row of Play, the time
+   with the section playing, Start and end, Open on YouTube and Close, and the sections one thin
+   strip of song-form names under it. The player itself is invisible: until the video first plays
+   it lies over Play, where iOS needs the first tap, and after that it is out of the way. The
+   volume is left to the device's buttons. */
+.cd-player__play-video {
   display: none;
 }
 @media (max-width: 47.99rem), (orientation: landscape) and (max-height: 31.99rem) {
   .cd-player[data-video]:not([data-compact]) {
     display: grid;
-    grid-template-columns: 200px minmax(0, 1fr);
-    grid-template-rows: auto auto auto 1fr;
+    grid-template-columns: var(--spacing-12) minmax(0, 1fr) auto auto auto;
     grid-template-areas:
-      "frame end"
-      "frame now"
-      "frame set"
-      "frame grip"
-      "points points"
-      "alert alert"
-      "cells cells";
-    gap: var(--spacing-2) var(--spacing-3);
-    inset-inline: var(--spacing-2) !important;
-    inset-block-end: calc(var(--spacing-2) + env(safe-area-inset-bottom, 0px));
-    padding: var(--spacing-3);
-    border: var(--border-width) solid var(--color-border-emphasized);
-    border-radius: var(--radius-container);
-  }
-  .cd-player[data-video]:not([data-compact]) .cd-player__grip {
-    display: flex;
-    grid-area: grip;
+      "play now set open close"
+      "play clock set open close"
+      "note note note note note"
+      "points points points points points"
+      "alert alert alert alert alert"
+      "cells cells cells cells cells";
     align-items: center;
-    justify-content: center;
-    min-block-size: var(--spacing-12);
-    margin: 0;
-    padding: 0;
-    border: 0;
-    border-radius: var(--radius-inner);
-    background: var(--color-background-muted);
-    color: var(--color-text-secondary);
-    cursor: grab;
-    font: inherit;
-    touch-action: none;
+    gap: 0 var(--spacing-2);
+    padding-inline: var(--spacing-3);
   }
-  .cd-player[data-video]:not([data-compact]) :is(.cd-player__controls, .cd-player__body) {
+  .cd-player[data-video]:not([data-compact])
+    :is(.cd-player__controls, .cd-player__body, .cd-player__end) {
     display: contents;
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player__play-video {
+    display: flex;
+    grid-area: play;
   }
   .cd-player[data-video]:not([data-compact]) .cd-player__controls > :first-child {
     grid-area: set;
-    justify-self: start;
-  }
-  .cd-player[data-video]:not([data-compact]) .cd-player__end {
-    grid-area: end;
   }
   .cd-player[data-video]:not([data-compact]) .cd-player__clock {
-    margin-inline-end: auto;
-    color: var(--color-text-primary);
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
+    grid-area: clock;
+    align-self: start;
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player__end > a.astryx-button {
+    grid-area: open;
+  }
+  .cd-player[data-video]:not([data-compact]) .cd-player__end > button.astryx-button {
+    grid-area: close;
   }
   .cd-player[data-video]:not([data-compact]) .cd-player__kind {
     display: none;
@@ -884,6 +869,7 @@
   .cd-player[data-video]:not([data-compact]) .cd-player__now {
     display: block;
     grid-area: now;
+    align-self: end;
     overflow: hidden;
     margin: 0;
     color: var(--color-text-blue);
@@ -892,7 +878,7 @@
     white-space: nowrap;
   }
   .cd-player[data-video]:not([data-compact]) .cd-player__note {
-    grid-area: now;
+    grid-area: note;
   }
   .cd-player[data-video]:not([data-compact]) .cd-player__points {
     grid-area: points;
@@ -900,18 +886,31 @@
   .cd-player[data-video]:not([data-compact]) .cd-player__alert {
     grid-area: alert;
   }
+  /* Invisible, over Play until the video first plays; then out of the way. YouTube plays only in
+     a player of at least 200 px square, so it keeps that size, centred on Play, and is cut to
+     Play's size: only Play's square takes the tap, on the middle of the video. */
   .cd-player[data-video]:not([data-compact]) .cd-video-dock__frame {
-    grid-area: frame;
+    z-index: 4;
+    grid-area: play;
+    align-self: center;
     inline-size: 200px;
     block-size: 200px;
+    max-inline-size: none;
     max-block-size: none;
+    margin: calc((var(--spacing-12) - 200px) / 2);
     aspect-ratio: auto;
+    clip-path: inset(calc((200px - var(--spacing-12)) / 2));
+    opacity: 0.01;
+  }
+  .cd-player[data-video][data-started]:not([data-compact]) .cd-video-dock__frame {
+    pointer-events: none;
   }
   .cd-player[data-video]:not([data-compact]) .cd-player__volume {
     display: none;
   }
   .cd-player[data-video]:not([data-compact]) .cd-player__main {
     grid-area: cells;
+    margin-block-start: var(--spacing-2);
   }
   .cd-player[data-video]:not([data-compact]) .cd-player-cells {
     min-block-size: var(--spacing-12);
@@ -926,31 +925,6 @@
   .cd-player[data-video]:not([data-compact]) .cd-player-cells__short {
     margin-block: auto;
     font-size: var(--cd-short-size, var(--font-size-base));
-  }
-}
-/* Upright, moved to the top: it takes no room below the chart. */
-@media (max-width: 47.99rem) and (not ((orientation: landscape) and (max-height: 31.99rem))) {
-  .cd-player[data-video][data-top]:not([data-compact]) {
-    --cd-player-below: 0;
-    inset-block: calc(var(--spacing-2) + env(safe-area-inset-top, 0px)) auto;
-  }
-}
-/* Turned on its side, the same card at the bottom right, or moved to the left, and the chart in
-   the room on the other side. */
-@media (orientation: landscape) and (max-height: 31.99rem) {
-  .cd-player[data-video]:not([data-compact]) {
-    --cd-player-below: 0;
-    inset-inline: auto calc(var(--spacing-3) + env(safe-area-inset-right, 0px)) !important;
-    inline-size: 24rem;
-  }
-  .cd-player[data-video][data-start]:not([data-compact]) {
-    inset-inline: calc(var(--spacing-3) + env(safe-area-inset-left, 0px)) auto !important;
-  }
-  body:has(> .cd-player[data-video]:not([data-compact], [data-start])) {
-    padding-inline-end: calc(24rem + var(--spacing-3) + env(safe-area-inset-right, 0px));
-  }
-  body:has(> .cd-player[data-video][data-start]:not([data-compact])) {
-    padding-inline-start: calc(24rem + var(--spacing-3) + env(safe-area-inset-left, 0px));
   }
 }
 

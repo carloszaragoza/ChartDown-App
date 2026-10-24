@@ -66,14 +66,9 @@ function useMedia(query: string): boolean {
   );
 }
 
-/** Where the video's player is laid out for a phone, upright or turned (T-2841). */
+/** Where the video's player is laid out for a phone, upright or turned: only heard (T-2841). */
 export function usePhonePlayer(): boolean {
   return useMedia("(max-width: 47.99rem), (orientation: landscape) and (max-height: 31.99rem)");
-}
-
-/** A phone turned on its side, where the player sits beside the chart (T-2841). */
-export function useSidePlayer(): boolean {
-  return useMedia("(orientation: landscape) and (max-height: 31.99rem)");
 }
 
 /**
