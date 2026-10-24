@@ -110,3 +110,32 @@ test("R-05.1 a set's name is unique in the band; songs are added, ordered and du
   await expect(page.getByRole("button", { name: /^Move / })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Duplicate", exact: true })).toHaveCount(0);
 });
+
+test("R-03.11 T-2844 a set's song plays its version's video", async ({ page, request }) => {
+  const stamp = Date.now();
+  const band = `Reel Band ${stamp}`;
+  const set = `Matins ${stamp}`;
+  const version = await createVersion(request, {
+    title: `Glass River ${stamp}`,
+    content: "## Verse\n1 | 4\n## Chorus\n4 | 1\n",
+    youtube: "https://www.youtube.com/watch?v=hBL9EBKB5DI",
+  });
+  await signUpAndConfirm(page, unique("setvideo"), "Vic Video");
+  await page.goto("/bands");
+  await page.getByLabel("Band name").fill(band);
+  await page.getByRole("button", { name: "Create band" }).click();
+  await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
+  await createSet(page, { name: set, type: "Rehearsal" });
+  await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
+  const setId = new URL(page.url()).pathname.split("/")[2] ?? "";
+  await page.goto(`/versions/${version}`);
+  await addToSet(page, `${band} · ${set}`);
+  await page.goto(`/sets/${setId}/songs/1`);
+  await page.getByRole("button", { name: "Watch the video" }).click();
+  const dock = page.getByRole("complementary", { name: "Video" });
+  await expect(dock).toBeVisible();
+  await expect(dock.getByRole("link", { name: "Open on YouTube" })).toHaveAttribute(
+    "href",
+    "https://www.youtube.com/watch?v=hBL9EBKB5DI",
+  );
+});

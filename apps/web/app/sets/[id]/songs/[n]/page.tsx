@@ -24,6 +24,8 @@ import { ChartControlsSlot } from "../../../../_components/ChartControlsSlot";
 import { ChartPreview } from "../../../../_components/ChartPreview";
 import { ViewOptions } from "../../../../_components/ViewOptions";
 import { saveAudioPoints } from "../../../../versions/[id]/audio";
+import { saveVideoPoints } from "../../../../versions/[id]/actions";
+import { VideoLink } from "../../../../_components/VideoDock";
 import { setRecording } from "../../../../../lib/sets/recording";
 import { LinkChoice } from "../../../../_components/LinkChoice";
 import { UUID } from "../../../../versions/[id]/load";
@@ -126,6 +128,18 @@ export default async function SetSongPage({
   // The band's recording of this song, for its members (R-06.7, T-2603).
   const a = await getTranslations("audio");
   const recording = await setRecording(supabase, song.set_id, song.version_id, a("personal"));
+  // The version's video, as on its own page (R-03.11, T-2844); its owner saves where the music
+  // starts and ends here too.
+  const [{ data: video }, { data: who }] = await Promise.all([
+    supabase
+      .from("versions")
+      .select("owner_id, status, source_youtube_url, video_start_ms, video_end_ms")
+      .eq("id", song.version_id)
+      .maybeSingle(),
+    supabase.auth.getUser(),
+  ]);
+  const youtube = (video?.source_youtube_url as string | null | undefined) ?? null;
+  const ownsVideo = !!video && video.owner_id === who.user?.id && video.status === "active";
 
   const phone = await guessPhone();
   return (
@@ -162,6 +176,24 @@ export default async function SetSongPage({
                       ? t("allNotesMd")
                       : t("allNotesTempMd")}
                 </Text>
+                {youtube && (
+                  <HStack gap={1} vAlign="center">
+                    <VideoLink
+                      size={phone ? "md" : "lg"}
+                      url={youtube}
+                      chart={chart}
+                      saved={
+                        typeof video?.video_start_ms === "number"
+                          ? video.video_start_ms / 1000
+                          : null
+                      }
+                      savedEnd={
+                        typeof video?.video_end_ms === "number" ? video.video_end_ms / 1000 : null
+                      }
+                      save={ownsVideo ? saveVideoPoints.bind(null, song.version_id) : undefined}
+                    />
+                  </HStack>
+                )}
                 {recording && (
                   <HStack gap={1} vAlign="center">
                     <AudioButton
