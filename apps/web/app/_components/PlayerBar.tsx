@@ -36,22 +36,52 @@ export function usePlayerStart(dock: RefObject<HTMLElement | null>): number {
   useEffect(() => {
     const element = dock.current;
     if (!element) return;
-    const nav =
-      element.parentElement === document.body ? document.querySelector(".astryx-side-nav") : null;
-    const panel = nav?.closest(".astryx-layout-panel") ?? null;
-    const measure = () =>
+    // Looked for on every measure: turning a phone shows the side navigation, or hides it, after
+    // the player opened (owner's review on iPhone, October 24, 2026).
+    let watched: Element | null = null;
+    const measure = () => {
+      const nav =
+        element.parentElement === document.body ? document.querySelector(".astryx-side-nav") : null;
+      const panel = nav?.closest(".astryx-layout-panel") ?? null;
+      if (panel !== watched) {
+        if (watched) observer.unobserve(watched);
+        if (panel) observer.observe(panel);
+        watched = panel;
+      }
       setStart(Math.max(0, Math.round(panel ? panel.getBoundingClientRect().right : 0)));
+    };
+    const observer = new ResizeObserver(() => measure());
     const first = requestAnimationFrame(measure);
-    const observer = new ResizeObserver(measure);
-    if (panel) observer.observe(panel);
-    window.addEventListener("resize", measure);
+    // The layout follows the screen's size a moment after it changes.
+    const shell = new ResizeObserver(() => requestAnimationFrame(measure));
+    shell.observe(document.documentElement);
+    const changed = new MutationObserver(() => measure());
+    changed.observe(document.body, { childList: true, subtree: true });
     return () => {
       cancelAnimationFrame(first);
       observer.disconnect();
-      window.removeEventListener("resize", measure);
+      shell.disconnect();
+      changed.disconnect();
     };
   }, [dock]);
   return start;
+}
+
+function useMedia(query: string): boolean {
+  return useSyncExternalStore(
+    (onChange) => {
+      const list = window.matchMedia(query);
+      list.addEventListener("change", onChange);
+      return () => list.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia(query).matches,
+    () => false,
+  );
+}
+
+/** Where the video's player is laid out for a phone, upright or turned: only heard (T-2841). */
+export function usePhonePlayer(): boolean {
+  return useMedia("(max-width: 47.99rem), (orientation: landscape) and (max-height: 31.99rem)");
 }
 
 /**
@@ -269,6 +299,7 @@ export function MusicPointsControls({
   saveLabel,
   isSaving,
   onSave,
+  isCompact = false,
 }: {
   start: number;
   end: number | null;
@@ -281,6 +312,8 @@ export function MusicPointsControls({
   saveLabel?: string | undefined;
   isSaving: boolean;
   onSave: () => void;
+  /** Beside the video on a phone: the button says only the times (T-2841). */
+  isCompact?: boolean;
 }) {
   const t = useTranslations("video");
   const [isOpen, setOpen] = useState(false);
@@ -292,8 +325,8 @@ export function MusicPointsControls({
       <ToggleButton
         label={
           end === null
-            ? t("pointsFrom", { start: clock(start) })
-            : t("points", { start: clock(start), end: clock(end) })
+            ? t(isCompact ? "pointsShortFrom" : "pointsFrom", { start: clock(start) })
+            : t(isCompact ? "pointsShort" : "points", { start: clock(start), end: clock(end) })
         }
         icon={<Icon icon={AdjustmentsHorizontalIcon} />}
         size="sm"

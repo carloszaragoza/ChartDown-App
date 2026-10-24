@@ -175,6 +175,52 @@ test("R-03.11 T-2828 T-2832 a YouTube link opens the video in a player across th
   await expect(dock).toHaveCount(0);
 });
 
+test("R-03.11 T-2841 on a phone the video is only heard: one row with Play, and the sections as a strip", async ({
+  page,
+}) => {
+  await signUpAndConfirm(page, unique("phone"), "Pia Phone");
+  // Signed in at the desktop size, where the profile shows in the side navigation; then a phone.
+  await page.setViewportSize({ width: 390, height: 760 });
+  await page.goto("/versions/new?song=new&q=Tide%20Lamp");
+  await page.getByLabel("YouTube link").fill("https://www.youtube.com/watch?v=hBL9EBKB5DI");
+  await page.getByRole("button", { name: "Play the video" }).click();
+  const dock = page.getByRole("complementary", { name: "Video" });
+  await expect(dock).toBeVisible();
+  // The dock's own Play, with the invisible player over it until the video first plays.
+  const play = dock.getByRole("button", { name: "Play the video" });
+  await expect(play).toBeVisible();
+  const frame = dock.locator(".cd-video-dock__frame");
+  await expect(frame).toHaveCSS("opacity", "0.01");
+  const over = await frame.evaluate((element) => {
+    const button = element.closest("aside")?.querySelector(".cd-player__play-video");
+    const a = element.getBoundingClientRect();
+    const b = button?.getBoundingClientRect();
+    // YouTube's minimum, centred on Play.
+    return {
+      size: [Math.round(a.width), Math.round(a.height)],
+      centred:
+        !!b &&
+        Math.abs(a.left + a.width / 2 - (b.left + b.width / 2)) < 2 &&
+        Math.abs(a.top + a.height / 2 - (b.top + b.height / 2)) < 2,
+    };
+  });
+  expect(over).toEqual({ size: [200, 200], centred: true });
+  // The device's buttons set the volume; the strip shows only the song-form names.
+  await expect(dock.getByRole("slider", { name: "Video volume" })).toBeHidden();
+  const bar = dock.getByRole("group", { name: "Sections" });
+  await expect(bar.locator(".cd-player-cells__short")).toHaveText(["V", "C"]);
+  await expect(bar.locator(".cd-player-cells__name").first()).toBeHidden();
+  // One row and a strip: far shorter than the video would be.
+  const height = await dock.evaluate((element) => element.getBoundingClientRect().height);
+  expect(height).toBeLessThan(200);
+  // The section chosen is named beside Play.
+  await bar.getByRole("button", { name: "Go to Chorus" }).click();
+  await expect(dock.locator(".cd-player__now")).toHaveText("Chorus");
+  await expect(dock.getByRole("button", { name: /^\d+:\d{2} – |^From / })).toBeVisible();
+  await dock.getByRole("button", { name: "Close the video" }).click();
+  await expect(dock).toHaveCount(0);
+});
+
 test("R-03.11 T-2830 T-2831 the owner saves where the music starts and ends, and they are there for the next reader", async ({
   page,
 }) => {
