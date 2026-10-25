@@ -681,6 +681,8 @@
     "textPlaceholder": "Corta y directa, como “Fuera en la primera vuelta.”"
   },
   "stand": {
+    "showNotes": "Mostrar notas",
+    "showNotesHelp": "Las notas del director musical y de los instrumentos en cada sección.",
     "noTempoShort": "– bpm",
     "view": "Vista",
     "turnPage": "Anterior y siguiente",

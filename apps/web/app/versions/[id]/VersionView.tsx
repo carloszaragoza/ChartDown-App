@@ -16,6 +16,7 @@ import type { Display } from "./display";
 import { BackToCatalog } from "./BackToCatalog";
 import { BandAudio, type BandRecording } from "./BandAudio";
 import { VideoLink } from "../../_components/VideoDock";
+import { NotesSwitch } from "../../_components/NotesSwitch";
 import { ViewOptions } from "../../_components/ViewOptions";
 import type { BasedOn } from "./load";
 import { AddToSet, ReportForm, VersionMenu, type VersionMenuItem } from "./VersionControls";
@@ -374,6 +375,7 @@ export function VersionView({
                   display &&
                   path && (
                     <ViewOptions phone={phone}>
+                      <NotesSwitch />
                       <DisplayBar
                         words={{
                           label: v("label"),

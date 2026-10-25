@@ -398,6 +398,7 @@ export function OfflineReader() {
                   homeKey={homeKey}
                   isFramed
                   hasForm
+                  canHideNotes
                   notes={notes}
                   beats={beats}
                 />
