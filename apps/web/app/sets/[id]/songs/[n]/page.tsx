@@ -22,6 +22,7 @@ import { BeatsControl } from "../../../../_components/BeatsControl";
 import { AudioButton } from "../../../../_components/AudioDock";
 import { ChartControlsSlot } from "../../../../_components/ChartControlsSlot";
 import { ChartPreview } from "../../../../_components/ChartPreview";
+import { NotesSwitch } from "../../../../_components/NotesSwitch";
 import { ViewOptions } from "../../../../_components/ViewOptions";
 import { saveAudioPoints } from "../../../../versions/[id]/audio";
 import { saveVideoPoints } from "../../../../versions/[id]/actions";
@@ -270,12 +271,14 @@ export default async function SetSongPage({
               homeKey={homeKey}
               isFramed
               hasForm
+              canHideNotes
               hasControlsInHeader
               beats={beats}
               // Numbers / Letters, Beat marks and View as in one sheet beside the metronome, as on
               // the version page and in stand mode (T-2807).
               viewOptions={
                 <ViewOptions phone={phone}>
+                  <NotesSwitch />
                   <LinkChoice
                     phone={phone}
                     label={v("style")}

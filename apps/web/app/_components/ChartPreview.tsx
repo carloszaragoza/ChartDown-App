@@ -42,6 +42,7 @@ import { DockRoom, useDockRoomSize } from "./DockRoom";
 import { useChartLabels } from "./chartLabels";
 import { hasJump, playRuns } from "../../lib/chart/playRuns";
 import { drawnRows } from "../../lib/chart/copies";
+import { useHiddenNotes } from "../../lib/view/notes";
 
 export interface ChartSectionProps {
   section: Section;
@@ -49,6 +50,8 @@ export interface ChartSectionProps {
   labels: SectionLabels;
   /** The notes shown on it; the chart's own by default. */
   notes?: readonly MDNoteData[];
+  /** None of its notes, when the reader chose to hide them in View (T-2843). */
+  hideNotes?: boolean;
   id?: string;
   /** In a card, as in stand mode; plain in the editors' previews. */
   isFramed?: boolean;
@@ -79,6 +82,7 @@ export function ChartSection({
   formatter,
   labels,
   notes,
+  hideNotes = false,
   id,
   isFramed = false,
   meter,
@@ -102,7 +106,9 @@ export function ChartSection({
           {times && <Token label={times} size="sm" color="blue" />}
           {after}
         </HStack>
-        <MDNotes notes={notes ?? section.notes} instrumentName={labels.bar.instrument} />
+        {!hideNotes && (
+          <MDNotes notes={notes ?? section.notes} instrumentName={labels.bar.instrument} />
+        )}
         {drawnRows(section).map((row, index) => (
           <BarRow
             key={index}
@@ -146,6 +152,7 @@ export function ChartPreview({
   phone = false,
   viewOptions,
   hasControlsInHeader = false,
+  canHideNotes = false,
 }: {
   chart: Chart;
   style?: ChordStyle;
@@ -166,7 +173,10 @@ export function ChartPreview({
   viewOptions?: ReactNode;
   /** The metronome and View options in the page header's ChartControlsSlot, not the pinned row. */
   hasControlsInHeader?: boolean;
+  /** A page that reads the chart, where View's Show notes applies; never an editor (T-2843). */
+  canHideNotes?: boolean;
 }) {
+  const hideNotes = useHiddenNotes() && canHideNotes;
   const isPhone = usePhone(phone);
   const labels = useChartLabels();
   const c = useTranslations("chart");
@@ -331,6 +341,7 @@ export function ChartPreview({
             meter={chart.meter}
             beats={beats}
             {...(notes ? { notes: notes[index] ?? [] } : {})}
+            hideNotes={hideNotes}
             now={nowAt(index)}
             start={startIn(index)}
           />
