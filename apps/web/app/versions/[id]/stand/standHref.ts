@@ -79,3 +79,27 @@ export function songsAhead(
     ...(current === 0 && songs.previousSong ? [songs.previousSong] : []),
   ];
 }
+
+/** One song of the set in stand mode's list (R-03.13). */
+export interface SetSongLink {
+  position: number;
+  title: string;
+  /** The key it is played in, as the set's song list shows it. */
+  key: string;
+  href: string;
+  current: boolean;
+}
+
+/**
+ * The set's songs in order for stand mode's list (R-03.13), the one being read marked; each one
+ * opens at its first section, through `link`, which keeps the view.
+ */
+export function setSongLinks(
+  songs: readonly { position: number; title: string; key: string }[],
+  current: number,
+  link: (position: number) => string,
+): SetSongLink[] {
+  return [...songs]
+    .sort((a, b) => a.position - b.position)
+    .map((song) => ({ ...song, href: link(song.position), current: song.position === current }));
+}

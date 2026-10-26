@@ -33,7 +33,7 @@ import { BeatsMemory } from "../../../_components/BeatsControl";
 import { AudioButton } from "../../../_components/AudioDock";
 import { ChartPreview } from "../../../_components/ChartPreview";
 import { readDisplay } from "../../../versions/[id]/display";
-import { readSection } from "../../../versions/[id]/stand/standHref";
+import { readSection, setSongLinks } from "../../../versions/[id]/stand/standHref";
 import { StandMode } from "../../../versions/[id]/stand/StandMode";
 import { OfflineChanges } from "../../../_components/OfflineChanges";
 import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
@@ -328,6 +328,15 @@ export function OfflineReader() {
           href: base,
           name: bundle.set.name,
           songOf: s("songOf", { position: song.position, total }),
+          songs: setSongLinks(
+            bundle.songs.map((each) => ({
+              position: each.position,
+              title: each.title,
+              key: keyName(setSongKey(parse(each.content), each.set_key)),
+            })),
+            song.position,
+            (n) => `${base}/${n}/stand`,
+          ),
           ...(song.position > 1
             ? { previousSong: `${base}/${song.position - 1}/stand?s=999` }
             : {}),

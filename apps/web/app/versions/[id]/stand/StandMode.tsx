@@ -6,6 +6,8 @@ import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
+import { Item } from "@astryxdesign/core/Item";
+import { List } from "@astryxdesign/core/List";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Selector } from "@astryxdesign/core/Selector";
 import { StackItem } from "@astryxdesign/core/Stack";
@@ -22,6 +24,7 @@ import {
   XMarkIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  QueueListIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -70,6 +73,7 @@ import {
   songsAhead,
   standHref,
   withView,
+  type SetSongLink,
   type StandTheme,
   type StandView,
 } from "./standHref";
@@ -106,6 +110,8 @@ export interface StandSet {
   songOf: string;
   previousSong?: string;
   nextSong?: string;
+  /** The set's songs, to jump to another one (R-03.13). */
+  songs?: readonly SetSongLink[];
   viewAs?: { label: string; options: ViewAsOption[] };
 }
 
@@ -176,6 +182,8 @@ function StandModeView({
   // View's Show notes, kept on the device (T-2843).
   const hideNotes = useHiddenNotes();
   const [isSheetOpen, setSheetOpen] = useState(false);
+  // The set's songs, to jump to another one when a song is cut short (R-03.13).
+  const [isSongsOpen, setSongsOpen] = useState(false);
   const [current, setCurrent] = useState(() => readSection(chart, String(initial + 1)));
   // The visual metronome (R-11.1 to R-11.5): it plays from the section being read, and the
   // section follows it.
@@ -644,6 +652,60 @@ function StandModeView({
     href: set ? set.href : `/versions/${versionId}`,
   };
   const position = t("position", { current: current + 1, total: chart.sections.length });
+  // "Song 3 of 8" opens the set's songs (R-03.13): choosing one opens it at its first section.
+  // Cutting a song cuts its click; a follower only looks ahead, the leader's band follows.
+  const songsButton = set?.songs?.length ? (
+    <Button
+      label={set.songOf}
+      tooltip={t("setSongs")}
+      variant="ghost"
+      size="lg"
+      isIconOnly={isPhone}
+      icon={<Icon icon={QueueListIcon} />}
+      onClick={() => setSongsOpen(true)}
+    />
+  ) : null;
+  const songsSheet = set?.songs?.length ? (
+    <BottomSheet
+      isOpen={isSongsOpen}
+      onOpenChange={setSongsOpen}
+      label={t("setSongs")}
+      height="hug"
+    >
+      <VStack gap={2} padding={4}>
+        <Heading level={2}>{t("setSongs")}</Heading>
+        <Text type="supporting">{set.name}</Text>
+        {/* A song chosen: its click stops and a follower looks ahead (the row is a link). */}
+        <div
+          onClickCapture={(event) => {
+            const link = (event.target as HTMLElement).closest("a");
+            if (!link) return;
+            if (isPlaying) player.stop();
+            const to = set.songs?.find((song) => song.href === link.getAttribute("href"));
+            if (!to?.current) detach?.();
+            setSongsOpen(false);
+          }}
+        >
+          <List hasDividers edgeCompensation="inline">
+            {set.songs.map((song) => (
+              <Item
+                key={song.position}
+                as="li"
+                href={song.href}
+                isSelected={song.current}
+                startContent={<Text weight="bold">{song.position}</Text>}
+                label={song.title}
+                description={t("setSongKey", { key: song.key })}
+                {...(song.current
+                  ? { endContent: <Token label={t("setSongNow")} size="sm" /> }
+                  : {})}
+              />
+            ))}
+          </List>
+        </div>
+      </VStack>
+    </BottomSheet>
+  ) : null;
   const previous =
     current > 0
       ? { label: t("previous"), href: href(current - 1) }
@@ -904,6 +966,7 @@ function StandModeView({
                       </VStack>
                     </StackItem>
                   )}
+                  {songsButton}
                   <Button
                     label={t("viewOptions")}
                     variant="secondary"
@@ -950,7 +1013,8 @@ function StandModeView({
                       <VStack gap={0}>
                         {set && (
                           <Text type="supporting" maxLines={1}>
-                            {set.name} · {set.songOf}
+                            {/* "Song 3 of 8" is the button beside it when the set's songs are known. */}
+                            {songsButton ? set.name : `${set.name} · ${set.songOf}`}
                           </Text>
                         )}
                         <Heading level={1} maxLines={1}>
@@ -969,6 +1033,7 @@ function StandModeView({
                         </Text>
                       </VStack>
                     </StackItem>
+                    {songsButton}
                     {viewAsControl}
                     <Button
                       label={t("viewOptions")}
@@ -1111,6 +1176,7 @@ function StandModeView({
             <DockRoom />
           </VStack>
           {tempoDialog}
+          {songsSheet}
           {
             <BottomSheet
               isOpen={isSheetOpen}

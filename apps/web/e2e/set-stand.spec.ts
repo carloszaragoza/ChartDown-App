@@ -6,6 +6,7 @@ import {
   chooseSection,
   createSet,
   expectSignedIn,
+  expectStandNow,
   expectStatus,
   gapUnderSongMap,
   setInstruments,
@@ -158,4 +159,52 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   await expect(page.getByRole("combobox", { name: "View as" })).toHaveCount(0);
   await expect(page.getByRole("main")).toContainText(notes.keys);
   expect(await response?.text()).not.toContain(notes.bass);
+});
+
+test("R-03.13 a song cut short: Song 2 of 4 opens the set's songs, and choosing one opens it at its first section", async ({
+  page,
+  request,
+}) => {
+  const stamp = Date.now();
+  const band = `Cut Band ${stamp}`;
+  const set = `Short Night ${stamp}`;
+  const titles = ["Harbor", "Long Ridge", "Ember", "Last Light"].map((name) => `${name} ${stamp}`);
+  const chart =
+    "---\nkey: G\ntempo: 120\n---\n## Intro\n1 | 4\n## Verse\n1 | 5\n## Chorus\n4 | 1\n";
+  const [second, fourth] = [titles[1] ?? "", titles[3] ?? ""];
+  const versions = [];
+  for (const title of titles)
+    versions.push(await createVersion(request, { title, content: chart }));
+
+  await signUpAndConfirm(page, unique("cutmd"), "Cora Cut");
+  await page.goto("/bands");
+  await page.getByLabel("Band name").fill(band);
+  await page.getByRole("button", { name: "Create band" }).click();
+  await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
+  await createSet(page, { name: set, type: "Concert" });
+  await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
+  const setId = new URL(page.url()).pathname.split("/")[2] ?? "";
+  for (const version of versions) {
+    await page.goto(`/versions/${version}`);
+    await addToSet(page, `${band} · ${set}`);
+  }
+
+  // Song 2, at its third section, with the metronome playing.
+  await page.goto(`/sets/${setId}/songs/2/stand?s=3`);
+  await expectStandNow(page, "Chorus");
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(page.getByRole("button", { name: "Stop" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Song 2 of 4" }).click();
+  const songs = page.getByRole("dialog", { name: "Songs of the set" });
+  await expect(songs.getByRole("link")).toHaveCount(4);
+  await expect(songs.getByRole("listitem").filter({ hasText: second })).toContainText("Now");
+  await expect(songs.getByRole("link", { name: fourth })).toContainText("Key G");
+  await songs.getByRole("link", { name: fourth }).click();
+
+  // Song 4 opens at its first section, and cutting the song cut its click.
+  await expect(page).toHaveURL(new RegExp(`/sets/${setId}/songs/4/stand`));
+  await expect(page.getByRole("heading", { level: 1, name: fourth })).toBeVisible();
+  await expectStandNow(page, "Intro");
+  await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
 });
