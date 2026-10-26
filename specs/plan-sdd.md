@@ -438,6 +438,40 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - Given a musician who is not in the band, when they try to join the session, then they can't.
 - Given the MD ends the session, when followers look at their screen, then they stay where they were and see that live mode ended.
 
+### SPEC-13 · Visual chart editor
+
+**Goal:** write and change a chart by touching it, as in a notation program such as Sibelius, without knowing ChartDown's syntax, on an iPad first. The text stays the chart's single source: the visual editor writes ChartDown text, so both always show the same chart (owner's request and decisions, October 26, 2026).
+
+**Phase:** 2. **Status:** draft for the owner's review; the screens wait for the owner's design handoff.
+
+**Requirements**
+
+- R-13.1 **Two modes, one chart:** the chart editor (Edit and New version) has two tabs, **Visual** and **Text**, over the same chart. The visual editor edits the chart's JSON form and writes it back as the canonical text (R-00.19), so switching shows the same chart in the other mode, at the same section. Saving makes one revision, whichever mode it was made in (revisions are immutable). The device remembers the last mode. Opening Visual changes nothing; the first change made in it rewrites the text in its canonical form, and Visual says so once, before that change ("Visual writes the chart in ChartDown's standard layout"), since the author's own spacing and line breaks are not kept.
+- R-13.2 **Only a chart that reads cleanly:** Visual edits a chart with no warnings. With warnings it shows them, each with "Fix in Text", which opens Text on that line (R-03.1); everything Visual writes parses with no warnings.
+- R-13.3 **It looks like the chart:** Visual draws the chart with the same components as the preview and stand mode (sections, rows of bars, numbers or letters, the chosen key), each bar a tap target. A tap selects a bar, a section's title selects the section; the selection is drawn in the selection blue and its outline, never color alone.
+- R-13.4 **Sections:** add a section after the selected one or at the end, rename it, move it up or down (or drag it), duplicate it, delete it, and repeat one already written (`@use`, with how many times), from the section's own menu.
+- R-13.5 **Bars:** insert a bar before or after the selected one, delete it, copy and paste one or several, repeat the previous bar (%), start a new row after it, and write a rest bar (x).
+- R-13.6 **Chords from a palette:** with a bar selected, a palette docked at the bottom writes its chords: the degree 1 to 7 with flat or sharp; the quality (m, 7, maj7, m7, sus, dim, aug, add9 and the rest ChartDown reads, most used first); a bass (/5); and the way it is played: push, hold, stab, fermata. A bar with several chords splits its beats from the palette (2 + 2, 3 + 1, 1 + 1 + 2), the bar's total checked against its meter: a bar that doesn't add up is marked, as a warning would be. With a keyboard, typing 1 to 7 and the qualities does the same.
+- R-13.7 **What the chart says beyond chords** (second step, after R-13.1 to R-13.6): repeat signs and how many times, first and second endings, dynamics, navigation (segno, coda, D.S., D.C., fine), cues for instruments, a pickup, a change of meter in a bar, a lyric landmark (8 words at most: no lyrics), and at a section, a change of key, meter or tempo and the author's notes for everyone. The MD's notes stay in the MD layer editor (R-03.5).
+- R-13.8 **The song's details** (title, artists, key, tempo, meter, feel) are edited in the same fields in both modes.
+- R-13.9 **Undo and redo** every change in Visual, many steps back, until the page is left; Save keeps working as today.
+- R-13.10 **iPad first:** touch targets at least 44 px, the palette's keys at stand mode's 50 px; both orientations; the palette never covers the selected bar. A desktop works with the mouse and the keyboard (arrows move the selection). A phone keeps Text only in this first version.
+- R-13.11 **Accessible:** every action can be done with a keyboard and is announced by a screen reader (the selected bar read as "Verse, bar 3: 1, 4"); WCAG AA contrast.
+
+**Acceptance criteria**
+
+- Given a chart opened in Visual, when the author selects the Verse's third bar and chooses 4 and maj7 in the palette, then Text shows that bar as `4maj7` and the chart saves as one revision.
+- Given a chart with a warning, when the author opens Visual, then they see the warning with "Fix in Text" and can't edit until it is fixed.
+- Given a chart written in Visual, when it is opened in Text and in Visual again, then both show the same sections, bars and chords.
+- Given a bar in 4/4 split into 3 + 2, when the author looks at it, then it is marked as not adding up.
+- Given the author deletes a section by mistake, when they tap Undo, then it is back where it was.
+
+**Open questions for the owner**
+
+- How a chord is entered: the palette (R-13.6, taken as the recommended choice) or also typed into the bar.
+- Whether Visual opens by default for new versions.
+- The design: the owner's handoff for the palette, the selection and the section menu comes before any screen is built.
+
 ## 7. Phases
 
 | Phase                                      | Includes                                                                                                                                                                                                                                          | Outcome                                                                                                 |

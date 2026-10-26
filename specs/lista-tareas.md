@@ -256,6 +256,18 @@ What moves with the parser: its sources, its history, its tests (SPEC-00, R-00.x
 | T-2102 | github.com/ChartDown/parser: the history of `packages/core` (only that folder), a standalone build with no monorepo files, its own CI (type check, tests, the suite), MIT, and `homepage`, `repository` and `bugs` pointing to it; its README links to the spec             | –            | T-2101     | M    | The repository's CI passes; the packed package passes the 0.7 suite through its adapter |
 | T-2103 | The app installs `chartdown` from npm (`^0.3.0`) in `apps/web` and `packages/ui`, and `packages/core` leaves the monorepo; the R-00.1 catalog test and the example charts the app's tests use move into the app; the root README and LICENSE no longer list `packages/core` | R-00.1       | T-2007     | S    | CI passes with the package from npm; the R-00.1 test reads `supabase/migrations`        |
 
+## E30 · Visual chart editor (SPEC-13, phase 2; draft for the owner's review)
+
+| Task   | Description | Requirements | Depends on | Size | Done when |
+| ------ | ----------- | ------------ | ---------- | ---- | --------- |
+| T-3001 | The owner's design handoff for Visual: the tabs, the selected bar and section, the section menu, the chord palette on an iPad in both orientations and a desktop | R-13.3, R-13.6, R-13.10 | – | M | The owner approves the design |
+| T-3002 | The chart's JSON form edited in memory: add, rename, move, duplicate and delete sections, `@use`; insert, delete, copy and repeat bars; every change written back with `write()` parses with no warnings, with undo and redo | R-13.1, R-13.2, R-13.4, R-13.5, R-13.9 | T-2902 | M | Unit: each change round-trips through `write()` and `parse()` with no warnings; undo returns the same text |
+| T-3003 | The Visual and Text tabs in Edit and New version: same chart, same section on switching, the mode kept on the device, the one-time notice before the first change, warnings with Fix in Text | R-13.1, R-13.2, R-13.8 | T-3001, T-3002 | M | End-to-end: a chart switched to Visual and back shows the same text; a chart with a warning offers Fix in Text |
+| T-3004 | Selecting in Visual: bars and sections drawn with the chart components, tap and arrow keys move the selection, the section menu and the bar actions | R-13.3, R-13.4, R-13.5, R-13.11 | T-3003 | M | End-to-end: selecting the Verse's third bar and inserting a bar after it adds one in Text |
+| T-3005 | The chord palette: degree, flat or sharp, quality, bass, push, hold, stab, fermata, beat splits, the bar's total checked; typing with a keyboard | R-13.6, R-13.10, R-13.11 | T-3004 | M | End-to-end: 4 and maj7 in the palette write `4maj7` in Text; a bar of 3 + 2 in 4/4 is marked |
+| T-3006 | What the chart says beyond chords: repeats, endings, dynamics, navigation, cues, pickup, meter in a bar, lyric landmark (8 words at most), key, meter and tempo at a section, the author's notes | R-13.7 | T-3005 | L | End-to-end: a repeat ×3 and a first and second ending made in Visual read back in Text |
+| T-3007 | The owner checks E30 on the preview on an iPad in both orientations and a desktop | – | T-3003 to T-3006 | S | The owner approves |
+
 ## E29 · ChartDown 0.10
 
 ChartDown 0.10 (ChartDown/spec PR #22, `d9a6768`, and PR #23, October 24–25, 2026) adds Appendix C, how an app writes ChartDown (canonical text), so a chart built with a toolbar or a grid saves the same way in every app; and in 5.2 an `@key` just before `@use` now applies to the copy. The parser follows the merged spec in its own repository, and the app installs the release (owner's approval, October 25, 2026).
