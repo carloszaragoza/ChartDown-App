@@ -460,6 +460,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-13.12 **iPad and desktop:** on an iPad touch targets at least 44 px and the tools 50 px, both orientations, the on-screen keyboard and the tools never covering the bar being written; on a desktop the keyboard and the mouse. A phone has only the Chart editor in this first version.
 - R-13.13 **Accessible:** everything works with a keyboard and a screen reader, each bar announced in full words ("Verse, bar 3, six minor, 4 beats"), never as "6m"; WCAG AA contrast.
 - R-13.14 **The MD's indications in the chart:** each section takes notes as ChartDown writes them, shown as the chart shows them: for everyone (`> Soft`), from the MD (`> MD: Watch me`), or the MD's for some instruments (`> MD keys: Pad only`, `> MD drums: Out`), and for some passes of a repeat (`> MD 2x drums: In`). The instruments and passes are chosen from a list, and the text is typed. These are the chart's own notes, which every reader of the version sees; a band's private notes (its MD layer, R-03.5, filtered as R-06.4 says) stay in the MD layer editor.
+- R-13.15 **Listen while you write, as in the Chart editor:** the visual editor keeps what the Chart editor offers around the chart: adding the song's video (its YouTube link) and the band's audio (R-06.7), the same player docked at the bottom (R-03.11), the start and end of the music set and saved there by the version's owner or the band's MD, play from a tapped bar, the chart following the player bar by bar and the section playing marked (owner's request, October 26, 2026). Nothing of it is drawn differently from the Chart editor's.
 
 **Acceptance criteria**
 
@@ -473,6 +474,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - Given a bar with `4 5`, when the author drags the push tool onto the 5 (or types `4 '5`), then the 5 is drawn pushed and the text has `4 '5`.
 - Given a section, when the author adds an MD note for keys, then it is drawn with the keys tag and the text has `> MD keys: …`.
 - Given a repeat, when the author sets it to 3x, then the sign says ×3 and the text has `:| 3x`.
+- Given a version with a YouTube link open in the visual editor, when the author plays the video and sets where the music starts, then the next reader's player starts there, as from the Chart editor.
 - Given an administrator on the free plan, when they open a version, then they can open it in both editors.
 
 **Still to define**

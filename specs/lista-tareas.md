@@ -269,7 +269,8 @@ The Chart editor and New version don't change (owner's decision, October 26, 202
 | T-3005 | The tool panel: drag or tap the chord's marks (push or syncopation, stab, fermata, hold), coda, segno and the other navigation, repeats, endings, fermata, push, stab, held chords, pickup, repeats' times set visually, and key, meter and tempo changes | R-13.7, R-13.12 | T-3004 | L | End-to-end: the coda dragged onto a bar writes `{coda}` there; the push dragged onto a 5 writes `'5`; a repeat set to 3x writes `:| 3x` |
 | T-3006 | Sections and bars from their menus (add by typing its name with the next number suggested, rename, move, duplicate, delete, `@use` read-only with Edit original, %, new row, rest), and the bars announced in full words | R-13.9, R-13.10, R-13.13 | T-3004 | M | End-to-end: deleting a repeated section asks to confirm; the selected `6m` bar is read "six minor" |
 | T-3008 | The MD's indications in a section: notes for everyone, the MD's, the MD's for some instruments and some passes, chosen from lists and typed, drawn as the chart shows them | R-13.14 | T-3004 | M | End-to-end: an MD note for keys is drawn with the keys tag and the text has `> MD keys: …` |
-| T-3007 | The owner checks E30 on the preview on an iPad in both orientations and a desktop | – | T-3003 to T-3006, T-3008 | S | The owner approves |
+| T-3009 | Listen while you write in the visual editor: add the video and the band's audio, the same docked player, the music's start and end saved, play from a tapped bar, the chart following bar by bar with the section playing marked, as in the Chart editor | R-13.15, R-03.11, R-06.7 | T-3003 | M | End-to-end: the video plays in the visual editor; the start set there is the next reader's |
+| T-3007 | The owner checks E30 on the preview on an iPad in both orientations and a desktop | – | T-3003 to T-3006, T-3008, T-3009 | S | The owner approves |
 
 ## E29 · ChartDown 0.10
 
