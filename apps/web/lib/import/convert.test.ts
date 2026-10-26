@@ -177,7 +177,7 @@ describe("T-2825 an imported tempo and its unit (ChartDown 0.9)", () => {
 });
 
 describe("T-2902 the draft in canonical text", () => {
-  it("R-10.14 a draft with no warnings is its own canonical text, and its review points at its lines", () => {
+  it("R-10.14 R-00.19 a draft with no warnings is its own canonical text, and its review points at its lines", () => {
     for (const name of ["morning-light", "lantern-bay-minor", "harbor-lights-bars"]) {
       const { source, review } = importSheet(sheet(name), numbers);
       expect(write(toJSON(parse(source))), name).toBe(source);
