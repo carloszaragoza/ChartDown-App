@@ -1,0 +1,209 @@
+// The visual editor's changes (SPEC-13, T-3002): each one returns a new chart, so undo and redo
+// keep the charts before it (R-13.11).
+import {
+  emptyBar,
+  emptySection,
+  tokens,
+  type VisualBar,
+  type VisualChart,
+  type VisualNote,
+  type VisualSection,
+} from "./model";
+
+/** A bar by its section and place in it. */
+export interface BarAt {
+  section: number;
+  bar: number;
+}
+
+const withSection = (
+  chart: VisualChart,
+  index: number,
+  change: (section: VisualSection) => VisualSection,
+): VisualChart => ({
+  ...chart,
+  sections: chart.sections.map((section, at) => (at === index ? change(section) : section)),
+});
+
+export const setBar = (chart: VisualChart, at: BarAt, change: Partial<VisualBar>): VisualChart =>
+  withSection(chart, at.section, (section) => ({
+    ...section,
+    bars: section.bars.map((bar, index) => {
+      if (index !== at.bar) return bar;
+      const next = { ...bar, ...change };
+      // A new chords line drops a split chosen for the old one (R-13.6).
+      if (change.chords !== undefined && change.split === undefined) {
+        const count = tokens(change.chords).length;
+        if (count !== tokens(bar.chords).length) next.split = null;
+      }
+      return next;
+    }),
+  }));
+
+/** A bar after the given one, or before it (R-13.10). */
+export const insertBar = (chart: VisualChart, at: BarAt, where: "before" | "after"): VisualChart =>
+  withSection(chart, at.section, (section) => {
+    const bars = [...section.bars];
+    const index = where === "after" ? at.bar + 1 : at.bar;
+    const fresh = emptyBar();
+    // Inserted before a row's first bar, the new one starts that row.
+    if (where === "before" && bars[at.bar]?.row) {
+      fresh.row = bars[at.bar]?.row ?? null;
+      bars[at.bar] = { ...(bars[at.bar] as VisualBar), row: null };
+    }
+    bars.splice(index, 0, fresh);
+    return { ...section, bars };
+  });
+
+export const deleteBar = (chart: VisualChart, at: BarAt): VisualChart =>
+  withSection(chart, at.section, (section) => {
+    const bars = [...section.bars];
+    const [gone] = bars.splice(at.bar, 1);
+    const next = bars[at.bar];
+    if (gone?.row && next && !next.row) bars[at.bar] = { ...next, row: gone.row };
+    return { ...section, bars };
+  });
+
+/** A new row starts with the bar after this one (R-13.10). */
+export const breakRowAfter = (chart: VisualChart, at: BarAt): VisualChart => {
+  const next = chart.sections[at.section]?.bars[at.bar + 1];
+  if (!next) return insertBar(setBar(chart, at, {}), at, "after");
+  return setBar(chart, { ...at, bar: at.bar + 1 }, { row: next.row ? null : {} });
+};
+
+export const addSection = (chart: VisualChart, after: number, name: string): VisualChart => {
+  const sections = [...chart.sections];
+  sections.splice(after + 1, 0, emptySection(name));
+  return { ...chart, sections };
+};
+
+export const renameSection = (chart: VisualChart, index: number, name: string): VisualChart => {
+  const old = chart.sections[index]?.name;
+  return {
+    ...chart,
+    sections: chart.sections.map((section, at) =>
+      at === index
+        ? { ...section, name }
+        : section.use === old
+          ? { ...section, use: name }
+          : section,
+    ),
+  };
+};
+
+export const moveSection = (chart: VisualChart, index: number, by: -1 | 1): VisualChart => {
+  const to = index + by;
+  if (to < 0 || to >= chart.sections.length) return chart;
+  const sections = [...chart.sections];
+  const [moved] = sections.splice(index, 1);
+  sections.splice(to, 0, moved as VisualSection);
+  return { ...chart, sections };
+};
+
+export const duplicateSection = (chart: VisualChart, index: number, name: string): VisualChart => {
+  const source = chart.sections[index];
+  if (!source) return chart;
+  const sections = [...chart.sections];
+  sections.splice(index + 1, 0, { ...structuredClone(source), name });
+  return { ...chart, sections };
+};
+
+/** The sections that repeat this one with `@use` (R-13.9): deleting it asks first. */
+export const repeatsOf = (chart: VisualChart, index: number): number =>
+  chart.sections.filter((section) => section.use === chart.sections[index]?.name).length;
+
+export const deleteSection = (chart: VisualChart, index: number): VisualChart => {
+  const name = chart.sections[index]?.name;
+  return {
+    ...chart,
+    sections: chart.sections.filter((section, at) => at !== index && section.use !== name),
+  };
+};
+
+/** Repeats a written section after it (`@use Chorus 2x`; R-13.9). */
+export const repeatSection = (chart: VisualChart, index: number, times: number | null) => {
+  const source = chart.sections[index];
+  if (!source || source.use) return chart;
+  const sections = [...chart.sections];
+  sections.splice(index + 1, 0, {
+    name: source.name,
+    notes: [],
+    bars: [],
+    use: source.name,
+    times,
+    useKey: null,
+  });
+  return { ...chart, sections };
+};
+
+export const setTimes = (chart: VisualChart, index: number, times: number | null) =>
+  withSection(chart, index, (section) => ({ ...section, times }));
+
+export const addNote = (chart: VisualChart, index: number, note: VisualNote) =>
+  withSection(chart, index, (section) => ({ ...section, notes: [...section.notes, note] }));
+
+export const deleteNote = (chart: VisualChart, index: number, note: number) =>
+  withSection(chart, index, (section) => ({
+    ...section,
+    notes: section.notes.filter((_, at) => at !== note),
+  }));
+
+/** The chord marks the tools put on a chord (R-13.7): push, stab, fermata, hold. */
+export type ChordMark = "push" | "shortPush" | "stab" | "fermata" | "hold";
+
+/** Turns a mark on or off on one chord of a chords line, as typing it would (`'5`, `5!`). */
+export function toggleMark(token: string, mark: ChordMark): string {
+  if (!/^('{0,2})(<?)([b#]?[1-7]|[A-G][b#]?)/.test(token)) return token;
+  let text = token;
+  let stab = false;
+  let fermata = false;
+  while (/[!~]$/.test(text)) {
+    if (text.endsWith("!")) stab = true;
+    else fermata = true;
+    text = text.slice(0, -1);
+  }
+  let push = 0;
+  if (text.startsWith("''")) push = 2;
+  else if (text.startsWith("'")) push = 1;
+  text = text.slice(push);
+  let hold = text.startsWith("<") && text.endsWith(">");
+  if (hold) text = text.slice(1, -1);
+  if (mark === "push") push = push === 1 ? 0 : 1;
+  if (mark === "shortPush") push = push === 2 ? 0 : 2;
+  if (mark === "stab") stab = !stab;
+  if (mark === "fermata") fermata = !fermata;
+  if (mark === "hold") hold = !hold;
+  return `${"'".repeat(push)}${hold ? `<${text}>` : text}${stab ? "!" : ""}${fermata ? "~" : ""}`;
+}
+
+/** A mark on the chord at `index` of a bar's chords line (the last one by default). */
+export function markChord(bar: VisualBar, mark: ChordMark, index?: number): string {
+  const list = tokens(bar.chords);
+  const at = index ?? list.length - 1;
+  return list.map((token, i) => (i === at ? toggleMark(token, mark) : token)).join(" ");
+}
+
+/** An indication added to a bar's top line, unless it is there already (R-13.7). */
+export function addIndication(top: string, text: string): string {
+  const pieces = top
+    .split(",")
+    .map((piece) => piece.trim())
+    .filter(Boolean);
+  return pieces.some((piece) => piece.toLowerCase() === text.toLowerCase())
+    ? top
+    : [...pieces, text].join(", ");
+}
+
+/** The bar after or before, across sections (Tab and Shift + Tab; R-13.5). */
+export function step(chart: VisualChart, at: BarAt, by: 1 | -1): BarAt | null {
+  let { section, bar } = at;
+  bar += by;
+  while (section >= 0 && section < chart.sections.length) {
+    const count = chart.sections[section]?.bars.length ?? 0;
+    if (bar >= 0 && bar < count) return { section, bar };
+    section += by;
+    if (section < 0 || section >= chart.sections.length) return null;
+    bar = by === 1 ? 0 : (chart.sections[section]?.bars.length ?? 0) - 1;
+  }
+  return null;
+}
