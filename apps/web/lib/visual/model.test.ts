@@ -136,6 +136,11 @@ describe("T-3002 the visual editor's chart", () => {
     expect(splitNeed(bar("1 2 3 4 5"), "4/4")).toEqual({ kind: "over" });
     // 6/8 counts dotted quarters: two chords take one each.
     expect(splitNeed(bar("1 4"), "6/8")).toEqual({ kind: "even" });
+    // With more chords than dotted quarters, 6/8 counts its eighths: three take two each.
+    expect(splitNeed(bar("1 4 5"), "6/8")).toEqual({ kind: "even" });
+    expect(splitNeed(bar("1 4 5 1"), "6/8")).toMatchObject({ kind: "choose" });
+    expect(splitNeed(bar("1 4 5"), "12/8")).toMatchObject({ kind: "choose" });
+    expect(splitNeed(bar("1 2 3 4 5 6 7"), "6/8")).toEqual({ kind: "over" });
   });
 
   it("R-13.6 R-13.8 three chords with no split are marked; 2+1+1 writes 1:2 4 5", () => {

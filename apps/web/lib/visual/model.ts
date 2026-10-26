@@ -139,14 +139,16 @@ export type SplitNeed =
 /**
  * How a bar's chords split its beats (R-13.6): evenly when the beats divide by the chords,
  * otherwise a choice; in a compound meter (6/8, 9/8, 12/8) the split counts the tempo's beat, the
- * dotted quarter.
+ * dotted quarter, and the eighths when there are more chords than dotted quarters.
  */
 export function splitNeed(bar: VisualBar, meter: string): SplitNeed {
   const timed = tokens(bar.chords).filter(isTimed).length;
   if (timed <= 1) return { kind: "even" };
   const beats = barBeats(bar, meter);
   const own = bar.meter ?? meter;
-  const step = compound(own) && bar.pickup === null ? 3 : 1;
+  // A compound meter counts its dotted quarters; with more chords than those, its eighths.
+  const pulses = compound(own) && bar.pickup === null ? beats / 3 : beats;
+  const step = timed > pulses ? 1 : beats / pulses;
   const units = beats / step;
   if (Number.isInteger(units / timed)) return { kind: "even" };
   if (timed > units) return { kind: "over" };
