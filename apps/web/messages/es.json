@@ -723,7 +723,14 @@
     "sound": "Opciones del metrónomo",
     "click": "Clic",
     "clickHint": "Un clic acentuado en el tiempo 1. Apagado, solo el pulso marca el tiempo.",
-    "volume": "Volumen",
+    "fader": {
+      "beat": "Pulso",
+      "eighths": "Corcheas",
+      "sixteenths": "Semicorcheas",
+      "beatTimes": "Pulso",
+      "eighthsTimes": "×2",
+      "sixteenthsTimes": "×4"
+    },
     "countIn": "Cuenta previa",
     "countInHint": "Un compás de clics antes del primer compás.",
     "keepAwake": "Mantener los altavoces despiertos",

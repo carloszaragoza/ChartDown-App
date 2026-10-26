@@ -723,7 +723,14 @@
     "sound": "Metronome options",
     "click": "Click",
     "clickHint": "An accented click on beat 1. Off, only the pulse shows the beat.",
-    "volume": "Volume",
+    "fader": {
+      "beat": "Beat",
+      "eighths": "Eighths",
+      "sixteenths": "Sixteenths",
+      "beatTimes": "Beat",
+      "eighthsTimes": "×2",
+      "sixteenthsTimes": "×4"
+    },
     "countIn": "Count-in",
     "countInHint": "One bar of clicks before the first bar.",
     "keepAwake": "Keep speakers awake",
