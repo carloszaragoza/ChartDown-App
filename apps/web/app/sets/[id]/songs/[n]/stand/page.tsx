@@ -1,4 +1,4 @@
-import { parse, type Chart } from "chartdown";
+import { keyName, parse, type Chart } from "chartdown";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../../../lib/auth/enabled";
@@ -8,7 +8,7 @@ import { guessPhone } from "../../../../../../lib/shell/guessPhone";
 import { createClient } from "../../../../../../lib/supabase/server";
 import { readDisplay } from "../../../../../versions/[id]/display";
 import { UUID } from "../../../../../versions/[id]/load";
-import { readSection } from "../../../../../versions/[id]/stand/standHref";
+import { readSection, setSongLinks } from "../../../../../versions/[id]/stand/standHref";
 import { StandMode } from "../../../../../versions/[id]/stand/StandMode";
 import { AudioButton } from "../../../../../_components/AudioDock";
 import { saveAudioPoints } from "../../../../../versions/[id]/audio";
@@ -27,6 +27,9 @@ type Search = Promise<{
  * `set_song`, red dots where they have notes, and Previous and Next across the set's songs.
  * The MD and the set's temporary MD may view as any instrument (`?as=bass`).
  */
+type One<T> = T | T[] | null;
+const one = <T,>(value: One<T>): T | null => (Array.isArray(value) ? (value[0] ?? null) : value);
+
 export default async function SetStandPage({
   params,
   searchParams,
@@ -39,15 +42,26 @@ export default async function SetStandPage({
   const position = Number(n);
   if (!UUID.test(id) || !Number.isInteger(position) || position < 1) notFound();
   const supabase = await createClient();
-  const [{ data, error }, { count }, { data: set }] = await Promise.all([
+  const [{ data, error }, { data: items }, { data: set }] = await Promise.all([
     supabase.rpc("set_song", { set_id: id, song_position: position }),
-    supabase.from("set_items").select("id", { count: "exact", head: true }).eq("set_id", id),
+    // Every song of the set with its title and key, for the list that jumps to one (R-03.13).
+    supabase
+      .from("set_items")
+      .select("position, set_key, revision:revisions(content), version:versions(song:songs(title))")
+      .eq("set_id", id)
+      .order("position"),
     supabase.from("sets").select("band_id, type").eq("id", id).maybeSingle(),
   ]);
   if (error || !data || !set) notFound();
   const song = data as SetSong;
   const search = await searchParams;
-  const total = count ?? position;
+  const list = (items ?? []) as unknown as {
+    position: number;
+    set_key: string | null;
+    revision: One<{ content: string }>;
+    version: One<{ song: One<{ title: string }> }>;
+  }[];
+  const total = list.length || position;
 
   // View as, for the MD and the temporary MD only.
   const leads = song.role !== "musician";
@@ -170,6 +184,18 @@ export default async function SetStandPage({
         href: `/sets/${id}`,
         name: `${song.set_name} – ${types(set.type as "service")}`,
         songOf: t("songOf", { position, total }),
+        songs: setSongLinks(
+          list.map((item) => {
+            const content = one(item.revision)?.content;
+            return {
+              position: item.position,
+              title: one(one(item.version)?.song ?? null)?.title ?? "",
+              key: content ? keyName(setSongKey(parse(content), item.set_key)) : "",
+            };
+          }),
+          position,
+          (n) => `${base(n)}${carry({})}`,
+        ),
         ...(position > 1 ? { previousSong: `${base(position - 1)}${carry({ s: "999" })}` } : {}),
         ...(position < total ? { nextSong: `${base(position + 1)}${carry({})}` } : {}),
         ...(leads
