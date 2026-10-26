@@ -14,16 +14,10 @@ import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
-import {
-  ArrowUturnLeftIcon,
-  ArrowUturnRightIcon,
-  PlusIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
 import { chordFormatter, EVERYONE, parse, STANDARD_INSTRUMENTS, type Warning } from "chartdown";
 import { BarRow, MDNotes, type BarLine } from "@chartdown/ui";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   useActionState,
   useEffect,
@@ -76,6 +70,7 @@ import {
   nextName,
   rowGroups,
   splitNeed,
+  suggestSection,
   tokens,
   visualChart,
   type VisualBar,
@@ -83,6 +78,21 @@ import {
   type VisualNote,
 } from "../../../../lib/visual/model";
 import { speakChords, type ChordWords } from "../../../../lib/visual/speak";
+import { VISUAL_ICONS, type VisualAction } from "../../../../lib/visual/icons";
+
+/** An action's icon from the editor's one list (R-13.16). */
+const icon = (action: VisualAction) => <Icon icon={VISUAL_ICONS[action]} />;
+
+/** How a tool is typed in a bar, said in its tooltip: tools and typing write the same (R-13.7). */
+const TYPED: Partial<Record<VisualAction, string>> = {
+  push: "'5",
+  shortPush: "''5",
+  stab: "5!",
+  fermata: "5~",
+  hold: "<5>",
+  repeatBar: "%",
+  rest: "x",
+};
 
 export interface VisualEditorProps {
   versionId: string;
@@ -147,8 +157,8 @@ const KEYS = ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"].f
   key,
   `${key}m`,
 ]);
-const DYNAMICS = ["pp", "p", "mp", "mf", "f", "ff", "cresc.", "decresc."];
-const NAVIGATION = ["Segno", "Coda", "To Coda", "D.S. al Coda", "D.C. al Fine", "Fine"];
+const DYNAMICS = ["pp", "p", "mp", "mf", "f", "ff", "cresc.", "decresc."] as const;
+const NAVIGATION = ["Segno", "Coda", "To Coda", "D.S. al Coda", "D.C. al Fine", "Fine"] as const;
 const CHORD_MARKS: ChordMark[] = ["push", "shortPush", "stab", "fermata", "hold"];
 
 interface History {
@@ -192,6 +202,12 @@ export function VisualEditor({
   const sources = useTranslations("version.source");
   const instruments = useTranslations("instruments");
   const labels = useChartLabels();
+  const language = useLocale() === "es" ? "es" : "en";
+  /** A section after another one, named as the song most often goes on (R-13.9). */
+  const addAfter = (after: number) => {
+    change((c) => addSection(c, after, suggestSection(c.sections, after, language)));
+    setSelected({ section: after + 1, bar: 0 });
+  };
   const router = useRouter();
   const opening = useMemo(() => parse(content), [content]);
   const warnings = opening.warnings;
@@ -484,7 +500,7 @@ export function VisualEditor({
       ? splitNeed(selectedBar, meterAt[selected.section]?.[selected.bar] ?? "4/4")
       : null;
 
-  const toolButton = (tool: Tool, text: string, key: string) => (
+  const toolButton = (tool: Tool, text: string, key: VisualAction) => (
     <div
       key={key}
       draggable
@@ -497,6 +513,8 @@ export function VisualEditor({
         label={text}
         size="lg"
         variant="secondary"
+        icon={icon(key)}
+        {...(TYPED[key] && selected ? { tooltip: TYPED[key] } : {})}
         isDisabled={!selected}
         {...(!selected ? { disabledMessage: t("tools.choose") } : {})}
         onClick={() => selected && apply(tool, selected)}
@@ -566,7 +584,7 @@ export function VisualEditor({
                   label={t("undo")}
                   isIconOnly
                   tooltip={t("undo")}
-                  icon={<Icon icon={ArrowUturnLeftIcon} />}
+                  icon={icon("undo")}
                   isDisabled={history.past.length === 0}
                   onClick={undo}
                 />
@@ -574,11 +592,15 @@ export function VisualEditor({
                   label={t("redo")}
                   isIconOnly
                   tooltip={t("redo")}
-                  icon={<Icon icon={ArrowUturnRightIcon} />}
+                  icon={icon("redo")}
                   isDisabled={history.future.length === 0}
                   onClick={redo}
                 />
-                <Button label={t("details")} onClick={() => setDetails(true)} />
+                <Button
+                  label={t("details")}
+                  icon={icon("details")}
+                  onClick={() => setDetails(true)}
+                />
                 {videoId(youtube) && (
                   <VideoLink
                     url={youtube}
@@ -589,22 +611,25 @@ export function VisualEditor({
                   />
                 )}
                 {bands.length > 0 && (
-                  <Button
-                    label={t("addAudio")}
-                    icon={<Icon icon={PlusIcon} />}
-                    onClick={openAddAudio}
-                  />
+                  <Button label={t("addAudio")} icon={icon("addAudio")} onClick={openAddAudio} />
                 )}
                 <Button
                   label={t("openText")}
+                  icon={icon("openText")}
                   variant="ghost"
                   href={`/versions/${versionId}/edit`}
                 />
-                <Button label={t("done")} variant="ghost" href={`/versions/${versionId}`} />
+                <Button
+                  label={t("done")}
+                  icon={icon("done")}
+                  variant="ghost"
+                  href={`/versions/${versionId}`}
+                />
                 <Button
                   type="submit"
                   variant="primary"
                   label={t("save")}
+                  icon={icon("save")}
                   isLoading={saving}
                   isDisabled={!dirty}
                 />
@@ -668,6 +693,7 @@ export function VisualEditor({
                         ? [
                             {
                               label: t("editOriginal"),
+                              icon: icon("editOriginal"),
                               onClick: () => {
                                 const original = chart.sections.findIndex(
                                   (x) => x.name === section.use && !x.use,
@@ -682,29 +708,50 @@ export function VisualEditor({
                         : [
                             {
                               label: t("rename"),
+                              icon: icon("rename"),
                               onClick: () => {
                                 change((c) => c);
                                 setRenaming(s);
                               },
                             },
-                            { label: t("addNote"), onClick: () => setNoteFor(s) },
+                            {
+                              label: t("addSectionAfter"),
+                              icon: icon("addSection"),
+                              onClick: () => addAfter(s),
+                            },
+                            {
+                              label: t("addNote"),
+                              icon: icon("addNote"),
+                              onClick: () => setNoteFor(s),
+                            },
                             {
                               label: t("repeatSection"),
+                              icon: icon("repeatSection"),
                               onClick: () => change((c) => repeatSection(c, s, 2)),
                             },
                             {
                               label: t("duplicate"),
+                              icon: icon("duplicate"),
                               onClick: () =>
                                 change((c) =>
                                   duplicateSection(c, s, nextName(c.sections, `${section.name} 2`)),
                                 ),
                             },
                           ]),
-                      { label: t("moveUp"), onClick: () => change((c) => moveSection(c, s, -1)) },
-                      { label: t("moveDown"), onClick: () => change((c) => moveSection(c, s, 1)) },
+                      {
+                        label: t("moveUp"),
+                        icon: icon("moveUp"),
+                        onClick: () => change((c) => moveSection(c, s, -1)),
+                      },
+                      {
+                        label: t("moveDown"),
+                        icon: icon("moveDown"),
+                        onClick: () => change((c) => moveSection(c, s, 1)),
+                      },
                       { type: "divider" as const },
                       {
                         label: t("deleteSection"),
+                        icon: icon("deleteSection"),
                         variant: "destructive" as const,
                         onClick: () =>
                           repeatsOf(chart, s) > 0
@@ -732,7 +779,7 @@ export function VisualEditor({
                             isIconOnly
                             size="sm"
                             variant="ghost"
-                            icon={<Icon icon={TrashIcon} />}
+                            icon={icon("deleteNote")}
                             onClick={() => change((c) => deleteNote(c, s, n))}
                           />
                         ))}
@@ -820,7 +867,7 @@ export function VisualEditor({
                         <Button
                           label={t("addRow")}
                           variant="ghost"
-                          icon={<Icon icon={PlusIcon} />}
+                          icon={icon("addRow")}
                           onClick={() => change((c) => addRow(c, s))}
                         />
                       </HStack>
@@ -832,12 +879,9 @@ export function VisualEditor({
             <HStack>
               <Button
                 label={t("addSection")}
-                icon={<Icon icon={PlusIcon} />}
-                onClick={() =>
-                  change((c) =>
-                    addSection(c, c.sections.length - 1, nextName(c.sections, t("newSectionName"))),
-                  )
-                }
+                icon={icon("addSection")}
+                // After the section being written in, or at the end.
+                onClick={() => addAfter(selected?.section ?? chart.sections.length - 1)}
               />
             </HStack>
             <datalist id="cd-visual-indications">
@@ -951,19 +995,23 @@ export function VisualEditor({
                   items={[
                     {
                       label: t("insertBefore"),
+                      icon: icon("insertBefore"),
                       onClick: () => change((c) => insertBar(c, selected, "before")),
                     },
                     {
                       label: t("insertAfter"),
+                      icon: icon("insertAfter"),
                       onClick: () => change((c) => insertBar(c, selected, "after")),
                     },
                     {
                       label: t("newRow"),
+                      icon: icon("newRow"),
                       onClick: () => change((c) => breakRowAfter(c, selected)),
                     },
                     { type: "divider" as const },
                     {
                       label: t("deleteBar"),
+                      icon: icon("deleteBar"),
                       variant: "destructive" as const,
                       onClick: () => {
                         change((c) => deleteBar(c, selected));

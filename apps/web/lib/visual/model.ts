@@ -452,3 +452,100 @@ export function nextName(sections: readonly VisualSection[], fallback: string): 
   while (sections.some((section) => section.name === `${base}${number}`)) number++;
   return `${base}${number}`;
 }
+
+/** The parts of a song a section's name says, in the order songs most often take them. */
+type Part = "intro" | "verse" | "preChorus" | "chorus" | "interlude" | "bridge" | "outro" | "tag";
+
+const PART_NAMES: Record<"en" | "es", Record<Part, string>> = {
+  en: {
+    intro: "Intro",
+    verse: "Verse",
+    preChorus: "Pre-Chorus",
+    chorus: "Chorus",
+    interlude: "Interlude",
+    bridge: "Bridge",
+    outro: "Outro",
+    tag: "Tag",
+  },
+  es: {
+    intro: "Intro",
+    verse: "Verso",
+    preChorus: "Pre-Coro",
+    chorus: "Coro",
+    interlude: "Interludio",
+    bridge: "Puente",
+    outro: "Final",
+    tag: "Tag",
+  },
+};
+
+// How a name is read, in English or Spanish; the first that matches wins.
+const PART_WORDS: [Part, "en" | "es" | null, RegExp][] = [
+  ["preChorus", "en", /^pre-?\s?chorus/i],
+  ["preChorus", "es", /^pre-?\s?coro/i],
+  ["verse", "en", /^verse/i],
+  ["verse", "es", /^verso/i],
+  ["chorus", "en", /^chorus/i],
+  ["chorus", "es", /^coro/i],
+  ["interlude", "en", /^(interlude|instrumental|inst\b)/i],
+  ["interlude", "es", /^interludio/i],
+  ["bridge", "en", /^bridge/i],
+  ["bridge", "es", /^puente/i],
+  ["outro", "en", /^(outro|ending|end)\b/i],
+  ["outro", "es", /^final/i],
+  ["intro", null, /^intro/i],
+  ["tag", null, /^tag/i],
+];
+
+/** What follows each part most often (owner's request, October 26, 2026; R-13.9). */
+const FOLLOWS: Record<Part, Part> = {
+  intro: "verse",
+  verse: "chorus",
+  preChorus: "chorus",
+  chorus: "interlude",
+  interlude: "bridge",
+  bridge: "verse",
+  outro: "outro",
+  tag: "outro",
+};
+
+const partOf = (name: string) => {
+  const found = PART_WORDS.find(([, , pattern]) => pattern.test(name.trim()));
+  return found ? { part: found[0], language: found[1] } : null;
+};
+
+/**
+ * The name a section added after another one takes (R-13.9), as songs most often go: Verse 1 is
+ * followed by Verse 2, a second verse by the Chorus, then Interlude, Bridge and a verse again; an
+ * Intro by Verse 1, a Pre-Chorus by the Chorus. A verse takes the next number free; another part
+ * its name, numbered from 2 once it is taken. Written in the language of the section it follows,
+ * or the interface's.
+ */
+export function suggestSection(
+  sections: readonly VisualSection[],
+  after: number,
+  language: "en" | "es",
+): string {
+  const current = sections[after];
+  const found = current ? partOf(current.name) : null;
+  const words = PART_NAMES[found?.language ?? language];
+  const taken = new Set(sections.map((section) => section.name.trim().toLowerCase()));
+  const free = (base: string, from: number) => {
+    let number = from;
+    while (taken.has(`${base} ${number}`.toLowerCase())) number++;
+    return `${base} ${number}`;
+  };
+  if (!found) return current ? free(words.verse, 1) : `${words.verse} 1`;
+  // The first verse is followed by the second; the second and later ones by the chorus.
+  const number = Number(/(\d+)$/.exec(current?.name.trim() ?? "")?.[1] ?? 1);
+  const secondFree = !taken.has(`${words.verse} 2`.toLowerCase());
+  const next =
+    found.part === "verse"
+      ? number === 1 && secondFree
+        ? "verse"
+        : "chorus"
+      : FOLLOWS[found.part];
+  if (next === "verse") return free(words.verse, 1);
+  const base = words[next];
+  return taken.has(base.toLowerCase()) ? free(base, 2) : base;
+}

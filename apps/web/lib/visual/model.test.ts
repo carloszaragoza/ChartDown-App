@@ -23,6 +23,7 @@ import {
   needsAttention,
   nextName,
   splitNeed,
+  suggestSection,
   visualChart,
   type VisualBar,
   type VisualChart,
@@ -193,6 +194,34 @@ describe("T-3002 the visual editor's chart", () => {
     expect(step(chart, { section: 0, bar: 4 }, 1)).toEqual({ section: 1, bar: 0 });
     expect(step(chart, { section: 1, bar: 0 }, -1)).toEqual({ section: 0, bar: 4 });
     expect(step(chart, { section: 0, bar: 0 }, -1)).toBeNull();
+  });
+
+  it("R-13.9 a new section is named as songs usually go: Verse 2, Chorus, Interlude, Bridge", () => {
+    const named = (...names: string[]) => names.map((name) => emptySection(name));
+    expect(suggestSection(named("Verse 1"), 0, "en")).toBe("Verse 2");
+    expect(suggestSection(named("Verse 1", "Verse 2"), 1, "en")).toBe("Chorus");
+    expect(suggestSection(named("Verse 1", "Verse 2", "Chorus"), 2, "en")).toBe("Interlude");
+    expect(suggestSection(named("Verse 1", "Chorus", "Interlude"), 2, "en")).toBe("Bridge");
+    expect(suggestSection(named("Verse 1", "Verse 2", "Chorus", "Bridge"), 3, "en")).toBe(
+      "Verse 3",
+    );
+    expect(suggestSection(named("Intro"), 0, "en")).toBe("Verse 1");
+    expect(suggestSection(named("Pre-Chorus"), 0, "en")).toBe("Chorus");
+    // A chorus already written: the next one is numbered.
+    expect(suggestSection(named("Verse 1", "Verse 2", "Chorus", "Verse 3"), 3, "en")).toBe(
+      "Chorus 2",
+    );
+    // After Verse 1 when Verse 2 is already there, the chorus.
+    expect(suggestSection(named("Verse 1", "Verse 2"), 0, "en")).toBe("Chorus");
+  });
+
+  it("R-13.9 the names follow the chart's language, or the interface's", () => {
+    const named = (...names: string[]) => names.map((name) => emptySection(name));
+    expect(suggestSection(named("Verso 1"), 0, "en")).toBe("Verso 2");
+    expect(suggestSection(named("Verso 1", "Verso 2"), 1, "en")).toBe("Coro");
+    expect(suggestSection(named("Coro"), 0, "en")).toBe("Interludio");
+    expect(suggestSection(named("Interludio"), 0, "en")).toBe("Puente");
+    expect(suggestSection(named("Solo de Juan"), 0, "es")).toBe("Verso 1");
   });
 
   it("R-13.10 rows of four: Tab past a full row starts a new one, and Add a row adds four bars", () => {

@@ -3,6 +3,7 @@ import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import en from "../../../../messages/en.json";
 import es from "../../../../messages/es.json";
+import { VISUAL_ICONS } from "../../../../lib/visual/icons";
 import { VisualEditor, type VisualEditorProps } from "./VisualEditor";
 
 vi.mock("../edit/actions", () => ({ saveChart: () => undefined }));
@@ -56,9 +57,19 @@ describe("T-3003 the visual editor", () => {
 
   it("R-13.7 the tools sit at the foot, ready to drag", () => {
     const html = wrap("es", <VisualEditor {...props("---\nkey: G\n---\n\n## Verso 1\n1\n")} />);
-    expect(html).toContain("Síncopa &#x27;");
-    expect(html).toContain("Calderón ~");
+    expect(html).toContain("Síncopa corta");
+    expect(html).toContain("Calderón");
     expect(html).toMatch(/draggable="true"/);
+  });
+
+  it("R-13.16 every action has its icon from one list, the chart's marks drawn as the chart draws them", () => {
+    for (const [action, Icon] of Object.entries(VISUAL_ICONS)) {
+      expect(typeof Icon, action).toMatch(/function|object/);
+    }
+    const html = wrap("en", <VisualEditor {...props("---\nkey: G\n---\n\n## Verse 1\n1\n")} />);
+    // The coda tool: its icon (a circle crossed) beside its name.
+    expect(html).toMatch(/class="cd-icon[^"]*"[^>]*><circle cx="12" cy="12" r="6"\/>.*?Coda</s);
+    expect(html).toContain(">mf</text>");
   });
 
   it("R-13.8 a chart that opens with warnings is fixed in Text first", () => {
