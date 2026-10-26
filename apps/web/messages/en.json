@@ -1601,6 +1601,7 @@
     "deleteNote": "Delete the indication “{text}”",
     "repeatTimes": "Times it plays",
     "addSection": "Add a section",
+    "addRow": "Add a row",
     "newSectionName": "Verse 1",
     "tools": {
       "label": "Tools",

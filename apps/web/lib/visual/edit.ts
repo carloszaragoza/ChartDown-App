@@ -3,6 +3,7 @@
 import {
   emptyBar,
   emptySection,
+  rowGroups,
   tokens,
   type VisualBar,
   type VisualChart,
@@ -63,6 +64,35 @@ export const deleteBar = (chart: VisualChart, at: BarAt): VisualChart =>
     if (gone?.row && next && !next.row) bars[at.bar] = { ...next, row: gone.row };
     return { ...section, bars };
   });
+
+/** How many bars a row holds before the next bar starts a new one, as on a printed chart. */
+export const ROW_BARS = 4;
+
+/**
+ * A bar at the end of a section (Tab past the last bar; R-13.5): it starts a new row once the last
+ * row holds four bars, so writing never runs on in one line (R-13.10).
+ */
+export const appendBar = (chart: VisualChart, section: number): VisualChart =>
+  withSection(chart, section, (current) => {
+    const groups = rowGroups(current);
+    const last = groups[groups.length - 1] ?? [];
+    const fresh = emptyBar();
+    if (last.length >= ROW_BARS || current.bars.length === 0) fresh.row = {};
+    return { ...current, bars: [...current.bars, fresh] };
+  });
+
+/** A new row of four empty bars at the end of a section (Add a row; R-13.10). */
+export const addRow = (chart: VisualChart, section: number): VisualChart =>
+  withSection(chart, section, (current) => ({
+    ...current,
+    bars: [
+      ...current.bars,
+      ...Array.from({ length: ROW_BARS }, (_, index) => ({
+        ...emptyBar(),
+        row: index === 0 ? {} : null,
+      })),
+    ],
+  }));
 
 /** A new row starts with the bar after this one (R-13.10). */
 export const breakRowAfter = (chart: VisualChart, at: BarAt): VisualChart => {

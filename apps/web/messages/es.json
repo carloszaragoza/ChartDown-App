@@ -1601,6 +1601,7 @@
     "deleteNote": "Borrar la indicación «{text}»",
     "repeatTimes": "Veces que se toca",
     "addSection": "Agregar una sección",
+    "addRow": "Agregar un renglón",
     "newSectionName": "Verso 1",
     "tools": {
       "label": "Herramientas",

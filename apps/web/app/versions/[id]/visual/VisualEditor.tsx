@@ -45,7 +45,9 @@ import { SOURCE_TYPES } from "../../../../lib/versions/validate";
 import {
   addIndication,
   addNote,
+  addRow,
   addSection,
+  appendBar,
   breakRowAfter,
   deleteBar,
   deleteNote,
@@ -303,12 +305,11 @@ export function VisualEditor({
   const moveTo = (at: BarAt, by: 1 | -1, line: Line) => {
     finish();
     let next = step(chart, at, by);
-    if (!next && by === 1) {
-      // Past the last bar, Tab writes a new one (R-13.5).
-      const last = chart.sections.length - 1;
-      setHistory((h) => ({ ...h, present: insertBar(h.present, at, "after") }));
+    const lastInSection = at.bar === (chart.sections[at.section]?.bars.length ?? 0) - 1;
+    if (by === 1 && lastInSection && (!next || next.section !== at.section)) {
+      // Past a section's last bar, Tab writes a new one, on a new row after four (R-13.5, R-13.10).
+      setHistory((h) => ({ ...h, present: appendBar(h.present, at.section) }));
       next = { section: at.section, bar: at.bar + 1 };
-      void last;
     }
     if (next) begin(next, line);
   };
@@ -813,6 +814,16 @@ export function VisualEditor({
                           </div>
                         );
                       })
+                    )}
+                    {!section.use && (
+                      <HStack>
+                        <Button
+                          label={t("addRow")}
+                          variant="ghost"
+                          icon={<Icon icon={PlusIcon} />}
+                          onClick={() => change((c) => addRow(c, s))}
+                        />
+                      </HStack>
                     )}
                   </VStack>
                 </section>

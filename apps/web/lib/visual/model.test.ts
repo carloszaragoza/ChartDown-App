@@ -2,6 +2,8 @@ import { parse } from "chartdown";
 import { describe, expect, it } from "vitest";
 import {
   addIndication,
+  addRow,
+  appendBar,
   addNote,
   addSection,
   deleteSection,
@@ -186,6 +188,22 @@ describe("T-3002 the visual editor's chart", () => {
     expect(step(chart, { section: 0, bar: 4 }, 1)).toEqual({ section: 1, bar: 0 });
     expect(step(chart, { section: 1, bar: 0 }, -1)).toEqual({ section: 0, bar: 4 });
     expect(step(chart, { section: 0, bar: 0 }, -1)).toBeNull();
+  });
+
+  it("R-13.10 rows of four: Tab past a full row starts a new one, and Add a row adds four bars", () => {
+    let chart = start();
+    ["1", "4", "5", "1"].forEach((chords, bar) => {
+      chart = setBar(chart, { section: 0, bar }, { chords });
+    });
+    chart = appendBar(chart, 0);
+    chart = setBar(chart, { section: 0, bar: 4 }, { chords: "6m" });
+    expect(canonicalText(chart, "").trimEnd().split("\n").slice(-2)).toEqual([
+      "1 | 4 | 5 | 1",
+      "6m",
+    ]);
+    chart = addRow(chart, 0);
+    chart = setBar(chart, { section: 0, bar: 5 }, { chords: "4" });
+    expect(canonicalText(chart, "").trimEnd().split("\n").slice(-2)).toEqual(["6m", "4"]);
   });
 
   it("R-13.11 every change makes a new chart, so the one before stays for undo", () => {
