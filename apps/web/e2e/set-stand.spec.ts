@@ -198,7 +198,7 @@ test("R-03.13 a song cut short: Song 2 of 4 opens the set's songs, and choosing 
   await page.getByRole("button", { name: "Song 2 of 4" }).click();
   const songs = page.getByRole("dialog", { name: "Songs of the set" });
   await expect(songs.getByRole("link")).toHaveCount(4);
-  await expect(songs.getByRole("link", { name: second })).toContainText("Now");
+  await expect(songs.getByRole("listitem").filter({ hasText: second })).toContainText("Now");
   await expect(songs.getByRole("link", { name: fourth })).toContainText("Key G");
   await songs.getByRole("link", { name: fourth }).click();
 

@@ -1013,7 +1013,8 @@ function StandModeView({
                       <VStack gap={0}>
                         {set && (
                           <Text type="supporting" maxLines={1}>
-                            {set.name} · {set.songOf}
+                            {/* "Song 3 of 8" is the button beside it when the set's songs are known. */}
+                            {songsButton ? set.name : `${set.name} · ${set.songOf}`}
                           </Text>
                         )}
                         <Heading level={1} maxLines={1}>
