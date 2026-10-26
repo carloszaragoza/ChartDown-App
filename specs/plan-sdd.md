@@ -440,7 +440,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 ### SPEC-13 · Visual chart editor (paid)
 
-**Goal:** a professional editor where the chart is written on the chart itself, as it will look when read, as in a notation program such as Sibelius: no ChartDown text boxes in sight. It is the editor of the paid plan. The **Chart editor** (R-03.1), where ChartDown is written by hand, stays as it is: it is the basic editor of the free plan and this spec changes nothing in it (owner's decisions, October 26, 2026). Both save the same ChartDown text, which stays the chart's single source.
+**Goal:** a professional editor where the chart is written on the chart itself, as it will look when read, as in a notation program such as Sibelius: no ChartDown text boxes in sight. It is the editor of the paid plan. The **Chart editor** (R-03.1), where ChartDown is written by hand, stays as it is: it is the basic editor of the free plan and this spec changes nothing in it (owner's decisions, October 26, 2026). Both save the same ChartDown text, which stays the chart's single source. An administrator always has both editors, whatever their plan, to check them (owner's decision, October 26, 2026).
 
 **Phase:** 2. **Status:** draft, revised by the owner on October 26, 2026; the screens wait for the owner's design handoff, and who has the paid plan waits for a spec of plans and subscriptions (today out of scope, section 10).
 
@@ -450,16 +450,16 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-13.2 **Starting a song, professionally:** "New song" asks first, on one well-laid page, for what a score's first page says: the song's title, the artists, the arranger, the song's link (YouTube) and the source, as New version does today; then, before the first bar, the **meter** (4/4, 3/4, 6/8, 12/8, 2/2 and the rest ChartDown reads), the **tempo** and what it counts (quarter, half, dotted quarter, eighth: R-00.18), the key and the feel. They are shown as a printed chart's header and can be changed at any moment.
 - R-13.3 **What you see is the chart:** the page is drawn as the finished chart, with the same components as the version page and stand mode: sections, rows of bars, the numbers in their ink. A tap or a click on a bar or a section's title selects it, in the selection blue with its outline. The first section starts with empty bars, ready to be written.
 - R-13.4 **Three lines in every bar:** **indications** at the top (Drums in, Drums out, mf, f, cresc., Coda…), the **chords** in the middle, the large line (`1 2 4sus`), and the **lyric** landmark at the bottom, so it is known what is sung in each bar (8 words at most: no lyrics). Choosing a line and typing writes in it, drawn as typed; indications suggest as they are typed; the lyric counts its words; a chord that isn't recognized is marked in red with an underline, never color alone.
-- R-13.5 **Writing bar after bar:** in the chords line the author types (`1 2 4sus`), a space between chords; Tab or Enter goes on to the next bar (a new one after the last), Shift + Tab or Shift + Enter back; ↑ and ↓ change line; Esc ends editing. Going back to any bar and line with the mouse or a finger and writing there works the same. So a chart is written line by line: chords first, then indications, then the lyric.
+- R-13.5 **Writing bar after bar:** in the chords line the author types (`1 2 4sus`), a space between chords; Tab or Enter goes on to the next bar (a new one after the last), Shift + Tab or Shift + Enter back; ↑ and ↓ change line; Esc ends editing. The chords are typed as ChartDown always writes them, marks included: a push (syncopation) as `'5` or `''5`, a stab `5!`, a fermata `5~`, a held chord `<5>`, a bass `5/7`. Going back to any bar and line with the mouse or a finger and writing there works the same. So a chart is written line by line: chords first, then indications, then the lyric.
 - R-13.6 **Splitting the beats:** when a bar's beats divide evenly among its chords they are split by themselves (in 4/4: 1 chord takes the 4 beats, 2 chords 2 and 2, 4 chords one each); otherwise the author chooses (3 chords in 4/4: 2+1+1, 1+2+1 or 1+1+2, with ⌥1 to ⌥3; 2 chords in 3/4: 2+1 or 1+2). In a compound meter such as 6/8 the split follows the tempo's beat unit. The text keeps ChartDown's form of a split (`:beats`, spec C.5).
-- R-13.7 **Tools to drag, for what isn't typed:** a tool panel, optional and slower than typing, holds what can't be written by hand in a line: coda, segno, D.S. and the other navigation, repeats and their times, first and second endings, fermata, push, stab, a chord held for the whole bar or until an indication ends, a pickup, and changes of key, meter or tempo. A tool is dragged onto a bar, a chord or a section (or tapped with them selected), and is drawn there as the chart shows it.
+- R-13.7 **Tools to drag, for what isn't typed or isn't known by heart:** a tool panel, optional and slower than typing, holds the chord's marks (push or syncopation, stab, fermata, hold: dragged onto a chord they change how it is drawn, as typing `'5` does) and what can't be written by hand in a line: coda, segno, D.S. and the other navigation, repeats and their times, first and second endings, fermata, push, stab, a chord held for the whole bar or until an indication ends, a pickup, and changes of key, meter or tempo. A tool is dragged onto a bar, a chord or a section (or tapped with them selected), and is drawn there as the chart shows it. A repeat says how many times it plays on its sign, 2 by default, changed visually (2x, 3x, 4x and on) as the pickup's length is.
 - R-13.8 **Problems never block while writing:** a bar that doesn't add up (3 chords with no split chosen, more chords than beats) is marked in amber with its icon and the work goes on. A chart written by hand that opens with warnings lists them with **Fix in Text** and is edited here once they are fixed.
-- R-13.9 **Sections:** add, rename, move (dragging or from its menu), duplicate and delete a section, and repeat one already written (`@use`, how many times). A repeat is read-only and has **Edit original**; deleting a section that others repeat asks to confirm.
+- R-13.9 **Sections:** add a section after the selected one or at the end by typing its name (Verse 1, then Verse 2, Chorus, Bridge; the next number suggested), rename, move (dragging or from its menu), duplicate and delete a section, and repeat one already written (`@use`, how many times). A repeat is read-only and has **Edit original**; deleting a section that others repeat asks to confirm.
 - R-13.10 **Bars:** insert, delete, copy and paste, repeat the previous bar (%), start a new row, a rest bar.
 - R-13.11 **Undo and redo** every change, many steps back.
 - R-13.12 **iPad and desktop:** on an iPad touch targets at least 44 px and the tools 50 px, both orientations, the on-screen keyboard and the tools never covering the bar being written; on a desktop the keyboard and the mouse. A phone has only the Chart editor in this first version.
 - R-13.13 **Accessible:** everything works with a keyboard and a screen reader, each bar announced in full words ("Verse, bar 3, six minor, 4 beats"), never as "6m"; WCAG AA contrast.
-- R-13.14 **The MD's notes** stay in the MD layer editor (R-03.5).
+- R-13.14 **The MD's indications in the chart:** each section takes notes as ChartDown writes them, shown as the chart shows them: for everyone (`> Soft`), from the MD (`> MD: Watch me`), or the MD's for some instruments (`> MD keys: Pad only`, `> MD drums: Out`), and for some passes of a repeat (`> MD 2x drums: In`). The instruments and passes are chosen from a list, and the text is typed. These are the chart's own notes, which every reader of the version sees; a band's private notes (its MD layer, R-03.5, filtered as R-06.4 says) stay in the MD layer editor.
 
 **Acceptance criteria**
 
@@ -470,6 +470,10 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - Given a 4/4 bar with three chords and no split, then it is marked in amber and writing goes on; choosing 2+1+1 writes `1:2 4 5`.
 - Given a chart made in the visual editor, when it is opened in the Chart editor, then it is the same chart as ChartDown text.
 - Given a screen reader on the bar `6m`, when it is selected, then it reads "six minor".
+- Given a bar with `4 5`, when the author drags the push tool onto the 5 (or types `4 '5`), then the 5 is drawn pushed and the text has `4 '5`.
+- Given a section, when the author adds an MD note for keys, then it is drawn with the keys tag and the text has `> MD keys: …`.
+- Given a repeat, when the author sets it to 3x, then the sign says ×3 and the text has `:| 3x`.
+- Given an administrator on the free plan, when they open a version, then they can open it in both editors.
 
 **Still to define**
 
@@ -479,7 +483,8 @@ A platform where musicians and music directors write charts in ChartDown, share 
 4. Whether copy and paste takes a range of bars.
 5. Later: rewrite only the section edited instead of the whole text, so the author's layout is kept.
 6. An unrecognized chord in red: red is reserved for the MD and instruments in the charts (Design Handoff, 1); to confirm, or use the theme's error color.
-7. The plans: the spec of plans and subscriptions (free: the Chart editor; paid: the visual editor), and who has the visual editor during the beta.
+7. The plans: the spec of plans and subscriptions (free: the Chart editor; paid: the visual editor, the MD's indications in it included), and who has the visual editor during the beta besides the administrators.
+9. Whether the chart's MD notes written here (R-13.14) and a band's private MD layer should be told apart better for the reader, since both say MD.
 8. Where it is reached: the side navigation's Create section, a version's Edit, or both.
 
 ## 7. Phases
