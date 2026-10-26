@@ -375,3 +375,34 @@ test.describe("with reduced motion", () => {
     await expect(page.getByText(/^[1-4] \/ 4$/)).not.toHaveText(first ?? "");
   });
 });
+
+test("R-11.17 T-2845 Metronome options mix the beat, its eighths and its sixteenths, kept after a reload", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, { title: "Split Time", content: FAST });
+  const six = await createVersion(request, {
+    title: "Rolling Six",
+    content: "---\nmeter: 6/8\ntempo: 60\n---\n## Verse\n1 | 4\n",
+  });
+  await page.goto(`/versions/${id}/stand`);
+  const options = page.getByRole("dialog");
+  const fader = (name: string) => options.getByRole("slider", { name, exact: true });
+  await page.getByRole("button", { name: "Metronome options" }).click();
+  await expect(fader("Beat")).toHaveAttribute("aria-valuenow", "70");
+  await expect(fader("Eighths")).toHaveAttribute("aria-valuenow", "0");
+  await expect(fader("Sixteenths")).toHaveAttribute("aria-valuenow", "0");
+  await expect(options.getByRole("slider", { name: "Volume" })).toHaveCount(0);
+  await fader("Sixteenths").focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(fader("Sixteenths")).toHaveAttribute("aria-valuenow", "5");
+
+  await page.reload();
+  await page.getByRole("button", { name: "Metronome options" }).click();
+  await expect(fader("Sixteenths")).toHaveAttribute("aria-valuenow", "5");
+
+  // In 6/8, never moved, Eighths sounds with the beat, as every eighth sounded before.
+  await page.goto(`/versions/${six}/stand`);
+  await page.getByRole("button", { name: "Metronome options" }).click();
+  await expect(fader("Eighths")).toHaveAttribute("aria-valuenow", "70");
+});

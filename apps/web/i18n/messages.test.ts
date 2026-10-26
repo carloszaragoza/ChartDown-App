@@ -56,6 +56,9 @@ const SAME_IN_BOTH = new Set([
   "landing.footer.youtube",
   "stand.setBar",
   "stand.beatOf",
+  // The faders where the beat is not a quarter or a dotted quarter (R-11.17).
+  "stand.fader.eighthsTimes",
+  "stand.fader.sixteenthsTimes",
   "stand.tempoTitle",
   "stand.speedValue",
   "stand.set",

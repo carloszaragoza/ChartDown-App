@@ -2,6 +2,7 @@ import type { Chart } from "chartdown";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { audioClock, clicks, continueWith, Metronome, sectionEnd, type Click } from "./engine";
 import {
+  clickSounds,
   DEFAULT_SOUND,
   getSound,
   keepSpeakersAwake,
@@ -47,7 +48,7 @@ export function useMetronome(chart: Chart) {
   const awake = useRef<(() => void) | null>(null);
   // The low hum that keeps the speakers from sleeping between clicks (T-2820), while it plays.
   const humming = useRef<(() => void) | null>(null);
-  // The click, its volume and the count-in, kept on this device (R-11.7, R-11.8). The scheduler
+  // The click, its faders and the count-in, kept on this device (R-11.7, R-11.8). The scheduler
   // reads the latest, so turning the click on while playing is heard on the next beat.
   const sound = useSyncExternalStore(subscribeSound, getSound, () => DEFAULT_SOUND);
   const heard = useRef(sound);
@@ -127,10 +128,12 @@ export function useMetronome(chart: Chart) {
         humming.current = keepSpeakersAwake(audio);
       const list = clicks(bars, { from, countIn: heard.current.countIn, ...options });
       const metronome = new Metronome(list, audioClock(audio), (click, at) => {
-        if (heard.current.click) {
-          const level = click.accent ? "accent" : click.group ? "group" : "beat";
-          playClick(audio, at, level, heard.current.volume);
-        }
+        if (!heard.current.click) return;
+        // The beat and its subdivisions at the faders' levels (R-11.17); a count-in in its
+        // starting bar's meter.
+        const meter = (bars[click.bar] ?? bars[from])?.meter ?? { beats: 4, unit: 4 };
+        for (const each of clickSounds(click, meter, heard.current))
+          playClick(audio, at + each.offset, each.level, each.volume);
       });
       engine.current = metronome;
       awake.current = keepAwake();

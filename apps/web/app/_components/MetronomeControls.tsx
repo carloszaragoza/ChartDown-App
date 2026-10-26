@@ -36,7 +36,7 @@ import {
 } from "../../lib/metronome/practiceTempo";
 import { MetronomeIcon } from "./MetronomeIcon";
 import { unitKey } from "../../lib/chart/tempo";
-import type { BeatLine } from "../../lib/metronome/sound";
+import { faders, type BeatLine } from "../../lib/metronome/sound";
 import { useMetronome } from "../../lib/metronome/useMetronome";
 
 /** Where the metronome is in one section, as ChartSection draws it (R-11.3). */
@@ -187,8 +187,12 @@ export function useMetronomeControls(
     </Dialog>
   );
 
-  // The click (off by default), its volume and the count-in, kept on this device (R-11.7, R-11.8).
+  // The click (off by default), its faders and the count-in, kept on this device (R-11.7, R-11.8).
   const { sound, setSound } = metronome;
+  // The faders name note values where the beat is a quarter or a dotted quarter, and say ×2 and
+  // ×4 elsewhere (R-11.17).
+  const levels = faders(sound, meter);
+  const named = beat === "q" || beat === "q.";
   // The tempo stepper (T-2808): the practice tempo in beats per minute, from the chart's own; on a
   // chart with no tempo, the tempo asked for.
   const stepped = written ? practiceTempo(written, speed) : clampTempo(tapped ?? askedTempo);
@@ -256,16 +260,20 @@ export function useMetronomeControls(
         value={sound.click}
         onChange={(click) => setSound({ ...sound, click })}
       />
-      <Slider
-        label={t("volume")}
-        value={sound.volume}
-        min={0}
-        max={100}
-        step={5}
-        valueDisplay="text"
-        formatValue={(volume) => `${volume}%`}
-        onChange={(volume: number) => setSound({ ...sound, volume })}
-      />
+      {/* The three faders in place of one volume (R-11.17): the beat and its subdivisions. */}
+      {(["beat", "eighths", "sixteenths"] as const).map((fader) => (
+        <Slider
+          key={fader}
+          label={t(named ? `fader.${fader}` : `fader.${fader}Times`)}
+          value={levels[fader]}
+          min={0}
+          max={100}
+          step={5}
+          valueDisplay="text"
+          formatValue={(volume) => `${volume}%`}
+          onChange={(volume: number) => setSound({ ...sound, [fader]: volume })}
+        />
+      ))}
       <Slider
         label={t("speed")}
         value={speed}

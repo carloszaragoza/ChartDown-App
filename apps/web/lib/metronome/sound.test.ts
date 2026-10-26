@@ -3,17 +3,22 @@ import {
   AWAKE_HZ,
   AWAKE_LEVEL,
   clickSamples,
+  clickSounds,
   clickTone,
   DEFAULT_SOUND,
+  faders,
   getSound,
   parseSound,
+  type SoundSettings,
 } from "./sound";
 
 describe("T-1505 the click", () => {
   it("R-11.7 the click is off by default, with no count-in", () => {
     expect(DEFAULT_SOUND).toEqual({
       click: false,
-      volume: 70,
+      beat: 70,
+      eighths: null,
+      sixteenths: 0,
       countIn: false,
       beatLine: "steps",
       keepAwake: true,
@@ -43,7 +48,9 @@ describe("T-2816 the beat line", () => {
     // Settings saved before the choice existed keep the rest and move in steps.
     expect(parseSound('{"click":true,"volume":40}')).toEqual({
       click: true,
-      volume: 40,
+      beat: 40,
+      eighths: null,
+      sixteenths: 0,
       countIn: false,
       beatLine: "steps",
       keepAwake: true,
@@ -90,5 +97,76 @@ describe("T-2820 keeping the speakers awake is a choice", () => {
     expect(parseSound(null).keepAwake).toBe(true);
     expect(parseSound('{"click":true}').keepAwake).toBe(true);
     expect(parseSound('{"keepAwake":false}').keepAwake).toBe(false);
+  });
+});
+
+describe("T-2845 subdivisions in the click", () => {
+  const FOUR = { beats: 4, unit: 4 };
+  const SIX = { beats: 6, unit: 8 };
+  const beat = { accent: false, duration: 0.8 };
+  const mix = (levels: Partial<SoundSettings>): SoundSettings => ({ ...DEFAULT_SOUND, ...levels });
+
+  it("R-11.17 with every fader up a 4/4 beat sounds four clicks, evenly spaced, the first the beat's", () => {
+    const sounds = clickSounds(beat, FOUR, mix({ beat: 70, eighths: 50, sixteenths: 30 }));
+    expect(sounds.map((each) => Number(each.offset.toFixed(6)))).toEqual([0, 0.2, 0.4, 0.6]);
+    expect(sounds.map((each) => each.level)).toEqual(["beat", "split", "split", "split"]);
+    expect(sounds.map((each) => each.volume)).toEqual([70, 30, 50, 30]);
+  });
+
+  it("R-11.17 the subdivisions are a lighter sound of their own, never heard as a beat", () => {
+    const split = clickTone("split", 70);
+    expect(split.frequency).not.toBe(clickTone("beat", 70).frequency);
+    expect(split.peak).toBeLessThan(clickTone("beat", 70).peak);
+  });
+
+  it("R-11.17 a fader at 0 sounds nothing, and beat 1 keeps its accent", () => {
+    expect(clickSounds(beat, FOUR, mix({ beat: 0, eighths: 0 }))).toEqual([]);
+    expect(clickSounds({ ...beat, accent: true }, FOUR, mix({ eighths: 40 }))).toEqual([
+      { offset: 0, level: "accent", volume: 70 },
+      { offset: 0.4, level: "split", volume: 40 },
+    ]);
+  });
+
+  it("R-11.17 6/8 with the settings saved before sounds every eighth, as before", () => {
+    const before = parseSound('{"click":true,"volume":60}');
+    const bar = [true, false, false, true, false, false].map((onBeat, at) =>
+      clickSounds(
+        { accent: at === 0, ...(onBeat && at > 0 ? { group: true as const } : {}), duration: 0.3 },
+        SIX,
+        before,
+      ),
+    );
+    expect(bar.map((sounds) => sounds.map((each) => [each.level, each.volume]))).toEqual([
+      [["accent", 60]],
+      [["beat", 60]],
+      [["beat", 60]],
+      [["group", 60]],
+      [["beat", 60]],
+      [["beat", 60]],
+    ]);
+  });
+
+  it("R-11.17 in 6/8 the beat is the group of three, Eighths the other two, Sixteenths between", () => {
+    const levels = mix({ beat: 80, eighths: 0, sixteenths: 20 });
+    expect(clickSounds({ accent: false, group: true, duration: 0.3 }, SIX, levels)).toEqual([
+      { offset: 0, level: "group", volume: 80 },
+      { offset: 0.15, level: "split", volume: 20 },
+    ]);
+    expect(clickSounds({ accent: false, duration: 0.3 }, SIX, levels)).toEqual([
+      { offset: 0.15, level: "split", volume: 20 },
+    ]);
+  });
+
+  it("R-11.17 the saved volume becomes Beat, and Eighths follows the meter until it is moved", () => {
+    const before = parseSound('{"volume":45}');
+    expect(faders(before, FOUR)).toEqual({ beat: 45, eighths: 0, sixteenths: 0 });
+    expect(faders(before, SIX)).toEqual({ beat: 45, eighths: 45, sixteenths: 0 });
+    const moved = parseSound('{"beat":45,"eighths":10,"sixteenths":120}');
+    expect(faders(moved, SIX)).toEqual({ beat: 45, eighths: 10, sixteenths: 100 });
+  });
+
+  it("R-11.17 the last beat of a fermata's bar sounds alone as it holds", () => {
+    const held = clickSounds({ ...beat, waits: true }, FOUR, mix({ eighths: 50, sixteenths: 50 }));
+    expect(held).toEqual([{ offset: 0, level: "beat", volume: 70 }]);
   });
 });

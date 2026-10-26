@@ -8,6 +8,7 @@ import {
   type Chart,
   type Meter,
 } from "chartdown";
+import { isCompound } from "./sound";
 
 /** One beat the metronome counts: its number in the bar, how strong it is, what sounds on it. */
 export interface TimelineBeat {
@@ -45,8 +46,7 @@ export interface TimelineBar {
 
 /** The first eighth of each group of three in 6/8, 9/8 and 12/8, after beat 1 (R-11.7). */
 export function startsGroup(meter: Meter, beat: number): boolean {
-  const isCompound = meter.unit === 8 && meter.beats > 3 && meter.beats % 3 === 0;
-  return isCompound && beat > 0 && beat % 3 === 0;
+  return isCompound(meter) && beat > 0 && beat % 3 === 0;
 }
 
 const isTimed = (item: BarItem) =>
