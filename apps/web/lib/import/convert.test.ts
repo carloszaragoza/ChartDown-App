@@ -1,4 +1,4 @@
-import { parse } from "chartdown";
+import { parse, toJSON, write } from "chartdown";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { degree, readChord, readKey, writeChord } from "./chords";
@@ -30,7 +30,7 @@ describe("T-1403 details and sections", () => {
     expect(result.title).toBe("Morning Light");
     expect(result.writers).toBe("Sam Rivera");
     expect(result.source).toMatch(
-      /^---\ntitle: Morning Light\nkey: E\ntempo: 72\nmeter: 4\/4\n---/,
+      /^---\nchartdown: 0\.10\ntitle: Morning Light\nkey: E\ntempo: 72\nmeter: 4\/4\n---/,
     );
     expect(result.source).not.toMatch(/copyright|ccli|rights/i);
     const harbor = importSheet(sheet("harbor-lights-bars"), numbers);
@@ -94,13 +94,14 @@ describe("T-1404 chords", () => {
     expect(readChord("Morning")).toBeNull();
     expect(readChord("Every")).toBeNull();
     const result = importSheet(sheet("morning-light"), numbers);
-    expect(rows(result.source, "Verse 1").at(-1)).toBe("6m | 4 | 5sus4 | 5");
+    // sus4 takes its canonical form, sus (spec 6, R-10.14).
+    expect(rows(result.source, "Verse 1").at(-1)).toBe("6m | 4 | 5sus | 5");
   });
 
   it("R-10.4 a chord-only line with bar lines keeps its bars exactly", () => {
     const result = importSheet(sheet("harbor-lights-bars"), numbers);
     expect(rows(result.source, "Intro")).toEqual(["1 | 1 | 4 | 4"]);
-    expect(rows(result.source, "Instrumental")).toEqual(["|: 1 5 | 6m 4 | 1 5 | 4 :| x2"]);
+    expect(rows(result.source, "Instrumental")).toEqual(["|: 1 5 | 6m 4 | 1 5 | 4 :|"]);
     expect(result.review.filter((item) => item.section === "Intro")).toEqual([]);
   });
 });
@@ -172,5 +173,48 @@ describe("T-2825 an imported tempo and its unit (ChartDown 0.9)", () => {
     const result = imported("Title: Low Tide\nKey: E\nTempo: 74.5\nTime: 4/4");
     expect(result.source).toMatch(/\ntempo: 74\.5\nmeter: 4\/4\n/);
     expect(result.review.some((item) => item.kind === "tempo-unit")).toBe(false);
+  });
+});
+
+describe("T-2902 the draft in canonical text", () => {
+  it("R-10.14 R-00.19 a draft with no warnings is its own canonical text, and its review points at its lines", () => {
+    for (const name of ["morning-light", "lantern-bay-minor", "harbor-lights-bars"]) {
+      const { source, review } = importSheet(sheet(name), numbers);
+      expect(write(toJSON(parse(source))), name).toBe(source);
+      const lines = source.split("\n");
+      for (const item of review.filter((each) => each.kind === "bars-proposed")) {
+        expect(item.line, name).toBeDefined();
+        const section = lines
+          .slice(0, item.line)
+          .filter((line) => line.startsWith("## "))
+          .at(-1);
+        expect(section, name).toBe(`## ${item.section}`);
+        expect(lines[(item.line as number) - 1], name).toMatch(/^[^#>@]/);
+      }
+    }
+  });
+
+  it("R-10.14 a section the sheet plays twice keeps it as a note, flagged on that line", () => {
+    const { source, review } = importSheet("Chorus x2\nG  C\nSing it\n", numbers);
+    const lines = source.split("\n");
+    const item = review.find((each) => each.kind === "unmapped");
+    expect(lines[(item?.line as number) - 1]).toBe("> Played x2 in the sheet.");
+    expect(lines[(item?.line as number) - 2]).toBe("## Chorus");
+  });
+
+  it("R-10.14 a tempo to confirm points at the header's tempo line", () => {
+    const { source, review } = importSheet(
+      "Key: E\nTempo: 58\nTime: 6/8\nVerse\nE  A\nWords\n",
+      numbers,
+    );
+    const item = review.find((each) => each.kind === "tempo-unit");
+    expect(source.split("\n")[(item?.line as number) - 1]).toBe("tempo: 58 ?");
+  });
+
+  it("R-10.14 a draft the parser warns about stays as the importer wrote it, so what is wrong shows", () => {
+    const { source, review } = importSheet("Verse\n| N.C. | G |\nWords\n", numbers);
+    expect(source).not.toContain("chartdown:");
+    expect(source).toContain('N.C. "Words" | 1');
+    expect(review.some((item) => item.kind === "unknown-chord")).toBe(true);
   });
 });

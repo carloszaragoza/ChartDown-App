@@ -1,4 +1,4 @@
-import { parse } from "chartdown";
+import { parse, toJSON, write } from "chartdown";
 import { keyText, readChord, readKey, writeChord, type SheetChord, type SheetKey } from "./chords";
 
 // Turning a chord sheet (chords written over lyric lines) into a ChartDown draft (SPEC-10,
@@ -213,8 +213,10 @@ export function importSheet(text: string, options: ImportOptions): ImportResult 
   if (!named) review.push({ kind: "key-guessed", detail: keyText(key) });
   if (sections.length === 0) review.push({ kind: "no-sections" });
 
-  // The draft, in ChartDown.
+  // The draft, in ChartDown. Review items that point at a line say where it is, and get their
+  // line from the draft as it is finally written.
   const out: string[] = ["---"];
+  const placed: { item: ReviewItem; at: Place }[] = [];
   if (title) out.push(`title: ${title}`);
   out.push(`key: ${keyText(key)}`);
   // The tempo keeps its decimals. In 6/8, 9/8 or 12/8 a sheet doesn't say what it counts, so it
@@ -226,20 +228,26 @@ export function importSheet(text: string, options: ImportOptions): ImportResult 
   const compound = bottom === 8 && top > 3 && top % 3 === 0;
   if (tempo > 0) {
     out.push(`tempo: ${tempo}${compound ? " ?" : ""}`);
-    if (compound) review.push({ kind: "tempo-unit", line: out.length, detail: String(tempo) });
+    if (compound) {
+      const item: ReviewItem = { kind: "tempo-unit", detail: String(tempo) };
+      review.push(item);
+      placed.push({ item, at: { field: "tempo" } });
+    }
   }
   if (readMeter) out.push(`meter: ${readMeter}`);
   out.push("---");
-  for (const section of sections) {
+  sections.forEach((section, at) => {
     out.push(`## ${section.name}`);
     if (section.repeat) {
-      out.push(`// Played x${section.repeat} in the sheet.`);
-      review.push({
+      // A note, not a comment, so the canonical text keeps it (R-10.14).
+      out.push(`> Played x${section.repeat} in the sheet.`);
+      const item: ReviewItem = {
         kind: "unmapped",
-        line: out.length,
         section: section.name,
         detail: `x${section.repeat}`,
-      });
+      };
+      review.push(item);
+      placed.push({ item, at: { section: at, note: true } });
     }
     section.rows.forEach((row, index) => {
       const bars = row.bars.map((bar) =>
@@ -255,14 +263,26 @@ export function importSheet(text: string, options: ImportOptions): ImportResult 
         bars[0] = `${bars[0]} "${section.landmark}"`;
       const body = bars.join(" | ");
       out.push(row.repeat ? `|: ${body} :| x${row.repeat}` : body);
-      if (row.proposed)
-        review.push({ kind: "bars-proposed", line: out.length, section: section.name });
+      if (row.proposed) {
+        const item: ReviewItem = { kind: "bars-proposed", section: section.name };
+        review.push(item);
+        placed.push({ item, at: { section: at, row: index } });
+      }
     });
+  });
+  const draft = `${out.join("\n")}\n`;
+
+  // A draft with no warnings is written in canonical text, as every chart the app builds; one
+  // with warnings stays as written, so what is wrong stays visible (R-10.14, R-00.19).
+  const chart = parse(draft);
+  const source = chart.warnings.length === 0 ? write(toJSON(chart)) : draft;
+  for (const { item, at } of placed) {
+    const line = lineOf(source, at);
+    if (line !== undefined) item.line = line;
   }
-  const source = `${out.join("\n")}\n`;
 
   // What the parser itself warns about: an unknown chord, an odd bar.
-  for (const warning of parse(source).warnings)
+  for (const warning of chart.warnings)
     review.push({
       kind: warning.code === "bad-token" ? "unknown-chord" : "chart-warning",
       line: warning.line,
@@ -270,6 +290,35 @@ export function importSheet(text: string, options: ImportOptions): ImportResult 
     });
 
   return { source, title, writers, key: keyText(key), review, sections: sections.length };
+}
+
+/** Where a review item points: a header field, a section's first note, or one of its rows. */
+type Place = { field: string } | { section: number; note: true } | { section: number; row: number };
+
+/** The line, from 1, of a place in a draft. */
+function lineOf(source: string, at: Place): number | undefined {
+  const lines = source.split("\n");
+  if ("field" in at) {
+    const end = lines.indexOf("---", 1);
+    const index = lines.findIndex((line, i) => i > 0 && i < end && line.startsWith(`${at.field}:`));
+    return index === -1 ? undefined : index + 1;
+  }
+  const heading = lines.reduce<number[]>(
+    (all, line, i) => (line.startsWith("## ") ? [...all, i] : all),
+    [],
+  )[at.section];
+  if (heading === undefined) return undefined;
+  let count = 0;
+  for (let i = heading + 1; i < lines.length && !(lines[i] as string).startsWith("## "); i++) {
+    const line = lines[i] as string;
+    if ("note" in at) {
+      if (line.startsWith(">")) return i + 1;
+      continue;
+    }
+    if (line.trim() === "" || /^(>|@|\/\/)/.test(line)) continue;
+    if (count++ === at.row) return i + 1;
+  }
+  return undefined;
 }
 
 /** A chord line's bars: kept as written when it has bar lines, one chord a bar otherwise (R-10.6). */
