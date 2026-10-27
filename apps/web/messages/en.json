@@ -1771,11 +1771,6 @@
       "phone": "The visual editor works on an iPad or a computer. On a phone, use the Chart editor."
     },
     "phone": "The visual editor works on an iPad or a computer. On a phone, use the Chart editor.",
-    "titleEdit": "Rename the song: {title}",
-    "titleError": {
-      "invalid": "Give the song a title of 1 to 200 characters.",
-      "error": "The title couldn't be changed. Try again."
-    },
     "keys": {
       "major": "Major",
       "minor": "Minor"

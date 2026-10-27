@@ -2,7 +2,6 @@
 
 import { Button } from "@astryxdesign/core/Button";
 import { Grid } from "@astryxdesign/core/Grid";
-import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { NumberInput } from "@astryxdesign/core/NumberInput";
@@ -15,7 +14,7 @@ import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { UNITS, type VisualChart } from "../../../../lib/visual/model";
 import { addTap, tapTempo } from "../../../../lib/visual/tap";
-import { renameSong } from "./actions";
+import { SongName } from "../edit/SongName";
 
 type Meta = VisualChart["meta"];
 
@@ -34,12 +33,13 @@ const tempoParts = (tempo: string | undefined) => {
 };
 
 /**
- * The chart's header, changed right where it is (R-13.2): a tap on the title edits it, the key
+ * The chart's header, changed right where it is (R-13.2): a tap on the title or the artists edits them, the key
  * opens the keys, the tempo a number and Tap, the meter its two rows and what the tempo counts.
  */
 export function HeaderFields({
   versionId,
   title,
+  artists,
   canRename,
   meta,
   onMeta,
@@ -48,15 +48,16 @@ export function HeaderFields({
 }: {
   versionId: string;
   title: string;
+  artists: string[];
+  /** Whether this person may rename the song: an administrator, or its only owner (R-02.2). */
   canRename: boolean;
   meta: Meta;
   onMeta: (change: (meta: Meta) => Meta) => void;
-  onRenamed: (title: string) => void;
-  /** What goes under the title: the artists and the arranger. */
+  onRenamed: (title: string, artists: string[]) => void;
+  /** What goes under the song's names: the arranger. */
   subtitle?: ReactNode;
 }) {
   const t = useTranslations("visual");
-  const [renameState, setRenameState] = useState<"idle" | "saving" | "invalid" | "error">("idle");
   const [taps, setTaps] = useState<number[]>([]);
   const { bpm, unit } = tempoParts(meta.tempo);
   const meter = meta.meter ?? "4/4";
@@ -70,62 +71,15 @@ export function HeaderFields({
       return next;
     });
 
-  // The title is edited in the heading itself: Enter keeps it, Esc puts it back (R-13.2).
-  const rename = async (field: HTMLElement) => {
-    const name = (field.textContent ?? "").trim();
-    if (name === title) {
-      field.textContent = title;
-      setRenameState("idle");
-      return;
-    }
-    setRenameState("saving");
-    const result = await renameSong(versionId, name);
-    if (result === "saved") {
-      onRenamed(name);
-      setRenameState("idle");
-    } else {
-      field.textContent = title;
-      setRenameState(result);
-    }
-  };
-
+  // The song's title and artists, written in place as in the Chart editor (R-13.2, R-02.2).
   const titleView = (
-    <VStack gap={1}>
-      <Heading level={1}>
-        {canRename ? (
-          <span
-            // A new title remounts it, since typing replaced the text React put there.
-            key={title}
-            className="cd-chart__title-edit"
-            role="textbox"
-            aria-label={t("titleEdit", { title })}
-            contentEditable={renameState !== "saving"}
-            suppressContentEditableWarning
-            spellCheck={false}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                event.currentTarget.blur();
-              }
-              if (event.key === "Escape") {
-                event.currentTarget.textContent = title;
-                event.currentTarget.blur();
-              }
-            }}
-            onBlur={(event) => void rename(event.currentTarget)}
-          >
-            {title}
-          </span>
-        ) : (
-          title
-        )}
-      </Heading>
-      {(renameState === "invalid" || renameState === "error") && (
-        <Text type="supporting" role="alert">
-          {t(`titleError.${renameState}`)}
-        </Text>
-      )}
-    </VStack>
+    <SongName
+      versionId={versionId}
+      title={title}
+      artists={artists}
+      canRename={canRename}
+      onRenamed={onRenamed}
+    />
   );
 
   const keyPicker = (

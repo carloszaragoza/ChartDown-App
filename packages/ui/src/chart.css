@@ -1183,21 +1183,3 @@
   border: var(--border-width) dashed var(--color-border-emphasized);
   border-radius: var(--radius-container);
 }
-
-/* The visual editor's title, renamed with a tap where it is (R-13.2): it reads as the title, with
-   a dotted underline that says it can be changed. */
-.cd-chart__title-edit {
-  cursor: text;
-  outline: none;
-  border-radius: var(--radius-inner);
-  text-decoration: underline dotted var(--color-border-emphasized);
-  text-underline-offset: 0.2em;
-}
-.cd-chart__title-edit:hover,
-.cd-chart__title-edit:focus {
-  text-decoration-color: var(--color-border-blue);
-}
-.cd-chart__title-edit:focus-visible {
-  outline: calc(var(--border-width) * 2) solid var(--color-border-blue);
-  outline-offset: calc(var(--border-width) * 2);
-}

@@ -244,6 +244,7 @@ export function VisualEditor({
     savedSource: source,
   });
   const [songTitle, setSongTitle] = useState(title);
+  const [songArtists, setSongArtists] = useState(artists);
   const saved = canonicalText(chart, songTitle);
   const sourceNow: SourceValues = { sourceType, album, year, youtube };
   const dirty =
@@ -639,16 +640,14 @@ export function VisualEditor({
                   canRename={canRename}
                   meta={chart.meta}
                   onMeta={(next) => change((c) => ({ ...c, meta: next(c.meta) }))}
-                  onRenamed={(name) => {
+                  artists={songArtists}
+                  onRenamed={(name, names) => {
                     setSongTitle(name);
+                    setSongArtists(names);
                     router.refresh();
                   }}
                   subtitle={
-                    <Text color="secondary">
-                      {[artists.join(", "), author && t("arranger", { name: author })]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </Text>
+                    author && <Text color="secondary">{t("arranger", { name: author })}</Text>
                   }
                 />
                 {chart.meta.feel && <Token label={chart.meta.feel} size="sm" />}

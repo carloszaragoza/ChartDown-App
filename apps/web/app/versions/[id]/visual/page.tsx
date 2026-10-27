@@ -24,14 +24,17 @@ export default async function VisualPage({ params }: { params: Promise<{ id: str
     .eq("id", version.currentRevisionId)
     .maybeSingle();
   if (!revision) notFound();
-  const { recordings, bands } = await loadRecordings(supabase, version.id, userId);
+  const [{ recordings, bands }, { data: canRename }] = await Promise.all([
+    loadRecordings(supabase, version.id, userId),
+    // Its title and artists are the song's: renamed by an administrator or its only owner (R-02.2).
+    supabase.rpc("can_rename_song", { version_id: version.id }),
+  ]);
 
   return (
     <VisualEditor
       versionId={version.id}
       title={version.title}
-      // Only an administrator opens the visual editor today, and may rename a song (R-02.2).
-      canRename
+      canRename={canRename === true}
       artists={version.artists}
       author={version.author}
       revisionId={version.currentRevisionId}
