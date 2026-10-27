@@ -87,6 +87,21 @@ describe("T-3003 the visual editor", () => {
     expect(html).toContain(">mf</text>");
   });
 
+  it("R-13.3 each section says its bars, a repeat is one strip, Add a section closes the page", () => {
+    const html = wrap(
+      "en",
+      <VisualEditor
+        {...props(
+          "## Verse\n1 | 4 | 6m | 5\n\n## Chorus\n4 | 1 | 5 | 1\n\n## Chorus\n@use Chorus 2x\n",
+        )}
+      />,
+    );
+    expect(html).toContain("4 bars");
+    expect(html).toContain("Plays ×2");
+    expect(html).toContain("Repeats the Chorus written above");
+    expect(html).toMatch(/class="cd-chart__add"/);
+  });
+
   it("R-13.8 a chart that opens with warnings is fixed in Text first", () => {
     const html = wrap("en", <VisualEditor {...props("## Verse\n1 | ??? | 4\n")} />);
     expect(html).toContain("Fix this chart in Text first");

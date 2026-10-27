@@ -1104,6 +1104,8 @@
   background: color-mix(in srgb, var(--color-background-blue) 50%, transparent);
 }
 .cd-chart__bar--selected {
+  background: color-mix(in srgb, var(--color-background-blue) 70%, transparent);
+  border-radius: var(--radius-inner);
   outline: calc(var(--border-width) * 2) solid var(--color-border-blue);
   outline-offset: calc(var(--border-width) * -2);
 }
@@ -1139,4 +1141,10 @@
 .cd-chart__bar[data-drop="true"] {
   outline: calc(var(--border-width) * 2) dashed var(--color-border-blue);
   outline-offset: calc(var(--border-width) * -2);
+}
+
+/* The visual editor's Add a section: a full-width dashed slot at the chart's end (R-13.3). */
+.cd-chart__add {
+  border: var(--border-width) dashed var(--color-border-emphasized);
+  border-radius: var(--radius-container);
 }

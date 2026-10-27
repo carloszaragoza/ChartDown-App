@@ -709,229 +709,264 @@ export function VisualEditor({
                 chart={drawn}
               />
             )}
-            {chart.sections.map((section, s) => {
-              const parsed = drawn.sections[s];
-              const isPlaying = playing === s;
-              const head = (
-                <HStack gap={2} vAlign="center" wrap="wrap">
-                  {renaming === s ? (
-                    <TextInput
-                      label={t("sectionName")}
-                      isLabelHidden
-                      value={section.name}
-                      onChange={(name) =>
-                        setHistory((h) => ({ ...h, present: renameSection(h.present, s, name) }))
-                      }
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === "Escape") setRenaming(null);
-                      }}
-                      onBlur={() => setRenaming(null)}
-                      hasAutoFocus
-                    />
-                  ) : (
-                    <Heading level={2}>{section.name}</Heading>
-                  )}
-                  {isPlaying && <Token label={t("playing")} size="sm" color="blue" />}
-                  {section.use && <Token label={t("repeats", { name: section.use })} size="sm" />}
-                  <MoreMenu
-                    label={t("sectionMenu", { name: section.name })}
-                    presentation="adaptive"
-                    items={[
-                      ...(section.use
-                        ? [
-                            {
-                              label: t("editOriginal"),
-                              icon: icon("editOriginal"),
-                              onClick: () => {
-                                const original = chart.sections.findIndex(
-                                  (x) => x.name === section.use && !x.use,
-                                );
-                                if (original >= 0) setSelected({ section: original, bar: 0 });
-                                document
-                                  .getElementById(`cd-visual-${original}`)
-                                  ?.scrollIntoView({ behavior: "smooth" });
-                              },
-                            },
-                          ]
-                        : [
-                            {
-                              label: t("rename"),
-                              icon: icon("rename"),
-                              onClick: () => {
-                                change((c) => c);
-                                setRenaming(s);
-                              },
-                            },
-                            {
-                              label: t("addSectionAfter"),
-                              icon: icon("addSection"),
-                              onClick: () => addAfter(s),
-                            },
-                            {
-                              label: t("addNote"),
-                              icon: icon("addNote"),
-                              onClick: () => setNoteFor(s),
-                            },
-                            {
-                              label: t("repeatSection"),
-                              icon: icon("repeatSection"),
-                              onClick: () => change((c) => repeatSection(c, s, 2)),
-                            },
-                            {
-                              label: t("duplicate"),
-                              icon: icon("duplicate"),
-                              onClick: () =>
-                                change((c) =>
-                                  duplicateSection(c, s, nextName(c.sections, `${section.name} 2`)),
-                                ),
-                            },
-                          ]),
-                      {
-                        label: t("moveUp"),
-                        icon: icon("moveUp"),
-                        onClick: () => change((c) => moveSection(c, s, -1)),
-                      },
-                      {
-                        label: t("moveDown"),
-                        icon: icon("moveDown"),
-                        onClick: () => change((c) => moveSection(c, s, 1)),
-                      },
-                      { type: "divider" as const },
-                      {
-                        label: t("deleteSection"),
-                        icon: icon("deleteSection"),
-                        variant: "destructive" as const,
-                        onClick: () =>
-                          repeatsOf(chart, s) > 0
-                            ? setConfirmDelete(s)
-                            : change((c) => deleteSection(c, s)),
-                      },
-                    ]}
-                  />
-                </HStack>
-              );
-              return (
-                <section key={s} id={`cd-visual-${s}`} aria-label={section.name}>
-                  <VStack gap={3}>
-                    {head}
-                    {section.notes.length > 0 && (
-                      <HStack gap={2} vAlign="start" wrap="wrap">
-                        <MDNotes
-                          notes={parsed?.notes ?? []}
-                          instrumentName={labels.bar.instrument}
-                        />
-                        {section.notes.map((note, n) => (
-                          <Button
-                            key={n}
-                            label={t("deleteNote", { text: note.text })}
-                            isIconOnly
-                            size="sm"
-                            variant="ghost"
-                            icon={icon("deleteNote")}
-                            onClick={() => change((c) => deleteNote(c, s, n))}
-                          />
-                        ))}
-                      </HStack>
-                    )}
-                    {section.use ? (
-                      // A repeat is read-only, with Edit original in its menu (R-13.9).
-                      <HStack gap={2} vAlign="center">
-                        <Text color="secondary">{t("repeatTimes")}</Text>
-                        <Button
-                          label="−"
-                          size="sm"
-                          isDisabled={(section.times ?? 1) <= 1}
-                          onClick={() =>
-                            change((c) => setTimes(c, s, Math.max(1, (section.times ?? 1) - 1)))
+            {/* The chart's page: its sections, one after another, and Add a section (R-13.3). */}
+            <Card padding={4}>
+              <VStack gap={6}>
+                {chart.sections.map((section, s) => {
+                  const parsed = drawn.sections[s];
+                  const isPlaying = playing === s;
+                  const head = (
+                    <HStack gap={2} vAlign="center" wrap="wrap">
+                      {renaming === s ? (
+                        <TextInput
+                          label={t("sectionName")}
+                          isLabelHidden
+                          value={section.name}
+                          onChange={(name) =>
+                            setHistory((h) => ({
+                              ...h,
+                              present: renameSection(h.present, s, name),
+                            }))
                           }
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === "Escape") setRenaming(null);
+                          }}
+                          onBlur={() => setRenaming(null)}
+                          hasAutoFocus
                         />
-                        <Text weight="semibold">×{section.times ?? 1}</Text>
-                        <Button
-                          label="+"
-                          size="sm"
-                          onClick={() => change((c) => setTimes(c, s, (section.times ?? 1) + 1))}
-                        />
-                      </HStack>
-                    ) : (
-                      rowGroups(section).map((group, r) => {
-                        const row = parsed?.rows[r];
-                        if (!row) return null;
-                        const at = (index: number): BarAt => ({
-                          section: s,
-                          bar: group[index] as number,
-                        });
-                        return (
-                          <div
-                            key={r}
-                            onClick={(event) => pick(event, s, group)}
-                            onDragOver={(event) => {
-                              event.preventDefault();
-                              const found = dropTarget(event, s, group);
-                              setDropOn(found?.key ?? null);
-                            }}
-                            onDragLeave={() => setDropOn(null)}
-                            onDrop={(event) => onDrop(event, s, group)}
-                          >
-                            <BarRow
-                              row={row}
-                              formatter={formatter}
-                              labels={labels.bar}
-                              size="md"
-                              beats="auto"
-                              edit={{
-                                ...(selected?.section === s && group.includes(selected.bar)
-                                  ? { selected: group.indexOf(selected.bar) }
-                                  : {}),
-                                ...(editing?.at.section === s && group.includes(editing.at.bar)
-                                  ? { editing: group.indexOf(editing.at.bar) }
-                                  : {}),
-                                flagged: group.flatMap((bar, index) =>
-                                  needsAttention(
-                                    section.bars[bar] as VisualBar,
-                                    meterAt[s]?.[bar] ?? "4/4",
-                                  ) || dropOn === `${s}:${bar}`
-                                    ? [index]
-                                    : [],
-                                ),
-                                line: (index, line) =>
-                                  ownLine(
-                                    at(index),
-                                    section.bars[group[index] as number] as VisualBar,
-                                    line,
-                                  ),
-                                label: (index) =>
-                                  label(
-                                    at(index),
-                                    section.bars[group[index] as number] as VisualBar,
-                                  ),
-                              }}
-                            />
-                          </div>
-                        );
-                      })
-                    )}
-                    {!section.use && (
-                      <HStack>
-                        <Button
-                          label={t("addRow")}
-                          variant="ghost"
-                          icon={icon("addRow")}
-                          onClick={() => change((c) => addRow(c, s))}
-                        />
-                      </HStack>
-                    )}
-                  </VStack>
-                </section>
-              );
-            })}
-            <HStack>
-              <Button
-                label={t("addSection")}
-                icon={icon("addSection")}
-                // After the section being written in, or at the end.
-                onClick={() => addAfter(selected?.section ?? chart.sections.length - 1)}
-              />
-            </HStack>
+                      ) : (
+                        <Heading level={2}>{section.name}</Heading>
+                      )}
+                      {section.use ? (
+                        <>
+                          <Token
+                            label={t("repeatToken", { times: section.times ?? 1 })}
+                            icon={icon("repeatSection")}
+                            size="sm"
+                            color="blue"
+                          />
+                          <Text type="supporting">{t("repeatsAbove", { name: section.use })}</Text>
+                        </>
+                      ) : (
+                        <Text type="supporting">
+                          {t("barCount", { count: section.bars.length })}
+                        </Text>
+                      )}
+                      {isPlaying && <Token label={t("playing")} size="sm" color="blue" />}
+                      {section.use && (
+                        // A repeat is read-only, with Edit original in its menu (R-13.9).
+                        <HStack gap={1} vAlign="center">
+                          <Button
+                            label="−"
+                            size="sm"
+                            tooltip={t("repeatTimes")}
+                            isDisabled={(section.times ?? 1) <= 1}
+                            onClick={() =>
+                              change((c) => setTimes(c, s, Math.max(1, (section.times ?? 1) - 1)))
+                            }
+                          />
+                          <Button
+                            label="+"
+                            size="sm"
+                            tooltip={t("repeatTimes")}
+                            onClick={() => change((c) => setTimes(c, s, (section.times ?? 1) + 1))}
+                          />
+                        </HStack>
+                      )}
+                      <MoreMenu
+                        label={t("sectionMenu", { name: section.name })}
+                        presentation="adaptive"
+                        items={[
+                          ...(section.use
+                            ? [
+                                {
+                                  label: t("editOriginal"),
+                                  icon: icon("editOriginal"),
+                                  onClick: () => {
+                                    const original = chart.sections.findIndex(
+                                      (x) => x.name === section.use && !x.use,
+                                    );
+                                    if (original >= 0) setSelected({ section: original, bar: 0 });
+                                    document
+                                      .getElementById(`cd-visual-${original}`)
+                                      ?.scrollIntoView({ behavior: "smooth" });
+                                  },
+                                },
+                              ]
+                            : [
+                                {
+                                  label: t("rename"),
+                                  icon: icon("rename"),
+                                  onClick: () => {
+                                    change((c) => c);
+                                    setRenaming(s);
+                                  },
+                                },
+                                {
+                                  label: t("addSectionAfter"),
+                                  icon: icon("addSection"),
+                                  onClick: () => addAfter(s),
+                                },
+                                {
+                                  label: t("addNote"),
+                                  icon: icon("addNote"),
+                                  onClick: () => setNoteFor(s),
+                                },
+                                {
+                                  label: t("repeatSection"),
+                                  icon: icon("repeatSection"),
+                                  onClick: () => change((c) => repeatSection(c, s, 2)),
+                                },
+                                {
+                                  label: t("duplicate"),
+                                  icon: icon("duplicate"),
+                                  onClick: () =>
+                                    change((c) =>
+                                      duplicateSection(
+                                        c,
+                                        s,
+                                        nextName(c.sections, `${section.name} 2`),
+                                      ),
+                                    ),
+                                },
+                              ]),
+                          {
+                            label: t("moveUp"),
+                            icon: icon("moveUp"),
+                            onClick: () => change((c) => moveSection(c, s, -1)),
+                          },
+                          {
+                            label: t("moveDown"),
+                            icon: icon("moveDown"),
+                            onClick: () => change((c) => moveSection(c, s, 1)),
+                          },
+                          { type: "divider" as const },
+                          {
+                            label: t("deleteSection"),
+                            icon: icon("deleteSection"),
+                            variant: "destructive" as const,
+                            onClick: () =>
+                              repeatsOf(chart, s) > 0
+                                ? setConfirmDelete(s)
+                                : change((c) => deleteSection(c, s)),
+                          },
+                        ]}
+                      />
+                    </HStack>
+                  );
+                  return (
+                    <section key={s} id={`cd-visual-${s}`} aria-label={section.name}>
+                      <Card
+                        variant={section.use ? "muted" : "transparent"}
+                        padding={section.use ? 2 : 0}
+                      >
+                        <VStack gap={3}>
+                          {head}
+                          {section.notes.length > 0 && (
+                            <HStack gap={2} vAlign="start" wrap="wrap">
+                              <MDNotes
+                                notes={parsed?.notes ?? []}
+                                instrumentName={labels.bar.instrument}
+                              />
+                              {section.notes.map((note, n) => (
+                                <Button
+                                  key={n}
+                                  label={t("deleteNote", { text: note.text })}
+                                  isIconOnly
+                                  size="sm"
+                                  variant="ghost"
+                                  icon={icon("deleteNote")}
+                                  onClick={() => change((c) => deleteNote(c, s, n))}
+                                />
+                              ))}
+                            </HStack>
+                          )}
+                          {!section.use &&
+                            rowGroups(section).map((group, r) => {
+                              const row = parsed?.rows[r];
+                              if (!row) return null;
+                              const at = (index: number): BarAt => ({
+                                section: s,
+                                bar: group[index] as number,
+                              });
+                              return (
+                                <div
+                                  key={r}
+                                  onClick={(event) => pick(event, s, group)}
+                                  onDragOver={(event) => {
+                                    event.preventDefault();
+                                    const found = dropTarget(event, s, group);
+                                    setDropOn(found?.key ?? null);
+                                  }}
+                                  onDragLeave={() => setDropOn(null)}
+                                  onDrop={(event) => onDrop(event, s, group)}
+                                >
+                                  <BarRow
+                                    row={row}
+                                    formatter={formatter}
+                                    labels={labels.bar}
+                                    size="md"
+                                    beats="auto"
+                                    edit={{
+                                      ...(selected?.section === s && group.includes(selected.bar)
+                                        ? { selected: group.indexOf(selected.bar) }
+                                        : {}),
+                                      ...(editing?.at.section === s &&
+                                      group.includes(editing.at.bar)
+                                        ? { editing: group.indexOf(editing.at.bar) }
+                                        : {}),
+                                      flagged: group.flatMap((bar, index) =>
+                                        needsAttention(
+                                          section.bars[bar] as VisualBar,
+                                          meterAt[s]?.[bar] ?? "4/4",
+                                        ) || dropOn === `${s}:${bar}`
+                                          ? [index]
+                                          : [],
+                                      ),
+                                      line: (index, line) =>
+                                        ownLine(
+                                          at(index),
+                                          section.bars[group[index] as number] as VisualBar,
+                                          line,
+                                        ),
+                                      label: (index) =>
+                                        label(
+                                          at(index),
+                                          section.bars[group[index] as number] as VisualBar,
+                                        ),
+                                    }}
+                                  />
+                                </div>
+                              );
+                            })}
+                          {!section.use && (
+                            <HStack>
+                              <Button
+                                label={t("addRow")}
+                                variant="ghost"
+                                icon={icon("addRow")}
+                                onClick={() => change((c) => addRow(c, s))}
+                              />
+                            </HStack>
+                          )}
+                        </VStack>
+                      </Card>
+                    </section>
+                  );
+                })}
+                <div className="cd-chart__add">
+                  <Button
+                    label={t("addSection")}
+                    icon={icon("addSection")}
+                    variant="ghost"
+                    size="lg"
+                    width="100%"
+                    // After the section being written in, or at the end.
+                    onClick={() => addAfter(selected?.section ?? chart.sections.length - 1)}
+                  />
+                </div>
+              </VStack>
+            </Card>
             <datalist id="cd-visual-indications">
               {[
                 ...DYNAMICS,
