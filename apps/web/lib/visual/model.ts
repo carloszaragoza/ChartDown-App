@@ -560,3 +560,9 @@ export const UNITS = [
   ["h.", "hDot"],
   ["e.", "eDot"],
 ] as const;
+
+/**
+ * The chart as it reads once saved (R-13.3): what the editor shows after Save, so bars added and
+ * left empty go, as they do from the saved text.
+ */
+export const afterSave = (chart: VisualChart): VisualChart => visualChart(canonicalText(chart, ""));

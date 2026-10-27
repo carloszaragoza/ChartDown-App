@@ -87,6 +87,7 @@ import {
   type ChordMark,
 } from "../../../../lib/visual/edit";
 import {
+  afterSave,
   canonicalText,
   chartText,
   isKnownToken,
@@ -657,7 +658,13 @@ export function VisualEditor({
                   }}
                 />
               </VStack>
-              <form action={action}>
+              <form
+                action={action}
+                // What is saved leaves out the bars left empty; the editor drops them too (R-13.3).
+                onSubmit={() => {
+                  if (accepted) setHistory((h) => ({ ...h, present: afterSave(h.present) }));
+                }}
+              >
                 <input type="hidden" name="versionId" value={versionId} />
                 <input type="hidden" name="content" value={accepted ? saved : content} />
                 <input type="hidden" name="sourceType" value={sourceType} />

@@ -21,6 +21,7 @@ import {
   toggleMark,
 } from "./edit";
 import {
+  afterSave,
   canonicalText,
   chartText,
   emptySection,
@@ -268,6 +269,15 @@ describe("T-3002 the visual editor's chart", () => {
     ]);
     chart = deleteRow(deleteRow(chart, { section: 0, bar: 0 }), { section: 0, bar: 0 });
     expect(chart.sections[0]?.bars).toHaveLength(1);
+  });
+
+  it("R-13.3 after Save the editor drops the bars added and left empty, as the saved text does", () => {
+    let chart = visualChart("## Verse\n1 | 4 | 5 | 1\n");
+    chart = addRow(chart, 0);
+    chart = setBar(chart, { section: 0, bar: 4 }, { chords: "6m" });
+    expect(chart.sections[0]?.bars).toHaveLength(8);
+    const saved = afterSave(chart);
+    expect(saved.sections[0]?.bars.map((bar) => bar.chords)).toEqual(["1", "4", "5", "1", "6m"]);
   });
 
   it("R-13.11 every change makes a new chart, so the one before stays for undo", () => {
