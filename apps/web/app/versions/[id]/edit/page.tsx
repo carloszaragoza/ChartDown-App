@@ -31,13 +31,18 @@ export default async function EditPage({ params }: { params: Promise<{ id: strin
   if (!revision) notFound();
   const sources = await getTranslations("version.source");
   // The bands' recordings, to write along with (T-2834).
-  const { recordings } = await loadRecordings(supabase, version.id, auth.user.id);
+  const [{ recordings }, { data: canRename }] = await Promise.all([
+    loadRecordings(supabase, version.id, auth.user.id),
+    // Its title and artists are the song's: renamed by an administrator or its only owner (R-02.2).
+    supabase.rpc("can_rename_song", { version_id: version.id }),
+  ]);
 
   return (
     <Editor
       phone={await guessPhone()}
       versionId={version.id}
       title={version.title}
+      canRename={canRename === true}
       visibility={version.visibility}
       revisionId={version.currentRevisionId}
       content={revision.content}

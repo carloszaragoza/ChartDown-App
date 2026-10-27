@@ -5,7 +5,6 @@ import { Grid, GridSpan } from "@astryxdesign/core/Grid";
 import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Button } from "@astryxdesign/core/Button";
-import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Item } from "@astryxdesign/core/Item";
@@ -32,12 +31,15 @@ import { VideoLink } from "../../../_components/VideoDock";
 import { BandAudio, type BandRecording } from "../BandAudio";
 import { usePlayingSection } from "../../../_components/usePlaybackBar";
 import { splitTitle, withTitle } from "../../../../lib/versions/title";
+import { SongName } from "./SongName";
 
 export interface EditorProps {
   /** The server's guess that the page opens on a phone (R-03.9). */
   phone: boolean;
   versionId: string;
   title: string;
+  /** Whether this person may rename the song: an administrator, or its only owner (R-02.2). */
+  canRename?: boolean;
   visibility: "public" | "private";
   revisionId: string;
   content: string;
@@ -75,6 +77,7 @@ export function Editor({
   phone,
   versionId,
   title,
+  canRename = false,
   visibility,
   revisionId,
   content,
@@ -92,6 +95,9 @@ export function Editor({
   const now = useNow({ updateInterval: 30_000 });
   const router = useRouter();
   const [text, setText] = useState(() => splitTitle(content).body);
+  // The song's names, changed in place in the header (R-02.2, T-2848).
+  const [songTitle, setSongTitle] = useState(title);
+  const [artists, setArtists] = useState(details?.artists ?? []);
   const initialSource: SourceValues = {
     sourceType: details?.sourceType ?? "",
     album: details?.album ?? "",
@@ -121,7 +127,7 @@ export function Editor({
       : {};
   // The preview may lag a keystroke behind so typing never waits for it.
   const shown = useDeferredValue(text);
-  const chart = useMemo(() => parse(withTitle(shown, title)), [shown, title]);
+  const chart = useMemo(() => parse(withTitle(shown, songTitle)), [shown, songTitle]);
   // The warnings name the lines of the text on screen, which has no title line, and so does the
   // heading of the section the player is in (T-2838).
   const onScreen = useMemo(() => parse(shown), [shown]);
@@ -160,14 +166,21 @@ export function Editor({
                   when: format.relativeTime(new Date(state.savedAt ?? savedAt), now),
                 })}
               </Text>
-              <Heading level={1}>{title}</Heading>
-              {details && details.artists.length > 0 && (
-                <Text color="secondary">{details.artists.join(", ")}</Text>
-              )}
+              <SongName
+                versionId={versionId}
+                title={songTitle}
+                artists={artists}
+                canRename={canRename}
+                onRenamed={(nextTitle, nextArtists) => {
+                  setSongTitle(nextTitle);
+                  setArtists(nextArtists);
+                  router.refresh();
+                }}
+              />
             </VStack>
             <form action={action}>
               <input type="hidden" name="versionId" value={versionId} />
-              <input type="hidden" name="content" value={withTitle(text, title)} />
+              <input type="hidden" name="content" value={withTitle(text, songTitle)} />
               <input type="hidden" name="sourceType" value={sourceType} />
               <input type="hidden" name="album" value={album} />
               <input type="hidden" name="year" value={year} />
