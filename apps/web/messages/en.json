@@ -1576,6 +1576,8 @@
     },
     "undo": "Undo",
     "redo": "Redo",
+    "undoKeys": "Undo · ⌘Z or Ctrl+Z",
+    "redoKeys": "Redo · ⌘⇧Z or Ctrl+Shift+Z",
     "details": "Song details",
     "addAudio": "Add the band's audio",
     "openText": "Open in the Chart editor",

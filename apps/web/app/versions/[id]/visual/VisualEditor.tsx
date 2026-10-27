@@ -35,6 +35,7 @@ import { saveChart, type SaveState, type SourceValues } from "../edit/actions";
 import { saveVideoPoints } from "../actions";
 import { BandAudio, openAddAudio, type BandRecording } from "../BandAudio";
 import { HeaderFields } from "./HeaderFields";
+import { historyKey } from "../../../../lib/visual/keys";
 import { VideoLink } from "../../../_components/VideoDock";
 import { useChartLabels } from "../../../_components/chartLabels";
 import { usePlayingSection } from "../../../_components/usePlaybackBar";
@@ -319,6 +320,26 @@ export function VisualEditor({
     );
     setEditing(null);
   };
+  // ⌘Z / Ctrl + Z and ⌘⇧Z / Ctrl + Shift + Z anywhere in the editor (R-13.11). Writing in a bar
+  // ends first, so the step taken back is the editor's last one; the title and the dialogs' fields
+  // keep their own undo.
+  useEffect(() => {
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      const which = historyKey(event);
+      if (!which) return;
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      if (target?.closest('[role="dialog"]')) return;
+      const inBar = target?.classList.contains("cd-chart__input") ?? false;
+      if (!inBar && target?.closest("input, textarea, select, [contenteditable='true']")) return;
+      event.preventDefault();
+      if (inBar) finish();
+      if (which === "undo") undo();
+      else redo();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
+
   const moveTo = (at: BarAt, by: 1 | -1, line: Line) => {
     finish();
     let next = step(chart, at, by);
@@ -628,7 +649,7 @@ export function VisualEditor({
                 <Button
                   label={t("undo")}
                   isIconOnly
-                  tooltip={t("undo")}
+                  tooltip={t("undoKeys")}
                   icon={icon("undo")}
                   isDisabled={history.past.length === 0}
                   onClick={undo}
@@ -636,7 +657,7 @@ export function VisualEditor({
                 <Button
                   label={t("redo")}
                   isIconOnly
-                  tooltip={t("redo")}
+                  tooltip={t("redoKeys")}
                   icon={icon("redo")}
                   isDisabled={history.future.length === 0}
                   onClick={redo}

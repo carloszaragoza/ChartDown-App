@@ -1576,6 +1576,8 @@
     },
     "undo": "Deshacer",
     "redo": "Rehacer",
+    "undoKeys": "Deshacer · ⌘Z o Ctrl+Z",
+    "redoKeys": "Rehacer · ⌘⇧Z o Ctrl+Shift+Z",
     "details": "Datos de la canción",
     "addAudio": "Agregar el audio de la banda",
     "openText": "Abrir en el editor de charts",
