@@ -181,9 +181,17 @@ export const deleteNote = (chart: VisualChart, index: number, note: number) =>
 /** The chord marks the tools put on a chord (R-13.7): push, stab, fermata, hold. */
 export type ChordMark = "push" | "shortPush" | "stab" | "fermata" | "hold";
 
-/** Turns a mark on or off on one chord of a chords line, as typing it would (`'5`, `5!`). */
-export function toggleMark(token: string, mark: ChordMark): string {
-  if (!/^('{0,2})(<?)([b#]?[1-7]|[A-G][b#]?)/.test(token)) return token;
+interface Marks {
+  push: 0 | 1 | 2;
+  stab: boolean;
+  fermata: boolean;
+  hold: boolean;
+  chord: string;
+}
+
+/** The marks on one chord of a chords line, or null when it isn't a chord (`x`, `%`). */
+function marksOf(token: string): Marks | null {
+  if (!/^('{0,2})(<?)([b#]?[1-7]|[A-G][b#]?)/.test(token)) return null;
   let text = token;
   let stab = false;
   let fermata = false;
@@ -192,18 +200,33 @@ export function toggleMark(token: string, mark: ChordMark): string {
     else fermata = true;
     text = text.slice(0, -1);
   }
-  let push = 0;
-  if (text.startsWith("''")) push = 2;
-  else if (text.startsWith("'")) push = 1;
+  const push = text.startsWith("''") ? 2 : text.startsWith("'") ? 1 : 0;
   text = text.slice(push);
-  let hold = text.startsWith("<") && text.endsWith(">");
-  if (hold) text = text.slice(1, -1);
+  const hold = text.startsWith("<") && text.endsWith(">");
+  return { push, stab, fermata, hold, chord: hold ? text.slice(1, -1) : text };
+}
+
+/** Whether a chord carries a mark, so its tool shows pressed (R-13.7). */
+export function hasMark(token: string, mark: ChordMark): boolean {
+  const marks = marksOf(token);
+  if (!marks) return false;
+  if (mark === "push") return marks.push === 1;
+  if (mark === "shortPush") return marks.push === 2;
+  return marks[mark];
+}
+
+/** Turns a mark on or off on one chord of a chords line, as typing it would (`'5`, `5!`). */
+export function toggleMark(token: string, mark: ChordMark): string {
+  const marks = marksOf(token);
+  if (!marks) return token;
+  let { push, stab, fermata, hold } = marks;
   if (mark === "push") push = push === 1 ? 0 : 1;
   if (mark === "shortPush") push = push === 2 ? 0 : 2;
   if (mark === "stab") stab = !stab;
   if (mark === "fermata") fermata = !fermata;
   if (mark === "hold") hold = !hold;
-  return `${"'".repeat(push)}${hold ? `<${text}>` : text}${stab ? "!" : ""}${fermata ? "~" : ""}`;
+  const chord = hold ? `<${marks.chord}>` : marks.chord;
+  return `${"'".repeat(push)}${chord}${stab ? "!" : ""}${fermata ? "~" : ""}`;
 }
 
 /** A mark on the chord at `index` of a bar's chords line (the last one by default). */
@@ -213,16 +236,27 @@ export function markChord(bar: VisualBar, mark: ChordMark, index?: number): stri
   return list.map((token, i) => (i === at ? toggleMark(token, mark) : token)).join(" ");
 }
 
-/** An indication added to a bar's top line, unless it is there already (R-13.7). */
-export function addIndication(top: string, text: string): string {
-  const pieces = top
+const pieces = (top: string) =>
+  top
     .split(",")
     .map((piece) => piece.trim())
     .filter(Boolean);
-  return pieces.some((piece) => piece.toLowerCase() === text.toLowerCase())
-    ? top
-    : [...pieces, text].join(", ");
-}
+
+/** Whether a bar's top line holds an indication, so its tool shows pressed (R-13.7). */
+export const hasIndication = (top: string, text: string) =>
+  pieces(top).some((piece) => piece.toLowerCase() === text.toLowerCase());
+
+/** An indication added to a bar's top line, unless it is there already (R-13.7). */
+export const addIndication = (top: string, text: string): string =>
+  hasIndication(top, text) ? top : [...pieces(top), text].join(", ");
+
+/** An indication added to a bar's top line, or taken off when it is there (R-13.7). */
+export const toggleIndication = (top: string, text: string): string =>
+  hasIndication(top, text)
+    ? pieces(top)
+        .filter((piece) => piece.toLowerCase() !== text.toLowerCase())
+        .join(", ")
+    : addIndication(top, text);
 
 /** The bar after or before, across sections (Tab and Shift + Tab; R-13.5). */
 export function step(chart: VisualChart, at: BarAt, by: 1 | -1): BarAt | null {

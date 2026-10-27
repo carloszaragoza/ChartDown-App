@@ -62,6 +62,21 @@ describe("T-3003 the visual editor", () => {
     expect(html).toMatch(/draggable="true"/);
   });
 
+  it("R-13.7 the tools are grouped by what they apply to: chord, bar, road map, dynamics", () => {
+    const html = wrap("en", <VisualEditor {...props("---\nkey: G\n---\n\n## Verse 1\n1\n")} />);
+    const groups = ["Chord", "Bar", "Road map", "Dynamics"].map((name) =>
+      html.indexOf(`aria-label="${name}"`),
+    );
+    expect(groups.every((at) => at > 0)).toBe(true);
+    expect([...groups].sort((a, b) => a - b)).toEqual(groups);
+    // Each tool sits in its group: the push with the chord, the coda in the road map.
+    expect(html.indexOf("Push")).toBeGreaterThan(groups[0] as number);
+    expect(html.indexOf("Push")).toBeLessThan(groups[1] as number);
+    expect(html.lastIndexOf("D.S. al Coda")).toBeGreaterThan(groups[2] as number);
+    expect(html.lastIndexOf(">mf</text>")).toBeGreaterThan(groups[3] as number);
+    expect(html).toContain("Select a bar");
+  });
+
   it("R-13.16 every action has its icon from one list, the chart's marks drawn as the chart draws them", () => {
     for (const [action, Icon] of Object.entries(VISUAL_ICONS)) {
       expect(typeof Icon, action).toMatch(/function|object/);

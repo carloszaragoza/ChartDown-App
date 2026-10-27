@@ -1619,7 +1619,17 @@
       "ending": "Casilla {number}",
       "pickup": "Anacrusa",
       "rest": "Compás de silencio",
-      "repeatBar": "Repetir compás"
+      "repeatBar": "Repetir compás",
+      "group": {
+        "chord": "Acorde",
+        "chordHint": "En el último acorde, o arrástrala a uno",
+        "bar": "Compás",
+        "barHint": "En el compás elegido",
+        "roadMap": "Navegación",
+        "dynamics": "Dinámicas",
+        "dynamicsHint": "Se escribe en la línea de indicaciones",
+        "choose": "Elige un compás"
+      }
     },
     "words": "{count} de {max} palabras",
     "split": "Reparto:",

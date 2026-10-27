@@ -2,7 +2,9 @@
 
 import { Banner } from "@astryxdesign/core/Banner";
 import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
 import { Dialog } from "@astryxdesign/core/Dialog";
+import { Grid, GridSpan } from "@astryxdesign/core/Grid";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
@@ -12,6 +14,7 @@ import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
+import { ToggleButton } from "@astryxdesign/core/ToggleButton";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
 import { chordFormatter, EVERYONE, parse, STANDARD_INSTRUMENTS, type Warning } from "chartdown";
@@ -37,7 +40,6 @@ import { usePlayingSection } from "../../../_components/usePlaybackBar";
 import { videoId } from "../../../../lib/video/youtube";
 import { SOURCE_TYPES } from "../../../../lib/versions/validate";
 import {
-  addIndication,
   addNote,
   addRow,
   addSection,
@@ -48,6 +50,8 @@ import {
   deleteSection,
   duplicateSection,
   insertBar,
+  hasIndication,
+  hasMark,
   markChord,
   moveSection,
   renameSection,
@@ -56,6 +60,7 @@ import {
   setBar,
   setTimes,
   step,
+  toggleIndication,
   type BarAt,
   type ChordMark,
 } from "../../../../lib/visual/edit";
@@ -366,7 +371,7 @@ export function VisualEditor({
         case "mark":
           return { chords: markChord(bar, tool.mark, chord) };
         case "indication":
-          return { top: addIndication(bar.top, tool.text) };
+          return { top: toggleIndication(bar.top, tool.text) };
         case "repeatStart":
           return { repeatStart: !bar.repeatStart };
         case "repeatEnd":
@@ -500,6 +505,30 @@ export function VisualEditor({
       ? splitNeed(selectedBar, meterAt[selected.section]?.[selected.bar] ?? "4/4")
       : null;
 
+  // Whether a tool is already on the selected bar, or on its last chord, so it shows pressed.
+  const isOn = (tool: Tool): boolean => {
+    const bar = selectedBar;
+    if (!bar) return false;
+    switch (tool.kind) {
+      case "mark":
+        return hasMark(tokens(bar.chords).at(-1) ?? "", tool.mark);
+      case "indication":
+        return hasIndication(bar.top, tool.text);
+      case "repeatStart":
+        return bar.repeatStart;
+      case "repeatEnd":
+        return bar.repeatEnd !== null;
+      case "ending":
+        return bar.ending?.[0] === tool.number;
+      case "pickup":
+        return bar.pickup !== null;
+      case "rest":
+        return bar.chords.trim() === "x";
+      case "repeatBar":
+        return bar.chords.trim() === "%";
+    }
+  };
+
   const toolButton = (tool: Tool, text: string, key: VisualAction) => (
     <div
       key={key}
@@ -509,17 +538,36 @@ export function VisualEditor({
         event.dataTransfer.effectAllowed = "copy";
       }}
     >
-      <Button
+      <ToggleButton
         label={text}
         size="lg"
-        variant="secondary"
         icon={icon(key)}
-        {...(TYPED[key] && selected ? { tooltip: TYPED[key] } : {})}
+        isPressed={isOn(tool)}
+        tooltip={selected ? (TYPED[key] ?? text) : t("tools.choose")}
         isDisabled={!selected}
-        {...(!selected ? { disabledMessage: t("tools.choose") } : {})}
-        onClick={() => selected && apply(tool, selected)}
-      />
+        onPressedChange={() => selected && apply(tool, selected)}
+      >
+        {text}
+      </ToggleButton>
     </div>
+  );
+
+  // A group of tools says what it applies to; the group of the line being written is
+  // highlighted (R-13.7).
+  const toolGroup = (name: string, hint: string, active: boolean, tools: ReactNode) => (
+    <Card variant={active ? "blue" : "muted"} padding={2}>
+      <VStack gap={1.5}>
+        <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
+          <Text type="label" weight="semibold">
+            {name}
+          </Text>
+          <Text type="supporting">{selected ? hint : t("tools.group.choose")}</Text>
+        </HStack>
+        <HStack gap={1} wrap="wrap" role="group" aria-label={name}>
+          {tools}
+        </HStack>
+      </VStack>
+    </Card>
   );
 
   const headerTokens = [
@@ -1022,28 +1070,56 @@ export function VisualEditor({
                 />
               )}
             </HStack>
-            <HStack gap={1} wrap="wrap">
-              {CHORD_MARKS.map((mark) =>
-                toolButton({ kind: "mark", mark }, t(`tools.${mark}`), mark),
+            <Grid columns={{ minWidth: 420, max: 2 }} gap={2}>
+              <GridSpan columns="full">
+                {toolGroup(
+                  t("tools.group.chord"),
+                  t("tools.group.chordHint"),
+                  editing?.line === "chords",
+                  CHORD_MARKS.map((mark) =>
+                    toolButton({ kind: "mark", mark }, t(`tools.${mark}`), mark),
+                  ),
+                )}
+              </GridSpan>
+              <GridSpan columns="full">
+                {toolGroup(
+                  t("tools.group.bar"),
+                  t("tools.group.barHint"),
+                  selected !== null && editing === null,
+                  <>
+                    {toolButton({ kind: "repeatStart" }, t("tools.repeatStart"), "repeatStart")}
+                    {toolButton({ kind: "repeatEnd" }, t("tools.repeatEnd"), "repeatEnd")}
+                    {toolButton(
+                      { kind: "ending", number: 1 },
+                      t("tools.ending", { number: 1 }),
+                      "ending1",
+                    )}
+                    {toolButton(
+                      { kind: "ending", number: 2 },
+                      t("tools.ending", { number: 2 }),
+                      "ending2",
+                    )}
+                    {toolButton({ kind: "pickup" }, t("tools.pickup"), "pickup")}
+                    {toolButton({ kind: "rest" }, t("tools.rest"), "rest")}
+                    {toolButton({ kind: "repeatBar" }, t("tools.repeatBar"), "repeatBar")}
+                  </>,
+                )}
+              </GridSpan>
+              {toolGroup(
+                t("tools.group.roadMap"),
+                t("tools.group.barHint"),
+                false,
+                NAVIGATION.map((word) =>
+                  toolButton({ kind: "indication", text: word }, word, word),
+                ),
               )}
-              {toolButton({ kind: "repeatStart" }, t("tools.repeatStart"), "repeatStart")}
-              {toolButton({ kind: "repeatEnd" }, t("tools.repeatEnd"), "repeatEnd")}
-              {toolButton(
-                { kind: "ending", number: 1 },
-                t("tools.ending", { number: 1 }),
-                "ending1",
+              {toolGroup(
+                t("tools.group.dynamics"),
+                t("tools.group.dynamicsHint"),
+                editing?.line === "tags",
+                DYNAMICS.map((word) => toolButton({ kind: "indication", text: word }, word, word)),
               )}
-              {toolButton(
-                { kind: "ending", number: 2 },
-                t("tools.ending", { number: 2 }),
-                "ending2",
-              )}
-              {toolButton({ kind: "pickup" }, t("tools.pickup"), "pickup")}
-              {toolButton({ kind: "rest" }, t("tools.rest"), "rest")}
-              {toolButton({ kind: "repeatBar" }, t("tools.repeatBar"), "repeatBar")}
-              {NAVIGATION.map((word) => toolButton({ kind: "indication", text: word }, word, word))}
-              {DYNAMICS.map((word) => toolButton({ kind: "indication", text: word }, word, word))}
-            </HStack>
+            </Grid>
           </VStack>
         </LayoutFooter>
       }

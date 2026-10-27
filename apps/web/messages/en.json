@@ -1619,7 +1619,17 @@
       "ending": "Ending {number}",
       "pickup": "Pickup",
       "rest": "Rest bar",
-      "repeatBar": "Repeat bar"
+      "repeatBar": "Repeat bar",
+      "group": {
+        "chord": "Chord",
+        "chordHint": "On the last chord, or drag onto one",
+        "bar": "Bar",
+        "barHint": "On the selected bar",
+        "roadMap": "Road map",
+        "dynamics": "Dynamics",
+        "dynamicsHint": "Written in the indications line",
+        "choose": "Select a bar"
+      }
     },
     "words": "{count} of {max} words",
     "split": "Split:",

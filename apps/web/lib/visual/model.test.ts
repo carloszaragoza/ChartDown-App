@@ -7,12 +7,16 @@ import {
   addNote,
   addSection,
   deleteSection,
+  hasIndication,
+  hasMark,
   insertBar,
   markChord,
   repeatSection,
   repeatsOf,
   setBar,
   step,
+  toggleIndication,
+  toggleMark,
 } from "./edit";
 import {
   canonicalText,
@@ -170,6 +174,19 @@ describe("T-3002 the visual editor's chart", () => {
       "|: 1 | 5 :| 3x",
       "{coda} 4",
     ]);
+  });
+
+  it("R-13.7 a tool already on the chord or bar shows pressed, and tapping it again takes it off", () => {
+    expect(hasMark("'5!", "push")).toBe(true);
+    expect(hasMark("'5!", "shortPush")).toBe(false);
+    expect(hasMark("'5!", "stab")).toBe(true);
+    expect(hasMark("<4>~", "hold")).toBe(true);
+    expect(hasMark("x", "push")).toBe(false);
+    expect(toggleMark("'5!", "push")).toBe("5!");
+    expect(toggleMark("<4>~", "hold")).toBe("4~");
+    expect(hasIndication("mf, Coda", "coda")).toBe(true);
+    expect(toggleIndication("mf, Coda", "Coda")).toBe("mf");
+    expect(toggleIndication("mf", "Fine")).toBe("mf, Fine");
   });
 
   it("R-13.9 sections: Verse 2 after Verse 1, a repeat with @use, deleting a repeated one", () => {
