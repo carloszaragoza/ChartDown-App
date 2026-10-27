@@ -1786,6 +1786,24 @@
     "visualChoice": "Visual",
     "textChoice": "Text",
     "saveFirst": "Save your changes first to switch to Text.",
-    "format": "ChartDown {version} · one revision on save"
+    "format": "ChartDown {version} · one revision on save",
+    "import": {
+      "button": "Import",
+      "title": "Import a chart written in ChartDown",
+      "intro": "Choose a file or paste its text. Any plain-text file works (.chartdown, .txt, .md…) as long as it is written in ChartDown.",
+      "file": "File",
+      "fileHint": "Plain text, up to 1 MB. It is read here and sent nowhere until you save.",
+      "paste": "Or paste the chart",
+      "empty": "There's nothing to import yet.",
+      "notChartDown": "This isn't written in ChartDown",
+      "notChartDownHint": "It looks like a chord sheet. Import it as a chord sheet: it is turned into ChartDown for you to review.",
+      "warnings": "This chart has warnings",
+      "warningsHint": "Fix them in the file, or paste it in the Chart editor, then import it again.",
+      "line": "Line {line}",
+      "replaces": "Importing replaces the chart (sections, bars, notes, key, tempo and meter). The song's title and artists stay. Undo takes it back.",
+      "sheetImporter": "Import a chord sheet",
+      "cancel": "Cancel",
+      "import": "Import"
+    }
   }
 }

@@ -464,6 +464,8 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 - R-13.16 **An icon for every action** (owner's request, October 26, 2026): one list gives each of the visual editor's actions its icon, shown with its name, so it is known by its picture too: the marks of the chart (push, stab, fermata, hold, repeats, endings, pickup, rest, %, segno, coda, D.S., D.C., fine, the dynamics) drawn as the chart draws them, on the ChartDown icons' grid and stroke; the rest of the editor's actions with the interface's icons.
 
+- R-13.17 **Import a chart written in ChartDown** (owner's decision, October 27, 2026): in a song open in the visual editor (a new one included, right after New song), **Import** on the Chart line takes a file or pasted text. The file can be of any plain-text kind (`.chartdown`, `.txt`, `.md`, no extension…), at most 1 MB: what counts is that it is written in ChartDown, which is recognized by its bars' chords. It is read in the browser and sent nowhere until the song is saved. A ChartDown text replaces the chart: its sections, bars, notes and its key, tempo, meter and feel; the song's title and artists stay the song's. The dialog says the chart is replaced and Undo takes it back. A ChartDown text with warnings lists them and isn't imported; a text that isn't ChartDown (a chord sheet with lyrics) points to Import a chord sheet (SPEC-10).
+
 **Acceptance criteria**
 
 - Given "New song", when the author has filled in the title, the artists and the arranger and chosen 4/4, 72 and quarter, then the page shows them as a chart's header with the first section's empty bars.

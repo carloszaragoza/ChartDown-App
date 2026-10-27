@@ -43,6 +43,7 @@ import { saveChart, type SaveState, type SourceValues } from "../edit/actions";
 import { saveVideoPoints } from "../actions";
 import { BandAudio, openAddAudio, type BandRecording } from "../BandAudio";
 import { HeaderFields } from "./HeaderFields";
+import { ImportDialog } from "./ImportDialog";
 import { SongName } from "../edit/SongName";
 import { historyKey } from "../../../../lib/visual/keys";
 import { VideoLink } from "../../../_components/VideoDock";
@@ -240,6 +241,7 @@ export function VisualEditor({
   const [selected, setSelected] = useState<BarAt | null>(null);
   const [editing, setEditing] = useState<{ at: BarAt; line: Line } | null>(null);
   const [details, setDetails] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [noteFor, setNoteFor] = useState<number | null>(null);
   const [renaming, setRenaming] = useState<number | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
@@ -766,9 +768,24 @@ export function VisualEditor({
                     isDisabled={history.future.length === 0}
                     onClick={redo}
                   />
+                  <Button
+                    label={t("import.button")}
+                    icon={icon("import")}
+                    onClick={() => setImporting(true)}
+                  />
                 </HStack>
                 <Text type="supporting">{t("format", { version: SUPPORTED_VERSION })}</Text>
               </HStack>
+              <ImportDialog
+                isOpen={importing}
+                onOpenChange={setImporting}
+                onImport={(imported) => {
+                  // The whole chart is replaced, in one step Undo takes back (R-13.17).
+                  setEditing(null);
+                  setSelected(null);
+                  change(() => imported);
+                }}
+              />
               <HeaderFields
                 meta={chart.meta}
                 onMeta={(next) => change((c) => ({ ...c, meta: next(c.meta) }))}

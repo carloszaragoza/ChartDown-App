@@ -1786,6 +1786,24 @@
     "visualChoice": "Visual",
     "textChoice": "Texto",
     "saveFirst": "Guarda tus cambios antes de pasar a Texto.",
-    "format": "ChartDown {version} · una revisión al guardar"
+    "format": "ChartDown {version} · una revisión al guardar",
+    "import": {
+      "button": "Importar",
+      "title": "Importar una carta escrita en ChartDown",
+      "intro": "Elige un archivo o pega su texto. Sirve cualquier archivo de texto (.chartdown, .txt, .md…) siempre que esté escrito en ChartDown.",
+      "file": "Archivo",
+      "fileHint": "Texto, hasta 1 MB. Se lee aquí y no se envía a ningún lado hasta que guardes.",
+      "paste": "O pega la carta",
+      "empty": "Todavía no hay nada que importar.",
+      "notChartDown": "Esto no está escrito en ChartDown",
+      "notChartDownHint": "Parece una hoja de acordes. Impórtala como hoja de acordes: se convierte a ChartDown para que la revises.",
+      "warnings": "Esta carta tiene advertencias",
+      "warningsHint": "Corrígelas en el archivo, o pégalo en el editor de texto, y vuelve a importarla.",
+      "line": "Línea {line}",
+      "replaces": "Importar reemplaza la carta (secciones, compases, notas, tono, tempo y compás). El título y los artistas de la canción se quedan. Deshacer la regresa.",
+      "sheetImporter": "Importar una hoja de acordes",
+      "cancel": "Cancelar",
+      "import": "Importar"
+    }
   }
 }
