@@ -59,7 +59,8 @@ const SAME_IN_BOTH = new Set([
   // The faders where the beat is not a quarter or a dotted quarter (R-11.17).
   "stand.fader.eighthsTimes",
   // A tempo as a chart writes it: the note and the number (R-13.2).
-  "visual.header.tempo",
+  "visual.header.tempoButton",
+  "visual.tap",
   // "Tempo" is the same word in Spanish; the placeholders are ChartDown as typed.
   "visual.field.tempo",
   "visual.newSong.tempo",

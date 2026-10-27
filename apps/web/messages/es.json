@@ -1571,7 +1571,8 @@
     "arranger": "Arreglo de {name}",
     "header": {
       "key": "Tono {key}",
-      "tempo": "♩ = {tempo}"
+      "tempoButton": "Tempo {tempo}",
+      "time": "Compás {meter}"
     },
     "undo": "Deshacer",
     "redo": "Rehacer",
@@ -1756,6 +1757,23 @@
       "start": "Empezar a escribir",
       "phone": "El editor visual funciona en un iPad o una computadora. En el teléfono, usa el editor de charts."
     },
-    "phone": "El editor visual funciona en un iPad o una computadora. En el teléfono, usa el editor de charts."
+    "phone": "El editor visual funciona en un iPad o una computadora. En el teléfono, usa el editor de charts.",
+    "titleField": "Título de la canción",
+    "titleEdit": "Cambiar el título de la canción: {title}",
+    "titleSave": "Cambiar",
+    "titleError": {
+      "invalid": "Escribe un título de 1 a 200 caracteres.",
+      "error": "No se pudo cambiar el título. Intenta de nuevo."
+    },
+    "keys": {
+      "major": "Mayores",
+      "minor": "Menores"
+    },
+    "tap": "Tap",
+    "tapHint": "Toca al ritmo, por lo menos dos veces.",
+    "tapCount": "{bpm} BPM con {count} toques",
+    "meterBeats": "Tiempos por compás",
+    "meterNote": "La figura del tiempo",
+    "unitNeedsTempo": "Primero escribe un tempo."
   }
 }

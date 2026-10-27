@@ -1571,7 +1571,8 @@
     "arranger": "Arranged by {name}",
     "header": {
       "key": "Key {key}",
-      "tempo": "♩ = {tempo}"
+      "tempoButton": "Tempo {tempo}",
+      "time": "Time {meter}"
     },
     "undo": "Undo",
     "redo": "Redo",
@@ -1756,6 +1757,23 @@
       "start": "Start writing",
       "phone": "The visual editor works on an iPad or a computer. On a phone, use the Chart editor."
     },
-    "phone": "The visual editor works on an iPad or a computer. On a phone, use the Chart editor."
+    "phone": "The visual editor works on an iPad or a computer. On a phone, use the Chart editor.",
+    "titleField": "Song title",
+    "titleEdit": "Rename the song: {title}",
+    "titleSave": "Rename",
+    "titleError": {
+      "invalid": "Give the song a title of 1 to 200 characters.",
+      "error": "The title couldn't be changed. Try again."
+    },
+    "keys": {
+      "major": "Major",
+      "minor": "Minor"
+    },
+    "tap": "Tap",
+    "tapHint": "Tap on the beat, at least twice.",
+    "tapCount": "{bpm} BPM from {count} taps",
+    "meterBeats": "Beats in a bar",
+    "meterNote": "The beat's note",
+    "unitNeedsTempo": "Set a tempo first."
   }
 }

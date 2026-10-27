@@ -30,6 +30,8 @@ export default async function VisualPage({ params }: { params: Promise<{ id: str
     <VisualEditor
       versionId={version.id}
       title={version.title}
+      // Only an administrator opens the visual editor today, and may rename a song (R-02.2).
+      canRename
       artists={version.artists}
       author={version.author}
       revisionId={version.currentRevisionId}

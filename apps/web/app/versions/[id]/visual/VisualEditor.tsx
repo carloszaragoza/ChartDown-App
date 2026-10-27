@@ -34,6 +34,7 @@ import {
 import { saveChart, type SaveState, type SourceValues } from "../edit/actions";
 import { saveVideoPoints } from "../actions";
 import { BandAudio, openAddAudio, type BandRecording } from "../BandAudio";
+import { HeaderFields } from "./HeaderFields";
 import { VideoLink } from "../../../_components/VideoDock";
 import { useChartLabels } from "../../../_components/chartLabels";
 import { usePlayingSection } from "../../../_components/usePlaybackBar";
@@ -77,6 +78,7 @@ import {
   splitNeed,
   suggestSection,
   tokens,
+  UNITS,
   visualChart,
   type VisualBar,
   type VisualChart,
@@ -102,6 +104,8 @@ const TYPED: Partial<Record<VisualAction, string>> = {
 export interface VisualEditorProps {
   versionId: string;
   title: string;
+  /** Whether this person may rename the song, shared by all its versions (R-13.2, R-02.2). */
+  canRename: boolean;
   artists: string[];
   /** The arranger: the version's author. */
   author: string;
@@ -131,16 +135,6 @@ const UNSAFE: Record<Line, RegExp> = {
 };
 
 const METERS = ["4/4", "3/4", "6/8", "12/8", "2/4", "2/2", "5/4", "7/8", "9/8"];
-// What a tempo counts (R-00.18), and its name in the messages.
-const UNITS = [
-  ["", "none"],
-  ["q", "q"],
-  ["h", "h"],
-  ["q.", "qDot"],
-  ["e", "e"],
-  ["h.", "hDot"],
-  ["e.", "eDot"],
-] as const;
 // Qualities read in words (R-13.13); others are spelled out.
 const QUALITY_WORDS = {
   m: "minor",
@@ -193,6 +187,7 @@ type Tool =
 export function VisualEditor({
   versionId,
   title,
+  canRename,
   artists,
   author,
   revisionId,
@@ -242,7 +237,8 @@ export function VisualEditor({
     savedContent: content,
     savedSource: source,
   });
-  const saved = canonicalText(chart, title);
+  const [songTitle, setSongTitle] = useState(title);
+  const saved = canonicalText(chart, songTitle);
   const sourceNow: SourceValues = { sourceType, album, year, youtube };
   const dirty =
     (accepted && saved !== state.savedContent && history.past.length > 0) ||
@@ -570,13 +566,6 @@ export function VisualEditor({
     </Card>
   );
 
-  const headerTokens = [
-    chart.meta.key && t("header.key", { key: chart.meta.key }),
-    chart.meta.meter ?? "4/4",
-    chart.meta.tempo && t("header.tempo", { tempo: chart.meta.tempo }),
-    chart.meta.feel,
-  ].filter(Boolean) as string[];
-
   if (warnings.length > 0) {
     // A chart written by hand with warnings is fixed in Text first (R-13.8).
     return (
@@ -608,17 +597,25 @@ export function VisualEditor({
             {/* The chart's header, as a printed chart's first lines (R-13.2). */}
             <VStack gap={1}>
               <Text type="supporting">{t("overline")}</Text>
-              <Heading level={1}>{title}</Heading>
-              <Text color="secondary">
-                {[artists.join(", "), author && t("arranger", { name: author })]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </Text>
-              <HStack gap={1} wrap="wrap">
-                {headerTokens.map((token) => (
-                  <Token key={token} label={token} size="sm" />
-                ))}
-              </HStack>
+              <HeaderFields
+                versionId={versionId}
+                title={songTitle}
+                canRename={canRename}
+                meta={chart.meta}
+                onMeta={(next) => change((c) => ({ ...c, meta: next(c.meta) }))}
+                onRenamed={(name) => {
+                  setSongTitle(name);
+                  router.refresh();
+                }}
+                subtitle={
+                  <Text color="secondary">
+                    {[artists.join(", "), author && t("arranger", { name: author })]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </Text>
+                }
+              />
+              {chart.meta.feel && <Token label={chart.meta.feel} size="sm" />}
             </VStack>
             <form action={action}>
               <input type="hidden" name="versionId" value={versionId} />

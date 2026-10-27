@@ -16,6 +16,7 @@ vi.mock("next/navigation", () => ({
 const props = (content: string): VisualEditorProps => ({
   versionId: "00000000-0000-0000-0000-0000000000f1",
   title: "Lantern Bay",
+  canRename: true,
   artists: ["Harbor Lights"],
   author: "Ana Ruiz",
   revisionId: "00000000-0000-0000-0000-0000000000d1",
@@ -53,6 +54,20 @@ describe("T-3003 the visual editor", () => {
     // The bars are read in full words (R-13.13).
     expect(html).toContain('aria-label="Verse 1, bar 2, four, 4 beats"');
     expect(html).toContain("Add a section");
+  });
+
+  it("R-13.2 the header is changed where it is: the title, the key, the tempo and the meter", () => {
+    const html = wrap(
+      "en",
+      <VisualEditor {...props("---\nkey: G\ntempo: 72 q\nmeter: 6/8\n---\n\n## Verse 1\n1\n")} />,
+    );
+    expect(html).toContain('aria-label="Rename the song: Lantern Bay"');
+    expect(html).toContain("Key G");
+    expect(html).toContain("Tempo 72");
+    expect(html).toContain("Time 6/8");
+    const fixed = wrap("en", <VisualEditor {...props("## Verse 1\n1\n")} canRename={false} />);
+    expect(fixed).not.toContain("Rename the song");
+    expect(fixed).toContain("Time 4/4");
   });
 
   it("R-13.7 the tools sit at the foot, ready to drag", () => {

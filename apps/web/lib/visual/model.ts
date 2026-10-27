@@ -549,3 +549,14 @@ export function suggestSection(
   const base = words[next];
   return taken.has(base.toLowerCase()) ? free(base, 2) : base;
 }
+
+// What a tempo counts (R-00.18), and its name in the messages.
+export const UNITS = [
+  ["", "none"],
+  ["q", "q"],
+  ["h", "h"],
+  ["q.", "qDot"],
+  ["e", "e"],
+  ["h.", "hDot"],
+  ["e.", "eDot"],
+] as const;
