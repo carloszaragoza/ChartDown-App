@@ -18,7 +18,7 @@ import { ToggleButton } from "@astryxdesign/core/ToggleButton";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
 import { chordFormatter, EVERYONE, parse, STANDARD_INSTRUMENTS, type Warning } from "chartdown";
-import { BarRow, MDNotes, type BarLine } from "@chartdown/ui";
+import { MDNotes, type BarLine } from "@chartdown/ui";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -39,6 +39,10 @@ import { historyKey } from "../../../../lib/visual/keys";
 import { VideoLink } from "../../../_components/VideoDock";
 import { useChartLabels } from "../../../_components/chartLabels";
 import { usePlayingSection } from "../../../_components/usePlaybackBar";
+import { useDockRoomSize } from "../../../_components/DockRoom";
+import { barSeek, videoClock } from "../../../../lib/video/clock";
+import { chartClicks } from "../../../../lib/video/sections";
+import { FollowedBarRow } from "./FollowedBarRow";
 import { videoId } from "../../../../lib/video/youtube";
 import { SOURCE_TYPES } from "../../../../lib/versions/validate";
 import {
@@ -251,6 +255,8 @@ export function VisualEditor({
   const formatter = useMemo(() => chordFormatter(drawn, { style: "numbers" }), [drawn]);
   const meterAt = useMemo(() => meters(chart), [chart]);
   const playing = usePlayingSection(drawn);
+  const placed = useMemo(() => chartClicks(drawn), [drawn]);
+  const room = useDockRoomSize();
 
   // Leaving with unsaved changes asks first.
   useEffect(() => {
@@ -482,6 +488,11 @@ export function VisualEditor({
     const bar = group[Number(element.dataset.index)];
     if (bar === undefined) return;
     const line = (target.closest<HTMLElement>("[data-line]")?.dataset.line ?? "chords") as Line;
+    // With a player open and paused, its Play starts on the tapped bar (R-13.15, T-2836); while it
+    // plays, writing in a bar never moves it.
+    const clock = videoClock.get();
+    if (clock && !clock.playing && element.dataset.bar)
+      barSeek.request({ section, number: Number(element.dataset.bar) });
     begin({ section, bar }, line);
   };
 
@@ -611,739 +622,765 @@ export function VisualEditor({
   }
 
   return (
-    <Layout
-      padding={8}
-      header={
-        <LayoutHeader hasDivider>
-          <HStack gap={4} vAlign="start" hAlign="between" wrap="wrap">
-            {/* The chart's header, as a printed chart's first lines (R-13.2). */}
-            <VStack gap={1}>
-              <Text type="supporting">{t("overline")}</Text>
-              <HeaderFields
-                versionId={versionId}
-                title={songTitle}
-                canRename={canRename}
-                meta={chart.meta}
-                onMeta={(next) => change((c) => ({ ...c, meta: next(c.meta) }))}
-                onRenamed={(name) => {
-                  setSongTitle(name);
-                  router.refresh();
-                }}
-                subtitle={
-                  <Text color="secondary">
-                    {[artists.join(", "), author && t("arranger", { name: author })]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </Text>
-                }
-              />
-              {chart.meta.feel && <Token label={chart.meta.feel} size="sm" />}
-            </VStack>
-            <form action={action}>
-              <input type="hidden" name="versionId" value={versionId} />
-              <input type="hidden" name="content" value={accepted ? saved : content} />
-              <input type="hidden" name="sourceType" value={sourceType} />
-              <input type="hidden" name="album" value={album} />
-              <input type="hidden" name="year" value={year} />
-              <input type="hidden" name="youtube" value={youtube} />
-              <HStack gap={2} vAlign="center" wrap="wrap">
-                <Button
-                  label={t("undo")}
-                  isIconOnly
-                  tooltip={t("undoKeys")}
-                  icon={icon("undo")}
-                  isDisabled={history.past.length === 0}
-                  onClick={undo}
+    // An open player is docked at the screen's bottom; the editor ends above it, so the tools sit
+    // right over the player as in the other editors (R-13.15, R-03.11).
+    <div style={{ blockSize: "100%", boxSizing: "border-box", paddingBlockEnd: room }}>
+      <Layout
+        padding={8}
+        header={
+          <LayoutHeader hasDivider>
+            <HStack gap={4} vAlign="start" hAlign="between" wrap="wrap">
+              {/* The chart's header, as a printed chart's first lines (R-13.2). */}
+              <VStack gap={1}>
+                <Text type="supporting">{t("overline")}</Text>
+                <HeaderFields
+                  versionId={versionId}
+                  title={songTitle}
+                  canRename={canRename}
+                  meta={chart.meta}
+                  onMeta={(next) => change((c) => ({ ...c, meta: next(c.meta) }))}
+                  onRenamed={(name) => {
+                    setSongTitle(name);
+                    router.refresh();
+                  }}
+                  subtitle={
+                    <Text color="secondary">
+                      {[artists.join(", "), author && t("arranger", { name: author })]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </Text>
+                  }
                 />
-                <Button
-                  label={t("redo")}
-                  isIconOnly
-                  tooltip={t("redoKeys")}
-                  icon={icon("redo")}
-                  isDisabled={history.future.length === 0}
-                  onClick={redo}
-                />
-                <Button
-                  label={t("details")}
-                  icon={icon("details")}
-                  onClick={() => setDetails(true)}
-                />
-                {videoId(youtube) && (
-                  <VideoLink
-                    url={youtube}
-                    chart={drawn}
-                    saved={videoStart}
-                    savedEnd={videoEnd}
-                    save={(points) => saveVideoPoints(versionId, points)}
-                  />
-                )}
-                {bands.length > 0 && (
-                  <Button label={t("addAudio")} icon={icon("addAudio")} onClick={openAddAudio} />
-                )}
-                <Button
-                  label={t("openText")}
-                  icon={icon("openText")}
-                  variant="ghost"
-                  href={`/versions/${versionId}/edit`}
-                />
-                <Button
-                  label={t("done")}
-                  icon={icon("done")}
-                  variant="ghost"
-                  href={`/versions/${versionId}`}
-                />
-                <Button
-                  type="submit"
-                  variant="primary"
-                  label={t("save")}
-                  icon={icon("save")}
-                  isLoading={saving}
-                  isDisabled={!dirty}
-                />
-              </HStack>
-            </form>
-          </HStack>
-          {state.status === "saved" && (
-            <Text type="supporting" role="status">
-              {t("savedAs", { number: state.number ?? 0 })}
-            </Text>
-          )}
-          {(state.status === "changed" ||
-            state.status === "error" ||
-            state.status === "invalid") && (
-            <div role="alert">
-              <Banner status="error" title={t(`errors.${state.status}`)} />
-            </div>
-          )}
-        </LayoutHeader>
-      }
-      content={
-        <LayoutContent>
-          <VStack gap={8}>
-            {(recordings.length > 0 || bands.length > 0) && (
-              <BandAudio
-                versionId={versionId}
-                recordings={recordings}
-                bands={bands}
-                chart={drawn}
-              />
-            )}
-            {/* The chart's page: its sections, one after another, and Add a section (R-13.3). */}
-            <Card padding={4}>
-              <VStack gap={6}>
-                {chart.sections.map((section, s) => {
-                  const parsed = drawn.sections[s];
-                  const isPlaying = playing === s;
-                  const head = (
-                    <HStack gap={2} vAlign="center" wrap="wrap">
-                      {renaming === s ? (
-                        <TextInput
-                          label={t("sectionName")}
-                          isLabelHidden
-                          value={section.name}
-                          onChange={(name) =>
-                            setHistory((h) => ({
-                              ...h,
-                              present: renameSection(h.present, s, name),
-                            }))
-                          }
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter" || event.key === "Escape") setRenaming(null);
-                          }}
-                          onBlur={() => setRenaming(null)}
-                          hasAutoFocus
-                        />
-                      ) : (
-                        <Heading level={2}>{section.name}</Heading>
-                      )}
-                      {section.use ? (
-                        <>
-                          <Token
-                            label={t("repeatToken", { times: section.times ?? 1 })}
-                            icon={icon("repeatSection")}
-                            size="sm"
-                            color="blue"
-                          />
-                          <Text type="supporting">{t("repeatsAbove", { name: section.use })}</Text>
-                        </>
-                      ) : (
-                        <Text type="supporting">
-                          {t("barCount", { count: section.bars.length })}
-                        </Text>
-                      )}
-                      {isPlaying && <Token label={t("playing")} size="sm" color="blue" />}
-                      {section.use && (
-                        // A repeat is read-only, with Edit original in its menu (R-13.9).
-                        <HStack gap={1} vAlign="center">
-                          <Button
-                            label="−"
-                            size="sm"
-                            tooltip={t("repeatTimes")}
-                            isDisabled={(section.times ?? 1) <= 1}
-                            onClick={() =>
-                              change((c) => setTimes(c, s, Math.max(1, (section.times ?? 1) - 1)))
-                            }
-                          />
-                          <Button
-                            label="+"
-                            size="sm"
-                            tooltip={t("repeatTimes")}
-                            onClick={() => change((c) => setTimes(c, s, (section.times ?? 1) + 1))}
-                          />
-                        </HStack>
-                      )}
-                      <MoreMenu
-                        label={t("sectionMenu", { name: section.name })}
-                        presentation="adaptive"
-                        items={[
-                          ...(section.use
-                            ? [
-                                {
-                                  label: t("editOriginal"),
-                                  icon: icon("editOriginal"),
-                                  onClick: () => {
-                                    const original = chart.sections.findIndex(
-                                      (x) => x.name === section.use && !x.use,
-                                    );
-                                    if (original >= 0) setSelected({ section: original, bar: 0 });
-                                    document
-                                      .getElementById(`cd-visual-${original}`)
-                                      ?.scrollIntoView({ behavior: "smooth" });
-                                  },
-                                },
-                              ]
-                            : [
-                                {
-                                  label: t("rename"),
-                                  icon: icon("rename"),
-                                  onClick: () => {
-                                    change((c) => c);
-                                    setRenaming(s);
-                                  },
-                                },
-                                {
-                                  label: t("addSectionAfter"),
-                                  icon: icon("addSection"),
-                                  onClick: () => addAfter(s),
-                                },
-                                {
-                                  label: t("addNote"),
-                                  icon: icon("addNote"),
-                                  onClick: () => setNoteFor(s),
-                                },
-                                {
-                                  label: t("repeatSection"),
-                                  icon: icon("repeatSection"),
-                                  onClick: () => change((c) => repeatSection(c, s, 2)),
-                                },
-                                {
-                                  label: t("duplicate"),
-                                  icon: icon("duplicate"),
-                                  onClick: () =>
-                                    change((c) =>
-                                      duplicateSection(
-                                        c,
-                                        s,
-                                        nextName(c.sections, `${section.name} 2`),
-                                      ),
-                                    ),
-                                },
-                              ]),
-                          {
-                            label: t("moveUp"),
-                            icon: icon("moveUp"),
-                            onClick: () => change((c) => moveSection(c, s, -1)),
-                          },
-                          {
-                            label: t("moveDown"),
-                            icon: icon("moveDown"),
-                            onClick: () => change((c) => moveSection(c, s, 1)),
-                          },
-                          { type: "divider" as const },
-                          {
-                            label: t("deleteSection"),
-                            icon: icon("deleteSection"),
-                            variant: "destructive" as const,
-                            onClick: () =>
-                              repeatsOf(chart, s) > 0
-                                ? setConfirmDelete(s)
-                                : change((c) => deleteSection(c, s)),
-                          },
-                        ]}
-                      />
-                    </HStack>
-                  );
-                  return (
-                    <section key={s} id={`cd-visual-${s}`} aria-label={section.name}>
-                      <Card
-                        variant={section.use ? "muted" : "transparent"}
-                        padding={section.use ? 2 : 0}
-                      >
-                        <VStack gap={3}>
-                          {head}
-                          {section.notes.length > 0 && (
-                            <HStack gap={2} vAlign="start" wrap="wrap">
-                              <MDNotes
-                                notes={parsed?.notes ?? []}
-                                instrumentName={labels.bar.instrument}
-                              />
-                              {section.notes.map((note, n) => (
-                                <Button
-                                  key={n}
-                                  label={t("deleteNote", { text: note.text })}
-                                  isIconOnly
-                                  size="sm"
-                                  variant="ghost"
-                                  icon={icon("deleteNote")}
-                                  onClick={() => change((c) => deleteNote(c, s, n))}
-                                />
-                              ))}
-                            </HStack>
-                          )}
-                          {!section.use &&
-                            rowGroups(section).map((group, r) => {
-                              const row = parsed?.rows[r];
-                              if (!row) return null;
-                              const at = (index: number): BarAt => ({
-                                section: s,
-                                bar: group[index] as number,
-                              });
-                              return (
-                                <div
-                                  key={r}
-                                  onClick={(event) => pick(event, s, group)}
-                                  onDragOver={(event) => {
-                                    event.preventDefault();
-                                    const found = dropTarget(event, s, group);
-                                    setDropOn(found?.key ?? null);
-                                  }}
-                                  onDragLeave={() => setDropOn(null)}
-                                  onDrop={(event) => onDrop(event, s, group)}
-                                >
-                                  <BarRow
-                                    row={row}
-                                    formatter={formatter}
-                                    labels={labels.bar}
-                                    size="md"
-                                    beats="auto"
-                                    edit={{
-                                      ...(selected?.section === s && group.includes(selected.bar)
-                                        ? { selected: group.indexOf(selected.bar) }
-                                        : {}),
-                                      ...(editing?.at.section === s &&
-                                      group.includes(editing.at.bar)
-                                        ? { editing: group.indexOf(editing.at.bar) }
-                                        : {}),
-                                      flagged: group.flatMap((bar, index) =>
-                                        needsAttention(
-                                          section.bars[bar] as VisualBar,
-                                          meterAt[s]?.[bar] ?? "4/4",
-                                        ) || dropOn === `${s}:${bar}`
-                                          ? [index]
-                                          : [],
-                                      ),
-                                      line: (index, line) =>
-                                        ownLine(
-                                          at(index),
-                                          section.bars[group[index] as number] as VisualBar,
-                                          line,
-                                        ),
-                                      label: (index) =>
-                                        label(
-                                          at(index),
-                                          section.bars[group[index] as number] as VisualBar,
-                                        ),
-                                    }}
-                                  />
-                                </div>
-                              );
-                            })}
-                          {!section.use && (
-                            <HStack>
-                              <Button
-                                label={t("addRow")}
-                                variant="ghost"
-                                icon={icon("addRow")}
-                                onClick={() => change((c) => addRow(c, s))}
-                              />
-                            </HStack>
-                          )}
-                        </VStack>
-                      </Card>
-                    </section>
-                  );
-                })}
-                <div className="cd-chart__add">
-                  <Button
-                    label={t("addSection")}
-                    icon={icon("addSection")}
-                    variant="ghost"
-                    size="lg"
-                    width="100%"
-                    // After the section being written in, or at the end.
-                    onClick={() => addAfter(selected?.section ?? chart.sections.length - 1)}
-                  />
-                </div>
+                {chart.meta.feel && <Token label={chart.meta.feel} size="sm" />}
               </VStack>
-            </Card>
-            <datalist id="cd-visual-indications">
-              {[
-                ...DYNAMICS,
-                ...NAVIGATION,
-                "Drums in",
-                "Drums out",
-                "Band in",
-                "Band out",
-                "rit.",
-                "a tempo",
-              ].map((word) => (
-                <option key={word} value={word} />
-              ))}
-            </datalist>
-          </VStack>
-        </LayoutContent>
-      }
-      footer={
-        // The tools, docked at the foot so they never cover the bar being written (R-13.7, R-13.12).
-        <LayoutFooter hasDivider label={t("tools.label")}>
-          <VStack gap={2}>
-            <HStack gap={2} vAlign="center" wrap="wrap">
-              <Text type="supporting">
-                {selected
-                  ? t("tools.selected", {
-                      bar: label(selected, selectedBar as VisualBar),
-                    })
-                  : t("tools.hint")}
-              </Text>
-              {editing?.line === "lyric" && selectedBar && (
-                <Text type="supporting" role="status">
-                  {t("words", { count: lyricWords(selectedBar.lyric), max: MAX_LYRIC_WORDS })}
-                </Text>
-              )}
-              {selected && selectedNeed?.kind === "choose" && (
-                <HStack gap={1} vAlign="center" wrap="wrap">
-                  <Text type="supporting">{t("split")}</Text>
-                  {selectedNeed.options.map((option, index) => (
-                    <Button
-                      key={option.join("+")}
-                      size="sm"
-                      label={option.join("+")}
-                      variant={
-                        selectedBar?.split?.join("+") === option.join("+") ? "primary" : "secondary"
-                      }
-                      {...(index < 6 ? { tooltip: `⌥${index + 1}` } : {})}
-                      onClick={() => change((c) => setBar(c, selected, { split: option }))}
+              <form action={action}>
+                <input type="hidden" name="versionId" value={versionId} />
+                <input type="hidden" name="content" value={accepted ? saved : content} />
+                <input type="hidden" name="sourceType" value={sourceType} />
+                <input type="hidden" name="album" value={album} />
+                <input type="hidden" name="year" value={year} />
+                <input type="hidden" name="youtube" value={youtube} />
+                <HStack gap={2} vAlign="center" wrap="wrap">
+                  <Button
+                    label={t("undo")}
+                    isIconOnly
+                    tooltip={t("undoKeys")}
+                    icon={icon("undo")}
+                    isDisabled={history.past.length === 0}
+                    onClick={undo}
+                  />
+                  <Button
+                    label={t("redo")}
+                    isIconOnly
+                    tooltip={t("redoKeys")}
+                    icon={icon("redo")}
+                    isDisabled={history.future.length === 0}
+                    onClick={redo}
+                  />
+                  <Button
+                    label={t("details")}
+                    icon={icon("details")}
+                    onClick={() => setDetails(true)}
+                  />
+                  {videoId(youtube) && (
+                    <VideoLink
+                      url={youtube}
+                      chart={drawn}
+                      saved={videoStart}
+                      savedEnd={videoEnd}
+                      save={(points) => saveVideoPoints(versionId, points)}
                     />
-                  ))}
-                </HStack>
-              )}
-              {selected && selectedNeed?.kind === "over" && (
-                <Text type="supporting">{t("over")}</Text>
-              )}
-              {selected && selectedBar?.repeatEnd && (
-                <HStack gap={1} vAlign="center">
-                  <Text type="supporting">{t("plays")}</Text>
+                  )}
+                  {bands.length > 0 && (
+                    <Button label={t("addAudio")} icon={icon("addAudio")} onClick={openAddAudio} />
+                  )}
                   <Button
-                    size="sm"
-                    label="−"
-                    isDisabled={selectedBar.repeatEnd <= 2}
-                    onClick={() =>
-                      change((c) =>
-                        setBar(c, selected, {
-                          repeatEnd: Math.max(2, (selectedBar.repeatEnd ?? 2) - 1),
-                        }),
-                      )
-                    }
+                    label={t("openText")}
+                    icon={icon("openText")}
+                    variant="ghost"
+                    href={`/versions/${versionId}/edit`}
                   />
-                  <Text weight="semibold">×{selectedBar.repeatEnd}</Text>
                   <Button
-                    size="sm"
-                    label="+"
-                    onClick={() =>
-                      change((c) =>
-                        setBar(c, selected, { repeatEnd: (selectedBar.repeatEnd ?? 2) + 1 }),
-                      )
-                    }
+                    label={t("done")}
+                    icon={icon("done")}
+                    variant="ghost"
+                    href={`/versions/${versionId}`}
+                  />
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    label={t("save")}
+                    icon={icon("save")}
+                    isLoading={saving}
+                    isDisabled={!dirty}
                   />
                 </HStack>
-              )}
-              {selected && selectedBar?.pickup !== null && selectedBar?.pickup !== undefined && (
-                <HStack gap={1} vAlign="center">
-                  <Text type="supporting">{t("pickupBeats")}</Text>
-                  <Button
-                    size="sm"
-                    label="−"
-                    isDisabled={selectedBar.pickup <= 1}
-                    onClick={() =>
-                      change((c) =>
-                        setBar(c, selected, { pickup: Math.max(1, (selectedBar.pickup ?? 1) - 1) }),
-                      )
-                    }
-                  />
-                  <Text weight="semibold">{selectedBar.pickup}</Text>
-                  <Button
-                    size="sm"
-                    label="+"
-                    onClick={() =>
-                      change((c) => setBar(c, selected, { pickup: (selectedBar.pickup ?? 1) + 1 }))
-                    }
-                  />
-                </HStack>
-              )}
-              {selected && (
-                <MoreMenu
-                  label={t("barMenu")}
-                  presentation="adaptive"
-                  items={[
-                    {
-                      label: t("insertBefore"),
-                      icon: icon("insertBefore"),
-                      onClick: () => change((c) => insertBar(c, selected, "before")),
-                    },
-                    {
-                      label: t("insertAfter"),
-                      icon: icon("insertAfter"),
-                      onClick: () => change((c) => insertBar(c, selected, "after")),
-                    },
-                    {
-                      label: t("newRow"),
-                      icon: icon("newRow"),
-                      onClick: () => change((c) => breakRowAfter(c, selected)),
-                    },
-                    { type: "divider" as const },
-                    {
-                      label: t("deleteBar"),
-                      icon: icon("deleteBar"),
-                      variant: "destructive" as const,
-                      onClick: () => {
-                        change((c) => deleteBar(c, selected));
-                        setSelected(null);
-                      },
-                    },
-                    {
-                      label: t("deleteRow"),
-                      icon: icon("deleteRow"),
-                      variant: "destructive" as const,
-                      onClick: () => {
-                        change((c) => deleteRow(c, selected));
-                        setSelected(null);
-                      },
-                    },
-                  ]}
+              </form>
+            </HStack>
+            {state.status === "saved" && (
+              <Text type="supporting" role="status">
+                {t("savedAs", { number: state.number ?? 0 })}
+              </Text>
+            )}
+            {(state.status === "changed" ||
+              state.status === "error" ||
+              state.status === "invalid") && (
+              <div role="alert">
+                <Banner status="error" title={t(`errors.${state.status}`)} />
+              </div>
+            )}
+          </LayoutHeader>
+        }
+        content={
+          <LayoutContent>
+            <VStack gap={8}>
+              {(recordings.length > 0 || bands.length > 0) && (
+                <BandAudio
+                  versionId={versionId}
+                  recordings={recordings}
+                  bands={bands}
+                  chart={drawn}
                 />
               )}
-            </HStack>
-            <Grid columns={{ minWidth: 420, max: 2 }} gap={2}>
-              <GridSpan columns="full">
+              {/* The chart's page: its sections, one after another, and Add a section (R-13.3). */}
+              <Card padding={4}>
+                <VStack gap={6}>
+                  {chart.sections.map((section, s) => {
+                    const parsed = drawn.sections[s];
+                    const isPlaying = playing === s;
+                    const head = (
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        {renaming === s ? (
+                          <TextInput
+                            label={t("sectionName")}
+                            isLabelHidden
+                            value={section.name}
+                            onChange={(name) =>
+                              setHistory((h) => ({
+                                ...h,
+                                present: renameSection(h.present, s, name),
+                              }))
+                            }
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === "Escape")
+                                setRenaming(null);
+                            }}
+                            onBlur={() => setRenaming(null)}
+                            hasAutoFocus
+                          />
+                        ) : (
+                          <Heading level={2}>{section.name}</Heading>
+                        )}
+                        {section.use ? (
+                          <>
+                            <Token
+                              label={t("repeatToken", { times: section.times ?? 1 })}
+                              icon={icon("repeatSection")}
+                              size="sm"
+                              color="blue"
+                            />
+                            <Text type="supporting">
+                              {t("repeatsAbove", { name: section.use })}
+                            </Text>
+                          </>
+                        ) : (
+                          <Text type="supporting">
+                            {t("barCount", { count: section.bars.length })}
+                          </Text>
+                        )}
+                        {isPlaying && <Token label={t("playing")} size="sm" color="blue" />}
+                        {section.use && (
+                          // A repeat is read-only, with Edit original in its menu (R-13.9).
+                          <HStack gap={1} vAlign="center">
+                            <Button
+                              label="−"
+                              size="sm"
+                              tooltip={t("repeatTimes")}
+                              isDisabled={(section.times ?? 1) <= 1}
+                              onClick={() =>
+                                change((c) => setTimes(c, s, Math.max(1, (section.times ?? 1) - 1)))
+                              }
+                            />
+                            <Button
+                              label="+"
+                              size="sm"
+                              tooltip={t("repeatTimes")}
+                              onClick={() =>
+                                change((c) => setTimes(c, s, (section.times ?? 1) + 1))
+                              }
+                            />
+                          </HStack>
+                        )}
+                        <MoreMenu
+                          label={t("sectionMenu", { name: section.name })}
+                          presentation="adaptive"
+                          items={[
+                            ...(section.use
+                              ? [
+                                  {
+                                    label: t("editOriginal"),
+                                    icon: icon("editOriginal"),
+                                    onClick: () => {
+                                      const original = chart.sections.findIndex(
+                                        (x) => x.name === section.use && !x.use,
+                                      );
+                                      if (original >= 0) setSelected({ section: original, bar: 0 });
+                                      document
+                                        .getElementById(`cd-visual-${original}`)
+                                        ?.scrollIntoView({ behavior: "smooth" });
+                                    },
+                                  },
+                                ]
+                              : [
+                                  {
+                                    label: t("rename"),
+                                    icon: icon("rename"),
+                                    onClick: () => {
+                                      change((c) => c);
+                                      setRenaming(s);
+                                    },
+                                  },
+                                  {
+                                    label: t("addSectionAfter"),
+                                    icon: icon("addSection"),
+                                    onClick: () => addAfter(s),
+                                  },
+                                  {
+                                    label: t("addNote"),
+                                    icon: icon("addNote"),
+                                    onClick: () => setNoteFor(s),
+                                  },
+                                  {
+                                    label: t("repeatSection"),
+                                    icon: icon("repeatSection"),
+                                    onClick: () => change((c) => repeatSection(c, s, 2)),
+                                  },
+                                  {
+                                    label: t("duplicate"),
+                                    icon: icon("duplicate"),
+                                    onClick: () =>
+                                      change((c) =>
+                                        duplicateSection(
+                                          c,
+                                          s,
+                                          nextName(c.sections, `${section.name} 2`),
+                                        ),
+                                      ),
+                                  },
+                                ]),
+                            {
+                              label: t("moveUp"),
+                              icon: icon("moveUp"),
+                              onClick: () => change((c) => moveSection(c, s, -1)),
+                            },
+                            {
+                              label: t("moveDown"),
+                              icon: icon("moveDown"),
+                              onClick: () => change((c) => moveSection(c, s, 1)),
+                            },
+                            { type: "divider" as const },
+                            {
+                              label: t("deleteSection"),
+                              icon: icon("deleteSection"),
+                              variant: "destructive" as const,
+                              onClick: () =>
+                                repeatsOf(chart, s) > 0
+                                  ? setConfirmDelete(s)
+                                  : change((c) => deleteSection(c, s)),
+                            },
+                          ]}
+                        />
+                      </HStack>
+                    );
+                    return (
+                      <section key={s} id={`cd-visual-${s}`} aria-label={section.name}>
+                        <Card
+                          variant={section.use ? "muted" : "transparent"}
+                          padding={section.use ? 2 : 0}
+                        >
+                          <VStack gap={3}>
+                            {head}
+                            {section.notes.length > 0 && (
+                              <HStack gap={2} vAlign="start" wrap="wrap">
+                                <MDNotes
+                                  notes={parsed?.notes ?? []}
+                                  instrumentName={labels.bar.instrument}
+                                />
+                                {section.notes.map((note, n) => (
+                                  <Button
+                                    key={n}
+                                    label={t("deleteNote", { text: note.text })}
+                                    isIconOnly
+                                    size="sm"
+                                    variant="ghost"
+                                    icon={icon("deleteNote")}
+                                    onClick={() => change((c) => deleteNote(c, s, n))}
+                                  />
+                                ))}
+                              </HStack>
+                            )}
+                            {!section.use &&
+                              rowGroups(section).map((group, r) => {
+                                const row = parsed?.rows[r];
+                                if (!row) return null;
+                                const at = (index: number): BarAt => ({
+                                  section: s,
+                                  bar: group[index] as number,
+                                });
+                                return (
+                                  <div
+                                    key={r}
+                                    onClick={(event) => pick(event, s, group)}
+                                    onDragOver={(event) => {
+                                      event.preventDefault();
+                                      const found = dropTarget(event, s, group);
+                                      setDropOn(found?.key ?? null);
+                                    }}
+                                    onDragLeave={() => setDropOn(null)}
+                                    onDrop={(event) => onDrop(event, s, group)}
+                                  >
+                                    <FollowedBarRow
+                                      placed={placed}
+                                      section={s}
+                                      rowIndex={r}
+                                      isFollowing={editing === null}
+                                      row={row}
+                                      formatter={formatter}
+                                      labels={labels.bar}
+                                      size="md"
+                                      beats="auto"
+                                      edit={{
+                                        ...(selected?.section === s && group.includes(selected.bar)
+                                          ? { selected: group.indexOf(selected.bar) }
+                                          : {}),
+                                        ...(editing?.at.section === s &&
+                                        group.includes(editing.at.bar)
+                                          ? { editing: group.indexOf(editing.at.bar) }
+                                          : {}),
+                                        flagged: group.flatMap((bar, index) =>
+                                          needsAttention(
+                                            section.bars[bar] as VisualBar,
+                                            meterAt[s]?.[bar] ?? "4/4",
+                                          ) || dropOn === `${s}:${bar}`
+                                            ? [index]
+                                            : [],
+                                        ),
+                                        line: (index, line) =>
+                                          ownLine(
+                                            at(index),
+                                            section.bars[group[index] as number] as VisualBar,
+                                            line,
+                                          ),
+                                        label: (index) =>
+                                          label(
+                                            at(index),
+                                            section.bars[group[index] as number] as VisualBar,
+                                          ),
+                                      }}
+                                    />
+                                  </div>
+                                );
+                              })}
+                            {!section.use && (
+                              <HStack>
+                                <Button
+                                  label={t("addRow")}
+                                  variant="ghost"
+                                  icon={icon("addRow")}
+                                  onClick={() => change((c) => addRow(c, s))}
+                                />
+                              </HStack>
+                            )}
+                          </VStack>
+                        </Card>
+                      </section>
+                    );
+                  })}
+                  <div className="cd-chart__add">
+                    <Button
+                      label={t("addSection")}
+                      icon={icon("addSection")}
+                      variant="ghost"
+                      size="lg"
+                      width="100%"
+                      // After the section being written in, or at the end.
+                      onClick={() => addAfter(selected?.section ?? chart.sections.length - 1)}
+                    />
+                  </div>
+                </VStack>
+              </Card>
+              <datalist id="cd-visual-indications">
+                {[
+                  ...DYNAMICS,
+                  ...NAVIGATION,
+                  "Drums in",
+                  "Drums out",
+                  "Band in",
+                  "Band out",
+                  "rit.",
+                  "a tempo",
+                ].map((word) => (
+                  <option key={word} value={word} />
+                ))}
+              </datalist>
+            </VStack>
+          </LayoutContent>
+        }
+        footer={
+          // The tools, docked at the foot so they never cover the bar being written (R-13.7, R-13.12).
+          <LayoutFooter hasDivider label={t("tools.label")}>
+            <VStack gap={2}>
+              <HStack gap={2} vAlign="center" wrap="wrap">
+                <Text type="supporting">
+                  {selected
+                    ? t("tools.selected", {
+                        bar: label(selected, selectedBar as VisualBar),
+                      })
+                    : t("tools.hint")}
+                </Text>
+                {editing?.line === "lyric" && selectedBar && (
+                  <Text type="supporting" role="status">
+                    {t("words", { count: lyricWords(selectedBar.lyric), max: MAX_LYRIC_WORDS })}
+                  </Text>
+                )}
+                {selected && selectedNeed?.kind === "choose" && (
+                  <HStack gap={1} vAlign="center" wrap="wrap">
+                    <Text type="supporting">{t("split")}</Text>
+                    {selectedNeed.options.map((option, index) => (
+                      <Button
+                        key={option.join("+")}
+                        size="sm"
+                        label={option.join("+")}
+                        variant={
+                          selectedBar?.split?.join("+") === option.join("+")
+                            ? "primary"
+                            : "secondary"
+                        }
+                        {...(index < 6 ? { tooltip: `⌥${index + 1}` } : {})}
+                        onClick={() => change((c) => setBar(c, selected, { split: option }))}
+                      />
+                    ))}
+                  </HStack>
+                )}
+                {selected && selectedNeed?.kind === "over" && (
+                  <Text type="supporting">{t("over")}</Text>
+                )}
+                {selected && selectedBar?.repeatEnd && (
+                  <HStack gap={1} vAlign="center">
+                    <Text type="supporting">{t("plays")}</Text>
+                    <Button
+                      size="sm"
+                      label="−"
+                      isDisabled={selectedBar.repeatEnd <= 2}
+                      onClick={() =>
+                        change((c) =>
+                          setBar(c, selected, {
+                            repeatEnd: Math.max(2, (selectedBar.repeatEnd ?? 2) - 1),
+                          }),
+                        )
+                      }
+                    />
+                    <Text weight="semibold">×{selectedBar.repeatEnd}</Text>
+                    <Button
+                      size="sm"
+                      label="+"
+                      onClick={() =>
+                        change((c) =>
+                          setBar(c, selected, { repeatEnd: (selectedBar.repeatEnd ?? 2) + 1 }),
+                        )
+                      }
+                    />
+                  </HStack>
+                )}
+                {selected && selectedBar?.pickup !== null && selectedBar?.pickup !== undefined && (
+                  <HStack gap={1} vAlign="center">
+                    <Text type="supporting">{t("pickupBeats")}</Text>
+                    <Button
+                      size="sm"
+                      label="−"
+                      isDisabled={selectedBar.pickup <= 1}
+                      onClick={() =>
+                        change((c) =>
+                          setBar(c, selected, {
+                            pickup: Math.max(1, (selectedBar.pickup ?? 1) - 1),
+                          }),
+                        )
+                      }
+                    />
+                    <Text weight="semibold">{selectedBar.pickup}</Text>
+                    <Button
+                      size="sm"
+                      label="+"
+                      onClick={() =>
+                        change((c) =>
+                          setBar(c, selected, { pickup: (selectedBar.pickup ?? 1) + 1 }),
+                        )
+                      }
+                    />
+                  </HStack>
+                )}
+                {selected && (
+                  <MoreMenu
+                    label={t("barMenu")}
+                    presentation="adaptive"
+                    items={[
+                      {
+                        label: t("insertBefore"),
+                        icon: icon("insertBefore"),
+                        onClick: () => change((c) => insertBar(c, selected, "before")),
+                      },
+                      {
+                        label: t("insertAfter"),
+                        icon: icon("insertAfter"),
+                        onClick: () => change((c) => insertBar(c, selected, "after")),
+                      },
+                      {
+                        label: t("newRow"),
+                        icon: icon("newRow"),
+                        onClick: () => change((c) => breakRowAfter(c, selected)),
+                      },
+                      { type: "divider" as const },
+                      {
+                        label: t("deleteBar"),
+                        icon: icon("deleteBar"),
+                        variant: "destructive" as const,
+                        onClick: () => {
+                          change((c) => deleteBar(c, selected));
+                          setSelected(null);
+                        },
+                      },
+                      {
+                        label: t("deleteRow"),
+                        icon: icon("deleteRow"),
+                        variant: "destructive" as const,
+                        onClick: () => {
+                          change((c) => deleteRow(c, selected));
+                          setSelected(null);
+                        },
+                      },
+                    ]}
+                  />
+                )}
+              </HStack>
+              <Grid columns={{ minWidth: 420, max: 2 }} gap={2}>
+                <GridSpan columns="full">
+                  {toolGroup(
+                    t("tools.group.chord"),
+                    t("tools.group.chordHint"),
+                    editing?.line === "chords",
+                    CHORD_MARKS.map((mark) =>
+                      toolButton({ kind: "mark", mark }, t(`tools.${mark}`), mark),
+                    ),
+                  )}
+                </GridSpan>
+                <GridSpan columns="full">
+                  {toolGroup(
+                    t("tools.group.bar"),
+                    t("tools.group.barHint"),
+                    selected !== null && editing === null,
+                    <>
+                      {toolButton({ kind: "repeatStart" }, t("tools.repeatStart"), "repeatStart")}
+                      {toolButton({ kind: "repeatEnd" }, t("tools.repeatEnd"), "repeatEnd")}
+                      {toolButton(
+                        { kind: "ending", number: 1 },
+                        t("tools.ending", { number: 1 }),
+                        "ending1",
+                      )}
+                      {toolButton(
+                        { kind: "ending", number: 2 },
+                        t("tools.ending", { number: 2 }),
+                        "ending2",
+                      )}
+                      {toolButton({ kind: "pickup" }, t("tools.pickup"), "pickup")}
+                      {toolButton({ kind: "rest" }, t("tools.rest"), "rest")}
+                      {toolButton({ kind: "repeatBar" }, t("tools.repeatBar"), "repeatBar")}
+                    </>,
+                  )}
+                </GridSpan>
                 {toolGroup(
-                  t("tools.group.chord"),
-                  t("tools.group.chordHint"),
-                  editing?.line === "chords",
-                  CHORD_MARKS.map((mark) =>
-                    toolButton({ kind: "mark", mark }, t(`tools.${mark}`), mark),
+                  t("tools.group.roadMap"),
+                  t("tools.group.barHint"),
+                  false,
+                  NAVIGATION.map((word) =>
+                    toolButton({ kind: "indication", text: word }, word, word),
                   ),
                 )}
-              </GridSpan>
-              <GridSpan columns="full">
                 {toolGroup(
-                  t("tools.group.bar"),
-                  t("tools.group.barHint"),
-                  selected !== null && editing === null,
-                  <>
-                    {toolButton({ kind: "repeatStart" }, t("tools.repeatStart"), "repeatStart")}
-                    {toolButton({ kind: "repeatEnd" }, t("tools.repeatEnd"), "repeatEnd")}
-                    {toolButton(
-                      { kind: "ending", number: 1 },
-                      t("tools.ending", { number: 1 }),
-                      "ending1",
-                    )}
-                    {toolButton(
-                      { kind: "ending", number: 2 },
-                      t("tools.ending", { number: 2 }),
-                      "ending2",
-                    )}
-                    {toolButton({ kind: "pickup" }, t("tools.pickup"), "pickup")}
-                    {toolButton({ kind: "rest" }, t("tools.rest"), "rest")}
-                    {toolButton({ kind: "repeatBar" }, t("tools.repeatBar"), "repeatBar")}
-                  </>,
+                  t("tools.group.dynamics"),
+                  t("tools.group.dynamicsHint"),
+                  editing?.line === "tags",
+                  DYNAMICS.map((word) =>
+                    toolButton({ kind: "indication", text: word }, word, word),
+                  ),
                 )}
-              </GridSpan>
-              {toolGroup(
-                t("tools.group.roadMap"),
-                t("tools.group.barHint"),
-                false,
-                NAVIGATION.map((word) =>
-                  toolButton({ kind: "indication", text: word }, word, word),
-                ),
-              )}
-              {toolGroup(
-                t("tools.group.dynamics"),
-                t("tools.group.dynamicsHint"),
-                editing?.line === "tags",
-                DYNAMICS.map((word) => toolButton({ kind: "indication", text: word }, word, word)),
-              )}
-            </Grid>
+              </Grid>
+            </VStack>
+          </LayoutFooter>
+        }
+      >
+        <Dialog
+          isOpen={asking !== null}
+          onOpenChange={(open) => !open && setAsking(null)}
+          purpose="required"
+          padding={4}
+        >
+          {/* Before the first change to a chart written by hand (R-13.1). */}
+          <VStack gap={4}>
+            <Heading level={2}>{t("notice.title")}</Heading>
+            <Text>{t("notice.body")}</Text>
+            <HStack gap={2} hAlign="end">
+              <Button
+                label={t("notice.text")}
+                variant="ghost"
+                onClick={() => router.push(`/versions/${versionId}/edit`)}
+              />
+              <Button
+                label={t("notice.continue")}
+                variant="primary"
+                onClick={() => {
+                  const run = asking;
+                  setAccepted(true);
+                  setAsking(null);
+                  run?.();
+                }}
+              />
+            </HStack>
           </VStack>
-        </LayoutFooter>
-      }
-    >
-      <Dialog
-        isOpen={asking !== null}
-        onOpenChange={(open) => !open && setAsking(null)}
-        purpose="required"
-        padding={4}
-      >
-        {/* Before the first change to a chart written by hand (R-13.1). */}
-        <VStack gap={4}>
-          <Heading level={2}>{t("notice.title")}</Heading>
-          <Text>{t("notice.body")}</Text>
-          <HStack gap={2} hAlign="end">
-            <Button
-              label={t("notice.text")}
-              variant="ghost"
-              onClick={() => router.push(`/versions/${versionId}/edit`)}
-            />
-            <Button
-              label={t("notice.continue")}
-              variant="primary"
-              onClick={() => {
-                const run = asking;
-                setAccepted(true);
-                setAsking(null);
-                run?.();
-              }}
-            />
-          </HStack>
-        </VStack>
-      </Dialog>
-      <Dialog
-        isOpen={confirmDelete !== null}
-        onOpenChange={(open) => !open && setConfirmDelete(null)}
-        padding={4}
-      >
-        <VStack gap={4}>
-          <Heading level={2}>
-            {t("confirmDelete.title", { name: chart.sections[confirmDelete ?? 0]?.name ?? "" })}
-          </Heading>
-          <Text>
-            {t("confirmDelete.body", {
-              count: confirmDelete === null ? 0 : repeatsOf(chart, confirmDelete),
-            })}
-          </Text>
-          <HStack gap={2} hAlign="end">
-            <Button label={t("cancel")} variant="ghost" onClick={() => setConfirmDelete(null)} />
-            <Button
-              label={t("deleteSection")}
-              variant="destructive"
-              onClick={() => {
-                const index = confirmDelete;
-                setConfirmDelete(null);
-                if (index !== null) change((c) => deleteSection(c, index));
-              }}
-            />
-          </HStack>
-        </VStack>
-      </Dialog>
-      <NoteDialog
-        open={noteFor !== null}
-        section={chart.sections[noteFor ?? 0]?.name ?? ""}
-        instruments={STANDARD_INSTRUMENTS.map((instrument) => ({
-          value: instrument.id,
-          label: instruments.has(instrument.id as "keys")
-            ? instruments(instrument.id as "keys")
-            : instrument.id,
-        }))}
-        onClose={() => setNoteFor(null)}
-        onAdd={(note) => {
-          const index = noteFor;
-          setNoteFor(null);
-          if (index !== null) change((c) => addNote(c, index, note));
-        }}
-      />
-      <Dialog isOpen={details} onOpenChange={setDetails} padding={4} width={560} purpose="form">
-        {/* The song's details: the header's fields and the version's source (R-13.2, R-13.11). */}
-        <VStack gap={4}>
-          <Heading level={2}>{t("details")}</Heading>
-          <HStack gap={3} wrap="wrap">
-            <Selector
-              label={t("field.key")}
-              options={KEYS}
-              value={chart.meta.key ?? ""}
-              onChange={(key) => change((c) => ({ ...c, meta: { ...c.meta, key } }))}
-            />
-            <Selector
-              label={t("field.meter")}
-              options={METERS}
-              value={chart.meta.meter ?? "4/4"}
-              onChange={(meter) => change((c) => ({ ...c, meta: { ...c.meta, meter } }))}
-            />
-          </HStack>
-          <HStack gap={3} wrap="wrap">
+        </Dialog>
+        <Dialog
+          isOpen={confirmDelete !== null}
+          onOpenChange={(open) => !open && setConfirmDelete(null)}
+          padding={4}
+        >
+          <VStack gap={4}>
+            <Heading level={2}>
+              {t("confirmDelete.title", { name: chart.sections[confirmDelete ?? 0]?.name ?? "" })}
+            </Heading>
+            <Text>
+              {t("confirmDelete.body", {
+                count: confirmDelete === null ? 0 : repeatsOf(chart, confirmDelete),
+              })}
+            </Text>
+            <HStack gap={2} hAlign="end">
+              <Button label={t("cancel")} variant="ghost" onClick={() => setConfirmDelete(null)} />
+              <Button
+                label={t("deleteSection")}
+                variant="destructive"
+                onClick={() => {
+                  const index = confirmDelete;
+                  setConfirmDelete(null);
+                  if (index !== null) change((c) => deleteSection(c, index));
+                }}
+              />
+            </HStack>
+          </VStack>
+        </Dialog>
+        <NoteDialog
+          open={noteFor !== null}
+          section={chart.sections[noteFor ?? 0]?.name ?? ""}
+          instruments={STANDARD_INSTRUMENTS.map((instrument) => ({
+            value: instrument.id,
+            label: instruments.has(instrument.id as "keys")
+              ? instruments(instrument.id as "keys")
+              : instrument.id,
+          }))}
+          onClose={() => setNoteFor(null)}
+          onAdd={(note) => {
+            const index = noteFor;
+            setNoteFor(null);
+            if (index !== null) change((c) => addNote(c, index, note));
+          }}
+        />
+        <Dialog isOpen={details} onOpenChange={setDetails} padding={4} width={560} purpose="form">
+          {/* The song's details: the header's fields and the version's source (R-13.2, R-13.11). */}
+          <VStack gap={4}>
+            <Heading level={2}>{t("details")}</Heading>
+            <HStack gap={3} wrap="wrap">
+              <Selector
+                label={t("field.key")}
+                options={KEYS}
+                value={chart.meta.key ?? ""}
+                onChange={(key) => change((c) => ({ ...c, meta: { ...c.meta, key } }))}
+              />
+              <Selector
+                label={t("field.meter")}
+                options={METERS}
+                value={chart.meta.meter ?? "4/4"}
+                onChange={(meter) => change((c) => ({ ...c, meta: { ...c.meta, meter } }))}
+              />
+            </HStack>
+            <HStack gap={3} wrap="wrap">
+              <TextInput
+                label={t("field.tempo")}
+                value={(chart.meta.tempo ?? "").split(" ")[0] ?? ""}
+                onChange={(value) => {
+                  const unit = (chart.meta.tempo ?? "").split(" ")[1];
+                  const bpm = value.replace(/[^\d.]/g, "");
+                  change((c) => {
+                    const meta = { ...c.meta };
+                    if (bpm) meta.tempo = unit ? `${bpm} ${unit}` : bpm;
+                    else delete meta.tempo;
+                    return { ...c, meta };
+                  });
+                }}
+              />
+              <Selector
+                label={t("field.unit")}
+                options={UNITS.map(([unit, name]) => ({
+                  value: unit || "none",
+                  label: t(`unit.${name}`),
+                }))}
+                value={(chart.meta.tempo ?? "").split(" ")[1] ?? "none"}
+                onChange={(unit) => {
+                  const bpm = (chart.meta.tempo ?? "").split(" ")[0];
+                  if (!bpm) return;
+                  change((c) => ({
+                    ...c,
+                    meta: { ...c.meta, tempo: unit === "none" ? bpm : `${bpm} ${unit}` },
+                  }));
+                }}
+              />
+              <TextInput
+                label={t("field.feel")}
+                value={chart.meta.feel ?? ""}
+                isOptional
+                onChange={(feel) =>
+                  change((c) => {
+                    const meta = { ...c.meta };
+                    if (feel) meta.feel = feel;
+                    else delete meta.feel;
+                    return { ...c, meta };
+                  })
+                }
+              />
+            </HStack>
             <TextInput
-              label={t("field.tempo")}
-              value={(chart.meta.tempo ?? "").split(" ")[0] ?? ""}
-              onChange={(value) => {
-                const unit = (chart.meta.tempo ?? "").split(" ")[1];
-                const bpm = value.replace(/[^\d.]/g, "");
-                change((c) => {
-                  const meta = { ...c.meta };
-                  if (bpm) meta.tempo = unit ? `${bpm} ${unit}` : bpm;
-                  else delete meta.tempo;
-                  return { ...c, meta };
-                });
-              }}
-            />
-            <Selector
-              label={t("field.unit")}
-              options={UNITS.map(([unit, name]) => ({
-                value: unit || "none",
-                label: t(`unit.${name}`),
-              }))}
-              value={(chart.meta.tempo ?? "").split(" ")[1] ?? "none"}
-              onChange={(unit) => {
-                const bpm = (chart.meta.tempo ?? "").split(" ")[0];
-                if (!bpm) return;
-                change((c) => ({
-                  ...c,
-                  meta: { ...c.meta, tempo: unit === "none" ? bpm : `${bpm} ${unit}` },
-                }));
-              }}
-            />
-            <TextInput
-              label={t("field.feel")}
-              value={chart.meta.feel ?? ""}
+              label={t("field.youtube")}
+              value={youtube}
+              onChange={setYoutube}
               isOptional
-              onChange={(feel) =>
-                change((c) => {
-                  const meta = { ...c.meta };
-                  if (feel) meta.feel = feel;
-                  else delete meta.feel;
-                  return { ...c, meta };
-                })
-              }
             />
-          </HStack>
-          <TextInput label={t("field.youtube")} value={youtube} onChange={setYoutube} isOptional />
-          <HStack gap={3} wrap="wrap">
-            <TextInput label={t("field.album")} value={album} onChange={setAlbum} isOptional />
-            <TextInput label={t("field.year")} value={year} onChange={setYear} isOptional />
-          </HStack>
-          <RadioList
-            label={t("field.source")}
-            value={sourceType}
-            onChange={setSourceType}
-            orientation="horizontal"
-          >
-            {SOURCE_TYPES.map((type) => (
-              <RadioListItem key={type} value={type} label={sources(type)} />
-            ))}
-          </RadioList>
-          <HStack hAlign="end">
-            <Button label={t("close")} variant="primary" onClick={() => setDetails(false)} />
-          </HStack>
-        </VStack>
-      </Dialog>
-    </Layout>
+            <HStack gap={3} wrap="wrap">
+              <TextInput label={t("field.album")} value={album} onChange={setAlbum} isOptional />
+              <TextInput label={t("field.year")} value={year} onChange={setYear} isOptional />
+            </HStack>
+            <RadioList
+              label={t("field.source")}
+              value={sourceType}
+              onChange={setSourceType}
+              orientation="horizontal"
+            >
+              {SOURCE_TYPES.map((type) => (
+                <RadioListItem key={type} value={type} label={sources(type)} />
+              ))}
+            </RadioList>
+            <HStack hAlign="end">
+              <Button label={t("close")} variant="primary" onClick={() => setDetails(false)} />
+            </HStack>
+          </VStack>
+        </Dialog>
+      </Layout>
+    </div>
   );
 }
 
