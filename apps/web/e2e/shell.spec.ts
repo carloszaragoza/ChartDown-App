@@ -10,14 +10,14 @@ test("T-1301 a visitor's pages have the side navigation; the landing page and st
     await page.goto("/catalog");
     const nav = page
       .getByRole("navigation")
-      .filter({ has: page.getByRole("link", { name: "Catalog" }) });
-    await expect(nav.getByRole("link", { name: "Catalog" })).toHaveAttribute(
+      .filter({ has: page.getByRole("link", { name: "Songs", exact: true }) });
+    await expect(nav.getByRole("link", { name: "Songs", exact: true })).toHaveAttribute(
       "aria-current",
       "page",
     );
     await expect(page.getByRole("link", { name: "Sign in" }).first()).toBeVisible();
     await expect(page.getByRole("img", { name: "ChartDown" }).first()).toBeVisible();
-    await expect(page.getByRole("main")).toContainText("Catalog");
+    await expect(page.getByRole("main")).toContainText("Songs");
   }
   await page.goto("/");
   await expect(page.getByRole("link", { name: "Overview" })).toHaveCount(0);
@@ -36,7 +36,7 @@ test("T-1301 a signed-in person gets every section; only admins get Administrati
     "Notices",
     "Sets",
     "Stand mode",
-    "Catalog",
+    "Songs",
     "New version",
     "Chart editor",
     "Director's notes",

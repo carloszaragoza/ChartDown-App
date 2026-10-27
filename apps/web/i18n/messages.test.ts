@@ -106,6 +106,19 @@ describe("R-01.5 interface in English by default, with Spanish as an option", ()
     }
   });
 
+  it("R-02.9 the public catalog is called Songs: no message a person reads says catalog", () => {
+    expect(en.nav.catalog).toBe("Songs");
+    expect(es.nav.catalog).toBe("Canciones");
+    expect(en.catalog.title).toBe("Songs");
+    expect(es.catalog.title).toBe("Canciones");
+    // The administration's instrument catalog keeps its name; legal texts live elsewhere.
+    const instruments = (key: string) => key.startsWith("admin.instruments.");
+    for (const [key, text] of Object.entries(english))
+      if (!instruments(key)) expect(text, key).not.toMatch(/catalog/i);
+    for (const [key, text] of Object.entries(spanish))
+      if (!instruments(key)) expect(text, key).not.toMatch(/cat[aá]logo/i);
+  });
+
   it("R-01.5 every parser warning has an English and a Spanish message with its values", () => {
     for (const code of WARNING_CODES) {
       expect(english[`warnings.${code}`], `en ${code}`).toBeDefined();
