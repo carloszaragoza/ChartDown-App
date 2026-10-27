@@ -241,7 +241,16 @@ function barText(bar: VisualBar, meter: string, blank: "rest" | "skip"): string 
   if (bar.ending) parts.push(`[${bar.ending.join(",")}]`);
   const list = tokens(bar.chords);
   if (list.length === 0) {
-    if (blank === "skip") return null;
+    // A bar with an indication, a lyric or a mark but no chords is kept as a rest with them
+    // (owner's decision, October 27, 2026); only a bar with nothing at all is left out.
+    const marked =
+      bar.top.trim() !== "" ||
+      bar.lyric.trim() !== "" ||
+      bar.pickup !== null ||
+      bar.ending !== null ||
+      bar.repeatStart ||
+      bar.repeatEnd !== null;
+    if (blank === "skip" && !marked) return null;
     parts.push("x");
   } else {
     const need = splitNeed(bar, meter);

@@ -280,6 +280,15 @@ describe("T-3002 the visual editor's chart", () => {
     expect(saved.sections[0]?.bars.map((bar) => bar.chords)).toEqual(["1", "4", "5", "1", "6m"]);
   });
 
+  it("R-13.3 a bar with an indication or a lyric but no chords is saved as a rest with them", () => {
+    let chart = visualChart("## Verse\n1 | 4\n");
+    chart = appendBar(chart, 0);
+    chart = setBar(chart, { section: 0, bar: 2 }, { top: "Drums in", lyric: "Was blind" });
+    chart = appendBar(chart, 0);
+    expect(lastLine(canonicalText(chart, ""))).toBe('1 | 4 | x {drums: in} "Was blind"');
+    expect(afterSave(chart).sections[0]?.bars).toHaveLength(3);
+  });
+
   it("R-13.11 every change makes a new chart, so the one before stays for undo", () => {
     const before = start();
     const after = setBar(before, { section: 0, bar: 0 }, { chords: "1" });
