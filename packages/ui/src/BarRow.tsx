@@ -45,6 +45,11 @@ export interface BarRowEdit {
   line?: (index: number, line: BarLine) => ReactNode | undefined;
   /** The name read for a bar, in full words (R-13.13). */
   label?: (index: number) => string;
+  /**
+   * How many bars wide the row is drawn: a row with fewer keeps each bar at that width and leaves
+   * the rest empty, as on a printed chart (R-13.10).
+   */
+  slots?: number;
 }
 
 /** "2x" or "1x,3x": the passes of a repeat a cue or a note is for (spec 9.1). */
@@ -377,13 +382,15 @@ export function BarRow({
       ? 1
       : Math.max(bar.pickup / meterOf(bar, row, meter).beats, PICKUP_MIN),
   );
+  // The visual editor keeps a row's width in bars, so a short row isn't stretched (R-13.10).
+  const empty = Math.max(0, (edit?.slots ?? 0) - row.bars.length);
   const bars = {
-    "--chart-bars": Math.max(1, row.bars.length),
+    "--chart-bars": Math.max(1, row.bars.length + empty),
     // On a phone in portrait a row wraps into lines of two bars (R-03.8, chart.css).
     "--chart-bars-phone": Math.min(2, Math.max(1, row.bars.length)),
   } as CSSProperties & Record<string, unknown>;
   if (weights.some((weight) => weight !== 1)) {
-    bars["--chart-bar-columns"] = weights
+    bars["--chart-bar-columns"] = [...weights, ...Array<number>(empty).fill(1)]
       .map((weight) => `minmax(calc(var(--chart-bar-min-width) * ${weight}), ${weight}fr)`)
       .join(" ");
   }

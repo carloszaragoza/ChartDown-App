@@ -63,6 +63,7 @@ import {
   moveSection,
   renameSection,
   repeatSection,
+  ROW_BARS,
   repeatsOf,
   setBar,
   setTimes,
@@ -949,6 +950,7 @@ export function VisualEditor({
                                       size="md"
                                       beats="auto"
                                       edit={{
+                                        slots: ROW_BARS,
                                         ...(selected?.section === s && group.includes(selected.bar)
                                           ? { selected: group.indexOf(selected.bar) }
                                           : {}),

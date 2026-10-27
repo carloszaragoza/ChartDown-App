@@ -117,6 +117,12 @@ describe("T-3003 the visual editor", () => {
     expect(html).toMatch(/class="cd-chart__add"/);
   });
 
+  it("R-13.10 a row is drawn four bars wide, so a short row keeps each bar a quarter", () => {
+    const html = wrap("en", <VisualEditor {...props("## Verse 1\n6 | 6 | 5 | 4\n7\n")} />);
+    const widths = [...html.matchAll(/--chart-bars:(\d+)/g)].map((match) => match[1]);
+    expect(widths).toEqual(["4", "4"]);
+  });
+
   it("R-13.8 a chart that opens with warnings is fixed in Text first", () => {
     const html = wrap("en", <VisualEditor {...props("## Verse\n1 | ??? | 4\n")} />);
     expect(html).toContain("Fix this chart in Text first");
