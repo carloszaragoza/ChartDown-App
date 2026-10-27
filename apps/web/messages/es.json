@@ -425,7 +425,9 @@
       "failed": "No se pudo enviar el reporte. Inténtalo de nuevo.",
       "title": "Reportar esta versión"
     },
-    "more": "Más acciones"
+    "more": "Más acciones",
+    "editVisual": "Editor visual",
+    "editText": "Texto (ChartDown)"
   },
   "newVersion": {
     "title": "Nueva versión",

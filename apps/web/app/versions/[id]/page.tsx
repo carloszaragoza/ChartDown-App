@@ -50,6 +50,11 @@ export default async function VersionPage({
   const { recordings, bands: arranged } = auth.user
     ? await loadRecordings(supabase, version.id, auth.user.id)
     : { recordings: [], bands: [] };
+  // The owner who is an administrator has both editors (R-13.1).
+  const { data: profile } =
+    auth.user && auth.user.id === version.ownerId
+      ? await supabase.from("profiles").select("role").eq("id", auth.user.id).maybeSingle()
+      : { data: null };
   const chart = parse(revision.content);
   // Back from the editor after a save (T-2404): the new revision is said once, here.
   const saved = /^\d+$/.test(search.saved ?? "") ? Number(search.saved) : null;
@@ -57,6 +62,7 @@ export default async function VersionPage({
   return (
     <VersionView
       id={version.id}
+      bothEditors={profile?.role === "admin"}
       songId={version.songId}
       videoStart={version.videoStart}
       videoEnd={version.videoEnd}

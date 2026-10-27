@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { EditIcon, ForkIcon, StandIcon } from "../../_components/ActionIcons";
+import { EditChoice } from "./EditChoice";
 import { forkVersion, saveVideoPoints } from "./actions";
 import type { Display } from "./display";
 import { BackToCatalog } from "./BackToCatalog";
@@ -48,6 +49,8 @@ export interface VersionViewProps {
   signedIn: boolean;
   /** The signed-in person owns this version: they find its history (R-02.8). */
   owner?: boolean;
+  /** An administrator, who has both editors: Edit offers Visual or Text (R-13.1). */
+  bothEditors?: boolean;
   /** For a fork, the version it is based on (R-02.7). */
   basedOn?: BasedOn | null;
   /** A private version, or a public one frozen when its owner made it private (R-02.4). */
@@ -128,6 +131,7 @@ export function versionMenuItems({
  * meter; Stand mode leads the actions, then what this person may do with it.
  */
 export function VersionView({
+  bothEditors = false,
   id,
   title,
   artists,
@@ -261,14 +265,19 @@ export function VersionView({
                       {signedIn && reading && (
                         <Button label={t("myNotes")} href={`/versions/${id}/notes`} size={size} />
                       )}
-                      {owner && status === "active" && (
-                        <Button
-                          label={t("edit")}
-                          href={`/versions/${id}/edit`}
-                          icon={<EditIcon />}
-                          size={size}
-                        />
-                      )}
+                      {owner &&
+                        status === "active" &&
+                        // An administrator chooses the visual editor or the text (R-13.1).
+                        (bothEditors ? (
+                          <EditChoice id={id} icon={<EditIcon />} size={size} />
+                        ) : (
+                          <Button
+                            label={t("edit")}
+                            href={`/versions/${id}/edit`}
+                            icon={<EditIcon />}
+                            size={size}
+                          />
+                        ))}
                       {owner && (
                         <Button label={t("history")} href={`/versions/${id}/history`} size={size} />
                       )}

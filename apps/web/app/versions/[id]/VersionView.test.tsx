@@ -242,3 +242,13 @@ describe("R-05.2 adding a version to a set", () => {
     ).toContain("Add to set");
   });
 });
+
+describe("R-13.1 an administrator has both editors", () => {
+  it("R-13.1 the owner who is an administrator chooses Visual or Text; everyone else edits the text", () => {
+    const admin = render("en", { signedIn: true, owner: true, bothEditors: true });
+    expect(admin).toMatch(/aria-haspopup="menu"[^>]*>|<button[^>]*aria-expanded/);
+    expect(admin).not.toContain(`href="/versions/${props.id}/edit"`);
+    const owner = render("en", { signedIn: true, owner: true });
+    expect(owner).toContain(`href="/versions/${props.id}/edit"`);
+  });
+});

@@ -425,7 +425,9 @@
       "failed": "The report could not be sent. Try again.",
       "title": "Report this version"
     },
-    "more": "More actions"
+    "more": "More actions",
+    "editVisual": "Visual editor",
+    "editText": "Text (ChartDown)"
   },
   "newVersion": {
     "title": "New version",

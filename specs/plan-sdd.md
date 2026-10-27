@@ -440,7 +440,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 ### SPEC-13 · Visual chart editor (paid)
 
-**Goal:** a professional editor where the chart is written on the chart itself, as it will look when read, as in a notation program such as Sibelius: no ChartDown text boxes in sight. It is the editor of the paid plan. The **Chart editor** (R-03.1), where ChartDown is written by hand, stays as it is: it is the basic editor of the free plan and this spec changes nothing in it (owner's decisions, October 26, 2026). Both save the same ChartDown text, which stays the chart's single source. An administrator always has both editors, whatever their plan, to check them (owner's decision, October 26, 2026).
+**Goal:** a professional editor where the chart is written on the chart itself, as it will look when read, as in a notation program such as Sibelius: no ChartDown text boxes in sight. It is the editor of the paid plan. The **Chart editor** (R-03.1), where ChartDown is written by hand, stays as it is: it is the basic editor of the free plan and this spec changes nothing in it (owner's decisions, October 26, 2026). Both save the same ChartDown text, which stays the chart's single source. An administrator always has both editors, whatever their plan, to check them (owner's decision, October 26, 2026). On a version's page, Edit offers them both to an administrator, Visual editor or Text (owner's request, October 27, 2026); everyone else's Edit opens the Chart editor as before.
 
 **Phase:** 2. **Status:** draft, revised by the owner on October 26, 2026; the screens wait for the owner's design handoff, and who has the paid plan waits for a spec of plans and subscriptions (today out of scope, section 10).
 
