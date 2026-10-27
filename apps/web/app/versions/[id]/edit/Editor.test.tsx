@@ -6,8 +6,10 @@ import en from "../../../../messages/en.json";
 import es from "../../../../messages/es.json";
 import { Editor, Warnings } from "./Editor";
 
-vi.mock("./actions", () => ({ saveChart: () => undefined }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: () => undefined }) }));
+vi.mock("./actions", () => ({ saveChart: () => undefined, renameSong: () => undefined }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: () => undefined, refresh: () => undefined }),
+}));
 
 const wrap = (locale: "en" | "es", node: React.ReactNode) =>
   renderToString(
@@ -26,6 +28,40 @@ describe("R-03.1 the chart editor", () => {
     expect(html).toMatch(/role="button"|<button/);
     expect(wrap("es", <Warnings warnings={chart.warnings} />)).toContain("Línea 4:");
     expect(wrap("en", <Warnings warnings={[]} />)).toContain("No warnings");
+  });
+
+  it("R-02.2 T-2848 the song's title and artists are written in place, only when it may be renamed", () => {
+    const editor = (canRename: boolean) =>
+      wrap(
+        "en",
+        <Editor
+          phone={false}
+          versionId="00000000-0000-0000-0000-0000000000f1"
+          title="Reaons"
+          canRename={canRename}
+          visibility="public"
+          revisionId="00000000-0000-0000-0000-0000000000d1"
+          content={"## Verse\n1 | 4\n"}
+          source="Live"
+          revisionNumber={1}
+          savedAt={new Date().toISOString()}
+          details={{
+            artists: ["Mitch Wong", "The Belonging Co"],
+            author: "Ana Ruiz",
+            sourceType: "live",
+            album: null,
+            year: null,
+            youtube: null,
+          }}
+        />,
+      );
+    const mine = editor(true);
+    expect(mine).toMatch(/<h1[^>]*><span[^>]*contenteditable="true"[^>]*>Reaons<\/span><\/h1>/i);
+    expect(mine).toContain('aria-label="Rename the song: Reaons"');
+    expect(mine).toContain('aria-label="Edit the artists: Mitch Wong, The Belonging Co"');
+    const shared = editor(false);
+    expect(shared).not.toMatch(/contenteditable/i);
+    expect(shared).toContain("Mitch Wong, The Belonging Co");
   });
 
   it("R-03.1 the editor shows the text beside a preview of the parsed chart", () => {
