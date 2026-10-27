@@ -66,7 +66,9 @@ describe("T-3003 the visual editor", () => {
     expect(html).toContain("Tempo 72");
     expect(html).toContain("Time 6/8");
     // The owner's design: the details strip, then the Chart line with Visual | Text.
-    expect(html).toContain("Edit details");
+    for (const field of ["Album", "Year", "Feel", "YouTube link"])
+      expect(html).toMatch(new RegExp(`role="textbox" aria-label="${field}"`));
+    expect(html).not.toContain("Edit details");
     expect(html).toMatch(/aria-label="Editor"/);
     expect(html).toMatch(/ChartDown (<!-- -->)?0\.10(<!-- -->)? · one revision on save/);
     const fixed = wrap("en", <VisualEditor {...props("## Verse 1\n1\n")} canRename={false} />);

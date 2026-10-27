@@ -8,8 +8,10 @@ import { Grid, GridSpan } from "@astryxdesign/core/Grid";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Layout, LayoutContent, LayoutFooter, LayoutHeader } from "@astryxdesign/core/Layout";
 import { MoreMenu } from "@astryxdesign/core/MoreMenu";
+import { Popover } from "@astryxdesign/core/Popover";
 import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Selector } from "@astryxdesign/core/Selector";
@@ -43,6 +45,7 @@ import { saveChart, type SaveState, type SourceValues } from "../edit/actions";
 import { saveVideoPoints } from "../actions";
 import { BandAudio, openAddAudio, type BandRecording } from "../BandAudio";
 import { HeaderFields } from "./HeaderFields";
+import { InlineText } from "./InlineText";
 import { ImportDialog } from "./ImportDialog";
 import { SongName } from "../edit/SongName";
 import { historyKey } from "../../../../lib/visual/keys";
@@ -96,7 +99,6 @@ import {
   splitNeed,
   suggestSection,
   tokens,
-  UNITS,
   visualChart,
   type VisualBar,
   type VisualChart,
@@ -152,7 +154,6 @@ const UNSAFE: Record<Line, RegExp> = {
   lyric: /[{}|"]/g,
 };
 
-const METERS = ["4/4", "3/4", "6/8", "12/8", "2/4", "2/2", "5/4", "7/8", "9/8"];
 // Qualities read in words (R-13.13); others are spelled out.
 const QUALITY_WORDS = {
   m: "minor",
@@ -170,10 +171,6 @@ const QUALITY_WORDS = {
   m7b5: "halfDim",
   "5": "power",
 } as const;
-const KEYS = ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"].flatMap((key) => [
-  key,
-  `${key}m`,
-]);
 const DYNAMICS = ["pp", "p", "mp", "mf", "f", "ff", "cresc.", "decresc."] as const;
 const NAVIGATION = ["Segno", "Coda", "To Coda", "D.S. al Coda", "D.C. al Fine", "Fine"] as const;
 const CHORD_MARKS: ChordMark[] = ["push", "shortPush", "stab", "fermata", "hold"];
@@ -241,7 +238,6 @@ export function VisualEditor({
   const chart = history.present;
   const [selected, setSelected] = useState<BarAt | null>(null);
   const [editing, setEditing] = useState<{ at: BarAt; line: Line } | null>(null);
-  const [details, setDetails] = useState(false);
   const [importing, setImporting] = useState(false);
   const [noteFor, setNoteFor] = useState<number | null>(null);
   // A note being changed: its section and its place there (R-13.14).
@@ -715,28 +711,56 @@ export function VisualEditor({
         content={
           <LayoutContent>
             <VStack gap={6}>
-              {/* The song's details in one line, changed in their dialog (owner's design, R-13.2). */}
+              {/* The song's details in one line, each changed right where it is (owner's design,
+                  R-13.2): saved with the chart. */}
               <Card padding={3}>
-                <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
-                  <HStack gap={3} vAlign="center" wrap="wrap">
-                    <Text weight="semibold">{t("details")}</Text>
-                    <Text color="secondary">
-                      {[
-                        author && t("arranger", { name: author }),
-                        sourceType && sources(sourceType as "live"),
-                        album.trim(),
-                        year.trim(),
-                        videoId(youtube) && "YouTube",
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </Text>
-                  </HStack>
-                  <Button
-                    label={t("editDetails")}
-                    icon={icon("details")}
-                    onClick={() => setDetails(true)}
-                  />
+                <HStack gap={3} vAlign="center" wrap="wrap">
+                  <Text weight="semibold">{t("details")}</Text>
+                  {author && <Text color="secondary">{t("arranger", { name: author })}</Text>}
+                  <Popover
+                    label={t("field.source")}
+                    content={
+                      <RadioList
+                        label={t("field.source")}
+                        value={sourceType}
+                        onChange={setSourceType}
+                      >
+                        {SOURCE_TYPES.map((type) => (
+                          <RadioListItem key={type} value={type} label={sources(type)} />
+                        ))}
+                      </RadioList>
+                    }
+                  >
+                    <Button
+                      label={sourceType ? sources(sourceType as "live") : t("field.source")}
+                      size="sm"
+                      variant="ghost"
+                      endContent={<Icon icon={ChevronDownIcon} />}
+                    />
+                  </Popover>
+                  <Text color="secondary">
+                    <InlineText label={t("field.album")} value={album} onChange={setAlbum} />
+                  </Text>
+                  <Text color="secondary">
+                    <InlineText label={t("field.year")} value={year} onChange={setYear} />
+                  </Text>
+                  <Text color="secondary">
+                    <InlineText
+                      label={t("field.feel")}
+                      value={chart.meta.feel ?? ""}
+                      onChange={(feel) =>
+                        change((c) => {
+                          const meta = { ...c.meta };
+                          if (feel) meta.feel = feel;
+                          else delete meta.feel;
+                          return { ...c, meta };
+                        })
+                      }
+                    />
+                  </Text>
+                  <Text color="secondary">
+                    <InlineText label={t("field.youtube")} value={youtube} onChange={setYoutube} />
+                  </Text>
                 </HStack>
               </Card>
               {/* The chart: which editor, undo and redo, then its key, tempo and meter. */}
@@ -792,9 +816,7 @@ export function VisualEditor({
               <HeaderFields
                 meta={chart.meta}
                 onMeta={(next) => change((c) => ({ ...c, meta: next(c.meta) }))}
-              >
-                {chart.meta.feel && <Token label={chart.meta.feel} size="sm" />}
-              </HeaderFields>
+              ></HeaderFields>
               {(recordings.length > 0 || bands.length > 0) && (
                 <BandAudio
                   versionId={versionId}
@@ -1394,94 +1416,6 @@ export function VisualEditor({
             else if (index !== null) change((c) => addNote(c, index, note));
           }}
         />
-        <Dialog isOpen={details} onOpenChange={setDetails} padding={4} width={560} purpose="form">
-          {/* The song's details: the header's fields and the version's source (R-13.2, R-13.11). */}
-          <VStack gap={4}>
-            <Heading level={2}>{t("details")}</Heading>
-            <HStack gap={3} wrap="wrap">
-              <Selector
-                label={t("field.key")}
-                options={KEYS}
-                value={chart.meta.key ?? ""}
-                onChange={(key) => change((c) => ({ ...c, meta: { ...c.meta, key } }))}
-              />
-              <Selector
-                label={t("field.meter")}
-                options={METERS}
-                value={chart.meta.meter ?? "4/4"}
-                onChange={(meter) => change((c) => ({ ...c, meta: { ...c.meta, meter } }))}
-              />
-            </HStack>
-            <HStack gap={3} wrap="wrap">
-              <TextInput
-                label={t("field.tempo")}
-                value={(chart.meta.tempo ?? "").split(" ")[0] ?? ""}
-                onChange={(value) => {
-                  const unit = (chart.meta.tempo ?? "").split(" ")[1];
-                  const bpm = value.replace(/[^\d.]/g, "");
-                  change((c) => {
-                    const meta = { ...c.meta };
-                    if (bpm) meta.tempo = unit ? `${bpm} ${unit}` : bpm;
-                    else delete meta.tempo;
-                    return { ...c, meta };
-                  });
-                }}
-              />
-              <Selector
-                label={t("field.unit")}
-                options={UNITS.map(([unit, name]) => ({
-                  value: unit || "none",
-                  label: t(`unit.${name}`),
-                }))}
-                value={(chart.meta.tempo ?? "").split(" ")[1] ?? "none"}
-                onChange={(unit) => {
-                  const bpm = (chart.meta.tempo ?? "").split(" ")[0];
-                  if (!bpm) return;
-                  change((c) => ({
-                    ...c,
-                    meta: { ...c.meta, tempo: unit === "none" ? bpm : `${bpm} ${unit}` },
-                  }));
-                }}
-              />
-              <TextInput
-                label={t("field.feel")}
-                value={chart.meta.feel ?? ""}
-                isOptional
-                onChange={(feel) =>
-                  change((c) => {
-                    const meta = { ...c.meta };
-                    if (feel) meta.feel = feel;
-                    else delete meta.feel;
-                    return { ...c, meta };
-                  })
-                }
-              />
-            </HStack>
-            <TextInput
-              label={t("field.youtube")}
-              value={youtube}
-              onChange={setYoutube}
-              isOptional
-            />
-            <HStack gap={3} wrap="wrap">
-              <TextInput label={t("field.album")} value={album} onChange={setAlbum} isOptional />
-              <TextInput label={t("field.year")} value={year} onChange={setYear} isOptional />
-            </HStack>
-            <RadioList
-              label={t("field.source")}
-              value={sourceType}
-              onChange={setSourceType}
-              orientation="horizontal"
-            >
-              {SOURCE_TYPES.map((type) => (
-                <RadioListItem key={type} value={type} label={sources(type)} />
-              ))}
-            </RadioList>
-            <HStack hAlign="end">
-              <Button label={t("close")} variant="primary" onClick={() => setDetails(false)} />
-            </HStack>
-          </VStack>
-        </Dialog>
       </Layout>
     </div>
   );
