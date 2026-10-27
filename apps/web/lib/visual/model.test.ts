@@ -6,6 +6,7 @@ import {
   appendBar,
   addNote,
   addSection,
+  deleteRow,
   deleteSection,
   hasIndication,
   hasMark,
@@ -255,6 +256,17 @@ describe("T-3002 the visual editor's chart", () => {
     chart = addRow(chart, 0);
     chart = setBar(chart, { section: 0, bar: 5 }, { chords: "4" });
     expect(canonicalText(chart, "").trimEnd().split("\n").slice(-2)).toEqual(["6m", "4"]);
+  });
+
+  it("R-13.10 Delete this row takes the whole row of the bar, and the rows after it stay", () => {
+    let chart = visualChart("## Verse\n6 | 6 | 5 | 4\n7\n7 | 7 | 7 | 7\n");
+    chart = deleteRow(chart, { section: 0, bar: 4 });
+    expect(canonicalText(chart, "").trimEnd().split("\n").slice(-2)).toEqual([
+      "6 | 6 | 5 | 4",
+      "7 | 7 | 7 | 7",
+    ]);
+    chart = deleteRow(deleteRow(chart, { section: 0, bar: 0 }), { section: 0, bar: 0 });
+    expect(chart.sections[0]?.bars).toHaveLength(1);
   });
 
   it("R-13.11 every change makes a new chart, so the one before stays for undo", () => {

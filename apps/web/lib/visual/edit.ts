@@ -94,6 +94,15 @@ export const addRow = (chart: VisualChart, section: number): VisualChart =>
     ],
   }));
 
+/** Deletes the whole row a bar is in (Delete this row; R-13.10). */
+export const deleteRow = (chart: VisualChart, at: BarAt): VisualChart =>
+  withSection(chart, at.section, (section) => {
+    const row = rowGroups(section).find((group) => group.includes(at.bar)) ?? [];
+    const bars = section.bars.filter((_, index) => !row.includes(index));
+    // A section keeps one empty bar to write in.
+    return { ...section, bars: bars.length > 0 ? bars : [emptyBar()] };
+  });
+
 /** A new row starts with the bar after this one (R-13.10). */
 export const breakRowAfter = (chart: VisualChart, at: BarAt): VisualChart => {
   const next = chart.sections[at.section]?.bars[at.bar + 1];

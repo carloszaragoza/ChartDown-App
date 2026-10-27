@@ -1646,6 +1646,7 @@
     "insertAfter": "Insert a bar after",
     "newRow": "New row after this bar",
     "deleteBar": "Delete bar",
+    "deleteRow": "Delete this row",
     "notice": {
       "title": "Visual writes the chart in ChartDown's standard layout",
       "body": "Your own spacing and line breaks in the text won't be kept. The chart itself stays the same.",

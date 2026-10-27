@@ -1646,6 +1646,7 @@
     "insertAfter": "Insertar un compás después",
     "newRow": "Renglón nuevo después de este compás",
     "deleteBar": "Borrar el compás",
+    "deleteRow": "Borrar este renglón",
     "notice": {
       "title": "Visual escribe la carta con la forma estándar de ChartDown",
       "body": "Tus espacios y saltos de línea en el texto no se conservan. La carta en sí no cambia.",

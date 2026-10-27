@@ -51,6 +51,7 @@ export const VISUAL_ICONS = {
   insertAfter: ArrowLongRightIcon,
   newRow: ArrowTurnDownLeftIcon,
   deleteBar: TrashIcon,
+  deleteRow: TrashIcon,
   // The chord's marks
   push: notationIcon("push"),
   shortPush: notationIcon("shortPush"),

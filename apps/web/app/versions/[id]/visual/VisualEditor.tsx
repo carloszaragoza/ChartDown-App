@@ -48,6 +48,7 @@ import {
   appendBar,
   breakRowAfter,
   deleteBar,
+  deleteRow,
   deleteNote,
   deleteSection,
   duplicateSection,
@@ -1116,6 +1117,15 @@ export function VisualEditor({
                       variant: "destructive" as const,
                       onClick: () => {
                         change((c) => deleteBar(c, selected));
+                        setSelected(null);
+                      },
+                    },
+                    {
+                      label: t("deleteRow"),
+                      icon: icon("deleteRow"),
+                      variant: "destructive" as const,
+                      onClick: () => {
+                        change((c) => deleteRow(c, selected));
                         setSelected(null);
                       },
                     },
