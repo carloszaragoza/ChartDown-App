@@ -1574,5 +1574,13 @@
     "backToLive": "Back to live",
     "banner": "Live now: {set}",
     "bannerLeader": "{name} is leading."
+  },
+  "standEntry": {
+    "title": "Stand mode",
+    "noUpcoming": "No upcoming sets",
+    "why": "Stand mode opens your next set. You have none from today on.",
+    "newMember": "When your music director adds you to a set, it shows up here.",
+    "createSet": "Create a set",
+    "allSets": "See all sets"
   }
 }

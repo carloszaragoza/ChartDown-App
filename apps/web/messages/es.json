@@ -1574,5 +1574,13 @@
     "backToLive": "Volver a en vivo",
     "banner": "En vivo ahora: {set}",
     "bannerLeader": "{name} está dirigiendo."
+  },
+  "standEntry": {
+    "title": "Modo atril",
+    "noUpcoming": "No hay sets próximos",
+    "why": "El modo atril abre tu próximo set. No tienes ninguno de hoy en adelante.",
+    "newMember": "Cuando tu director musical te agregue a un set, aparecerá aquí.",
+    "createSet": "Crear un set",
+    "allSets": "Ver todos los sets"
   }
 }

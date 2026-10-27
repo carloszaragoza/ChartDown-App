@@ -61,8 +61,16 @@ test("T-1301 a signed-in person gets every section; only admins get Administrati
   for (const link of ["Overview", "Instruments", "Invite codes", "Reports"])
     await expect(nav.getByRole("link", { name: link, exact: true }), link).toBeVisible();
 
-  // Stand mode with no sets yet opens the sets list.
+  // Stand mode with no upcoming set stays on its page and says so (R-05.7, T-2847); a person in no
+  // band yet reads Home's line and only See all sets.
   await nav.getByRole("link", { name: "Stand mode", exact: true }).click();
+  await expect(page).toHaveURL(/\/stand$/);
+  await expect(page.getByText("No upcoming sets")).toBeVisible();
+  await expect(
+    page.getByText("When your music director adds you to a set, it shows up here."),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Create a set" })).toHaveCount(0);
+  await page.getByRole("link", { name: "See all sets" }).click();
   await expect(page).toHaveURL(/\/sets$/);
 });
 
