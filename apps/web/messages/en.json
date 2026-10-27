@@ -603,7 +603,17 @@
     "numbers": "Numbers",
     "privateForGood": "This version is private; a private version doesn't go back to public.",
     "textPanel": "ChartDown text",
-    "goToLine": "Go to line {line}"
+    "goToLine": "Go to line {line}",
+    "rename": {
+      "title": "Rename the song: {title}",
+      "artists": "Edit the artists: {artists}",
+      "noArtists": "Add the artists",
+      "errors": {
+        "invalid": "A title needs 1 to 200 characters, and each artist 200 at most.",
+        "refused": "Someone else also has a version of this song, so only an administrator can rename it.",
+        "error": "The change couldn't be saved. Try again."
+      }
+    }
   },
   "viewer": {
     "label": "Display",

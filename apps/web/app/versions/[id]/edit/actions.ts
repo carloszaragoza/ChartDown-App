@@ -112,3 +112,28 @@ export async function saveChart(previous: SaveState, form: FormData): Promise<Sa
   }
   return next;
 }
+
+/**
+ * Renames the version's song, its title and artists, from the editor's header (R-02.2, T-2848).
+ * The database allows it to an administrator, or to the version's owner while every version of
+ * the song is theirs; anyone else is refused and the names stay.
+ */
+export async function renameSong(
+  versionId: string,
+  title: string,
+  artists: string[],
+): Promise<"saved" | "invalid" | "refused" | "error"> {
+  if (!authEnabled() || !UUID.test(versionId)) return "error";
+  const name = title.trim();
+  const names = artists.map((artist) => artist.trim()).filter(Boolean);
+  if (name.length < 1 || name.length > 200 || names.some((artist) => artist.length > 200))
+    return "invalid";
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("rename_song", {
+    version_id: versionId,
+    new_title: name,
+    new_artists: names,
+  });
+  if (!error) return "saved";
+  return error.code === "42501" ? "refused" : "error";
+}

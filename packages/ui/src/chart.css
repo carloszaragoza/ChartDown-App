@@ -509,6 +509,28 @@
      text fits whole beside the chart (T-2837). */
   block-size: max(calc(100dvh - var(--spacing-12) * 2.75 - var(--cd-dock-room, 0px)), 18rem);
 }
+/* A name written in place in an editor's header, as the song's title and artists (R-02.2): it
+   reads as the text it is, with a dotted underline that says it can be changed. */
+.cd-inline-edit {
+  cursor: text;
+  outline: none;
+  border-radius: var(--radius-inner);
+  text-decoration: underline dotted var(--color-border-emphasized);
+  text-underline-offset: 0.2em;
+}
+.cd-inline-edit:hover,
+.cd-inline-edit:focus {
+  text-decoration-color: var(--color-border-blue);
+}
+.cd-inline-edit:focus-visible {
+  outline: calc(var(--border-width) * 2) solid var(--color-border-blue);
+  outline-offset: calc(var(--border-width) * 2);
+}
+.cd-inline-edit:empty::before {
+  content: attr(data-placeholder);
+  color: var(--color-text-disabled);
+}
+
 /* The chart's text beside its preview: pinned in view while the page follows the chart as it
    plays, so it can be written at any moment (T-2837). */
 .cd-write-text {

@@ -603,7 +603,17 @@
     "numbers": "Números",
     "privateForGood": "Esta versión es privada; una versión privada no vuelve a ser pública.",
     "textPanel": "Texto en ChartDown",
-    "goToLine": "Ir a la línea {line}"
+    "goToLine": "Ir a la línea {line}",
+    "rename": {
+      "title": "Cambiar el nombre de la canción: {title}",
+      "artists": "Editar los artistas: {artists}",
+      "noArtists": "Agrega los artistas",
+      "errors": {
+        "invalid": "El título necesita de 1 a 200 caracteres, y cada artista 200 como máximo.",
+        "refused": "Alguien más tiene una versión de esta canción, así que solo un administrador puede cambiarle el nombre.",
+        "error": "No se pudo guardar el cambio. Intenta de nuevo."
+      }
+    }
   },
   "viewer": {
     "label": "Visualización",
