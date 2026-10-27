@@ -1122,6 +1122,20 @@
   min-block-size: 1.2em;
   border-radius: var(--radius-inner);
 }
+/* The indications and the lyric, above and below the chords, are the same slot in the editor:
+   one height, one inset, and both shown while the bar is written, so the bar reads symmetric
+   (owner's review, October 27, 2026). */
+.cd-chart--editable .cd-chart__tags,
+.cd-chart--editable .cd-chart__lyric {
+  display: flex;
+  align-items: center;
+  min-block-size: calc(var(--font-size-sm) * 2);
+  padding-inline: var(--spacing-2);
+}
+.cd-chart--editable .cd-chart__bar--editing .cd-chart__tags,
+.cd-chart--editable .cd-chart__bar--editing .cd-chart__lyric {
+  background: color-mix(in srgb, var(--color-background-blue) 50%, transparent);
+}
 .cd-chart--editable .cd-chart__bar:hover [data-line]:hover {
   background: color-mix(in srgb, var(--color-background-blue) 50%, transparent);
 }
@@ -1171,6 +1185,13 @@
 .cd-chart--editable .cd-chart__spread,
 .cd-chart--editable .cd-chart__grid {
   min-block-size: calc(var(--chart-chord-size) * 1.4);
+}
+/* A repeated section's bars in the visual editor: drawn as the original, never written in. */
+.cd-visual-repeat .cd-chart__bar {
+  cursor: default;
+}
+.cd-visual-repeat [data-line]:hover {
+  background: none;
 }
 /* A drag over a bar or a chord shows where a tool lands (R-13.7). */
 .cd-chart__bar[data-drop="true"] {

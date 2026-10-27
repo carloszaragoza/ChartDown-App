@@ -15,6 +15,7 @@ import {
   repeatSection,
   repeatsOf,
   setBar,
+  setNote,
   step,
   toggleIndication,
   toggleMark,
@@ -284,6 +285,12 @@ describe("T-3002 the visual editor's chart", () => {
     expect(canonicalText(chart, "")).toContain(
       "## Verse 1\n> Soft\n> MD: Watch me\n> MD 2x keys: Pad only\n1\n",
     );
+  });
+
+  it("R-13.14 a note is changed in place, the others kept in their order", () => {
+    let chart = visualChart("## Verse\n> MD: Soft\n> MD keys: Pad only\n1 | 4\n");
+    chart = setNote(chart, 0, 1, { md: true, roles: ["bass"], passes: [2], text: "Walk up" });
+    expect(canonicalText(chart, "")).toContain("> MD: Soft\n> MD 2x bass: Walk up");
   });
 
   it("R-13.3 empty bars keep their place on screen and are left out of what is saved", () => {

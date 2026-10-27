@@ -1698,7 +1698,9 @@
       "passes": "Pasadas",
       "passesHint": "Solo algunas vueltas, como 2 o 1, 3. Vacío: todas.",
       "text": "Indicación",
-      "add": "Agregar"
+      "add": "Agregar",
+      "editTitle": "Cambiar una nota de {section}",
+      "save": "Guardar la nota"
     },
     "line": {
       "tags": "Indicaciones",
@@ -1804,6 +1806,7 @@
       "sheetImporter": "Importar una hoja de acordes",
       "cancel": "Cancelar",
       "import": "Importar"
-    }
+    },
+    "editNote": "Editar la indicación «{text}»"
   }
 }

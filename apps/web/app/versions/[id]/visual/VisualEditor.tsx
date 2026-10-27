@@ -64,6 +64,7 @@ import {
   deleteBar,
   deleteRow,
   deleteNote,
+  setNote,
   deleteSection,
   duplicateSection,
   insertBar,
@@ -243,6 +244,8 @@ export function VisualEditor({
   const [details, setDetails] = useState(false);
   const [importing, setImporting] = useState(false);
   const [noteFor, setNoteFor] = useState<number | null>(null);
+  // A note being changed: its section and its place there (R-13.14).
+  const [noteEdit, setNoteEdit] = useState<{ section: number; note: number } | null>(null);
   const [renaming, setRenaming] = useState<number | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [youtube, setYoutube] = useState(source.youtube);
@@ -952,31 +955,62 @@ export function VisualEditor({
                     );
                     return (
                       <section key={s} id={`cd-visual-${s}`} aria-label={section.name}>
-                        <Card
-                          variant={section.use ? "muted" : "transparent"}
-                          padding={section.use ? 2 : 0}
-                        >
+                        <Card variant="transparent" padding={0}>
                           <VStack gap={3}>
                             {head}
                             {section.notes.length > 0 && (
-                              <HStack gap={2} vAlign="start" wrap="wrap">
-                                <MDNotes
-                                  notes={parsed?.notes ?? []}
-                                  instrumentName={labels.bar.instrument}
-                                />
-                                {section.notes.map((note, n) => (
-                                  <Button
-                                    key={n}
-                                    label={t("deleteNote", { text: note.text })}
-                                    isIconOnly
-                                    size="sm"
-                                    variant="ghost"
-                                    icon={icon("deleteNote")}
-                                    onClick={() => change((c) => deleteNote(c, s, n))}
-                                  />
-                                ))}
-                              </HStack>
+                              // Each note with its own Edit and Delete, beside it (R-13.14).
+                              <VStack gap={1}>
+                                {section.notes.map((note, n) => {
+                                  const drawnNote = parsed?.notes[n];
+                                  return (
+                                    <HStack key={n} gap={1} vAlign="center" wrap="wrap">
+                                      {drawnNote && (
+                                        <MDNotes
+                                          notes={[drawnNote]}
+                                          instrumentName={labels.bar.instrument}
+                                        />
+                                      )}
+                                      <Button
+                                        label={t("editNote", { text: note.text })}
+                                        isIconOnly
+                                        size="sm"
+                                        variant="ghost"
+                                        icon={icon("rename")}
+                                        onClick={() => setNoteEdit({ section: s, note: n })}
+                                      />
+                                      <Button
+                                        label={t("deleteNote", { text: note.text })}
+                                        isIconOnly
+                                        size="sm"
+                                        variant="ghost"
+                                        icon={icon("deleteNote")}
+                                        onClick={() => change((c) => deleteNote(c, s, n))}
+                                      />
+                                    </HStack>
+                                  );
+                                })}
+                              </VStack>
                             )}
+                            {section.use &&
+                              // A repeat shows the bars it plays, aligned with the others and read
+                              // only: they are changed in the original (R-13.9).
+                              parsed?.rows.map((row, r) => (
+                                <div key={r} className="cd-visual-repeat">
+                                  <FollowedBarRow
+                                    placed={placed}
+                                    section={s}
+                                    rowIndex={r}
+                                    isFollowing={editing === null}
+                                    row={row}
+                                    formatter={formatter}
+                                    labels={labels.bar}
+                                    size="md"
+                                    beats="auto"
+                                    edit={{ slots: ROW_BARS }}
+                                  />
+                                </div>
+                              ))}
                             {!section.use &&
                               rowGroups(section).map((group, r) => {
                                 const row = parsed?.rows[r];
@@ -1335,19 +1369,29 @@ export function VisualEditor({
           </VStack>
         </Dialog>
         <NoteDialog
-          open={noteFor !== null}
-          section={chart.sections[noteFor ?? 0]?.name ?? ""}
+          key={noteEdit ? `${noteEdit.section}:${noteEdit.note}` : `new:${noteFor}`}
+          open={noteFor !== null || noteEdit !== null}
+          section={chart.sections[noteFor ?? noteEdit?.section ?? 0]?.name ?? ""}
+          initial={
+            noteEdit ? (chart.sections[noteEdit.section]?.notes[noteEdit.note] ?? null) : null
+          }
           instruments={STANDARD_INSTRUMENTS.map((instrument) => ({
             value: instrument.id,
             label: instruments.has(instrument.id as "keys")
               ? instruments(instrument.id as "keys")
               : instrument.id,
           }))}
-          onClose={() => setNoteFor(null)}
+          onClose={() => {
+            setNoteFor(null);
+            setNoteEdit(null);
+          }}
           onAdd={(note) => {
             const index = noteFor;
+            const editing = noteEdit;
             setNoteFor(null);
-            if (index !== null) change((c) => addNote(c, index, note));
+            setNoteEdit(null);
+            if (editing) change((c) => setNote(c, editing.section, editing.note, note));
+            else if (index !== null) change((c) => addNote(c, index, note));
           }}
         />
         <Dialog isOpen={details} onOpenChange={setDetails} padding={4} width={560} purpose="form">
@@ -1447,21 +1491,25 @@ export function VisualEditor({
 function NoteDialog({
   open,
   section,
+  initial,
   instruments,
   onClose,
   onAdd,
 }: {
   open: boolean;
   section: string;
+  /** The note being changed, or null for a new one. */
+  initial: VisualNote | null;
   instruments: { value: string; label: string }[];
   onClose: () => void;
   onAdd: (note: VisualNote) => void;
 }) {
   const t = useTranslations("visual");
-  const [kind, setKind] = useState<"everyone" | "md">("md");
-  const [role, setRole] = useState<string>(EVERYONE);
-  const [passes, setPasses] = useState("");
-  const [text, setText] = useState("");
+  // A note being changed opens with what it says; the dialog is new for each note (its key).
+  const [kind, setKind] = useState<"everyone" | "md">(initial && !initial.md ? "everyone" : "md");
+  const [role, setRole] = useState<string>(initial?.roles[0] ?? EVERYONE);
+  const [passes, setPasses] = useState(initial?.passes.join(", ") ?? "");
+  const [text, setText] = useState(initial?.text ?? "");
   const reset = () => {
     setKind("md");
     setRole(EVERYONE);
@@ -1476,7 +1524,9 @@ function NoteDialog({
       purpose="form"
     >
       <VStack gap={4}>
-        <Heading level={2}>{t("note.title", { section })}</Heading>
+        <Heading level={2}>
+          {initial ? t("note.editTitle", { section }) : t("note.title", { section })}
+        </Heading>
         <RadioList
           label={t("note.kind")}
           value={kind}
@@ -1514,7 +1564,7 @@ function NoteDialog({
             }}
           />
           <Button
-            label={t("note.add")}
+            label={initial ? t("note.save") : t("note.add")}
             variant="primary"
             isDisabled={!text.trim()}
             onClick={() => {

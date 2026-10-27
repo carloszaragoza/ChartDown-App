@@ -181,6 +181,13 @@ export const setTimes = (chart: VisualChart, index: number, times: number | null
 export const addNote = (chart: VisualChart, index: number, note: VisualNote) =>
   withSection(chart, index, (section) => ({ ...section, notes: [...section.notes, note] }));
 
+/** A note of a section changed in place (R-13.14). */
+export const setNote = (chart: VisualChart, index: number, at: number, note: VisualNote) =>
+  withSection(chart, index, (section) => ({
+    ...section,
+    notes: section.notes.map((current, n) => (n === at ? note : current)),
+  }));
+
 export const deleteNote = (chart: VisualChart, index: number, note: number) =>
   withSection(chart, index, (section) => ({
     ...section,

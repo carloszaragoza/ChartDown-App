@@ -118,6 +118,8 @@ describe("T-3003 the visual editor", () => {
     expect(html).toContain("4 bars");
     expect(html).toContain("Plays ×2");
     expect(html).toContain("Repeats the Chorus written above");
+    // The repeat shows the bars it plays, read only, aligned with the others.
+    expect(html).toMatch(/class="cd-visual-repeat"/);
     expect(html).toMatch(/class="cd-chart__add"/);
   });
 
@@ -125,6 +127,18 @@ describe("T-3003 the visual editor", () => {
     const html = wrap("en", <VisualEditor {...props("## Verse 1\n6 | 6 | 5 | 4\n7\n")} />);
     const widths = [...html.matchAll(/--chart-bars:(\d+)/g)].map((match) => match[1]);
     expect(widths).toEqual(["4", "4"]);
+  });
+
+  it("R-13.14 each note has its own Edit and Delete beside it", () => {
+    const html = wrap(
+      "en",
+      <VisualEditor {...props("## Verse\n> MD: Soft\n> MD bass: Walk up\n1 | 4 | 5 | 1\n")} />,
+    );
+    const at = (label: string) => html.indexOf(`aria-label="${label}"`);
+    // Soft's Edit and Delete come before the next note's, each beside its own note.
+    expect(at("Edit the indication “Soft”")).toBeGreaterThan(0);
+    expect(at("Delete the indication “Soft”")).toBeGreaterThan(at("Edit the indication “Soft”"));
+    expect(at("Edit the indication “Walk up”")).toBeGreaterThan(at("Delete the indication “Soft”"));
   });
 
   it("R-13.8 a chart that opens with warnings is fixed in Text first", () => {

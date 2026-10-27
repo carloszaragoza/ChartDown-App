@@ -1698,7 +1698,9 @@
       "passes": "Passes",
       "passesHint": "Only some times through, such as 2 or 1, 3. Empty: every time.",
       "text": "Indication",
-      "add": "Add"
+      "add": "Add",
+      "editTitle": "Change a note in {section}",
+      "save": "Save the note"
     },
     "line": {
       "tags": "Indications",
@@ -1804,6 +1806,7 @@
       "sheetImporter": "Import a chord sheet",
       "cancel": "Cancel",
       "import": "Import"
-    }
+    },
+    "editNote": "Edit the indication “{text}”"
   }
 }
