@@ -65,6 +65,10 @@ describe("T-3003 the visual editor", () => {
     expect(html).toContain("Key G");
     expect(html).toContain("Tempo 72");
     expect(html).toContain("Time 6/8");
+    // The owner's design: the details strip, then the Chart line with Visual | Text.
+    expect(html).toContain("Edit details");
+    expect(html).toMatch(/aria-label="Editor"/);
+    expect(html).toMatch(/ChartDown (<!-- -->)?0\.10(<!-- -->)? · one revision on save/);
     const fixed = wrap("en", <VisualEditor {...props("## Verse 1\n1\n")} canRename={false} />);
     expect(fixed).not.toContain("Rename the song");
     expect(fixed).toContain("Time 4/4");

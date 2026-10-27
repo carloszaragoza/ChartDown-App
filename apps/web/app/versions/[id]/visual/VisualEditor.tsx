@@ -11,13 +11,21 @@ import { Icon } from "@astryxdesign/core/Icon";
 import { Layout, LayoutContent, LayoutFooter, LayoutHeader } from "@astryxdesign/core/Layout";
 import { MoreMenu } from "@astryxdesign/core/MoreMenu";
 import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
+import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { ToggleButton } from "@astryxdesign/core/ToggleButton";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
-import { chordFormatter, EVERYONE, parse, STANDARD_INSTRUMENTS, type Warning } from "chartdown";
+import {
+  chordFormatter,
+  EVERYONE,
+  parse,
+  STANDARD_INSTRUMENTS,
+  SUPPORTED_VERSION,
+  type Warning,
+} from "chartdown";
 import { MDNotes, type BarLine } from "@chartdown/ui";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -35,6 +43,7 @@ import { saveChart, type SaveState, type SourceValues } from "../edit/actions";
 import { saveVideoPoints } from "../actions";
 import { BandAudio, openAddAudio, type BandRecording } from "../BandAudio";
 import { HeaderFields } from "./HeaderFields";
+import { SongName } from "../edit/SongName";
 import { historyKey } from "../../../../lib/visual/keys";
 import { VideoLink } from "../../../_components/VideoDock";
 import { useChartLabels } from "../../../_components/chartLabels";
@@ -632,26 +641,20 @@ export function VisualEditor({
         header={
           <LayoutHeader hasDivider>
             <HStack gap={4} vAlign="start" hAlign="between" wrap="wrap">
-              {/* The chart's header, as a printed chart's first lines (R-13.2). */}
+              {/* The song's names, written in place as in the Chart editor (R-13.2, R-02.2). */}
               <VStack gap={1}>
                 <Text type="supporting">{t("overline")}</Text>
-                <HeaderFields
+                <SongName
                   versionId={versionId}
                   title={songTitle}
-                  canRename={canRename}
-                  meta={chart.meta}
-                  onMeta={(next) => change((c) => ({ ...c, meta: next(c.meta) }))}
                   artists={songArtists}
+                  canRename={canRename}
                   onRenamed={(name, names) => {
                     setSongTitle(name);
                     setSongArtists(names);
                     router.refresh();
                   }}
-                  subtitle={
-                    author && <Text color="secondary">{t("arranger", { name: author })}</Text>
-                  }
                 />
-                {chart.meta.feel && <Token label={chart.meta.feel} size="sm" />}
               </VStack>
               <form action={action}>
                 <input type="hidden" name="versionId" value={versionId} />
@@ -661,27 +664,6 @@ export function VisualEditor({
                 <input type="hidden" name="year" value={year} />
                 <input type="hidden" name="youtube" value={youtube} />
                 <HStack gap={2} vAlign="center" wrap="wrap">
-                  <Button
-                    label={t("undo")}
-                    isIconOnly
-                    tooltip={t("undoKeys")}
-                    icon={icon("undo")}
-                    isDisabled={history.past.length === 0}
-                    onClick={undo}
-                  />
-                  <Button
-                    label={t("redo")}
-                    isIconOnly
-                    tooltip={t("redoKeys")}
-                    icon={icon("redo")}
-                    isDisabled={history.future.length === 0}
-                    onClick={redo}
-                  />
-                  <Button
-                    label={t("details")}
-                    icon={icon("details")}
-                    onClick={() => setDetails(true)}
-                  />
                   {videoId(youtube) && (
                     <VideoLink
                       url={youtube}
@@ -694,12 +676,6 @@ export function VisualEditor({
                   {bands.length > 0 && (
                     <Button label={t("addAudio")} icon={icon("addAudio")} onClick={openAddAudio} />
                   )}
-                  <Button
-                    label={t("openText")}
-                    icon={icon("openText")}
-                    variant="ghost"
-                    href={`/versions/${versionId}/edit`}
-                  />
                   <Button
                     label={t("done")}
                     icon={icon("done")}
@@ -733,7 +709,72 @@ export function VisualEditor({
         }
         content={
           <LayoutContent>
-            <VStack gap={8}>
+            <VStack gap={6}>
+              {/* The song's details in one line, changed in their dialog (owner's design, R-13.2). */}
+              <Card padding={3}>
+                <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
+                  <HStack gap={3} vAlign="center" wrap="wrap">
+                    <Text weight="semibold">{t("details")}</Text>
+                    <Text color="secondary">
+                      {[
+                        author && t("arranger", { name: author }),
+                        sourceType && sources(sourceType as "live"),
+                        album.trim(),
+                        year.trim(),
+                        videoId(youtube) && "YouTube",
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </Text>
+                  </HStack>
+                  <Button
+                    label={t("editDetails")}
+                    icon={icon("details")}
+                    onClick={() => setDetails(true)}
+                  />
+                </HStack>
+              </Card>
+              {/* The chart: which editor, undo and redo, then its key, tempo and meter. */}
+              <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
+                <HStack gap={3} vAlign="center" wrap="wrap">
+                  <Heading level={2}>{t("chart")}</Heading>
+                  <SegmentedControl
+                    label={t("editorChoice")}
+                    value="visual"
+                    isDisabled={dirty}
+                    disabledMessage={t("saveFirst")}
+                    onChange={(value) => {
+                      if (value === "text") router.push(`/versions/${versionId}/edit`);
+                    }}
+                  >
+                    <SegmentedControlItem value="visual" label={t("visualChoice")} />
+                    <SegmentedControlItem value="text" label={t("textChoice")} />
+                  </SegmentedControl>
+                  <Button
+                    label={t("undo")}
+                    isIconOnly
+                    tooltip={t("undoKeys")}
+                    icon={icon("undo")}
+                    isDisabled={history.past.length === 0}
+                    onClick={undo}
+                  />
+                  <Button
+                    label={t("redo")}
+                    isIconOnly
+                    tooltip={t("redoKeys")}
+                    icon={icon("redo")}
+                    isDisabled={history.future.length === 0}
+                    onClick={redo}
+                  />
+                </HStack>
+                <Text type="supporting">{t("format", { version: SUPPORTED_VERSION })}</Text>
+              </HStack>
+              <HeaderFields
+                meta={chart.meta}
+                onMeta={(next) => change((c) => ({ ...c, meta: next(c.meta) }))}
+              >
+                {chart.meta.feel && <Token label={chart.meta.feel} size="sm" />}
+              </HeaderFields>
               {(recordings.length > 0 || bands.length > 0) && (
                 <BandAudio
                   versionId={versionId}

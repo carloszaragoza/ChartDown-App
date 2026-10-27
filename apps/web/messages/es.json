@@ -1590,7 +1590,6 @@
     "redoKeys": "Rehacer · ⌘⇧Z o Ctrl+Shift+Z",
     "details": "Datos de la canción",
     "addAudio": "Agregar el audio de la banda",
-    "openText": "Abrir en el editor de charts",
     "done": "Listo",
     "save": "Guardar",
     "savedAs": "Guardado como revisión {number}.",
@@ -1780,6 +1779,13 @@
     "tapCount": "{bpm} BPM con {count} toques",
     "meterBeats": "Tiempos por compás",
     "meterNote": "La figura del tiempo",
-    "unitNeedsTempo": "Primero escribe un tempo."
+    "unitNeedsTempo": "Primero escribe un tempo.",
+    "editDetails": "Editar datos",
+    "chart": "Carta",
+    "editorChoice": "Editor",
+    "visualChoice": "Visual",
+    "textChoice": "Texto",
+    "saveFirst": "Guarda tus cambios antes de pasar a Texto.",
+    "format": "ChartDown {version} · una revisión al guardar"
   }
 }

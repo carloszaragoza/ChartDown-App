@@ -14,7 +14,6 @@ import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { UNITS, type VisualChart } from "../../../../lib/visual/model";
 import { addTap, tapTempo } from "../../../../lib/visual/tap";
-import { SongName } from "../edit/SongName";
 
 type Meta = VisualChart["meta"];
 
@@ -33,29 +32,18 @@ const tempoParts = (tempo: string | undefined) => {
 };
 
 /**
- * The chart's header, changed right where it is (R-13.2): a tap on the title or the artists edits them, the key
+ * The chart's key, tempo and meter, changed right where they are (R-13.2): the key
  * opens the keys, the tempo a number and Tap, the meter its two rows and what the tempo counts.
  */
 export function HeaderFields({
-  versionId,
-  title,
-  artists,
-  canRename,
   meta,
   onMeta,
-  onRenamed,
-  subtitle,
+  children,
 }: {
-  versionId: string;
-  title: string;
-  artists: string[];
-  /** Whether this person may rename the song: an administrator, or its only owner (R-02.2). */
-  canRename: boolean;
   meta: Meta;
   onMeta: (change: (meta: Meta) => Meta) => void;
-  onRenamed: (title: string, artists: string[]) => void;
-  /** What goes under the song's names: the arranger. */
-  subtitle?: ReactNode;
+  /** Shown after them, as the feel. */
+  children?: ReactNode;
 }) {
   const t = useTranslations("visual");
   const [taps, setTaps] = useState<number[]>([]);
@@ -70,17 +58,6 @@ export function HeaderFields({
       else delete next.tempo;
       return next;
     });
-
-  // The song's title and artists, written in place as in the Chart editor (R-13.2, R-02.2).
-  const titleView = (
-    <SongName
-      versionId={versionId}
-      title={title}
-      artists={artists}
-      canRename={canRename}
-      onRenamed={onRenamed}
-    />
-  );
 
   const keyPicker = (
     <VStack gap={2}>
@@ -193,31 +170,28 @@ export function HeaderFields({
   );
 
   return (
-    <VStack gap={2}>
-      {titleView}
-      {subtitle}
-      <HStack gap={2} wrap="wrap">
-        <Popover content={keyPicker} label={t("field.key")} width={420}>
-          <Button
-            label={meta.key ? t("header.key", { key: meta.key }) : t("field.key")}
-            endContent={chevron}
-          />
-        </Popover>
-        <Popover
-          content={tempoPicker}
-          label={t("field.tempo")}
-          width={320}
-          onOpenChange={(open) => open && setTaps([])}
-        >
-          <Button
-            label={bpm ? t("header.tempoButton", { tempo: bpm }) : t("field.tempo")}
-            endContent={chevron}
-          />
-        </Popover>
-        <Popover content={timePicker} label={t("field.meter")} width={480}>
-          <Button label={t("header.time", { meter })} endContent={chevron} />
-        </Popover>
-      </HStack>
-    </VStack>
+    <HStack gap={2} vAlign="center" wrap="wrap">
+      <Popover content={keyPicker} label={t("field.key")} width={420}>
+        <Button
+          label={meta.key ? t("header.key", { key: meta.key }) : t("field.key")}
+          endContent={chevron}
+        />
+      </Popover>
+      <Popover
+        content={tempoPicker}
+        label={t("field.tempo")}
+        width={320}
+        onOpenChange={(open) => open && setTaps([])}
+      >
+        <Button
+          label={bpm ? t("header.tempoButton", { tempo: bpm }) : t("field.tempo")}
+          endContent={chevron}
+        />
+      </Popover>
+      <Popover content={timePicker} label={t("field.meter")} width={480}>
+        <Button label={t("header.time", { meter })} endContent={chevron} />
+      </Popover>
+      {children}
+    </HStack>
   );
 }

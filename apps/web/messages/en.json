@@ -1590,7 +1590,6 @@
     "redoKeys": "Redo · ⌘⇧Z or Ctrl+Shift+Z",
     "details": "Song details",
     "addAudio": "Add the band's audio",
-    "openText": "Open in the Chart editor",
     "done": "Done",
     "save": "Save",
     "savedAs": "Saved as revision {number}.",
@@ -1780,6 +1779,13 @@
     "tapCount": "{bpm} BPM from {count} taps",
     "meterBeats": "Beats in a bar",
     "meterNote": "The beat's note",
-    "unitNeedsTempo": "Set a tempo first."
+    "unitNeedsTempo": "Set a tempo first.",
+    "editDetails": "Edit details",
+    "chart": "Chart",
+    "editorChoice": "Editor",
+    "visualChoice": "Visual",
+    "textChoice": "Text",
+    "saveFirst": "Save your changes first to switch to Text.",
+    "format": "ChartDown {version} · one revision on save"
   }
 }
