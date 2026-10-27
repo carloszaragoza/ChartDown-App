@@ -8,7 +8,6 @@ import { Icon } from "@astryxdesign/core/Icon";
 import { NumberInput } from "@astryxdesign/core/NumberInput";
 import { Popover } from "@astryxdesign/core/Popover";
 import { Text } from "@astryxdesign/core/Text";
-import { TextInput } from "@astryxdesign/core/TextInput";
 import { ToggleButton } from "@astryxdesign/core/ToggleButton";
 import { VStack } from "@astryxdesign/core/VStack";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
@@ -57,8 +56,6 @@ export function HeaderFields({
   subtitle?: ReactNode;
 }) {
   const t = useTranslations("visual");
-  const [renaming, setRenaming] = useState(false);
-  const [draft, setDraft] = useState(title);
   const [renameState, setRenameState] = useState<"idle" | "saving" | "invalid" | "error">("idle");
   const [taps, setTaps] = useState<number[]>([]);
   const { bpm, unit } = tempoParts(meta.tempo);
@@ -73,65 +70,62 @@ export function HeaderFields({
       return next;
     });
 
-  const rename = async () => {
-    const name = draft.trim();
+  // The title is edited in the heading itself: Enter keeps it, Esc puts it back (R-13.2).
+  const rename = async (field: HTMLElement) => {
+    const name = (field.textContent ?? "").trim();
     if (name === title) {
-      setRenaming(false);
+      field.textContent = title;
+      setRenameState("idle");
       return;
     }
     setRenameState("saving");
     const result = await renameSong(versionId, name);
     if (result === "saved") {
       onRenamed(name);
-      setRenaming(false);
       setRenameState("idle");
-    } else setRenameState(result);
+    } else {
+      field.textContent = title;
+      setRenameState(result);
+    }
   };
 
-  const titleView = renaming ? (
-    <HStack gap={2} vAlign="center" wrap="wrap">
-      <TextInput
-        label={t("titleField")}
-        isLabelHidden
-        size="lg"
-        value={draft}
-        onChange={setDraft}
-        hasAutoFocus
-        onKeyDown={(event) => {
-          if (event.key === "Enter") void rename();
-          if (event.key === "Escape") {
-            setDraft(title);
-            setRenaming(false);
-            setRenameState("idle");
-          }
-        }}
-        {...(renameState === "invalid" || renameState === "error"
-          ? { status: { type: "error" as const, message: t(`titleError.${renameState}`) } }
-          : {})}
-      />
-      <Button
-        label={t("titleSave")}
-        variant="primary"
-        isLoading={renameState === "saving"}
-        onClick={() => void rename()}
-      />
-    </HStack>
-  ) : canRename ? (
-    <Heading level={1}>
-      <button
-        type="button"
-        className="cd-chart__title-edit"
-        aria-label={t("titleEdit", { title })}
-        onClick={() => {
-          setDraft(title);
-          setRenaming(true);
-        }}
-      >
-        {title}
-      </button>
-    </Heading>
-  ) : (
-    <Heading level={1}>{title}</Heading>
+  const titleView = (
+    <VStack gap={1}>
+      <Heading level={1}>
+        {canRename ? (
+          <span
+            // A new title remounts it, since typing replaced the text React put there.
+            key={title}
+            className="cd-chart__title-edit"
+            role="textbox"
+            aria-label={t("titleEdit", { title })}
+            contentEditable={renameState !== "saving"}
+            suppressContentEditableWarning
+            spellCheck={false}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                event.currentTarget.blur();
+              }
+              if (event.key === "Escape") {
+                event.currentTarget.textContent = title;
+                event.currentTarget.blur();
+              }
+            }}
+            onBlur={(event) => void rename(event.currentTarget)}
+          >
+            {title}
+          </span>
+        ) : (
+          title
+        )}
+      </Heading>
+      {(renameState === "invalid" || renameState === "error") && (
+        <Text type="supporting" role="alert">
+          {t(`titleError.${renameState}`)}
+        </Text>
+      )}
+    </VStack>
   );
 
   const keyPicker = (

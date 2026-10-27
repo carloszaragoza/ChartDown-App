@@ -1758,9 +1758,7 @@
       "phone": "El editor visual funciona en un iPad o una computadora. En el teléfono, usa el editor de charts."
     },
     "phone": "El editor visual funciona en un iPad o una computadora. En el teléfono, usa el editor de charts.",
-    "titleField": "Título de la canción",
     "titleEdit": "Cambiar el título de la canción: {title}",
-    "titleSave": "Cambiar",
     "titleError": {
       "invalid": "Escribe un título de 1 a 200 caracteres.",
       "error": "No se pudo cambiar el título. Intenta de nuevo."

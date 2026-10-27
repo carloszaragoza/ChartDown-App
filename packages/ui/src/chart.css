@@ -1137,6 +1137,19 @@
 .cd-chart__lyric .cd-chart__input {
   font-style: italic;
 }
+/* The chords line is written at the chart's size, in its numbers, so a bar looks the same while
+   it is typed; in the editor it keeps room for them even when empty (owner's review). */
+.cd-chart__spread .cd-chart__input {
+  font-family: var(--chart-font-numbers);
+  font-size: var(--chart-chord-size);
+  font-weight: var(--chart-chord-weight);
+  line-height: 1.15;
+  text-align: center;
+}
+.cd-chart--editable .cd-chart__spread,
+.cd-chart--editable .cd-chart__grid {
+  min-block-size: calc(var(--chart-chord-size) * 1.4);
+}
 /* A drag over a bar or a chord shows where a tool lands (R-13.7). */
 .cd-chart__bar[data-drop="true"] {
   outline: calc(var(--border-width) * 2) dashed var(--color-border-blue);
@@ -1152,14 +1165,15 @@
 /* The visual editor's title, renamed with a tap where it is (R-13.2): it reads as the title, with
    a dotted underline that says it can be changed. */
 .cd-chart__title-edit {
-  all: unset;
   cursor: text;
+  outline: none;
   border-radius: var(--radius-inner);
   text-decoration: underline dotted var(--color-border-emphasized);
   text-underline-offset: 0.2em;
 }
-.cd-chart__title-edit:hover {
-  text-decoration-color: currentColor;
+.cd-chart__title-edit:hover,
+.cd-chart__title-edit:focus {
+  text-decoration-color: var(--color-border-blue);
 }
 .cd-chart__title-edit:focus-visible {
   outline: calc(var(--border-width) * 2) solid var(--color-border-blue);
