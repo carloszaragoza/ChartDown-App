@@ -48,7 +48,7 @@ import { HeaderFields } from "./HeaderFields";
 import { InlineText } from "./InlineText";
 import { ImportDialog } from "./ImportDialog";
 import { SongName } from "../edit/SongName";
-import { historyKey } from "../../../../lib/visual/keys";
+import { clipboardKey, historyKey } from "../../../../lib/visual/keys";
 import { VideoLink } from "../../../_components/VideoDock";
 import { useChartLabels } from "../../../_components/chartLabels";
 import { usePlayingSection } from "../../../_components/usePlaybackBar";
@@ -64,6 +64,7 @@ import {
   addSection,
   appendBar,
   breakRowAfter,
+  copyBars,
   deleteBar,
   deleteRow,
   deleteNote,
@@ -75,6 +76,7 @@ import {
   hasMark,
   markChord,
   moveSection,
+  pasteBars,
   renameSection,
   repeatSection,
   ROW_BARS,
@@ -85,6 +87,7 @@ import {
   toggleIndication,
   type BarAt,
   type ChordMark,
+  type BarClip,
 } from "../../../../lib/visual/edit";
 import {
   afterSave,
@@ -239,6 +242,8 @@ export function VisualEditor({
   const chart = history.present;
   const [selected, setSelected] = useState<BarAt | null>(null);
   const [editing, setEditing] = useState<{ at: BarAt; line: Line } | null>(null);
+  // The bars copied, until the next copy (R-13.10).
+  const [clip, setClip] = useState<BarClip | null>(null);
   const [importing, setImporting] = useState(false);
   const [noteFor, setNoteFor] = useState<number | null>(null);
   // A note being changed: its section and its place there (R-13.14).
@@ -355,6 +360,32 @@ export function VisualEditor({
       if (inBar) finish();
       if (which === "undo") undo();
       else redo();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
+
+  const copy = (at: BarAt, what: "bar" | "row") => {
+    const copied = copyBars(chart, at, what);
+    if (copied) setClip(copied);
+  };
+  const paste = (at: BarAt, where: "over" | "after") => {
+    if (clip) change((c) => pasteBars(c, at, clip, where));
+  };
+  // ⌘C / Ctrl + C and ⌘V / Ctrl + V on the selected bar (R-13.10). A line being written, a field,
+  // a dialog or text selected on the page keep the browser's own copy and paste.
+  useEffect(() => {
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      const which = clipboardKey(event);
+      if (!which || !selected || editing) return;
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      if (target?.closest("[role='dialog'], input, textarea, select, [contenteditable='true']"))
+        return;
+      if (which === "copy" && window.getSelection()?.toString()) return;
+      if (which === "paste" && !clip) return;
+      event.preventDefault();
+      if (which === "copy") copy(selected, "bar");
+      else paste(selected, "over");
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -1160,6 +1191,11 @@ export function VisualEditor({
                       })
                     : t("tools.hint")}
                 </Text>
+                {clip && (
+                  <Text type="supporting" role="status">
+                    {t("copied", { count: clip.bars.length })}
+                  </Text>
+                )}
                 {editing?.line === "lyric" && selectedBar && (
                   <Text type="supporting" role="status">
                     {t("words", { count: lyricWords(selectedBar.lyric), max: MAX_LYRIC_WORDS })}
@@ -1260,6 +1296,29 @@ export function VisualEditor({
                         label: t("newRow"),
                         icon: icon("newRow"),
                         onClick: () => change((c) => breakRowAfter(c, selected)),
+                      },
+                      { type: "divider" as const },
+                      {
+                        label: t("copyBar"),
+                        icon: icon("copyBar"),
+                        onClick: () => copy(selected, "bar"),
+                      },
+                      {
+                        label: t("copyRow"),
+                        icon: icon("copyRow"),
+                        onClick: () => copy(selected, "row"),
+                      },
+                      {
+                        label: t("paste"),
+                        icon: icon("paste"),
+                        isDisabled: !clip,
+                        onClick: () => paste(selected, "over"),
+                      },
+                      {
+                        label: t("pasteAfter"),
+                        icon: icon("pasteAfter"),
+                        isDisabled: !clip,
+                        onClick: () => paste(selected, "after"),
                       },
                       { type: "divider" as const },
                       {

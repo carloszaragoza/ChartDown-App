@@ -5,6 +5,7 @@ import {
   addRow,
   appendBar,
   addNote,
+  copyBars,
   addSection,
   deleteRow,
   deleteSection,
@@ -12,6 +13,7 @@ import {
   hasMark,
   insertBar,
   markChord,
+  pasteBars,
   repeatSection,
   repeatsOf,
   setBar,
@@ -269,6 +271,43 @@ describe("T-3002 the visual editor's chart", () => {
     ]);
     chart = deleteRow(deleteRow(chart, { section: 0, bar: 0 }), { section: 0, bar: 0 });
     expect(chart.sections[0]?.bars).toHaveLength(1);
+  });
+
+  it("R-13.10 a copied bar pastes over another whole, and the place keeps where its row starts", () => {
+    let chart = visualChart('## Verse\n1 {drums: in} "Was blind" | 4 | 5 | 1\n6m | 4\n');
+    const clip = copyBars(chart, { section: 0, bar: 0 }, "bar");
+    expect(clip?.bars).toHaveLength(1);
+    chart = pasteBars(chart, { section: 0, bar: 4 }, clip!, "over");
+    const bar = chart.sections[0]?.bars[4];
+    expect(bar?.chords).toBe("1");
+    expect(bar?.top).toBe(chart.sections[0]?.bars[0]?.top);
+    expect(bar?.lyric).toBe("Was blind");
+    // The second row still starts there.
+    expect(canonicalText(chart, "").trimEnd().split("\n").slice(-2)).toEqual([
+      expect.stringMatching(/^1 .*\| 4 \| 5 \| 1$/),
+      expect.stringMatching(/^1 .*\| 4$/),
+    ]);
+  });
+
+  it("R-13.10 a copied row pasted after a row's last bar is a row of its own", () => {
+    let chart = visualChart("## Verse\n1 | 4 | 5 | 1\n6m | 4\n");
+    const clip = copyBars(chart, { section: 0, bar: 2 }, "row");
+    chart = pasteBars(chart, { section: 0, bar: 3 }, clip!, "after");
+    expect(canonicalText(chart, "").trimEnd().split("\n").slice(-3)).toEqual([
+      "1 | 4 | 5 | 1",
+      "1 | 4 | 5 | 1",
+      "6m | 4",
+    ]);
+  });
+
+  it("R-13.10 pasting over past the section's end adds bars, four to a row", () => {
+    let chart = visualChart("## Verse\n1 | 4 | 5\n");
+    const clip = copyBars(chart, { section: 0, bar: 0 }, "row");
+    chart = pasteBars(chart, { section: 0, bar: 2 }, clip!, "over");
+    expect(canonicalText(chart, "").trimEnd().split("\n").slice(-2)).toEqual([
+      "1 | 4 | 1 | 4",
+      "5",
+    ]);
   });
 
   it("R-13.3 after Save the editor drops the bars added and left empty, as the saved text does", () => {

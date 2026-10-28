@@ -1658,6 +1658,11 @@
     "newRow": "Renglón nuevo después de este compás",
     "deleteBar": "Borrar el compás",
     "deleteRow": "Borrar este renglón",
+    "copyBar": "Copiar este compás",
+    "copyRow": "Copiar este renglón",
+    "paste": "Pegar sobre este compás",
+    "pasteAfter": "Pegar después de este compás",
+    "copied": "{count, plural, one {# compás copiado} other {# compases copiados}}",
     "notice": {
       "title": "Visual escribe la carta con la forma estándar de ChartDown",
       "body": "Tus espacios y saltos de línea en el texto no se conservan. La carta en sí no cambia.",

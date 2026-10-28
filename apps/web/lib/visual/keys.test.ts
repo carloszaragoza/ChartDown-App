@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { historyKey } from "./keys";
+import { clipboardKey, historyKey } from "./keys";
 
 const press = (key: string, keys: Partial<Record<"meta" | "ctrl" | "shift" | "alt", boolean>>) => ({
   key,
@@ -22,5 +22,21 @@ describe("T-3003 the editor's undo and redo keys", () => {
     expect(historyKey(press("z", {}))).toBeNull();
     expect(historyKey(press("z", { meta: true, alt: true }))).toBeNull();
     expect(historyKey(press("s", { meta: true }))).toBeNull();
+  });
+});
+
+describe("T-3006 the editor's copy and paste keys", () => {
+  it("R-13.10 ⌘C or Ctrl + C copies a bar; ⌘V or Ctrl + V pastes over it", () => {
+    expect(clipboardKey(press("c", { meta: true }))).toBe("copy");
+    expect(clipboardKey(press("c", { ctrl: true }))).toBe("copy");
+    expect(clipboardKey(press("v", { meta: true }))).toBe("paste");
+    expect(clipboardKey(press("V", { ctrl: true }))).toBe("paste");
+  });
+
+  it("R-13.10 shifted, optioned or plain keys are left alone", () => {
+    expect(clipboardKey(press("v", { meta: true, shift: true }))).toBeNull();
+    expect(clipboardKey(press("c", { ctrl: true, alt: true }))).toBeNull();
+    expect(clipboardKey(press("c", {}))).toBeNull();
+    expect(clipboardKey(press("z", { meta: true }))).toBeNull();
   });
 });

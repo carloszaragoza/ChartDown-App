@@ -1658,6 +1658,11 @@
     "newRow": "New row after this bar",
     "deleteBar": "Delete bar",
     "deleteRow": "Delete this row",
+    "copyBar": "Copy this bar",
+    "copyRow": "Copy this row",
+    "paste": "Paste over this bar",
+    "pasteAfter": "Paste after this bar",
+    "copied": "{count, plural, one {# bar copied} other {# bars copied}}",
     "notice": {
       "title": "Visual writes the chart in ChartDown's standard layout",
       "body": "Your own spacing and line breaks in the text won't be kept. The chart itself stays the same.",

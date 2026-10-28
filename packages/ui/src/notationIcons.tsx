@@ -71,6 +71,12 @@ export const EDITOR_ICONS = {
   insertAfter: '<path d="M4 5v14M10 5v14"/><path d="M17 9v6M14 12h6"/>',
   newRow: '<path d="M20 5v6a3 3 0 0 1-3 3H5"/><path d="m9 10-4 4 4 4"/>',
   deleteRow: '<path d="M3 4v6M9 4v6M15 4v6M21 4v6"/><path d="M8 17h8"/>',
+  copyBar: '<path d="M9 8h11v12H9Z"/><path d="M13 12v4M16 12v4"/><path d="M5 16V4h11"/>',
+  copyRow: '<path d="M3 4v6M9 4v6M15 4v6M21 4v6"/><path d="M10 15h9v6h-9Z"/><path d="M6 18v-5h9"/>',
+  paste:
+    '<path d="M8 4H6a1 1 0 0 0-1 1v15a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-2"/><path d="M9 3h6v3H9Z"/><path d="M9.5 11v6M14.5 11v6"/>',
+  pasteAfter:
+    '<path d="M4 5v14M10 5v14"/><path d="M14 8h6v12h-6Z"/><path d="M15.5 6.5h3"/><path d="M17 12v4"/>',
 } as const;
 
 export type EditorIconName = keyof typeof EDITOR_ICONS;

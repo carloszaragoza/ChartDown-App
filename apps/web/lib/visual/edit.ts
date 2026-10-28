@@ -103,6 +103,70 @@ export const deleteRow = (chart: VisualChart, at: BarAt): VisualChart =>
     return { ...section, bars: bars.length > 0 ? bars : [emptyBar()] };
   });
 
+/** Bars copied from the editor (R-13.10): whole, but never where their row starts. */
+export interface BarClip {
+  bars: VisualBar[];
+  /** A whole row was copied, so pasting it after a bar starts a new row. */
+  row: boolean;
+}
+
+/** Copies the selected bar, or the whole row it is in (Copy this bar, Copy this row). */
+export function copyBars(chart: VisualChart, at: BarAt, what: "bar" | "row"): BarClip | null {
+  const section = chart.sections[at.section];
+  if (!section?.bars[at.bar]) return null;
+  const indexes =
+    what === "row"
+      ? (rowGroups(section).find((group) => group.includes(at.bar)) ?? [at.bar])
+      : [at.bar];
+  return {
+    bars: indexes.map((index) => ({ ...(section.bars[index] as VisualBar), row: null })),
+    row: what === "row",
+  };
+}
+
+const pasted = (bar: VisualBar, row: VisualBar["row"]): VisualBar => ({
+  ...bar,
+  split: bar.split ? [...bar.split] : null,
+  ending: bar.ending ? [...bar.ending] : null,
+  row,
+});
+
+/**
+ * Pastes copied bars (R-13.10): over the selected bar and those after it, adding bars past the
+ * section's end, or after it; each place keeps where its row starts.
+ */
+export const pasteBars = (
+  chart: VisualChart,
+  at: BarAt,
+  clip: BarClip,
+  where: "over" | "after",
+): VisualChart =>
+  withSection(chart, at.section, (section) => {
+    const bars = [...section.bars];
+    if (where === "over") {
+      clip.bars.forEach((bar, offset) => {
+        const index = at.bar + offset;
+        const place = bars[index];
+        if (place) {
+          bars[index] = pasted(bar, place.row);
+          return;
+        }
+        // Past the section's end a new row starts once the last one holds four bars.
+        const last = rowGroups({ ...section, bars }).at(-1) ?? [];
+        bars.push(pasted(bar, last.length >= ROW_BARS ? {} : null));
+      });
+    } else {
+      const fresh = clip.bars.map((bar, offset) =>
+        pasted(bar, clip.row && offset === 0 ? {} : null),
+      );
+      // A whole row pasted after a bar starts its own row; the bars after it, another.
+      const next = bars[at.bar + 1];
+      if (clip.row && next && !next.row) bars[at.bar + 1] = { ...next, row: {} };
+      bars.splice(at.bar + 1, 0, ...fresh);
+    }
+    return { ...section, bars };
+  });
+
 /** A new row starts with the bar after this one (R-13.10). */
 export const breakRowAfter = (chart: VisualChart, at: BarAt): VisualChart => {
   const next = chart.sections[at.section]?.bars[at.bar + 1];

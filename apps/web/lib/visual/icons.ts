@@ -32,6 +32,10 @@ export const VISUAL_ICONS = {
   newRow: editorIcon("newRow"),
   deleteBar: editorIcon("delete"),
   deleteRow: editorIcon("deleteRow"),
+  copyBar: editorIcon("copyBar"),
+  copyRow: editorIcon("copyRow"),
+  paste: editorIcon("paste"),
+  pasteAfter: editorIcon("pasteAfter"),
   // The chord's marks
   push: notationIcon("push"),
   shortPush: notationIcon("shortPush"),
