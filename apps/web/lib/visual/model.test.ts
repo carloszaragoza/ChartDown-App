@@ -23,6 +23,7 @@ import {
   step,
   toggleIndication,
   toggleMark,
+  writeBars,
 } from "./edit";
 import {
   afterSave,
@@ -347,6 +348,28 @@ describe("T-3002 the visual editor's chart", () => {
     // A bar with no chord has nothing to hold.
     const empty = visualChart("## Verse\nx\n");
     expect(holdUntil(empty, { section: 0, bar: 0 }, "the vocal")).toBe(empty);
+  });
+
+  it("R-13.5 a bar line typed in a bar ends it: what follows goes on in a new bar after it", () => {
+    const chart = visualChart("## Verse\n1 | 5\n");
+    const written = writeBars(chart, { section: 0, bar: 0 }, "6m7 '1/3 | 4");
+    expect(written.chart.sections[0]?.bars.map((bar) => bar.chords)).toEqual([
+      "6m7 '1/3",
+      "4",
+      "5",
+    ]);
+    expect(written.at).toEqual({ section: 0, bar: 1 });
+    expect(lastLine(canonicalText(written.chart, ""))).toBe("6m7 '1/3 | 4 | 5");
+  });
+
+  it("R-13.5 a bar line fills an empty next bar, and one typed last opens a bar to write in", () => {
+    let chart = visualChart("## Verse\n1\n");
+    chart = appendBar(chart, 0);
+    const filled = writeBars(chart, { section: 0, bar: 0 }, "1 | 4");
+    expect(filled.chart.sections[0]?.bars.map((bar) => bar.chords)).toEqual(["1", "4"]);
+    const open = writeBars(filled.chart, { section: 0, bar: 1 }, "4 |");
+    expect(open.chart.sections[0]?.bars.map((bar) => bar.chords)).toEqual(["1", "4", ""]);
+    expect(open.at).toEqual({ section: 0, bar: 2 });
   });
 
   it("R-13.3 after Save the editor drops the bars added and left empty, as the saved text does", () => {
