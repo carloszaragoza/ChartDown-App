@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clipboardKey, historyKey } from "./keys";
+import { clipboardKey, deleteBarKey, historyKey } from "./keys";
 
 const press = (key: string, keys: Partial<Record<"meta" | "ctrl" | "shift" | "alt", boolean>>) => ({
   key,
@@ -38,5 +38,20 @@ describe("T-3006 the editor's copy and paste keys", () => {
     expect(clipboardKey(press("c", { ctrl: true, alt: true }))).toBeNull();
     expect(clipboardKey(press("c", {}))).toBeNull();
     expect(clipboardKey(press("z", { meta: true }))).toBeNull();
+  });
+});
+
+describe("T-3017 the delete keys", () => {
+  it("R-13.10 Delete or ⌫ deletes the selected bar when no line is being written", () => {
+    expect(deleteBarKey(press("Backspace", {}), false)).toBe(true);
+    expect(deleteBarKey(press("Delete", {}), false)).toBe(true);
+    expect(deleteBarKey(press("x", {}), false)).toBe(false);
+    expect(deleteBarKey(press("Backspace", { shift: true }), false)).toBe(false);
+  });
+
+  it("R-13.10 while a line is written ⌫ erases text, and ⌘⌫ / Ctrl + ⌫ deletes the bar", () => {
+    expect(deleteBarKey(press("Backspace", {}), true)).toBe(false);
+    expect(deleteBarKey(press("Backspace", { meta: true }), true)).toBe(true);
+    expect(deleteBarKey(press("Backspace", { ctrl: true }), true)).toBe(true);
   });
 });

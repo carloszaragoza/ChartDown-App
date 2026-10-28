@@ -44,4 +44,14 @@ test("T-3012 a chart written by hand opens in the visual editor: the notice asks
   await expect(bars.nth(0)).toContainText("1/3");
   await expect(bars.nth(0)).not.toContainText("4");
   await expect(bars.nth(1)).toContainText("4");
+
+  // T-3017 a bar is deleted at once: ⌫ with no line being written, or the Delete bar button.
+  const count = await bars.count();
+  await bars.nth(1).locator("[data-line='chords']").click();
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Backspace");
+  await expect(bars).toHaveCount(count - 1);
+  await bars.nth(0).locator("[data-line='chords']").click();
+  await page.getByRole("button", { name: "Delete bar", exact: true }).click();
+  await expect(bars).toHaveCount(count - 2);
 });

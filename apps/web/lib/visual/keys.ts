@@ -1,4 +1,4 @@
-// The editor's undo and redo keys (R-13.11), and its copy and paste of bars (R-13.10).
+// The editor's undo and redo keys (R-13.11), and its copy, paste and delete of bars (R-13.10).
 
 export interface HistoryKeyEvent {
   key: string;
@@ -24,4 +24,15 @@ export function clipboardKey(event: HistoryKeyEvent): "copy" | "paste" | null {
   if (key === "c") return "copy";
   if (key === "v") return "paste";
   return null;
+}
+
+/**
+ * Delete or ⌫ deletes the selected bar when no line is being written; ⌘⌫ or Ctrl + ⌫ also while
+ * one is, since there ⌫ alone erases what is typed (T-3017).
+ */
+export function deleteBarKey(event: HistoryKeyEvent, isWriting: boolean): boolean {
+  if (event.altKey || event.shiftKey) return false;
+  if (event.key !== "Backspace" && event.key !== "Delete") return false;
+  if (event.metaKey || event.ctrlKey) return true;
+  return !isWriting;
 }

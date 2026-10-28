@@ -1657,6 +1657,7 @@
     "insertAfter": "Insertar un compás después",
     "newRow": "Renglón nuevo después de este compás",
     "deleteBar": "Borrar el compás",
+    "deleteBarKeys": "Borrar el compás (⌫)",
     "deleteRow": "Borrar este renglón",
     "copyBar": "Copiar este compás",
     "copyRow": "Copiar este renglón",
