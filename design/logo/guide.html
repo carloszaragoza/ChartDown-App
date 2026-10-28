@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ChartDown logo · usage guide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Figtree:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+  @page { size: Letter; margin: 0; }
+  :root { --ink: #16212C; --muted: #566574; --rule: #d4dbe2; --paper: #FBFCFD; --brand: #D12F26; --brand-dark: #FF7A6B; --night: #17212B; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); font-family: Figtree, sans-serif; font-size: 11px; }
+  .page { width: 8.5in; height: 11in; padding: 0.36in 0.5in; display: flex; flex-direction: column; gap: 9px; overflow: hidden; }
+  h1, h2 { font-family: "Barlow Condensed", sans-serif; font-weight: 700; margin: 0; }
+  h1 { font-size: 30px; line-height: 1; }
+  h2 { font-size: 16px; margin-bottom: 8px; }
+  p { margin: 0; color: var(--muted); line-height: 1.45; }
+  .card { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+  .row { display: grid; gap: 12px; }
+  .stage { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 62px; }
+  .clear { border: 1.5px dashed var(--brand); border-radius: 4px; padding: 16px 24px; position: relative; display: flex; justify-content: center; }
+  .clear span { position: absolute; top: 4px; left: 8px; color: var(--brand); font-weight: 600; font-size: 10px; }
+  .sizes { display: flex; align-items: flex-end; justify-content: center; gap: 26px; }
+  .sizes figure { margin: 0; text-align: center; color: var(--muted); font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-weight: 600; font-size: 10.5px; padding: 4px 0; border-bottom: 1px solid var(--rule); }
+  td { padding: 6px 0; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+  .sw { display: inline-flex; align-items: center; gap: 7px; font-variant-numeric: tabular-nums; }
+  .sw i { width: 26px; height: 26px; border-radius: 5px; display: inline-block; border: 1px solid var(--rule); }
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .tile { border: 1px solid var(--rule); border-radius: 8px; height: 62px; display: flex; align-items: center; justify-content: center; }
+  .wide { grid-column: span 2; }
+  .donts { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+  .dont .tile { height: 54px; overflow: hidden; }
+  .dont p { font-size: 9.5px; margin-top: 5px; color: var(--ink); }
+  .dont b { color: var(--brand); }
+  ul { margin: 0; padding-left: 16px; line-height: 1.5; }
+  img { display: block; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div>
+    <h1>ChartDown logo · usage guide</h1>
+    <p style="margin-top: 4px;">One bar of a chart: two bar lines and four rhythm slashes. The first beat, in the brand red, is the cue that starts the band.</p>
+  </div>
+
+  <div class="row" style="grid-template-columns: 1.3fr 1fr 0.7fr;">
+    <div class="card"><h2>Horizontal</h2><div class="stage"><img src="svg/chartdown-horizontal-color-on-light.svg" style="height: 46px;"></div><p>Default. Use it wherever there is room.</p></div>
+    <div class="card"><h2>Stacked</h2><div class="stage"><img src="svg/chartdown-stacked-color-on-light.svg" style="height: 78px;"></div><p>For square and narrow spaces.</p></div>
+    <div class="card"><h2>Symbol</h2><div class="stage"><img src="svg/chartdown-symbol-color-on-light.svg" style="height: 54px;"></div><p>App icon, avatar, favicon.</p></div>
+  </div>
+
+  <div class="row" style="grid-template-columns: 1.55fr 1fr;">
+    <div class="card"><h2>Clear space</h2>
+      <div class="clear"><span>x</span><img src="svg/chartdown-horizontal-color-on-light.svg" style="height: 58px;"></div>
+      <p>Keep at least x = half the symbol's height empty on every side. Nothing else enters that area.</p>
+    </div>
+    <div class="card"><h2>Minimum size</h2>
+      <div class="stage sizes">
+        <figure><img src="svg/chartdown-symbol-small-color-on-light.svg" style="height: 16px;">16 px</figure>
+        <figure><img src="svg/chartdown-symbol-color-on-light.svg" style="height: 24px;">24 px</figure>
+        <figure><img src="svg/chartdown-horizontal-color-on-light.svg" style="width: 96px;">96 px wide</figure>
+      </div>
+      <p>Symbol 16 px minimum; horizontal logo 96 px wide minimum. At 24 px and below use the two-beat small symbol (files named <i>symbol-small</i>).</p>
+    </div>
+  </div>
+
+  <div class="row" style="grid-template-columns: 1fr 1fr;">
+    <div class="card"><h2>Colors</h2>
+      <table>
+        <tr><th></th><th>On light</th><th>On dark</th></tr>
+        <tr><td>Ink: bar lines, slashes, name</td><td><span class="sw"><i style="background:#16212C"></i>#16212C</span></td><td><span class="sw"><i style="background:#E6EDF3"></i>#E6EDF3</span></td></tr>
+        <tr><td>Brand red (signal red): first slash only</td><td><span class="sw"><i style="background:#D12F26"></i>#D12F26</span></td><td><span class="sw"><i style="background:#FF7A6B"></i>#FF7A6B</span></td></tr>
+        <tr><td>Backgrounds</td><td><span class="sw"><i style="background:#FBFCFD"></i>#FBFCFD</span></td><td><span class="sw"><i style="background:#17212B"></i>#17212B</span></td></tr>
+      </table>
+      <p>Red is an accent, never the meaning: the logo reads the same in one color, so it works for color-blind readers. The brand red is the logo's and the landing page's; in the app's charts the music director keeps Rosewood (#94484A).</p>
+    </div>
+    <div class="card"><h2>Backgrounds and one color</h2>
+      <div class="tiles">
+        <div class="tile"><img src="svg/chartdown-symbol-color-on-light.svg" style="height: 40px;"></div>
+        <div class="tile" style="background: var(--night); border-color: var(--night);"><img src="svg/chartdown-symbol-color-on-dark.svg" style="height: 40px;"></div>
+        <div class="tile"><img src="svg/chartdown-symbol-black.svg" style="height: 40px;"></div>
+        <div class="tile" style="background: #000; border-color: #000;"><img src="svg/chartdown-symbol-white.svg" style="height: 40px;"></div>
+        <div class="tile wide" style="background: var(--night); border-color: var(--night);"><img src="svg/chartdown-horizontal-color-on-dark.svg" style="height: 26px;"></div>
+      </div>
+      <p>Full color on light and dark stage mode; black or white for single-color print, embroidery and engraving.</p>
+    </div>
+  </div>
+
+  <div class="card"><h2>Don't</h2>
+    <div class="donts">
+      <div class="dont"><div class="tile"><svg viewBox="9 20 78 56" width="104" height="28" preserveAspectRatio="none"><g fill="#16212C"><rect x="9" y="20" width="7" height="56" rx="3.5"/><rect x="80" y="20" width="7" height="56" rx="3.5"/></g><g stroke="#16212C" stroke-width="7" stroke-linecap="round"><line x1="24.5" y1="67" x2="31.5" y2="29" stroke="#D12F26"/><line x1="38" y1="67" x2="45" y2="29"/><line x1="51.5" y1="67" x2="58.5" y2="29"/><line x1="65" y1="67" x2="72" y2="29"/></g></svg></div><p><b>Don't</b> stretch or squash it.</p></div>
+      <div class="dont"><div class="tile"><img src="svg/chartdown-symbol-color-on-light.svg" style="height: 38px; transform: rotate(-14deg);"></div><p><b>Don't</b> rotate or tilt it.</p></div>
+      <div class="dont"><div class="tile"><svg viewBox="9 20 78 56" height="38"><g fill="#D12F26"><rect x="9" y="20" width="7" height="56" rx="3.5"/><rect x="80" y="20" width="7" height="56" rx="3.5"/></g><g stroke="#D12F26" stroke-width="7" stroke-linecap="round"><line x1="24.5" y1="67" x2="31.5" y2="29"/><line x1="38" y1="67" x2="45" y2="29"/><line x1="51.5" y1="67" x2="58.5" y2="29"/><line x1="65" y1="67" x2="72" y2="29"/></g></svg></div><p><b>Don't</b> make the whole mark red.</p></div>
+      <div class="dont"><div class="tile"><img src="svg/chartdown-symbol-color-on-light.svg" style="height: 38px; filter: drop-shadow(3px 4px 2px rgba(0,0,0,.45));"></div><p><b>Don't</b> add shadows, gradients or textures.</p></div>
+      <div class="dont"><div class="tile"><svg viewBox="9 20 106 56" height="38"><g fill="#16212C"><rect x="9" y="20" width="7" height="56" rx="3.5"/><rect x="108" y="20" width="7" height="56" rx="3.5"/></g><g stroke="#16212C" stroke-width="7" stroke-linecap="round"><line x1="24.5" y1="67" x2="31.5" y2="29" stroke="#D12F26"/><line x1="38" y1="67" x2="45" y2="29"/><line x1="51.5" y1="67" x2="58.5" y2="29"/><line x1="65" y1="67" x2="72" y2="29"/><line x1="78.5" y1="67" x2="85.5" y2="29"/><line x1="92" y1="67" x2="99" y2="29"/></g></svg></div><p><b>Don't</b> add or remove slashes.</p></div>
+      <div class="dont"><div class="tile" style="background: repeating-linear-gradient(45deg, #2d4f9e 0 7px, #c23b2c 7px 14px);"><img src="svg/chartdown-symbol-color-on-light.svg" style="height: 38px;"></div><p><b>Don't</b> place it on busy or low-contrast backgrounds.</p></div>
+    </div>
+  </div>
+
+  <div class="card"><h2>Typography</h2>
+    <ul>
+      <li>Name: Barlow Condensed Bold, converted to outlines in every file. "App" is set in Barlow Condensed Medium, smaller, and is always secondary to ChartDown.</li>
+      <li>Interface and body text: Figtree (the app's Astryx theme). Both fonts are under the SIL Open Font License.</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
