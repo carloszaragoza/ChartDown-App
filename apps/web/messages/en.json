@@ -1841,6 +1841,14 @@
     "createSet": "Create a set",
     "allSets": "See all sets"
   },
+  "drafts": {
+    "title": "Changes not saved, from {when}",
+    "body": "They were kept on this device. Restore them to go on, or discard them.",
+    "savedSince": "They were kept on this device, and the chart was saved since: restoring them replaces what was saved with them.",
+    "restore": "Restore",
+    "discard": "Discard",
+    "kept": "Kept on this device · {when}"
+  },
   "countIn": {
     "label": "Count-in"
   }
