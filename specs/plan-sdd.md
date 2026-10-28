@@ -173,6 +173,8 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 **Goal:** an open catalog where every version is identified by its source and nothing public is lost.
 
+People see the catalog as **Songs** ("Canciones" in Spanish) in the side navigation, the landing's nav, its page title, every message that names it and the terms of use (owner's decisions, October 27, 2026: "Catalog" reads like an inventory; "Song list" was set aside because musicians call a set list that; the terms of use too, the same day). Its address stays `/catalog`, so links keep working. The administration's instrument catalog keeps its name.
+
 **Requirements**
 
 - R-02.1 Create a song or pick an existing one, and create a version of it. A new version of an existing song starts from a chart of it: the version the person came from, or else the song's most recently updated public version, never a blank example (owner's review, October 16, 2026).
@@ -253,12 +255,14 @@ A platform where musicians and music directors write charts in ChartDown, share 
 - R-05.4 **Key per song in the set.** It does not change the version or affect other users (decision 9).
 - R-05.5 **Temporary MD:** the MD appoints a member as MD for one set. They can edit that set (order, keys, lineup) and nothing else, without writing in the notes layer (decision 9.6), and the role ends when the MD removes it or the set's date passes (decision 2).
 - R-05.6 List of upcoming and past sets. Duplicate an existing set.
+- R-05.7 **Stand mode with no set to open** (owner's request, October 13, 2026: Stand mode in the side navigation led to Sets without a word, and looked broken): Stand mode in the side navigation opens the next upcoming set (R-05.6, from the person's own today) at its first song in stand mode, or the set's page when it has no songs yet. When the person has no upcoming set, it stays on its own page in the app shell and says so: "No upcoming sets", why ("Stand mode opens your next set. You have none from today on.") and what to do: **Create a set**, where Home's Create set leads (the sets of the band they direct, otherwise their personal space), and **See all sets**, past ones included. A person in no band yet reads Home's line for them ("When your music director adds you to a set, it shows up here.") and only See all sets. Nothing else redirects in silence.
 
 **Acceptance criteria**
 
 - Given an MD, when they create a set with a name that already exists in their band, then the system asks for another name.
 - Given a set in the key of A for a version written in G, when another user opens that version, then they see it in G.
 - Given the temporary MD of the set “Sunday 12”, when they try to edit the set “Sunday 19”, then they don't have permission.
+- Given a musician whose sets are all past, when they tap Stand mode in the side navigation, then they stay on Stand mode's page, read "No upcoming sets" and why, and See all sets takes them to Sets.
 
 ### SPEC-06 · Per-instrument view
 

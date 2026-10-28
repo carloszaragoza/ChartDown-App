@@ -3,7 +3,7 @@
     "title": "ChartDown App",
     "tagline": "Number charts for the whole band, with each player’s notes.",
     "newVersion": "New version",
-    "catalog": "Catalog",
+    "catalog": "Songs",
     "bands": "Bands",
     "personal": "Personal space",
     "newSubtitle": "Four steps and your band can play from the same charts.",
@@ -43,7 +43,7 @@
       },
       "version": {
         "title": "Publish your first version",
-        "hint": "Write a chart in ChartDown or start from the catalog.",
+        "hint": "Write a chart in ChartDown or start from one in Songs.",
         "action": "New version"
       },
       "set": {
@@ -387,7 +387,7 @@
   },
   "version": {
     "newOfSong": "New version of this song",
-    "backToCatalog": "Catalog",
+    "backToCatalog": "Songs",
     "by": "Arrangement by {author}",
     "source": {
       "studio": "Studio recording",
@@ -436,7 +436,7 @@
     "search": {
       "label": "Find the song by title",
       "submit": "Search",
-      "results": "Songs in the catalog",
+      "results": "Songs on ChartDown",
       "none": "No songs match. Create it as a new song.",
       "use": "Use {title}",
       "useShort": "Use this song",
@@ -470,7 +470,7 @@
     "details": "Song details",
     "chartTitle": "Chart",
     "preview": "Preview",
-    "intro": "Find the song in the catalog, or start a new one.",
+    "intro": "Search for the song, or start a new one.",
     "import": {
       "open": "Import a chord sheet",
       "title": "Import a chord sheet",
@@ -514,7 +514,7 @@
           "key-guessed": "The key was guessed.",
           "tempo-unit": "The tempo's unit isn't known: in this meter it can count dotted quarters or eighths. It's written with ?, and Play asks."
         },
-        "existing": "“{title}” is already in the catalog.",
+        "existing": "“{title}” is already on ChartDown.",
         "existingHint": "You can add your version to that song instead of starting a new one.",
         "useExisting": "Add my version to that song",
         "openExisting": "See that song",
@@ -544,7 +544,7 @@
   "makePrivate": {
     "title": "Make this version private",
     "copy": "You get a private copy with the current chart, and you keep editing it there.",
-    "frozen": "This public version stays in the catalog under the name {author}, marked “Frozen public version”. Nobody can edit it anymore, you included.",
+    "frozen": "This public version stays public under the name {author}, marked “Frozen public version”. Nobody can edit it anymore, you included.",
     "others": "Other people's sets and forks keep using the public version. Public versions are shared under CC0 and stay with the community.",
     "final": "This cannot be undone.",
     "confirm": "Make private",
@@ -553,20 +553,20 @@
     "consequences": "What happens"
   },
   "catalog": {
-    "title": "Catalog",
+    "title": "Songs",
     "search": "Search by title, artist or album",
     "submit": "Search",
     "sources": "Source",
     "all": "All sources",
     "results": "Songs",
     "none": "No songs match.",
-    "error": "The catalog could not be loaded. Try again.",
+    "error": "The songs could not be loaded. Try again.",
     "versions": "{count, plural, one {# version} other {# versions}}",
     "versionsOf": "Versions of {title}",
     "pages": "Pages",
     "previous": "Previous",
     "next": "Next",
-    "back": "Back to the catalog",
+    "back": "Back to Songs",
     "intro": "Public ChartDown versions shared by the community. Free to use, fork and play.",
     "newVersion": "New version",
     "placeholder": "Search by title, artist or source",
@@ -896,7 +896,7 @@
     "remove": "Remove from the set",
     "removeName": "Remove {title} from the set",
     "addHint": "To add a song, open its version and choose Add to a set.",
-    "catalog": "Open the catalog",
+    "catalog": "Browse songs",
     "edit": "Name, date and type",
     "save": "Save",
     "duplicate": "Duplicate the set",
@@ -1213,10 +1213,10 @@
       "noneHidden": "No hidden versions.",
       "show": "Show again: {title}",
       "hiddenDone": "{title} is hidden; its owner was told why.",
-      "shownDone": "{title} is back in the catalog.",
+      "shownDone": "{title} is back in Songs.",
       "dismissedDone": "The report was dismissed.",
       "failed": "That did not work; it may have changed already. Try again.",
-      "description": "Public versions people reported. Hiding a version removes it from the catalog and tells its owner.",
+      "description": "Public versions people reported. Hiding a version removes it from Songs and tells its owner.",
       "openArea": "Open reports",
       "count": "{count, plural, =0 {No open reports} one {# open report} other {# open reports}}",
       "openTab": "Open reports ({count})",
@@ -1245,7 +1245,7 @@
       "why": "Why ChartDown",
       "features": "Features",
       "open": "Open standard",
-      "catalog": "Catalog",
+      "catalog": "Songs",
       "join": "Join the waitlist",
       "signIn": "Sign in"
     },
@@ -1441,7 +1441,7 @@
     "sets": "Sets",
     "stand": "Stand mode",
     "create": "Create",
-    "catalog": "Catalog",
+    "catalog": "Songs",
     "newVersion": "New version",
     "editor": "Chart editor",
     "visualEditor": "Visual editor",
@@ -1475,7 +1475,7 @@
     "description": "The versions you published or keep private. Edit a chart, or write the director's notes for your band.",
     "newVersion": "New version",
     "emptyTitle": "No versions yet",
-    "emptyDescription": "Write your first chart in ChartDown and publish it, or fork one from the catalog.",
+    "emptyDescription": "Write your first chart in ChartDown and publish it, or fork one from Songs.",
     "updated": "Updated {when}",
     "public": "Public",
     "private": "Private",
@@ -1814,5 +1814,13 @@
       "import": "Import"
     },
     "editNote": "Edit the indication “{text}”"
+  },
+  "standEntry": {
+    "title": "Stand mode",
+    "noUpcoming": "No upcoming sets",
+    "why": "Stand mode opens your next set. You have none from today on.",
+    "newMember": "When your music director adds you to a set, it shows up here.",
+    "createSet": "Create a set",
+    "allSets": "See all sets"
   }
 }

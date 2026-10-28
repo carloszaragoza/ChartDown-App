@@ -65,9 +65,9 @@ test("R-03.1 the preview updates without reloading", async ({ page }) => {
   await page.goto("/");
   await signOut(page);
   await page.goto(address);
-  await expect(page.getByRole("main").getByRole("button", { name: "Edit", exact: true })).toHaveCount(
-    0,
-  );
+  await expect(
+    page.getByRole("main").getByRole("button", { name: "Edit", exact: true }),
+  ).toHaveCount(0);
   expect((await page.goto(`${address}/edit`))?.status()).toBe(404);
 });
 

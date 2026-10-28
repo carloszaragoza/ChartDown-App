@@ -262,11 +262,11 @@ export function VersionView({
                       {signedIn && reading && (
                         <Button label={t("myNotes")} href={`/versions/${id}/notes`} size={size} />
                       )}
-                      {owner &&
-                        status === "active" &&
+                      {owner && status === "active" && (
                         // The owner chooses the visual editor or the text (R-13.1; open to
                         // everyone during the beta, October 28, 2026).
-                        <EditChoice id={id} icon={<EditIcon />} size={size} />}
+                        <EditChoice id={id} icon={<EditIcon />} size={size} />
+                      )}
                       {owner && (
                         <Button label={t("history")} href={`/versions/${id}/history`} size={size} />
                       )}
