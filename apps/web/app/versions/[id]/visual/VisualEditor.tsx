@@ -809,7 +809,7 @@ export function VisualEditor({
                   </Text>
                 </HStack>
               </Card>
-              {/* The chart: which editor, undo and redo, then its key, tempo and meter. */}
+              {/* The chart: which editor, undo and redo, import, its key, tempo and meter, on one line. */}
               <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
                 <HStack gap={3} vAlign="center" wrap="wrap">
                   <Heading level={2}>{t("chart")}</Heading>
@@ -846,6 +846,11 @@ export function VisualEditor({
                     icon={icon("import")}
                     onClick={() => setImporting(true)}
                   />
+                  {/* The key, tempo and meter on the same line (owner's review, October 28, 2026). */}
+                  <HeaderFields
+                    meta={chart.meta}
+                    onMeta={(next) => change((c) => ({ ...c, meta: next(c.meta) }))}
+                  />
                 </HStack>
                 <Text type="supporting">{t("format", { version: SUPPORTED_VERSION })}</Text>
               </HStack>
@@ -859,10 +864,6 @@ export function VisualEditor({
                   change(() => imported);
                 }}
               />
-              <HeaderFields
-                meta={chart.meta}
-                onMeta={(next) => change((c) => ({ ...c, meta: next(c.meta) }))}
-              ></HeaderFields>
               {(recordings.length > 0 || bands.length > 0) && (
                 <BandAudio
                   versionId={versionId}
@@ -1421,115 +1422,119 @@ export function VisualEditor({
             </VStack>
           </LayoutFooter>
         }
+      />
+      {/* Dialogs sit beside the Layout: given `content`, Layout leaves its children out (T-3012). */}
+      <Dialog
+        isOpen={asking !== null}
+        onOpenChange={(open) => !open && setAsking(null)}
+        purpose="required"
+        padding={4}
       >
-        <Dialog
-          isOpen={asking !== null}
-          onOpenChange={(open) => !open && setAsking(null)}
-          purpose="required"
-          padding={4}
-        >
-          {/* Before the first change to a chart written by hand (R-13.1). */}
-          <VStack gap={4}>
-            <Heading level={2}>{t("notice.title")}</Heading>
-            <Text>{t("notice.body")}</Text>
-            <HStack gap={2} hAlign="end">
-              <Button
-                label={t("notice.text")}
-                variant="ghost"
-                onClick={() => router.push(`/versions/${versionId}/edit`)}
-              />
-              <Button
-                label={t("notice.continue")}
-                variant="primary"
-                onClick={() => {
-                  const run = asking;
-                  setAccepted(true);
-                  setAsking(null);
-                  run?.();
-                }}
-              />
-            </HStack>
-          </VStack>
-        </Dialog>
-        <Dialog
-          isOpen={confirmDelete !== null}
-          onOpenChange={(open) => !open && setConfirmDelete(null)}
-          padding={4}
-        >
-          <VStack gap={4}>
-            <Heading level={2}>
-              {t("confirmDelete.title", { name: chart.sections[confirmDelete ?? 0]?.name ?? "" })}
-            </Heading>
-            <Text>
-              {t("confirmDelete.body", {
-                count: confirmDelete === null ? 0 : repeatsOf(chart, confirmDelete),
-              })}
-            </Text>
-            <HStack gap={2} hAlign="end">
-              <Button label={t("cancel")} variant="ghost" onClick={() => setConfirmDelete(null)} />
-              <Button
-                label={t("deleteSection")}
-                variant="destructive"
-                onClick={() => {
-                  const index = confirmDelete;
-                  setConfirmDelete(null);
-                  if (index !== null) change((c) => deleteSection(c, index));
-                }}
-              />
-            </HStack>
-          </VStack>
-        </Dialog>
-        {rowChangeAt && (
-          <RowChangeDialog
-            key={`${rowChangeAt.section}:${rowChangeAt.bar}`}
-            open
-            bar={label(rowChangeAt, barAt(rowChangeAt) as VisualBar)}
-            initial={rowChangeOf(barAt(rowChangeAt) as VisualBar)}
-            onClose={() => setRowChangeAt(null)}
-            onApply={(next) => {
-              change((c) => setRowChange(c, rowChangeAt, next));
-              setRowChangeAt(null);
-            }}
-          />
-        )}
-        {holdAt && (
-          <HoldUntilDialog
-            key={`${holdAt.section}:${holdAt.bar}`}
-            open
-            onClose={() => setHoldAt(null)}
-            onHold={(cue) => {
-              change((c) => holdUntil(c, holdAt, cue));
-              setHoldAt(null);
-            }}
-          />
-        )}
-        <NoteDialog
-          key={noteEdit ? `${noteEdit.section}:${noteEdit.note}` : `new:${noteFor}`}
-          open={noteFor !== null || noteEdit !== null}
-          section={chart.sections[noteFor ?? noteEdit?.section ?? 0]?.name ?? ""}
-          initial={
-            noteEdit ? (chart.sections[noteEdit.section]?.notes[noteEdit.note] ?? null) : null
-          }
-          instruments={STANDARD_INSTRUMENTS.map((instrument) => ({
-            value: instrument.id,
-            label: instruments.has(instrument.id as "keys")
-              ? instruments(instrument.id as "keys")
-              : instrument.id,
-          }))}
-          onClose={() => {
-            setNoteFor(null);
-            setNoteEdit(null);
-          }}
-          onAdd={(note) => {
-            const index = noteFor;
-            const editing = noteEdit;
-            setNoteFor(null);
-            setNoteEdit(null);
-            if (editing) change((c) => setNote(c, editing.section, editing.note, note));
-            else if (index !== null) change((c) => addNote(c, index, note));
+        {/* Before the first change to a chart written by hand (R-13.1). */}
+        <VStack gap={4}>
+          <Heading level={2}>{t("notice.title")}</Heading>
+          <Text>{t("notice.body")}</Text>
+          <HStack gap={2} hAlign="end">
+            <Button
+              label={t("notice.text")}
+              variant="ghost"
+              onClick={() => router.push(`/versions/${versionId}/edit`)}
+            />
+            <Button
+              label={t("notice.continue")}
+              variant="primary"
+              onClick={() => {
+                const run = asking;
+                setAccepted(true);
+                setAsking(null);
+                run?.();
+                // The closing dialog gives focus back to where it was; the bar being written takes
+                // it once the dialog has gone, so typing goes on at once.
+                window.setTimeout(
+                  () => document.querySelector<HTMLInputElement>(".cd-chart__input")?.focus(),
+                  50,
+                );
+              }}
+            />
+          </HStack>
+        </VStack>
+      </Dialog>
+      <Dialog
+        isOpen={confirmDelete !== null}
+        onOpenChange={(open) => !open && setConfirmDelete(null)}
+        padding={4}
+      >
+        <VStack gap={4}>
+          <Heading level={2}>
+            {t("confirmDelete.title", { name: chart.sections[confirmDelete ?? 0]?.name ?? "" })}
+          </Heading>
+          <Text>
+            {t("confirmDelete.body", {
+              count: confirmDelete === null ? 0 : repeatsOf(chart, confirmDelete),
+            })}
+          </Text>
+          <HStack gap={2} hAlign="end">
+            <Button label={t("cancel")} variant="ghost" onClick={() => setConfirmDelete(null)} />
+            <Button
+              label={t("deleteSection")}
+              variant="destructive"
+              onClick={() => {
+                const index = confirmDelete;
+                setConfirmDelete(null);
+                if (index !== null) change((c) => deleteSection(c, index));
+              }}
+            />
+          </HStack>
+        </VStack>
+      </Dialog>
+      {rowChangeAt && (
+        <RowChangeDialog
+          key={`${rowChangeAt.section}:${rowChangeAt.bar}`}
+          open
+          bar={label(rowChangeAt, barAt(rowChangeAt) as VisualBar)}
+          initial={rowChangeOf(barAt(rowChangeAt) as VisualBar)}
+          onClose={() => setRowChangeAt(null)}
+          onApply={(next) => {
+            change((c) => setRowChange(c, rowChangeAt, next));
+            setRowChangeAt(null);
           }}
         />
-      </Layout>
+      )}
+      {holdAt && (
+        <HoldUntilDialog
+          key={`${holdAt.section}:${holdAt.bar}`}
+          open
+          onClose={() => setHoldAt(null)}
+          onHold={(cue) => {
+            change((c) => holdUntil(c, holdAt, cue));
+            setHoldAt(null);
+          }}
+        />
+      )}
+      <NoteDialog
+        key={noteEdit ? `${noteEdit.section}:${noteEdit.note}` : `new:${noteFor}`}
+        open={noteFor !== null || noteEdit !== null}
+        section={chart.sections[noteFor ?? noteEdit?.section ?? 0]?.name ?? ""}
+        initial={noteEdit ? (chart.sections[noteEdit.section]?.notes[noteEdit.note] ?? null) : null}
+        instruments={STANDARD_INSTRUMENTS.map((instrument) => ({
+          value: instrument.id,
+          label: instruments.has(instrument.id as "keys")
+            ? instruments(instrument.id as "keys")
+            : instrument.id,
+        }))}
+        onClose={() => {
+          setNoteFor(null);
+          setNoteEdit(null);
+        }}
+        onAdd={(note) => {
+          const index = noteFor;
+          const editing = noteEdit;
+          setNoteFor(null);
+          setNoteEdit(null);
+          if (editing) change((c) => setNote(c, editing.section, editing.note, note));
+          else if (index !== null) change((c) => addNote(c, index, note));
+        }}
+      />
     </div>
   );
 }

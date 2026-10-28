@@ -1193,6 +1193,13 @@
 .cd-chart--editable .cd-chart__grid {
   min-block-size: calc(var(--chart-chord-size) * 1.4);
 }
+/* Within that room the chords sit in the middle, the same air above as below (owner's review,
+   October 28, 2026). */
+.cd-chart--editable .cd-chart__spread,
+.cd-chart--editable .cd-chart__grid,
+.cd-chart--editable .cd-chart__cell {
+  align-items: center;
+}
 /* A repeated section's bars in the visual editor: drawn as the original, never written in. */
 .cd-visual-repeat .cd-chart__bar {
   cursor: default;
