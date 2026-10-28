@@ -49,7 +49,7 @@ import { RowChangeDialog } from "./RowChangeDialog";
 import { InlineText } from "./InlineText";
 import { ImportDialog } from "./ImportDialog";
 import { SongName } from "../edit/SongName";
-import { clipboardKey, historyKey } from "../../../../lib/visual/keys";
+import { clipboardKey, deleteBarKey, historyKey } from "../../../../lib/visual/keys";
 import { VideoLink } from "../../../_components/VideoDock";
 import { BeatsControl } from "../../../_components/BeatsControl";
 import { ViewOptions } from "../../../_components/ViewOptions";
@@ -412,6 +412,31 @@ export function VisualEditor({
       event.preventDefault();
       if (which === "copy") copy(selected, "bar");
       else paste(selected, "over");
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
+
+  // Delete or ⌫ deletes the selected bar, ⌘⌫ / Ctrl + ⌫ also while it is written (T-3017); any
+  // other field or a dialog keeps its own keys.
+  const removeBar = (at: BarAt) => {
+    setEditing(null);
+    change((c) => deleteBar(c, at));
+    setSelected(null);
+  };
+  useEffect(() => {
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (!selected) return;
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      const inBar = target?.classList.contains("cd-chart__input") ?? false;
+      if (
+        !inBar &&
+        target?.closest("[role='dialog'], input, textarea, select, [contenteditable='true']")
+      )
+        return;
+      if (!deleteBarKey(event, editing !== null)) return;
+      event.preventDefault();
+      removeBar(selected);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -1323,6 +1348,17 @@ export function VisualEditor({
                   </HStack>
                 )}
                 {selected && (
+                  <Button
+                    label={t("deleteBar")}
+                    tooltip={t("deleteBarKeys")}
+                    variant="ghost"
+                    size="sm"
+                    isIconOnly
+                    icon={icon("deleteBar")}
+                    onClick={() => removeBar(selected)}
+                  />
+                )}
+                {selected && (
                   <MoreMenu
                     label={t("barMenu")}
                     presentation="adaptive"
@@ -1375,10 +1411,7 @@ export function VisualEditor({
                         label: t("deleteBar"),
                         icon: icon("deleteBar"),
                         variant: "destructive" as const,
-                        onClick: () => {
-                          change((c) => deleteBar(c, selected));
-                          setSelected(null);
-                        },
+                        onClick: () => removeBar(selected),
                       },
                       {
                         label: t("deleteRow"),

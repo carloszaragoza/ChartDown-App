@@ -1657,6 +1657,7 @@
     "insertAfter": "Insert a bar after",
     "newRow": "New row after this bar",
     "deleteBar": "Delete bar",
+    "deleteBarKeys": "Delete bar (⌫)",
     "deleteRow": "Delete this row",
     "copyBar": "Copy this bar",
     "copyRow": "Copy this row",
