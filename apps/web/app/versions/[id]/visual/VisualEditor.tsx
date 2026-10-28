@@ -261,7 +261,6 @@ export function VisualEditor({
   const [noteFor, setNoteFor] = useState<number | null>(null);
   // A note being changed: its section and its place there (R-13.14).
   const [noteEdit, setNoteEdit] = useState<{ section: number; note: number } | null>(null);
-  const [renaming, setRenaming] = useState<number | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [youtube, setYoutube] = useState(source.youtube);
   const [sourceType, setSourceType] = useState(source.sourceType);
@@ -941,27 +940,20 @@ export function VisualEditor({
                     const isPlaying = playing === s;
                     const head = (
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        {renaming === s ? (
-                          <TextInput
-                            label={t("sectionName")}
-                            isLabelHidden
-                            value={section.name}
-                            onChange={(name) =>
-                              setHistory((h) => ({
-                                ...h,
-                                present: renameSection(h.present, s, name),
-                              }))
-                            }
-                            onKeyDown={(event) => {
-                              if (event.key === "Enter" || event.key === "Escape")
-                                setRenaming(null);
-                            }}
-                            onBlur={() => setRenaming(null)}
-                            hasAutoFocus
-                          />
-                        ) : (
-                          <Heading level={2}>{section.name}</Heading>
-                        )}
+                        {/* Its name is written in place, as the song's title (T-3020); a repeat
+                            keeps the name of what it repeats. */}
+                        <Heading level={2}>
+                          {section.use ? (
+                            section.name
+                          ) : (
+                            <InlineText
+                              label={t("sectionNameOf", { name: section.name })}
+                              value={section.name}
+                              isRequired
+                              onChange={(name) => change((c) => renameSection(c, s, name))}
+                            />
+                          )}
+                        </Heading>
                         {section.use ? (
                           <>
                             <Token
@@ -1023,14 +1015,6 @@ export function VisualEditor({
                                   },
                                 ]
                               : [
-                                  {
-                                    label: t("rename"),
-                                    icon: icon("rename"),
-                                    onClick: () => {
-                                      change((c) => c);
-                                      setRenaming(s);
-                                    },
-                                  },
                                   {
                                     label: t("addSectionAfter"),
                                     icon: icon("addSection"),
@@ -1292,6 +1276,11 @@ export function VisualEditor({
                 )}
                 {selected && selectedNeed?.kind === "over" && (
                   <Text type="supporting">{t("over")}</Text>
+                )}
+                {selected && selectedNeed?.kind === "uneven" && (
+                  <Text type="supporting">
+                    {t("uneven", { sum: selectedNeed.sum, beats: selectedNeed.beats })}
+                  </Text>
                 )}
                 {selected && selectedBar?.repeatEnd && (
                   <HStack gap={1} vAlign="center">

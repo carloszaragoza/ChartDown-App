@@ -1601,6 +1601,7 @@
       "invalid": "Revisa los datos de la canción."
     },
     "sectionName": "Nombre de la sección",
+    "sectionNameOf": "Renombrar la sección: {name}",
     "playing": "Sonando",
     "repeatsAbove": "Repite {name}, escrito arriba",
     "repeatToken": "Se toca ×{times}",
@@ -1650,6 +1651,7 @@
     "words": "{count} de {max} palabras",
     "split": "Reparto:",
     "over": "Más acordes que tiempos.",
+    "uneven": "Los tiempos escritos suman {sum}; el compás tiene {beats}.",
     "plays": "Se toca",
     "pickupBeats": "Tiempos de la anacrusa",
     "barMenu": "Compás: más",
