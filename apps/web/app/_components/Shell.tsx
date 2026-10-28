@@ -202,16 +202,15 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
           PencilSquareIcon,
           PencilSolid,
         )}
-        {/* The visual editor (SPEC-13): the paid plan's editor, open to administrators until the
-            plans exist (R-13.1). */}
-        {account.admin &&
-          item(
-            "visualEditor",
-            t("visualEditor"),
-            version ? `/versions/${version}/visual` : "/visual/new",
-            PaintBrushIcon,
-            PaintBrushSolid,
-          )}
+        {/* The visual editor (SPEC-13): open to everyone signed in during the beta (R-13.1;
+            owner's decision, October 28, 2026). */}
+        {item(
+          "visualEditor",
+          t("visualEditor"),
+          version ? `/versions/${version}/visual` : "/visual/new",
+          PaintBrushIcon,
+          PaintBrushSolid,
+        )}
         {item(
           "notes",
           t("notes"),

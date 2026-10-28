@@ -243,12 +243,12 @@ describe("R-05.2 adding a version to a set", () => {
   });
 });
 
-describe("R-13.1 an administrator has both editors", () => {
-  it("R-13.1 the owner who is an administrator chooses Visual or Text; everyone else edits the text", () => {
-    const admin = render("en", { signedIn: true, owner: true, bothEditors: true });
-    expect(admin).toMatch(/aria-haspopup="menu"[^>]*>|<button[^>]*aria-expanded/);
-    expect(admin).not.toContain(`href="/versions/${props.id}/edit"`);
+describe("R-13.1 during the beta every owner has both editors", () => {
+  it("R-13.1 the owner chooses Visual or Text from Edit; a reader has no Edit", () => {
     const owner = render("en", { signedIn: true, owner: true });
-    expect(owner).toContain(`href="/versions/${props.id}/edit"`);
+    expect(owner).toMatch(/aria-haspopup="menu"[^>]*>|<button[^>]*aria-expanded/);
+    expect(owner).not.toContain(`href="/versions/${props.id}/edit"`);
+    const reader = render("en", { signedIn: true });
+    expect(reader).not.toContain(">Edit<");
   });
 });

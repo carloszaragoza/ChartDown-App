@@ -49,8 +49,6 @@ export interface VersionViewProps {
   signedIn: boolean;
   /** The signed-in person owns this version: they find its history (R-02.8). */
   owner?: boolean;
-  /** An administrator, who has both editors: Edit offers Visual or Text (R-13.1). */
-  bothEditors?: boolean;
   /** For a fork, the version it is based on (R-02.7). */
   basedOn?: BasedOn | null;
   /** A private version, or a public one frozen when its owner made it private (R-02.4). */
@@ -131,7 +129,6 @@ export function versionMenuItems({
  * meter; Stand mode leads the actions, then what this person may do with it.
  */
 export function VersionView({
-  bothEditors = false,
   id,
   title,
   artists,
@@ -267,17 +264,9 @@ export function VersionView({
                       )}
                       {owner &&
                         status === "active" &&
-                        // An administrator chooses the visual editor or the text (R-13.1).
-                        (bothEditors ? (
-                          <EditChoice id={id} icon={<EditIcon />} size={size} />
-                        ) : (
-                          <Button
-                            label={t("edit")}
-                            href={`/versions/${id}/edit`}
-                            icon={<EditIcon />}
-                            size={size}
-                          />
-                        ))}
+                        // The owner chooses the visual editor or the text (R-13.1; open to
+                        // everyone during the beta, October 28, 2026).
+                        <EditChoice id={id} icon={<EditIcon />} size={size} />}
                       {owner && (
                         <Button label={t("history")} href={`/versions/${id}/history`} size={size} />
                       )}

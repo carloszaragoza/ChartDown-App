@@ -440,7 +440,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 ### SPEC-13 · Visual chart editor (paid)
 
-**Goal:** a professional editor where the chart is written on the chart itself, as it will look when read, as in a notation program such as Sibelius: no ChartDown text boxes in sight. It is the editor of the paid plan. The **Chart editor** (R-03.1), where ChartDown is written by hand, stays as it is: it is the basic editor of the free plan and this spec changes nothing in it (owner's decisions, October 26, 2026). Both save the same ChartDown text, which stays the chart's single source. An administrator always has both editors, whatever their plan, to check them (owner's decision, October 26, 2026). On a version's page, Edit offers them both to an administrator, Visual editor or Text (owner's request, October 27, 2026); everyone else's Edit opens the Chart editor as before.
+**Goal:** a professional editor where the chart is written on the chart itself, as it will look when read, as in a notation program such as Sibelius: no ChartDown text boxes in sight. It is the editor of the paid plan. The **Chart editor** (R-03.1), where ChartDown is written by hand, stays as it is: it is the basic editor of the free plan and this spec changes nothing in it (owner's decisions, October 26, 2026). Both save the same ChartDown text, which stays the chart's single source. An administrator always has both editors, whatever their plan, to check them (owner's decision, October 26, 2026). **During the beta the visual editor is open to everyone signed in** (owner's decision, October 28, 2026, replacing "administrators only"): the side navigation has Visual editor, New song opens for everyone, and on a version's page its owner's Edit offers Visual editor or Text (owner's request, October 27, 2026, then for administrators only). Who keeps it once the beta ends waits for the spec of plans.
 
 **Phase:** 2. **Status:** draft, revised by the owner on October 26, 2026; the screens wait for the owner's design handoff, and who has the paid plan waits for a spec of plans and subscriptions (today out of scope, section 10).
 
@@ -489,7 +489,7 @@ A platform where musicians and music directors write charts in ChartDown, share 
 4. Whether copy and paste takes a range of bars.
 5. Later: rewrite only the section edited instead of the whole text, so the author's layout is kept.
 6. An unrecognized chord in red: red is reserved for the MD and instruments in the charts (Design Handoff, 1); to confirm, or use the theme's error color.
-7. The plans: the spec of plans and subscriptions (free: the Chart editor; paid: the visual editor, the MD's indications in it included), and who has the visual editor during the beta besides the administrators.
+7. The plans: the spec of plans and subscriptions (free: the Chart editor; paid: the visual editor, the MD's indications in it included), and who keeps the visual editor once the beta ends (during the beta everyone signed in has it; owner's decision, October 28, 2026).
 9. Whether the chart's MD notes written here (R-13.14) and a band's private MD layer should be told apart better for the reader, since both say MD.
 8. Where it is reached: the side navigation's Create section, a version's Edit, or both.
 

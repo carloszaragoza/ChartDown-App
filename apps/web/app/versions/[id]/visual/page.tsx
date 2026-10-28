@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { requireAdmin } from "../../../../lib/admin/guard";
+import { requireSignedIn } from "../../../../lib/auth/guard";
 import { guessPhone } from "../../../../lib/shell/guessPhone";
 import { PhoneOnly } from "../../../visual/PhoneOnly";
 import { loadVersion } from "../load";
@@ -7,13 +7,13 @@ import { loadRecordings } from "../recordings";
 import { VisualEditor } from "./VisualEditor";
 
 /**
- * The visual editor for a version (SPEC-13): its owner writes the chart on the chart itself. It is
- * the paid plan's editor; until the plans exist, only administrators open it (R-13.1). A phone
- * keeps the Chart editor (R-13.12).
+ * The visual editor for a version (SPEC-13): its owner writes the chart on the chart itself. Open
+ * to everyone signed in during the beta (R-13.1; owner's decision, October 28, 2026). A phone keeps
+ * the Chart editor (R-13.12).
  */
 export default async function VisualPage({ params }: { params: Promise<{ id: string }> }) {
-  const { supabase, userId } = await requireAdmin();
   const { id } = await params;
+  const { supabase, userId } = await requireSignedIn(`/versions/${id}/visual`);
   const version = await loadVersion(supabase, id);
   if (!version?.currentRevisionId || userId !== version.ownerId || version.status !== "active")
     notFound();

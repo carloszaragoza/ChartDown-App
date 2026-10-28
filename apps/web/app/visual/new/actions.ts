@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { requireAdmin } from "../../../lib/admin/guard";
+import { requireSignedIn } from "../../../lib/auth/guard";
 import { withChartVersion } from "../../../lib/chart/version";
 import { withTitle } from "../../../lib/versions/title";
 import {
@@ -25,7 +25,7 @@ const UNIT = /^(h\.?|q\.?|e\.?|s)$/;
  * and a first section to write in; then the visual editor opens on it.
  */
 export async function createSong(_previous: NewSongState, form: FormData): Promise<NewSongState> {
-  const { supabase } = await requireAdmin();
+  const { supabase } = await requireSignedIn("/visual/new");
   const text = (name: string) => String(form.get(name) ?? "").trim();
   const meta: string[] = [];
   const key = text("key");

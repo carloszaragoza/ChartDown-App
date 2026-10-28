@@ -233,7 +233,8 @@ test("R-06.7 T-2834 the chart editor plays the band's audio, and its preview fol
   await dialog.getByRole("button", { name: "Upload" }).click();
   await expect(page.getByText("Just me's recording · 0:08")).toBeVisible();
 
-  await page.getByRole("main").getByRole("link", { name: "Edit", exact: true }).click();
+  await page.getByRole("main").getByRole("button", { name: "Edit", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Text (ChartDown)" }).click();
   await page.getByRole("button", { name: "Play Just me's recording" }).click();
   const player = page.getByRole("complementary", { name: "Band audio" });
   // The preview follows the recording while it plays, as the version page does.
