@@ -17,7 +17,10 @@ import { barSeek, type ChartBar, videoClock } from "../../lib/video/clock";
 import { barStart, sectionAt, videoSections } from "../../lib/video/sections";
 import { chartWave, shapedWave } from "../../lib/video/wave";
 import { useDockRoom, useDockTarget } from "./DockRoom";
+import { countIn } from "../../lib/video/countIn";
+import { useCountIn } from "./useCountIn";
 import {
+  CountInSwitch,
   MusicPointsControls,
   PlayerVolume,
   SectionCells,
@@ -39,6 +42,7 @@ interface YouTubePlayer {
   getVolume?(): number;
   setVolume?(volume: number): void;
   isMuted?(): boolean;
+  mute?(): void;
   pauseVideo?(): void;
   playVideo?(): void;
   unMute?(): void;
@@ -303,6 +307,9 @@ function VideoDock({
     };
   }, [id, start]);
 
+  const counter = useCountIn();
+  const { counting } = counter;
+  const recount = useRef<(seconds: number) => void>(() => {});
   // A bar tapped on the chart: the video moves to where it starts (T-2836); one chosen before the
   // video was opened is where it opens (T-3015).
   const opened = useRef(false);
@@ -311,6 +318,7 @@ function VideoDock({
       const at = chart ? barStart(chart, section, number) : null;
       if (at === null) return;
       const to = Math.max(0, startRef.current + at);
+      if (counting.current) return recount.current(to);
       seeking.current = { to, at: performance.now() };
       player.current?.seekTo?.(to, true);
       setNow(to);
@@ -321,7 +329,7 @@ function VideoDock({
       if (bar) go(bar);
     }
     return barSeek.subscribe(go);
-  }, [chart]);
+  }, [chart, counting]);
 
   const seek = (seconds: number) => {
     const to = Math.max(0, seconds);
@@ -329,6 +337,39 @@ function VideoDock({
     player.current?.seekTo?.(to, true);
     setNow(to);
   };
+  // Play counts one bar first when Count-in is on (R-03.14, T-3023): the dock's own Play, since
+  // YouTube's play button in the video can't count; Pause also stops a count, and a section or a
+  // bar chosen while it counts counts again into it.
+  const countFrom = (seconds: number) => {
+    const video = player.current;
+    if (!video) return;
+    const plan = counter.isOn && chart && sections ? countIn(chart, seconds, musicStart) : null;
+    if (!plan) {
+      seek(seconds);
+      return video.playVideo?.();
+    }
+    counter.start(plan, {
+      time: () => video.getCurrentTime?.() ?? 0,
+      seek,
+      play: () => video.playVideo?.(),
+      pause: () => video.pauseVideo?.(),
+      isMuted: () => video.isMuted?.() ?? false,
+      setMuted: (muted) => (muted ? video.mute?.() : video.unMute?.()),
+    });
+  };
+  useEffect(() => {
+    recount.current = countFrom;
+  });
+  const toggle = () => {
+    const video = player.current;
+    if (!video) return;
+    if (counter.isCounting) return counter.stop();
+    if (isPlaying) return video.pauseVideo?.();
+    countFrom(video.getCurrentTime?.() ?? now);
+  };
+  const chooseTime = (seconds: number) => (counter.isCounting ? countFrom(seconds) : seek(seconds));
+  const playLabel = isPlaying || counter.isCounting ? t("pause") : t("play");
+  const playIcon = isPlaying || counter.isCounting ? PauseIcon : PlayIcon;
   const clock = (seconds: number) =>
     `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
   // On a phone the strip shows only song-form names, so the one playing is named beside the video.
@@ -379,12 +420,26 @@ function VideoDock({
             <Text type="supporting">{t("noTempo")}</Text>
           </span>
         )}
+        {sections && (
+          <CountInSwitch isOn={counter.isOn} onChange={counter.setOn} beat={counter.beat} />
+        )}
         {isPhone && playing && (
           <p className="cd-player__now" aria-hidden="true">
             {playing.name}
           </p>
         )}
         <div className="cd-player__end">
+          {!isPhone && (
+            <Button
+              label={playLabel}
+              variant="secondary"
+              size="sm"
+              icon={<Icon icon={playIcon} />}
+              isIconOnly
+              tooltip={playLabel}
+              onClick={toggle}
+            />
+          )}
           <span className="cd-player__clock">
             <span className="cd-player__kind">{t("player")} · </span>
             {clock(now)}
@@ -418,13 +473,11 @@ function VideoDock({
       {isPhone && (
         <span className="cd-player__play-video">
           <Button
-            label={isPlaying ? t("pause") : t("play")}
+            label={playLabel}
             variant="primary"
-            icon={<Icon icon={isPlaying ? PauseIcon : PlayIcon} />}
+            icon={<Icon icon={playIcon} />}
             isIconOnly
-            onClick={() =>
-              isPlaying ? player.current?.pauseVideo?.() : player.current?.playVideo?.()
-            }
+            onClick={toggle}
           />
         </span>
       )}
@@ -439,7 +492,7 @@ function VideoDock({
               chart={chart}
               sections={sections}
               now={now}
-              onSeek={seek}
+              onSeek={chooseTime}
               label={t("sections")}
               goTo={(name) => t("goTo", { name })}
               wave={wave}

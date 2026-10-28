@@ -93,7 +93,15 @@ test("R-06.7 the MD adds the band's audio; its musicians hear it, nobody else", 
   const player = page.getByRole("complementary", { name: "Band audio" });
   const play = player.getByRole("button", { name: "Play", exact: true });
   await expect(play).toBeEnabled();
+  // R-03.14 T-3023 Count-in is on by default: Play counts a bar of 4/4 first.
+  await expect(player.getByRole("button", { name: "Count-in" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   await play.click();
+  await expect(player.locator(".cd-player__count-in .cd-metronome-count")).toHaveText(
+    /^[1-4] \/ 4$/,
+  );
   await expect(player.getByRole("button", { name: "Pause" })).toBeVisible();
   const sections = player.getByRole("group", { name: "Sections" });
   // Named as in the song form (T-2505), under each section's full name (T-2828).

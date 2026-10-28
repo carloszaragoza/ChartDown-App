@@ -1848,5 +1848,8 @@
     "restore": "Recuperar",
     "discard": "Descartar",
     "kept": "Guardado en este dispositivo · {when}"
+  },
+  "countIn": {
+    "label": "Cuenta previa"
   }
 }

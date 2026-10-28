@@ -1848,5 +1848,8 @@
     "restore": "Restore",
     "discard": "Discard",
     "kept": "Kept on this device · {when}"
+  },
+  "countIn": {
+    "label": "Count-in"
   }
 }

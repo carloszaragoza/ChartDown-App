@@ -15,7 +15,10 @@ import { barSeek, type ChartBar, videoClock } from "../../lib/video/clock";
 import { barStart, videoSections } from "../../lib/video/sections";
 import { shapedWave, windowWave } from "../../lib/video/wave";
 import { useDockRoom, useDockTarget } from "./DockRoom";
+import { countIn } from "../../lib/video/countIn";
+import { useCountIn } from "./useCountIn";
 import {
+  CountInSwitch,
   MusicPointsControls,
   PlayerVolume,
   SectionCells,
@@ -190,6 +193,9 @@ function AudioDock({
     return () => window.clearInterval(timer);
   }, [musicStart, keepWithin]);
   useEffect(() => () => videoClock.set(null), []);
+  const counter = useCountIn();
+  const { counting } = counter;
+  const recount = useRef<(seconds: number) => void>(() => {});
   // A bar tapped on the chart: the recording moves to where it starts (T-2836); one chosen before
   // the recording was opened is where it opens, once its length is known (T-3015).
   const opened = useRef(false);
@@ -199,6 +205,7 @@ function AudioDock({
       const element = audio.current;
       if (at === null || !element) return;
       const to = Math.min(Math.max(0, musicStart + at), duration);
+      if (counting.current) return recount.current(to);
       element.currentTime = to;
       setNow(to);
     };
@@ -208,7 +215,7 @@ function AudioDock({
       if (bar) go(bar);
     }
     return barSeek.subscribe(go);
-  }, [chart, musicStart, duration]);
+  }, [chart, musicStart, duration, counting]);
 
   const seek = (seconds: number) => {
     const element = audio.current;
@@ -216,12 +223,38 @@ function AudioDock({
     if (element) element.currentTime = to;
     setNow(to);
   };
+  // Play counts one bar first when Count-in is on (R-03.14, T-3023); Pause also stops a count,
+  // and a section or a bar chosen while it counts counts again into it.
+  const countFrom = (seconds: number) => {
+    const element = audio.current;
+    if (!element) return;
+    const plan = counter.isOn && sections ? countIn(chart, seconds, musicStart) : null;
+    if (!plan) {
+      seek(seconds);
+      return void element.play();
+    }
+    counter.start(plan, {
+      time: () => element.currentTime,
+      seek,
+      play: () => void element.play(),
+      pause: () => element.pause(),
+      isMuted: () => element.muted,
+      setMuted: (muted) => {
+        element.muted = muted;
+      },
+    });
+  };
+  useEffect(() => {
+    recount.current = countFrom;
+  });
   const toggle = () => {
     const element = audio.current;
     if (!element) return;
-    if (element.paused) void element.play();
-    else element.pause();
+    if (counter.isCounting) return counter.stop();
+    if (!element.paused) return element.pause();
+    countFrom(element.currentTime);
   };
+  const chooseTime = (seconds: number) => (counter.isCounting ? countFrom(seconds) : seek(seconds));
   return (
     <aside
       ref={dock}
@@ -259,6 +292,9 @@ function AudioDock({
           }}
         />
         {!sections && <Text type="supporting">{v("noTempo")}</Text>}
+        {sections && (
+          <CountInSwitch isOn={counter.isOn} onChange={counter.setOn} beat={counter.beat} />
+        )}
         <HStack gap={1} vAlign="center">
           <Icon icon={MusicalNoteIcon} />
           <Text type="supporting" maxLines={1}>
@@ -283,10 +319,10 @@ function AudioDock({
       <div className="cd-player__body">
         <div className="cd-player__play">
           <Button
-            label={playing ? t("pause") : t("playShort")}
+            label={playing || counter.isCounting ? t("pause") : t("playShort")}
             variant="primary"
             size="lg"
-            icon={<Icon icon={playing ? PauseIcon : PlayIcon} />}
+            icon={<Icon icon={playing || counter.isCounting ? PauseIcon : PlayIcon} />}
             isIconOnly
             isDisabled={!source}
             onClick={toggle}
@@ -301,7 +337,7 @@ function AudioDock({
               chart={chart}
               sections={sections}
               now={now}
-              onSeek={seek}
+              onSeek={chooseTime}
               label={v("sections")}
               goTo={(name) => v("goTo", { name })}
               wave={wave}

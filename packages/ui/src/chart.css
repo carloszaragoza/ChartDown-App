@@ -962,6 +962,13 @@
   scroll-margin-block-end: var(--cd-dock-room, 0px);
 }
 
+/* The player's Count-in switch, with the beat it counts beside it (R-03.14, T-3023). */
+.cd-player__count-in {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
 /* The metronome control's tempo or count (T-2701): one width for "74" and "3 / 4", so the control
    never jumps while it counts. */
 .cd-metronome-count {
