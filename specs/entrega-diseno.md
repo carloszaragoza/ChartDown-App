@@ -102,6 +102,8 @@ The logo is **concept 3C, "One bar"**: one bar of a chart, two bar lines and fou
 - **Where:** the side navigation's header and the landing page show the horizontal logo, with the accessible name "ChartDown"; the favicon (an SVG that follows the browser's light or dark theme, plus ICO), the iPad and Apple touch icons, the web app manifest (192, 512 and maskable 512 px) and the Open Graph image for link previews come from the kit.
 - The text in every logo file is converted to outlines (Barlow Condensed Bold, "App" in Medium).
 
+**The visual editor's icons** (SPEC-13, R-13.16): one list, `apps/web/lib/visual/icons.ts`, gives each action its icon, always beside its name. The chart's marks use the notation icons of `@chartdown/ui` (`notationIcons.tsx`): drawn as the chart draws each mark (‹ for a push, the fermata's arc and dot, |: and :| with their dots, the ending's bracket and number, segno, coda), on Astryx's 24 × 24 grid and 1.5 line, the dynamics as their bold italic letters; the editor's other actions use ChartDown's own icons drawn the same way (`EDITOR_ICONS`, owner's decision, October 27, 2026: never generic ones): undo, redo, song details, import, the band's audio, the video, the ChartDown text (`#`), save, done, add a section or a row, rename, add a note, repeat a section (the repeat signs), duplicate, move, edit the original, delete, a bar before or after (bar lines), a new row, delete a row, and the visual editor itself. The dropdowns' chevrons stay Astryx's.
+
 ## 8. Sources of truth
 
 - **Design system:** Astryx (`github.com/facebook/astryx`), theme neutral; its CLI for component APIs.

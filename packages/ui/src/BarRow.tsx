@@ -7,7 +7,7 @@ import {
   type Meter,
   type Row,
 } from "chartdown";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { DEFAULT_BAR_LABELS, type BarLabels } from "./Bar";
 import { barSpans, COLUMNS_PER_BEAT, PICKUP_MIN } from "./beats";
 import { beatMarks, showBeats, tokenSpans, type BeatsMode } from "./beatMarks";
@@ -29,6 +29,28 @@ const NAV_TEXT = {
   dcalcoda: "D.C. al Coda",
   dcalfine: "D.C. al Fine",
 } as const;
+
+/** A bar's three lines, as the visual editor names them (SPEC-13, R-13.4). */
+export type BarLine = "tags" | "chords" | "lyric";
+
+/** What the visual editor adds to a row (SPEC-13): a selected bar, marked bars, its own lines. */
+export interface BarRowEdit {
+  /** The bar selected, by its place in the row, drawn in the selection blue (R-13.3). */
+  selected?: number;
+  /** The bar being written in. */
+  editing?: number;
+  /** Bars marked in amber, by their place in the row (R-13.8). */
+  flagged?: readonly number[];
+  /** A line the editor draws itself (a field being typed in, a chord drawn in red). */
+  line?: (index: number, line: BarLine) => ReactNode | undefined;
+  /** The name read for a bar, in full words (R-13.13). */
+  label?: (index: number) => string;
+  /**
+   * How many bars wide the row is drawn: a row with fewer keeps each bar at that width and leaves
+   * the rest empty, as on a printed chart (R-13.10).
+   */
+  slots?: number;
+}
 
 /** "2x" or "1x,3x": the passes of a repeat a cue or a note is for (spec 9.1). */
 export const passesText = (passes: readonly number[]) => passes.map((pass) => `${pass}x`).join(",");
@@ -134,6 +156,8 @@ function OneBar({
   progress,
   isDownbeat = false,
   isStart = false,
+  index,
+  edit,
 }: {
   bar: BarData;
   row: Row;
@@ -152,7 +176,12 @@ function OneBar({
   isDownbeat?: boolean;
   /** The metronome will start on this bar (R-11.2). */
   isStart?: boolean;
+  index: number;
+  edit?: BarRowEdit | undefined;
 }) {
+  const own = (line: BarLine) => edit?.line?.(index, line);
+  // The lines are named only in the visual editor, which finds a tap's line by them.
+  const named = (line: BarLine) => (edit ? { "data-line": line } : {});
   // A pickup has only the beats it was written with (spec 5.3).
   const beats = bar.pickup ?? meter.beats;
   const columns = Math.round(beats * COLUMNS_PER_BEAT);
@@ -169,12 +198,20 @@ function OneBar({
     progress !== undefined && "cd-chart__bar--now",
     progress !== undefined && isDownbeat && "cd-chart__bar--downbeat",
     isStart && progress === undefined && "cd-chart__bar--start",
+    edit?.selected === index && "cd-chart__bar--selected",
+    edit?.editing === index && "cd-chart__bar--editing",
+    edit?.flagged?.includes(index) && "cd-chart__bar--flagged",
   ].filter(Boolean);
+  const tags = own("tags");
+  const chords = own("chords");
+  const lyric = own("lyric");
   return (
     <div
       role="group"
       className={classes.join(" ")}
       data-bar={bar.number}
+      {...(edit ? { "data-index": index } : {})}
+      {...(edit?.label ? { "aria-label": edit.label(index) } : {})}
       {...(progress !== undefined
         ? {
             "aria-current": "step" as const,
@@ -182,37 +219,48 @@ function OneBar({
           }
         : {})}
     >
-      <div className="cd-chart__tags">
-        {bar.ending && <span className="cd-chart__ending">{bar.ending.join(", ")}.</span>}
-        {bar.dynamic && (
-          <i className="cd-chart__dynamic">{DYNAMIC_TEXT[bar.dynamic] ?? bar.dynamic}</i>
+      <div className="cd-chart__tags" {...named("tags")}>
+        {tags}
+        {tags === undefined && (
+          <>
+            {bar.ending && <span className="cd-chart__ending">{bar.ending.join(", ")}.</span>}
+            {bar.dynamic && (
+              <i className="cd-chart__dynamic">{DYNAMIC_TEXT[bar.dynamic] ?? bar.dynamic}</i>
+            )}
+            {bar.meter && (
+              <i className="cd-chart__mark">{`${bar.meter.beats}/${bar.meter.unit}`}</i>
+            )}
+            {bar.tempoMark && <i className="cd-chart__mark">{TEMPO_MARK_TEXT[bar.tempoMark]}</i>}
+            {bar.nav?.map((mark) => (
+              <span key={mark} className="cd-chart__nav">
+                {NAV_TEXT[mark]}
+              </span>
+            ))}
+            {bar.cues.map((cue, index) => {
+              const who = [
+                cue.passes.length > 0 ? passesText(cue.passes) : "",
+                cue.roles.includes("everyone") ? "" : cue.roles.map(labels.instrument).join(", "),
+              ]
+                .filter(Boolean)
+                .join(" ");
+              return (
+                <span key={index} className="cd-chart__cue">
+                  {who && <b className="cd-chart__cue-role">{who} </b>}
+                  {cue.text}
+                </span>
+              );
+            })}
+          </>
         )}
-        {bar.meter && <i className="cd-chart__mark">{`${bar.meter.beats}/${bar.meter.unit}`}</i>}
-        {bar.tempoMark && <i className="cd-chart__mark">{TEMPO_MARK_TEXT[bar.tempoMark]}</i>}
-        {bar.nav?.map((mark) => (
-          <span key={mark} className="cd-chart__nav">
-            {NAV_TEXT[mark]}
-          </span>
-        ))}
-        {bar.cues.map((cue, index) => {
-          const who = [
-            cue.passes.length > 0 ? passesText(cue.passes) : "",
-            cue.roles.includes("everyone") ? "" : cue.roles.map(labels.instrument).join(", "),
-          ]
-            .filter(Boolean)
-            .join(" ");
-          return (
-            <span key={index} className="cd-chart__cue">
-              {who && <b className="cd-chart__cue-role">{who} </b>}
-              {cue.text}
-            </span>
-          );
-        })}
         {bar.repeatEnd && <span className="cd-chart__times">×{bar.repeatEnd.times}</span>}
       </div>
-      {marks ? (
+      {chords !== undefined ? (
+        <div className="cd-chart__spread" {...named("chords")}>
+          {chords}
+        </div>
+      ) : marks ? (
         // Each chord starts at its beat and spans its length; a dashed line marks a change.
-        <div className="cd-chart__grid" style={grid}>
+        <div className="cd-chart__grid" style={grid} {...named("chords")}>
           {bar.items.map((item, index) => {
             const at = spans[index] ?? { start: 1, span: columns };
             return (
@@ -235,7 +283,7 @@ function OneBar({
         </div>
       ) : (
         // No marks: the chords are spread evenly across the bar, as on a printed chart.
-        <div className="cd-chart__spread">
+        <div className="cd-chart__spread" {...named("chords")}>
           {bar.items.map((item, index) => (
             <Item
               key={index}
@@ -275,7 +323,9 @@ function OneBar({
         // The row shares one beat line: a bar without marks leaves its cell empty.
         !plain && <div aria-hidden="true" />
       )}
-      <div className="cd-chart__lyric">{bar.lyric !== undefined && `“${bar.lyric}”`}</div>
+      <div className="cd-chart__lyric" {...named("lyric")}>
+        {lyric !== undefined ? lyric : bar.lyric !== undefined && `“${bar.lyric}”`}
+      </div>
     </div>
   );
 }
@@ -301,6 +351,8 @@ export interface BarRowProps {
   now?: { index: number; progress: number; downbeat?: boolean };
   /** The bar the metronome will start on, by its place in the row (R-11.2). */
   start?: number;
+  /** The visual editor's selection, marks and lines (SPEC-13). */
+  edit?: BarRowEdit;
 }
 
 /**
@@ -321,6 +373,7 @@ export function BarRow({
   size = "lg",
   now,
   start,
+  edit,
 }: BarRowProps) {
   const labels: Required<BarLabels> = { ...DEFAULT_BAR_LABELS, ...given };
   // As many columns as the row has bars, as the approved prototype draws it; a pickup is narrower.
@@ -329,13 +382,15 @@ export function BarRow({
       ? 1
       : Math.max(bar.pickup / meterOf(bar, row, meter).beats, PICKUP_MIN),
   );
+  // The visual editor keeps a row's width in bars, so a short row isn't stretched (R-13.10).
+  const empty = Math.max(0, (edit?.slots ?? 0) - row.bars.length);
   const bars = {
-    "--chart-bars": Math.max(1, row.bars.length),
+    "--chart-bars": Math.max(1, row.bars.length + empty),
     // On a phone in portrait a row wraps into lines of two bars (R-03.8, chart.css).
     "--chart-bars-phone": Math.min(2, Math.max(1, row.bars.length)),
   } as CSSProperties & Record<string, unknown>;
   if (weights.some((weight) => weight !== 1)) {
-    bars["--chart-bar-columns"] = weights
+    bars["--chart-bar-columns"] = [...weights, ...Array<number>(empty).fill(1)]
       .map((weight) => `minmax(calc(var(--chart-bar-min-width) * ${weight}), ${weight}fr)`)
       .join(" ");
   }
@@ -353,7 +408,7 @@ export function BarRow({
         })
       : "";
   return (
-    <div className={`cd-chart cd-chart--${size}`}>
+    <div className={`cd-chart cd-chart--${size}${edit ? " cd-chart--editable" : ""}`}>
       {row.keyChange && (
         <div className="cd-chart__key-change">
           {labels.keyChange(keyName(formatter.rowKey(row)))}
@@ -377,6 +432,8 @@ export function BarRow({
                 ? { progress: now.progress, isDownbeat: now.downbeat === true }
                 : {})}
               isStart={start === index}
+              index={index}
+              edit={edit}
             />
           ))}
         </div>

@@ -39,6 +39,7 @@ test("T-1301 a signed-in person gets every section; only admins get Administrati
     "Songs",
     "New version",
     "Chart editor",
+    "Visual editor",
     "Director's notes",
     "Bands",
     "Personal space",

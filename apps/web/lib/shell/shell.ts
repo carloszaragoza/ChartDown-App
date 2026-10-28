@@ -33,6 +33,7 @@ export type NavItem =
   | "catalog"
   | "newVersion"
   | "editor"
+  | "visualEditor"
   | "notes"
   | "bands"
   | "personal"
@@ -58,6 +59,8 @@ export function currentItem(pathname: string, personalBand: string | null): NavI
   if (starts("/catalog") || starts("/songs")) return "catalog";
   if (pathname === "/versions/new") return "newVersion";
   if (pathname === "/versions/mine") return "editor";
+  if (pathname === "/visual/new" || /^\/versions\/[^/]+\/visual$/.test(pathname))
+    return "visualEditor";
   if (/^\/versions\/[^/]+\/notes$/.test(pathname)) return "notes";
   if (/^\/versions\/[^/]+\/(edit|history|revisions\/\d+)$/.test(pathname)) return "editor";
   return null;

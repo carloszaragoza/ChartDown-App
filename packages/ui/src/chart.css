@@ -1109,3 +1109,98 @@
 .cd-stand-stack[data-layout="song"] .cd-chart {
   --chart-bar-min-width: calc(var(--spacing-12) * 1.5 * var(--stand-scale, 1));
 }
+
+/* The visual editor (SPEC-13): the chart is written on itself. Each of a bar's three lines can be
+   chosen (R-13.4); the selected bar takes the selection blue's outline (R-13.3), the one being
+   written in its tint too, and a bar that needs attention the warning's amber with its icon
+   (R-13.8). Never color alone: an outline, a tint and the editor's words. */
+.cd-chart--editable .cd-chart__bar {
+  cursor: text;
+  position: relative;
+}
+.cd-chart--editable [data-line] {
+  min-block-size: 1.2em;
+  border-radius: var(--radius-inner);
+}
+/* The indications and the lyric, above and below the chords, are the same slot in the editor:
+   one height, one inset, and both shown while the bar is written, so the bar reads symmetric
+   (owner's review, October 27, 2026). */
+.cd-chart--editable .cd-chart__tags,
+.cd-chart--editable .cd-chart__lyric {
+  display: flex;
+  align-items: center;
+  min-block-size: calc(var(--font-size-sm) * 2);
+  padding-inline: var(--spacing-2);
+}
+.cd-chart--editable .cd-chart__bar--editing .cd-chart__tags,
+.cd-chart--editable .cd-chart__bar--editing .cd-chart__lyric {
+  background: color-mix(in srgb, var(--color-background-blue) 50%, transparent);
+}
+.cd-chart--editable .cd-chart__bar:hover [data-line]:hover {
+  background: color-mix(in srgb, var(--color-background-blue) 50%, transparent);
+}
+.cd-chart__bar--selected {
+  background: color-mix(in srgb, var(--color-background-blue) 70%, transparent);
+  border-radius: var(--radius-inner);
+  outline: calc(var(--border-width) * 2) solid var(--color-border-blue);
+  outline-offset: calc(var(--border-width) * -2);
+}
+.cd-chart__bar--editing {
+  background: color-mix(in srgb, var(--color-background-blue) 40%, transparent);
+}
+.cd-chart__bar--flagged {
+  background: var(--color-warning-muted);
+  box-shadow: inset 0 calc(var(--border-width) * -3) 0 var(--color-warning);
+}
+/* A chord ChartDown doesn't read, as the editor draws it (R-13.4): red with a wavy underline. */
+.cd-chart__unknown {
+  color: var(--color-error);
+  text-decoration: underline wavy var(--color-error);
+  text-underline-offset: 0.2em;
+}
+/* The field a line is typed in: the line's own type, so what is typed looks as it will be drawn. */
+.cd-chart__input {
+  inline-size: 100%;
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  border-block-end: calc(var(--border-width) * 2) solid var(--color-border-blue);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+.cd-chart__lyric .cd-chart__input {
+  font-style: italic;
+}
+/* The chords line is written at the chart's size, in its numbers, so a bar looks the same while
+   it is typed; in the editor it keeps room for them even when empty (owner's review). */
+.cd-chart__spread .cd-chart__input {
+  font-family: var(--chart-font-numbers);
+  font-size: var(--chart-chord-size);
+  font-weight: var(--chart-chord-weight);
+  line-height: 1.15;
+  text-align: center;
+}
+.cd-chart--editable .cd-chart__spread,
+.cd-chart--editable .cd-chart__grid {
+  min-block-size: calc(var(--chart-chord-size) * 1.4);
+}
+/* A repeated section's bars in the visual editor: drawn as the original, never written in. */
+.cd-visual-repeat .cd-chart__bar {
+  cursor: default;
+}
+.cd-visual-repeat [data-line]:hover {
+  background: none;
+}
+/* A drag over a bar or a chord shows where a tool lands (R-13.7). */
+.cd-chart__bar[data-drop="true"] {
+  outline: calc(var(--border-width) * 2) dashed var(--color-border-blue);
+  outline-offset: calc(var(--border-width) * -2);
+}
+
+/* The visual editor's Add a section: a full-width dashed slot at the chart's end (R-13.3). */
+.cd-chart__add {
+  border: var(--border-width) dashed var(--color-border-emphasized);
+  border-radius: var(--radius-container);
+}
