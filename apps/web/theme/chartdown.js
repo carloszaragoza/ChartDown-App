@@ -496,6 +496,11 @@ export const chartdownTheme = {
       "base": {
         "padding": "var(--spacing-3)"
       }
+    },
+    "dropdown-menu": {
+      "base": {
+        "maxHeight": "calc(100dvb - var(--spacing-4) - var(--spacing-4))"
+      }
     }
   },
   __onDark: {
