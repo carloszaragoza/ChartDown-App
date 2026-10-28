@@ -1,8 +1,9 @@
 "use client";
 
-import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useInView } from "motion/react";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import styles from "./landing.module.css";
+import { useStill } from "./motion";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 // The opening curtain and the first rise take about this long; the first change waits for them.
@@ -74,7 +75,7 @@ function Slot({
 export function Headline({ pairs, same }: { pairs: HeadlinePair[]; same: string }) {
   const ref = useRef<HTMLHeadingElement>(null);
   const inView = useInView(ref);
-  const still = useReducedMotion();
+  const still = useStill();
   const [at, setAt] = useState(0);
   // The order is drawn at the first change, so the server and the first render agree.
   const [order, setOrder] = useState<number[] | null>(null);

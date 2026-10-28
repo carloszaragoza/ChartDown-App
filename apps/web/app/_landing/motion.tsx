@@ -4,15 +4,15 @@ import {
   AnimatePresence,
   motion,
   MotionConfig,
+  MotionGlobalConfig,
   useInView,
   useMotionValue,
-  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
   type MotionValue,
 } from "motion/react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { BarsView } from "./BarsView";
 import type { DemoBar, DemoSection } from "./bars";
 import styles from "./landing.module.css";
@@ -36,6 +36,38 @@ function reveal(still: boolean | null, amount = 0.25) {
     : ({ initial: "hidden", whileInView: "shown", viewport: { once: true, amount } } as const);
 }
 
+const STILL = "(prefers-reduced-motion: reduce)";
+
+/** With reduced motion every animation jumps to its end, its delays included (T-2853). */
+const skipWhenStill = () => {
+  MotionGlobalConfig.skipAnimations = window.matchMedia(STILL).matches;
+};
+// Before the page hydrates: it changes no markup, only how animations run.
+if (typeof window !== "undefined") skipWhenStill();
+
+const onStillChange = (change: () => void) => {
+  const query = window.matchMedia(STILL);
+  const changed = () => {
+    skipWhenStill();
+    change();
+  };
+  query.addEventListener("change", changed);
+  return () => query.removeEventListener("change", changed);
+};
+
+/**
+ * The system's reduced-motion choice (T-2853). While the page hydrates it is what the server could
+ * draw, unknown (null), so the browser's first render matches the server's page; the real choice
+ * follows at once. Each still path then sets its final state outright.
+ */
+export function useStill(): boolean | null {
+  return useSyncExternalStore(
+    onStillChange,
+    () => window.matchMedia(STILL).matches,
+    () => null,
+  );
+}
+
 /** The landing's motion settings: the system's reduced-motion choice wins. */
 export function MotionRoot({ children }: { children: ReactNode }) {
   return <MotionConfig reducedMotion="user">{children}</MotionConfig>;
@@ -54,7 +86,7 @@ export function Rise({
   scale?: boolean;
   className?: string | undefined;
 }) {
-  const still = useReducedMotion();
+  const still = useStill();
   return (
     <motion.div
       className={className}
@@ -77,7 +109,7 @@ export function Rise({
 export function Words({ text, accent }: { text: string; accent?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.4 });
-  const still = useReducedMotion();
+  const still = useStill();
   const all = [
     ...text.split(" ").map((word) => ({ word, red: false })),
     ...(accent ? accent.split(" ").map((word) => ({ word, red: true })) : []),
@@ -110,13 +142,16 @@ export function Words({ text, accent }: { text: string; accent?: string }) {
  */
 export function TiltWindow({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
-  const still = useReducedMotion();
+  const still = useStill();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start 0.2"] });
   const rotateX = useTransform(scrollYProgress, [0, 1], [34, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], [0.9, 1]);
   return (
     <div ref={ref} className={styles.tiltStage}>
-      <motion.div style={still ? {} : { rotateX, scale }} className={styles.tilt}>
+      <motion.div
+        style={still ? { rotateX: 0, scale: 1 } : { rotateX, scale }}
+        className={styles.tilt}
+      >
         {children}
       </motion.div>
     </div>
@@ -126,14 +161,14 @@ export function TiltWindow({ children }: { children: ReactNode }) {
 /** Two rows of the app's words, sliding opposite ways as the page scrolls. */
 export function Marquee({ words }: { words: string[] }) {
   const ref = useRef<HTMLDivElement>(null);
-  const still = useReducedMotion();
+  const still = useStill();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const left = useTransform(scrollYProgress, [0, 1], ["0%", "-28%"]);
   const right = useTransform(scrollYProgress, [0, 1], ["-28%", "0%"]);
   const row = (x: MotionValue<string>, outline: boolean) => (
     <motion.div
       className={outline ? `${styles.marqueeRow} ${styles.marqueeOutline}` : styles.marqueeRow}
-      style={still ? {} : { x }}
+      style={still ? { x: 0 } : { x }}
     >
       {[0, 1, 2].flatMap((copy) =>
         words.map((word, index) => (
@@ -168,7 +203,7 @@ export function Chat({
       className={className}
       role="group"
       aria-label={label}
-      {...reveal(useReducedMotion(), 0.35)}
+      {...reveal(useStill(), 0.35)}
       variants={{ shown: { transition: { staggerChildren: 0.42, delayChildren: 0.2 } } }}
     >
       {items.map((item, index) =>
@@ -212,7 +247,7 @@ export function Stagger({
   return (
     <List
       className={className}
-      {...reveal(useReducedMotion(), 0.3)}
+      {...reveal(useStill(), 0.3)}
       variants={{ shown: { transition: { staggerChildren: 0.14, delayChildren: 0.2 } } }}
     >
       {items.map((item) => (
@@ -234,11 +269,16 @@ export function Stagger({
 /** A large figure that drifts slower than the page behind a feature. */
 export function Drift({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
-  const still = useReducedMotion();
+  const still = useStill();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], [80, -80]);
   return (
-    <motion.div ref={ref} className={styles.drift} style={still ? {} : { y }} aria-hidden="true">
+    <motion.div
+      ref={ref}
+      className={styles.drift}
+      style={still ? { y: 0 } : { y }}
+      aria-hidden="true"
+    >
       {children}
     </motion.div>
   );
@@ -248,7 +288,7 @@ export function Drift({ children }: { children: ReactNode }) {
 function useCycle(length: number, every: number) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { amount: 0.5 });
-  const still = useReducedMotion();
+  const still = useStill();
   const [index, setIndex] = useState(0);
   useEffect(() => {
     if (!inView || still || length < 2) return;
@@ -308,7 +348,7 @@ export function KeyFlip({
 export function WriteIn({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.5 });
-  const still = useReducedMotion();
+  const still = useStill();
   return (
     <span ref={ref}>
       <motion.span
@@ -374,7 +414,7 @@ export function DarkBand({
   id: string;
 }) {
   const ref = useRef<HTMLElement>(null);
-  const still = useReducedMotion();
+  const still = useStill();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start 0.2"] });
   const clipPath = useTransform(
     scrollYProgress,
@@ -382,7 +422,12 @@ export function DarkBand({
     ["inset(0% 6% 0% 6% round 40px)", "inset(0% 0% 0% 0% round 0px)"],
   );
   return (
-    <motion.section ref={ref} id={id} className={className} style={still ? {} : { clipPath }}>
+    <motion.section
+      ref={ref}
+      id={id}
+      className={className}
+      style={still ? { clipPath: "none" } : { clipPath }}
+    >
       {children}
     </motion.section>
   );
@@ -400,7 +445,7 @@ export function TypeLines({
     <motion.pre
       className={styles.code}
       aria-label={label}
-      {...reveal(useReducedMotion(), 0.4)}
+      {...reveal(useStill(), 0.4)}
       variants={{ shown: { transition: { staggerChildren: 0.16 } } }}
     >
       <code>
@@ -436,32 +481,27 @@ function ReadWord({
   return <motion.span style={{ opacity }}>{word} </motion.span>;
 }
 
-/** The founder's words light up as they are read. */
+/**
+ * The founder's words light up as they are read. They are drawn word by word for everyone, so the
+ * server's page and the browser's agree (T-2853: a reduced-motion branch here broke hydration);
+ * with reduced motion the stylesheet lights them all at once.
+ */
 export function ReadQuote({ text }: { text: string }) {
   const ref = useRef<HTMLQuoteElement>(null);
-  const still = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.85", "end 0.5"] });
   const words = text.split(" ");
   return (
     <blockquote ref={ref} className={styles.quote}>
-      {still
-        ? text
-        : words.map((word, index) => (
-            <ReadWord
-              key={index}
-              word={word}
-              progress={scrollYProgress}
-              at={index}
-              of={words.length}
-            />
-          ))}
+      {words.map((word, index) => (
+        <ReadWord key={index} word={word} progress={scrollYProgress} at={index} of={words.length} />
+      ))}
     </blockquote>
   );
 }
 
 /** A button that leans toward the pointer, only where there is a fine pointer. */
 export function Magnetic({ children }: { children: ReactNode }) {
-  const still = useReducedMotion();
+  const still = useStill();
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const springX = useSpring(x, { stiffness: 300, damping: 20 });
@@ -469,7 +509,7 @@ export function Magnetic({ children }: { children: ReactNode }) {
   return (
     <motion.span
       className={styles.magnetic}
-      style={still ? {} : { x: springX, y: springY }}
+      style={still ? { x: 0, y: 0 } : { x: springX, y: springY }}
       onPointerMove={(event) => {
         if (still || event.pointerType !== "mouse") return;
         const box = event.currentTarget.getBoundingClientRect();
