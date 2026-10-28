@@ -542,7 +542,7 @@ export async function HomeView({
                 <Token
                   key={instrument.slug}
                   label={instrument.name}
-                  color="red"
+                  color="purple"
                   size="sm"
                   {...(hasInstrumentIcon(instrument.slug)
                     ? { icon: <Icon name={instrument.slug} size={16} /> }

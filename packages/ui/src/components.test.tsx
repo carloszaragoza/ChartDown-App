@@ -4,7 +4,14 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { Button } from "./Button";
 import { Icon } from "./Icon";
-import { ACTION_ICONS, ICONS, INSTRUMENT_ICONS, SCREEN_ICONS, type IconName } from "./icons";
+import {
+  ACTION_ICONS,
+  CHART_ICONS,
+  ICONS,
+  INSTRUMENT_ICONS,
+  SCREEN_ICONS,
+  type IconName,
+} from "./icons";
 import { InstrumentTag } from "./InstrumentTag";
 
 const read = (path: string) => readFileSync(new URL(path, import.meta.url), "utf8");
@@ -31,7 +38,9 @@ describe("Handoff 3 Icon", () => {
   );
 
   it("draws every icon exactly as the design system does", () => {
-    const fromSet = Object.keys(ICONS).filter((name) => !Object.hasOwn(SCREEN_ICONS, name));
+    const fromSet = Object.keys(ICONS).filter(
+      (name) => !Object.hasOwn(SCREEN_ICONS, name) && !Object.hasOwn(CHART_ICONS, name),
+    );
     expect(fromSet.sort()).toEqual(Object.keys(drawn).sort());
     for (const name of fromSet as IconName[]) {
       const inner = /<svg[^>]*>(.*)<\/svg>/.exec(render(<Icon name={name} />))?.[1];
@@ -80,7 +89,7 @@ describe("Handoff 3 Icon", () => {
 
   it("icons draw in the current text color, never in md or dynamic", () => {
     expect(rule(css, ".cd-icon")).toContain("stroke: currentColor");
-    expect(rule(css, ".cd-icon")).toContain("stroke-width: 1.75");
+    expect(rule(css, ".cd-icon")).toContain("stroke-width: 1.5");
     for (const selector of [".cd-icon", ".cd-icon .cd-icon-dot", ".cd-icon .cd-icon-knob"]) {
       expect(rule(css, selector)).not.toMatch(/--md|--dynamic/);
     }

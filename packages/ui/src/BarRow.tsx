@@ -237,15 +237,23 @@ function OneBar({
               </span>
             ))}
             {bar.cues.map((cue, index) => {
+              const everyone = cue.roles.length === 0 || cue.roles.includes("everyone");
               const who = [
                 cue.passes.length > 0 ? passesText(cue.passes) : "",
-                cue.roles.includes("everyone") ? "" : cue.roles.map(labels.instrument).join(", "),
+                everyone ? "" : cue.roles.map(labels.instrument).join(", "),
               ]
                 .filter(Boolean)
                 .join(" ");
               return (
                 <span key={index} className="cd-chart__cue">
-                  {who && <b className="cd-chart__cue-role">{who} </b>}
+                  {who && (
+                    <b
+                      className="cd-chart__cue-role"
+                      data-for={everyone ? "everyone" : "instruments"}
+                    >
+                      {who}{" "}
+                    </b>
+                  )}
                   {cue.text}
                 </span>
               );

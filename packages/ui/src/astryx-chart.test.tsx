@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { BarRow } from "./BarRow";
+import { CHART_ICONS } from "./icons";
 import { MDNotes } from "./MDNotes";
 
 const render = (node: React.ReactElement) => renderToStaticMarkup(node);
@@ -161,7 +162,7 @@ describe("T-1309 the chart viewer", () => {
   it("T-1309 a lyric landmark sits under the beats, and cues name their instrument", () => {
     const [html] = draw('## Build\n{p} 1 "Morning on the road" | {cresc} 4 {drums: in}\n');
     expect(html).toMatch(/cd-chart__lyric">“Morning on the road”</);
-    expect(html).toMatch(/cd-chart__cue-role">Drums </);
+    expect(html).toMatch(/cd-chart__cue-role" data-for="instruments">Drums </);
     expect(text(html!)).toContain("cresc.");
   });
 
@@ -305,5 +306,27 @@ describe("T-1301 MDNotes", () => {
     // Everyone's notes first, then instruments, then plain notes.
     expect(text(html)).toBe("MD Open it up. Drums Light groove. A plain note.");
     expect(html).toMatch(/<svg class="cd-icon"/);
+  });
+
+  it("T-2850 the MD's Token is the theme's red (Rosewood) with the baton; an instrument's is purple with its icon", () => {
+    const html = render(
+      <MDNotes
+        instrumentName={name}
+        notes={[
+          { md: true, roles: [], text: "Open it up.", passes: [2] },
+          { md: true, roles: ["drums"], text: "Light groove.", passes: [1] },
+        ]}
+      />,
+    );
+    const tokens = [...html.matchAll(/data-color="(\w+)"[^>]*>(.*?)<\/span><\/span>/g)];
+    const md = tokens.find(([, , inner]) => inner?.endsWith(">MD"));
+    expect(md?.[1]).toBe("red");
+    expect(md?.[2]).toContain(CHART_ICONS.md);
+    const drums = tokens.find(([, , inner]) => inner?.endsWith(">Drums"));
+    expect(drums?.[1]).toBe("purple");
+    expect(drums?.[2]).toContain('<ellipse cx="12" cy="9"');
+    // A pass's Token takes the color of who the note is for.
+    expect(html.match(/data-color="(\w+)"[^>]*><span[^>]*>2x</)?.[1]).toBe("red");
+    expect(html.match(/data-color="(\w+)"[^>]*><span[^>]*>1x</)?.[1]).toBe("purple");
   });
 });

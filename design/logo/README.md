@@ -1,6 +1,6 @@
 # ChartDown logo kit
 
-Final logo: concept 3C, One bar (rounded). Two bar lines and four rhythm slashes; the first beat, in red pencil, is the MD's cue.
+Final logo: concept 3C, One bar (rounded). Two bar lines and four rhythm slashes; the first beat, in Rosewood, is the MD's cue.
 Start with `guide.pdf` (one page: clear space, minimum sizes, colors, do and don't).
 
 ## svg/ and png/  (svg = master, png = transparent; vector PDFs are in the original kit)
@@ -35,8 +35,8 @@ Color versions: `color-on-light`, `color-on-dark`, `black`, `white`. All text is
 `packages/ui` `ChartDownLogo`: symbol, horizontal or stacked; `app` and `mono` options; colors from `--chartdown-ink` and `--chartdown-cue`.
 
 ```css
-:root { --chartdown-ink: #16212C; --chartdown-cue: #B8322A; }
-[data-theme="dark"] { --chartdown-ink: #E6EDF3; --chartdown-cue: #FF8478; }
+:root { --chartdown-ink: #16212C; --chartdown-cue: #94484A; }
+[data-theme="dark"] { --chartdown-ink: #E6EDF3; --chartdown-cue: #E5ABA8; }
 ```
 
 ## Colors (Papel y tinta)
