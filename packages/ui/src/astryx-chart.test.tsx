@@ -291,6 +291,20 @@ describe("T-1504 the bar to start on", () => {
   });
 });
 
+describe("T-3014 one baseline in the visual editor", () => {
+  it("R-13.3 the chords line has one height and every bar's chords share the chart's baseline", () => {
+    const css = readFileSync(join(__dirname, "chart.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const editable = [...css.matchAll(/([^{}]*cd-chart--editable[^{}]*)\{([^}]*)\}/g)];
+    const chords = editable.find(([, selector]) => selector?.includes(".cd-chart__spread,"));
+    expect(chords?.[2]).toMatch(/(^|[^-])block-size: calc\(var\(--chart-chord-size\) \* 1\.4\)/);
+    expect(chords?.[2]).toContain("padding-block");
+    // No rule centres a bar's chords in its own box: bars with and without beat marks drift apart.
+    for (const [selector = "", body = ""] of editable.map(([, a, b]) => [a, b]))
+      if (/spread|grid|cell/.test(selector))
+        expect(body, selector).not.toMatch(/align-items:\s*center/);
+  });
+});
+
 describe("T-1301 MDNotes", () => {
   it("R-06.1 a note for everyone says MD; an instrument's note says the instrument; never color alone", () => {
     const html = render(

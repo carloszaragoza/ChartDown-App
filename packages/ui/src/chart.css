@@ -1186,19 +1186,23 @@
   font-family: var(--chart-font-numbers);
   font-size: var(--chart-chord-size);
   font-weight: var(--chart-chord-weight);
-  line-height: 1.15;
+  /* The chords' own line height, so writing in a bar never moves its row (T-3014). */
+  line-height: 1;
   text-align: center;
 }
+/* The room is the same air above and below the chords (owner's review, October 28, 2026), while
+   every bar keeps the chart's one baseline: a bar with beat marks and one without sit level, as
+   they play (T-3014: centering each bar's chords in its own box moved them apart). */
 .cd-chart--editable .cd-chart__spread,
 .cd-chart--editable .cd-chart__grid {
-  min-block-size: calc(var(--chart-chord-size) * 1.4);
+  block-size: calc(var(--chart-chord-size) * 1.4);
+  padding-block: calc(var(--chart-chord-size) * 0.2);
+  box-sizing: border-box;
 }
-/* Within that room the chords sit in the middle, the same air above as below (owner's review,
-   October 28, 2026). */
-.cd-chart--editable .cd-chart__spread,
-.cd-chart--editable .cd-chart__grid,
-.cd-chart--editable .cd-chart__cell {
-  align-items: center;
+/* The field fills that room exactly, so writing in a bar never moves its row (T-3014). */
+.cd-chart--editable .cd-chart__spread .cd-chart__input {
+  block-size: 100%;
+  box-sizing: border-box;
 }
 /* A repeated section's bars in the visual editor: drawn as the original, never written in. */
 .cd-visual-repeat .cd-chart__bar {
