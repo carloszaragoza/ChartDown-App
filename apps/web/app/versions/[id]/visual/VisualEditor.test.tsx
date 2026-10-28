@@ -84,18 +84,17 @@ describe("T-3003 the visual editor", () => {
     expect(html).toMatch(/draggable="true"/);
   });
 
-  it("R-13.7 the tools are grouped by what they apply to: chord, bar, road map, dynamics", () => {
+  it("R-13.7 the tools are grouped by what they apply to, one group at a time, Chord first", () => {
     const html = wrap("en", <VisualEditor {...props("---\nkey: G\n---\n\n## Verse 1\n1\n")} />);
-    const groups = ["Chord", "Bar", "Road map", "Dynamics"].map((name) =>
-      html.indexOf(`aria-label="${name}"`),
-    );
-    expect(groups.every((at) => at > 0)).toBe(true);
-    expect([...groups].sort((a, b) => a - b)).toEqual(groups);
-    // Each tool sits in its group: the push with the chord, the coda in the road map.
-    expect(html.indexOf("Push")).toBeGreaterThan(groups[0] as number);
-    expect(html.indexOf("Push")).toBeLessThan(groups[1] as number);
-    expect(html.lastIndexOf("D.S. al Coda")).toBeGreaterThan(groups[2] as number);
-    expect(html.lastIndexOf(">mf</text>")).toBeGreaterThan(groups[3] as number);
+    // The four groups' names, in order, in one row; the chords line's group shows its tools.
+    const names = ["Chord", "Bar", "Road map", "Dynamics"].map((name) => html.indexOf(`>${name}<`));
+    expect(names.every((at) => at > 0)).toBe(true);
+    expect([...names].sort((a, b) => a - b)).toEqual(names);
+    expect(html).toContain('role="group" aria-label="Chord"');
+    expect(html).toContain(">Push<");
+    expect(html).toContain("Hold until a cue");
+    // The other groups' tools wait for their tab, so the panel stays compact.
+    expect(html).not.toContain(">Repeat start<");
     expect(html).toContain("Select a bar");
   });
 
@@ -103,10 +102,9 @@ describe("T-3003 the visual editor", () => {
     for (const [action, Icon] of Object.entries(VISUAL_ICONS)) {
       expect(typeof Icon, action).toMatch(/function|object/);
     }
-    const html = wrap("en", <VisualEditor {...props("---\nkey: G\n---\n\n## Verse 1\n1\n")} />);
-    // The coda tool: its icon (a circle crossed) beside its name.
-    expect(html).toMatch(/class="cd-icon[^"]*"[^>]*><circle cx="12" cy="12" r="6"\/>.*?Coda</s);
-    expect(html).toContain(">mf</text>");
+    // The coda tool: its icon, a circle crossed, as the chart draws it; mf as its letters.
+    expect(renderToString(<VISUAL_ICONS.Coda />)).toContain('<circle cx="12" cy="12" r="6"/>');
+    expect(renderToString(<VISUAL_ICONS.mf />)).toContain(">mf</text>");
   });
 
   it("R-13.16 every action's icon is ChartDown's own drawing, never a generic one", () => {

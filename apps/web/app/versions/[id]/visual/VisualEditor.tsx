@@ -4,7 +4,6 @@ import { Banner } from "@astryxdesign/core/Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
 import { Dialog } from "@astryxdesign/core/Dialog";
-import { Grid, GridSpan } from "@astryxdesign/core/Grid";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
@@ -191,6 +190,8 @@ interface History {
 }
 
 /** What a tool does to a bar, or to one of its chords (R-13.7). */
+type ToolGroup = "chord" | "bar" | "roadMap" | "dynamics";
+
 type Tool =
   | { kind: "mark"; mark: ChordMark }
   | { kind: "indication"; text: string }
@@ -621,7 +622,7 @@ export function VisualEditor({
     >
       <ToggleButton
         label={text}
-        size="lg"
+        size="md"
         icon={icon(key)}
         isPressed={isOn(tool)}
         tooltip={selected ? (TYPED[key] ?? text) : t("tools.choose")}
@@ -635,21 +636,24 @@ export function VisualEditor({
 
   // A group of tools says what it applies to; the group of the line being written is
   // highlighted (R-13.7).
-  const toolGroup = (name: string, hint: string, active: boolean, tools: ReactNode) => (
-    <Card variant={active ? "blue" : "muted"} padding={2}>
-      <VStack gap={1.5}>
-        <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
-          <Text type="label" weight="semibold">
-            {name}
-          </Text>
-          <Text type="supporting">{selected ? hint : t("tools.group.choose")}</Text>
-        </HStack>
-        <HStack gap={1} wrap="wrap" role="group" aria-label={name}>
-          {tools}
-        </HStack>
-      </VStack>
-    </Card>
+  // The tool group shown: the one chosen, while the same line is being written; else the line's
+  // own (Chord for the chords, Dynamics for the indications) (R-13.7).
+  const [pickedGroup, setPickedGroup] = useState<{ group: ToolGroup; line: Line | null } | null>(
+    null,
   );
+  const lineNow = editing?.line ?? null;
+  const shownGroup: ToolGroup =
+    pickedGroup && pickedGroup.line === lineNow
+      ? pickedGroup.group
+      : lineNow === "tags"
+        ? "dynamics"
+        : "chord";
+  const TOOL_HINTS: Record<ToolGroup, string> = {
+    chord: t("tools.group.chordHint"),
+    bar: t("tools.group.barHint"),
+    roadMap: t("tools.group.barHint"),
+    dynamics: t("tools.group.dynamicsHint"),
+  };
 
   if (warnings.length > 0) {
     // A chart written by hand with warnings is fixed in Text first (R-13.8).
@@ -1357,68 +1361,80 @@ export function VisualEditor({
                   />
                 )}
               </HStack>
-              <Grid columns={{ minWidth: 420, max: 2 }} gap={2}>
-                <GridSpan columns="full">
-                  {toolGroup(
-                    t("tools.group.chord"),
-                    t("tools.group.chordHint"),
-                    editing?.line === "chords",
-                    <>
-                      {CHORD_MARKS.map((mark) =>
-                        toolButton({ kind: "mark", mark }, t(`tools.${mark}`), mark),
+              {/* One group at a time (R-13.7; owner's review, October 28, 2026). */}
+              <Card variant="muted" padding={1.5}>
+                <VStack gap={1}>
+                  <HStack gap={2} vAlign="center" wrap="wrap">
+                    <SegmentedControl
+                      label={t("tools.label")}
+                      value={shownGroup}
+                      onChange={(value) =>
+                        setPickedGroup({
+                          group: value as ToolGroup,
+                          line: editing?.line ?? null,
+                        })
+                      }
+                    >
+                      <SegmentedControlItem value="chord" label={t("tools.group.chord")} />
+                      <SegmentedControlItem value="bar" label={t("tools.group.bar")} />
+                      <SegmentedControlItem value="roadMap" label={t("tools.group.roadMap")} />
+                      <SegmentedControlItem value="dynamics" label={t("tools.group.dynamics")} />
+                    </SegmentedControl>
+                    <Text type="supporting">
+                      {selected ? TOOL_HINTS[shownGroup] : t("tools.group.choose")}
+                    </Text>
+                  </HStack>
+                  <HStack
+                    gap={0.5}
+                    wrap="wrap"
+                    role="group"
+                    aria-label={t(`tools.group.${shownGroup}`)}
+                  >
+                    {shownGroup === "chord" && (
+                      <>
+                        {CHORD_MARKS.map((mark) =>
+                          toolButton({ kind: "mark", mark }, t(`tools.${mark}`), mark),
+                        )}
+                        <Button
+                          label={t("holdUntil.tool")}
+                          size="md"
+                          icon={icon("holdUntil")}
+                          tooltip={selected ? t("holdUntil.hint") : t("tools.choose")}
+                          isDisabled={!selected}
+                          onClick={() => selected && setHoldAt(selected)}
+                        />
+                      </>
+                    )}
+                    {shownGroup === "bar" && (
+                      <>
+                        {toolButton({ kind: "repeatStart" }, t("tools.repeatStart"), "repeatStart")}
+                        {toolButton({ kind: "repeatEnd" }, t("tools.repeatEnd"), "repeatEnd")}
+                        {toolButton(
+                          { kind: "ending", number: 1 },
+                          t("tools.ending", { number: 1 }),
+                          "ending1",
+                        )}
+                        {toolButton(
+                          { kind: "ending", number: 2 },
+                          t("tools.ending", { number: 2 }),
+                          "ending2",
+                        )}
+                        {toolButton({ kind: "pickup" }, t("tools.pickup"), "pickup")}
+                        {toolButton({ kind: "rest" }, t("tools.rest"), "rest")}
+                        {toolButton({ kind: "repeatBar" }, t("tools.repeatBar"), "repeatBar")}
+                      </>
+                    )}
+                    {shownGroup === "roadMap" &&
+                      NAVIGATION.map((word) =>
+                        toolButton({ kind: "indication", text: word }, word, word),
                       )}
-                      <Button
-                        label={t("holdUntil.tool")}
-                        size="lg"
-                        icon={icon("holdUntil")}
-                        tooltip={selected ? t("holdUntil.hint") : t("tools.choose")}
-                        isDisabled={!selected}
-                        onClick={() => selected && setHoldAt(selected)}
-                      />
-                    </>,
-                  )}
-                </GridSpan>
-                <GridSpan columns="full">
-                  {toolGroup(
-                    t("tools.group.bar"),
-                    t("tools.group.barHint"),
-                    selected !== null && editing === null,
-                    <>
-                      {toolButton({ kind: "repeatStart" }, t("tools.repeatStart"), "repeatStart")}
-                      {toolButton({ kind: "repeatEnd" }, t("tools.repeatEnd"), "repeatEnd")}
-                      {toolButton(
-                        { kind: "ending", number: 1 },
-                        t("tools.ending", { number: 1 }),
-                        "ending1",
+                    {shownGroup === "dynamics" &&
+                      DYNAMICS.map((word) =>
+                        toolButton({ kind: "indication", text: word }, word, word),
                       )}
-                      {toolButton(
-                        { kind: "ending", number: 2 },
-                        t("tools.ending", { number: 2 }),
-                        "ending2",
-                      )}
-                      {toolButton({ kind: "pickup" }, t("tools.pickup"), "pickup")}
-                      {toolButton({ kind: "rest" }, t("tools.rest"), "rest")}
-                      {toolButton({ kind: "repeatBar" }, t("tools.repeatBar"), "repeatBar")}
-                    </>,
-                  )}
-                </GridSpan>
-                {toolGroup(
-                  t("tools.group.roadMap"),
-                  t("tools.group.barHint"),
-                  false,
-                  NAVIGATION.map((word) =>
-                    toolButton({ kind: "indication", text: word }, word, word),
-                  ),
-                )}
-                {toolGroup(
-                  t("tools.group.dynamics"),
-                  t("tools.group.dynamicsHint"),
-                  editing?.line === "tags",
-                  DYNAMICS.map((word) =>
-                    toolButton({ kind: "indication", text: word }, word, word),
-                  ),
-                )}
-              </Grid>
+                  </HStack>
+                </VStack>
+              </Card>
             </VStack>
           </LayoutFooter>
         }
