@@ -2,6 +2,7 @@ import { WARNING_CODES } from "chartdown";
 import { describe, expect, it } from "vitest";
 import en from "../messages/en.json";
 import es from "../messages/es.json";
+import { LEGAL_TEXTS } from "../lib/legal/texts";
 import { DEFAULT_LOCALE, isLocale, LOCALES } from "./locales";
 
 type Messages = { [key: string]: string | Messages };
@@ -111,12 +112,14 @@ describe("R-01.5 interface in English by default, with Spanish as an option", ()
     expect(es.nav.catalog).toBe("Canciones");
     expect(en.catalog.title).toBe("Songs");
     expect(es.catalog.title).toBe("Canciones");
-    // The administration's instrument catalog keeps its name; legal texts live elsewhere.
+    // The administration's instrument catalog keeps its name.
     const instruments = (key: string) => key.startsWith("admin.instruments.");
     for (const [key, text] of Object.entries(english))
       if (!instruments(key)) expect(text, key).not.toMatch(/catalog/i);
     for (const [key, text] of Object.entries(spanish))
       if (!instruments(key)) expect(text, key).not.toMatch(/cat[aá]logo/i);
+    for (const text of Object.values(LEGAL_TEXTS).flatMap((doc) => Object.values(doc)))
+      expect(text).not.toMatch(/catalog|cat[aá]logo/i);
   });
 
   it("R-01.5 every parser warning has an English and a Spanish message with its values", () => {
