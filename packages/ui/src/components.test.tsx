@@ -143,9 +143,11 @@ describe("Handoff 3 Button", () => {
       ".cd-bar__cue-instrument",
       ".cd-note__md",
       ".cd-form__dot",
-      // The logo's first slash is the music director's cue (Design Handoff 7).
-      ".cd-logo",
     ]);
+  });
+
+  it("T-2852 the logo's first slash takes the brand red, never the MD's Rosewood", () => {
+    expect(rule(css, ".cd-logo")).toContain("--chartdown-cue: var(--brand)");
   });
 
   it("puts the next arrow after the text and other icons before it", () => {

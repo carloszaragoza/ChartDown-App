@@ -1,6 +1,6 @@
 /* The landing page, version 3 (T-1310): it looks like the app, always light, and moves.
    Built from the design tokens only: the surfaces, borders and tags are mixed from paper, ink,
-   rule and the MD red. Figtree is the app's text face; Barlow Condensed draws chart numbers.
+   rule, the MD's Rosewood and the brand red. Figtree is the app's text face; Barlow Condensed draws chart numbers.
    Every animation has a reduced-motion path at the end of this file. */
 
 .landing {
@@ -9,6 +9,7 @@
   --line: color-mix(in srgb, var(--rule) 40%, var(--paper));
   --line-strong: color-mix(in srgb, var(--rule) 70%, var(--paper));
   --md-bg: color-mix(in srgb, var(--md) 12%, var(--paper));
+  --brand-bg: color-mix(in srgb, var(--brand) 12%, var(--paper));
   --ink-soft: color-mix(in srgb, var(--ink-muted) 80%, var(--paper));
   --dark-muted: color-mix(in srgb, var(--ink-inverse) 74%, var(--ink));
   --container: 77.5rem;
@@ -37,7 +38,7 @@
   text-decoration: none;
 }
 .landing ::selection {
-  background: var(--md-bg);
+  background: var(--brand-bg);
   color: var(--ink);
 }
 .landing :focus-visible {
@@ -127,7 +128,7 @@
   }
 }
 .accent {
-  color: var(--md);
+  color: var(--brand);
 }
 /* "Every night." gets a pen stroke under it, drawn after it rises. */
 .underline {
@@ -256,6 +257,20 @@
   border-radius: var(--radius-md);
   background: var(--md-bg);
   color: var(--md);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+}
+/* The brand's tags (BETA, Sound familiar?): the brand red, apart from the MD's Rosewood. */
+.brandTag {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-md);
+  background: var(--brand-bg);
+  color: var(--brand);
   font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -677,7 +692,7 @@
   gap: 2.5rem;
 }
 .marqueeSlash {
-  color: var(--md);
+  color: var(--brand);
   -webkit-text-stroke: 0;
 }
 
@@ -737,7 +752,7 @@
   font-weight: 600;
 }
 .number {
-  color: var(--md);
+  color: var(--brand);
   font-family: var(--font-code);
   font-size: 0.8125rem;
   font-weight: 600;
@@ -805,7 +820,7 @@
   flex: none;
   padding: 0.2rem 0.4rem;
   border-radius: var(--radius-sm);
-  background: var(--md);
+  background: var(--brand);
   color: var(--ink-inverse);
   font-size: 0.6875rem;
   font-weight: 700;
@@ -1069,7 +1084,7 @@
   color: color-mix(in srgb, var(--ink-inverse) 55%, var(--ink));
 }
 .code_section {
-  color: color-mix(in srgb, var(--md) 55%, var(--ink-inverse));
+  color: color-mix(in srgb, var(--brand) 55%, var(--ink-inverse));
   font-weight: 600;
 }
 .code_note {

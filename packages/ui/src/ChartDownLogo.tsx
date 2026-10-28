@@ -67,7 +67,7 @@ export function ChartDownLogo({
   className,
   style,
 }: Props) {
-  const cue = mono ? ink : "var(--chartdown-cue, #94484A)";
+  const cue = mono ? ink : "var(--chartdown-cue, #D12F26)";
   const label = app ? "ChartDown App" : "ChartDown";
   const classes = className ? `cd-logo ${className}` : "cd-logo";
   const common = { role: "img", "aria-label": label, className: classes, style } as const;
