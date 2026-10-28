@@ -85,6 +85,12 @@ test("T-1310 the landing page works on a phone, with no sideways scrolling and 4
 });
 
 test("T-1310 with reduced motion every section shows its final state at once", async ({ page }) => {
+  // T-2853 the page the server sends and the browser's agree: no hydration error.
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error" && /hydrat/i.test(message.text())) errors.push(message.text());
+  });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await expect(page.locator("[aria-hidden='true']").first()).toBeAttached();
@@ -97,4 +103,16 @@ test("T-1310 with reduced motion every section shows its final state at once", a
     () => document.getAnimations().filter((animation) => animation.playState === "running").length,
   );
   expect(moving).toBe(0);
+  // Every word of the founder's quote is lit at once.
+  const dim = await page
+    .locator("blockquote span")
+    .evaluateAll((words) => words.filter((word) => getComputedStyle(word).opacity !== "1").length);
+  expect(dim).toBe(0);
+  // Nothing keeps the server's moving state: the chart window is not tilted.
+  const tilted = await page
+    .locator("[class*='tilt']")
+    .first()
+    .evaluate((element) => getComputedStyle(element).transform);
+  expect(["none", "matrix(1, 0, 0, 1, 0, 0)"]).toContain(tilted);
+  expect(errors).toEqual([]);
 });

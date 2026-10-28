@@ -1401,6 +1401,10 @@
   :global(html):has(.landing) {
     scroll-behavior: auto;
   }
+  /* The founder's quote is drawn word by word for everyone; still, every word is lit at once. */
+  .quote span {
+    opacity: 1 !important;
+  }
   .curtain {
     display: none;
   }
