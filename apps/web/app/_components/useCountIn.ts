@@ -62,6 +62,11 @@ export function useCountIn() {
   const [beat, setBeat] = useState<{ count: number; of: number } | null>(null);
   const [isCounting, setCounting] = useState(false);
   const running = useRef<(() => void) | null>(null);
+  // Read by the player's seek, which a chosen section or bar calls outside a render.
+  const counting = useRef(false);
+  useEffect(() => {
+    counting.current = isCounting;
+  }, [isCounting]);
 
   const stop = useCallback(() => {
     running.current?.();
@@ -159,5 +164,5 @@ export function useCountIn() {
     [stop],
   );
 
-  return { isOn, setOn, beat, isCounting, start, stop };
+  return { isOn, setOn, beat, isCounting, counting, start, stop };
 }
