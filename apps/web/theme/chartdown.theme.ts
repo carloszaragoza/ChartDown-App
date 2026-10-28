@@ -10,6 +10,17 @@ import { neutralTheme } from "@astryxdesign/theme-neutral";
 export const chartdownTheme = defineTheme({
   name: "chartdown",
   extends: neutralTheme,
+  tokens: {
+    // One meaning per color (owner's decision, October 27, 2026): the theme's red is Rosewood,
+    // the music director's color and the logo's first slash, calmer on a stand than Astryx's red.
+    // Errors keep Astryx's own red, so a form's error never reads as an MD note.
+    "--color-text-red": ["#94484a", "#e5aba8"],
+    "--color-icon-red": ["#94484a", "#e5aba8"],
+    "--color-background-red": ["#f6e8e7", "#33201f"],
+    "--color-border-red": ["#e5aba8", "#94484a"],
+    "--color-error": ["#76000c", "#ffc4be"],
+    "--color-error-muted": ["#ffc4be", "#ff98903d"],
+  },
   components: {
     button: {
       // Square at least, so a one-letter section in the song form ("I") is a whole touch target

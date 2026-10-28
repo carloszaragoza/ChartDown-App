@@ -20,9 +20,10 @@ const forEveryone = (note: MDNoteData) =>
   note.roles.length === 0 || note.roles.includes("everyone");
 
 /**
- * A section's notes (Design Handoff 2.0, section 3): a red Token with "MD" for the whole band, or
- * the instrument's name and icon, then the note. Never color alone: the Token's word carries the
- * meaning. Notes that aren't the music director's are plain secondary text.
+ * A section's notes (Design Handoff 2.0, section 3, and its colors of October 27, 2026): a
+ * Rosewood Token (the theme's red) with the baton and "MD" for the whole band, or a purple one
+ * with the instrument's name and icon, then the note. Never color alone: the Token's word and icon
+ * carry the meaning. Notes that aren't the music director's are plain secondary text.
  */
 export function MDNotes({ notes, instrumentName, limit }: MDNotesProps) {
   const ordered = orderNotes(notes);
@@ -34,21 +35,22 @@ export function MDNotes({ notes, instrumentName, limit }: MDNotesProps) {
       gap={limit ? 4 : 2}
       {...(limit ? { wrap: "wrap" as const, vAlign: "center" as const } : {})}
     >
-      {shown.map((note, index) =>
-        note.md ? (
+      {shown.map((note, index) => {
+        const color = forEveryone(note) ? "red" : "purple";
+        return note.md ? (
           <HStack key={index} gap={2} vAlign="center" wrap="wrap">
             {/* A note for one pass says so in words: "2x" before who it is for (spec 9.1). */}
             {note.passes && note.passes.length > 0 && (
-              <Token label={passesText(note.passes)} color="red" size="sm" />
+              <Token label={passesText(note.passes)} color={color} size="sm" />
             )}
             {forEveryone(note) ? (
-              <Token label="MD" color="red" size="sm" />
+              <Token label="MD" color="red" size="sm" icon={<Icon name="md" size={16} />} />
             ) : (
               note.roles.map((role) => (
                 <Token
                   key={role}
                   label={instrumentName(role)}
-                  color="red"
+                  color="purple"
                   size="sm"
                   {...(hasInstrumentIcon(role) ? { icon: <Icon name={role} size={16} /> } : {})}
                 />
@@ -60,8 +62,8 @@ export function MDNotes({ notes, instrumentName, limit }: MDNotesProps) {
           <Text key={index} color="secondary" as="p">
             {note.text}
           </Text>
-        ),
-      )}
+        );
+      })}
       {limit && hidden > 0 && <Text type="supporting">{limit.more(hidden)}</Text>}
     </Stack>
   );

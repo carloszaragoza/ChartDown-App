@@ -2,7 +2,7 @@ import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { ChartDownLogo } from "./ChartDownLogo";
 
-const cue = "var(--chartdown-cue, #B8322A)";
+const cue = "var(--chartdown-cue, #94484A)";
 
 describe("T-901 the ChartDown logo (concept 3C, One bar)", () => {
   it("T-901 the horizontal logo is one bar and the name, read as ChartDown", () => {

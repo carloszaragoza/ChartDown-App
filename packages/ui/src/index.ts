@@ -25,6 +25,7 @@ export { ChartDownLogo } from "./ChartDownLogo";
 export { Icon, type IconProps } from "./Icon";
 export {
   ACTION_ICONS,
+  CHART_ICONS,
   hasInstrumentIcon,
   ICONS,
   INSTRUMENT_ICONS,

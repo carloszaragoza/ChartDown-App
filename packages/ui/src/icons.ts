@@ -51,7 +51,29 @@ export const SCREEN_ICONS = {
   check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
 } as const;
 
-export const ICONS = { ...ACTION_ICONS, ...INSTRUMENT_ICONS, ...SCREEN_ICONS } as const;
+/**
+ * The chart's colors' own icons (owner's decision, October 27, 2026): drawn for ChartDown on
+ * Astryx's grid and line, never generic. Each color comes with its word and one of these.
+ */
+export const CHART_ICONS = {
+  /** The music director's baton (Rosewood). */
+  md: '<path d="M14.5 9.5 4.5 19.5"/><path d="m12.5 7.5 4 4"/><circle class="cd-icon-dot" cx="18.2" cy="5.8" r="1.8"/>',
+  /** An indication: a flag on a bar line (blue). */
+  indication: '<path d="M6 4v16"/><path d="M6 5h11l-2.5 3.5L17 12H6"/>',
+  /** A problem in a bar: two bar lines around an exclamation mark (yellow). */
+  problem:
+    '<path d="M4 5v14M20 5v14"/><path d="M12 7.5v6"/><circle class="cd-icon-dot" cx="12" cy="16.8" r="1.25"/>',
+  /** A chord not recognized: a dashed chord box around a question mark (yellow). */
+  unknownChord:
+    '<rect x="5" y="4" width="14" height="16" rx="2" stroke-dasharray="2.6 2.6"/><path d="M10 10a2 2 0 1 1 3 1.7c-.7.4-1 .9-1 1.6"/><circle class="cd-icon-dot" cx="12" cy="16.6" r="1.1"/>',
+} as const;
+
+export const ICONS = {
+  ...ACTION_ICONS,
+  ...INSTRUMENT_ICONS,
+  ...SCREEN_ICONS,
+  ...CHART_ICONS,
+} as const;
 export type IconName = keyof typeof ICONS;
 export type InstrumentIconName = keyof typeof INSTRUMENT_ICONS;
 

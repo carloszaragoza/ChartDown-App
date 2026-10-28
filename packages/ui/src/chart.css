@@ -40,8 +40,11 @@
   --chart-beat-weak-weight: var(--font-weight-normal);
 
   /* Meaning colors */
+  /* One meaning per color (October 27, 2026): the theme's red is Rosewood, the MD's; purple is
+     the instruments'. */
   --chart-md: var(--color-text-red);
   --chart-md-border: var(--color-border-red);
+  --chart-instrument: var(--color-text-purple);
   /* Blue = dynamics (CLAUDE.md, Handoff 1). chart-tokens.css maps this to --color-text-accent,
      but the neutral theme's accent is the ink, so the theme's blue text token is used instead. */
   --chart-dynamic: var(--color-text-blue);
@@ -280,6 +283,9 @@
   color: var(--chart-md);
   font-weight: var(--font-weight-bold);
 }
+.cd-chart__cue-role[data-for="instruments"] {
+  color: var(--chart-instrument);
+}
 .cd-chart__times {
   margin-inline-start: auto;
   font-weight: var(--font-weight-bold);
@@ -443,9 +449,10 @@
 
 /* The ChartDown text with its line numbers (owner's review, October 15, 2026): warnings and an
    import's review name lines, so the editor shows them. Lines don't wrap, so each number stays
-   beside its line; the numbers scroll with the text. A flagged number is marked: red for a
-   warning, amber for something to check (never color alone: it is also a button that selects
-   its line, named "Go to line N"). */
+   beside its line; the numbers scroll with the text. A flagged number is marked in yellow, the
+   color of a problem to fix (October 27, 2026; it was red, now the MD's), for a warning and for
+   something to check (never color alone: it is also a button that selects its line, named
+   "Go to line N"). */
 .cd-lines {
   position: relative;
 }
@@ -479,8 +486,8 @@
   --cd-lines-tint: var(--color-warning-muted);
 }
 .cd-lines__mark[data-flag="warning"] {
-  --cd-lines-ink: var(--color-error);
-  --cd-lines-tint: var(--color-error-muted);
+  --cd-lines-ink: var(--color-warning);
+  --cd-lines-tint: var(--color-warning-muted);
 }
 /* The heading of the section the player is in: the player's selection blue (T-2838). */
 .cd-lines__mark[data-flag="playing"] {
