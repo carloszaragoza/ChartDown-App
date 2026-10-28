@@ -1840,5 +1840,8 @@
     "newMember": "When your music director adds you to a set, it shows up here.",
     "createSet": "Create a set",
     "allSets": "See all sets"
+  },
+  "countIn": {
+    "label": "Count-in"
   }
 }

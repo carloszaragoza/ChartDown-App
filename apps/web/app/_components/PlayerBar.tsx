@@ -25,6 +25,7 @@ import {
   type RefObject,
 } from "react";
 import { sectionAt, sectionLabels, type VideoSection } from "../../lib/video/sections";
+import { MetronomeIcon } from "./MetronomeIcon";
 
 /**
  * Where a player across the bottom starts (T-2828): at the side navigation's edge, so it never
@@ -439,5 +440,37 @@ export function useMusicEnd(end: number | null, start: number) {
       } else stopped.current = false;
     },
     [end, start],
+  );
+}
+
+/**
+ * The Count-in switch in the player's top row (R-03.14, T-3023), and while it counts the beat, as
+ * the metronome's counter says it ("2 / 4").
+ */
+export function CountInSwitch({
+  isOn,
+  onChange,
+  beat,
+}: {
+  isOn: boolean;
+  onChange: (on: boolean) => void;
+  beat: { count: number; of: number } | null;
+}) {
+  const t = useTranslations("countIn");
+  return (
+    <span className="cd-player__count-in">
+      <ToggleButton
+        label={t("label")}
+        size="sm"
+        icon={<MetronomeIcon width="1.25em" height="1.25em" beat={beat?.count} />}
+        isPressed={isOn}
+        onPressedChange={(pressed) => onChange(pressed)}
+      >
+        {t("label")}
+      </ToggleButton>
+      <span role="status" className="cd-metronome-count">
+        {beat ? `${beat.count} / ${beat.of}` : ""}
+      </span>
+    </span>
   );
 }

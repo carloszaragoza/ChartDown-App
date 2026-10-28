@@ -15,7 +15,10 @@ import { barSeek, type ChartBar, videoClock } from "../../lib/video/clock";
 import { barStart, videoSections } from "../../lib/video/sections";
 import { shapedWave, windowWave } from "../../lib/video/wave";
 import { useDockRoom, useDockTarget } from "./DockRoom";
+import { countIn } from "../../lib/video/countIn";
+import { useCountIn } from "./useCountIn";
 import {
+  CountInSwitch,
   MusicPointsControls,
   PlayerVolume,
   SectionCells,
@@ -216,11 +219,28 @@ function AudioDock({
     if (element) element.currentTime = to;
     setNow(to);
   };
+  // Play counts one bar first when Count-in is on (R-03.14, T-3023); Pause also stops a count.
+  const counter = useCountIn();
   const toggle = () => {
     const element = audio.current;
     if (!element) return;
-    if (element.paused) void element.play();
-    else element.pause();
+    if (counter.isCounting) return counter.stop();
+    if (!element.paused) return element.pause();
+    const plan = counter.isOn && sections ? countIn(chart, element.currentTime, musicStart) : null;
+    if (!plan) return void element.play();
+    counter.start(plan, {
+      time: () => element.currentTime,
+      seek: (to) => {
+        element.currentTime = Math.min(Math.max(0, to), duration);
+        setNow(element.currentTime);
+      },
+      play: () => void element.play(),
+      pause: () => element.pause(),
+      isMuted: () => element.muted,
+      setMuted: (muted) => {
+        element.muted = muted;
+      },
+    });
   };
   return (
     <aside
@@ -259,6 +279,9 @@ function AudioDock({
           }}
         />
         {!sections && <Text type="supporting">{v("noTempo")}</Text>}
+        {sections && (
+          <CountInSwitch isOn={counter.isOn} onChange={counter.setOn} beat={counter.beat} />
+        )}
         <HStack gap={1} vAlign="center">
           <Icon icon={MusicalNoteIcon} />
           <Text type="supporting" maxLines={1}>
@@ -283,10 +306,10 @@ function AudioDock({
       <div className="cd-player__body">
         <div className="cd-player__play">
           <Button
-            label={playing ? t("pause") : t("playShort")}
+            label={playing || counter.isCounting ? t("pause") : t("playShort")}
             variant="primary"
             size="lg"
-            icon={<Icon icon={playing ? PauseIcon : PlayIcon} />}
+            icon={<Icon icon={playing || counter.isCounting ? PauseIcon : PlayIcon} />}
             isIconOnly
             isDisabled={!source}
             onClick={toggle}

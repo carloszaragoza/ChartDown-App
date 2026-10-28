@@ -1840,5 +1840,8 @@
     "newMember": "Cuando tu director musical te agregue a un set, aparecerá aquí.",
     "createSet": "Crear un set",
     "allSets": "Ver todos los sets"
+  },
+  "countIn": {
+    "label": "Cuenta previa"
   }
 }
