@@ -342,7 +342,7 @@
    pencil for the first slash only. */
 .cd-logo {
   --chartdown-ink: var(--ink);
-  --chartdown-cue: var(--md);
+  --chartdown-cue: var(--brand);
   display: block;
   flex: none;
 }

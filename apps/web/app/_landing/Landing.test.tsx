@@ -77,6 +77,18 @@ describe("T-1310 the landing page, version 3", () => {
     expect(rule(".problem")).not.toContain("color:");
   });
 
+  it("T-2852 the landing's accents take the brand red; its MD tags keep the MD's Rosewood", () => {
+    const css = readFileSync(join(__dirname, "landing.module.css"), "utf8");
+    const rule = (selector: string) =>
+      css.slice(css.indexOf(`${selector} {`), css.indexOf("}", css.indexOf(`${selector} {`)));
+    for (const accent of [".accent", ".brandTag", ".marqueeSlash", ".number"])
+      expect(rule(accent), accent).toContain("var(--brand)");
+    expect(rule(".md")).toContain("var(--md)");
+    const html = render(open);
+    // BETA is the brand's tag, not the MD's.
+    expect(html).toMatch(/class="[^"]*brandTag[^"]*">BETA</);
+  });
+
   it("R-01.7 sign-in and the invite code show only where sign-in is open", () => {
     const html = render(open);
     expect(html).toContain('href="/auth/sign-in"');

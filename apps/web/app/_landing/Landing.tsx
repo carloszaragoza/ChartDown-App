@@ -144,7 +144,7 @@ export function Landing({ signInEnabled, waitlistReady, accountDeleted = false }
                 className={`${styles.badge} ${styles.enter}`}
                 style={{ "--d": 0 } as CSSProperties}
               >
-                <span className={styles.md}>{t("hero.tag")}</span>
+                <span className={styles.brandTag}>{t("hero.tag")}</span>
                 {t("hero.tagText")}
               </p>
               <Headline
@@ -257,7 +257,7 @@ export function Landing({ signInEnabled, waitlistReady, accountDeleted = false }
             <div className={styles.split}>
               <div className={styles.copy}>
                 <Rise>
-                  <span className={styles.md}>{t("problem.tag")}</span>
+                  <span className={styles.brandTag}>{t("problem.tag")}</span>
                 </Rise>
                 <h2 id="problem-title" className={styles.h2}>
                   <Words text={t("problem.title")} />

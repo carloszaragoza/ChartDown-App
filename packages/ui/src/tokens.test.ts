@@ -44,6 +44,7 @@ const HANDOFF_COLORS = {
     "--rule": "#b4bec8",
     "--control-border": "#7d8a97",
     "--md": "#94484a",
+    "--brand": "#d12f26",
     "--dynamic": "#1f4fa8",
   },
   dark: {
@@ -55,6 +56,7 @@ const HANDOFF_COLORS = {
     "--rule": "#3a4857",
     "--control-border": "#64748a",
     "--md": "#e5aba8",
+    "--brand": "#ff7a6b",
     "--dynamic": "#86aaff",
   },
 };
