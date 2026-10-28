@@ -649,6 +649,10 @@
     --astryx-section-padding: var(--spacing-3);
   }
 
+  .astryx-dropdown-menu {
+    max-height: calc(100dvb - var(--spacing-4) - var(--spacing-4));
+  }
+
   .astryx-text[data-color="primary"] { color: var(--color-text-primary); }
 
   .astryx-heading[data-color="primary"] { color: var(--color-text-primary); }
