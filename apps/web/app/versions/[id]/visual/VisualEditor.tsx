@@ -4,7 +4,6 @@ import { Banner } from "@astryxdesign/core/Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
 import { Dialog } from "@astryxdesign/core/Dialog";
-import { Grid, GridSpan } from "@astryxdesign/core/Grid";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
@@ -191,6 +190,8 @@ interface History {
 }
 
 /** What a tool does to a bar, or to one of its chords (R-13.7). */
+type ToolGroup = "chord" | "bar" | "roadMap" | "dynamics";
+
 type Tool =
   | { kind: "mark"; mark: ChordMark }
   | { kind: "indication"; text: string }
@@ -621,7 +622,7 @@ export function VisualEditor({
     >
       <ToggleButton
         label={text}
-        size="lg"
+        size="md"
         icon={icon(key)}
         isPressed={isOn(tool)}
         tooltip={selected ? (TYPED[key] ?? text) : t("tools.choose")}
@@ -635,21 +636,24 @@ export function VisualEditor({
 
   // A group of tools says what it applies to; the group of the line being written is
   // highlighted (R-13.7).
-  const toolGroup = (name: string, hint: string, active: boolean, tools: ReactNode) => (
-    <Card variant={active ? "blue" : "muted"} padding={2}>
-      <VStack gap={1.5}>
-        <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
-          <Text type="label" weight="semibold">
-            {name}
-          </Text>
-          <Text type="supporting">{selected ? hint : t("tools.group.choose")}</Text>
-        </HStack>
-        <HStack gap={1} wrap="wrap" role="group" aria-label={name}>
-          {tools}
-        </HStack>
-      </VStack>
-    </Card>
+  // The tool group shown: the one chosen, while the same line is being written; else the line's
+  // own (Chord for the chords, Dynamics for the indications) (R-13.7).
+  const [pickedGroup, setPickedGroup] = useState<{ group: ToolGroup; line: Line | null } | null>(
+    null,
   );
+  const lineNow = editing?.line ?? null;
+  const shownGroup: ToolGroup =
+    pickedGroup && pickedGroup.line === lineNow
+      ? pickedGroup.group
+      : lineNow === "tags"
+        ? "dynamics"
+        : "chord";
+  const TOOL_HINTS: Record<ToolGroup, string> = {
+    chord: t("tools.group.chordHint"),
+    bar: t("tools.group.barHint"),
+    roadMap: t("tools.group.barHint"),
+    dynamics: t("tools.group.dynamicsHint"),
+  };
 
   if (warnings.length > 0) {
     // A chart written by hand with warnings is fixed in Text first (R-13.8).
@@ -809,7 +813,7 @@ export function VisualEditor({
                   </Text>
                 </HStack>
               </Card>
-              {/* The chart: which editor, undo and redo, then its key, tempo and meter. */}
+              {/* The chart: which editor, undo and redo, import, its key, tempo and meter, on one line. */}
               <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
                 <HStack gap={3} vAlign="center" wrap="wrap">
                   <Heading level={2}>{t("chart")}</Heading>
@@ -846,6 +850,11 @@ export function VisualEditor({
                     icon={icon("import")}
                     onClick={() => setImporting(true)}
                   />
+                  {/* The key, tempo and meter on the same line (owner's review, October 28, 2026). */}
+                  <HeaderFields
+                    meta={chart.meta}
+                    onMeta={(next) => change((c) => ({ ...c, meta: next(c.meta) }))}
+                  />
                 </HStack>
                 <Text type="supporting">{t("format", { version: SUPPORTED_VERSION })}</Text>
               </HStack>
@@ -859,10 +868,6 @@ export function VisualEditor({
                   change(() => imported);
                 }}
               />
-              <HeaderFields
-                meta={chart.meta}
-                onMeta={(next) => change((c) => ({ ...c, meta: next(c.meta) }))}
-              ></HeaderFields>
               {(recordings.length > 0 || bands.length > 0) && (
                 <BandAudio
                   versionId={versionId}
@@ -1356,180 +1361,196 @@ export function VisualEditor({
                   />
                 )}
               </HStack>
-              <Grid columns={{ minWidth: 420, max: 2 }} gap={2}>
-                <GridSpan columns="full">
-                  {toolGroup(
-                    t("tools.group.chord"),
-                    t("tools.group.chordHint"),
-                    editing?.line === "chords",
-                    <>
-                      {CHORD_MARKS.map((mark) =>
-                        toolButton({ kind: "mark", mark }, t(`tools.${mark}`), mark),
+              {/* One group at a time (R-13.7; owner's review, October 28, 2026). */}
+              <Card variant="muted" padding={1.5}>
+                <VStack gap={1}>
+                  <HStack gap={2} vAlign="center" wrap="wrap">
+                    <SegmentedControl
+                      label={t("tools.label")}
+                      value={shownGroup}
+                      onChange={(value) =>
+                        setPickedGroup({
+                          group: value as ToolGroup,
+                          line: editing?.line ?? null,
+                        })
+                      }
+                    >
+                      <SegmentedControlItem value="chord" label={t("tools.group.chord")} />
+                      <SegmentedControlItem value="bar" label={t("tools.group.bar")} />
+                      <SegmentedControlItem value="roadMap" label={t("tools.group.roadMap")} />
+                      <SegmentedControlItem value="dynamics" label={t("tools.group.dynamics")} />
+                    </SegmentedControl>
+                    <Text type="supporting">
+                      {selected ? TOOL_HINTS[shownGroup] : t("tools.group.choose")}
+                    </Text>
+                  </HStack>
+                  <HStack
+                    gap={0.5}
+                    wrap="wrap"
+                    role="group"
+                    aria-label={t(`tools.group.${shownGroup}`)}
+                  >
+                    {shownGroup === "chord" && (
+                      <>
+                        {CHORD_MARKS.map((mark) =>
+                          toolButton({ kind: "mark", mark }, t(`tools.${mark}`), mark),
+                        )}
+                        <Button
+                          label={t("holdUntil.tool")}
+                          size="md"
+                          icon={icon("holdUntil")}
+                          tooltip={selected ? t("holdUntil.hint") : t("tools.choose")}
+                          isDisabled={!selected}
+                          onClick={() => selected && setHoldAt(selected)}
+                        />
+                      </>
+                    )}
+                    {shownGroup === "bar" && (
+                      <>
+                        {toolButton({ kind: "repeatStart" }, t("tools.repeatStart"), "repeatStart")}
+                        {toolButton({ kind: "repeatEnd" }, t("tools.repeatEnd"), "repeatEnd")}
+                        {toolButton(
+                          { kind: "ending", number: 1 },
+                          t("tools.ending", { number: 1 }),
+                          "ending1",
+                        )}
+                        {toolButton(
+                          { kind: "ending", number: 2 },
+                          t("tools.ending", { number: 2 }),
+                          "ending2",
+                        )}
+                        {toolButton({ kind: "pickup" }, t("tools.pickup"), "pickup")}
+                        {toolButton({ kind: "rest" }, t("tools.rest"), "rest")}
+                        {toolButton({ kind: "repeatBar" }, t("tools.repeatBar"), "repeatBar")}
+                      </>
+                    )}
+                    {shownGroup === "roadMap" &&
+                      NAVIGATION.map((word) =>
+                        toolButton({ kind: "indication", text: word }, word, word),
                       )}
-                      <Button
-                        label={t("holdUntil.tool")}
-                        size="lg"
-                        icon={icon("holdUntil")}
-                        tooltip={selected ? t("holdUntil.hint") : t("tools.choose")}
-                        isDisabled={!selected}
-                        onClick={() => selected && setHoldAt(selected)}
-                      />
-                    </>,
-                  )}
-                </GridSpan>
-                <GridSpan columns="full">
-                  {toolGroup(
-                    t("tools.group.bar"),
-                    t("tools.group.barHint"),
-                    selected !== null && editing === null,
-                    <>
-                      {toolButton({ kind: "repeatStart" }, t("tools.repeatStart"), "repeatStart")}
-                      {toolButton({ kind: "repeatEnd" }, t("tools.repeatEnd"), "repeatEnd")}
-                      {toolButton(
-                        { kind: "ending", number: 1 },
-                        t("tools.ending", { number: 1 }),
-                        "ending1",
+                    {shownGroup === "dynamics" &&
+                      DYNAMICS.map((word) =>
+                        toolButton({ kind: "indication", text: word }, word, word),
                       )}
-                      {toolButton(
-                        { kind: "ending", number: 2 },
-                        t("tools.ending", { number: 2 }),
-                        "ending2",
-                      )}
-                      {toolButton({ kind: "pickup" }, t("tools.pickup"), "pickup")}
-                      {toolButton({ kind: "rest" }, t("tools.rest"), "rest")}
-                      {toolButton({ kind: "repeatBar" }, t("tools.repeatBar"), "repeatBar")}
-                    </>,
-                  )}
-                </GridSpan>
-                {toolGroup(
-                  t("tools.group.roadMap"),
-                  t("tools.group.barHint"),
-                  false,
-                  NAVIGATION.map((word) =>
-                    toolButton({ kind: "indication", text: word }, word, word),
-                  ),
-                )}
-                {toolGroup(
-                  t("tools.group.dynamics"),
-                  t("tools.group.dynamicsHint"),
-                  editing?.line === "tags",
-                  DYNAMICS.map((word) =>
-                    toolButton({ kind: "indication", text: word }, word, word),
-                  ),
-                )}
-              </Grid>
+                  </HStack>
+                </VStack>
+              </Card>
             </VStack>
           </LayoutFooter>
         }
+      />
+      {/* Dialogs sit beside the Layout: given `content`, Layout leaves its children out (T-3012). */}
+      <Dialog
+        isOpen={asking !== null}
+        onOpenChange={(open) => !open && setAsking(null)}
+        purpose="required"
+        padding={4}
       >
-        <Dialog
-          isOpen={asking !== null}
-          onOpenChange={(open) => !open && setAsking(null)}
-          purpose="required"
-          padding={4}
-        >
-          {/* Before the first change to a chart written by hand (R-13.1). */}
-          <VStack gap={4}>
-            <Heading level={2}>{t("notice.title")}</Heading>
-            <Text>{t("notice.body")}</Text>
-            <HStack gap={2} hAlign="end">
-              <Button
-                label={t("notice.text")}
-                variant="ghost"
-                onClick={() => router.push(`/versions/${versionId}/edit`)}
-              />
-              <Button
-                label={t("notice.continue")}
-                variant="primary"
-                onClick={() => {
-                  const run = asking;
-                  setAccepted(true);
-                  setAsking(null);
-                  run?.();
-                }}
-              />
-            </HStack>
-          </VStack>
-        </Dialog>
-        <Dialog
-          isOpen={confirmDelete !== null}
-          onOpenChange={(open) => !open && setConfirmDelete(null)}
-          padding={4}
-        >
-          <VStack gap={4}>
-            <Heading level={2}>
-              {t("confirmDelete.title", { name: chart.sections[confirmDelete ?? 0]?.name ?? "" })}
-            </Heading>
-            <Text>
-              {t("confirmDelete.body", {
-                count: confirmDelete === null ? 0 : repeatsOf(chart, confirmDelete),
-              })}
-            </Text>
-            <HStack gap={2} hAlign="end">
-              <Button label={t("cancel")} variant="ghost" onClick={() => setConfirmDelete(null)} />
-              <Button
-                label={t("deleteSection")}
-                variant="destructive"
-                onClick={() => {
-                  const index = confirmDelete;
-                  setConfirmDelete(null);
-                  if (index !== null) change((c) => deleteSection(c, index));
-                }}
-              />
-            </HStack>
-          </VStack>
-        </Dialog>
-        {rowChangeAt && (
-          <RowChangeDialog
-            key={`${rowChangeAt.section}:${rowChangeAt.bar}`}
-            open
-            bar={label(rowChangeAt, barAt(rowChangeAt) as VisualBar)}
-            initial={rowChangeOf(barAt(rowChangeAt) as VisualBar)}
-            onClose={() => setRowChangeAt(null)}
-            onApply={(next) => {
-              change((c) => setRowChange(c, rowChangeAt, next));
-              setRowChangeAt(null);
-            }}
-          />
-        )}
-        {holdAt && (
-          <HoldUntilDialog
-            key={`${holdAt.section}:${holdAt.bar}`}
-            open
-            onClose={() => setHoldAt(null)}
-            onHold={(cue) => {
-              change((c) => holdUntil(c, holdAt, cue));
-              setHoldAt(null);
-            }}
-          />
-        )}
-        <NoteDialog
-          key={noteEdit ? `${noteEdit.section}:${noteEdit.note}` : `new:${noteFor}`}
-          open={noteFor !== null || noteEdit !== null}
-          section={chart.sections[noteFor ?? noteEdit?.section ?? 0]?.name ?? ""}
-          initial={
-            noteEdit ? (chart.sections[noteEdit.section]?.notes[noteEdit.note] ?? null) : null
-          }
-          instruments={STANDARD_INSTRUMENTS.map((instrument) => ({
-            value: instrument.id,
-            label: instruments.has(instrument.id as "keys")
-              ? instruments(instrument.id as "keys")
-              : instrument.id,
-          }))}
-          onClose={() => {
-            setNoteFor(null);
-            setNoteEdit(null);
-          }}
-          onAdd={(note) => {
-            const index = noteFor;
-            const editing = noteEdit;
-            setNoteFor(null);
-            setNoteEdit(null);
-            if (editing) change((c) => setNote(c, editing.section, editing.note, note));
-            else if (index !== null) change((c) => addNote(c, index, note));
+        {/* Before the first change to a chart written by hand (R-13.1). */}
+        <VStack gap={4}>
+          <Heading level={2}>{t("notice.title")}</Heading>
+          <Text>{t("notice.body")}</Text>
+          <HStack gap={2} hAlign="end">
+            <Button
+              label={t("notice.text")}
+              variant="ghost"
+              onClick={() => router.push(`/versions/${versionId}/edit`)}
+            />
+            <Button
+              label={t("notice.continue")}
+              variant="primary"
+              onClick={() => {
+                const run = asking;
+                setAccepted(true);
+                setAsking(null);
+                run?.();
+                // The closing dialog gives focus back to where it was; the bar being written takes
+                // it once the dialog has gone, so typing goes on at once.
+                window.setTimeout(
+                  () => document.querySelector<HTMLInputElement>(".cd-chart__input")?.focus(),
+                  50,
+                );
+              }}
+            />
+          </HStack>
+        </VStack>
+      </Dialog>
+      <Dialog
+        isOpen={confirmDelete !== null}
+        onOpenChange={(open) => !open && setConfirmDelete(null)}
+        padding={4}
+      >
+        <VStack gap={4}>
+          <Heading level={2}>
+            {t("confirmDelete.title", { name: chart.sections[confirmDelete ?? 0]?.name ?? "" })}
+          </Heading>
+          <Text>
+            {t("confirmDelete.body", {
+              count: confirmDelete === null ? 0 : repeatsOf(chart, confirmDelete),
+            })}
+          </Text>
+          <HStack gap={2} hAlign="end">
+            <Button label={t("cancel")} variant="ghost" onClick={() => setConfirmDelete(null)} />
+            <Button
+              label={t("deleteSection")}
+              variant="destructive"
+              onClick={() => {
+                const index = confirmDelete;
+                setConfirmDelete(null);
+                if (index !== null) change((c) => deleteSection(c, index));
+              }}
+            />
+          </HStack>
+        </VStack>
+      </Dialog>
+      {rowChangeAt && (
+        <RowChangeDialog
+          key={`${rowChangeAt.section}:${rowChangeAt.bar}`}
+          open
+          bar={label(rowChangeAt, barAt(rowChangeAt) as VisualBar)}
+          initial={rowChangeOf(barAt(rowChangeAt) as VisualBar)}
+          onClose={() => setRowChangeAt(null)}
+          onApply={(next) => {
+            change((c) => setRowChange(c, rowChangeAt, next));
+            setRowChangeAt(null);
           }}
         />
-      </Layout>
+      )}
+      {holdAt && (
+        <HoldUntilDialog
+          key={`${holdAt.section}:${holdAt.bar}`}
+          open
+          onClose={() => setHoldAt(null)}
+          onHold={(cue) => {
+            change((c) => holdUntil(c, holdAt, cue));
+            setHoldAt(null);
+          }}
+        />
+      )}
+      <NoteDialog
+        key={noteEdit ? `${noteEdit.section}:${noteEdit.note}` : `new:${noteFor}`}
+        open={noteFor !== null || noteEdit !== null}
+        section={chart.sections[noteFor ?? noteEdit?.section ?? 0]?.name ?? ""}
+        initial={noteEdit ? (chart.sections[noteEdit.section]?.notes[noteEdit.note] ?? null) : null}
+        instruments={STANDARD_INSTRUMENTS.map((instrument) => ({
+          value: instrument.id,
+          label: instruments.has(instrument.id as "keys")
+            ? instruments(instrument.id as "keys")
+            : instrument.id,
+        }))}
+        onClose={() => {
+          setNoteFor(null);
+          setNoteEdit(null);
+        }}
+        onAdd={(note) => {
+          const index = noteFor;
+          const editing = noteEdit;
+          setNoteFor(null);
+          setNoteEdit(null);
+          if (editing) change((c) => setNote(c, editing.section, editing.note, note));
+          else if (index !== null) change((c) => addNote(c, index, note));
+        }}
+      />
     </div>
   );
 }
