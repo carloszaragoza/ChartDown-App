@@ -1,3 +1,4 @@
+import { EDITOR_ICONS } from "@chartdown/ui";
 import { NextIntlClientProvider } from "next-intl";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
@@ -106,6 +107,17 @@ describe("T-3003 the visual editor", () => {
     // The coda tool: its icon (a circle crossed) beside its name.
     expect(html).toMatch(/class="cd-icon[^"]*"[^>]*><circle cx="12" cy="12" r="6"\/>.*?Coda</s);
     expect(html).toContain(">mf</text>");
+  });
+
+  it("R-13.16 every action's icon is ChartDown's own drawing, never a generic one", () => {
+    for (const [action, Icon] of Object.entries(VISUAL_ICONS)) {
+      const svg = renderToString(<Icon />);
+      expect(svg, action).toMatch(/^<svg[^>]*class="cd-icon"/);
+      expect(svg, action).toContain('stroke-width="1.5"');
+    }
+    // The undo and the repeat use the editor's own drawings: the repeat its signs' dots.
+    expect(renderToString(<VISUAL_ICONS.undo />)).toContain(EDITOR_ICONS.undo);
+    expect(renderToString(<VISUAL_ICONS.repeatSection />)).toContain(EDITOR_ICONS.repeatSection);
   });
 
   it("R-13.3 each section says its bars, a repeat is one strip, Add a section closes the page", () => {

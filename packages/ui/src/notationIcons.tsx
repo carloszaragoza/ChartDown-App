@@ -2,8 +2,8 @@ import type { SVGProps } from "react";
 
 /**
  * The visual editor's notation icons (SPEC-13, R-13.16): a mark of the chart as the chart draws
- * it, on the ChartDown icons' 24×24 grid and stroke (icons.ts). The rest of the editor's actions
- * use the interface's Heroicons. Dots and filled shapes take the `cd-icon-dot` class.
+ * it, on Astryx's 24×24 grid and 1.5 line, as the ChartDown icons (icons.ts). Dots and filled
+ * shapes take the `cd-icon-dot` class.
  */
 export const NOTATION_ICONS = {
   push: '<path d="M11 7 6 12l5 5"/><path d="M17 5v14"/>',
@@ -37,24 +37,57 @@ export const NOTATION_ICONS = {
 
 export type NotationIconName = keyof typeof NOTATION_ICONS;
 
+/**
+ * The visual editor's other actions (R-13.16; owner's decision, October 27, 2026: never generic
+ * icons): drawn for ChartDown on the same grid and line, musical where they can be: bar lines for
+ * rows and bars, the repeat signs, `#` for the ChartDown text, the waveform for the band's audio.
+ */
+export const EDITOR_ICONS = {
+  undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
+  redo: '<path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/>',
+  details:
+    '<path d="M4 7h2.75M11.25 7H20M4 17h8.75M17.25 17H20"/><circle cx="9" cy="7" r="2.25"/><circle cx="15" cy="17" r="2.25"/>',
+  import:
+    '<path d="M6 11V3h8l4 4v4"/><path d="M14 3v4h4"/><path d="M4 15v6M20 15v6"/><path d="M12 10v9M9 16l3 3 3-3"/>',
+  save: '<path d="M6 3h9l4 4v14H6Z"/><path d="M15 3v4h4"/><path d="m9 14 2.5 2.5L16 12"/>',
+  done: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  text: '<path d="M9 4 7 20M17 4l-2 16M4 9h16M3 15h16"/>',
+  visual: '<path d="M3 4v10M9 4v10M15 4v5"/><path d="m13 21 1-3.5 5.5-5.5 2.5 2.5-5.5 5.5Z"/>',
+  audio: '<path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/>',
+  video: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3Z"/>',
+  addSection: '<path d="M8 4H4v16h4M16 4h4v16h-4"/><path d="M12 8v8M8 12h8"/>',
+  addRow: '<path d="M3 4v6M9 4v6M15 4v6M21 4v6"/><path d="M12 14v6M9 17h6"/>',
+  rename: '<path d="M4 20l4-1L19 8l-3-3L5 16Z"/><path d="m14 7 3 3"/>',
+  addNote: '<path d="M4 6h16M4 11h10M4 16h6"/><path d="M17 14v6M14 17h6"/>',
+  repeatSection:
+    '<path d="M4 5v14M6.5 5v14M20 5v14M17.5 5v14"/><circle class="cd-icon-dot" cx="10" cy="10" r="1.15"/><circle class="cd-icon-dot" cx="10" cy="14" r="1.15"/><circle class="cd-icon-dot" cx="14" cy="10" r="1.15"/><circle class="cd-icon-dot" cx="14" cy="14" r="1.15"/>',
+  duplicate: '<path d="M8 8h12v12H8Z"/><path d="M16 4H4v12"/>',
+  moveUp: '<path d="M12 19V5M6 11l6-6 6 6"/>',
+  moveDown: '<path d="M12 5v14M6 13l6 6 6-6"/>',
+  editOriginal: '<path d="M13 5h6v6M19 5l-8 8"/><path d="M17 14v5H5V7h5"/>',
+  delete: '<path d="M4 7h16M10 4h4M6 7l1 13h10l1-13"/><path d="M10 11v5M14 11v5"/>',
+  deleteNote: '<path d="M4 6h10M4 11h7M4 16h5"/><path d="m15 13 5 5M20 13l-5 5"/>',
+  insertBefore: '<path d="M14 5v14M20 5v14"/><path d="M7 9v6M4 12h6"/>',
+  insertAfter: '<path d="M4 5v14M10 5v14"/><path d="M17 9v6M14 12h6"/>',
+  newRow: '<path d="M20 5v6a3 3 0 0 1-3 3H5"/><path d="m9 10-4 4 4 4"/>',
+  deleteRow: '<path d="M3 4v6M9 4v6M15 4v6M21 4v6"/><path d="M8 17h8"/>',
+} as const;
+
+export type EditorIconName = keyof typeof EDITOR_ICONS;
+
 /** A dynamic as its icon: its letters, bold and italic, as the chart writes them (pp to ff). */
 const dynamicIcon = (letters: string) =>
   `<text x="12" y="16.5" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="${letters.length > 1 ? 11 : 14}" fill="currentColor" stroke="none">${letters}</text>`;
 
-/**
- * A notation icon as a component, for Astryx's Icon (`<Icon icon={notationIcon("coda")} />`), or
- * a dynamic's letters (`notationIcon("mf")`).
- */
-export function notationIcon(name: NotationIconName | "pp" | "p" | "mp" | "mf" | "f" | "ff") {
-  const body =
-    name in NOTATION_ICONS ? NOTATION_ICONS[name as NotationIconName] : dynamicIcon(name);
-  function NotationIcon(props: SVGProps<SVGSVGElement>) {
+/** A ChartDown drawing as a component, for Astryx's Icon (`<Icon icon={...} />`). */
+function drawn(body: string) {
+  function ChartDownIcon(props: SVGProps<SVGSVGElement>) {
     return (
       <svg
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth={1.75}
+        strokeWidth={1.5}
         strokeLinecap="round"
         strokeLinejoin="round"
         aria-hidden="true"
@@ -67,5 +100,18 @@ export function notationIcon(name: NotationIconName | "pp" | "p" | "mp" | "mf" |
       />
     );
   }
-  return NotationIcon;
+  return ChartDownIcon;
 }
+
+/**
+ * A notation icon as a component, for Astryx's Icon (`<Icon icon={notationIcon("coda")} />`), or
+ * a dynamic's letters (`notationIcon("mf")`).
+ */
+export function notationIcon(name: NotationIconName | "pp" | "p" | "mp" | "mf" | "f" | "ff") {
+  return drawn(
+    name in NOTATION_ICONS ? NOTATION_ICONS[name as NotationIconName] : dynamicIcon(name),
+  );
+}
+
+/** One of the visual editor's actions as a component, for Astryx's Icon. */
+export const editorIcon = (name: EditorIconName) => drawn(EDITOR_ICONS[name]);

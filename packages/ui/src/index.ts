@@ -62,4 +62,11 @@ export {
   type SectionProps,
 } from "./Section";
 export { playedLength } from "./played";
-export { NOTATION_ICONS, notationIcon, type NotationIconName } from "./notationIcons";
+export {
+  EDITOR_ICONS,
+  editorIcon,
+  NOTATION_ICONS,
+  notationIcon,
+  type EditorIconName,
+  type NotationIconName,
+} from "./notationIcons";
