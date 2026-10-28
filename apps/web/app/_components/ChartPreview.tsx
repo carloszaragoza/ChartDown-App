@@ -209,9 +209,11 @@ export function ChartPreview({
     const section = bar?.closest("section[id^='section-']")?.id.replace("section-", "");
     if (isPlaying || !bar || !section) return;
     chooseStart(Number(section) - 1, Number(bar.dataset.bar));
-    if (videoClock.get())
-      barSeek.request({ section: Number(section) - 1, number: Number(bar.dataset.bar) });
+    // A player opened after the tap starts on it too (T-3015).
+    barSeek.request({ section: Number(section) - 1, number: Number(bar.dataset.bar) });
   };
+  // Leaving the page forgets the bar chosen on it (T-3015).
+  useEffect(() => () => barSeek.forget(), []);
   const root = useRef<HTMLDivElement>(null);
   const slot = useChartControlsSlot(hasControlsInHeader);
   // An open player takes the screen's bottom: the bar being followed is centered above it (T-2505).

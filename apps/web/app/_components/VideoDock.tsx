@@ -13,7 +13,7 @@ import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { barSeek, videoClock } from "../../lib/video/clock";
+import { barSeek, type ChartBar, videoClock } from "../../lib/video/clock";
 import { barStart, sectionAt, videoSections } from "../../lib/video/sections";
 import { chartWave, shapedWave } from "../../lib/video/wave";
 import { useDockRoom, useDockTarget } from "./DockRoom";
@@ -303,19 +303,25 @@ function VideoDock({
     };
   }, [id, start]);
 
-  // A bar tapped on the chart: the video moves to where it starts (T-2836).
-  useEffect(
-    () =>
-      barSeek.subscribe(({ section, number }) => {
-        const at = chart ? barStart(chart, section, number) : null;
-        if (at === null) return;
-        const to = Math.max(0, startRef.current + at);
-        seeking.current = { to, at: performance.now() };
-        player.current?.seekTo?.(to, true);
-        setNow(to);
-      }),
-    [chart],
-  );
+  // A bar tapped on the chart: the video moves to where it starts (T-2836); one chosen before the
+  // video was opened is where it opens (T-3015).
+  const opened = useRef(false);
+  useEffect(() => {
+    const go = ({ section, number }: ChartBar) => {
+      const at = chart ? barStart(chart, section, number) : null;
+      if (at === null) return;
+      const to = Math.max(0, startRef.current + at);
+      seeking.current = { to, at: performance.now() };
+      player.current?.seekTo?.(to, true);
+      setNow(to);
+    };
+    if (!opened.current) {
+      opened.current = true;
+      const bar = barSeek.chosen();
+      if (bar) go(bar);
+    }
+    return barSeek.subscribe(go);
+  }, [chart]);
 
   const seek = (seconds: number) => {
     const to = Math.max(0, seconds);
