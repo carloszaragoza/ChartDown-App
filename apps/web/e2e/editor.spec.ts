@@ -219,6 +219,7 @@ test("R-03.1 T-2837 the chart's text stays in view while the page scrolls down t
   await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
   await page.getByRole("main").getByRole("button", { name: "Edit", exact: true }).click();
   await page.getByRole("menuitem", { name: "Text (ChartDown)" }).click();
+  await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}\/edit$/);
 
   const preview = page.getByRole("region", { name: "Preview" });
   await preview.getByRole("heading", { name: "Part 12" }).scrollIntoViewIfNeeded();

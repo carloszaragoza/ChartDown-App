@@ -575,3 +575,33 @@ export const UNITS = [
  * left empty go, as they do from the saved text.
  */
 export const afterSave = (chart: VisualChart): VisualChart => visualChart(canonicalText(chart, ""));
+
+/** The keys offered by name, major and minor (R-13.2, R-13.10). */
+export const MAJOR_KEYS = ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
+export const MINOR_KEYS = [
+  "Cm",
+  "C#m",
+  "Dm",
+  "Ebm",
+  "Em",
+  "Fm",
+  "F#m",
+  "Gm",
+  "G#m",
+  "Am",
+  "Bbm",
+  "Bm",
+];
+/** The meters offered for a change from a bar on (R-13.10). */
+export const CHANGE_METERS = [
+  "2/4",
+  "3/4",
+  "4/4",
+  "5/4",
+  "6/4",
+  "2/2",
+  "6/8",
+  "7/8",
+  "9/8",
+  "12/8",
+];

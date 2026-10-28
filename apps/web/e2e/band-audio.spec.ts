@@ -235,6 +235,8 @@ test("R-06.7 T-2834 the chart editor plays the band's audio, and its preview fol
 
   await page.getByRole("main").getByRole("button", { name: "Edit", exact: true }).click();
   await page.getByRole("menuitem", { name: "Text (ChartDown)" }).click();
+  // The menu opens the editor in place: wait for it, as the version page has the same button.
+  await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}\/edit$/);
   await page.getByRole("button", { name: "Play Just me's recording" }).click();
   const player = page.getByRole("complementary", { name: "Band audio" });
   // The preview follows the recording while it plays, as the version page does.

@@ -1663,6 +1663,21 @@
     "paste": "Paste over this bar",
     "pasteAfter": "Paste after this bar",
     "copied": "{count, plural, one {# bar copied} other {# bars copied}}",
+    "rowChange": {
+      "menu": "Change key, meter or tempo here",
+      "title": "From {bar} on",
+      "intro": "Leave a field empty to keep it as it is. This bar starts a row.",
+      "none": "No change",
+      "apply": "Apply"
+    },
+    "holdUntil": {
+      "tool": "Hold until a cue",
+      "title": "Hold the chord until…",
+      "cue": "What it waits for",
+      "placeholder": "until the vocal comes in",
+      "hint": "The bar's last chord is held with a fermata, and this is written above it.",
+      "apply": "Hold"
+    },
     "notice": {
       "title": "Visual writes the chart in ChartDown's standard layout",
       "body": "Your own spacing and line breaks in the text won't be kept. The chart itself stays the same.",
