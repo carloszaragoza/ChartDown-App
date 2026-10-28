@@ -138,7 +138,12 @@ export type SplitNeed =
   /** The author chooses one of these (2+1+1, 1+2+1, 1+1+2). */
   | { kind: "choose"; options: number[][] }
   /** More chords than beats: the bar is marked (R-13.8). */
-  | { kind: "over" };
+  | { kind: "over" }
+  /** The beats written in the bar (`x:3 1:0.5! 1:0.5!`) don't add up to it (T-3019). */
+  | { kind: "uneven"; sum: number; beats: number };
+
+/** A token with its beats written: `x:3`, `1:0.5!`, `R[1 1]:1` (spec 6). */
+const hasBeats = (token: string) => /:\d+(?:\.\d+)?[!~]*$/.test(token);
 
 /**
  * How a bar's chords split its beats (R-13.6): evenly when the beats divide by the chords,
@@ -146,10 +151,19 @@ export type SplitNeed =
  * dotted quarter, and the eighths when there are more chords than dotted quarters.
  */
 export function splitNeed(bar: VisualBar, meter: string): SplitNeed {
-  const timed = tokens(bar.chords).filter(isTimed).length;
-  if (timed <= 1) return { kind: "even" };
+  const list = tokens(bar.chords).filter(isTimed);
+  const timed = list.length;
   const beats = barBeats(bar, meter);
   const own = bar.meter ?? meter;
+  // Beats written in the bar are the author's split: ChartDown only checks they add up (T-3019).
+  if (list.some(hasBeats)) {
+    const unit = own.split("/")[1] ?? "4";
+    const read = parse(`---\nmeter: ${beats}/${unit}\n---\n## A\n${list.join(" ")}\n`);
+    const mismatch = read.warnings.find((warning) => warning.code === "beats-mismatch");
+    const sum = Number(mismatch?.values?.sum);
+    return mismatch && Number.isFinite(sum) ? { kind: "uneven", sum, beats } : { kind: "even" };
+  }
+  if (timed <= 1) return { kind: "even" };
   // A compound meter counts its dotted quarters; with more chords than those, its eighths.
   const pulses = compound(own) && bar.pickup === null ? beats / 3 : beats;
   const step = timed > pulses ? 1 : beats / pulses;
@@ -162,7 +176,7 @@ export function splitNeed(bar: VisualBar, meter: string): SplitNeed {
 /** Whether a bar is marked in amber (R-13.8): a split not chosen, or more chords than beats. */
 export function needsAttention(bar: VisualBar, meter: string): boolean {
   const need = splitNeed(bar, meter);
-  if (need.kind === "over") return true;
+  if (need.kind === "over" || need.kind === "uneven") return true;
   if (need.kind === "choose") {
     return !need.options.some((option) => sameSplit(option, bar.split));
   }

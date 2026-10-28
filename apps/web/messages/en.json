@@ -1651,6 +1651,7 @@
     "words": "{count} of {max} words",
     "split": "Split:",
     "over": "More chords than beats.",
+    "uneven": "The beats written add up to {sum}; the bar has {beats}.",
     "plays": "Plays",
     "pickupBeats": "Pickup beats",
     "barMenu": "Bar: more",
