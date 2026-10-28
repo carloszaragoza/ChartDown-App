@@ -99,11 +99,15 @@ export function tokens(chords: string): string[] {
 const QUALITY =
   /^(?:5|(?:m|dim|aug)?(?:maj(?:7|9|11|13)|6|7|9|11|13|69)?(?:[b#](?:5|9|11|13))*(?:alt)?(?:sus2?)?(?:add(?:2|4|9|11|13))*)$/;
 
-/** Whether ChartDown reads a token as written (R-13.4: one it doesn't is drawn in red). */
+/**
+ * Whether ChartDown reads a token as written (R-13.4: one it doesn't is drawn in red). The token is
+ * read alone, so the beats it adds up to are the bar's to check, never the token's: `x:3` is read
+ * (T-3018).
+ */
 export function isKnownToken(token: string): boolean {
   const chart = parse(`## A\n${token}\n`);
   const item = chart.sections[0]?.rows[0]?.bars[0]?.items[0];
-  if (chart.warnings.length > 0 || !item) return false;
+  if (chart.warnings.some((warning) => warning.code !== "beats-mismatch") || !item) return false;
   return item.type !== "chord" || QUALITY.test(item.quality);
 }
 
