@@ -27,7 +27,7 @@ import {
   SUPPORTED_VERSION,
   type Warning,
 } from "chartdown";
-import { MDNotes, type BarLine } from "@chartdown/ui";
+import { MDNotes, type BarLine, type BeatsMode } from "@chartdown/ui";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -51,6 +51,8 @@ import { ImportDialog } from "./ImportDialog";
 import { SongName } from "../edit/SongName";
 import { clipboardKey, historyKey } from "../../../../lib/visual/keys";
 import { VideoLink } from "../../../_components/VideoDock";
+import { BeatsControl } from "../../../_components/BeatsControl";
+import { ViewOptions } from "../../../_components/ViewOptions";
 import { useChartLabels } from "../../../_components/chartLabels";
 import { usePlayingSection } from "../../../_components/usePlaybackBar";
 import { useDockRoomSize } from "../../../_components/DockRoom";
@@ -227,6 +229,7 @@ export function VisualEditor({
   const t = useTranslations("visual");
   const sources = useTranslations("version.source");
   const instruments = useTranslations("instruments");
+  const c = useTranslations("chart");
   const labels = useChartLabels();
   const language = useLocale() === "es" ? "es" : "en";
   /** A section after another one, named as the song most often goes on (R-13.9). */
@@ -285,6 +288,8 @@ export function VisualEditor({
   const playing = usePlayingSection(drawn);
   const placed = useMemo(() => chartClicks(drawn), [drawn]);
   const room = useDockRoomSize();
+  // Every bar shows its beat marks while it is written, so all sit on one line (T-3016).
+  const [beats, setBeats] = useState<BeatsMode>("always");
   // Leaving the page forgets the bar chosen on it (T-3015).
   useEffect(() => () => barSeek.forget(), []);
 
@@ -861,6 +866,22 @@ export function VisualEditor({
                     icon={icon("import")}
                     onClick={() => setImporting(true)}
                   />
+                  {/* How the chart is drawn, as on the version page (T-3016). */}
+                  <ViewOptions>
+                    <BeatsControl
+                      value={beats}
+                      onChoose={setBeats}
+                      isRemembered={false}
+                      words={{
+                        label: c("beatsLabel"),
+                        name: c("beatsName"),
+                        off: c("beatsOff"),
+                        auto: c("beatsAuto"),
+                        always: c("beatsAlways"),
+                        help: { about: c("beatsAbout"), text: c("beatsHelp") },
+                      }}
+                    />
+                  </ViewOptions>
                   {/* The key, tempo and meter on the same line (owner's review, October 28, 2026). */}
                   <HeaderFields
                     meta={chart.meta}
@@ -1090,7 +1111,7 @@ export function VisualEditor({
                                     formatter={formatter}
                                     labels={labels.bar}
                                     size="md"
-                                    beats="auto"
+                                    beats={beats}
                                     edit={{ slots: ROW_BARS }}
                                   />
                                 </div>
@@ -1124,7 +1145,7 @@ export function VisualEditor({
                                       formatter={formatter}
                                       labels={labels.bar}
                                       size="md"
-                                      beats="auto"
+                                      beats={beats}
                                       edit={{
                                         slots: ROW_BARS,
                                         ...(selected?.section === s && group.includes(selected.bar)
