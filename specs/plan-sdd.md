@@ -173,6 +173,8 @@ A platform where musicians and music directors write charts in ChartDown, share 
 
 **Goal:** an open catalog where every version is identified by its source and nothing public is lost.
 
+People see the catalog as **Songs** ("Canciones" in Spanish) in the side navigation, the landing's nav, its page title, every message that names it and the terms of use (owner's decisions, October 27, 2026: "Catalog" reads like an inventory; "Song list" was set aside because musicians call a set list that; the terms of use too, the same day). Its address stays `/catalog`, so links keep working. The administration's instrument catalog keeps its name.
+
 **Requirements**
 
 - R-02.1 Create a song or pick an existing one, and create a version of it. A new version of an existing song starts from a chart of it: the version the person came from, or else the song's most recently updated public version, never a blank example (owner's review, October 16, 2026).

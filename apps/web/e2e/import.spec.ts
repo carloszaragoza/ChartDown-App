@@ -98,7 +98,7 @@ test("R-10.12 a sheet whose song is already in the catalog offers adding a versi
   await page.locator("textarea").first().fill(`${title}\nKey: G\n\nVerse\nG    C    D    G\n`);
   await page.getByText("I have the right to use this chord sheet.").click();
   await page.getByRole("button", { name: "Convert to a chart" }).click();
-  await expect(page.getByText(`“${title}” is already in the catalog.`)).toBeVisible();
+  await expect(page.getByText(`“${title}” is already on ChartDown.`)).toBeVisible();
   await page.getByRole("button", { name: "Add my version to that song" }).click();
   // The draft stays; it is now a version of that song.
   await expect(page.locator("input[name=songId]")).toHaveCount(1);
