@@ -1601,6 +1601,7 @@
       "invalid": "Revisa los datos de la canción."
     },
     "sectionName": "Nombre de la sección",
+    "sectionNameOf": "Renombrar la sección: {name}",
     "playing": "Sonando",
     "repeatsAbove": "Repite {name}, escrito arriba",
     "repeatToken": "Se toca ×{times}",

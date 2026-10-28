@@ -1601,6 +1601,7 @@
       "invalid": "Check the song details."
     },
     "sectionName": "Section name",
+    "sectionNameOf": "Rename the section: {name}",
     "playing": "Playing",
     "repeatsAbove": "Repeats the {name} written above",
     "repeatToken": "Plays ×{times}",
