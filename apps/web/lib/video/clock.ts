@@ -42,14 +42,23 @@ export interface ChartBar {
 }
 
 const seekListeners = new Set<(bar: ChartBar) => void>();
+let chosen: ChartBar | null = null;
 
 /**
  * A bar tapped on the chart while a player is open (T-2836): the open player moves to where that
- * bar starts in it, so Play starts there, or goes on from there when it plays.
+ * bar starts in it, so Play starts there, or goes on from there when it plays. A bar tapped before
+ * is kept, and a player opened after it opens there (T-3015).
  */
 export const barSeek = {
   request(bar: ChartBar) {
+    chosen = bar;
     for (const listener of seekListeners) listener(bar);
+  },
+  /** The bar last chosen on the page, if any. */
+  chosen: (): ChartBar | null => chosen,
+  /** Leaving the page forgets it. */
+  forget() {
+    chosen = null;
   },
   subscribe(listener: (bar: ChartBar) => void) {
     seekListeners.add(listener);

@@ -285,6 +285,8 @@ export function VisualEditor({
   const playing = usePlayingSection(drawn);
   const placed = useMemo(() => chartClicks(drawn), [drawn]);
   const room = useDockRoomSize();
+  // Leaving the page forgets the bar chosen on it (T-3015).
+  useEffect(() => () => barSeek.forget(), []);
 
   // Leaving with unsaved changes asks first.
   useEffect(() => {
@@ -551,10 +553,9 @@ export function VisualEditor({
     const bar = group[Number(element.dataset.index)];
     if (bar === undefined) return;
     const line = (target.closest<HTMLElement>("[data-line]")?.dataset.line ?? "chords") as Line;
-    // With a player open and paused, its Play starts on the tapped bar (R-13.15, T-2836); while it
-    // plays, writing in a bar never moves it.
-    const clock = videoClock.get();
-    if (clock && !clock.playing && element.dataset.bar)
+    // With a player open and paused, its Play starts on the tapped bar (R-13.15, T-2836), and one
+    // opened after starts there (T-3015); while it plays, writing in a bar never moves it.
+    if (!videoClock.get()?.playing && element.dataset.bar)
       barSeek.request({ section, number: Number(element.dataset.bar) });
     begin({ section, bar }, line);
   };

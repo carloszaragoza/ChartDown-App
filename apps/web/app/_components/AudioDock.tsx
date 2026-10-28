@@ -11,7 +11,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { storedAudio } from "../../lib/offline/store";
 import { createClient } from "../../lib/supabase/browser";
-import { barSeek, videoClock } from "../../lib/video/clock";
+import { barSeek, type ChartBar, videoClock } from "../../lib/video/clock";
 import { barStart, videoSections } from "../../lib/video/sections";
 import { shapedWave, windowWave } from "../../lib/video/wave";
 import { useDockRoom, useDockTarget } from "./DockRoom";
@@ -190,19 +190,25 @@ function AudioDock({
     return () => window.clearInterval(timer);
   }, [musicStart, keepWithin]);
   useEffect(() => () => videoClock.set(null), []);
-  // A bar tapped on the chart: the recording moves to where it starts (T-2836).
-  useEffect(
-    () =>
-      barSeek.subscribe(({ section, number }) => {
-        const at = barStart(chart, section, number);
-        const element = audio.current;
-        if (at === null || !element) return;
-        const to = Math.min(Math.max(0, musicStart + at), duration);
-        element.currentTime = to;
-        setNow(to);
-      }),
-    [chart, musicStart, duration],
-  );
+  // A bar tapped on the chart: the recording moves to where it starts (T-2836); one chosen before
+  // the recording was opened is where it opens, once its length is known (T-3015).
+  const opened = useRef(false);
+  useEffect(() => {
+    const go = ({ section, number }: ChartBar) => {
+      const at = barStart(chart, section, number);
+      const element = audio.current;
+      if (at === null || !element) return;
+      const to = Math.min(Math.max(0, musicStart + at), duration);
+      element.currentTime = to;
+      setNow(to);
+    };
+    if (!opened.current && duration > 0) {
+      opened.current = true;
+      const bar = barSeek.chosen();
+      if (bar) go(bar);
+    }
+    return barSeek.subscribe(go);
+  }, [chart, musicStart, duration]);
 
   const seek = (seconds: number) => {
     const element = audio.current;
