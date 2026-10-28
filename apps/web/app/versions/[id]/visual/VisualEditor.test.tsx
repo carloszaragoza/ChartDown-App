@@ -48,7 +48,7 @@ describe("T-3003 the visual editor", () => {
     expect(html).toContain("Lantern Bay");
     expect(html).toContain("Arranged by Ana Ruiz");
     expect(html).toContain("Key G");
-    expect(html).toMatch(/<h2[^>]*>Verse 1</);
+    expect(html).toMatch(/<h2[^>]*>(<span[^>]*>)?Verse 1</);
     expect(html).toContain("cd-chart--editable");
     expect(html).toContain("Pad only");
     expect(html).toContain("“Take the road”");
@@ -83,6 +83,14 @@ describe("T-3003 the visual editor", () => {
     expect(html.match(/class="cd-chart__beat /g)?.length).toBe(12);
     expect(html).not.toContain("cd-chart__bars--plain");
     expect(html).toContain('aria-label="View options"');
+  });
+
+  it("R-13.9 a section's name is written in place, as the song's title (T-3020)", () => {
+    const html = wrap("en", <VisualEditor {...props("## Verse 1\n1\n\n## Interlude\n4\n")} />);
+    expect(html).toMatch(
+      /<h2[^>]*><span[^>]*role="textbox" aria-label="Rename the section: Interlude"[^>]*>Interlude</,
+    );
+    expect(html).toContain('aria-label="Rename the section: Verse 1"');
   });
 
   it("R-13.7 the tools sit at the foot, ready to drag", () => {

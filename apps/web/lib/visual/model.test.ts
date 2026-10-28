@@ -171,6 +171,15 @@ describe("T-3002 the visual editor's chart", () => {
     expect(lastLine(canonicalText(chart, ""))).toBe("1:2 4 5");
   });
 
+  it("R-13.6 R-13.8 beats written in the bar are its split, marked only if they don't add up (T-3019)", () => {
+    expect(splitNeed(bar("x:3 1:0.5! 1:0.5!"), "4/4")).toEqual({ kind: "even" });
+    expect(splitNeed(bar("x:3 R[1 1]"), "4/4")).toEqual({ kind: "even" });
+    expect(needsAttention(bar("x:3 1:0.5! 1:0.5!"), "4/4")).toBe(false);
+    expect(splitNeed(bar("x:3 1:2"), "4/4")).toEqual({ kind: "uneven", sum: 5, beats: 4 });
+    expect(needsAttention(bar("x:3 1:2"), "4/4")).toBe(true);
+    expect(splitNeed(bar("1:4 4:2"), "6/8")).toEqual({ kind: "even" });
+  });
+
   it("R-13.6 a new chords line drops the split chosen for the old one", () => {
     let chart = setBar(start(), { section: 0, bar: 0 }, { chords: "1 4 5", split: [2, 1, 1] });
     chart = setBar(chart, { section: 0, bar: 0 }, { chords: "1 4" });

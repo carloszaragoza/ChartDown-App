@@ -22,6 +22,14 @@ export const chartdownTheme = defineTheme({
     "--color-error-muted": ["#ffc4be", "#ff98903d"],
   },
   components: {
+    // A menu shows all its actions when the screen has room (owner's review, October 28, 2026:
+    // a section's menu was cut at 300 px, its Delete half hidden); it still never leaves the
+    // screen (T-3021).
+    "dropdown-menu": {
+      base: {
+        maxHeight: "calc(100dvb - var(--spacing-4) - var(--spacing-4))",
+      },
+    },
     button: {
       // Square at least, so a one-letter section in the song form ("I") is a whole touch target
       // (T-2833).
