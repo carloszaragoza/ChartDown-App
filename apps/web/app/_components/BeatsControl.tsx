@@ -67,9 +67,12 @@ export function BeatsControl({
   value,
   hrefs,
   onChoose,
+  isRemembered = true,
   words,
 }: {
   value: BeatsMode;
+  /** The browser remembers the choice and brings it back; not in an editor, which has its own. */
+  isRemembered?: boolean;
   /** The address for each mode, when the server draws it. */
   hrefs?: Record<BeatsMode, string>;
   /** Draws the chosen mode in place instead of asking the server for its address (F-005). */
@@ -94,7 +97,7 @@ export function BeatsControl({
   // Its name above it, as every choice in View options (T-2807), with the help beside the name.
   return (
     <VStack gap={1}>
-      <BeatsMemory current={value} onChoose={onChoose} />
+      {isRemembered && <BeatsMemory current={value} onChoose={onChoose} />}
       <HStack gap={1} vAlign="center">
         <Text type="label" aria-hidden="true">
           {words.label}
@@ -117,7 +120,7 @@ export function BeatsControl({
         value={value}
         onChange={(mode) => {
           const chosen = readBeatsMode(mode);
-          rememberBeats(chosen);
+          if (isRemembered) rememberBeats(chosen);
           if (onChoose) onChoose(chosen);
           else if (hrefs) router.push(hrefs[chosen]);
         }}
