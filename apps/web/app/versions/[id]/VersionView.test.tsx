@@ -148,13 +148,13 @@ describe("R-02.4 making a version private", () => {
 });
 
 describe("R-02.6 only the owner edits", () => {
-  const edit = 'href="/versions/00000000-0000-0000-0000-0000000000f1/edit"';
-
   it("R-02.6 the owner of an active version sees Edit; nobody else does", () => {
-    expect(render("en", { signedIn: true, owner: true })).toContain(edit);
-    expect(render("en", { signedIn: true })).not.toContain(edit);
-    expect(render("en")).not.toContain(edit);
-    expect(render("en", { signedIn: true, owner: true, status: "frozen" })).not.toContain(edit);
+    // Edit is a menu of the two editors during the beta (R-13.1).
+    const editMenu = ">Edit<";
+    expect(render("en", { signedIn: true, owner: true })).toContain(editMenu);
+    expect(render("en", { signedIn: true })).not.toContain(editMenu);
+    expect(render("en")).not.toContain(editMenu);
+    expect(render("en", { signedIn: true, owner: true, status: "frozen" })).not.toContain(editMenu);
   });
 });
 
@@ -240,5 +240,15 @@ describe("R-05.2 adding a version to a set", () => {
     expect(
       render("en", { signedIn: true, setBands: [{ id: "b1", name: "Harbor Band" }] }),
     ).toContain("Add to set");
+  });
+});
+
+describe("R-13.1 during the beta every owner has both editors", () => {
+  it("R-13.1 the owner chooses Visual or Text from Edit; a reader has no Edit", () => {
+    const owner = render("en", { signedIn: true, owner: true });
+    expect(owner).toMatch(/aria-haspopup="menu"[^>]*>|<button[^>]*aria-expanded/);
+    expect(owner).not.toContain(`href="/versions/${props.id}/edit"`);
+    const reader = render("en", { signedIn: true });
+    expect(reader).not.toContain(">Edit<");
   });
 });

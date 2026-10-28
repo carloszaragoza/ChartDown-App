@@ -30,6 +30,7 @@ import {
   FlagIcon,
   KeyIcon,
   MusicalNoteIcon,
+  PaintBrushIcon,
   PencilSquareIcon,
   QueueListIcon,
   Squares2X2Icon,
@@ -46,6 +47,7 @@ import {
   FlagIcon as FlagSolid,
   KeyIcon as KeySolid,
   MusicalNoteIcon as MusicalNoteSolid,
+  PaintBrushIcon as PaintBrushSolid,
   PencilSquareIcon as PencilSolid,
   QueueListIcon as QueueListSolid,
   Squares2X2Icon as GridSolid,
@@ -199,6 +201,15 @@ export function Shell({ account, bands, chosenBand, unread, openReports, childre
           version ? `/versions/${version}/edit` : "/versions/mine",
           PencilSquareIcon,
           PencilSolid,
+        )}
+        {/* The visual editor (SPEC-13): open to everyone signed in during the beta (R-13.1;
+            owner's decision, October 28, 2026). */}
+        {item(
+          "visualEditor",
+          t("visualEditor"),
+          version ? `/versions/${version}/visual` : "/visual/new",
+          PaintBrushIcon,
+          PaintBrushSolid,
         )}
         {item(
           "notes",

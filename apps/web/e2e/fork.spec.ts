@@ -22,7 +22,9 @@ test("R-02.7 the fork shows “Based on the version by…”", async ({ page }) 
   await signUpAndConfirm(page, unique("forker"), "Ben Forker");
   await page.goto(original);
   await expect(page.getByRole("main").getByRole("link", { name: "History" })).toHaveCount(0);
-  await expect(page.getByRole("main").getByRole("link", { name: "Edit" })).toHaveCount(0);
+  await expect(
+    page.getByRole("main").getByRole("button", { name: "Edit", exact: true }),
+  ).toHaveCount(0);
   await page.getByRole("button", { name: "More actions" }).click();
   await expect(page.getByRole("menuitem", { name: "Report", exact: true })).toBeVisible();
   await expect(page.getByRole("menuitem", { name: "Make private" })).toHaveCount(0);

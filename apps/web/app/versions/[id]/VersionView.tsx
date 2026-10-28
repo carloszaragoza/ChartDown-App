@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { EditIcon, ForkIcon, StandIcon } from "../../_components/ActionIcons";
+import { EditChoice } from "./EditChoice";
 import { forkVersion, saveVideoPoints } from "./actions";
 import type { Display } from "./display";
 import { BackToCatalog } from "./BackToCatalog";
@@ -262,12 +263,9 @@ export function VersionView({
                         <Button label={t("myNotes")} href={`/versions/${id}/notes`} size={size} />
                       )}
                       {owner && status === "active" && (
-                        <Button
-                          label={t("edit")}
-                          href={`/versions/${id}/edit`}
-                          icon={<EditIcon />}
-                          size={size}
-                        />
+                        // The owner chooses the visual editor or the text (R-13.1; open to
+                        // everyone during the beta, October 28, 2026).
+                        <EditChoice id={id} icon={<EditIcon />} size={size} />
                       )}
                       {owner && (
                         <Button label={t("history")} href={`/versions/${id}/history`} size={size} />

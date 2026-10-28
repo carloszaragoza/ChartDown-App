@@ -14,7 +14,8 @@ test("R-03.1 the preview updates without reloading", async ({ page }) => {
   await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
   const address = new URL(page.url()).pathname;
 
-  await page.getByRole("main").getByRole("link", { name: "Edit", exact: true }).click();
+  await page.getByRole("main").getByRole("button", { name: "Edit", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Text (ChartDown)" }).click();
   await expect(page).toHaveURL(new RegExp(`${address}/edit$`));
   const save = page.getByRole("button", { name: "Save" });
   await expect(save).toBeDisabled();
@@ -64,9 +65,9 @@ test("R-03.1 the preview updates without reloading", async ({ page }) => {
   await page.goto("/");
   await signOut(page);
   await page.goto(address);
-  await expect(page.getByRole("main").getByRole("link", { name: "Edit", exact: true })).toHaveCount(
-    0,
-  );
+  await expect(
+    page.getByRole("main").getByRole("button", { name: "Edit", exact: true }),
+  ).toHaveCount(0);
   expect((await page.goto(`${address}/edit`))?.status()).toBe(404);
 });
 
@@ -216,7 +217,8 @@ test("R-03.1 T-2837 the chart's text stays in view while the page scrolls down t
   await page.getByLabel("Studio recording").check();
   await page.getByRole("button", { name: "Publish version" }).click();
   await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}$/);
-  await page.getByRole("main").getByRole("link", { name: "Edit", exact: true }).click();
+  await page.getByRole("main").getByRole("button", { name: "Edit", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Text (ChartDown)" }).click();
 
   const preview = page.getByRole("region", { name: "Preview" });
   await preview.getByRole("heading", { name: "Part 12" }).scrollIntoViewIfNeeded();
