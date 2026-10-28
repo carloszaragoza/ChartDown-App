@@ -1,9 +1,11 @@
 # ChartDown logo kit
 
 Final logo: concept 3C, One bar (rounded). Two bar lines and four rhythm slashes; the first beat, in the brand red (signal red), is the MD's cue.
-Start with `guide.pdf` (one page: clear space, minimum sizes, colors, do and don't).
+Start with `guide.pdf` (one page: clear space, minimum sizes, colors, do and don't). Its source is `guide.html`, drawn from the SVGs in `svg/`: change it and print it to PDF from Chromium (Letter, backgrounds on), so the guide never drifts from the files.
 
-## svg/ and png/  (svg = master, png = transparent; vector PDFs are in the original kit)
+## svg/, pdf/ and png/  (svg = master, pdf = vector for print, png = transparent)
+
+The PDFs are printed from the SVGs (Chromium, October 28, 2026), so every format carries the brand red. The original kit of October 6, 2026 (red pencil `#B8322A`) is in the owner's `~/Downloads/LogoChartDown.zip`; this folder replaces it.
 - `chartdown-horizontal-*`      symbol + name (default)
 - `chartdown-stacked-*`         symbol above name
 - `chartdown-symbol-*`          symbol alone
@@ -46,5 +48,5 @@ Color versions: `color-on-light`, `color-on-dark`, `black`, `white`. All text is
 | Red pencil (cue, first slash only) | #B8322A | #FF8478 |
 | Paper | #FBFCFD | #17212B |
 
-Fonts: Barlow Condensed (name) and Source Sans 3 (interface), both SIL Open Font License.
+Fonts: Barlow Condensed (name) and Figtree (interface, the app's Astryx theme), both SIL Open Font License.
 The logo is original work; all rights belong to ChartDown.
