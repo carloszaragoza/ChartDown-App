@@ -1650,6 +1650,7 @@
     "words": "{count} de {max} palabras",
     "split": "Reparto:",
     "over": "Más acordes que tiempos.",
+    "uneven": "Los tiempos escritos suman {sum}; el compás tiene {beats}.",
     "plays": "Se toca",
     "pickupBeats": "Tiempos de la anacrusa",
     "barMenu": "Compás: más",
