@@ -1293,6 +1293,11 @@ export function VisualEditor({
                 {selected && selectedNeed?.kind === "over" && (
                   <Text type="supporting">{t("over")}</Text>
                 )}
+                {selected && selectedNeed?.kind === "uneven" && (
+                  <Text type="supporting">
+                    {t("uneven", { sum: selectedNeed.sum, beats: selectedNeed.beats })}
+                  </Text>
+                )}
                 {selected && selectedBar?.repeatEnd && (
                   <HStack gap={1} vAlign="center">
                     <Text type="supporting">{t("plays")}</Text>
