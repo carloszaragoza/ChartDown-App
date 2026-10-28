@@ -1840,5 +1840,13 @@
     "newMember": "Cuando tu director musical te agregue a un set, aparecerá aquí.",
     "createSet": "Crear un set",
     "allSets": "Ver todos los sets"
+  },
+  "drafts": {
+    "title": "Cambios sin guardar, del {when}",
+    "body": "Se guardaron en este dispositivo. Recupéralos para seguir, o descártalos.",
+    "savedSince": "Se guardaron en este dispositivo, y la chart se guardó después: al recuperarlos reemplazan lo guardado.",
+    "restore": "Recuperar",
+    "discard": "Descartar",
+    "kept": "Guardado en este dispositivo · {when}"
   }
 }

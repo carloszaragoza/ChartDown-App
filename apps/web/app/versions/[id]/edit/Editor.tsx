@@ -23,6 +23,7 @@ import { useActionState, useDeferredValue, useEffect, useMemo, useRef, useState 
 import { ChartTextArea, type ChartTextAreaHandle } from "../../../_components/ChartTextArea";
 import { ChartPreview } from "../../../_components/ChartPreview";
 import { saveChart, type SaveState, type SourceValues } from "./actions";
+import { DraftBanner, DraftStatus, useDraft } from "../../../_components/useDraft";
 import { SOURCE_TYPES, type VersionError } from "../../../../lib/versions/validate";
 import { videoId } from "../../../../lib/video/youtube";
 import { saveVideoPoints } from "../actions";
@@ -121,6 +122,15 @@ export function Editor({
     album.trim() !== saved.album.trim() ||
     year.trim() !== saved.year.trim() ||
     youtube.trim() !== saved.youtube.trim();
+  // Kept in this browser as it is written, and offered again if not saved (R-02.12, T-3022).
+  const written = withTitle(text, songTitle);
+  const draft = useDraft({
+    versionId,
+    revisionId,
+    opened: content,
+    current: written,
+    isDirty: written !== state.savedContent,
+  });
   const fieldError = (code: VersionError) =>
     state.status === "invalid" && state.error === code
       ? { status: { type: "error" as const, message: n(`errors.${code}`) } }
@@ -180,7 +190,7 @@ export function Editor({
             </VStack>
             <form action={action}>
               <input type="hidden" name="versionId" value={versionId} />
-              <input type="hidden" name="content" value={withTitle(text, songTitle)} />
+              <input type="hidden" name="content" value={written} />
               <input type="hidden" name="sourceType" value={sourceType} />
               <input type="hidden" name="album" value={album} />
               <input type="hidden" name="year" value={year} />
@@ -212,6 +222,7 @@ export function Editor({
                   href={`/versions/${versionId}/history`}
                   icon={<Icon icon={ClockIcon} />}
                 />
+                <DraftStatus keptAt={draft.keptAt} />
                 <CancelButton href={page} dirty={dirty} />
                 <Button
                   type="submit"
@@ -297,6 +308,17 @@ export function Editor({
       textLabel={t("textPanel")}
       text={
         <VStack gap={3}>
+          {draft.offered && (
+            <DraftBanner
+              draft={draft.offered}
+              revisionId={revisionId}
+              onRestore={() => {
+                const kept = draft.restore();
+                if (kept) setText(splitTitle(kept.content).body);
+              }}
+              onDiscard={draft.discard}
+            />
+          )}
           {(state.status === "changed" || state.status === "error") && (
             <div role="alert">
               <Banner

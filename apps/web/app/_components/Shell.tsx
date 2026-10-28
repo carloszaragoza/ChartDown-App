@@ -69,6 +69,7 @@ import {
   type ShellBand,
 } from "../../lib/shell/shell";
 import { signOut } from "../auth/actions";
+import { forgetAllDrafts } from "../../lib/drafts";
 
 export interface ShellProps {
   /** The signed-in person, or null for a visitor. */
@@ -290,7 +291,7 @@ function Footer({ account, collapsed }: { account: ShellProps["account"]; collap
               as={IntentLink}
               icon={<Avatar name={account.name} size="sm" tooltip={false} />}
             />
-            <form action={signOut}>
+            <form action={signOut} onSubmit={forgetAllDrafts}>
               <Button
                 type="submit"
                 label={t("signOut")}
@@ -338,7 +339,7 @@ function Footer({ account, collapsed }: { account: ShellProps["account"]; collap
               startContent={<Avatar name={account.name} size="sm" tooltip={false} />}
             />
           </StackItem>
-          <form action={signOut}>
+          <form action={signOut} onSubmit={forgetAllDrafts}>
             <Button
               type="submit"
               label={t("signOut")}

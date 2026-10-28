@@ -54,4 +54,14 @@ test("T-3012 a chart written by hand opens in the visual editor: the notice asks
   await bars.nth(0).locator("[data-line='chords']").click();
   await page.getByRole("button", { name: "Delete bar", exact: true }).click();
   await expect(bars).toHaveCount(count - 2);
+
+  // T-3022 what wasn't saved is kept in the browser: a reload offers it, and Restore brings it back.
+  await expect(page.getByRole("status").filter({ hasText: "Kept on this device" })).toBeVisible();
+  page.on("dialog", (dialog) => void dialog.accept());
+  await page.reload();
+  await expect(page.getByText(/Changes not saved, from/)).toBeVisible();
+  await expect(save).toBeDisabled();
+  await page.getByRole("button", { name: "Restore", exact: true }).click();
+  await expect(bars).toHaveCount(count - 2);
+  await expect(save).toBeEnabled();
 });
