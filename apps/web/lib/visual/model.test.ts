@@ -11,6 +11,7 @@ import {
   deleteSection,
   hasIndication,
   hasMark,
+  holdUntil,
   insertBar,
   markChord,
   pasteBars,
@@ -18,6 +19,7 @@ import {
   repeatsOf,
   setBar,
   setNote,
+  setRowChange,
   step,
   toggleIndication,
   toggleMark,
@@ -308,6 +310,43 @@ describe("T-3002 the visual editor's chart", () => {
       "1 | 4 | 1 | 4",
       "5",
     ]);
+  });
+
+  it("R-13.10 a key, meter and tempo change at a bar writes its lines before the row it starts", () => {
+    let chart = visualChart("---\nkey: G\n---\n## Verse\n1 | 4 | 5 | 1\n");
+    chart = setRowChange(chart, { section: 0, bar: 2 }, { key: "A", meter: "3/4", tempo: "90" });
+    const text = canonicalText(chart, "");
+    expect(text.trimEnd().split("\n").slice(-5)).toEqual([
+      "1 | 4",
+      "@key A",
+      "@meter 3/4",
+      "@tempo 90",
+      "5 | 1",
+    ]);
+    expect(parse(text).warnings).toEqual([]);
+    // The chart drawn from it says the change above that row.
+    expect(parse(text).sections[0]?.rows[1]?.keyChange).toBeTruthy();
+  });
+
+  it("R-13.10 clearing a change leaves the row and no change; a bar with none is left as it was", () => {
+    let chart = visualChart("## Verse\n1 | 4 | 5 | 1\n");
+    chart = setRowChange(chart, { section: 0, bar: 2 }, { key: "A", meter: "", tempo: "" });
+    chart = setRowChange(chart, { section: 0, bar: 2 }, { key: "", meter: "", tempo: "" });
+    expect(canonicalText(chart, "").trimEnd().split("\n").slice(-2)).toEqual(["1 | 4", "5 | 1"]);
+    const same = setRowChange(chart, { section: 0, bar: 1 }, { key: "", meter: "", tempo: "" });
+    expect(same.sections[0]?.bars[1]?.row).toBeNull();
+  });
+
+  it("R-13.7 Hold until a cue holds the last chord with a fermata and writes the cue", () => {
+    let chart = visualChart("## Verse\n1 | 4 5\n");
+    chart = holdUntil(chart, { section: 0, bar: 1 }, "until the vocal, comes in");
+    chart = holdUntil(chart, { section: 0, bar: 1 }, "until the vocal, comes in");
+    const text = canonicalText(chart, "");
+    expect(lastLine(text)).toBe("1 | 4 <5>~ {until the vocal comes in}");
+    expect(parse(text).warnings).toEqual([]);
+    // A bar with no chord has nothing to hold.
+    const empty = visualChart("## Verse\nx\n");
+    expect(holdUntil(empty, { section: 0, bar: 0 }, "the vocal")).toBe(empty);
   });
 
   it("R-13.3 after Save the editor drops the bars added and left empty, as the saved text does", () => {

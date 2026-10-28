@@ -71,6 +71,10 @@ export const EDITOR_ICONS = {
   insertAfter: '<path d="M4 5v14M10 5v14"/><path d="M17 9v6M14 12h6"/>',
   newRow: '<path d="M20 5v6a3 3 0 0 1-3 3H5"/><path d="m9 10-4 4 4 4"/>',
   deleteRow: '<path d="M3 4v6M9 4v6M15 4v6M21 4v6"/><path d="M8 17h8"/>',
+  rowChange:
+    '<path d="M4 5v14"/><path d="M11 7v12M16 5v12"/><path d="m8.5 11.5 10-2.5M8.5 16l10-2.5"/>',
+  holdUntil:
+    '<path d="m12 10 4.5 4.5L12 19l-4.5-4.5Z"/><path d="M5 9a7 7 0 0 1 14 0"/><circle class="cd-icon-dot" cx="12" cy="7.3" r="1.2"/>',
   copyBar: '<path d="M9 8h11v12H9Z"/><path d="M13 12v4M16 12v4"/><path d="M5 16V4h11"/>',
   copyRow: '<path d="M3 4v6M9 4v6M15 4v6M21 4v6"/><path d="M10 15h9v6h-9Z"/><path d="M6 18v-5h9"/>',
   paste:

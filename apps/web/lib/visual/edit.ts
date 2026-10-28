@@ -7,6 +7,7 @@ import {
   tokens,
   type VisualBar,
   type VisualChart,
+  type RowStart,
   type VisualNote,
   type VisualSection,
 } from "./model";
@@ -350,4 +351,52 @@ export function step(chart: VisualChart, at: BarAt, by: 1 | -1): BarAt | null {
     bar = by === 1 ? 0 : (chart.sections[section]?.bars.length ?? 0) - 1;
   }
   return null;
+}
+
+/** A change of key, meter or tempo from a bar on; empty fields change nothing (R-13.10). */
+export interface RowChange {
+  key: string;
+  meter: string;
+  tempo: string;
+}
+
+/** The change a bar starts, for its dialog. */
+export const rowChangeOf = (bar: VisualBar): RowChange => ({
+  key: bar.row?.key ?? "",
+  meter: bar.row?.meter ?? "",
+  tempo: bar.row?.tempo ?? "",
+});
+
+/**
+ * Changes the key, meter or tempo from this bar on (R-13.10): the bar starts a row and the text
+ * writes `@key`, `@meter` and `@tempo` before it. Clearing all three leaves the row, no change.
+ */
+export function setRowChange(chart: VisualChart, at: BarAt, change: RowChange): VisualChart {
+  const bar = chart.sections[at.section]?.bars[at.bar];
+  if (!bar) return chart;
+  const row: Partial<RowStart> = {};
+  if (change.key.trim()) row.key = change.key.trim();
+  if (change.meter.trim()) row.meter = change.meter.trim();
+  if (change.tempo.trim()) row.tempo = change.tempo.trim();
+  const changes = Object.keys(row).length > 0;
+  return setBar(chart, at, { row: changes || bar.row ? row : null });
+}
+
+/**
+ * Hold until a cue (R-13.7): the bar's last chord held with a fermata, `<5>~` (held until cued),
+ * and what it waits for in the indications line, a cue for everyone. ChartDown needs no change.
+ */
+export function holdUntil(chart: VisualChart, at: BarAt, cue: string): VisualChart {
+  const bar = chart.sections[at.section]?.bars[at.bar];
+  const list = tokens(bar?.chords ?? "");
+  // A rest or a repeated bar has no chord of its own to hold.
+  const last = list.at(-1);
+  if (!bar || last === undefined || last === "x" || last === "%") return chart;
+  let chords = bar.chords;
+  for (const mark of ["hold", "fermata"] as const) {
+    if (!hasMark(tokens(chords).at(-1) ?? "", mark)) chords = markChord({ ...bar, chords }, mark);
+  }
+  // Commas part the indications line, so the cue keeps none.
+  const text = cue.replace(/,/g, " ").replace(/\s+/g, " ").trim();
+  return setBar(chart, at, { chords, ...(text ? { top: addIndication(bar.top, text) } : {}) });
 }

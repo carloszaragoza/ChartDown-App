@@ -45,6 +45,8 @@ import { saveChart, type SaveState, type SourceValues } from "../edit/actions";
 import { saveVideoPoints } from "../actions";
 import { BandAudio, openAddAudio, type BandRecording } from "../BandAudio";
 import { HeaderFields } from "./HeaderFields";
+import { HoldUntilDialog } from "./HoldUntilDialog";
+import { RowChangeDialog } from "./RowChangeDialog";
 import { InlineText } from "./InlineText";
 import { ImportDialog } from "./ImportDialog";
 import { SongName } from "../edit/SongName";
@@ -74,6 +76,7 @@ import {
   insertBar,
   hasIndication,
   hasMark,
+  holdUntil,
   markChord,
   moveSection,
   pasteBars,
@@ -81,7 +84,9 @@ import {
   repeatSection,
   ROW_BARS,
   repeatsOf,
+  rowChangeOf,
   setBar,
+  setRowChange,
   setTimes,
   step,
   toggleIndication,
@@ -244,6 +249,9 @@ export function VisualEditor({
   const [editing, setEditing] = useState<{ at: BarAt; line: Line } | null>(null);
   // The bars copied, until the next copy (R-13.10).
   const [clip, setClip] = useState<BarClip | null>(null);
+  // The bar whose key, meter or tempo change is being set, and the bar to hold until a cue.
+  const [rowChangeAt, setRowChangeAt] = useState<BarAt | null>(null);
+  const [holdAt, setHoldAt] = useState<BarAt | null>(null);
   const [importing, setImporting] = useState(false);
   const [noteFor, setNoteFor] = useState<number | null>(null);
   // A note being changed: its section and its place there (R-13.14).
@@ -1297,6 +1305,11 @@ export function VisualEditor({
                         icon: icon("newRow"),
                         onClick: () => change((c) => breakRowAfter(c, selected)),
                       },
+                      {
+                        label: t("rowChange.menu"),
+                        icon: icon("rowChange"),
+                        onClick: () => setRowChangeAt(selected),
+                      },
                       { type: "divider" as const },
                       {
                         label: t("copyBar"),
@@ -1349,9 +1362,19 @@ export function VisualEditor({
                     t("tools.group.chord"),
                     t("tools.group.chordHint"),
                     editing?.line === "chords",
-                    CHORD_MARKS.map((mark) =>
-                      toolButton({ kind: "mark", mark }, t(`tools.${mark}`), mark),
-                    ),
+                    <>
+                      {CHORD_MARKS.map((mark) =>
+                        toolButton({ kind: "mark", mark }, t(`tools.${mark}`), mark),
+                      )}
+                      <Button
+                        label={t("holdUntil.tool")}
+                        size="lg"
+                        icon={icon("holdUntil")}
+                        tooltip={selected ? t("holdUntil.hint") : t("tools.choose")}
+                        isDisabled={!selected}
+                        onClick={() => selected && setHoldAt(selected)}
+                      />
+                    </>,
                   )}
                 </GridSpan>
                 <GridSpan columns="full">
@@ -1456,6 +1479,30 @@ export function VisualEditor({
             </HStack>
           </VStack>
         </Dialog>
+        {rowChangeAt && (
+          <RowChangeDialog
+            key={`${rowChangeAt.section}:${rowChangeAt.bar}`}
+            open
+            bar={label(rowChangeAt, barAt(rowChangeAt) as VisualBar)}
+            initial={rowChangeOf(barAt(rowChangeAt) as VisualBar)}
+            onClose={() => setRowChangeAt(null)}
+            onApply={(next) => {
+              change((c) => setRowChange(c, rowChangeAt, next));
+              setRowChangeAt(null);
+            }}
+          />
+        )}
+        {holdAt && (
+          <HoldUntilDialog
+            key={`${holdAt.section}:${holdAt.bar}`}
+            open
+            onClose={() => setHoldAt(null)}
+            onHold={(cue) => {
+              change((c) => holdUntil(c, holdAt, cue));
+              setHoldAt(null);
+            }}
+          />
+        )}
         <NoteDialog
           key={noteEdit ? `${noteEdit.section}:${noteEdit.note}` : `new:${noteFor}`}
           open={noteFor !== null || noteEdit !== null}

@@ -32,6 +32,8 @@ export const VISUAL_ICONS = {
   newRow: editorIcon("newRow"),
   deleteBar: editorIcon("delete"),
   deleteRow: editorIcon("deleteRow"),
+  rowChange: editorIcon("rowChange"),
+  holdUntil: editorIcon("holdUntil"),
   copyBar: editorIcon("copyBar"),
   copyRow: editorIcon("copyRow"),
   paste: editorIcon("paste"),

@@ -1663,6 +1663,21 @@
     "paste": "Pegar sobre este compás",
     "pasteAfter": "Pegar después de este compás",
     "copied": "{count, plural, one {# compás copiado} other {# compases copiados}}",
+    "rowChange": {
+      "menu": "Cambiar tono, compás o tempo aquí",
+      "title": "Desde {bar}",
+      "intro": "Deja vacío lo que no cambia. Este compás empieza un renglón.",
+      "none": "Sin cambio",
+      "apply": "Aplicar"
+    },
+    "holdUntil": {
+      "tool": "Sostener hasta una señal",
+      "title": "Sostener el acorde hasta…",
+      "cue": "Qué espera",
+      "placeholder": "hasta que entre la voz",
+      "hint": "El último acorde del compás se sostiene con calderón, y esto se escribe arriba.",
+      "apply": "Sostener"
+    },
     "notice": {
       "title": "Visual escribe la carta con la forma estándar de ChartDown",
       "body": "Tus espacios y saltos de línea en el texto no se conservan. La carta en sí no cambia.",

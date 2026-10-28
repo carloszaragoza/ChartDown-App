@@ -12,13 +12,11 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
-import { UNITS, type VisualChart } from "../../../../lib/visual/model";
+import { MAJOR_KEYS, MINOR_KEYS, UNITS, type VisualChart } from "../../../../lib/visual/model";
 import { addTap, tapTempo } from "../../../../lib/visual/tap";
 
 type Meta = VisualChart["meta"];
 
-const MAJOR = ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
-const MINOR = ["Cm", "C#m", "Dm", "Ebm", "Em", "Fm", "F#m", "Gm", "G#m", "Am", "Bbm", "Bm"];
 // The meter's two rows (R-13.2): the beats in a bar, and the beat's note.
 const BEATS = [2, 3, 4, 5, 6, 7, 9, 12];
 const NOTES = [2, 4, 8];
@@ -62,8 +60,8 @@ export function HeaderFields({
   const keyPicker = (
     <VStack gap={2}>
       {[
-        ["major", MAJOR],
-        ["minor", MINOR],
+        ["major", MAJOR_KEYS],
+        ["minor", MINOR_KEYS],
       ].map(([name, keys]) => (
         <VStack key={name as string} gap={1}>
           <Text type="label">{t(`keys.${name as "major"}`)}</Text>
