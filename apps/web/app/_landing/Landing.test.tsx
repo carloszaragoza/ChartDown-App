@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { NextIntlClientProvider } from "next-intl";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
@@ -63,6 +65,16 @@ describe("T-1310 the landing page, version 3", () => {
 
   it("T-1310 the landing is always light: it pins the light tokens", () => {
     expect(render(open)).toContain('data-theme="light"');
+  });
+
+  it("T-2851 the waitlist form's errors take the error color, never the MD's Rosewood", () => {
+    const css = readFileSync(join(__dirname, "landing.module.css"), "utf8");
+    const rule = (selector: string) =>
+      css.slice(css.indexOf(`${selector} {`), css.indexOf("}", css.indexOf(`${selector} {`)));
+    expect(rule('.input[aria-invalid="true"]')).toContain("var(--color-error)");
+    expect(rule(".formProblem")).toContain("var(--color-error)");
+    // The band chat's section is its own class, so it no longer takes the error's style.
+    expect(rule(".problem")).not.toContain("color:");
   });
 
   it("R-01.7 sign-in and the invite code show only where sign-in is open", () => {

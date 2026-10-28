@@ -1195,15 +1195,18 @@
   outline: none;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 12%, transparent);
 }
+/* A form's error is the error color, never the MD's Rosewood (one meaning per color, October 28,
+   2026). */
 .input[aria-invalid="true"] {
-  border-color: var(--md);
+  border-color: var(--color-error);
 }
 .formNote {
   color: var(--ink-soft);
   font-size: 0.875rem;
 }
-.problem {
-  color: var(--md);
+/* Its own class: `.problem` is the band chat's section. */
+.formProblem {
+  color: var(--color-error);
   font-size: 0.875rem;
   font-weight: 600;
 }
