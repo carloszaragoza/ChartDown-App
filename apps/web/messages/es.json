@@ -3,7 +3,7 @@
     "title": "ChartDown App",
     "tagline": "Cifrados en números para toda la banda, con las notas de cada músico.",
     "newVersion": "Nueva versión",
-    "catalog": "Catálogo",
+    "catalog": "Canciones",
     "bands": "Bandas",
     "personal": "Espacio personal",
     "newSubtitle": "Cuatro pasos y tu banda puede tocar con los mismos cifrados.",
@@ -43,7 +43,7 @@
       },
       "version": {
         "title": "Publica tu primera versión",
-        "hint": "Escribe un cifrado en ChartDown o parte del catálogo.",
+        "hint": "Escribe un cifrado en ChartDown o parte de uno en Canciones.",
         "action": "Nueva versión"
       },
       "set": {
@@ -387,7 +387,7 @@
   },
   "version": {
     "newOfSong": "Nueva versión de esta canción",
-    "backToCatalog": "Catálogo",
+    "backToCatalog": "Canciones",
     "by": "Arreglo de {author}",
     "source": {
       "studio": "Grabación de estudio",
@@ -434,7 +434,7 @@
     "search": {
       "label": "Busca la canción por título",
       "submit": "Buscar",
-      "results": "Canciones del catálogo",
+      "results": "Canciones en ChartDown",
       "none": "Ninguna canción coincide. Créala como canción nueva.",
       "use": "Usar {title}",
       "useShort": "Usar esta canción",
@@ -468,7 +468,7 @@
     "details": "Datos de la canción",
     "chartTitle": "Cifrado",
     "preview": "Vista previa",
-    "intro": "Busca la canción en el catálogo, o empieza una nueva.",
+    "intro": "Busca la canción, o empieza una nueva.",
     "import": {
       "open": "Importar una hoja de acordes",
       "title": "Importar una hoja de acordes",
@@ -512,7 +512,7 @@
           "key-guessed": "El tono se dedujo.",
           "tempo-unit": "No se sabe qué figura cuenta el tempo: en este compás puede ser la negra con puntillo o la corchea. Se escribió con ? y Play lo pregunta."
         },
-        "existing": "“{title}” ya está en el catálogo.",
+        "existing": "“{title}” ya está en ChartDown.",
         "existingHint": "Puedes agregar tu versión a esa canción en lugar de empezar una nueva.",
         "useExisting": "Agregar mi versión a esa canción",
         "openExisting": "Ver esa canción",
@@ -542,7 +542,7 @@
   "makePrivate": {
     "title": "Hacer privada esta versión",
     "copy": "Recibes una copia privada con el cifrado actual, y sigues editándola ahí.",
-    "frozen": "Esta versión pública se queda en el catálogo con el nombre {author}, marcada como “Versión pública congelada”. Ya nadie puede editarla, tampoco tú.",
+    "frozen": "Esta versión pública sigue pública con el nombre {author}, marcada como “Versión pública congelada”. Ya nadie puede editarla, tampoco tú.",
     "others": "Los sets y las copias de otras personas siguen usando la versión pública. Las versiones públicas se comparten bajo CC0 y se quedan con la comunidad.",
     "final": "No se puede deshacer.",
     "confirm": "Hacer privada",
@@ -551,20 +551,20 @@
     "consequences": "Qué pasa"
   },
   "catalog": {
-    "title": "Catálogo",
+    "title": "Canciones",
     "search": "Busca por título, artista o álbum",
     "submit": "Buscar",
     "sources": "Fuente",
     "all": "Todas las fuentes",
     "results": "Canciones",
     "none": "Ninguna canción coincide.",
-    "error": "No se pudo cargar el catálogo. Inténtalo de nuevo.",
+    "error": "No se pudieron cargar las canciones. Inténtalo de nuevo.",
     "versions": "{count, plural, one {# versión} other {# versiones}}",
     "versionsOf": "Versiones de {title}",
     "pages": "Páginas",
     "previous": "Anterior",
     "next": "Siguiente",
-    "back": "Volver al catálogo",
+    "back": "Volver a Canciones",
     "intro": "Versiones públicas de ChartDown compartidas por la comunidad. Libres para usar, copiar y tocar.",
     "newVersion": "Nueva versión",
     "placeholder": "Busca por título, artista o fuente",
@@ -894,7 +894,7 @@
     "remove": "Quitar del set",
     "removeName": "Quitar {title} del set",
     "addHint": "Para agregar una canción, abre su versión y elige Agregar a un set.",
-    "catalog": "Abrir el catálogo",
+    "catalog": "Ver canciones",
     "edit": "Nombre, fecha y tipo",
     "save": "Guardar",
     "duplicate": "Duplicar el set",
@@ -1211,10 +1211,10 @@
       "noneHidden": "No hay versiones ocultas.",
       "show": "Mostrar de nuevo: {title}",
       "hiddenDone": "{title} quedó oculta; se avisó a su dueño por qué.",
-      "shownDone": "{title} volvió al catálogo.",
+      "shownDone": "{title} volvió a Canciones.",
       "dismissedDone": "Se descartó el reporte.",
       "failed": "No funcionó; quizá ya cambió. Inténtalo de nuevo.",
-      "description": "Versiones públicas que la gente reportó. Ocultar una versión la quita del catálogo y avisa a su dueño.",
+      "description": "Versiones públicas que la gente reportó. Ocultar una versión la quita de Canciones y avisa a su dueño.",
       "openArea": "Abrir reportes",
       "count": "{count, plural, =0 {Sin reportes abiertos} one {# reporte abierto} other {# reportes abiertos}}",
       "openTab": "Reportes abiertos ({count})",
@@ -1243,7 +1243,7 @@
       "why": "Por qué ChartDown",
       "features": "Funciones",
       "open": "Estándar abierto",
-      "catalog": "Catálogo",
+      "catalog": "Canciones",
       "join": "Unirme a la lista",
       "signIn": "Iniciar sesión"
     },
@@ -1439,7 +1439,7 @@
     "sets": "Sets",
     "stand": "Modo atril",
     "create": "Crear",
-    "catalog": "Catálogo",
+    "catalog": "Canciones",
     "newVersion": "Nueva versión",
     "editor": "Editor de charts",
     "notes": "Notas del director",
@@ -1472,7 +1472,7 @@
     "description": "Las versiones que publicaste o mantienes privadas. Edita un chart o escribe las notas del director para tu banda.",
     "newVersion": "Nueva versión",
     "emptyTitle": "Aún no tienes versiones",
-    "emptyDescription": "Escribe tu primer chart en ChartDown y publícalo, o haz un fork de uno del catálogo.",
+    "emptyDescription": "Escribe tu primer chart en ChartDown y publícalo, o haz un fork de uno de Canciones.",
     "updated": "Actualizada el {when}",
     "public": "Pública",
     "private": "Privada",
@@ -1574,5 +1574,13 @@
     "backToLive": "Volver a en vivo",
     "banner": "En vivo ahora: {set}",
     "bannerLeader": "{name} está dirigiendo."
+  },
+  "standEntry": {
+    "title": "Modo atril",
+    "noUpcoming": "No hay sets próximos",
+    "why": "El modo atril abre tu próximo set. No tienes ninguno de hoy en adelante.",
+    "newMember": "Cuando tu director musical te agregue a un set, aparecerá aquí.",
+    "createSet": "Crear un set",
+    "allSets": "Ver todos los sets"
   }
 }

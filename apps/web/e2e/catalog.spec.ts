@@ -26,7 +26,7 @@ test("R-02.10 a visitor searches the catalog and opens a version", async ({ page
   });
 
   await page.goto("/");
-  await page.getByRole("link", { name: "Catalog" }).click();
+  await page.getByRole("link", { name: "Songs", exact: true }).click();
   await page.getByLabel("Search by title, artist or album").fill(title);
   await page.getByRole("button", { name: "Search" }).click();
   // The only result is the open song: a card with its versions (Design Handoff 2.0 screen 04).
@@ -109,7 +109,7 @@ test("R-02.10 back from a version, the catalog keeps the search and the open son
   await page.getByRole("main").getByText("Far Lanterns").first().click();
   await expect(page).toHaveURL(new RegExp(`/versions/${second}$`));
 
-  await page.getByRole("main").getByRole("link", { name: "Catalog" }).click();
+  await page.getByRole("main").getByRole("link", { name: "Songs", exact: true }).click();
   await expect(page).toHaveURL(/\/catalog\?/);
   await expect(page.getByLabel("Search by title, artist or album")).toHaveValue(
     `Ember Road ${stamp}`,
