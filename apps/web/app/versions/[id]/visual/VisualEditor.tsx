@@ -52,6 +52,7 @@ import { SongName } from "../edit/SongName";
 import { clipboardKey, deleteBarKey, historyKey } from "../../../../lib/visual/keys";
 import { VideoLink } from "../../../_components/VideoDock";
 import { BeatsControl } from "../../../_components/BeatsControl";
+import { DraftBanner, DraftStatus, useDraft } from "../../../_components/useDraft";
 import { ViewOptions } from "../../../_components/ViewOptions";
 import { useChartLabels } from "../../../_components/chartLabels";
 import { usePlayingSection } from "../../../_components/usePlaybackBar";
@@ -280,6 +281,26 @@ export function VisualEditor({
   const dirty =
     (accepted && saved !== state.savedContent && history.past.length > 0) ||
     JSON.stringify(sourceNow) !== JSON.stringify(state.savedSource);
+
+  // Kept in this browser as it is written, and offered again if not saved (R-02.12, T-3022).
+  const draft = useDraft({
+    versionId,
+    revisionId,
+    opened: content,
+    current: saved,
+    isDirty: accepted && saved !== state.savedContent && history.past.length > 0,
+  });
+  const restoreDraft = () => {
+    const kept = draft.restore();
+    if (!kept) return;
+    // One step to undo, as any change; what was kept is already in its standard layout.
+    setHistory((h) => ({
+      past: [...h.past, h.present].slice(-200),
+      present: visualChart(kept.content),
+      future: [],
+    }));
+    setAccepted(true);
+  };
 
   // What is drawn: the chart with its empty bars kept in place (R-13.3).
   const drawn = useMemo(() => parse(chartText(chart, "rest")), [chart]);
@@ -768,6 +789,7 @@ export function VisualEditor({
                   {bands.length > 0 && (
                     <Button label={t("addAudio")} icon={icon("addAudio")} onClick={openAddAudio} />
                   )}
+                  <DraftStatus keptAt={draft.keptAt} />
                   <Button
                     label={t("done")}
                     icon={icon("done")}
@@ -802,6 +824,14 @@ export function VisualEditor({
         content={
           <LayoutContent>
             <VStack gap={6}>
+              {draft.offered && (
+                <DraftBanner
+                  draft={draft.offered}
+                  revisionId={revisionId}
+                  onRestore={restoreDraft}
+                  onDiscard={draft.discard}
+                />
+              )}
               {/* The song's details in one line, each changed right where it is (owner's design,
                   R-13.2): saved with the chart. */}
               <Card padding={3}>
