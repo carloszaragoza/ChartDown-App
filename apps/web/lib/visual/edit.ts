@@ -400,3 +400,30 @@ export function holdUntil(chart: VisualChart, at: BarAt, cue: string): VisualCha
   const text = cue.replace(/,/g, " ").replace(/\s+/g, " ").trim();
   return setBar(chart, at, { chords, ...(text ? { top: addIndication(bar.top, text) } : {}) });
 }
+
+/**
+ * A bar line typed or pasted in a bar's chords line (R-13.5): the bar ends there, as in ChartDown,
+ * and what follows each `|` goes on in the next bar, the one after it when it is empty or else a
+ * new one. Returns the chart and the bar the writing goes on in.
+ */
+export function writeBars(
+  chart: VisualChart,
+  at: BarAt,
+  text: string,
+): { chart: VisualChart; at: BarAt } {
+  const [first = "", ...rest] = text.split("|");
+  let next = setBar(chart, at, { chords: first.trim() });
+  let place = at;
+  for (const piece of rest) {
+    const section = next.sections[place.section];
+    const after = section?.bars[place.bar + 1];
+    if (!after || tokens(after.chords).length > 0)
+      next =
+        place.bar + 1 >= (section?.bars.length ?? 0)
+          ? appendBar(next, place.section)
+          : insertBar(next, place, "after");
+    place = { section: place.section, bar: place.bar + 1 };
+    next = setBar(next, place, { chords: piece.trimStart() });
+  }
+  return { chart: next, at: place };
+}

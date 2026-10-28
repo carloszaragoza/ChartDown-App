@@ -89,6 +89,7 @@ import {
   setTimes,
   step,
   toggleIndication,
+  writeBars,
   type BarAt,
   type ChordMark,
   type BarClip,
@@ -305,11 +306,20 @@ export function VisualEditor({
     else setAsking(() => run);
   };
   /** Typing in a line updates the chart as it goes, in the step its editing began. */
-  const typeIn = (at: BarAt, line: Line, value: string) =>
+  const typeIn = (at: BarAt, line: Line, value: string) => {
+    // A bar line in the chords line ends the bar and the writing goes on in the next (R-13.5).
+    if (line === "chords" && value.includes("|")) {
+      const written = writeBars(chart, at, value.replace(/[{}"]/g, ""));
+      setHistory((h) => ({ ...h, present: written.chart }));
+      setSelected(written.at);
+      setEditing({ at: written.at, line });
+      return;
+    }
     setHistory((h) => ({
       ...h,
       present: setBar(h.present, at, { [FIELD[line]]: value.replace(UNSAFE[line], "") }),
     }));
+  };
   const undo = () =>
     setHistory((h) =>
       h.past.length === 0

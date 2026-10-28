@@ -34,4 +34,14 @@ test("T-3012 a chart written by hand opens in the visual editor: the notice asks
   await input.press("Escape");
   await expect(page.locator(".cd-chart__bar").first()).toContainText("6");
   await expect(save).toBeEnabled();
+
+  // T-3013 a bar line typed in the chords line ends the bar; the writing goes on in the next.
+  await page.locator(".cd-chart__bar").first().locator("[data-line='chords']").click();
+  await page.locator(".cd-chart__input").first().fill("6m7 '1/3 | 4");
+  await expect(page.locator(".cd-chart__input")).toHaveValue("4");
+  await page.keyboard.press("Escape");
+  const bars = page.locator(".cd-chart__bar");
+  await expect(bars.nth(0)).toContainText("1/3");
+  await expect(bars.nth(0)).not.toContainText("4");
+  await expect(bars.nth(1)).toContainText("4");
 });
