@@ -127,7 +127,7 @@ export function WaitlistForm({
           </Magnetic>
         </div>
         {problem ? (
-          <p id={`${id}-problem`} role="alert" className={styles.problem}>
+          <p id={`${id}-problem`} role="alert" className={styles.formProblem}>
             {problem}
           </p>
         ) : (
