@@ -115,6 +115,13 @@ describe("T-3002 the visual editor's chart", () => {
     expect(isKnownToken("hello")).toBe(false);
   });
 
+  it("R-13.4 a token with its beats is read, whatever the bar adds up to (T-3018)", () => {
+    expect(isKnownToken("x:3")).toBe(true);
+    expect(isKnownToken("1/3:1")).toBe(true);
+    expect(isKnownToken("6m7:2")).toBe(true);
+    expect(isKnownToken("4zz:2")).toBe(false);
+  });
+
   it("R-13.4 the lyric keeps 8 words at most (no lyrics)", () => {
     const chart = setBar(
       start(),
