@@ -43,6 +43,6 @@ describe("T-901 the installable app", () => {
     const svg = readFileSync(new URL("./icon.svg", import.meta.url), "utf8");
     expect(svg.match(/<line /g)).toHaveLength(2);
     expect(svg).toContain("prefers-color-scheme: dark");
-    expect(svg).toContain("#B8322A");
+    expect(svg).toContain("#94484A");
   });
 });
