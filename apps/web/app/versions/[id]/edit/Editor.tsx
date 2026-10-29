@@ -12,7 +12,6 @@ import { LayoutHeader } from "@astryxdesign/core/Layout";
 import { List } from "@astryxdesign/core/List";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
-import { StackItem } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import { parse, SUPPORTED_VERSION, type Warning } from "chartdown";
@@ -260,32 +259,39 @@ export function Editor({
               isOptional
               {...fieldError("year_invalid")}
             />
-            <HStack gap={1} vAlign="end">
-              {videoId(youtube) && (
-                <VideoLink
-                  url={youtube}
-                  chart={chart}
-                  saved={details?.videoStart}
-                  savedEnd={details?.videoEnd}
-                  save={(points) => saveVideoPoints(versionId, points)}
-                  isIconOnly
-                />
-              )}
-              <StackItem size="fill">
-                <TextInput
-                  label={n("youtube")}
-                  value={youtube}
-                  onChange={setYoutube}
-                  isOptional
-                  {...fieldError("youtube_invalid")}
-                />
-              </StackItem>
-            </HStack>
-            {recordings.length > 0 && (
-              // The band's audio plays here as on the version page, in the bar across the bottom,
-              // and the preview follows it (T-2834); adding one stays in the version's "…" menu.
+            <TextInput
+              label={n("youtube")}
+              value={youtube}
+              onChange={setYoutube}
+              isOptional
+              {...fieldError("youtube_invalid")}
+            />
+            {(videoId(youtube) || recordings.length > 0) && (
+              // The video and the band's audio on one line, as on the version page (T-3025); both
+              // play in the bar across the bottom and the preview follows them (T-2834); adding a
+              // recording stays in the version's "…" menu.
               <GridSpan columns="full">
-                <BandAudio versionId={versionId} recordings={recordings} bands={[]} chart={chart} />
+                <HStack gap={2} vAlign="center" wrap="wrap">
+                  {videoId(youtube) && (
+                    <VideoLink
+                      url={youtube}
+                      chart={chart}
+                      saved={details?.videoStart}
+                      savedEnd={details?.videoEnd}
+                      save={(points) => saveVideoPoints(versionId, points)}
+                      size="md"
+                    />
+                  )}
+                  {recordings.length > 0 && (
+                    <BandAudio
+                      versionId={versionId}
+                      recordings={recordings}
+                      bands={[]}
+                      chart={chart}
+                      size="md"
+                    />
+                  )}
+                </HStack>
               </GridSpan>
             )}
             <GridSpan columns="full">

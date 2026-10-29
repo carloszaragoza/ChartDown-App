@@ -82,14 +82,14 @@ test("R-06.7 the MD adds the band's audio; its musicians hear it, nobody else", 
 
   await dialog.locator("input[type=file]").setInputFiles(TONE);
   await dialog.getByRole("button", { name: "Upload" }).click();
-  await expect(page.getByText(`${band}'s recording · 0:08`)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Listen to the audio" })).toBeVisible();
 
   // Ben hears it; a visitor doesn't even see it.
   await switchTo(page, ben, "Ben Audio");
   await page.goto(`/versions/${version}`);
-  await expect(page.getByText(`${band}'s recording · 0:08`)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Listen to the audio" })).toBeVisible();
   // T-2603: he plays it; the sections lie over its waveform and the chart follows it.
-  await page.getByRole("button", { name: `Play ${band}'s recording` }).click();
+  await page.getByRole("button", { name: "Listen to the audio" }).click();
   const player = page.getByRole("complementary", { name: "Band audio" });
   const play = player.getByRole("button", { name: "Play", exact: true });
   await expect(play).toBeEnabled();
@@ -132,7 +132,7 @@ test("R-06.7 the MD adds the band's audio; its musicians hear it, nobody else", 
   await signOut(page);
   await page.goto(`/versions/${version}`);
   await expect(page.getByText(`${band}'s recording`)).toHaveCount(0);
-  await expect(page.getByRole("button", { name: `Play ${band}'s recording` })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Listen to the audio" })).toHaveCount(0);
 });
 
 test("R-06.7 a downloaded set keeps its songs' recordings: stand mode plays them offline", async ({
@@ -171,7 +171,7 @@ test("R-06.7 a downloaded set keeps its songs' recordings: stand mode plays them
   await dialog.locator("input[type=file]").setInputFiles(TONE);
   await dialog.getByText("The band has the right to use this recording.").click();
   await dialog.getByRole("button", { name: "Upload" }).click();
-  await expect(page.getByText(`${band}'s recording · 0:08`)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Listen to the audio" })).toBeVisible();
   // Adding the song opens the set's page.
   await addToSet(page, `${band} · ${set}`);
 
@@ -239,13 +239,13 @@ test("R-06.7 T-2834 the chart editor plays the band's audio, and its preview fol
   await dialog.locator("input[type=file]").setInputFiles(TONE);
   await dialog.getByText("The band has the right to use this recording.").click();
   await dialog.getByRole("button", { name: "Upload" }).click();
-  await expect(page.getByText("Just me's recording · 0:08")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Listen to the audio" })).toBeVisible();
 
   await page.getByRole("main").getByRole("button", { name: "Edit", exact: true }).click();
   await page.getByRole("menuitem", { name: "Text (ChartDown)" }).click();
   // The menu opens the editor in place: wait for it, as the version page has the same button.
   await expect(page).toHaveURL(/\/versions\/[0-9a-f-]{36}\/edit$/);
-  await page.getByRole("button", { name: "Play Just me's recording" }).click();
+  await page.getByRole("button", { name: "Listen to the audio" }).click();
   const player = page.getByRole("complementary", { name: "Band audio" });
   // The preview follows the recording while it plays, as the version page does.
   const play = player.getByRole("button", { name: "Play", exact: true });

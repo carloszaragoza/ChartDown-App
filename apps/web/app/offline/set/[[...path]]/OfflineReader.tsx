@@ -302,6 +302,8 @@ export function OfflineReader() {
     <AudioButton
       recording={{ ...kept, band: bundle.set.personal ? a("personal") : bundle.set.band }}
       chart={chart}
+      // Stand mode's top bar keeps it an icon (T-3025).
+      isIconOnly={Boolean(place.stand)}
     />
   ) : null;
 

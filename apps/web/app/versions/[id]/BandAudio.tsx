@@ -11,7 +11,7 @@ import { Icon } from "@astryxdesign/core/Icon";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
-import { MusicalNoteIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -42,11 +42,6 @@ export function openAddAudio(): void {
   window.dispatchEvent(new Event(ADD_AUDIO));
 }
 
-const minutes = (milliseconds: number) => {
-  const seconds = Math.round(milliseconds / 1000);
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
-};
-
 /**
  * The bands' recordings of this version (R-06.7, T-2602): each band's members see theirs; the
  * band's MD adds one from the "…" menu, replaces it or removes it. The browser checks the file (MP3 or M4A, at most
@@ -57,10 +52,13 @@ export function BandAudio({
   recordings,
   bands,
   chart,
+  size = "lg",
 }: {
   versionId: string;
   /** The chart the player places its sections on (T-2603). */
   chart: Chart;
+  /** The buttons' size, as the video's beside them; medium on a phone. */
+  size?: "md" | "lg";
   recordings: BandRecording[];
   /** The bands whose recording this person may add: those they arrange. */
   bands: { id: string; name: string }[];
@@ -130,17 +128,16 @@ export function BandAudio({
   };
 
   if (recordings.length === 0 && bands.length === 0) return null;
+  // Each recording a button beside the video's, on the same line (R-03.11, T-3025).
   return (
-    <VStack gap={1}>
+    <HStack gap={2} vAlign="center" wrap="wrap">
       {recordings.map((recording) => (
-        <HStack key={recording.bandId} gap={2} vAlign="center" wrap="wrap">
-          <Icon icon={MusicalNoteIcon} />
-          <Text>
-            {t("recording", { band: recording.band, length: minutes(recording.durationMs) })}
-          </Text>
+        <HStack key={recording.bandId} gap={0.5} vAlign="center">
           <AudioButton
             recording={{ ...recording, versionId }}
             chart={chart}
+            isNamed={recordings.length > 1}
+            size={size}
             save={
               recording.canArrange
                 ? (points) => saveAudioPoints(recording.bandId, versionId, points)
@@ -209,6 +206,6 @@ export function BandAudio({
           </HStack>
         </VStack>
       </Dialog>
-    </VStack>
+    </HStack>
   );
 }
