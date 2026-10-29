@@ -13,6 +13,12 @@ export interface CountedPlayer {
   pause(): void;
   isMuted(): boolean;
   setMuted(muted: boolean): void;
+  /**
+   * The player's own audio graph, when the recording plays through it: the clicks then sound in
+   * it too, and silencing turns its gain down, so it keeps playing. An iPhone pauses a recording
+   * unmuted without a tap and interrupts a second audio context (T-3023).
+   */
+  context?: AudioContext;
 }
 
 const KEY = "chartdown:count-in";
@@ -40,6 +46,12 @@ const AHEAD = 0.05;
 // The recording runs this close to its bar before it is heard, so the first beat is never cut.
 const EARLY = 0.02;
 const GIVE_UP_MS = 4000;
+// How near the bar before the recording must say it is before its clock is trusted: a video
+// moved there still reports where it was for a moment.
+const SETTLE = 0.25;
+
+// One count at a time on the page: a count started in another player stops this one.
+let active: (() => void) | null = null;
 
 /**
  * The count-in before the video or the band's audio (R-03.14, T-3023): one bar of the metronome's
@@ -81,7 +93,8 @@ export function useCountIn() {
     (plan: CountIn, player: CountedPlayer) => {
       stop();
       setCounting(true);
-      const audio = new AudioContext();
+      const own = !player.context;
+      const audio = player.context ?? new AudioContext();
       void audio.resume();
       const volume = getSound().beat;
       const wasMuted = player.isMuted();
@@ -90,23 +103,37 @@ export function useCountIn() {
       let timer = 0;
       // Audio-clock time of the count's first click, once known.
       let first: number | null = null;
+      const sources: AudioBufferSourceNode[] = [];
       const schedule = (at: number) => {
         first = at;
-        for (const click of plan.clicks)
-          playClick(
+        for (const click of plan.clicks) {
+          const source = playClick(
             audio,
             Math.max(at + click.time, audio.currentTime),
             click.accent ? "accent" : "beat",
             volume,
           );
+          if (source) sources.push(source);
+        }
       };
       const done = () => {
         cancelAnimationFrame(frame);
         window.clearTimeout(timer);
-        window.setTimeout(() => void audio.close(), 500);
+        if (own) window.setTimeout(() => void audio.close(), 500);
+        if (active === cancel) active = null;
         running.current = null;
         setBeat(null);
         setCounting(false);
+      };
+      // Stopped early: the clicks not yet heard are silenced at once, never left to sound.
+      const silence = () => {
+        for (const source of sources) {
+          try {
+            source.stop();
+          } catch {
+            // Already played.
+          }
+        }
       };
       const show = () => {
         if (first === null) return;
@@ -115,51 +142,68 @@ export function useCountIn() {
         setBeat(click ? { count: click.count, of: click.of } : null);
       };
       if (lead >= 0) {
-        // Silent from a bar before; the clicks follow the recording's own clock.
-        player.setMuted(true);
+        // A bar of the recording before: it is heard under the count, as a band counts in over
+        // the room, and the clicks follow its own clock, so the song lands on the bar (owner's
+        // review, October 28, 2026: what comes before the song, heard, sounds professional; a
+        // recording starting cut on the bar doesn't). Nothing is muted, which a phone would
+        // punish by pausing it.
         player.seek(lead);
         player.play();
         const began = performance.now();
+        let settled = false;
         const follow = () => {
           const time = player.time();
+          // Until the recording says it is at the bar before, what it says is where it was.
+          if (!settled) settled = time >= lead - SETTLE && time < plan.at;
           // A recording that never starts (still loading, or not allowed): it plays as it can.
-          if (first === null && performance.now() - began > GIVE_UP_MS) {
-            if (!wasMuted) player.setMuted(false);
-            return done();
-          }
-          if (first === null && time > lead + EARLY) schedule(audio.currentTime - (time - lead));
+          if (first === null && performance.now() - began > GIVE_UP_MS) return done();
+          if (settled && first === null && time > lead + EARLY)
+            schedule(audio.currentTime - (time - lead));
           show();
-          if (first !== null && time >= plan.at - EARLY) {
-            if (!wasMuted) player.setMuted(false);
-            return done();
-          }
+          if (settled && first !== null && time >= plan.at - EARLY) return done();
           frame = requestAnimationFrame(follow);
         };
         frame = requestAnimationFrame(follow);
       } else {
-        // Too near the recording's start for a silent bar: it starts when the count ends.
+        // Less of the recording before the bar than the count lasts (a song from 0:00): the count
+        // starts alone and the recording comes in from its start when what is left of the count
+        // is what it has before the bar, so the bar still lands on the count's end.
         schedule(audio.currentTime + AHEAD);
         const tick = () => {
           show();
           frame = requestAnimationFrame(tick);
         };
         frame = requestAnimationFrame(tick);
-        // Moved there only now: YouTube starts a video it hasn't played yet when it is moved.
-        player.pause();
+        if (player.context) {
+          // Through its own graph it runs silent from the tap, as a phone needs to let it sound.
+          player.setMuted(true);
+          player.seek(0);
+          player.play();
+        } else {
+          // Moved only when it comes in: YouTube starts a video it hasn't played yet when moved.
+          player.pause();
+        }
+        const comesIn = Math.max(0, plan.length - plan.at);
         timer = window.setTimeout(
           () => {
-            player.seek(plan.at);
-            player.play();
-            done();
+            player.seek(0);
+            if (player.context) {
+              if (!wasMuted) player.setMuted(false);
+            } else player.play();
+            timer = window.setTimeout(done, Math.max(0, plan.at) * 1000);
           },
-          (AHEAD + plan.length) * 1000,
+          (AHEAD + comesIn) * 1000,
         );
       }
-      running.current = () => {
+      const cancel = () => {
+        silence();
         done();
         player.pause();
         if (!wasMuted) player.setMuted(false);
       };
+      active?.();
+      active = cancel;
+      running.current = cancel;
     },
     [stop],
   );
