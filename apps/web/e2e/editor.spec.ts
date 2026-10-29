@@ -156,16 +156,27 @@ test("R-02.2 the owner changes the version's source in the editor", async ({ pag
 
   await page.goto(`${address}/edit`);
   const details = page.getByRole("region", { name: "Song details" });
-  // A wrong year is refused, with its message, and nothing changes.
-  await details.getByLabel("Year").fill("12");
+  // T-3027 the details are written in place, as in the visual editor. A wrong year is refused,
+  // with its message, and nothing changes.
+  await details.getByRole("textbox", { name: "Year" }).fill("12");
+  await details.getByRole("textbox", { name: "Year" }).press("Enter");
   await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByRole("alert").filter({ hasText: "year" }).first()).toBeVisible();
   await expect(page).toHaveURL(new RegExp(`${address}/edit$`));
 
-  await details.getByLabel("Year").fill("2024");
-  await details.getByLabel("Album").fill("Harbor Nights");
-  await details.getByLabel("YouTube link").fill("https://www.youtube.com/watch?v=hBL9EBKB5DI");
-  await details.getByLabel("Acoustic").check();
+  for (const [field, value] of [
+    ["Year", "2024"],
+    ["Album", "Harbor Nights"],
+    ["YouTube link", "https://www.youtube.com/watch?v=hBL9EBKB5DI"],
+  ] as const) {
+    await details.getByRole("textbox", { name: field }).fill(value);
+    await details.getByRole("textbox", { name: field }).press("Enter");
+  }
+  // The source from its menu.
+  await details.getByRole("button", { name: "Live" }).click();
+  await page.getByRole("radio", { name: "Acoustic" }).check();
+  await page.keyboard.press("Escape");
+  await expect(details.getByRole("button", { name: "Acoustic" })).toBeVisible();
   await page.getByRole("button", { name: "Save", exact: true }).click();
   // Only the source changed: back to the version, with no new revision.
   await expect(page).toHaveURL(new RegExp(`${address}$`));

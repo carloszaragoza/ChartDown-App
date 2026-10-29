@@ -1,9 +1,7 @@
 "use client";
 
 import { Banner } from "@astryxdesign/core/Banner";
-import { Grid, GridSpan } from "@astryxdesign/core/Grid";
-import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
-import { TextInput } from "@astryxdesign/core/TextInput";
+import { Heading } from "@astryxdesign/core/Heading";
 import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
@@ -23,7 +21,6 @@ import { ChartTextArea, type ChartTextAreaHandle } from "../../../_components/Ch
 import { ChartPreview } from "../../../_components/ChartPreview";
 import { saveChart, type SaveState, type SourceValues } from "./actions";
 import { DraftBanner, DraftStatus, useDraft } from "../../../_components/useDraft";
-import { SOURCE_TYPES, type VersionError } from "../../../../lib/versions/validate";
 import { videoId } from "../../../../lib/video/youtube";
 import { saveVideoPoints } from "../actions";
 import { CancelButton, WriteLayout } from "../../../_components/WriteLayout";
@@ -32,6 +29,7 @@ import { BandAudio, type BandRecording } from "../BandAudio";
 import { usePlayingSection } from "../../../_components/usePlaybackBar";
 import { splitTitle, withTitle } from "../../../../lib/versions/title";
 import { SongName } from "./SongName";
+import { SongDetails } from "../SongDetails";
 
 export interface EditorProps {
   /** The server's guess that the page opens on a phone (R-03.9). */
@@ -90,7 +88,7 @@ export function Editor({
   const t = useTranslations("editor");
   const v = useTranslations("version");
   const n = useTranslations("newVersion");
-  const sources = useTranslations("version.source");
+  const vis = useTranslations("visual");
   const format = useFormatter();
   const now = useNow({ updateInterval: 30_000 });
   const router = useRouter();
@@ -130,10 +128,6 @@ export function Editor({
     current: written,
     isDirty: written !== state.savedContent,
   });
-  const fieldError = (code: VersionError) =>
-    state.status === "invalid" && state.error === code
-      ? { status: { type: "error" as const, message: n(`errors.${code}`) } }
-      : {};
   // The preview may lag a keystroke behind so typing never waits for it.
   const shown = useDeferredValue(text);
   const chart = useMemo(() => parse(withTitle(shown, songTitle)), [shown, songTitle]);
@@ -195,6 +189,27 @@ export function Editor({
               <input type="hidden" name="year" value={year} />
               <input type="hidden" name="youtube" value={youtube} />
               <HStack gap={2} vAlign="center" wrap="wrap">
+                {/* The video and the band's audio first, as in the visual editor's header (T-3025,
+                    T-3027); both play in the bar across the bottom and the preview follows them. */}
+                {videoId(youtube) && (
+                  <VideoLink
+                    url={youtube}
+                    chart={chart}
+                    saved={details?.videoStart}
+                    savedEnd={details?.videoEnd}
+                    save={(points) => saveVideoPoints(versionId, points)}
+                    size="md"
+                  />
+                )}
+                {recordings.length > 0 && (
+                  <BandAudio
+                    versionId={versionId}
+                    recordings={recordings}
+                    bands={[]}
+                    chart={chart}
+                    size="md"
+                  />
+                )}
                 {/* Going private is its own flow (R-02.4), with no way back. */}
                 <SegmentedControl
                   label={t("visibility")}
@@ -238,79 +253,27 @@ export function Editor({
       }
       detailsLabel={n("details")}
       details={
-        <VStack gap={4}>
+        <VStack gap={2}>
           {state.status === "invalid" && state.error && (
             <div role="alert">
               <Banner status="error" title={n(`errors.${state.error}`)} />
             </div>
           )}
-          <Grid columns={{ minWidth: 220 }} gap={4} align="start">
-            {details && (
-              <VStack gap={0.5}>
-                <Text type="supporting">{n("author")}</Text>
-                <Text weight="semibold">{details.author}</Text>
-              </VStack>
-            )}
-            <TextInput label={n("album")} value={album} onChange={setAlbum} isOptional />
-            <TextInput
-              label={n("year")}
-              value={year}
-              onChange={setYear}
-              isOptional
-              {...fieldError("year_invalid")}
-            />
-            <TextInput
-              label={n("youtube")}
-              value={youtube}
-              onChange={setYoutube}
-              isOptional
-              {...fieldError("youtube_invalid")}
-            />
-            {(videoId(youtube) || recordings.length > 0) && (
-              // The video and the band's audio on one line, as on the version page (T-3025); both
-              // play in the bar across the bottom and the preview follows them (T-2834); adding a
-              // recording stays in the version's "…" menu.
-              <GridSpan columns="full">
-                <HStack gap={2} vAlign="center" wrap="wrap">
-                  {videoId(youtube) && (
-                    <VideoLink
-                      url={youtube}
-                      chart={chart}
-                      saved={details?.videoStart}
-                      savedEnd={details?.videoEnd}
-                      save={(points) => saveVideoPoints(versionId, points)}
-                      size="md"
-                    />
-                  )}
-                  {recordings.length > 0 && (
-                    <BandAudio
-                      versionId={versionId}
-                      recordings={recordings}
-                      bands={[]}
-                      chart={chart}
-                      size="md"
-                    />
-                  )}
-                </HStack>
-              </GridSpan>
-            )}
-            <GridSpan columns="full">
-              <RadioList
-                label={n("source")}
-                value={sourceType}
-                onChange={setSourceType}
-                orientation={phone ? "vertical" : "horizontal"}
-                isRequired
-                {...fieldError("source_required")}
-              >
-                {SOURCE_TYPES.map((type) => (
-                  <RadioListItem key={type} value={type} label={sources(type)} />
-                ))}
-              </RadioList>
-            </GridSpan>
-          </Grid>
+          {/* The same strip as the visual editor's, each detail written in place (T-3027). */}
+          <SongDetails
+            author={details?.author}
+            sourceType={sourceType}
+            onSourceType={setSourceType}
+            album={album}
+            onAlbum={setAlbum}
+            year={year}
+            onYear={setYear}
+            youtube={youtube}
+            onYoutube={setYoutube}
+          />
         </VStack>
       }
+      detailsPadding={3}
       textLabel={t("textPanel")}
       text={
         <VStack gap={3}>
@@ -333,7 +296,25 @@ export function Editor({
               />
             </div>
           )}
-          <Text type="supporting">ChartDown {chart.version ?? SUPPORTED_VERSION}</Text>
+          {/* The chart's line, as in the visual editor: which editor, and the format (T-3027). */}
+          <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
+            <HStack gap={3} vAlign="center" wrap="wrap">
+              <Heading level={2}>{vis("chart")}</Heading>
+              <SegmentedControl
+                label={vis("editorChoice")}
+                value="text"
+                isDisabled={dirty}
+                disabledMessage={vis("saveFirst")}
+                onChange={(value) => {
+                  if (value === "visual") router.push(`/versions/${versionId}/visual`);
+                }}
+              >
+                <SegmentedControlItem value="visual" label={vis("visualChoice")} />
+                <SegmentedControlItem value="text" label={vis("textChoice")} />
+              </SegmentedControl>
+            </HStack>
+            <Text type="supporting">ChartDown {chart.version ?? SUPPORTED_VERSION}</Text>
+          </HStack>
           <ChartTextArea
             handle={lines}
             label={t("text")}

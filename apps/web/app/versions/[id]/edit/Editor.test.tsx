@@ -60,8 +60,17 @@ describe("R-03.1 the chart editor", () => {
     expect(mine).toContain('aria-label="Rename the song: Reaons"');
     expect(mine).toContain('aria-label="Edit the artists: Mitch Wong, The Belonging Co"');
     const shared = editor(false);
-    expect(shared).not.toMatch(/contenteditable/i);
+    // Only the song's names are kept from it; its details are still written in place (T-3027).
+    expect(shared).not.toContain("Rename the song");
+    expect(shared).not.toMatch(/<h1[^>]*><span[^>]*contenteditable/i);
     expect(shared).toContain("Mitch Wong, The Belonging Co");
+    // R-03.1 R-13.2 T-3027 the visual editor's header: its details strip, and Visual and Text.
+    expect(mine).toContain("Arranged by Ana Ruiz");
+    for (const field of ["Album", "Year", "YouTube link"])
+      expect(mine).toMatch(new RegExp(`role="textbox" aria-label="${field}"`));
+    expect(mine).toMatch(/aria-label="Editor"/);
+    expect(mine).toMatch(/data-value="text"[^>]*>/);
+    expect(mine).not.toContain('aria-label="Album" type="text"');
   });
 
   it("R-03.1 the editor shows the text beside a preview of the parsed chart", () => {
