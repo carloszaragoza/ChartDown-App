@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+import { STAND_THEME_COOKIE, standThemeOf } from "../../../../../../lib/stand/theme";
 import { keyName, parse, type Chart } from "chartdown";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -110,7 +112,8 @@ export default async function SetStandPage({
   }
   const display = readDisplay(chart, { view: search.view, beats: search.beats });
   const homeKey = setSongKey(chart, song.set_key);
-  const theme = search.theme === "stage" ? "stage" : "light";
+  // The link's theme, then the one chosen on the device, else the device's appearance (T-3031).
+  const theme = standThemeOf(search.theme, (await cookies()).get(STAND_THEME_COOKIE)?.value);
   const keep: Record<string, string> = as ? { as } : {};
   const base = (n: number) => `/sets/${id}/songs/${n}/stand`;
   // The view, theme and View as travel with every link; the section only where it is given.
