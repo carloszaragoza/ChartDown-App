@@ -17,6 +17,7 @@ export const VISUAL_ICONS = {
   // Sections
   addSection: editorIcon("addSection"),
   addRow: editorIcon("addRow"),
+  splitSection: editorIcon("splitSection"),
   rename: editorIcon("rename"),
   addNote: editorIcon("addNote"),
   repeatSection: editorIcon("repeatSection"),

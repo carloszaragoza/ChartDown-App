@@ -181,6 +181,33 @@ export const addSection = (chart: VisualChart, after: number, name: string): Vis
   return { ...chart, sections };
 };
 
+/**
+ * Splits a section in two before one of its bars, the first of a row (R-13.9, T-3028): the bars
+ * from it on become a new section right after, named `name`; the notes stay with the first part.
+ */
+export const splitSection = (
+  chart: VisualChart,
+  index: number,
+  atBar: number,
+  name: string,
+): VisualChart => {
+  const section = chart.sections[index];
+  if (!section || section.use || atBar <= 0 || atBar >= section.bars.length) return chart;
+  const after = section.bars.slice(atBar);
+  const first = after[0] as VisualBar;
+  const second: VisualSection = {
+    name,
+    notes: [],
+    bars: [{ ...first, row: first.row ?? {} }, ...after.slice(1)],
+    use: null,
+    times: null,
+    useKey: null,
+  };
+  const sections = [...chart.sections];
+  sections.splice(index, 1, { ...section, bars: section.bars.slice(0, atBar) }, second);
+  return { ...chart, sections };
+};
+
 export const renameSection = (chart: VisualChart, index: number, name: string): VisualChart => {
   const old = chart.sections[index]?.name;
   return {

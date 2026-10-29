@@ -20,6 +20,7 @@ import {
   setBar,
   setNote,
   setRowChange,
+  splitSection,
   step,
   toggleIndication,
   toggleMark,
@@ -433,5 +434,33 @@ describe("T-3002 the visual editor's chart", () => {
     const chart = setBar(start(), { section: 0, bar: 1 }, { chords: "5" });
     expect(lastLine(chartText(chart, "rest"))).toBe("x | 5 | x | x");
     expect(lastLine(canonicalText(chart, ""))).toBe("5");
+  });
+});
+
+describe("T-3028 splitting a section in two", () => {
+  it("R-13.9 the rows after the split become the next section, its notes left with the first", () => {
+    const chart = visualChart(
+      "## Verse 1\n> MD: Keys and vocal.\n1 | 1 | 1sus | 1sus\n6m | 6m | 4 | 4\n6m7 | 4 | 5 | 5\n## Chorus 1\n4 | 1\n",
+    );
+    const split = splitSection(chart, 0, 4, "Verse 2");
+    expect(split.sections.map((section) => section.name)).toEqual([
+      "Verse 1",
+      "Verse 2",
+      "Chorus 1",
+    ]);
+    expect(split.sections[0]?.bars).toHaveLength(4);
+    expect(split.sections[1]?.bars).toHaveLength(8);
+    expect(split.sections[0]?.notes).toHaveLength(1);
+    expect(split.sections[1]?.notes).toHaveLength(0);
+    expect(canonicalText(split, "")).toContain(
+      "## Verse 1\n> MD: Keys and vocal.\n1 | 1 | 1sus | 1sus\n\n## Verse 2\n6m | 6m | 4 | 4\n6m7 | 4 | 5 | 5\n",
+    );
+  });
+
+  it("R-13.9 only between rows of a section written here: never at its ends, never a repeat", () => {
+    const chart = visualChart("## Verse 1\n1 | 4\n## Again\n@use Verse 1\n");
+    expect(splitSection(chart, 0, 0, "X")).toBe(chart);
+    expect(splitSection(chart, 0, 2, "X")).toBe(chart);
+    expect(splitSection(chart, 1, 1, "X")).toBe(chart);
   });
 });

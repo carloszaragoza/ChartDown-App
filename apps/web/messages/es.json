@@ -1622,6 +1622,7 @@
     "addSection": "Agregar una sección",
     "addSectionAfter": "Agregar una sección después",
     "addRow": "Agregar un renglón",
+    "splitSection": "Partir {name} aquí",
     "newSectionName": "Verso 1",
     "tools": {
       "label": "Herramientas",

@@ -93,6 +93,16 @@ describe("T-3003 the visual editor", () => {
     expect(html).toContain('aria-label="Rename the section: Verse 1"');
   });
 
+  it("R-13.9 between two rows of a section, a button splits it there (T-3028)", () => {
+    const html = wrap(
+      "en",
+      <VisualEditor {...props("## Verse 1\n1 | 1 | 4 | 4\n6m | 6m | 5 | 5\n6m | 4 | 5 | 1\n")} />,
+    );
+    // Three rows: two places to split, none before the first row.
+    expect(html.match(/aria-label="Split Verse 1 here"/g)).toHaveLength(2);
+    expect(html).toContain("cd-visual-split");
+  });
+
   it("R-13.7 the tools sit at the foot, ready to drag", () => {
     const html = wrap("es", <VisualEditor {...props("---\nkey: G\n---\n\n## Verso 1\n1\n")} />);
     expect(html).toContain("Síncopa corta");

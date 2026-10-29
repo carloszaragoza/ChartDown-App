@@ -57,6 +57,9 @@ export const EDITOR_ICONS = {
   video: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3Z"/>',
   addSection: '<path d="M8 4H4v16h4M16 4h4v16h-4"/><path d="M12 8v8M8 12h8"/>',
   addRow: '<path d="M3 4v6M9 4v6M15 4v6M21 4v6"/><path d="M12 14v6M9 17h6"/>',
+  // Two sections apart: a row above, a row below, and the opening between them.
+  splitSection:
+    '<path d="M3 4v4M9 4v4M15 4v4M21 4v4M3 16v4M9 16v4M15 16v4M21 16v4"/><path d="M3 12h4M17 12h4"/><path d="m10 10 2 2 2-2"/>',
   rename: '<path d="M4 20l4-1L19 8l-3-3L5 16Z"/><path d="m14 7 3 3"/>',
   addNote: '<path d="M4 6h16M4 11h10M4 16h6"/><path d="M17 14v6M14 17h6"/>',
   repeatSection:
