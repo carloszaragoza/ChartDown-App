@@ -818,7 +818,7 @@
     "removeName": "Quitar a {name} de la banda",
     "invite": "Invitar a un músico",
     "email": "Su correo",
-    "inviteHint": "Verá la invitación en la app cuando inicie sesión con este correo.",
+    "inviteHint": "Verá la invitación en la app cuando inicie sesión con este correo. Envíasela por WhatsApp desde Invitaciones pendientes.",
     "inviteButton": "Enviar invitación",
     "pending": "Invitaciones pendientes",
     "cancel": "Cancelar",
@@ -858,7 +858,10 @@
     "instrumentsColumn": "Instrumentos por defecto",
     "actionsColumn": "Acciones",
     "editInstruments": "Editar instrumentos",
-    "noPending": "No hay invitaciones pendientes."
+    "noPending": "No hay invitaciones pendientes.",
+    "whatsapp": "Enviar por WhatsApp",
+    "whatsappFor": "Enviar por WhatsApp la invitación a {email}",
+    "whatsappMessage": "{name} te invita a tocar en {band} en ChartDown. Entra con el correo con el que te invitó y acéptala: {link}"
   },
   "sets": {
     "mySets": "Mis sets",
