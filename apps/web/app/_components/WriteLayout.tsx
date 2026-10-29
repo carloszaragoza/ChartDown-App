@@ -27,6 +27,7 @@ export function WriteLayout({
   header,
   details,
   detailsLabel,
+  detailsPadding,
   text,
   textLabel,
   preview,
@@ -37,6 +38,8 @@ export function WriteLayout({
   header: ReactNode;
   details: ReactNode;
   detailsLabel: string;
+  /** The details' card padding, as the visual editor's strip where the editor uses it. */
+  detailsPadding?: 3 | undefined;
   text: ReactNode;
   textLabel: string;
   preview: ReactNode;
@@ -53,7 +56,7 @@ export function WriteLayout({
       header={header}
       content={
         <VStack gap={6}>
-          <Card>
+          <Card {...(detailsPadding ? { padding: detailsPadding } : {})}>
             <section aria-label={detailsLabel}>{details}</section>
           </Card>
           <Split

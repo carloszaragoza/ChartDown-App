@@ -7,10 +7,8 @@ import { Dialog } from "@astryxdesign/core/Dialog";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Layout, LayoutContent, LayoutFooter, LayoutHeader } from "@astryxdesign/core/Layout";
 import { MoreMenu } from "@astryxdesign/core/MoreMenu";
-import { Popover } from "@astryxdesign/core/Popover";
 import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Selector } from "@astryxdesign/core/Selector";
@@ -47,6 +45,7 @@ import { HeaderFields } from "./HeaderFields";
 import { HoldUntilDialog } from "./HoldUntilDialog";
 import { RowChangeDialog } from "./RowChangeDialog";
 import { InlineText } from "./InlineText";
+import { SongDetails } from "../SongDetails";
 import { ImportDialog } from "./ImportDialog";
 import { SongName } from "../edit/SongName";
 import { clipboardKey, deleteBarKey, historyKey } from "../../../../lib/visual/keys";
@@ -61,7 +60,6 @@ import { barSeek, videoClock } from "../../../../lib/video/clock";
 import { chartClicks } from "../../../../lib/video/sections";
 import { FollowedBarRow } from "./FollowedBarRow";
 import { videoId } from "../../../../lib/video/youtube";
-import { SOURCE_TYPES } from "../../../../lib/versions/validate";
 import {
   addNote,
   addRow,
@@ -228,7 +226,6 @@ export function VisualEditor({
   bands,
 }: VisualEditorProps) {
   const t = useTranslations("visual");
-  const sources = useTranslations("version.source");
   const instruments = useTranslations("instruments");
   const c = useTranslations("chart");
   const labels = useChartLabels();
@@ -843,54 +840,26 @@ export function VisualEditor({
               {/* The song's details in one line, each changed right where it is (owner's design,
                   R-13.2): saved with the chart. */}
               <Card padding={3}>
-                <HStack gap={3} vAlign="center" wrap="wrap">
-                  <Text weight="semibold">{t("details")}</Text>
-                  {author && <Text color="secondary">{t("arranger", { name: author })}</Text>}
-                  <Popover
-                    label={t("field.source")}
-                    content={
-                      <RadioList
-                        label={t("field.source")}
-                        value={sourceType}
-                        onChange={setSourceType}
-                      >
-                        {SOURCE_TYPES.map((type) => (
-                          <RadioListItem key={type} value={type} label={sources(type)} />
-                        ))}
-                      </RadioList>
-                    }
-                  >
-                    <Button
-                      label={sourceType ? sources(sourceType as "live") : t("field.source")}
-                      size="sm"
-                      variant="ghost"
-                      endContent={<Icon icon={ChevronDownIcon} />}
-                    />
-                  </Popover>
-                  <Text color="secondary">
-                    <InlineText label={t("field.album")} value={album} onChange={setAlbum} />
-                  </Text>
-                  <Text color="secondary">
-                    <InlineText label={t("field.year")} value={year} onChange={setYear} />
-                  </Text>
-                  <Text color="secondary">
-                    <InlineText
-                      label={t("field.feel")}
-                      value={chart.meta.feel ?? ""}
-                      onChange={(feel) =>
-                        change((c) => {
-                          const meta = { ...c.meta };
-                          if (feel) meta.feel = feel;
-                          else delete meta.feel;
-                          return { ...c, meta };
-                        })
-                      }
-                    />
-                  </Text>
-                  <Text color="secondary">
-                    <InlineText label={t("field.youtube")} value={youtube} onChange={setYoutube} />
-                  </Text>
-                </HStack>
+                <SongDetails
+                  author={author}
+                  sourceType={sourceType}
+                  onSourceType={setSourceType}
+                  album={album}
+                  onAlbum={setAlbum}
+                  year={year}
+                  onYear={setYear}
+                  feel={chart.meta.feel ?? ""}
+                  onFeel={(feel) =>
+                    change((c) => {
+                      const meta = { ...c.meta };
+                      if (feel) meta.feel = feel;
+                      else delete meta.feel;
+                      return { ...c, meta };
+                    })
+                  }
+                  youtube={youtube}
+                  onYoutube={setYoutube}
+                />
               </Card>
               {/* The chart: which editor, undo and redo, import, its key, tempo and meter, on one line. */}
               <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
