@@ -8,6 +8,7 @@ import {
   ArrowsPointingOutIcon,
   BookOpenIcon,
   ChatBubbleLeftRightIcon,
+  ChatBubbleOvalLeftEllipsisIcon,
   CheckCircleIcon,
   ClipboardDocumentIcon,
   EyeIcon,
@@ -104,4 +105,9 @@ export function ShowIcon() {
 
 export function BackIcon() {
   return <Icon icon={ArrowLeftIcon} />;
+}
+
+/** A message to send outside the app, as a band invitation by WhatsApp (T-3029). */
+export function MessageIcon() {
+  return <Icon icon={ChatBubbleOvalLeftEllipsisIcon} />;
 }

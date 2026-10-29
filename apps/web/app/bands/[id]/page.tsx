@@ -22,8 +22,10 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";
+import { siteOrigin, whatsappLink } from "../../../lib/origin";
 import { createClient, readUser } from "../../../lib/supabase/server";
 import { UUID } from "../../versions/[id]/load";
+import { MessageIcon } from "../../_components/ActionIcons";
 import { NameForm } from "../../_components/NameForm";
 import { PageTabs } from "../../_components/PageTabs";
 import { cancelInvitation, inviteMember, leaveBand, removeMember, renameBand } from "../actions";
@@ -113,6 +115,12 @@ export default async function BandPage({
   const status = STATUS.find((key) => search[key]);
   const profileName = (member: Member) =>
     (Array.isArray(member.profile) ? member.profile[0]?.name : member.profile?.name) ?? "";
+
+  // Each pending invitation can be sent by WhatsApp, the app sending no email yet (T-3029).
+  const invitesLink = `${await siteOrigin()}/bands`;
+  const whatsapp = whatsappLink(
+    t("whatsappMessage", { name: profileName(me), band: band.name, link: invitesLink }),
+  );
 
   const asked = search.tab ?? TAB_OF[status ?? ""] ?? TAB_OF[search.error ?? ""];
   const tab =
@@ -308,20 +316,31 @@ export default async function BandPage({
                             as="li"
                             label={invitation.email as string}
                             endContent={
-                              <form action={cancelInvitation}>
-                                <input type="hidden" name="bandId" value={band.id} />
-                                <input
-                                  type="hidden"
-                                  name="invitationId"
-                                  value={invitation.id as string}
-                                />
+                              <HStack gap={2} vAlign="center">
                                 <Button
-                                  type="submit"
-                                  label={t("cancelFor", { email: invitation.email as string })}
+                                  label={t("whatsappFor", { email: invitation.email as string })}
+                                  href={whatsapp}
+                                  target="_blank"
+                                  variant="secondary"
+                                  icon={<MessageIcon />}
                                 >
-                                  {t("cancel")}
+                                  {t("whatsapp")}
                                 </Button>
-                              </form>
+                                <form action={cancelInvitation}>
+                                  <input type="hidden" name="bandId" value={band.id} />
+                                  <input
+                                    type="hidden"
+                                    name="invitationId"
+                                    value={invitation.id as string}
+                                  />
+                                  <Button
+                                    type="submit"
+                                    label={t("cancelFor", { email: invitation.email as string })}
+                                  >
+                                    {t("cancel")}
+                                  </Button>
+                                </form>
+                              </HStack>
                             }
                           />
                         ))}

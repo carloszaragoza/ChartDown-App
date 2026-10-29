@@ -233,7 +233,7 @@ People see the catalog as **Songs** ("Canciones" in Spanish) in the side navigat
 **Requirements**
 
 - R-04.1 Any user can create a band and becomes its only MD (decision 2).
-- R-04.2 The MD invites musicians and they accept the invitation.
+- R-04.2 The MD invites musicians and they accept the invitation. Each pending invitation can be sent by WhatsApp (owner's request, October 28, 2026, T-3029: the app sends no email yet): Send by WhatsApp opens WhatsApp with a message written for it, who invites, to which band, and the link to the app, where the musician signs in with the email invited and accepts; the MD picks the contact in WhatsApp, so the link carries no phone number and no email.
 - R-04.3 Each member has one or more default instruments, from the catalog.
 - R-04.4 The MD can remove members. A musician can leave the band.
 - R-04.5 A user can belong to several bands, with a different role in each (decision 1).

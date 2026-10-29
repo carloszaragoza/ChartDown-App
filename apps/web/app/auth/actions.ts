@@ -1,7 +1,8 @@
 "use server";
 
 import { getLocale } from "next-intl/server";
-import { cookies, headers } from "next/headers";
+import { siteOrigin } from "../../lib/origin";
+import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { authEnabled } from "../../lib/auth/enabled";
 import { authError } from "../../lib/auth/errors";
@@ -17,14 +18,7 @@ const text = (form: FormData, name: string) => String(form.get(name) ?? "").trim
 const secret = (form: FormData, name: string) => String(form.get(name) ?? "");
 
 /** This app's address, for the links in sign-in emails. Supabase only accepts its allowed list. */
-async function origin(): Promise<string> {
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const protocol =
-    h.get("x-forwarded-proto") ??
-    (host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https");
-  return `${protocol}://${host}`;
-}
+const origin = siteOrigin;
 
 function ensureEnabled() {
   if (!authEnabled()) notFound();

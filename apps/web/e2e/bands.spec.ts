@@ -38,6 +38,14 @@ test("R-04.2 the MD invites, the musician accepts, and whoever leaves loses acce
   }
   const pending = page.getByRole("region", { name: "Pending invitations" });
   await expect(pending.getByRole("listitem")).toHaveCount(2);
+  // T-3029 each can be sent by WhatsApp: the message names who invites and the band, and the
+  // link carries nothing but it.
+  const whatsapp = pending.getByRole("link", {
+    name: `Send the invitation to ${ben.toLowerCase()} by WhatsApp`,
+  });
+  const sent = new URL((await whatsapp.getAttribute("href")) ?? "");
+  expect(sent.origin + sent.pathname).toBe("https://wa.me/");
+  expect(sent.searchParams.get("text")).toContain(`Ana Lead invites you to play in ${band}`);
   await page.goto("/");
   await signOut(page);
 
