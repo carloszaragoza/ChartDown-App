@@ -33,6 +33,20 @@ describe("T-3023 the count-in before a recording", () => {
     expect(countIn(chart, at - 0.5, 4)?.at).toBe(at - 2);
   });
 
+  it("R-03.14 at 150 from 0:04, a bar chosen is counted into, not the one before (T-3026)", () => {
+    // The owner's chart: 4/4 at 150, a bar is 1.6 s, the music from 0:04. A player moved to a
+    // bar reads back its time to the millisecond, and 1.6 × 3 is 4.800000000000001.
+    const song = parse(
+      "---\ntempo: 150\nmeter: 4/4\n---\n## Verse\n1 | 4 | 5 | 1\n## Chorus 1\n1 | 1 | 1maj7 | 1maj7\n",
+    );
+    const second = barStart(song, 1, 2) ?? 0;
+    const moved = Math.floor((4 + second) * 1000) / 1000;
+    const count = countIn(song, moved, 4);
+    expect(count?.at).toBeCloseTo(4 + second, 6);
+    // Heard from the bar before it, Chorus 1's first, under the count.
+    expect((count?.at ?? 0) - (count?.length ?? 0)).toBeCloseTo(4 + second - 1.6, 6);
+  });
+
   it("R-03.14 past the music's end, from the first bar again", () => {
     expect(countIn(chart, 60, 4)?.at).toBe(4);
   });
