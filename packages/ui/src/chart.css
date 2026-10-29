@@ -1214,8 +1214,11 @@
   box-sizing: border-box;
 }
 /* Between two rows of a section, at the center, the button that splits it there (T-3028): it
-   takes no room of its own, so the rows keep their spacing, and it is quiet until the pointer is
-   near or it has focus. */
+   takes no room of its own, so the rows keep their spacing. It is moved into the gap by its
+   position, never a transform, and never dimmed as a whole: a transform or an opacity on it would
+   carry into its tooltip, drawn inside it, which then showed faint and late (owner's review,
+   October 29, 2026, T-3030). Its icon is in the secondary ink at rest and the primary one near
+   the pointer or with focus. */
 .cd-visual-split {
   position: relative;
   z-index: 1;
@@ -1227,13 +1230,17 @@
   margin-block-start: calc(var(--spacing-3) * -1);
 }
 .cd-visual-split > * {
-  transform: translateY(calc(var(--spacing-3) / 2 - 50%));
-  opacity: 0.55;
-  background: var(--color-background-card);
+  position: relative;
+  inset-block-start: calc(var(--spacing-3) / 2 - var(--size-element-sm) / 2);
 }
-.cd-visual-split:hover > *,
-.cd-visual-split:focus-within > * {
-  opacity: 1;
+/* The button only: its tooltip, beside it in the same wrapper, keeps the theme's own look. */
+.cd-visual-split .astryx-button {
+  background: var(--color-background-card);
+  color: var(--color-text-secondary);
+}
+.cd-visual-split .astryx-button:hover,
+.cd-visual-split .astryx-button:focus-visible {
+  color: var(--color-text-primary);
 }
 
 /* A repeated section's bars in the visual editor: drawn as the original, never written in. */
