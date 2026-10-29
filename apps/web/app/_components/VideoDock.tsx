@@ -9,6 +9,7 @@ import {
   PlayIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { editorIcon } from "@chartdown/ui";
 import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
@@ -157,7 +158,8 @@ export function VideoLink({
         label={isIconOnly ? t("play") : t("watch")}
         variant={isIconOnly ? "ghost" : "secondary"}
         size={isIconOnly ? "md" : size}
-        icon={<Icon icon={PlayIcon} />}
+        // ChartDown's screen, beside the audio's waveform on one line (R-03.11, T-3025).
+        icon={<Icon icon={editorIcon("video")} />}
         isIconOnly={isIconOnly}
         {...(isIconOnly ? { tooltip: t("play") } : {})}
         onClick={() => setOpen(true)}

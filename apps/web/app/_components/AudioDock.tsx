@@ -5,6 +5,7 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Text } from "@astryxdesign/core/Text";
 import { MusicalNoteIcon, PauseIcon, PlayIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { editorIcon } from "@chartdown/ui";
 import type { Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -57,24 +58,42 @@ export function AudioButton({
   recording,
   chart,
   save,
+  isIconOnly = false,
+  isNamed = false,
+  size = "lg",
 }: {
   recording: PlayerRecording;
   chart: Chart;
   /** For the band's MD: saves where the music starts, in milliseconds. */
   save?: ((points: MusicPoints) => Promise<boolean>) | undefined;
+  /** Only its icon, as in stand mode's top bar. */
+  isIconOnly?: boolean;
+  /** Says the band, where more than one band's recording is offered. */
+  isNamed?: boolean;
+  size?: "md" | "lg";
 }) {
   const t = useTranslations("audio");
   const [open, setOpen] = useState(false);
   const target = useDockTarget();
+  // ChartDown's waveform, beside the video's screen on one line (R-03.11, T-3025); the band and
+  // the length are said in its tooltip, never as a line of their own.
+  const seconds = Math.round(recording.durationMs / 1000);
+  const length = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
   return (
     <>
       <Button
-        label={t("play", { band: recording.band })}
-        tooltip={t("playShort")}
-        variant="ghost"
-        size="sm"
-        icon={<Icon icon={PlayIcon} />}
-        isIconOnly
+        label={
+          isIconOnly
+            ? t("play", { band: recording.band })
+            : isNamed
+              ? t("listenBand", { band: recording.band })
+              : t("listen")
+        }
+        tooltip={isIconOnly ? t("playShort") : t("recording", { band: recording.band, length })}
+        variant={isIconOnly ? "ghost" : "secondary"}
+        size={isIconOnly ? "sm" : size}
+        icon={<Icon icon={editorIcon("audio")} />}
+        isIconOnly={isIconOnly}
         onClick={() => setOpen(true)}
       />
       {open &&

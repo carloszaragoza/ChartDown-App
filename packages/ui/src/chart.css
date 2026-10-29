@@ -572,9 +572,10 @@
     calc(var(--spacing-3) + env(safe-area-inset-bottom, 0px));
   border-block-start: var(--border-width) solid var(--color-border-emphasized);
   background: var(--color-background-card);
-  box-shadow: var(--shadow-high);
+  /* No shadow: the bar lies on the page's plane, beside the side navigation, never over it
+     (owner's review, October 28, 2026, T-3025); its top line sets it apart from the chart. */
 }
-/* With no chart to place, only the video, in the corner. */
+/* With no chart to place, only the video, in the corner: it floats over the page. */
 .cd-player[data-compact] {
   inset-inline-start: auto !important;
   inset-inline-end: var(--spacing-4);
@@ -583,6 +584,7 @@
   max-inline-size: calc(100vw - var(--spacing-4) * 2);
   border: var(--border-width) solid var(--color-border-emphasized);
   border-radius: var(--radius-container);
+  box-shadow: var(--shadow-high);
 }
 .cd-player__controls {
   display: flex;

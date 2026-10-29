@@ -785,6 +785,15 @@ export function VisualEditor({
                       save={(points) => saveVideoPoints(versionId, points)}
                     />
                   )}
+                  {/* The band's audio beside the video, on one line (T-3025). */}
+                  {(recordings.length > 0 || bands.length > 0) && (
+                    <BandAudio
+                      versionId={versionId}
+                      recordings={recordings}
+                      bands={bands}
+                      chart={drawn}
+                    />
+                  )}
                   {bands.length > 0 && (
                     <Button label={t("addAudio")} icon={icon("addAudio")} onClick={openAddAudio} />
                   )}
@@ -954,14 +963,6 @@ export function VisualEditor({
                   change(() => imported);
                 }}
               />
-              {(recordings.length > 0 || bands.length > 0) && (
-                <BandAudio
-                  versionId={versionId}
-                  recordings={recordings}
-                  bands={bands}
-                  chart={drawn}
-                />
-              )}
               {/* The chart's page: its sections, one after another, and Add a section (R-13.3). */}
               <Card padding={4}>
                 <VStack gap={6}>

@@ -171,6 +171,7 @@ export default async function SetStandPage({
               <AudioButton
                 recording={recording}
                 chart={chart}
+                isIconOnly
                 save={
                   leads
                     ? saveAudioPoints.bind(null, recording.bandId, recording.versionId)

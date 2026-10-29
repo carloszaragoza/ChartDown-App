@@ -177,36 +177,37 @@ export default async function SetSongPage({
                       ? t("allNotesMd")
                       : t("allNotesTempMd")}
                 </Text>
-                {youtube && (
-                  <HStack gap={1} vAlign="center">
-                    <VideoLink
-                      size={phone ? "md" : "lg"}
-                      url={youtube}
-                      chart={chart}
-                      saved={
-                        typeof video?.video_start_ms === "number"
-                          ? video.video_start_ms / 1000
-                          : null
-                      }
-                      savedEnd={
-                        typeof video?.video_end_ms === "number" ? video.video_end_ms / 1000 : null
-                      }
-                      save={ownsVideo ? saveVideoPoints.bind(null, song.version_id) : undefined}
-                    />
-                  </HStack>
-                )}
-                {recording && (
-                  <HStack gap={1} vAlign="center">
-                    <AudioButton
-                      recording={recording}
-                      chart={chart}
-                      save={
-                        leads
-                          ? saveAudioPoints.bind(null, recording.bandId, recording.versionId)
-                          : undefined
-                      }
-                    />
-                    <Text type="supporting">{a("bandRecording", { band: recording.band })}</Text>
+                {/* The video and the band's audio on one line (T-3025). */}
+                {(youtube || recording) && (
+                  <HStack gap={2} vAlign="center" wrap="wrap">
+                    {youtube && (
+                      <VideoLink
+                        size={phone ? "md" : "lg"}
+                        url={youtube}
+                        chart={chart}
+                        saved={
+                          typeof video?.video_start_ms === "number"
+                            ? video.video_start_ms / 1000
+                            : null
+                        }
+                        savedEnd={
+                          typeof video?.video_end_ms === "number" ? video.video_end_ms / 1000 : null
+                        }
+                        save={ownsVideo ? saveVideoPoints.bind(null, song.version_id) : undefined}
+                      />
+                    )}
+                    {recording && (
+                      <AudioButton
+                        recording={recording}
+                        chart={chart}
+                        size={phone ? "md" : "lg"}
+                        save={
+                          leads
+                            ? saveAudioPoints.bind(null, recording.bandId, recording.versionId)
+                            : undefined
+                        }
+                      />
+                    )}
                   </HStack>
                 )}
               </VStack>

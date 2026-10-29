@@ -312,24 +312,22 @@ export function VersionView({
                 </VStack>
                 {display && path && <ChartControlsSlot />}
               </HStack>
-              {/* The media: the video, then the bands' recordings. */}
+              {/* The media on one line: the video, then the bands' recordings (T-3025). */}
               {(source.youtube || (audio && reading)) && (
-                <VStack gap={2}>
+                <HStack gap={2} vAlign="center" wrap="wrap">
                   {source.youtube && (
-                    <HStack>
-                      <VideoLink
-                        size={size}
-                        url={source.youtube}
-                        chart={chart}
-                        saved={videoStart}
-                        savedEnd={videoEnd}
-                        save={
-                          owner && reading && status === "active"
-                            ? saveVideoPoints.bind(null, id)
-                            : undefined
-                        }
-                      />
-                    </HStack>
+                    <VideoLink
+                      size={size}
+                      url={source.youtube}
+                      chart={chart}
+                      saved={videoStart}
+                      savedEnd={videoEnd}
+                      save={
+                        owner && reading && status === "active"
+                          ? saveVideoPoints.bind(null, id)
+                          : undefined
+                      }
+                    />
                   )}
                   {audio && reading && (
                     <BandAudio
@@ -337,9 +335,10 @@ export function VersionView({
                       recordings={audio.recordings}
                       bands={audio.bands}
                       chart={chart}
+                      size={size}
                     />
                   )}
-                </VStack>
+                </HStack>
               )}
             </VStack>
           </LayoutHeader>

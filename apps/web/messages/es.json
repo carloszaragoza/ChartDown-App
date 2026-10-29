@@ -1546,7 +1546,9 @@
       "size": "El archivo pasa de 15 MB.",
       "unreadable": "Este archivo no se puede leer como audio.",
       "failed": "No se pudo subir. Inténtalo de nuevo."
-    }
+    },
+    "listen": "Escuchar el audio",
+    "listenBand": "Escuchar el audio de {band}"
   },
   "live": {
     "title": "Modo en vivo",
