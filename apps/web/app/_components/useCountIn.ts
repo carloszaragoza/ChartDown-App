@@ -13,6 +13,12 @@ export interface CountedPlayer {
   pause(): void;
   isMuted(): boolean;
   setMuted(muted: boolean): void;
+  /**
+   * The player's own audio graph, when the recording plays through it: the clicks then sound in
+   * it too, and silencing turns its gain down, so it keeps playing. An iPhone pauses a recording
+   * unmuted without a tap and interrupts a second audio context (T-3023).
+   */
+  context?: AudioContext;
 }
 
 const KEY = "chartdown:count-in";
@@ -81,7 +87,8 @@ export function useCountIn() {
     (plan: CountIn, player: CountedPlayer) => {
       stop();
       setCounting(true);
-      const audio = new AudioContext();
+      const own = !player.context;
+      const audio = player.context ?? new AudioContext();
       void audio.resume();
       const volume = getSound().beat;
       const wasMuted = player.isMuted();
@@ -103,7 +110,7 @@ export function useCountIn() {
       const done = () => {
         cancelAnimationFrame(frame);
         window.clearTimeout(timer);
-        window.setTimeout(() => void audio.close(), 500);
+        if (own) window.setTimeout(() => void audio.close(), 500);
         running.current = null;
         setBeat(null);
         setCounting(false);
@@ -144,12 +151,21 @@ export function useCountIn() {
           frame = requestAnimationFrame(tick);
         };
         frame = requestAnimationFrame(tick);
-        // Moved there only now: YouTube starts a video it hasn't played yet when it is moved.
-        player.pause();
+        if (player.context) {
+          // Through its own graph it plays silent from the tap, as a phone needs, and moves to
+          // the bar when the count ends.
+          player.setMuted(true);
+          player.play();
+        } else {
+          // Moved there only now: YouTube starts a video it hasn't played yet when it is moved.
+          player.pause();
+        }
         timer = window.setTimeout(
           () => {
             player.seek(plan.at);
-            player.play();
+            if (player.context) {
+              if (!wasMuted) player.setMuted(false);
+            } else player.play();
             done();
           },
           (AHEAD + plan.length) * 1000,

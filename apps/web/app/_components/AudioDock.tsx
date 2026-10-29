@@ -112,9 +112,39 @@ function AudioDock({
   // The recording's volume (T-2828), where the browser lets a page set it.
   const canSetVolume = useCanSetVolume();
   const [volume, setVolume] = useState(100);
+  // The recording through one audio graph with the count's clicks (T-3023): an iPhone pauses a
+  // recording unmuted without a tap, and interrupts a second audio context, so the count silences
+  // it with the graph's gain, and its volume is set there too once it plays through it.
+  const graph = useRef<{ context: AudioContext; gain: GainNode } | null>(null);
+  const level = useRef({ volume: 100, silent: false });
+  const applyLevel = () => {
+    if (graph.current)
+      graph.current.gain.gain.value = level.current.silent ? 0 : level.current.volume / 100;
+  };
+  const ensureGraph = () => {
+    const element = audio.current;
+    if (!element) return undefined;
+    if (!graph.current) {
+      try {
+        const context = new AudioContext();
+        const gain = context.createGain();
+        context.createMediaElementSource(element).connect(gain).connect(context.destination);
+        graph.current = { context, gain };
+        element.volume = 1;
+        applyLevel();
+      } catch {
+        return undefined;
+      }
+    }
+    void graph.current.context.resume();
+    return graph.current.context;
+  };
+  useEffect(() => () => void graph.current?.context.close(), []);
   const changeVolume = (to: number) => {
     setVolume(to);
-    if (audio.current) audio.current.volume = to / 100;
+    level.current.volume = to;
+    if (graph.current) applyLevel();
+    else if (audio.current) audio.current.volume = to / 100;
   };
   const [source, setSource] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
@@ -233,15 +263,27 @@ function AudioDock({
       seek(seconds);
       return void element.play();
     }
+    const context = ensureGraph();
     counter.start(plan, {
       time: () => element.currentTime,
       seek,
       play: () => void element.play(),
       pause: () => element.pause(),
-      isMuted: () => element.muted,
-      setMuted: (muted) => {
-        element.muted = muted;
-      },
+      ...(context
+        ? {
+            context,
+            isMuted: () => level.current.silent,
+            setMuted: (muted: boolean) => {
+              level.current.silent = muted;
+              applyLevel();
+            },
+          }
+        : {
+            isMuted: () => element.muted,
+            setMuted: (muted: boolean) => {
+              element.muted = muted;
+            },
+          }),
     });
   };
   useEffect(() => {
@@ -252,6 +294,8 @@ function AudioDock({
     if (!element) return;
     if (counter.isCounting) return counter.stop();
     if (!element.paused) return element.pause();
+    // Once it plays through its graph, the graph wakes from this tap too.
+    if (graph.current) ensureGraph();
     countFrom(element.currentTime);
   };
   const chooseTime = (seconds: number) => (counter.isCounting ? countFrom(seconds) : seek(seconds));
