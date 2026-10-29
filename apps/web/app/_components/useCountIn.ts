@@ -142,8 +142,11 @@ export function useCountIn() {
         setBeat(click ? { count: click.count, of: click.of } : null);
       };
       if (lead >= 0) {
-        // Silent from a bar before; the clicks follow the recording's own clock.
-        player.setMuted(true);
+        // A bar of the recording before: it is heard under the count, as a band counts in over
+        // the room, and the clicks follow its own clock, so the song lands on the bar (owner's
+        // review, October 28, 2026: what comes before the song, heard, sounds professional; a
+        // recording starting cut on the bar doesn't). Nothing is muted, which a phone would
+        // punish by pausing it.
         player.seek(lead);
         player.play();
         const began = performance.now();
@@ -153,22 +156,18 @@ export function useCountIn() {
           // Until the recording says it is at the bar before, what it says is where it was.
           if (!settled) settled = time >= lead - SETTLE && time < plan.at;
           // A recording that never starts (still loading, or not allowed): it plays as it can.
-          if (first === null && performance.now() - began > GIVE_UP_MS) {
-            if (!wasMuted) player.setMuted(false);
-            return done();
-          }
+          if (first === null && performance.now() - began > GIVE_UP_MS) return done();
           if (settled && first === null && time > lead + EARLY)
             schedule(audio.currentTime - (time - lead));
           show();
-          if (settled && first !== null && time >= plan.at - EARLY) {
-            if (!wasMuted) player.setMuted(false);
-            return done();
-          }
+          if (settled && first !== null && time >= plan.at - EARLY) return done();
           frame = requestAnimationFrame(follow);
         };
         frame = requestAnimationFrame(follow);
       } else {
-        // Too near the recording's start for a silent bar: it starts when the count ends.
+        // Less of the recording before the bar than the count lasts (a song from 0:00): the count
+        // starts alone and the recording comes in from its start when what is left of the count
+        // is what it has before the bar, so the bar still lands on the count's end.
         schedule(audio.currentTime + AHEAD);
         const tick = () => {
           show();
@@ -176,23 +175,24 @@ export function useCountIn() {
         };
         frame = requestAnimationFrame(tick);
         if (player.context) {
-          // Through its own graph it plays silent from the tap, as a phone needs, and moves to
-          // the bar when the count ends.
+          // Through its own graph it runs silent from the tap, as a phone needs to let it sound.
           player.setMuted(true);
+          player.seek(0);
           player.play();
         } else {
-          // Moved there only now: YouTube starts a video it hasn't played yet when it is moved.
+          // Moved only when it comes in: YouTube starts a video it hasn't played yet when moved.
           player.pause();
         }
+        const comesIn = Math.max(0, plan.length - plan.at);
         timer = window.setTimeout(
           () => {
-            player.seek(plan.at);
+            player.seek(0);
             if (player.context) {
               if (!wasMuted) player.setMuted(false);
             } else player.play();
-            done();
+            timer = window.setTimeout(done, Math.max(0, plan.at) * 1000);
           },
-          (AHEAD + plan.length) * 1000,
+          (AHEAD + comesIn) * 1000,
         );
       }
       const cancel = () => {
