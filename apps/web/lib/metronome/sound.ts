@@ -218,15 +218,17 @@ export function playClick(
   at: number,
   level: ClickLevel,
   volume: number,
-): void {
+): AudioBufferSourceNode | null {
   const { frequency, peak } = clickTone(level, volume);
-  if (peak <= 0) return;
+  if (peak <= 0) return null;
   const click = audio.createBufferSource();
   click.buffer = clickBuffer(audio, frequency);
   const gain = audio.createGain();
   gain.gain.value = peak;
   click.connect(gain).connect(audio.destination);
   click.start(at);
+  // Returned, so a count stopped early can silence the clicks it scheduled.
+  return click;
 }
 
 /**

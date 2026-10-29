@@ -46,6 +46,12 @@ const AHEAD = 0.05;
 // The recording runs this close to its bar before it is heard, so the first beat is never cut.
 const EARLY = 0.02;
 const GIVE_UP_MS = 4000;
+// How near the bar before the recording must say it is before its clock is trusted: a video
+// moved there still reports where it was for a moment.
+const SETTLE = 0.25;
+
+// One count at a time on the page: a count started in another player stops this one.
+let active: (() => void) | null = null;
 
 /**
  * The count-in before the video or the band's audio (R-03.14, T-3023): one bar of the metronome's
@@ -97,23 +103,37 @@ export function useCountIn() {
       let timer = 0;
       // Audio-clock time of the count's first click, once known.
       let first: number | null = null;
+      const sources: AudioBufferSourceNode[] = [];
       const schedule = (at: number) => {
         first = at;
-        for (const click of plan.clicks)
-          playClick(
+        for (const click of plan.clicks) {
+          const source = playClick(
             audio,
             Math.max(at + click.time, audio.currentTime),
             click.accent ? "accent" : "beat",
             volume,
           );
+          if (source) sources.push(source);
+        }
       };
       const done = () => {
         cancelAnimationFrame(frame);
         window.clearTimeout(timer);
         if (own) window.setTimeout(() => void audio.close(), 500);
+        if (active === cancel) active = null;
         running.current = null;
         setBeat(null);
         setCounting(false);
+      };
+      // Stopped early: the clicks not yet heard are silenced at once, never left to sound.
+      const silence = () => {
+        for (const source of sources) {
+          try {
+            source.stop();
+          } catch {
+            // Already played.
+          }
+        }
       };
       const show = () => {
         if (first === null) return;
@@ -127,16 +147,20 @@ export function useCountIn() {
         player.seek(lead);
         player.play();
         const began = performance.now();
+        let settled = false;
         const follow = () => {
           const time = player.time();
+          // Until the recording says it is at the bar before, what it says is where it was.
+          if (!settled) settled = time >= lead - SETTLE && time < plan.at;
           // A recording that never starts (still loading, or not allowed): it plays as it can.
           if (first === null && performance.now() - began > GIVE_UP_MS) {
             if (!wasMuted) player.setMuted(false);
             return done();
           }
-          if (first === null && time > lead + EARLY) schedule(audio.currentTime - (time - lead));
+          if (settled && first === null && time > lead + EARLY)
+            schedule(audio.currentTime - (time - lead));
           show();
-          if (first !== null && time >= plan.at - EARLY) {
+          if (settled && first !== null && time >= plan.at - EARLY) {
             if (!wasMuted) player.setMuted(false);
             return done();
           }
@@ -171,11 +195,15 @@ export function useCountIn() {
           (AHEAD + plan.length) * 1000,
         );
       }
-      running.current = () => {
+      const cancel = () => {
+        silence();
         done();
         player.pause();
         if (!wasMuted) player.setMuted(false);
       };
+      active?.();
+      active = cancel;
+      running.current = cancel;
     },
     [stop],
   );

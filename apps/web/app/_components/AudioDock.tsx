@@ -117,9 +117,12 @@ function AudioDock({
   // it with the graph's gain, and its volume is set there too once it plays through it.
   const graph = useRef<{ context: AudioContext; gain: GainNode } | null>(null);
   const level = useRef({ volume: 100, silent: false });
+  // Eased over a few milliseconds: a gain that jumps is heard as a click.
   const applyLevel = () => {
-    if (graph.current)
-      graph.current.gain.gain.value = level.current.silent ? 0 : level.current.volume / 100;
+    const node = graph.current;
+    if (!node) return;
+    const to = level.current.silent ? 0 : level.current.volume / 100;
+    node.gain.gain.setTargetAtTime(to, node.context.currentTime, 0.005);
   };
   const ensureGraph = () => {
     const element = audio.current;
