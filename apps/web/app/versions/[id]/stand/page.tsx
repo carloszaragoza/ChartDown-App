@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+import { STAND_THEME_COOKIE, standThemeOf } from "../../../../lib/stand/theme";
 import { parse } from "chartdown";
 import { notFound } from "next/navigation";
 import { authEnabled } from "../../../../lib/auth/enabled";
@@ -51,7 +53,7 @@ export default async function StandPage({
       style={display.style}
       homeKey={display.key}
       beats={display.beats}
-      theme={search.theme === "stage" ? "stage" : "light"}
+      theme={standThemeOf(search.theme, (await cookies()).get(STAND_THEME_COOKIE)?.value)}
       phone={await guessPhone()}
     />
   );

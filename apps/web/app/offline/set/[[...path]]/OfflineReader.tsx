@@ -35,6 +35,7 @@ import { ChartPreview } from "../../../_components/ChartPreview";
 import { readDisplay } from "../../../versions/[id]/display";
 import { readSection, setSongLinks } from "../../../versions/[id]/stand/standHref";
 import { StandMode } from "../../../versions/[id]/stand/StandMode";
+import { savedStandTheme, standThemeOf } from "../../../../lib/stand/theme";
 import { OfflineChanges } from "../../../_components/OfflineChanges";
 import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
 
@@ -321,7 +322,7 @@ export function OfflineReader() {
         style={display.style}
         homeKey={homeKey}
         beats={display.beats}
-        theme={search.get("theme") === "stage" ? "stage" : "light"}
+        theme={standThemeOf(search.get("theme"), savedStandTheme())}
         path={`${base}/${song.position}/stand`}
         notes={notes}
         {...(audio ? { audio } : {})}

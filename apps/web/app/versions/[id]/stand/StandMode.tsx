@@ -16,6 +16,7 @@ import { Token } from "@astryxdesign/core/Token";
 import { VisuallyHidden } from "@astryxdesign/core/VisuallyHidden";
 import { VStack } from "@astryxdesign/core/VStack";
 import { chartdownStandTheme } from "../../../../theme/chartdown-stand";
+import { rememberStandTheme, themeOnDevice } from "../../../../lib/stand/theme";
 import { chordFormatter, keyName, parse, type Key } from "chartdown";
 import { formStripItems, type FormStripItem, type MDNoteData } from "@chartdown/ui";
 import {
@@ -75,6 +76,7 @@ import {
   withView,
   type SetSongLink,
   type StandTheme,
+  type StandThemeChoice,
   type StandView,
 } from "./standHref";
 import { tempoLabel, unitKey } from "../../../../lib/chart/tempo";
@@ -88,7 +90,8 @@ export interface StandModeProps {
   homeKey: Key;
   /** How many bars show beat marks (R-03.7); Auto by default. */
   beats?: Display["beats"];
-  theme: StandTheme;
+  /** Light or Stage, or the device's appearance until the person chooses (T-3031). */
+  theme: StandThemeChoice;
   /** Where this stand mode lives; the version's by default. */
   path?: string;
   /** Kept in every address of this page, such as View as (`as=bass`). */
@@ -135,6 +138,15 @@ function atSection(href: string, section: number): string {
   if (section === 0) return href;
   return `${href}${href.includes("?") ? "&" : "?"}s=${section + 1}`;
 }
+
+// The device's appearance, for stand mode's Light or Stage until one is chosen (T-3031).
+const DARK = "(prefers-color-scheme: dark)";
+const prefersDark = () => window.matchMedia(DARK).matches;
+const subscribeDark = (onChange: () => void) => {
+  const query = window.matchMedia(DARK);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+};
 
 // Keys that page-turner pedals and keyboards send.
 const FORWARD = new Set(["ArrowRight", "ArrowDown", "PageDown"]);
@@ -224,8 +236,16 @@ function StandModeView({
   const forYou = chosenView?.forYou ?? forYouGiven;
   const kept = Object.fromEntries(Object.entries(keepGiven).filter(([name]) => name !== "as"));
   const keep: Record<string, string> = view.as ? { ...kept, as: view.as } : kept;
-  const { style, beats, theme } = view;
+  const { style, beats, theme: chosenTheme } = view;
   const changeView = (changes: Partial<StandView>) => setView((now) => ({ ...now, ...changes }));
+  // Light or Stage as the device shows itself until the person chooses; their choice is kept on
+  // the device for every song and set (R-03.12, T-3031).
+  const isDark = useSyncExternalStore(subscribeDark, prefersDark, () => false);
+  const theme = themeOnDevice(chosenTheme, isDark);
+  const chooseTheme = (to: StandTheme) => {
+    rememberStandTheme(to);
+    changeView({ theme: to });
+  };
   // Whether the browser can go full screen; never on the server.
   const canFullscreen = useSyncExternalStore(
     noChanges,
@@ -262,7 +282,7 @@ function StandModeView({
   const href = (section: number, changes: Partial<{ display: Display; theme: StandTheme }> = {}) =>
     standHref(
       path,
-      { section, display: changes.display ?? display, theme: changes.theme ?? theme },
+      { section, display: changes.display ?? display, theme: changes.theme ?? chosenTheme },
       chart,
       keep,
     );
@@ -287,7 +307,7 @@ function StandModeView({
   useEffect(() => {
     const address = standHref(
       path,
-      { section: current, display: { style, key: homeKey, beats }, theme },
+      { section: current, display: { style, key: homeKey, beats }, theme: chosenTheme },
       chart,
       keep,
     );
@@ -295,7 +315,7 @@ function StandModeView({
       window.history.replaceState(null, "", address);
     // keep is a new object on every render with the same values; path names them.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, style, beats, theme, view.as, homeKey, path, chart]);
+  }, [current, style, beats, chosenTheme, view.as, homeKey, path, chart]);
 
   // Live mode (SPEC-12): the leader's device says where it is and what its metronome does; a
   // follower's moves with it, unless they looked away (R-12.3 to R-12.7).
@@ -434,7 +454,7 @@ function StandModeView({
       else lead(section > current ? 1 : -1);
     } else if (section >= 0) move(() => section);
     else if (to === styleHref) changeView({ style: otherStyle });
-    else if (to === themeHref) changeView({ theme: otherTheme });
+    else if (to === themeHref) chooseTheme(otherTheme);
     else return;
     event.preventDefault();
   };
@@ -604,7 +624,7 @@ function StandModeView({
           ["light", t("light")],
           ["stage", t("stage")],
         ],
-        (chosen) => changeView({ theme: chosen === "stage" ? "stage" : "light" }),
+        (chosen) => chooseTheme(chosen === "stage" ? "stage" : "light"),
       )}
       {choice(
         t("numberSize"),
@@ -928,7 +948,12 @@ function StandModeView({
 
   return (
     <div ref={root} onClickCapture={onClickCapture}>
-      <Theme theme={chartdownStandTheme} mode={theme === "stage" ? "dark" : "light"}>
+      {/* Following the device, the theme follows its appearance by CSS, so the first paint is
+          already right; a choice is the server's to paint (T-3031). */}
+      <Theme
+        theme={chartdownStandTheme}
+        mode={chosenTheme === "device" ? "system" : theme === "stage" ? "dark" : "light"}
+      >
         {/* Stand mode fills the screen in its own mode (light or stage), so it paints its own
             background from that mode's tokens. */}
         <div

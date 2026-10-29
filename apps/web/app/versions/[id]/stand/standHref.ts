@@ -1,13 +1,15 @@
 import { keyName, type Chart } from "chartdown";
 import type { Display } from "../display";
 
-export type StandTheme = "light" | "stage";
+import type { StandTheme, StandThemeChoice } from "../../../../lib/stand/theme";
+
+export type { StandTheme, StandThemeChoice };
 
 export interface StandPlace {
   /** The current section, counted from 0. */
   section: number;
   display: Display;
-  theme: StandTheme;
+  theme: StandThemeChoice;
 }
 
 /** Where stand mode is: the section (from 1 in the address), view, key and theme (R-03.3). */
@@ -41,7 +43,7 @@ export function readSection(chart: Chart, value: string | undefined): number {
 export interface StandView {
   style: Display["style"];
   beats: Display["beats"];
-  theme: StandTheme;
+  theme: StandThemeChoice;
   /** View as, for the MD in a set (T-802); left as it is when not given. */
   as?: string | null;
 }
