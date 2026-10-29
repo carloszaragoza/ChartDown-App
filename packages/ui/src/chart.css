@@ -1213,6 +1213,29 @@
   block-size: 100%;
   box-sizing: border-box;
 }
+/* Between two rows of a section, at the center, the button that splits it there (T-3028): it
+   takes no room of its own, so the rows keep their spacing, and it is quiet until the pointer is
+   near or it has focus. */
+.cd-visual-split {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  block-size: 0;
+  /* The section's rows are a stack spaced by spacing-3: this takes one space back, so two rows
+     keep one gap between them, and the button sits at its middle. */
+  margin-block-start: calc(var(--spacing-3) * -1);
+}
+.cd-visual-split > * {
+  transform: translateY(calc(var(--spacing-3) / 2 - 50%));
+  opacity: 0.55;
+  background: var(--color-background-card);
+}
+.cd-visual-split:hover > *,
+.cd-visual-split:focus-within > * {
+  opacity: 1;
+}
+
 /* A repeated section's bars in the visual editor: drawn as the original, never written in. */
 .cd-visual-repeat .cd-chart__bar {
   cursor: default;

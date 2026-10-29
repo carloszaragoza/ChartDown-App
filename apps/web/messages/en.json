@@ -1622,6 +1622,7 @@
     "addSection": "Add a section",
     "addSectionAfter": "Add a section after",
     "addRow": "Add a row",
+    "splitSection": "Split {name} here",
     "newSectionName": "Verse 1",
     "tools": {
       "label": "Tools",

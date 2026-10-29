@@ -31,6 +31,7 @@ import { MDNotes, type BarLine, type BeatsMode } from "@chartdown/ui";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
+  Fragment,
   useActionState,
   useEffect,
   useMemo,
@@ -65,6 +66,7 @@ import { SOURCE_TYPES } from "../../../../lib/versions/validate";
 import {
   addNote,
   addRow,
+  splitSection,
   addSection,
   appendBar,
   breakRowAfter,
@@ -1165,58 +1167,86 @@ export function VisualEditor({
                                   bar: group[index] as number,
                                 });
                                 return (
-                                  <div
-                                    key={r}
-                                    onClick={(event) => pick(event, s, group)}
-                                    onDragOver={(event) => {
-                                      event.preventDefault();
-                                      const found = dropTarget(event, s, group);
-                                      setDropOn(found?.key ?? null);
-                                    }}
-                                    onDragLeave={() => setDropOn(null)}
-                                    onDrop={(event) => onDrop(event, s, group)}
-                                  >
-                                    <FollowedBarRow
-                                      placed={placed}
-                                      section={s}
-                                      rowIndex={r}
-                                      isFollowing={editing === null}
-                                      row={row}
-                                      formatter={formatter}
-                                      labels={labels.bar}
-                                      size="md"
-                                      beats={beats}
-                                      edit={{
-                                        slots: ROW_BARS,
-                                        ...(selected?.section === s && group.includes(selected.bar)
-                                          ? { selected: group.indexOf(selected.bar) }
-                                          : {}),
-                                        ...(editing?.at.section === s &&
-                                        group.includes(editing.at.bar)
-                                          ? { editing: group.indexOf(editing.at.bar) }
-                                          : {}),
-                                        flagged: group.flatMap((bar, index) =>
-                                          needsAttention(
-                                            section.bars[bar] as VisualBar,
-                                            meterAt[s]?.[bar] ?? "4/4",
-                                          ) || dropOn === `${s}:${bar}`
-                                            ? [index]
-                                            : [],
-                                        ),
-                                        line: (index, line) =>
-                                          ownLine(
-                                            at(index),
-                                            section.bars[group[index] as number] as VisualBar,
-                                            line,
-                                          ),
-                                        label: (index) =>
-                                          label(
-                                            at(index),
-                                            section.bars[group[index] as number] as VisualBar,
-                                          ),
+                                  <Fragment key={r}>
+                                    {r > 0 && (
+                                      // Between two rows, at the center: splits the section there
+                                      // into the next one, renamed in place (T-3028).
+                                      <div className="cd-visual-split">
+                                        <Button
+                                          label={t("splitSection", { name: section.name })}
+                                          tooltip={t("splitSection", { name: section.name })}
+                                          variant="ghost"
+                                          size="sm"
+                                          isIconOnly
+                                          icon={icon("splitSection")}
+                                          onClick={() => {
+                                            setEditing(null);
+                                            setSelected(null);
+                                            change((c) =>
+                                              splitSection(
+                                                c,
+                                                s,
+                                                group[0] as number,
+                                                suggestSection(c.sections, s, language),
+                                              ),
+                                            );
+                                          }}
+                                        />
+                                      </div>
+                                    )}
+                                    <div
+                                      onClick={(event) => pick(event, s, group)}
+                                      onDragOver={(event) => {
+                                        event.preventDefault();
+                                        const found = dropTarget(event, s, group);
+                                        setDropOn(found?.key ?? null);
                                       }}
-                                    />
-                                  </div>
+                                      onDragLeave={() => setDropOn(null)}
+                                      onDrop={(event) => onDrop(event, s, group)}
+                                    >
+                                      <FollowedBarRow
+                                        placed={placed}
+                                        section={s}
+                                        rowIndex={r}
+                                        isFollowing={editing === null}
+                                        row={row}
+                                        formatter={formatter}
+                                        labels={labels.bar}
+                                        size="md"
+                                        beats={beats}
+                                        edit={{
+                                          slots: ROW_BARS,
+                                          ...(selected?.section === s &&
+                                          group.includes(selected.bar)
+                                            ? { selected: group.indexOf(selected.bar) }
+                                            : {}),
+                                          ...(editing?.at.section === s &&
+                                          group.includes(editing.at.bar)
+                                            ? { editing: group.indexOf(editing.at.bar) }
+                                            : {}),
+                                          flagged: group.flatMap((bar, index) =>
+                                            needsAttention(
+                                              section.bars[bar] as VisualBar,
+                                              meterAt[s]?.[bar] ?? "4/4",
+                                            ) || dropOn === `${s}:${bar}`
+                                              ? [index]
+                                              : [],
+                                          ),
+                                          line: (index, line) =>
+                                            ownLine(
+                                              at(index),
+                                              section.bars[group[index] as number] as VisualBar,
+                                              line,
+                                            ),
+                                          label: (index) =>
+                                            label(
+                                              at(index),
+                                              section.bars[group[index] as number] as VisualBar,
+                                            ),
+                                        }}
+                                      />
+                                    </div>
+                                  </Fragment>
                                 );
                               })}
                             {!section.use && (
