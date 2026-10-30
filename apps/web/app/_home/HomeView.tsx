@@ -27,6 +27,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { localTimeZone } from "../../lib/sets/today";
 import { setWhen, todayIn } from "../../lib/sets/when";
+import { ActionRow } from "../_components/ActionRow";
 import {
   AddIcon,
   GoIcon,
@@ -287,13 +288,14 @@ export async function HomeView({
                 </HStack>
                 <List hasDividers edgeCompensation="inline">
                   {steps.map((step, index) => (
-                    <Item
+                    // A step to do is a tap target whole, following its button (T-3035).
+                    <ActionRow
                       key={step.key}
-                      as="li"
+                      isLink={!step.done}
                       startContent={<Text weight="semibold">{index + 1}</Text>}
                       label={t(`steps.${step.key}.title`)}
                       description={t(`steps.${step.key}.hint`)}
-                      endContent={
+                      actions={
                         step.done ? (
                           <Token label={t("stepDone")} size="sm" />
                         ) : (
@@ -483,7 +485,7 @@ export async function HomeView({
             <Heading level={2} id="attention">
               {t("attention.title")}
             </Heading>
-            <List edgeCompensation="inline">
+            <List hasDividers edgeCompensation="inline">
               {attentionItems.map((item) => (
                 <Item
                   key={item.key}
@@ -512,7 +514,7 @@ export async function HomeView({
             <Text type="supporting">
               {t("bandLine", { band: data.band.name, count: data.members.length })}
             </Text>
-            <List edgeCompensation="inline">
+            <List hasDividers edgeCompensation="inline">
               {data.members.map((member, index) => (
                 <Item
                   key={index}

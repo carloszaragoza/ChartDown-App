@@ -784,7 +784,13 @@
     "unitReading": "{unit}: eighth notes at {eighths} a minute",
     "unitTap": "Not sure? Tap tempo in Metronome options while the recording plays, and compare.",
     "unitChosen": "Counting the {unit}, as you chose. The chart doesn't say.",
-    "unitPending": "The chart doesn't say what one beat is: Play asks."
+    "unitPending": "The chart doesn't say what one beat is: Play asks.",
+    "settings": "Settings",
+    "tabChart": "Chart",
+    "tabScreen": "Screen",
+    "tabMetronome": "Metronome",
+    "theme": "Theme",
+    "more": "More"
   },
   "bands": {
     "title": "Bands",
@@ -1581,7 +1587,10 @@
     "reconnecting": "Reconnecting…",
     "backToLive": "Back to live",
     "banner": "Live now: {set}",
-    "bannerLeader": "{name} is leading."
+    "bannerLeader": "{name} is leading.",
+    "confirmTitle": "Start live mode?",
+    "confirmText": "{count, plural, =0 {Nobody else is in this set's lineup yet.} one {The musician in this set's lineup gets a notice and follows you from song to song.} other {The # musicians in this set's lineup get a notice and follow you from song to song.}}",
+    "cancel": "Cancel"
   },
   "visual": {
     "overline": "Visual editor",

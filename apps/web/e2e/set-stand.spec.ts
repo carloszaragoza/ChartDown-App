@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
 import {
+  openStandSettings,
   PASSWORD,
   addToSet,
   chooseSection,
@@ -107,6 +108,17 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
     ever.push(`${address.pathname}${address.search}`);
   });
 
+  // T-3035: a song's row is a tap target whole, as the catalog's: a tap away from its title
+  // opens the set's song.
+  await page.goto(setAddress);
+  const songRow = page.getByRole("listitem").filter({ hasText: first });
+  const rowBox = await songRow.boundingBox();
+  await page.mouse.click(
+    (rowBox?.x ?? 0) + (rowBox?.width ?? 0) * 0.6,
+    (rowBox?.y ?? 0) + (rowBox?.height ?? 0) / 2,
+  );
+  await expect(page).toHaveURL(new RegExp(`${setAddress}/songs/1$`));
+
   // The MD opens stand mode from the set's song: every note, and View as.
   await page.goto(`${setAddress}/songs/1`);
   await page.getByRole("link", { name: "Start in stand mode" }).click();
@@ -121,10 +133,13 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   await expect(current).toContainText(notes.bass);
 
   const viewAs = async (label: string) => {
-    // View as is a menu on the stand's top line on an iPad (T-2706).
-    await page.getByRole("combobox", { name: "View as" }).click();
+    // View as is in Settings, on its Chart tab (T-3032, T-3034).
+    const sheet = await openStandSettings(page);
+    await sheet.getByRole("combobox", { name: "View as" }).click();
     await page.getByRole("option", { name: label, exact: true }).click();
-    await expect(page.getByRole("combobox", { name: "View as" })).toContainText(label);
+    await expect(sheet.getByRole("combobox", { name: "View as" })).toContainText(label);
+    await page.keyboard.press("Escape");
+    await expect(sheet).toBeHidden();
   };
   // F-006: every view came with the page, so switching asks the server nothing for this song
   // (the next song, loaded ahead, follows the view).
@@ -156,7 +171,9 @@ test("R-06.3 the MD switches views and sees every note", async ({ page, request 
   // Ben has no View as, and the bass note never reaches him, even asking for it.
   await switchTo(page, ben, "Ben Stand");
   const response = await page.goto(`${setAddress}/songs/1/stand?s=2&as=bass`);
-  await expect(page.getByRole("combobox", { name: "View as" })).toHaveCount(0);
+  const settings = await openStandSettings(page);
+  await expect(settings.getByRole("combobox", { name: "View as" })).toHaveCount(0);
+  await page.keyboard.press("Escape");
   await expect(page.getByRole("main")).toContainText(notes.keys);
   expect(await response?.text()).not.toContain(notes.bass);
 });

@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { createVersion } from "./admin";
-import { standNow } from "./flows";
+import { openStandSettings, standNow } from "./flows";
 
 const OPEN_ROAD = readFileSync(
   new URL("../../../fixtures/open-road.chartdown", import.meta.url),
@@ -93,12 +93,12 @@ test.describe("on an iPhone 16 in portrait", () => {
     const top = await firstRow.evaluate((row) => row.getBoundingClientRect().top);
     expect(top).toBeLessThan(PORTRAIT.height / 2);
     await expect(page.getByText("Section 1 of 7")).toBeVisible();
-    // The display choices wait in the View sheet.
+    // The display choices wait in Settings, by tab (T-3034).
     await expect(page.getByRole("radio", { name: "Letters" })).toBeHidden();
-    await page.getByRole("button", { name: "View options" }).click();
-    const sheet = page.getByRole("dialog", { name: "View options" });
-    await expect(sheet.getByRole("radio", { name: "Letters" })).toBeVisible();
+    const sheet = await openStandSettings(page, "Screen");
     await expect(sheet.getByRole("radio", { name: "Stage" })).toBeVisible();
+    await sheet.getByRole("tab", { name: "Chart" }).click();
+    await expect(sheet.getByRole("radio", { name: "Letters" })).toBeVisible();
     await sheet.getByRole("radio", { name: "Letters" }).click();
     await expect(page).toHaveURL(/view=letters/);
     await page.keyboard.press("Escape");

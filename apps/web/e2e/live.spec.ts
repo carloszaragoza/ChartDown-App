@@ -83,11 +83,19 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 the band follows 
   await page.getByRole("button", { name: "Save lineup" }).click();
   await expectStatus(page, "The lineup was saved.");
 
-  // R-12.1 Ana goes live from stand mode's View.
+  // R-12.1 Ana goes live from stand mode's top bar (T-3032): it asks first, saying who gets the
+  // notice, and Cancel starts nothing.
   await page.goto(`${setAddress}/songs/1/stand`);
-  await page.getByRole("button", { name: "View options" }).click();
-  await page.getByRole("dialog").getByRole("button", { name: "Go live" }).click();
-  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Go live" }).click();
+  const ask = page.getByRole("alertdialog", { name: "Start live mode?" });
+  await expect(ask).toContainText("The musician in this set's lineup gets a notice");
+  await ask.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByText("You lead", { exact: false })).toHaveCount(0);
+  await page.getByRole("button", { name: "Go live" }).click();
+  await page
+    .getByRole("alertdialog", { name: "Start live mode?" })
+    .getByRole("button", { name: "Go live" })
+    .click();
   await expect(page.getByText("You lead", { exact: false })).toBeVisible(FOLLOW);
 
   // R-12.2 Luis sees Live now on Home and joins with one tap, on Ana's song.

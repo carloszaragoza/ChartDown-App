@@ -101,6 +101,23 @@ export async function openViewOptions(page: Page) {
   await expect(page.getByRole("dialog", { name: "View options" })).toBeVisible();
 }
 
+/**
+ * In stand mode, opens Settings on one of its tabs (T-3034), and its More when asked: Chart,
+ * where it opens first, Screen or Metronome.
+ */
+export async function openStandSettings(
+  page: Page,
+  tab: "Chart" | "Screen" | "Metronome" = "Chart",
+  more = false,
+) {
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  const sheet = page.getByRole("dialog", { name: "Settings" });
+  await expect(sheet).toBeVisible();
+  await sheet.getByRole("tab", { name: tab }).click();
+  if (more) await sheet.getByRole("button", { name: "More" }).click();
+  return sheet;
+}
+
 /** On a version's page, opens the "…" menu and chooses one of its actions (T-2806). */
 export async function moreAction(page: Page, name: string) {
   await page.getByRole("button", { name: "More actions" }).click();

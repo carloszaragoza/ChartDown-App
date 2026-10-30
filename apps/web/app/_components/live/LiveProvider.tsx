@@ -39,6 +39,8 @@ export interface Live {
   session: LiveSession | null;
   role: LiveRole;
   canLead: boolean;
+  /** How many others in the set's lineup get the notice when this person starts (T-3032). */
+  audience: number;
   /** Following the session; the leader always is. */
   isJoined: boolean;
   status: LiveStatus;
@@ -55,7 +57,8 @@ export interface Live {
   /** The song this device's stand mode shows, or null on another page of the set. */
   song: number | null;
   error: string | null;
-  start: () => Promise<void>;
+  /** Starts the set's session; whether it started. */
+  start: () => Promise<boolean>;
   join: () => void;
   leave: () => void;
   end: () => Promise<void>;
@@ -115,12 +118,14 @@ export function LiveProvider({
   setId,
   me,
   canLead,
+  audience = 0,
   initial,
   children,
 }: {
   setId: string;
   me: { id: string; name: string };
   canLead: boolean;
+  audience?: number;
   initial: LiveSession | null;
   children: ReactNode;
 }) {
@@ -403,6 +408,7 @@ export function LiveProvider({
     sent.current = null;
     setEnded(false);
     await refresh();
+    return !failed;
   }, [supabase, setId, refresh]);
   const end = useCallback(async () => {
     if (!sessionId) return;
@@ -457,6 +463,7 @@ export function LiveProvider({
     session,
     role,
     canLead,
+    audience,
     isJoined,
     status,
     isDetached,

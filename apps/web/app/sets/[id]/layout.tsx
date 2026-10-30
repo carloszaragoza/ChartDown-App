@@ -51,6 +51,24 @@ export default async function SetLayout({
     (lineup ?? []) as { member_id: string; instrument_id: string }[],
   ).get(member.id)?.length;
   if (!canLead && !plays) return children;
+  // Who gets the notice when this person starts live mode: the rest of the set's lineup (T-3032).
+  let audience = 0;
+  if (canLead) {
+    const { data: members } = await supabase
+      .from("band_members")
+      .select("id, instruments:member_instruments(instrument_id)")
+      .eq("band_id", set.band_id)
+      .neq("user_id", user.id);
+    const others = (members ?? []) as { id: string; instruments: { instrument_id: string }[] }[];
+    const lineupOf = effectiveLineup(
+      others.map((other) => ({
+        id: other.id,
+        defaults: other.instruments.map((row) => row.instrument_id),
+      })),
+      (lineup ?? []) as { member_id: string; instrument_id: string }[],
+    );
+    audience = others.filter((other) => lineupOf.get(other.id)?.length).length;
+  }
 
   const { data: row } = await supabase
     .from("live_sessions")
@@ -73,6 +91,7 @@ export default async function SetLayout({
       setId={id}
       me={{ id: user.id, name: (profile?.name as string | undefined) ?? "" }}
       canLead={canLead}
+      audience={audience}
       initial={initial}
     >
       {children}

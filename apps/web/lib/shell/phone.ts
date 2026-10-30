@@ -25,6 +25,11 @@ export function usePhone(guess: boolean): boolean {
   return useMedia(PHONE_QUERY, guess);
 }
 
+/** Whether the screen is upright (portrait); the server cannot tell, so it says no. */
+export function usePortrait(): boolean {
+  return useMedia("(orientation: portrait)", false);
+}
+
 /** Whether the screen is short, a phone in landscape; the server cannot tell, so it says no. */
 export function useShortScreen(): boolean {
   return useMedia(SHORT_QUERY, false);

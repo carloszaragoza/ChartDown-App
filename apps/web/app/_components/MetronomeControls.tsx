@@ -25,6 +25,7 @@ import {
 import { EIGHTHS_PER_BEAT, meterBeat, type BeatUnit, type Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
+import { jumpTarget } from "../../lib/metronome/jump";
 import { speedFor, tapTempo } from "../../lib/metronome/tapTempo";
 import {
   clampTempo,
@@ -110,6 +111,12 @@ export function useMetronomeControls(
   const chooseStart = (inSection: number, number: number) => {
     const index = bars.findIndex((bar) => bar.section === inSection && bar.number === number);
     if (index >= 0) setChosen((now) => (now === index ? null : index));
+  };
+  /** A tap on a bar while it plays: the metronome goes on from there (R-11.18). */
+  const jumpTo = (inSection: number, number: number) => {
+    const at = metronome.position?.click.bar ?? 0;
+    const to = jumpTarget(bars, inSection, number, Math.max(at, 0));
+    if (to !== null) metronome.jump(to);
   };
   const startIn = (inSection: number): StartBar | undefined => {
     const bar = start !== null ? bars[start] : undefined;
@@ -209,7 +216,9 @@ export function useMetronomeControls(
       : stepped === roundTempo(written)
         ? t("tempoSame")
         : t("tempoChart", { bpm: roundTempo(written) });
-  const soundControls = (
+  // What is changed while playing (T-3034): the tempo with Tap tempo beside it, the click and the
+  // count-in; the rest, set once, is soundMore.
+  const soundMain = (
     <VStack gap={4}>
       {/* − and + at the touch size beside the field, which also takes a typed tempo (T-2808). */}
       <VStack gap={2}>
@@ -252,7 +261,22 @@ export function useMetronomeControls(
             isDisabled={stepped >= TEMPO_MAX}
             onClick={() => step(stepped + 1)}
           />
+          {/* Tapping sets the same tempo, so it sits on its row (T-3034). */}
+          <Button label={t("tapTempo")} size="lg" variant="secondary" onClick={tap} />
         </HStack>
+        {(speed !== 100 || tapped !== null) && (
+          <HStack gap={2}>
+            <Button
+              label={t("chartTempo")}
+              variant="ghost"
+              onClick={() => {
+                setSpeed(100);
+                setTapped(null);
+                taps.current = [];
+              }}
+            />
+          </HStack>
+        )}
       </VStack>
       <Switch
         label={t("click")}
@@ -260,6 +284,18 @@ export function useMetronomeControls(
         value={sound.click}
         onChange={(click) => setSound({ ...sound, click })}
       />
+      <Switch
+        label={t("countIn")}
+        description={t("countInHint")}
+        value={sound.countIn}
+        onChange={(countIn) => setSound({ ...sound, countIn })}
+      />
+    </VStack>
+  );
+  // Set once (T-3034): the beat's and its subdivisions' levels, the practice speed, the beat line
+  // and keeping the speakers awake.
+  const soundMore = (
+    <VStack gap={4}>
       {/* The three faders in place of one volume (R-11.17): the beat and its subdivisions. */}
       {(["beat", "eighths", "sixteenths"] as const).map((fader) => (
         <Slider
@@ -290,32 +326,6 @@ export function useMetronomeControls(
         marks={[{ value: 100 }]}
         onChange={(value: number) => setSpeed(value)}
       />
-      <HStack gap={2} wrap="wrap">
-        <Button label={t("tapTempo")} variant="secondary" onClick={tap} />
-        {(speed !== 100 || tapped !== null) && (
-          <Button
-            label={t("chartTempo")}
-            variant="ghost"
-            onClick={() => {
-              setSpeed(100);
-              setTapped(null);
-              taps.current = [];
-            }}
-          />
-        )}
-      </HStack>
-      <Switch
-        label={t("countIn")}
-        description={t("countInHint")}
-        value={sound.countIn}
-        onChange={(countIn) => setSound({ ...sound, countIn })}
-      />
-      <Switch
-        label={t("keepAwake")}
-        description={t("keepAwakeHint")}
-        value={sound.keepAwake}
-        onChange={(keepAwake) => setSound({ ...sound, keepAwake })}
-      />
       <VStack gap={1}>
         <Text type="label">{t("beatLine")}</Text>
         <SegmentedControl
@@ -327,6 +337,18 @@ export function useMetronomeControls(
           <SegmentedControlItem value="smooth" label={t("beatLineSmooth")} />
         </SegmentedControl>
       </VStack>
+      <Switch
+        label={t("keepAwake")}
+        description={t("keepAwakeHint")}
+        value={sound.keepAwake}
+        onChange={(keepAwake) => setSound({ ...sound, keepAwake })}
+      />
+    </VStack>
+  );
+  const soundControls = (
+    <VStack gap={4}>
+      {soundMain}
+      {soundMore}
     </VStack>
   );
   const soundButton = (
@@ -378,29 +400,33 @@ export function useMetronomeControls(
     : tapped !== null
       ? roundTempo(tapped)
       : null;
+  const metronomeButton = (
+    <Button
+      label={metronome.isPlaying ? t("stop") : t("play")}
+      variant={metronome.isPlaying ? "primary" : "secondary"}
+      size={size}
+      // The metronome, its pendulum swinging with the beat while it plays. Play and Stop are
+      // its name, and the button turns primary and counts while it plays.
+      icon={
+        <MetronomeIcon
+          width="1.25em"
+          height="1.25em"
+          beat={metronome.isPlaying && click ? click.count : undefined}
+          seconds={click?.duration}
+        />
+      }
+      onClick={toggle}
+    >
+      {/* One width whatever it shows, the tempo or the count (T-2701). */}
+      <span className="cd-metronome-count">
+        {(metronome.isPlaying && counter) ||
+          (shownTempo !== null ? t("tempoShort", { bpm: shownTempo }) : t("noTempoShort"))}
+      </span>
+    </Button>
+  );
   const control = (
     <ButtonGroup label={t("metronome")} size={size}>
-      <Button
-        label={metronome.isPlaying ? t("stop") : t("play")}
-        variant={metronome.isPlaying ? "primary" : "secondary"}
-        // The metronome, its pendulum swinging with the beat while it plays. Play and Stop are
-        // its name, and the button turns primary and counts while it plays.
-        icon={
-          <MetronomeIcon
-            width="1.25em"
-            height="1.25em"
-            beat={metronome.isPlaying && click ? click.count : undefined}
-            seconds={click?.duration}
-          />
-        }
-        onClick={toggle}
-      >
-        {/* One width whatever it shows, the tempo or the count (T-2701). */}
-        <span className="cd-metronome-count">
-          {(metronome.isPlaying && counter) ||
-            (shownTempo !== null ? t("tempoShort", { bpm: shownTempo }) : t("noTempoShort"))}
-        </span>
-      </Button>
+      {metronomeButton}
       <Button
         label={t("sound")}
         variant={metronome.isPlaying ? "primary" : "secondary"}
@@ -415,9 +441,13 @@ export function useMetronomeControls(
   return {
     metronome,
     control,
+    /** Play with the tempo on it, alone: stand mode's top bar keeps the sound in Settings (T-3032). */
+    metronomeButton,
     playButton,
     soundButton,
     soundControls,
+    soundMain,
+    soundMore,
     tempoDialog: (
       <>
         {tempoDialog}
@@ -441,6 +471,7 @@ export function useMetronomeControls(
     toggle,
     resume: metronome.resume,
     chooseStart,
+    jumpTo,
     startIn,
   };
 }

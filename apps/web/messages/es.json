@@ -784,7 +784,13 @@
     "unitReading": "{unit}: corcheas a {eighths} por minuto",
     "unitTap": "¿No estás seguro? Usa Tap tempo en Opciones del metrónomo con la grabación y compara.",
     "unitChosen": "Contando la {unit}, como elegiste. El chart no lo dice.",
-    "unitPending": "El chart no dice qué figura es un pulso: Play te lo pregunta."
+    "unitPending": "El chart no dice qué figura es un pulso: Play te lo pregunta.",
+    "settings": "Ajustes",
+    "tabChart": "Partitura",
+    "tabScreen": "Pantalla",
+    "tabMetronome": "Metrónomo",
+    "theme": "Tema",
+    "more": "Más"
   },
   "bands": {
     "title": "Bandas",
@@ -1581,7 +1587,10 @@
     "reconnecting": "Reconectando…",
     "backToLive": "Volver a en vivo",
     "banner": "En vivo ahora: {set}",
-    "bannerLeader": "{name} está dirigiendo."
+    "bannerLeader": "{name} está dirigiendo.",
+    "confirmTitle": "¿Iniciar el modo en vivo?",
+    "confirmText": "{count, plural, =0 {Nadie más está en la alineación de este set todavía.} one {El músico de la alineación de este set recibe un aviso y te sigue de canción en canción.} other {Los # músicos de la alineación de este set reciben un aviso y te siguen de canción en canción.}}",
+    "cancel": "Cancelar"
   },
   "visual": {
     "overline": "Editor visual",

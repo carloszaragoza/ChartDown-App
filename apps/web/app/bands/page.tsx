@@ -3,13 +3,12 @@ import { Banner } from "@astryxdesign/core/Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Item } from "@astryxdesign/core/Item";
 import { LayoutHeader } from "@astryxdesign/core/Layout";
 import { List } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
-import Link from "next/link";
+import { LinkRow } from "../_components/LinkRow";
 import { notFound, redirect } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../lib/auth/enabled";
@@ -90,11 +89,11 @@ export default async function BandsPage({ searchParams }: { searchParams: Search
       : null;
   };
   const rowOf = (band: { id: string; name: string }, role: "md" | "musician") => (
-    <Item
+    <LinkRow
       key={band.id}
-      as="li"
+      href={`/bands/${band.id}`}
+      title={band.name}
       startContent={<Avatar name={band.name} shape="rounded" tooltip={false} />}
-      label={<Link href={`/bands/${band.id}`}>{band.name}</Link>}
       description={[t("members", { count: membersOf(band.id) }), nextOf(band.id)]
         .filter(Boolean)
         .join(" · ")}
@@ -164,10 +163,10 @@ export default async function BandsPage({ searchParams }: { searchParams: Search
                 <List hasDividers edgeCompensation="inline">
                   {bands.map(({ role, band }) => (band ? rowOf(band, role) : null))}
                   {personal && (
-                    <Item
-                      as="li"
+                    <LinkRow
+                      href={`/bands/${personal.id}/sets`}
+                      title={t("personal")}
                       startContent={<Avatar name={t("personal")} shape="rounded" tooltip={false} />}
-                      label={<Link href={`/bands/${personal.id}/sets`}>{t("personal")}</Link>}
                       description={[t("personalHint"), nextOf(personal.id)]
                         .filter(Boolean)
                         .join(" · ")}

@@ -13,6 +13,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
 import Link from "next/link";
+import { LinkRow } from "../../_components/LinkRow";
 import { notFound } from "next/navigation";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";
@@ -268,6 +269,8 @@ export default async function SetPage({
             ) : (
               <List
                 listStyle="decimal"
+                hasDividers
+                edgeCompensation="inline"
                 header={<Text className="cd-visually-hidden">{t("songsTitle")}</Text>}
               >
                 {items.map((item, index) => {
@@ -279,11 +282,11 @@ export default async function SetPage({
                     : undefined;
                   const forYou = shown && shown.notes > 0;
                   return (
-                    <Item
+                    <LinkRow
                       key={item.id}
-                      as="li"
                       align="start"
-                      label={<Link href={`/sets/${set.id}/songs/${item.position}`}>{title}</Link>}
+                      href={`/sets/${set.id}/songs/${item.position}`}
+                      title={title}
                       description={
                         <VStack gap={2}>
                           <Text type="supporting">
