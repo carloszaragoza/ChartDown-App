@@ -580,6 +580,11 @@ export const chartdownTheme = {
               "base": {
                 "minHeight": "44px"
               }
+            },
+            "item": {
+              "base": {
+                "minHeight": "var(--size-element-md)"
+              }
             }
           }
         }

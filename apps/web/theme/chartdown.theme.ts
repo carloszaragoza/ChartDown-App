@@ -49,7 +49,6 @@ export const chartdownTheme = defineTheme({
     "--spacing-10": "2.25rem",
     "--spacing-11": "2.475rem",
     "--spacing-12": "2.7rem",
-
   },
   components: {
     // A menu shows all its actions when the screen has room (owner's review, October 28, 2026:
@@ -78,8 +77,13 @@ export const chartdownTheme = defineTheme({
             "--size-element-md": "44px",
             "--size-element-lg": "47px",
           },
-          // The heading links home; it doesn't follow the element sizes.
-          components: { "side-nav-heading": { base: { minHeight: "44px" } } },
+          // The heading links home; it doesn't follow the element sizes. A row (a list's, the
+          // account at the foot of the side navigation) is a touch target too, at least as tall as
+          // a control, whatever the density does to its text (T-3042).
+          components: {
+            "side-nav-heading": { base: { minHeight: "44px" } },
+            item: { base: { minHeight: "var(--size-element-md)" } },
+          },
         },
       },
       {

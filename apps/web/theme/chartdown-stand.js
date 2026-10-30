@@ -585,6 +585,11 @@ export const chartdownStandTheme = {
               "base": {
                 "minHeight": "44px"
               }
+            },
+            "item": {
+              "base": {
+                "minHeight": "var(--size-element-md)"
+              }
             }
           }
         }

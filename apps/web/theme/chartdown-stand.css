@@ -747,6 +747,10 @@
     .astryx-side-nav-heading {
     min-height: 44px;
   }
+
+    .astryx-item {
+    min-height: var(--size-element-md);
+  }
   }
 }
 
