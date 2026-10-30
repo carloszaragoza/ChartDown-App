@@ -138,7 +138,7 @@ test.describe("on an iPad, during a performance", () => {
     for (const color of colors) expect(color).toBe(ground);
   });
 
-  test("T-1302 T-2813 T-3036 the song form is at least 50 px, with room between sections; Previous / Next are the app's button size", async ({
+  test("T-1302 T-2813 T-3036 the song form and Previous / Next are the app's button size, with room between sections", async ({
     page,
     request,
   }) => {
@@ -152,9 +152,11 @@ test.describe("on an iPad, during a performance", () => {
     const sections = form.getByRole("link");
     await expect(sections).toHaveCount(5);
     const boxes = await Promise.all((await sections.all()).map((link) => link.boundingBox()));
+    // The section buttons are the app's size too (T-3036), at least square.
+    const button = await page.getByRole("button", { name: "Settings", exact: true }).boundingBox();
     for (const box of boxes) {
-      expect(Math.round(box?.width ?? 0)).toBeGreaterThanOrEqual(50);
-      expect(Math.round(box?.height ?? 0)).toBeGreaterThanOrEqual(50);
+      expect(Math.round(box?.height ?? 0)).toBe(Math.round(button?.height ?? -1));
+      expect(Math.round(box?.width ?? 0)).toBeGreaterThanOrEqual(Math.round(box?.height ?? 0));
     }
     for (let index = 1; index < boxes.length; index++) {
       const [before, after] = [boxes[index - 1], boxes[index]];
