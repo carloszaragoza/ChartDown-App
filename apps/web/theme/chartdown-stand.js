@@ -19,18 +19,18 @@ export const chartdownStandTheme = {
   name: 'chartdown-stand',
   __built: true,
   tokens: {
-    "--font-size-4xs": "0.375rem",
-    "--font-size-3xs": "0.4375rem",
-    "--font-size-2xs": "0.5rem",
-    "--font-size-xs": "0.625rem",
-    "--font-size-sm": "0.75rem",
-    "--font-size-base": "0.875rem",
-    "--font-size-lg": "1.0625rem",
-    "--font-size-xl": "1.25rem",
-    "--font-size-2xl": "1.5rem",
-    "--font-size-3xl": "1.8125rem",
-    "--font-size-4xl": "2.1875rem",
-    "--font-size-5xl": "2.625rem",
+    "--font-size-4xs": "0.3375rem",
+    "--font-size-3xs": "0.3937rem",
+    "--font-size-2xs": "0.45rem",
+    "--font-size-xs": "0.5625rem",
+    "--font-size-sm": "0.675rem",
+    "--font-size-base": "0.7875rem",
+    "--font-size-lg": "0.9563rem",
+    "--font-size-xl": "1.125rem",
+    "--font-size-2xl": "1.35rem",
+    "--font-size-3xl": "1.6313rem",
+    "--font-size-4xl": "1.9688rem",
+    "--font-size-5xl": "2.3625rem",
     "--text-heading-1-size": "var(--font-size-2xl)",
     "--text-heading-1-weight": "var(--font-weight-semibold)",
     "--text-heading-1-leading": "1.3333",
@@ -193,7 +193,21 @@ export const chartdownStandTheme = {
     "--shadow-inset-selected": "inset 0px 0px 0px 2px #0074e280",
     "--shadow-inset-success": "inset 0px 0px 0px 2px #2f7d334D",
     "--shadow-inset-warning": "inset 0px 0px 0px 2px #f8d36a4D",
-    "--shadow-inset-error": "inset 0px 0px 0px 2px #de47454D"
+    "--shadow-inset-error": "inset 0px 0px 0px 2px #de47454D",
+    "--spacing-0-5": "0.1125rem",
+    "--spacing-1": "0.225rem",
+    "--spacing-1-5": "0.3375rem",
+    "--spacing-2": "0.45rem",
+    "--spacing-3": "0.675rem",
+    "--spacing-4": "0.9rem",
+    "--spacing-5": "1.125rem",
+    "--spacing-6": "1.35rem",
+    "--spacing-7": "1.575rem",
+    "--spacing-8": "1.8rem",
+    "--spacing-9": "2.025rem",
+    "--spacing-10": "2.25rem",
+    "--spacing-11": "2.475rem",
+    "--spacing-12": "2.7rem"
   },
   localTokens: {
     "--astryx-theme-neutral-color-status-fill-accent": "light-dark(#0074e2, #6d9cfe)",
@@ -572,6 +586,30 @@ export const chartdownStandTheme = {
                 "minHeight": "44px"
               }
             }
+          }
+        }
+      },
+      {
+        "when": {
+          "pointer": "coarse",
+          "width": {
+            "below": "lg"
+          }
+        },
+        "value": {
+          "tokens": {
+            "--font-size-4xs": "0.3937rem",
+            "--font-size-3xs": "0.45rem",
+            "--font-size-2xs": "0.5625rem",
+            "--font-size-xs": "0.675rem",
+            "--font-size-sm": "0.7875rem",
+            "--font-size-base": "0.9rem",
+            "--font-size-lg": "1.0688rem",
+            "--font-size-xl": "1.2375rem",
+            "--font-size-2xl": "1.4625rem",
+            "--font-size-3xl": "1.6875rem",
+            "--font-size-4xl": "2.025rem",
+            "--font-size-5xl": "2.3625rem"
           }
         }
       },

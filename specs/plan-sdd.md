@@ -435,6 +435,7 @@ People see the catalog as **Songs** ("Canciones" in Spanish) in the side navigat
 - R-12.10 **End:** the leader ends the session; followers stay on the last position and get a notice that live mode ended. A session also ends if the leader is disconnected for more than 5 minutes.
 - R-12.11 **Hand over:** the leader can pass control to the temporary MD or another member during the session.
 - R-12.12 **Privacy:** only members of the band in the set's lineup (as R-12.2 counts it), its MD and its temporary MD can join. The session shares positions and cues, never personal data.
+- R-12.13 **Leave live (owner's request, October 30, 2026):** a musician who follows can leave live mode at any time with **Leave live** on their line, and their device is theirs again: it stays where it was and stops following. When the leader is not connected (they closed the window, their device slept), the line says so in words ("Sam isn't connected") and offers Leave live first, so nobody waits for the 5 minutes of R-12.10. A musician who left sees "Live now" with Join again while the session lasts; a leader who comes back still leads it.
 
 **Acceptance criteria**
 

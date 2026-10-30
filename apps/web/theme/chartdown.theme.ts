@@ -20,6 +20,36 @@ export const chartdownTheme = defineTheme({
     "--color-border-red": ["#e5aba8", "#94484a"],
     "--color-error": ["#76000c", "#ffc4be"],
     "--color-error-muted": ["#ffc4be", "#ff98903d"],
+    // Density (owner's review on an iPad, October 30, 2026, T-3042): the type and the spacing a
+    // tenth under Astryx's neutral, everything but the controls, whose heights (--size-element-*)
+    // stay at the touch standard. Each value is neutral's times 0.9.
+    "--font-size-4xs": "0.3375rem",
+    "--font-size-3xs": "0.3937rem",
+    "--font-size-2xs": "0.45rem",
+    "--font-size-xs": "0.5625rem",
+    "--font-size-sm": "0.675rem",
+    "--font-size-base": "0.7875rem",
+    "--font-size-lg": "0.9563rem",
+    "--font-size-xl": "1.125rem",
+    "--font-size-2xl": "1.35rem",
+    "--font-size-3xl": "1.6313rem",
+    "--font-size-4xl": "1.9688rem",
+    "--font-size-5xl": "2.3625rem",
+    "--spacing-0-5": "0.1125rem",
+    "--spacing-1": "0.225rem",
+    "--spacing-1-5": "0.3375rem",
+    "--spacing-2": "0.45rem",
+    "--spacing-3": "0.675rem",
+    "--spacing-4": "0.9rem",
+    "--spacing-5": "1.125rem",
+    "--spacing-6": "1.35rem",
+    "--spacing-7": "1.575rem",
+    "--spacing-8": "1.8rem",
+    "--spacing-9": "2.025rem",
+    "--spacing-10": "2.25rem",
+    "--spacing-11": "2.475rem",
+    "--spacing-12": "2.7rem",
+
   },
   components: {
     // A menu shows all its actions when the screen has room (owner's review, October 28, 2026:
@@ -50,6 +80,27 @@ export const chartdownTheme = defineTheme({
           },
           // The heading links home; it doesn't follow the element sizes.
           components: { "side-nav-heading": { base: { minHeight: "44px" } } },
+        },
+      },
+      {
+        // Neutral sets larger type on a touch screen under 1024 px (an iPad upright); the same
+        // tenth comes off it (T-3042).
+        when: { pointer: "coarse", width: { below: "lg" } },
+        value: {
+          tokens: {
+            "--font-size-4xs": "0.3937rem",
+            "--font-size-3xs": "0.45rem",
+            "--font-size-2xs": "0.5625rem",
+            "--font-size-xs": "0.675rem",
+            "--font-size-sm": "0.7875rem",
+            "--font-size-base": "0.9rem",
+            "--font-size-lg": "1.0688rem",
+            "--font-size-xl": "1.2375rem",
+            "--font-size-2xl": "1.4625rem",
+            "--font-size-3xl": "1.6875rem",
+            "--font-size-4xl": "2.025rem",
+            "--font-size-5xl": "2.3625rem",
+          },
         },
       },
       {

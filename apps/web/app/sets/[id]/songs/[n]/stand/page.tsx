@@ -175,8 +175,10 @@ export default async function SetStandPage({
               <AudioButton
                 recording={recording}
                 chart={chart}
-                // Its word on an iPad's top bar, only its icon on a phone's (T-3032).
-                isIconOnly={phone}
+                // Its icon only on stand mode's top bar, at the app's size, its name in a tooltip
+                // and for screen readers (owner's review, October 30, 2026, T-3042).
+                isIconOnly
+                size="md"
                 save={
                   leads
                     ? saveAudioPoints.bind(null, recording.bandId, recording.versionId)

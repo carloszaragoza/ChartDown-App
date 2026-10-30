@@ -60,7 +60,7 @@ export function AudioButton({
   save,
   isIconOnly = false,
   isNamed = false,
-  size = "lg",
+  size,
 }: {
   recording: PlayerRecording;
   chart: Chart;
@@ -70,6 +70,10 @@ export function AudioButton({
   isIconOnly?: boolean;
   /** Says the band, where more than one band's recording is offered. */
   isNamed?: boolean;
+  /**
+   * Given, the button is that size and filled, as on stand mode's top bar beside the metronome
+   * (T-3042); otherwise large, or small and quiet with only its icon.
+   */
   size?: "md" | "lg";
 }) {
   const t = useTranslations("audio");
@@ -90,8 +94,8 @@ export function AudioButton({
               : t("listen")
         }
         tooltip={isIconOnly ? t("playShort") : t("recording", { band: recording.band, length })}
-        variant={isIconOnly ? "ghost" : "secondary"}
-        size={isIconOnly ? "sm" : size}
+        variant={isIconOnly && !size ? "ghost" : "secondary"}
+        size={size ?? (isIconOnly ? "sm" : "lg")}
         icon={<Icon icon={editorIcon("audio")} />}
         isIconOnly={isIconOnly}
         onClick={() => setOpen(true)}

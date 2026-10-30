@@ -99,6 +99,14 @@ export function LiveStrip({
             <Text>{t("paused")}</Text>
           </StackItem>
         </>
+      ) : live.isLeaderAway ? (
+        // The leader is gone: said in words, and leaving comes first (R-12.13).
+        <>
+          <StatusDot variant="warning" label={t("leaderAway", { name: session.leaderName })} />
+          <StackItem size="fill">
+            <Text>{t("leaderAway", { name: session.leaderName })}</Text>
+          </StackItem>
+        </>
       ) : (
         <StackItem size="fill">
           <Text>
@@ -107,7 +115,7 @@ export function LiveStrip({
         </StackItem>
       )}
       {/* How well this device knows the leader's clock, in words (R-14.1). */}
-      {status !== "paused" && live.sync && (
+      {status !== "paused" && !live.isLeaderAway && live.sync && (
         <HStack gap={1} vAlign="center">
           <StatusDot
             variant={live.sync === "in" ? "success" : "neutral"}
@@ -117,6 +125,12 @@ export function LiveStrip({
         </HStack>
       )}
       {isDetached && <Button label={t("backToLive")} variant="primary" onClick={live.backToLive} />}
+      {/* Leaving gives the device back: it stays where it is and stops following (R-12.13). */}
+      <Button
+        label={t("leave")}
+        variant={live.isLeaderAway ? "primary" : "ghost"}
+        onClick={live.leave}
+      />
     </HStack>
   );
 }

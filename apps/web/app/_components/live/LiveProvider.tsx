@@ -69,6 +69,11 @@ export interface Live {
    * or twice the slowest connected device's round trip.
    */
   lead: number;
+  /**
+   * The leader isn't on the session's channel (they closed the window, their device slept), as a
+   * joined follower sees it (R-12.13).
+   */
+  isLeaderAway: boolean;
   /** This follower's knowledge of the leader's clock (R-14.1); null for the leader or outside. */
   sync: LiveSync | null;
   /** The leader's clock as this device knows it (SPEC-14), for scheduling on it (T-3038). */
@@ -563,6 +568,13 @@ export function LiveProvider({
     target,
     cue: cueHeard === undefined ? (session?.cue ?? null) : cueHeard,
     connected,
+    // Only once the channel says who is there, this device among them, so joining never flashes it.
+    isLeaderAway:
+      role === "follower" &&
+      isJoined &&
+      status === "live" &&
+      connected.some((person) => person.id === me.id) &&
+      !leaderHere,
     lead: Math.max(
       MIN_LEAD_MS,
       ...connected.map((person) =>
