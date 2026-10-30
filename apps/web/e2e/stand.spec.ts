@@ -138,7 +138,7 @@ test.describe("on an iPad, during a performance", () => {
     for (const color of colors) expect(color).toBe(ground);
   });
 
-  test("T-1302 T-2813 the song form and Previous / Next are at least 50 px, with room between sections", async ({
+  test("T-1302 T-2813 T-3036 the song form is at least 50 px, with room between sections; Previous / Next are the app's button size", async ({
     page,
     request,
   }) => {
@@ -164,9 +164,13 @@ test.describe("on an iPad, during a performance", () => {
     // The current section is marked, and a repeated one says which time it is.
     await expect(form.locator('[aria-current="true"]')).toHaveCount(1);
     await expect(form.getByRole("link", { name: /Bridge 1.*2nd time/ })).toBeVisible();
+    // One size for every button, stand mode's included (T-3036): Settings' height, the app's.
+    const settings = await page
+      .getByRole("button", { name: "Settings", exact: true })
+      .boundingBox();
     for (const name of ["Previous", "Next"]) {
       const box = await page.getByRole("link", { name, exact: true }).boundingBox();
-      expect(Math.round(box?.height ?? 0), name).toBeGreaterThanOrEqual(50);
+      expect(Math.round(box?.height ?? 0), name).toBe(Math.round(settings?.height ?? -1));
     }
   });
 });
@@ -186,11 +190,13 @@ test("R-03.3 the clearer stand: one metronome control, the next section's notes,
   // Settings.
   const top = page.getByRole("navigation", { name: "Sections" });
   await expect(top.getByRole("link", { name: "Close" })).toBeVisible();
-  // T-2810: the way back is a quiet icon, with no word, still at the large touch size.
+  // T-2810, T-3036: the way back is a quiet icon, with no word, at the app's one button size.
   await expect(top.getByRole("link", { name: "Close" })).toHaveText("");
   expect(
     Math.round((await top.getByRole("link", { name: "Close" }).boundingBox())?.height ?? 0),
-  ).toBeGreaterThanOrEqual(50);
+  ).toBe(
+    Math.round((await top.getByRole("button", { name: "Settings" }).boundingBox())?.height ?? -1),
+  );
   await expect(top.getByRole("heading", { level: 1 })).toContainText("Clear Stand");
   const metronome = top;
   const closeBox = await top.getByRole("link", { name: "Close" }).boundingBox();

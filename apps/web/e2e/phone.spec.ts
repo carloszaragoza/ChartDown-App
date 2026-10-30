@@ -103,10 +103,13 @@ test.describe("on an iPhone 16 in portrait", () => {
     await expect(page).toHaveURL(/view=letters/);
     await page.keyboard.press("Escape");
 
-    // Next moves on; on a phone the turn buttons are 40 px (R-03.9, T-2811).
+    // Next moves on, at the app's one button size, as Settings beside it (R-03.9, T-3036).
     const next = page.getByRole("link", { name: "Next", exact: true });
     const size = await next.boundingBox();
-    expect(size?.height).toBeGreaterThanOrEqual(40);
+    const settings = await page
+      .getByRole("button", { name: "Settings", exact: true })
+      .boundingBox();
+    expect(Math.round(size?.height ?? 0)).toBe(Math.round(settings?.height ?? -1));
     await next.click();
     await expect(current.getByRole("heading", { level: 2, name: "Verse 1" })).toBeVisible();
     await expect(page.getByText("Section 2 of 7")).toBeVisible();

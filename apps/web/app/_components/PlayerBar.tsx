@@ -25,7 +25,7 @@ import {
   type RefObject,
 } from "react";
 import { sectionAt, sectionLabels, type VideoSection } from "../../lib/video/sections";
-import { MetronomeIcon } from "./MetronomeIcon";
+import { MetronomePendulum, SwingingMetronomeIcon } from "./MetronomeIcon";
 
 /**
  * Where a player across the bottom starts (T-2828): at the side navigation's edge, so it never
@@ -459,15 +459,17 @@ export function CountInSwitch({
   const t = useTranslations("countIn");
   return (
     <span className="cd-player__count-in">
-      <ToggleButton
-        label={t("label")}
-        size="sm"
-        icon={<MetronomeIcon width="1.25em" height="1.25em" beat={beat?.count} />}
-        isPressed={isOn}
-        onPressedChange={(pressed) => onChange(pressed)}
-      >
-        {t("label")}
-      </ToggleButton>
+      <MetronomePendulum beat={beat?.count}>
+        <ToggleButton
+          label={t("label")}
+          size="sm"
+          icon={<Icon icon={SwingingMetronomeIcon} />}
+          isPressed={isOn}
+          onPressedChange={(pressed) => onChange(pressed)}
+        >
+          {t("label")}
+        </ToggleButton>
+      </MetronomePendulum>
       <span role="status" className="cd-metronome-count">
         {beat ? `${beat.count} / ${beat.of}` : ""}
       </span>

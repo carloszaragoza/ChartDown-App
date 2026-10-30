@@ -1,4 +1,6 @@
-import type { SVGProps } from "react";
+"use client";
+
+import { createContext, useContext, type ReactNode, type SVGProps } from "react";
 
 /**
  * A metronome, drawn like the outline icons beside it (24 × 24, 1.5 stroke, the text's color):
@@ -44,4 +46,28 @@ export function MetronomeIcon({
       </g>
     </svg>
   );
+}
+
+const Pendulum = createContext<{ beat?: number | undefined; seconds?: number | undefined }>({});
+
+/** The beat the metronome icons inside it swing to (T-3036). */
+export function MetronomePendulum({
+  beat,
+  seconds,
+  children,
+}: {
+  beat?: number | undefined;
+  seconds?: number | undefined;
+  children: ReactNode;
+}) {
+  return <Pendulum.Provider value={{ beat, seconds }}>{children}</Pendulum.Provider>;
+}
+
+/**
+ * The metronome for Astryx's Icon (T-3036): the Icon gives it its size from the button it sits
+ * in, as every other icon gets, and MetronomePendulum around the button gives it the beat.
+ */
+export function SwingingMetronomeIcon(props: SVGProps<SVGSVGElement>) {
+  const { beat, seconds } = useContext(Pendulum);
+  return <MetronomeIcon {...props} beat={beat} seconds={seconds} />;
 }

@@ -242,7 +242,6 @@ export function LiveButton({ sections }: { sections: readonly string[] }) {
         <Button
           label={t("options")}
           variant="destructive"
-          size="lg"
           icon={<Icon icon={LiveIcon} />}
           onClick={() => setOpen(true)}
         >
@@ -258,7 +257,6 @@ export function LiveButton({ sections }: { sections: readonly string[] }) {
       <Button
         label={t("start")}
         variant="secondary"
-        size="lg"
         icon={<Icon icon={LiveIcon} />}
         onClick={() => setAsking(true)}
       >

@@ -556,7 +556,6 @@ function StandModeView({
     ) : (
       <Selector
         label={t("viewAs")}
-        size="lg"
         options={viewAs.options.map((option) => ({ value: option.label, label: option.label }))}
         value={viewAsValue}
         onChange={chooseView}
@@ -718,7 +717,6 @@ function StandModeView({
       label={set.songOf}
       tooltip={t("setSongs")}
       variant="ghost"
-      size="lg"
       isIconOnly={isPhone}
       icon={<Icon icon={QueueListIcon} />}
       onClick={() => setSongsOpen(true)}
@@ -1007,7 +1005,6 @@ function StandModeView({
     <Button
       label={t("settings")}
       variant="ghost"
-      size="lg"
       icon={<Icon icon={Cog6ToothIcon} />}
       onClick={() => setSheetOpen(true)}
     >
@@ -1040,7 +1037,6 @@ function StandModeView({
                     href={back.href}
                     as={Link}
                     variant="ghost"
-                    size="lg"
                     isIconOnly
                     icon={<Icon icon={ArrowUturnLeftIcon} />}
                   />
@@ -1064,7 +1060,6 @@ function StandModeView({
                   <Button
                     label={t("settings")}
                     variant="secondary"
-                    size="lg"
                     isIconOnly
                     icon={<Icon icon={Cog6ToothIcon} />}
                     onClick={() => setSheetOpen(true)}
@@ -1076,7 +1071,6 @@ function StandModeView({
                     <Button
                       label={following.label}
                       href={following.href}
-                      size="lg"
                       variant="primary"
                       isIconOnly
                       icon={<Icon icon={ChevronRightIcon} />}
@@ -1100,7 +1094,6 @@ function StandModeView({
                         href={back.href}
                         as={Link}
                         variant="ghost"
-                        size="lg"
                         isIconOnly
                         tooltip={back.label}
                         icon={<Icon icon={set ? ArrowUturnLeftIcon : XMarkIcon} />}
@@ -1224,7 +1217,6 @@ function StandModeView({
                   {previous ? (
                     <Button
                       label={previous.label}
-                      size="lg"
                       href={previous.href}
                       icon={<Icon icon={ChevronLeftIcon} />}
                     />
@@ -1251,7 +1243,6 @@ function StandModeView({
                   {following ? (
                     <Button
                       label={following.label}
-                      size="lg"
                       href={following.href}
                       variant="primary"
                       endContent={<Icon icon={ChevronRightIcon} />}
@@ -1294,7 +1285,6 @@ function StandModeView({
                   onChange={(tab) => setSettingsTab(tab as SettingsTab)}
                   role="tablist"
                   layout="fill"
-                  size="lg"
                   hasDivider
                 >
                   {SETTINGS_TABS.map((tab) => (
