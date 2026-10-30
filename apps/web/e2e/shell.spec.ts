@@ -88,10 +88,13 @@ test.describe("on an iPad", () => {
     for (const control of await controls.all()) {
       if (!(await control.isVisible())) continue;
       // The heading's chevron is its keyboard control; a tap anywhere on the heading opens the
-      // band menu, so the heading is the target.
+      // band menu, so the heading is the target. A row's link (the account at the foot) takes a
+      // tap anywhere on its row, so the row is (T-3035, T-3042).
       const box = await control.evaluate((element) => {
         const rect = (
-          element.closest(".astryx-side-nav-heading") ?? element
+          element.closest(".astryx-side-nav-heading") ??
+          element.closest(".astryx-item") ??
+          element
         ).getBoundingClientRect();
         return { width: rect.width, height: rect.height };
       });

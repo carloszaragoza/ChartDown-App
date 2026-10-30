@@ -34,7 +34,7 @@ async function pressOn(page: Page, key: string) {
   await page.keyboard.press(key);
 }
 
-test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 the band follows the MD live, hands-free, looks ahead and comes back", async ({
+test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 R-12.13 R-14.2 the band follows the MD live, hands-free, looks ahead and comes back", async ({
   page,
   browser,
   request,
@@ -176,6 +176,21 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 the band follows 
   await page.getByRole("button", { name: "Stop" }).first().click();
   await expect(page.getByRole("button", { name: "Play" }).first()).toBeVisible(FOLLOW);
   await expect(luisPage.getByRole("button", { name: "Play" }).first()).toBeVisible(FOLLOW);
+
+  // R-12.13 Luis leaves live mode: his device is his again, and he can join again.
+  await luisPage.getByRole("button", { name: "Leave live" }).click();
+  await expect(luisPage.getByRole("button", { name: "Join" })).toBeVisible(FOLLOW);
+  await luisPage.getByRole("button", { name: "Join" }).click();
+  await expect(luisPage.getByText("Following Ana Live")).toBeVisible(FOLLOW);
+  // Ana leaves the set's pages, as when she closes the window: Luis is told, Leave live first.
+  const standAddress = page.url();
+  await page.goto("/");
+  await expect(luisPage.getByText("Ana Live isn't connected")).toBeVisible(FOLLOW);
+  await expect(luisPage.getByRole("button", { name: "Leave live" })).toBeVisible();
+  // She comes back and still leads.
+  await page.goto(standAddress);
+  await expect(page.getByText("You lead", { exact: false })).toBeVisible(FOLLOW);
+  await expect(luisPage.getByText("Following Ana Live")).toBeVisible(FOLLOW);
 
   // R-12.10 Ana ends live mode; Luis stays where he was and is told.
   await page.bringToFront();

@@ -1592,7 +1592,9 @@
     "confirmText": "{count, plural, =0 {Nobody else is in this set's lineup yet.} one {The musician in this set's lineup gets a notice and follows you from song to song.} other {The # musicians in this set's lineup get a notice and follow you from song to song.}}",
     "cancel": "Cancel",
     "inSync": "In sync",
-    "syncing": "Syncing…"
+    "syncing": "Syncing…",
+    "leave": "Leave live",
+    "leaderAway": "{name} isn't connected"
   },
   "visual": {
     "overline": "Visual editor",

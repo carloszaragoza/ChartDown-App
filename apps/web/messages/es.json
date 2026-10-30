@@ -1592,7 +1592,9 @@
     "confirmText": "{count, plural, =0 {Nadie más está en la alineación de este set todavía.} one {El músico de la alineación de este set recibe un aviso y te sigue de canción en canción.} other {Los # músicos de la alineación de este set reciben un aviso y te siguen de canción en canción.}}",
     "cancel": "Cancelar",
     "inSync": "Sincronizado",
-    "syncing": "Sincronizando…"
+    "syncing": "Sincronizando…",
+    "leave": "Salir del modo en vivo",
+    "leaderAway": "{name} no está conectado"
   },
   "visual": {
     "overline": "Editor visual",

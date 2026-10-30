@@ -155,6 +155,9 @@ const subscribeDark = (onChange: () => void) => {
 const FORWARD = new Set(["ArrowRight", "ArrowDown", "PageDown"]);
 const BACK = new Set(["ArrowLeft", "ArrowUp", "PageUp"]);
 
+/** The room the song's title keeps on stand mode's top bar before the actions drop their words. */
+const TITLE_ROOM_PX = 220;
+
 /** Settings' tabs in stand mode (T-3034), by what the musician does. */
 const SETTINGS_TABS = ["chart", "screen", "metronome"] as const;
 type SettingsTab = (typeof SETTINGS_TABS)[number];
@@ -733,7 +736,9 @@ function StandModeView({
       label={c("songForm")}
       current={current}
       notesLabel={labels.notesForYou}
-      isStrip={isPhone}
+      // One row that scrolls sideways on every screen, the current section kept in view, never a
+      // second row taking the chart's room (owner's review on an iPad, October 30, 2026, T-3042).
+      isStrip
       items={items.map((item, index) => ({
         abbreviation: item.abbreviation,
         description: describe(item),
@@ -751,12 +756,34 @@ function StandModeView({
   const position = t("position", { current: current + 1, total: chart.sections.length });
   // "Song 3 of 8" opens the set's songs (R-03.13): choosing one opens it at its first section.
   // Cutting a song cuts its click; a follower only looks ahead, the leader's band follows.
+  // When the top bar's actions leave the song's title too little room, Settings and the set's songs
+  // show their icons only, their names in a tooltip and for screen readers, and "Song 3 of 8"
+  // goes beside the set's name (T-3042): the title never disappears.
+  const bar = useRef<HTMLElement | null>(null);
+  const actionsBox = useRef<HTMLDivElement | null>(null);
+  const fullActions = useRef(0);
+  const [isCompact, setCompact] = useState(false);
+  useEffect(() => {
+    const nav = bar.current;
+    const actions = actionsBox.current;
+    if (!nav || !actions || isPhone) return;
+    const fit = () => {
+      // The actions' width with every word, measured while they show them.
+      if (!isCompact) fullActions.current = actions.scrollWidth;
+      const room = nav.clientWidth - fullActions.current - TITLE_ROOM_PX;
+      setCompact(room < 0);
+    };
+    fit();
+    const watch = new ResizeObserver(fit);
+    watch.observe(nav);
+    return () => watch.disconnect();
+  }, [isPhone, isCompact, isPlaying, audio, set]);
   const songsButton = set?.songs?.length ? (
     <Button
       label={set.songOf}
       tooltip={t("setSongs")}
       variant="ghost"
-      isIconOnly={isPhone}
+      isIconOnly={isPhone || isCompact}
       icon={<Icon icon={QueueListIcon} />}
       onClick={() => setSongsOpen(true)}
     />
@@ -1040,9 +1067,11 @@ function StandModeView({
       label={t("settings")}
       variant="ghost"
       icon={<Icon icon={Cog6ToothIcon} />}
+      isIconOnly={isCompact}
+      {...(isCompact ? { tooltip: t("settings") } : {})}
       onClick={() => setSheetOpen(true)}
     >
-      {t("settings")}
+      {isCompact ? undefined : t("settings")}
     </Button>
   );
 
@@ -1117,8 +1146,9 @@ function StandModeView({
                 {/* The top bar on an iPad or a desktop (T-2706, T-3032, T-3036): one line, always.
                   The way back and the song, then the actions by how much they are used: the
                   metronome, the band's audio, Live for the MD, the set's songs, and Settings
-                  last. When room runs short the song's title shortens, never the controls. */}
-                <nav aria-label={set ? t("setBar") : t("turn")}>
+                  last. When room runs short the song's title shortens, never the controls, and
+                  past a readable title Settings and the set's songs keep their icons (T-3042). */}
+                <nav ref={bar} aria-label={set ? t("setBar") : t("turn")}>
                   <HStack gap={3} vAlign="center">
                     <StackItem size="fill">
                       <HStack gap={3} vAlign="center">
@@ -1137,8 +1167,11 @@ function StandModeView({
                           <VStack gap={0}>
                             {set && (
                               <Text type="supporting" maxLines={1}>
-                                {/* "Song 3 of 8" is the button beside it when the set's songs are known. */}
-                                {songsButton ? set.name : `${set.name} · ${set.songOf}`}
+                                {/* "Song 3 of 8" is the button beside it when the set's songs are known
+                                  and the bar has room for its words. */}
+                                {songsButton && !isCompact
+                                  ? set.name
+                                  : `${set.name} · ${set.songOf}`}
                               </Text>
                             )}
                             <Heading level={1} maxLines={1}>
@@ -1162,7 +1195,7 @@ function StandModeView({
                         </StackItem>
                       </HStack>
                     </StackItem>
-                    <HStack gap={2} vAlign="center">
+                    <HStack ref={actionsBox} gap={2} vAlign="center">
                       {actions}
                       {songsButton}
                       {settingsButton}
