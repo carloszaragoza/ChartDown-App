@@ -68,7 +68,11 @@ export default async function NoticesPage() {
           {notices.length === 0 ? (
             <EmptyState title={t("caughtUp")} description={t("none")} />
           ) : (
-            <List header={<Text className="cd-visually-hidden">{t("list")}</Text>}>
+            <List
+              hasDividers
+              edgeCompensation="inline"
+              header={<Text className="cd-visually-hidden">{t("list")}</Text>}
+            >
               {notices.map((notice) => (
                 <Item
                   key={notice.id}

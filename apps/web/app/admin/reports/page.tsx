@@ -3,7 +3,8 @@ import { Button } from "@astryxdesign/core/Button";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Layout, LayoutContent } from "@astryxdesign/core/Layout";
-import { List, ListItem } from "@astryxdesign/core/List";
+import { List } from "@astryxdesign/core/List";
+import { LinkRow } from "../../_components/LinkRow";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -124,7 +125,7 @@ export default async function AdminReportsPage({ searchParams }: { searchParams:
                   icon={<ReportIcon />}
                 />
               ) : (
-                <List aria-label={t("open")}>
+                <List aria-label={t("open")} hasDividers edgeCompensation="inline">
                   {open.map((report) => {
                     const version = one(report.version);
                     if (!version) return null;
@@ -134,10 +135,12 @@ export default async function AdminReportsPage({ searchParams }: { searchParams:
                       dateStyle: "medium",
                     });
                     return (
-                      <ListItem
+                      // The row opens the reported version (T-3035); its buttons moderate it.
+                      <LinkRow
                         key={report.id}
+                        href={`/versions/${version.id}`}
+                        title={title}
                         startContent={<ReportIcon />}
-                        label={title}
                         description={
                           <VStack gap={1}>
                             <Text type="supporting">{byLine(version)}</Text>
@@ -158,13 +161,6 @@ export default async function AdminReportsPage({ searchParams }: { searchParams:
                         }
                         endContent={
                           <HStack gap={2} vAlign="center" wrap="wrap">
-                            <Button
-                              label={t("viewOf", { title })}
-                              href={`/versions/${version.id}`}
-                              variant="ghost"
-                            >
-                              {t("view")}
-                            </Button>
                             <form action={dismissReport}>
                               <input type="hidden" name="reportId" value={report.id} />
                               <Button type="submit" label={t("dismissOf", { title })}>
@@ -195,23 +191,17 @@ export default async function AdminReportsPage({ searchParams }: { searchParams:
               (hiddenVersions.length === 0 ? (
                 <EmptyState title={t("noneHidden")} description={t("noneHiddenDescription")} />
               ) : (
-                <List aria-label={t("hidden")}>
+                <List aria-label={t("hidden")} hasDividers edgeCompensation="inline">
                   {hiddenVersions.map((version) => {
                     const title = titleOf(version);
                     return (
-                      <ListItem
+                      <LinkRow
                         key={version.id}
-                        label={title}
+                        href={`/versions/${version.id}`}
+                        title={title}
                         description={byLine(version)}
                         endContent={
                           <HStack gap={2} vAlign="center">
-                            <Button
-                              label={t("viewOf", { title })}
-                              href={`/versions/${version.id}`}
-                              variant="ghost"
-                            >
-                              {t("view")}
-                            </Button>
                             <form action={showVersion}>
                               <input type="hidden" name="versionId" value={version.id} />
                               <input type="hidden" name="title" value={title} />

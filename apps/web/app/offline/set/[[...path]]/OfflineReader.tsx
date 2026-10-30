@@ -147,7 +147,7 @@ export function OfflineReader() {
                 {all.length === 0 ? (
                   <EmptyState title={t("noneDownloaded")} />
                 ) : (
-                  <List hasDividers>
+                  <List hasDividers edgeCompensation="inline">
                     {all.map((item) => (
                       <Item
                         key={item.set.id}
