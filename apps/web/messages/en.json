@@ -1590,7 +1590,9 @@
     "bannerLeader": "{name} is leading.",
     "confirmTitle": "Start live mode?",
     "confirmText": "{count, plural, =0 {Nobody else is in this set's lineup yet.} one {The musician in this set's lineup gets a notice and follows you from song to song.} other {The # musicians in this set's lineup get a notice and follow you from song to song.}}",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "inSync": "In sync",
+    "syncing": "Syncing…"
   },
   "visual": {
     "overline": "Visual editor",

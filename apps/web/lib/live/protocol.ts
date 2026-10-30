@@ -110,6 +110,28 @@ export function readMetronome(payload: unknown): LiveMetronome | null {
   };
 }
 
+/** A follower's clock question (R-14.1): who asks and when it sent, on its clock. */
+export function readClockPing(payload: unknown): { from: string; sent: number } | null {
+  if (!payload || typeof payload !== "object") return null;
+  const { from, sent } = payload as Record<string, unknown>;
+  return typeof from === "string" && typeof sent === "number" && Number.isFinite(sent)
+    ? { from, sent }
+    : null;
+}
+
+/** The leader's answer (R-14.1): to whom, the question's time, and the leader's two times. */
+export function readClockPong(
+  payload: unknown,
+): { to: string; sent: number; received: number; answered: number } | null {
+  if (!payload || typeof payload !== "object") return null;
+  const { to, sent, received, answered } = payload as Record<string, unknown>;
+  const times = [sent, received, answered];
+  return typeof to === "string" &&
+    times.every((time) => typeof time === "number" && Number.isFinite(time))
+    ? { to, sent: sent as number, received: received as number, answered: answered as number }
+    : null;
+}
+
 /** Whether two positions are the same place, the cue included. */
 export function samePosition(a: LivePosition | null, b: LivePosition | null): boolean {
   return a?.song === b?.song && a?.section === b?.section && a?.cue === b?.cue;

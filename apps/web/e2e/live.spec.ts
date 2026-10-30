@@ -112,6 +112,16 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 the band follows 
   // The leader sees who joined.
   await expect(page.getByText("You lead 1 musician")).toBeVisible(FOLLOW);
 
+  // R-14.1 R-14.12 Luis measures Ana's clock on the session's channel: his line says In sync,
+  // and Ana's Live options say it of him.
+  await expect(luisPage.getByText("In sync", { exact: true })).toBeVisible(FOLLOW);
+  await page.bringToFront();
+  await page.getByRole("button", { name: "Live options" }).click();
+  await expect(
+    page.getByRole("dialog").getByRole("listitem").filter({ hasText: "Luis Live" }),
+  ).toContainText("In sync", FOLLOW);
+  await page.keyboard.press("Escape");
+
   // R-12.3 Ana moves; Luis's stand mode moves with her.
   await pressOn(page, "ArrowRight");
   await expectStandNow(page, "Chorus");
