@@ -786,8 +786,11 @@
     "unitChosen": "Contando la {unit}, como elegiste. El chart no lo dice.",
     "unitPending": "El chart no dice qué figura es un pulso: Play te lo pregunta.",
     "settings": "Ajustes",
-    "settingsView": "Vista",
-    "settingsMetronome": "Metrónomo"
+    "tabChart": "Partitura",
+    "tabScreen": "Pantalla",
+    "tabMetronome": "Metrónomo",
+    "theme": "Tema",
+    "more": "Más"
   },
   "bands": {
     "title": "Bandas",

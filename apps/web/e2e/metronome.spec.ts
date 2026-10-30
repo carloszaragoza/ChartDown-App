@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { createVersion } from "./admin";
-import { expectStandNow, standNow } from "./flows";
+import { expectStandNow, openStandSettings, standNow } from "./flows";
 
 // Two bars of 4/4 at 240 bpm: a beat every quarter second, so the test is short.
 const FAST = "---\ntempo: 240\n---\n## Verse\n1 | 4 1\n## Chorus\n5 | 1\n";
@@ -48,7 +48,7 @@ test("R-03.12 playing, the current section says which bar sounds, after a count-
   const slow = "---\ntempo: 120\n---\n## Verse\n1 | 4 | 5 | 1\n## Chorus\n5 | 1\n";
   const id = await createVersion(request, { title: "Count Me In", content: slow });
   await page.goto(`/versions/${id}/stand`);
-  await page.getByRole("button", { name: "Metronome options" }).click();
+  await openStandSettings(page, "Metronome", true);
   await page.getByRole("dialog").getByRole("switch", { name: "Count-in" }).click();
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Play" }).click();
@@ -198,7 +198,7 @@ test("R-11.7 with the click off no audio plays and the pulse still runs; on, it 
   expect(await tones()).toBe(0);
   await page.getByRole("button", { name: "Stop" }).click();
 
-  await page.getByRole("button", { name: "Metronome options" }).click();
+  await openStandSettings(page, "Metronome", true);
   await page.getByRole("dialog").getByRole("switch", { name: "Click" }).click();
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Play" }).click();
@@ -211,7 +211,7 @@ test("R-11.9 the practice speed changes the tempo played, never the chart", asyn
 }) => {
   const id = await createVersion(request, { title: "Fast Song", content: FAST });
   await page.goto(`/versions/${id}/stand`);
-  await page.getByRole("button", { name: "Metronome options" }).click();
+  await openStandSettings(page, "Metronome", true);
   const speed = page.getByRole("dialog").getByRole("slider", { name: "Practice speed" });
   await speed.focus();
   for (let step = 0; step < 4; step++) await page.keyboard.press("ArrowLeft");
@@ -230,7 +230,7 @@ test("R-11.9 T-2808 the tempo stepper plays at 74 while the chart still says 71"
     content: "---\ntempo: 71\n---\n## Verse\n1 | 4 | 5 | 1\n",
   });
   await page.goto(`/versions/${id}/stand`);
-  await page.getByRole("button", { name: "Metronome options" }).click();
+  await openStandSettings(page, "Metronome", true);
   const sheet = page.getByRole("dialog");
   const tempo = sheet.getByRole("spinbutton", { name: "Tempo" });
   await expect(tempo).toHaveValue("71");
@@ -256,7 +256,7 @@ test("R-11.9 T-2808 a tempo with a decimal plays as written: 85.5, then 86.5", a
   await page.goto(`/versions/${id}/stand`);
   const metronome = page.getByRole("group", { name: "Metronome" }).first();
   await expect(metronome).toContainText("85.5");
-  await page.getByRole("button", { name: "Metronome options" }).click();
+  await openStandSettings(page, "Metronome", true);
   const sheet = page.getByRole("dialog");
   await expect(sheet.getByRole("spinbutton", { name: "Tempo" })).toHaveValue("85.5");
   await expect(sheet.getByText("Same as the chart tempo.")).toBeVisible();
@@ -315,7 +315,7 @@ test("R-11.3 T-2816 the beat line moves in steps, or smoothly when Metronome opt
   await expect(page.getByRole("main").locator('[aria-current="step"]')).toHaveCount(1);
   expect(await line()).toBe(0);
   await page.getByRole("button", { name: "Stop" }).click();
-  await page.getByRole("button", { name: "Metronome options" }).click();
+  await openStandSettings(page, "Metronome", true);
   await page.getByRole("dialog").getByText("Smooth", { exact: true }).click();
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Play" }).click();
@@ -388,7 +388,7 @@ test("R-11.17 T-2845 Metronome options mix the beat, its eighths and its sixteen
   await page.goto(`/versions/${id}/stand`);
   const options = page.getByRole("dialog");
   const fader = (name: string) => options.getByRole("slider", { name, exact: true });
-  await page.getByRole("button", { name: "Metronome options" }).click();
+  await openStandSettings(page, "Metronome", true);
   await expect(fader("Beat")).toHaveAttribute("aria-valuenow", "70");
   await expect(fader("Eighths")).toHaveAttribute("aria-valuenow", "0");
   await expect(fader("Sixteenths")).toHaveAttribute("aria-valuenow", "0");
@@ -398,12 +398,12 @@ test("R-11.17 T-2845 Metronome options mix the beat, its eighths and its sixteen
   await expect(fader("Sixteenths")).toHaveAttribute("aria-valuenow", "5");
 
   await page.reload();
-  await page.getByRole("button", { name: "Metronome options" }).click();
+  await openStandSettings(page, "Metronome", true);
   await expect(fader("Sixteenths")).toHaveAttribute("aria-valuenow", "5");
 
   // In 6/8, never moved, Eighths sounds with the beat, as every eighth sounded before.
   await page.goto(`/versions/${six}/stand`);
-  await page.getByRole("button", { name: "Metronome options" }).click();
+  await openStandSettings(page, "Metronome", true);
   await expect(fader("Eighths")).toHaveAttribute("aria-valuenow", "70");
 });
 

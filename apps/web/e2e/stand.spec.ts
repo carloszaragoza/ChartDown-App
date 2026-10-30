@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { createVersion } from "./admin";
-import { expectStandNow, gapUnderSongMap, standNow } from "./flows";
+import { expectStandNow, gapUnderSongMap, openStandSettings, standNow } from "./flows";
 
 const OPEN_ROAD = readFileSync(
   new URL("../../../fixtures/open-road.chartdown", import.meta.url),
@@ -65,8 +65,7 @@ test("R-03.3 every section reads without zooming on an iPad in landscape", async
   const lightSize = await size();
   const lightBackground = await background();
   // Stage is set once, in View (T-2706).
-  await page.getByRole("button", { name: "Settings" }).click();
-  await page.getByRole("dialog").getByRole("radio", { name: "Stage" }).click();
+  await (await openStandSettings(page, "Screen")).getByRole("radio", { name: "Stage" }).click();
   await page.keyboard.press("Escape");
   await expect(page).toHaveURL(/theme=stage/);
   await expectWholeSection(page, "Chorus");
@@ -210,8 +209,7 @@ test("R-03.3 the clearer stand: one metronome control, the next section's notes,
   await expect(metronome.getByRole("button", { name: "Stop" })).toHaveText(/^\d \/ 4$/);
   await metronome.getByRole("button", { name: "Stop" }).click();
   await expect(top.getByRole("button", { name: "Settings" })).toHaveText("Settings");
-  await top.getByRole("button", { name: "Settings" }).click();
-  await expect(page.getByRole("dialog")).toContainText("Count-in");
+  await expect(await openStandSettings(page, "Metronome")).toContainText("Count-in");
   await page.keyboard.press("Escape");
 
   // T-2703, R-03.12: the next section and its note are on screen before it comes, in its card.
@@ -312,7 +310,7 @@ test("R-03.12 T-2823 the whole song, which a pinch chose, shows every section on
   await stack.getByRole("heading", { level: 2, name: "Bridge", exact: true }).click();
   await expect(standNow(page).getByRole("heading", { level: 2 })).toHaveText(/Bridge/);
   // View has no layout choice, and nothing for one section at a time.
-  await page.getByRole("button", { name: "Settings" }).click();
+  await openStandSettings(page, "Screen");
   await expect(page.getByRole("dialog").getByText("Coming up", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("dialog").getByText("Extra small", { exact: true })).toBeVisible();
 });
@@ -359,8 +357,7 @@ test("R-03.12 View's Coming up and Number size are kept on the device", async ({
       .first()
       .evaluate((element) => parseFloat(getComputedStyle(element).fontSize));
   const medium = await chord();
-  await page.getByRole("button", { name: "Settings" }).click();
-  const sheet = page.getByRole("dialog");
+  const sheet = await openStandSettings(page, "Screen");
   await sheet.getByRole("radio", { name: "1 section" }).click();
   await sheet.getByRole("radio", { name: "Large" }).click();
   await page.keyboard.press("Escape");
@@ -386,8 +383,7 @@ test("R-03.12 T-2843 Show notes off hides the sections' notes, in stand mode and
   await expectStandNow(page, "Verse");
   const note = page.getByText("Build a little more each time.");
   await expect(note).toBeVisible();
-  await page.getByRole("button", { name: "Settings" }).click();
-  const shown = page.getByRole("dialog").getByRole("switch", { name: "Show notes" });
+  const shown = (await openStandSettings(page)).getByRole("switch", { name: "Show notes" });
   await expect(shown).toBeChecked();
   await shown.click();
   await page.keyboard.press("Escape");

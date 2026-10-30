@@ -786,8 +786,11 @@
     "unitChosen": "Counting the {unit}, as you chose. The chart doesn't say.",
     "unitPending": "The chart doesn't say what one beat is: Play asks.",
     "settings": "Settings",
-    "settingsView": "View",
-    "settingsMetronome": "Metronome"
+    "tabChart": "Chart",
+    "tabScreen": "Screen",
+    "tabMetronome": "Metronome",
+    "theme": "Theme",
+    "more": "More"
   },
   "bands": {
     "title": "Bands",

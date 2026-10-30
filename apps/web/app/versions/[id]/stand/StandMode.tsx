@@ -5,7 +5,9 @@ import { BottomSheet } from "@astryxdesign/core/BottomSheet";
 import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
+import { Collapsible } from "@astryxdesign/core/Collapsible";
 import { Icon } from "@astryxdesign/core/Icon";
+import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { Item } from "@astryxdesign/core/Item";
 import { List } from "@astryxdesign/core/List";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
@@ -152,6 +154,15 @@ const subscribeDark = (onChange: () => void) => {
 const FORWARD = new Set(["ArrowRight", "ArrowDown", "PageDown"]);
 const BACK = new Set(["ArrowLeft", "ArrowUp", "PageUp"]);
 
+/** Settings' tabs in stand mode (T-3034), by what the musician does. */
+const SETTINGS_TABS = ["chart", "screen", "metronome"] as const;
+type SettingsTab = (typeof SETTINGS_TABS)[number];
+const TAB_LABEL = {
+  chart: "tabChart",
+  screen: "tabScreen",
+  metronome: "tabMetronome",
+} as const satisfies Record<SettingsTab, string>;
+
 /**
  * Stand mode (R-03.3, R-03.12): every section stacked in order, the current one at the top of the
  * stack, and one tap to move on. Every control is a plain link, so it works without JavaScript;
@@ -196,6 +207,7 @@ function StandModeView({
   // View's Show notes, kept on the device (T-2843).
   const hideNotes = useHiddenNotes();
   const [isSheetOpen, setSheetOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>("chart");
   // The set's songs, to jump to another one when a song is cut short (R-03.13).
   const [isSongsOpen, setSongsOpen] = useState(false);
   const [current, setCurrent] = useState(() => readSection(chart, String(initial + 1)));
@@ -204,7 +216,8 @@ function StandModeView({
   const {
     playButton,
     metronomeButton,
-    soundControls,
+    soundMain,
+    soundMore,
     tempoDialog,
     counter,
     nowIn,
@@ -568,10 +581,14 @@ function StandModeView({
     </VStack>
   );
   const sectionNames = chart.sections.map((section) => section.name);
-  const tools = (
+  // Settings' three tabs (T-3034), by what the musician does: Chart, what is read; Screen, how it
+  // looks; Metronome, how it sounds. What is changed during a rehearsal shows; what is set once
+  // waits under More.
+  const chartTab = (
     <VStack gap={4}>
       {/* On an iPad Live is on the top bar (T-3032). */}
       {set && isPhone && <GoLive />}
+      {viewAsControl}
       {choice(
         t("chartChoice"),
         style,
@@ -599,29 +616,12 @@ function StandModeView({
         }}
       />
       <NotesSwitch />
-      {!isSong &&
-        choice(
-          t("comingUp"),
-          preferences.comingUp,
-          [
-            ["1", t("comingUpOne")],
-            ["2", t("comingUpTwo")],
-            ["fill", t("comingUpFill")],
-          ],
-          (chosen) => standPreferences.set({ comingUp: chosen as ComingUp }),
-        )}
-      {!isSong &&
-        choice(
-          t("motion"),
-          preferences.motion,
-          [
-            ["calm", t("motionCalm")],
-            ["bounce", t("motionBounce")],
-          ],
-          (chosen) => standPreferences.set({ motion: chosen as StandMotion }),
-        )}
+    </VStack>
+  );
+  const screenTab = (
+    <VStack gap={4}>
       {choice(
-        t("screen"),
+        t("theme"),
         theme,
         [
           ["light", t("light")],
@@ -640,6 +640,17 @@ function StandModeView({
         ],
         (chosen) => standPreferences.set({ size: chosen as NumberSize }),
       )}
+      {!isSong &&
+        choice(
+          t("comingUp"),
+          preferences.comingUp,
+          [
+            ["1", t("comingUpOne")],
+            ["2", t("comingUpTwo")],
+            ["fill", t("comingUpFill")],
+          ],
+          (chosen) => standPreferences.set({ comingUp: chosen as ComingUp }),
+        )}
       {canFullscreen && (
         <Button
           label={t("fullscreen")}
@@ -651,6 +662,31 @@ function StandModeView({
           }
         />
       )}
+      {!isSong && (
+        <Collapsible trigger={t("more")} defaultIsOpen={false}>
+          <VStack gap={4} paddingBlockStart={2}>
+            {choice(
+              t("motion"),
+              preferences.motion,
+              [
+                ["calm", t("motionCalm")],
+                ["bounce", t("motionBounce")],
+              ],
+              (chosen) => standPreferences.set({ motion: chosen as StandMotion }),
+            )}
+          </VStack>
+        </Collapsible>
+      )}
+    </VStack>
+  );
+  const metronomeTab = (
+    <VStack gap={4}>
+      {soundMain}
+      <Collapsible trigger={t("more")} defaultIsOpen={false}>
+        <VStack gap={4} paddingBlockStart={2}>
+          {soundMore}
+        </VStack>
+      </Collapsible>
     </VStack>
   );
   const songForm = (
@@ -1239,18 +1275,48 @@ function StandModeView({
               height="hug"
             >
               <VStack gap={4} padding={4}>
-                <VStack gap={2}>
-                  <Heading level={2}>{title}</Heading>
-                  {set && <Text type="supporting">{set.name}</Text>}
-                  <HStack gap={2} wrap="wrap">
-                    {songTokens}
-                  </HStack>
-                </VStack>
-                {viewAsControl}
-                <Heading level={3}>{t("settingsView")}</Heading>
-                {tools}
-                <Heading level={3}>{t("settingsMetronome")}</Heading>
-                {soundControls}
+                {/* The song's name and key are on an iPad's top bar; a phone's bar has no room
+                    for them, so they lead its Settings. */}
+                {isPhone ? (
+                  <VStack gap={2}>
+                    <Heading level={2}>{title}</Heading>
+                    {set && <Text type="supporting">{set.name}</Text>}
+                    <HStack gap={2} wrap="wrap">
+                      {songTokens}
+                    </HStack>
+                  </VStack>
+                ) : (
+                  <Heading level={2}>{t("settings")}</Heading>
+                )}
+                {/* Kept while stand mode is open, so Settings opens where it was left. */}
+                <TabList
+                  value={settingsTab}
+                  onChange={(tab) => setSettingsTab(tab as SettingsTab)}
+                  role="tablist"
+                  layout="fill"
+                  size="lg"
+                  hasDivider
+                >
+                  {SETTINGS_TABS.map((tab) => (
+                    <Tab
+                      key={tab}
+                      value={tab}
+                      label={t(TAB_LABEL[tab])}
+                      panelId={`stand-settings-${tab}`}
+                    />
+                  ))}
+                </TabList>
+                <div
+                  id={`stand-settings-${settingsTab}`}
+                  role="tabpanel"
+                  aria-label={t(TAB_LABEL[settingsTab])}
+                >
+                  {settingsTab === "chart"
+                    ? chartTab
+                    : settingsTab === "screen"
+                      ? screenTab
+                      : metronomeTab}
+                </div>
               </VStack>
             </BottomSheet>
           }

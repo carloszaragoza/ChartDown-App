@@ -216,7 +216,9 @@ export function useMetronomeControls(
       : stepped === roundTempo(written)
         ? t("tempoSame")
         : t("tempoChart", { bpm: roundTempo(written) });
-  const soundControls = (
+  // What is changed while playing (T-3034): the tempo with Tap tempo beside it, the click and the
+  // count-in; the rest, set once, is soundMore.
+  const soundMain = (
     <VStack gap={4}>
       {/* − and + at the touch size beside the field, which also takes a typed tempo (T-2808). */}
       <VStack gap={2}>
@@ -259,7 +261,22 @@ export function useMetronomeControls(
             isDisabled={stepped >= TEMPO_MAX}
             onClick={() => step(stepped + 1)}
           />
+          {/* Tapping sets the same tempo, so it sits on its row (T-3034). */}
+          <Button label={t("tapTempo")} size="lg" variant="secondary" onClick={tap} />
         </HStack>
+        {(speed !== 100 || tapped !== null) && (
+          <HStack gap={2}>
+            <Button
+              label={t("chartTempo")}
+              variant="ghost"
+              onClick={() => {
+                setSpeed(100);
+                setTapped(null);
+                taps.current = [];
+              }}
+            />
+          </HStack>
+        )}
       </VStack>
       <Switch
         label={t("click")}
@@ -267,6 +284,18 @@ export function useMetronomeControls(
         value={sound.click}
         onChange={(click) => setSound({ ...sound, click })}
       />
+      <Switch
+        label={t("countIn")}
+        description={t("countInHint")}
+        value={sound.countIn}
+        onChange={(countIn) => setSound({ ...sound, countIn })}
+      />
+    </VStack>
+  );
+  // Set once (T-3034): the beat's and its subdivisions' levels, the practice speed, the beat line
+  // and keeping the speakers awake.
+  const soundMore = (
+    <VStack gap={4}>
       {/* The three faders in place of one volume (R-11.17): the beat and its subdivisions. */}
       {(["beat", "eighths", "sixteenths"] as const).map((fader) => (
         <Slider
@@ -297,32 +326,6 @@ export function useMetronomeControls(
         marks={[{ value: 100 }]}
         onChange={(value: number) => setSpeed(value)}
       />
-      <HStack gap={2} wrap="wrap">
-        <Button label={t("tapTempo")} variant="secondary" onClick={tap} />
-        {(speed !== 100 || tapped !== null) && (
-          <Button
-            label={t("chartTempo")}
-            variant="ghost"
-            onClick={() => {
-              setSpeed(100);
-              setTapped(null);
-              taps.current = [];
-            }}
-          />
-        )}
-      </HStack>
-      <Switch
-        label={t("countIn")}
-        description={t("countInHint")}
-        value={sound.countIn}
-        onChange={(countIn) => setSound({ ...sound, countIn })}
-      />
-      <Switch
-        label={t("keepAwake")}
-        description={t("keepAwakeHint")}
-        value={sound.keepAwake}
-        onChange={(keepAwake) => setSound({ ...sound, keepAwake })}
-      />
       <VStack gap={1}>
         <Text type="label">{t("beatLine")}</Text>
         <SegmentedControl
@@ -334,6 +337,18 @@ export function useMetronomeControls(
           <SegmentedControlItem value="smooth" label={t("beatLineSmooth")} />
         </SegmentedControl>
       </VStack>
+      <Switch
+        label={t("keepAwake")}
+        description={t("keepAwakeHint")}
+        value={sound.keepAwake}
+        onChange={(keepAwake) => setSound({ ...sound, keepAwake })}
+      />
+    </VStack>
+  );
+  const soundControls = (
+    <VStack gap={4}>
+      {soundMain}
+      {soundMore}
     </VStack>
   );
   const soundButton = (
@@ -431,6 +446,8 @@ export function useMetronomeControls(
     playButton,
     soundButton,
     soundControls,
+    soundMain,
+    soundMore,
     tempoDialog: (
       <>
         {tempoDialog}
