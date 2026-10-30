@@ -152,6 +152,26 @@ export function audioClock(context: Pick<AudioContext, "currentTime">): Clock {
   return { now: () => context.currentTime };
 }
 
+/** The device's own clock in seconds, which runs whatever the audio does (F-013). */
+export function deviceClock(now: () => number = () => performance.now() / 1000): Clock {
+  return { now };
+}
+
+/**
+ * The clock a run plays on, chosen when it starts (R-11.12, F-013): the audio clock while the
+ * audio runs, with the click; otherwise the device's own, silent, since a browser that keeps the
+ * audio asleep (Safari, outside a tap it accepts) stops its clock at 0 and the pulse would never
+ * move. The next Play tries the audio again.
+ */
+export function runClock(
+  context: Pick<AudioContext, "currentTime" | "state">,
+  device: Clock = deviceClock(),
+): { clock: Clock; isAudible: boolean } {
+  return context.state === "running"
+    ? { clock: audioClock(context), isAudible: true }
+    : { clock: device, isAudible: false };
+}
+
 /** How far ahead clicks are handed to the audio clock, and how often the queue is filled. */
 export const LOOKAHEAD = 0.1;
 /**
