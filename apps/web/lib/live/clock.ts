@@ -35,8 +35,14 @@ export function sampleOf(
 
 /** Exchanges kept: the fastest of them sets the offset, the least disturbed by the network. */
 export const KEPT = 16;
-/** A round trip under this bounds the offset's error to half of it, 5 ms: "In sync" (R-14.1). */
-export const IN_SYNC_DELAY_MS = 10;
+/**
+ * A round trip under this bounds the offset's error to half of it, 5 ms: what a direct link on
+ * one Wi-Fi gives (R-14.7). Through the internet the round trip is longer, though the error is
+ * far smaller than half of it when the way there and back take alike (measured October 30, 2026).
+ */
+export const DIRECT_DELAY_MS = 10;
+/** Exchanges kept before the clock counts as known: enough to choose the fastest (R-14.1). */
+export const IN_SYNC_SAMPLES = 3;
 /** A new offset is eased in over this time, never jumped, while the band plays (R-14.3). */
 export const EASE_MS = 1500;
 
@@ -82,9 +88,14 @@ export class SharedClock {
     );
   }
 
-  /** Known within 5 ms: an exchange fast enough has been kept. */
+  /** In sync (R-14.1): enough exchanges kept to take the fastest, and the band's moments on it. */
   get isInSync(): boolean {
-    return (this.best()?.delay ?? Infinity) < IN_SYNC_DELAY_MS;
+    return this.samples.length >= IN_SYNC_SAMPLES;
+  }
+
+  /** Known within 5 ms, as a direct link on one Wi-Fi gives (R-14.7). */
+  get isDirect(): boolean {
+    return (this.best()?.delay ?? Infinity) < DIRECT_DELAY_MS;
   }
 
   /** Whether any exchange has been made. */

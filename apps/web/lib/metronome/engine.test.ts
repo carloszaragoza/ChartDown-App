@@ -2,6 +2,7 @@ import { parse } from "chartdown";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   clicks,
+  clockMap,
   continueWith,
   Metronome,
   runClock,
@@ -298,5 +299,83 @@ describe("F-013 the pulse never waits on audio a browser keeps asleep", () => {
     // Half a second a beat at 120: the pulse is on the second beat, with no sound.
     expect(metronome.position()?.count).toBe(2);
     expect(audio.currentTime).toBe(0);
+  });
+});
+
+describe("T-3038 the metronome starts at the band's moment", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+  const twoBars = () => clicks(timeline(parse("---\ntempo: 120\n---\n## A\n1 | 4\n")));
+  const run = (metronome: Metronome, clock: ReturnType<typeof fakeClock>, seconds: number) => {
+    for (let step = 0; step < seconds * 40; step++) {
+      clock.advance(0.025);
+      vi.advanceTimersByTime(25);
+    }
+  };
+
+  it("R-14.2 a start moment ahead: nothing sounds before it, the first click at it", () => {
+    const clock = fakeClock();
+    const sounded: number[] = [];
+    const metronome = new Metronome(twoBars(), clock, (_, at) => sounded.push(at));
+    metronome.start(0.5);
+    run(metronome, clock, 0.3);
+    expect(sounded).toEqual([]);
+    expect(metronome.position()).toBeUndefined();
+    run(metronome, clock, 0.4);
+    expect(sounded[0]).toBeCloseTo(0.5);
+  });
+
+  it("R-14.2 a start moment already gone: it lands on the band's beat, the past clicks never played", () => {
+    const clock = fakeClock();
+    clock.advance(1.2);
+    const sounded: number[] = [];
+    const metronome = new Metronome(twoBars(), clock, (_, at) => sounded.push(at));
+    // The band started at 0: at 120 a beat is half a second, so 1.2 s in is beat 3 of bar 1.
+    metronome.start(0);
+    expect(metronome.position()?.count).toBe(3);
+    expect(metronome.position()?.bar).toBe(0);
+    run(metronome, clock, 0.4);
+    expect(sounded.every((at) => at >= 1.2)).toBe(true);
+    expect(sounded[0]).toBeCloseTo(1.5);
+  });
+
+  it("R-14.4 after a fermata it goes on at the band's moment", () => {
+    const list = clicks(timeline(parse("---\ntempo: 120\n---\n## A\n1~ | 4\n")));
+    const clock = fakeClock();
+    const sounded: number[] = [];
+    const metronome = new Metronome(list, clock, (_, at) => sounded.push(at));
+    metronome.start(0);
+    run(metronome, clock, 2.5);
+    expect(metronome.isWaiting).toBe(true);
+    const before = sounded.length;
+    metronome.resume(clock.now() + 0.4);
+    run(metronome, clock, 0.2);
+    expect(sounded.length).toBe(before);
+    run(metronome, clock, 0.4);
+    expect(sounded[before]).toBeCloseTo(clock.now() - 0.6 + 0.4, 1);
+  });
+});
+
+describe("T-3038 the band's moments on the clock a run plays on", () => {
+  it("R-14.2 on the audio clock, paired with the page's by the browser", () => {
+    // The page started at 1,000,000 ms; 2,000 ms into it the audio clock read 5 s.
+    const map = clockMap(
+      { currentTime: 0, getOutputTimestamp: () => ({ contextTime: 5, performanceTime: 2000 }) },
+      true,
+      1_000_000,
+    );
+    expect(map.toClock(1_002_500)).toBeCloseTo(5.5);
+    expect(map.toDevice(6)).toBeCloseTo(1_003_000);
+  });
+
+  it("R-14.2 without the browser's pairing, the audio clock's own time now", () => {
+    const map = clockMap({ currentTime: 3 }, true, 0, () => 10_000);
+    expect(map.toClock(10_250)).toBeCloseTo(3.25);
+  });
+
+  it("F-013 R-14.2 with the audio asleep, the device's own seconds", () => {
+    const map = clockMap({ currentTime: 0 }, false, 500);
+    expect(map.toClock(2500)).toBe(2);
+    expect(map.toDevice(2)).toBe(2500);
   });
 });

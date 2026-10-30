@@ -32,6 +32,22 @@ export interface LiveMetronome {
   at: number | null;
   /** The practice speed as a share of the chart's tempo (1 is the chart's tempo). */
   speed: number;
+  /**
+   * Where its run starts on the leader's clock (SPEC-14, T-3038): the bar it plays from and the
+   * moment, in the leader's milliseconds, of that bar's first beat; a new id for every change.
+   */
+  run?: LiveRun | null;
+  /** The moment, on the leader's clock, it stops at (R-14.4). */
+  stopAt?: number | null;
+}
+
+export interface LiveRun {
+  id: string;
+  from: number;
+  moment: number;
+  speed: number;
+  tempo?: number;
+  unit?: string;
 }
 
 /** Five minutes without the leader, and the session counts as ended (R-12.10). */
@@ -102,12 +118,57 @@ export function readMetronome(payload: unknown): LiveMetronome | null {
   const { song, playing, at, speed } = payload as Record<string, unknown>;
   const place = whole(song, 1);
   if (place === null || typeof playing !== "boolean") return null;
+  const { run, stopAt } = payload as Record<string, unknown>;
   return {
     song: place,
     playing,
     at: whole(at, 0),
     speed: typeof speed === "number" && speed > 0 && speed <= 4 ? speed : 1,
+    run: readRun(run),
+    stopAt: typeof stopAt === "number" && Number.isFinite(stopAt) ? stopAt : null,
   };
+}
+
+/** A run from the channel (T-3038), or null when it is not one. */
+export function readRun(value: unknown): LiveRun | null {
+  if (!value || typeof value !== "object") return null;
+  const { id, from, moment, speed, tempo, unit } = value as Record<string, unknown>;
+  const bar = whole(from, 0);
+  if (typeof id !== "string" || bar === null) return null;
+  if (typeof moment !== "number" || !Number.isFinite(moment)) return null;
+  return {
+    id,
+    from: bar,
+    moment,
+    speed: typeof speed === "number" && speed > 0 && speed <= 4 ? speed : 1,
+    ...(typeof tempo === "number" && tempo > 0 ? { tempo } : {}),
+    ...(typeof unit === "string" ? { unit } : {}),
+  };
+}
+
+/**
+ * What a follower does with the leader's run (SPEC-14, T-3038), knowing the leader's clock:
+ * play from its bar at its moment, on this device's clock; stop at the leader's stop moment;
+ * or nothing, when it is the run already followed.
+ */
+export function runStep(
+  leader: LiveMetronome,
+  followed: string | null,
+  mine: { playing: boolean; stopping: number | null },
+  toLocal: (leaderMoment: number) => number,
+):
+  | { kind: "start"; run: LiveRun; at: number }
+  | { kind: "stop"; at: number | null }
+  | { kind: "none" } {
+  if (!leader.playing || leader.stopAt != null) {
+    if (!mine.playing) return { kind: "none" };
+    const at = leader.stopAt != null ? toLocal(leader.stopAt) : null;
+    return mine.stopping !== null && at !== null && Math.abs(mine.stopping - at) < 1
+      ? { kind: "none" }
+      : { kind: "stop", at };
+  }
+  if (!leader.run || leader.run.id === followed) return { kind: "none" };
+  return { kind: "start", run: leader.run, at: toLocal(leader.run.moment) };
 }
 
 /** A follower's clock question (R-14.1): who asks and when it sent, on its clock. */

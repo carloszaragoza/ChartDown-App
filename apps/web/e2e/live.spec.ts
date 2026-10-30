@@ -16,7 +16,7 @@ import {
 } from "./flows";
 
 const FIRST = "## Verse\n1 | 4\n## Chorus\n4 | 5\n## Bridge\n6m | 4\n";
-const SECOND = "## Intro\n1 | 5\n## Outro\n4 | 1\n";
+const SECOND = "---\ntempo: 60\n---\n## Intro\n1 | 5 | 1 | 5\n## Outro\n4 | 1\n";
 const FOLLOW = { timeout: 10_000 };
 
 // Which section a device shows as Now; the other device's window may sit behind, where its stack
@@ -155,6 +155,27 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 the band follows 
   await expect(page).toHaveURL(new RegExp(`${setAddress}/songs/2/stand`));
   await expect(luisPage).toHaveURL(new RegExp(`${setAddress}/songs/2/stand`), FOLLOW);
   await expectNow(luisPage, "Intro");
+
+  // R-14.2 R-14.3 T-3038 Ana taps Play: the band starts together a moment ahead, on Ana's bar
+  // and beat, and stays together; Luis never touches his metronome.
+  await page.bringToFront();
+  await page.getByRole("button", { name: "Play" }).first().click();
+  await expect(luisPage.getByRole("button", { name: "Stop" }).first()).toBeVisible(FOLLOW);
+  const beatOf = (device: Page) =>
+    device.locator(".cd-metronome-count").first().textContent({ timeout: 2000 });
+  let together = 0;
+  for (let sample = 0; sample < 6; sample++) {
+    await page.waitForTimeout(450);
+    const [ana, luis] = await Promise.all([beatOf(page), beatOf(luisPage)]);
+    if (ana && ana === luis && /^\d \/ 4$/.test(ana)) together++;
+  }
+  // A beat lasts a second here: sampled together, they read the same beat (a sample may fall on
+  // a beat's edge).
+  expect(together).toBeGreaterThanOrEqual(5);
+  // R-14.4 Ana taps Stop: the band stops on the same beat.
+  await page.getByRole("button", { name: "Stop" }).first().click();
+  await expect(page.getByRole("button", { name: "Play" }).first()).toBeVisible(FOLLOW);
+  await expect(luisPage.getByRole("button", { name: "Play" }).first()).toBeVisible(FOLLOW);
 
   // R-12.10 Ana ends live mode; Luis stays where he was and is told.
   await page.bringToFront();
