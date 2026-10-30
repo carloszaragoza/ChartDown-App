@@ -423,7 +423,7 @@ People see the catalog as **Songs** ("Canciones" in Spanish) in the side navigat
 **Requirements**
 
 - R-12.1 **Start live:** the MD (or the set's temporary MD) starts a live session for a set. Only one leader per session.
-- R-12.2 **Join:** musicians in the set's lineup see "Live now" on Home, in Notices and on the set, and join with one tap. The leader sees who is connected.
+- R-12.2 **Join:** musicians in the set's lineup (its own, or the band's default instruments when it has none: R-05.3) see "Live now" on Home, in Notices and on the set, and join with one tap. The leader sees who is connected.
 - R-12.3 **Follow:** when the leader moves to another section or song, every connected device shows the same section within half a second on the venue network. Each musician still sees only the notes for everyone and for their instruments (R-06.4).
 - R-12.4 **Cue next:** the leader can mark the next section ahead of time (for example "Chorus next" or "Repeat the Bridge"). Followers see the cue on screen before the change happens.
 - R-12.5 **Look ahead and come back:** a musician can scroll away to look at another part; a "Back to live" button returns them to where the leader is. Their device never changes the leader's position.
@@ -433,7 +433,7 @@ People see the catalog as **Songs** ("Canciones" in Spanish) in the side navigat
 - R-12.9 **Bad connection:** if a follower loses the connection, their device keeps working on its own with the downloaded set and shows "Offline – following paused". When the connection comes back, it jumps to the leader's position.
 - R-12.10 **End:** the leader ends the session; followers stay on the last position and get a notice that live mode ended. A session also ends if the leader is disconnected for more than 5 minutes.
 - R-12.11 **Hand over:** the leader can pass control to the temporary MD or another member during the session.
-- R-12.12 **Privacy:** only members of the band in the set's lineup can join. The session shares positions and cues, never personal data.
+- R-12.12 **Privacy:** only members of the band in the set's lineup (as R-12.2 counts it), its MD and its temporary MD can join. The session shares positions and cues, never personal data.
 
 **Acceptance criteria**
 
@@ -442,6 +442,7 @@ People see the catalog as **Songs** ("Canciones" in Spanish) in the side navigat
 - Given a keys player who scrolled to the Outro, when they tap "Back to live", then they return to the MD's current section.
 - Given a follower whose connection drops, when it comes back, then their device jumps to the MD's current position and the "following paused" message disappears.
 - Given a musician who is not in the band, when they try to join the session, then they can't.
+- Given a set with no lineup of its own, when the MD starts live mode, then the musicians who play by default in the band get the notice and can join (owner's finding in production, October 29, 2026).
 - Given the MD ends the session, when followers look at their screen, then they stay where they were and see that live mode ended.
 
 ### SPEC-13 · Visual chart editor (paid)

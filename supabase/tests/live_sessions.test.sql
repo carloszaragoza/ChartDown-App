@@ -1,9 +1,9 @@
 -- T-1601, T-1602, T-1607 tests (pgTAP): a set's live session, who starts, joins, moves, hands over
 -- and ends it, its 5-minute timeout, its notices and its channel (R-12.1, R-12.2, R-12.10 to
--- R-12.12). Run with: supabase test db
+-- R-12.12), and a set with no lineup of its own (F-012). Run with: supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(25);
+select plan(31);
 
 create function pg_temp.login(person uuid) returns void language plpgsql as $$
 begin
@@ -140,6 +140,41 @@ update public.live_sessions set leader_seen_at = now() - interval '6 minutes' wh
 do $$ begin perform pg_temp.login('00000000-0000-0000-0000-0000000000a1'); end $$;
 select isnt(public.live_start('00000000-0000-0000-0000-00000000c501'), pg_temp.setting('test.old'),
   'R-12.10 a session ends 5 minutes after its leader drops; a new one starts');
+
+-- A set with no lineup of its own: the band's default instruments are its lineup (R-05.3, F-012).
+-- Carl plays keys by default; Ben has no default instrument.
+do $$ begin perform pg_temp.logout(); end $$;
+insert into public.sets (id, band_id, name, date, type) values
+  ('00000000-0000-0000-0000-00000000c502', pg_temp.setting('test.band'), 'Rehearsal', current_date + 3, 'rehearsal');
+delete from public.member_instruments where member_id in
+  (select id from public.band_members where user_id in ('00000000-0000-0000-0000-0000000000b1', '00000000-0000-0000-0000-0000000000c1'));
+insert into public.member_instruments (member_id, instrument_id)
+select m.id, i.id from public.band_members m, public.instruments i
+where m.user_id = '00000000-0000-0000-0000-0000000000c1' and i.slug = 'keys';
+do $$ begin perform pg_temp.login('00000000-0000-0000-0000-0000000000a1'); end $$;
+do $$ begin
+  perform set_config('test.default', public.live_start('00000000-0000-0000-0000-00000000c502')::text, true);
+end $$;
+do $$ begin perform pg_temp.logout(); end $$;
+select is((select count(*)::int from public.notifications
+           where user_id = '00000000-0000-0000-0000-0000000000c1' and type = 'live_started'
+             and detail ->> 'set_name' = 'Rehearsal'), 1,
+  'R-12.2 with no lineup of its own, a member who plays by default gets the Live now notice');
+select is((select count(*)::int from public.notifications
+           where user_id = '00000000-0000-0000-0000-0000000000b1' and type = 'live_started'
+             and detail ->> 'set_name' = 'Rehearsal'), 0,
+  'R-12.2 with no lineup of its own, a member with no default instrument does not get it');
+do $$ begin perform pg_temp.login('00000000-0000-0000-0000-0000000000c1'); end $$;
+select is((select count(*)::int from public.live_sessions where set_id = '00000000-0000-0000-0000-00000000c502'), 1,
+  'R-12.2 with no lineup of its own, a member who plays by default sees the session');
+select ok(private.can_listen_live('live:' || current_setting('test.default')),
+  'R-12.12 with no lineup of its own, a member who plays by default listens on the channel');
+do $$ begin perform pg_temp.login('00000000-0000-0000-0000-0000000000b1'); end $$;
+select ok(not private.can_listen_live('live:' || current_setting('test.default')),
+  'R-12.12 with no lineup of its own, a member with no default instrument cannot listen');
+do $$ begin perform pg_temp.login('00000000-0000-0000-0000-0000000000d1'); end $$;
+select ok(not private.can_listen_live('live:' || current_setting('test.default')),
+  'R-12.12 with no lineup of its own, someone outside the band still cannot join');
 
 select * from finish();
 rollback;
