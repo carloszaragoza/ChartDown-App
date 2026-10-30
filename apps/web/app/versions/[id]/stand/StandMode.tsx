@@ -20,7 +20,7 @@ import { rememberStandTheme, themeOnDevice } from "../../../../lib/stand/theme";
 import { chordFormatter, keyName, parse, type Key } from "chartdown";
 import { formStripItems, type FormStripItem, type MDNoteData } from "@chartdown/ui";
 import {
-  AdjustmentsHorizontalIcon,
+  Cog6ToothIcon,
   ArrowUturnLeftIcon,
   XMarkIcon,
   ChevronLeftIcon,
@@ -29,7 +29,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { usePhone, useShortScreen } from "../../../../lib/shell/phone";
+import { usePhone, usePortrait, useShortScreen } from "../../../../lib/shell/phone";
 import { prefetchWhole } from "../../../../lib/shell/prefetch";
 import { useTranslations } from "next-intl";
 import {
@@ -51,7 +51,7 @@ import { useMetronomeControls } from "../../../_components/MetronomeControls";
 import { SongForm } from "../../../_components/SongForm";
 import { BeatsControl } from "../../../_components/BeatsControl";
 import { barIn, usePlaybackBar } from "../../../_components/usePlaybackBar";
-import { GoLive, LiveStrip } from "../../../_components/live/LiveControls";
+import { GoLive, LiveButton, LiveStrip } from "../../../_components/live/LiveControls";
 import { useLive } from "../../../_components/live/LiveProvider";
 import { metronomeStep } from "../../../../lib/live/protocol";
 import { copyAt } from "../../../../lib/chart/copies";
@@ -191,6 +191,8 @@ function StandModeView({
   const isPhone = usePhone(phoneGuess);
   // Held sideways, the song form joins the top bar, so the bars get the height (R-03.8).
   const isSideways = useShortScreen() && isPhone;
+  // An iPad held upright: the top bar takes two lines, so no button's word is cut (T-3032).
+  const isUpright = usePortrait() && !isPhone;
   // View's Show notes, kept on the device (T-2843).
   const hideNotes = useHiddenNotes();
   const [isSheetOpen, setSheetOpen] = useState(false);
@@ -201,7 +203,7 @@ function StandModeView({
   // section follows it.
   const {
     playButton,
-    control,
+    metronomeButton,
     soundControls,
     tempoDialog,
     counter,
@@ -526,8 +528,8 @@ function StandModeView({
       {chart.header.tempo && <Token label={`${c("tempo")} ${tempoText}`} size="sm" />}
     </>
   );
-  // View as: a segmented control in the phone's View sheet; a compact menu on the top line of an
-  // iPad, so the song's name keeps its room in portrait (T-2706).
+  // View as, in Settings (T-3032): a segmented control on a phone, a menu with its name above it
+  // on an iPad, where an instrument's name may be long.
   const viewAsValue = (chosenView ?? viewAs?.options.find((option) => option.current))?.label ?? "";
   const viewAsControl =
     viewAs &&
@@ -540,7 +542,6 @@ function StandModeView({
     ) : (
       <Selector
         label={t("viewAs")}
-        isLabelHidden
         size="lg"
         options={viewAs.options.map((option) => ({ value: option.label, label: option.label }))}
         value={viewAsValue}
@@ -568,7 +569,8 @@ function StandModeView({
   const sectionNames = chart.sections.map((section) => section.name);
   const tools = (
     <VStack gap={4}>
-      {set && <GoLive />}
+      {/* On an iPad Live is on the top bar (T-3032). */}
+      {set && isPhone && <GoLive />}
       {choice(
         t("chartChoice"),
         style,
@@ -946,6 +948,33 @@ function StandModeView({
     if (!isPlaying && bar) chooseStart(current, Number(bar.dataset.bar));
   };
 
+  // What is done while playing, on an iPad's top bar (T-3032): the metronome with its tempo, the
+  // band's audio and, for the MD in a set, Live.
+  const actions = (
+    <HStack gap={2} vAlign="center">
+      {!isPlaying && counter && (
+        <Text type="large" weight="bold">
+          {counter}
+        </Text>
+      )}
+      {metronomeButton}
+      {audio}
+      {set && <LiveButton sections={sectionNames} />}
+    </HStack>
+  );
+  // What is set once, apart from the actions: View as, View and the metronome's sound (T-3032).
+  const settingsButton = (
+    <Button
+      label={t("settings")}
+      variant="ghost"
+      size="lg"
+      icon={<Icon icon={Cog6ToothIcon} />}
+      onClick={() => setSheetOpen(true)}
+    >
+      {t("settings")}
+    </Button>
+  );
+
   return (
     <div ref={root} onClickCapture={onClickCapture}>
       {/* Following the device, the theme follows its appearance by CSS, so the first paint is
@@ -993,11 +1022,11 @@ function StandModeView({
                   )}
                   {songsButton}
                   <Button
-                    label={t("viewOptions")}
+                    label={t("settings")}
                     variant="secondary"
                     size="lg"
                     isIconOnly
-                    icon={<Icon icon={AdjustmentsHorizontalIcon} />}
+                    icon={<Icon icon={Cog6ToothIcon} />}
                     onClick={() => setSheetOpen(true)}
                   />
                   {/* Play takes Previous's place: a swipe to the right goes back (R-03.3). */}
@@ -1017,68 +1046,63 @@ function StandModeView({
               </nav>
             ) : (
               <>
-                {/* One line (T-2706), in portrait and landscape: the way back with the song
-                  beside it, then View as for the MD, View and the metronome. What is set once
-                  (Letters, Beats, Stage, Full screen) is in View. */}
+                {/* The top bar on an iPad or a desktop (T-2706, T-3032): the way back, the song and
+                  the set's songs, then what is done while playing, each with its icon and its
+                  word (the metronome, the band's audio, Live for the MD), and Settings apart,
+                  for what is set once. One line in landscape; two upright, so no word is cut. */}
                 <nav aria-label={set ? t("setBar") : t("turn")}>
-                  <HStack gap={3} vAlign="center">
-                    {/* The way back is quiet: used once, at the end, so the song's title leads the
-                      line (T-2810); it keeps the large touch size. */}
-                    <Button
-                      label={back.label}
-                      href={back.href}
-                      as={Link}
-                      variant="ghost"
-                      size="lg"
-                      isIconOnly
-                      tooltip={back.label}
-                      icon={<Icon icon={set ? ArrowUturnLeftIcon : XMarkIcon} />}
-                    />
-                    <StackItem size="fill">
-                      <VStack gap={0}>
-                        {set && (
+                  <VStack gap={2}>
+                    <HStack gap={3} vAlign="center">
+                      {/* The way back is quiet: used once, at the end, so the song's title leads
+                        the line (T-2810); it keeps the large touch size. */}
+                      <Button
+                        label={back.label}
+                        href={back.href}
+                        as={Link}
+                        variant="ghost"
+                        size="lg"
+                        isIconOnly
+                        tooltip={back.label}
+                        icon={<Icon icon={set ? ArrowUturnLeftIcon : XMarkIcon} />}
+                      />
+                      <StackItem size="fill">
+                        <VStack gap={0}>
+                          {set && (
+                            <Text type="supporting" maxLines={1}>
+                              {/* "Song 3 of 8" is the button beside it when the set's songs are known. */}
+                              {songsButton ? set.name : `${set.name} · ${set.songOf}`}
+                            </Text>
+                          )}
+                          <Heading level={1} maxLines={1}>
+                            {title}
+                          </Heading>
                           <Text type="supporting" maxLines={1}>
-                            {/* "Song 3 of 8" is the button beside it when the set's songs are known. */}
-                            {songsButton ? set.name : `${set.name} · ${set.songOf}`}
+                            {[
+                              `${c("key")} ${shown}`,
+                              shown !== written ? c("writtenIn", { key: written }) : null,
+                              chart.header.meter,
+                              chart.header.tempo ? `${c("tempo")} ${tempoText}` : null,
+                              position,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
                           </Text>
-                        )}
-                        <Heading level={1} maxLines={1}>
-                          {title}
-                        </Heading>
-                        <Text type="supporting" maxLines={1}>
-                          {[
-                            `${c("key")} ${shown}`,
-                            shown !== written ? c("writtenIn", { key: written }) : null,
-                            chart.header.meter,
-                            chart.header.tempo ? `${c("tempo")} ${tempoText}` : null,
-                            position,
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </Text>
-                      </VStack>
-                    </StackItem>
-                    {songsButton}
-                    {viewAsControl}
-                    <Button
-                      label={t("viewOptions")}
-                      variant="secondary"
-                      size="lg"
-                      icon={<Icon icon={AdjustmentsHorizontalIcon} />}
-                      onClick={() => setSheetOpen(true)}
-                    >
-                      {t("view")}
-                    </Button>
-                    {!isPlaying && counter && (
-                      <Text type="large" weight="bold">
-                        {counter}
-                      </Text>
+                        </VStack>
+                      </StackItem>
+                      {songsButton}
+                      {!isUpright && actions}
+                      {!isUpright && settingsButton}
+                    </HStack>
+                    {isUpright && (
+                      <HStack gap={3} vAlign="center">
+                        {actions}
+                        <StackItem size="fill" />
+                        {settingsButton}
+                      </HStack>
                     )}
-                    {audio}
-                    {control}
-                  </HStack>
+                  </VStack>
                 </nav>
-                <LiveStrip sections={sectionNames} />
+                <LiveStrip sections={sectionNames} hasOptions={false} />
                 {songForm}
               </>
             )}
@@ -1124,6 +1148,7 @@ function StandModeView({
                         meter={chart.meter}
                         beats={beats}
                         size="lg"
+                        isCompact
                         now={isAgain ? undefined : (nowIn(index) ?? barIn(playbackBar, index))}
                         start={isAgain ? undefined : startIn(index)}
                         times={timesOf(index)}
@@ -1206,7 +1231,7 @@ function StandModeView({
             <BottomSheet
               isOpen={isSheetOpen}
               onOpenChange={setSheetOpen}
-              label={t("viewOptions")}
+              label={t("settings")}
               height="hug"
             >
               <VStack gap={4} padding={4}>
@@ -1217,9 +1242,11 @@ function StandModeView({
                     {songTokens}
                   </HStack>
                 </VStack>
-                {isPhone && viewAsControl}
+                {viewAsControl}
+                <Heading level={3}>{t("settingsView")}</Heading>
                 {tools}
-                {isPhone && soundControls}
+                <Heading level={3}>{t("settingsMetronome")}</Heading>
+                {soundControls}
               </VStack>
             </BottomSheet>
           }

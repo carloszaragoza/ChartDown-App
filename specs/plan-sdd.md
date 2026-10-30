@@ -422,7 +422,7 @@ People see the catalog as **Songs** ("Canciones" in Spanish) in the side navigat
 
 **Requirements**
 
-- R-12.1 **Start live:** the MD (or the set's temporary MD) starts a live session for a set. Only one leader per session.
+- R-12.1 **Start live:** the MD (or the set's temporary MD) starts a live session for a set, from a **Live** button on stand mode's top bar (on a phone, from View), after confirming it, since every musician in the lineup gets a notice (owner's decision, October 29, 2026). Only one leader per session.
 - R-12.2 **Join:** musicians in the set's lineup (its own, or the band's default instruments when it has none: R-05.3) see "Live now" on Home, in Notices and on the set, and join with one tap. The leader sees who is connected.
 - R-12.3 **Follow:** when the leader moves to another section or song, every connected device shows the same section within half a second on the venue network. Each musician still sees only the notes for everyone and for their instruments (R-06.4).
 - R-12.4 **Cue next:** the leader can mark the next section ahead of time (for example "Chorus next" or "Repeat the Bridge"). Followers see the cue on screen before the change happens.

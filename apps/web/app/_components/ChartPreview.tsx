@@ -71,6 +71,8 @@ export interface ChartSectionProps {
   badge?: ReactNode;
   /** After the section's length, such as stand mode's "Bar 3 of 8" (R-03.12). */
   after?: ReactNode;
+  /** Tighter, as stand mode's cards (T-3032): less room between its parts, a smaller name. */
+  isCompact?: boolean;
 }
 
 /**
@@ -93,13 +95,16 @@ export function ChartSection({
   times,
   badge,
   after,
+  isCompact = false,
 }: ChartSectionProps) {
   const body = (
     <section aria-label={section.name} {...(id ? { id } : {})}>
-      <VStack gap={3}>
+      <VStack gap={isCompact ? 2 : 3}>
         <HStack gap={2} vAlign="center" wrap="wrap">
           {badge}
-          <Heading level={2}>{section.name}</Heading>
+          <Heading level={isCompact ? 3 : 2} accessibilityLevel={2}>
+            {section.name}
+          </Heading>
           <Text type="supporting">
             {labels.length(playedLength(section), { pickup: hasPickup(section) })}
           </Text>

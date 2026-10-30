@@ -95,8 +95,8 @@ test.describe("on an iPhone 16 in portrait", () => {
     await expect(page.getByText("Section 1 of 7")).toBeVisible();
     // The display choices wait in the View sheet.
     await expect(page.getByRole("radio", { name: "Letters" })).toBeHidden();
-    await page.getByRole("button", { name: "View options" }).click();
-    const sheet = page.getByRole("dialog", { name: "View options" });
+    await page.getByRole("button", { name: "Settings" }).click();
+    const sheet = page.getByRole("dialog", { name: "Settings" });
     await expect(sheet.getByRole("radio", { name: "Letters" })).toBeVisible();
     await expect(sheet.getByRole("radio", { name: "Stage" })).toBeVisible();
     await sheet.getByRole("radio", { name: "Letters" }).click();

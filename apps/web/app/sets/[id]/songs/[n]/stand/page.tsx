@@ -153,6 +153,7 @@ export default async function SetStandPage({
     (await getTranslations("audio"))("personal"),
   );
 
+  const phone = await guessPhone();
   return (
     <StandMode
       versionId={song.version_id}
@@ -167,14 +168,15 @@ export default async function SetStandPage({
       keep={keep}
       notes={shown.notes}
       forYou={shown.forYou}
-      phone={await guessPhone()}
+      phone={phone}
       {...(recording
         ? {
             audio: (
               <AudioButton
                 recording={recording}
                 chart={chart}
-                isIconOnly
+                // Its word on an iPad's top bar, only its icon on a phone's (T-3032).
+                isIconOnly={phone}
                 save={
                   leads
                     ? saveAudioPoints.bind(null, recording.bandId, recording.versionId)

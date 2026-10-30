@@ -65,7 +65,7 @@ test("R-03.3 every section reads without zooming on an iPad in landscape", async
   const lightSize = await size();
   const lightBackground = await background();
   // Stage is set once, in View (T-2706).
-  await page.getByRole("button", { name: "View options" }).click();
+  await page.getByRole("button", { name: "Settings" }).click();
   await page.getByRole("dialog").getByRole("radio", { name: "Stage" }).click();
   await page.keyboard.press("Escape");
   await expect(page).toHaveURL(/theme=stage/);
@@ -183,7 +183,8 @@ test("R-03.3 the clearer stand: one metronome control, the next section's notes,
   });
   await page.goto(`/versions/${id}/stand`);
 
-  // T-2706: one line with Close, the song, View and the metronome; Beats is in View.
+  // T-2706, T-3032: one line with Close, the song, the metronome and Settings; Beats is in
+  // Settings.
   const top = page.getByRole("navigation", { name: "Sections" });
   await expect(top.getByRole("link", { name: "Close" })).toBeVisible();
   // T-2810: the way back is a quiet icon, with no word, still at the large touch size.
@@ -192,22 +193,24 @@ test("R-03.3 the clearer stand: one metronome control, the next section's notes,
     Math.round((await top.getByRole("link", { name: "Close" }).boundingBox())?.height ?? 0),
   ).toBeGreaterThanOrEqual(50);
   await expect(top.getByRole("heading", { level: 1 })).toContainText("Clear Stand");
-  const metronome = top.getByRole("group", { name: "Metronome" });
+  const metronome = top;
   const closeBox = await top.getByRole("link", { name: "Close" }).boundingBox();
-  const metronomeBox = await metronome.boundingBox();
+  const metronomeBox = await top.getByRole("button", { name: "Play" }).boundingBox();
   expect(Math.abs((closeBox?.y ?? 0) - (metronomeBox?.y ?? 0))).toBeLessThan(20);
-  await top.getByRole("button", { name: "View options" }).click();
+  await top.getByRole("button", { name: "Settings" }).click();
   await expect(
     page.getByRole("dialog").getByRole("radiogroup", { name: "Beat slashes" }),
   ).toBeVisible();
   await page.keyboard.press("Escape");
 
-  // T-2701: Play shows the tempo, the counter while it plays; the options sit beside it.
+  // T-2701: Play shows the tempo, the counter while it plays; its options are in Settings
+  // (T-3032), apart from the actions, with their word.
   await expect(metronome.getByRole("button", { name: "Play" })).toHaveText("96");
   await metronome.getByRole("button", { name: "Play" }).click();
   await expect(metronome.getByRole("button", { name: "Stop" })).toHaveText(/^\d \/ 4$/);
   await metronome.getByRole("button", { name: "Stop" }).click();
-  await metronome.getByRole("button", { name: "Metronome options" }).click();
+  await expect(top.getByRole("button", { name: "Settings" })).toHaveText("Settings");
+  await top.getByRole("button", { name: "Settings" }).click();
   await expect(page.getByRole("dialog")).toContainText("Count-in");
   await page.keyboard.press("Escape");
 
@@ -309,7 +312,7 @@ test("R-03.12 T-2823 the whole song, which a pinch chose, shows every section on
   await stack.getByRole("heading", { level: 2, name: "Bridge", exact: true }).click();
   await expect(standNow(page).getByRole("heading", { level: 2 })).toHaveText(/Bridge/);
   // View has no layout choice, and nothing for one section at a time.
-  await page.getByRole("button", { name: "View options" }).click();
+  await page.getByRole("button", { name: "Settings" }).click();
   await expect(page.getByRole("dialog").getByText("Coming up", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("dialog").getByText("Extra small", { exact: true })).toBeVisible();
 });
@@ -356,7 +359,7 @@ test("R-03.12 View's Coming up and Number size are kept on the device", async ({
       .first()
       .evaluate((element) => parseFloat(getComputedStyle(element).fontSize));
   const medium = await chord();
-  await page.getByRole("button", { name: "View options" }).click();
+  await page.getByRole("button", { name: "Settings" }).click();
   const sheet = page.getByRole("dialog");
   await sheet.getByRole("radio", { name: "1 section" }).click();
   await sheet.getByRole("radio", { name: "Large" }).click();
@@ -383,7 +386,7 @@ test("R-03.12 T-2843 Show notes off hides the sections' notes, in stand mode and
   await expectStandNow(page, "Verse");
   const note = page.getByText("Build a little more each time.");
   await expect(note).toBeVisible();
-  await page.getByRole("button", { name: "View options" }).click();
+  await page.getByRole("button", { name: "Settings" }).click();
   const shown = page.getByRole("dialog").getByRole("switch", { name: "Show notes" });
   await expect(shown).toBeChecked();
   await shown.click();

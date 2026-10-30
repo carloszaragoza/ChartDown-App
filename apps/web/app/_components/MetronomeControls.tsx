@@ -378,29 +378,33 @@ export function useMetronomeControls(
     : tapped !== null
       ? roundTempo(tapped)
       : null;
+  const metronomeButton = (
+    <Button
+      label={metronome.isPlaying ? t("stop") : t("play")}
+      variant={metronome.isPlaying ? "primary" : "secondary"}
+      size={size}
+      // The metronome, its pendulum swinging with the beat while it plays. Play and Stop are
+      // its name, and the button turns primary and counts while it plays.
+      icon={
+        <MetronomeIcon
+          width="1.25em"
+          height="1.25em"
+          beat={metronome.isPlaying && click ? click.count : undefined}
+          seconds={click?.duration}
+        />
+      }
+      onClick={toggle}
+    >
+      {/* One width whatever it shows, the tempo or the count (T-2701). */}
+      <span className="cd-metronome-count">
+        {(metronome.isPlaying && counter) ||
+          (shownTempo !== null ? t("tempoShort", { bpm: shownTempo }) : t("noTempoShort"))}
+      </span>
+    </Button>
+  );
   const control = (
     <ButtonGroup label={t("metronome")} size={size}>
-      <Button
-        label={metronome.isPlaying ? t("stop") : t("play")}
-        variant={metronome.isPlaying ? "primary" : "secondary"}
-        // The metronome, its pendulum swinging with the beat while it plays. Play and Stop are
-        // its name, and the button turns primary and counts while it plays.
-        icon={
-          <MetronomeIcon
-            width="1.25em"
-            height="1.25em"
-            beat={metronome.isPlaying && click ? click.count : undefined}
-            seconds={click?.duration}
-          />
-        }
-        onClick={toggle}
-      >
-        {/* One width whatever it shows, the tempo or the count (T-2701). */}
-        <span className="cd-metronome-count">
-          {(metronome.isPlaying && counter) ||
-            (shownTempo !== null ? t("tempoShort", { bpm: shownTempo }) : t("noTempoShort"))}
-        </span>
-      </Button>
+      {metronomeButton}
       <Button
         label={t("sound")}
         variant={metronome.isPlaying ? "primary" : "secondary"}
@@ -415,6 +419,8 @@ export function useMetronomeControls(
   return {
     metronome,
     control,
+    /** Play with the tempo on it, alone: stand mode's top bar keeps the sound in Settings (T-3032). */
+    metronomeButton,
     playButton,
     soundButton,
     soundControls,

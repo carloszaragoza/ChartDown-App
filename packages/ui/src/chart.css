@@ -1011,7 +1011,7 @@
 .cd-stand-stack__list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1024,7 +1024,11 @@
   box-sizing: border-box;
   scroll-snap-align: start;
   scroll-margin-block-start: var(--spacing-1-5);
-  padding: var(--spacing-3) var(--spacing-5) var(--spacing-4);
+  /* Compact (owner's review on a regular iPad, October 29, 2026, T-3032): less room inside the
+     card and in each bar, the numbers kept at their size. */
+  --chart-cell-padding: var(--spacing-2);
+  --chart-bar-padding-end: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4) var(--spacing-3);
   border: calc(var(--border-width) * 3) solid transparent;
   border-radius: var(--radius-container);
   background: transparent;
@@ -1051,7 +1055,7 @@
   --chart-bar-line: calc(var(--border-width) * 3) solid var(--color-border-emphasized);
   --chart-repeat-line: calc(var(--border-width) * 5) double var(--color-border-emphasized);
 }
-.cd-stand-card:not([data-state="current"]) h2 {
+.cd-stand-card:not([data-state="current"]) :is(h2, h3) {
   color: var(--color-text-secondary);
 }
 .cd-stand-card[data-state="past"] {
@@ -1119,7 +1123,7 @@
   --chart-bar-line: calc(var(--border-width) * 3) solid var(--chart-ink);
   --chart-repeat-line: calc(var(--border-width) * 5) double var(--chart-ink);
 }
-.cd-stand-stack[data-layout="song"] .cd-stand-card:not([data-state="current"]) h2 {
+.cd-stand-stack[data-layout="song"] .cd-stand-card:not([data-state="current"]) :is(h2, h3) {
   color: var(--color-text-primary);
 }
 .cd-stand-stack[data-layout="song"] .cd-chart {
