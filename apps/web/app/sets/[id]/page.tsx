@@ -1,6 +1,6 @@
 import { keyName, parse } from "chartdown";
 import { Avatar } from "@astryxdesign/core/Avatar";
-import { Banner } from "@astryxdesign/core/Banner";
+import { Banner } from "../../_components/Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Heading } from "@astryxdesign/core/Heading";

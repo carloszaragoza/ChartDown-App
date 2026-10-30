@@ -1,4 +1,4 @@
-import { Banner } from "@astryxdesign/core/Banner";
+import { Banner } from "../../_components/Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { Text } from "@astryxdesign/core/Text";
 import Link from "next/link";

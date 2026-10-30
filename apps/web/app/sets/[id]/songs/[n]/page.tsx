@@ -1,6 +1,6 @@
 import { keyName, parse, type Chart } from "chartdown";
 import { readBeatsMode, type BeatsMode } from "@chartdown/ui";
-import { Banner } from "@astryxdesign/core/Banner";
+import { Banner } from "../../../../_components/Banner";
 import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
 import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";

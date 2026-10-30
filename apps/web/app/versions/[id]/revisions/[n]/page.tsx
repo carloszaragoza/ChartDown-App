@@ -1,5 +1,5 @@
 import { parse } from "chartdown";
-import { Banner } from "@astryxdesign/core/Banner";
+import { Banner } from "../../../../_components/Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
 import { notFound } from "next/navigation";

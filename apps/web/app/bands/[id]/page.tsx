@@ -1,5 +1,5 @@
 import { Avatar } from "@astryxdesign/core/Avatar";
-import { Banner } from "@astryxdesign/core/Banner";
+import { Banner } from "../../_components/Banner";
 import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";

@@ -2,7 +2,7 @@ import { rootCallback } from "../lib/auth/callback";
 import { authEnabled, waitlistEnabled } from "../lib/auth/enabled";
 import { createClient, readUser } from "../lib/supabase/server";
 import { redirect } from "next/navigation";
-import { Banner } from "@astryxdesign/core/Banner";
+import { Banner } from "./_components/Banner";
 import { VStack } from "@astryxdesign/core/VStack";
 import { cookies } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";

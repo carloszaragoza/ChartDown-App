@@ -1,4 +1,4 @@
-import { Banner } from "@astryxdesign/core/Banner";
+import { Banner } from "../../../_components/Banner";
 import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
