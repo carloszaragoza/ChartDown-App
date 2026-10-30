@@ -1,5 +1,5 @@
 import { parse } from "chartdown";
-import { Banner } from "@astryxdesign/core/Banner";
+import { Banner } from "../../_components/Banner";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";

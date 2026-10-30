@@ -1,6 +1,6 @@
 "use client";
 
-import { Banner } from "@astryxdesign/core/Banner";
+import { Banner } from "./Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Text } from "@astryxdesign/core/Text";

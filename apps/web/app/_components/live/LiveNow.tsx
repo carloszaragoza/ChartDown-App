@@ -1,4 +1,4 @@
-import { Banner } from "@astryxdesign/core/Banner";
+import { Banner } from "../Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { VStack } from "@astryxdesign/core/VStack";
 import type { SupabaseClient } from "@supabase/supabase-js";

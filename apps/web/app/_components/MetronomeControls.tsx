@@ -35,7 +35,7 @@ import {
   TEMPO_MAX,
   TEMPO_MIN,
 } from "../../lib/metronome/practiceTempo";
-import { MetronomeIcon } from "./MetronomeIcon";
+import { MetronomePendulum, SwingingMetronomeIcon } from "./MetronomeIcon";
 import { unitKey } from "../../lib/chart/tempo";
 import { faders, type BeatLine } from "../../lib/metronome/sound";
 import { useMetronome } from "../../lib/metronome/useMetronome";
@@ -61,13 +61,13 @@ export interface StartBar {
  * Play / Stop, the "2 / 4" counter, the question for a tempo when the chart has none (R-11.1),
  * and where the metronome is, section by section. Play starts on a tapped bar (R-11.2), or at
  * the first bar of `section` (stand mode's own) or of the song (null). A fermata waits for a tap
- * on the chart (R-11.6). The control is stand mode's large size there, and the medium one on the
- * pages that show a whole chart (owner's review, October 22, 2026, T-2833).
+ * on the chart (R-11.6). Its buttons are the app's own size everywhere, stand mode included
+ * (owner's review, October 30, 2026, T-3036); a phone's version page asks for the large one.
  */
 export function useMetronomeControls(
   chart: Chart,
   section: number | null,
-  size: "md" | "lg" = "lg",
+  size: "md" | "lg" = "md",
 ) {
   const t = useTranslations("stand");
   const c = useTranslations("chart");
@@ -133,7 +133,6 @@ export function useMetronomeControls(
   const playButton = (
     <Button
       label={metronome.isPlaying ? t("stop") : t("play")}
-      size="lg"
       variant={metronome.isPlaying ? "primary" : "secondary"}
       isIconOnly
       icon={<Icon icon={metronome.isPlaying ? StopIcon : PlayIcon} />}
@@ -230,7 +229,6 @@ export function useMetronomeControls(
           <Button
             label={t("slower")}
             tooltip={t("slower")}
-            size="lg"
             variant="secondary"
             isIconOnly
             icon={<Icon icon={MinusIcon} />}
@@ -247,14 +245,12 @@ export function useMetronomeControls(
               step={1}
               isWheelEnabled={false}
               units="bpm"
-              size="lg"
               onChange={step}
             />
           </StackItem>
           <Button
             label={t("faster")}
             tooltip={t("faster")}
-            size="lg"
             variant="secondary"
             isIconOnly
             icon={<Icon icon={PlusIcon} />}
@@ -262,7 +258,7 @@ export function useMetronomeControls(
             onClick={() => step(stepped + 1)}
           />
           {/* Tapping sets the same tempo, so it sits on its row (T-3034). */}
-          <Button label={t("tapTempo")} size="lg" variant="secondary" onClick={tap} />
+          <Button label={t("tapTempo")} variant="secondary" onClick={tap} />
         </HStack>
         {(speed !== 100 || tapped !== null) && (
           <HStack gap={2}>
@@ -354,7 +350,6 @@ export function useMetronomeControls(
   const soundButton = (
     <Button
       label={t("sound")}
-      size="lg"
       variant="secondary"
       isIconOnly
       icon={<Icon icon={SpeakerWaveIcon} />}
@@ -401,28 +396,27 @@ export function useMetronomeControls(
       ? roundTempo(tapped)
       : null;
   const metronomeButton = (
-    <Button
-      label={metronome.isPlaying ? t("stop") : t("play")}
-      variant={metronome.isPlaying ? "primary" : "secondary"}
-      size={size}
-      // The metronome, its pendulum swinging with the beat while it plays. Play and Stop are
-      // its name, and the button turns primary and counts while it plays.
-      icon={
-        <MetronomeIcon
-          width="1.25em"
-          height="1.25em"
-          beat={metronome.isPlaying && click ? click.count : undefined}
-          seconds={click?.duration}
-        />
-      }
-      onClick={toggle}
+    <MetronomePendulum
+      beat={metronome.isPlaying && click ? click.count : undefined}
+      seconds={click?.duration}
     >
-      {/* One width whatever it shows, the tempo or the count (T-2701). */}
-      <span className="cd-metronome-count">
-        {(metronome.isPlaying && counter) ||
-          (shownTempo !== null ? t("tempoShort", { bpm: shownTempo }) : t("noTempoShort"))}
-      </span>
-    </Button>
+      <Button
+        label={metronome.isPlaying ? t("stop") : t("play")}
+        variant={metronome.isPlaying ? "primary" : "secondary"}
+        size={size}
+        // The metronome, its pendulum swinging with the beat while it plays. Play and Stop are
+        // its name, and the button turns primary and counts while it plays.
+        // Sized by the button, as every icon is (T-3036).
+        icon={<Icon icon={SwingingMetronomeIcon} />}
+        onClick={toggle}
+      >
+        {/* One width whatever it shows, the tempo or the count (T-2701). */}
+        <span className="cd-metronome-count">
+          {(metronome.isPlaying && counter) ||
+            (shownTempo !== null ? t("tempoShort", { bpm: shownTempo }) : t("noTempoShort"))}
+        </span>
+      </Button>
+    </MetronomePendulum>
   );
   const control = (
     <ButtonGroup label={t("metronome")} size={size}>

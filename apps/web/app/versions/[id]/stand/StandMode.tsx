@@ -31,7 +31,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { usePhone, usePortrait, useShortScreen } from "../../../../lib/shell/phone";
+import { usePhone, useShortScreen } from "../../../../lib/shell/phone";
 import { prefetchWhole } from "../../../../lib/shell/prefetch";
 import { useTranslations } from "next-intl";
 import {
@@ -202,8 +202,6 @@ function StandModeView({
   const isPhone = usePhone(phoneGuess);
   // Held sideways, the song form joins the top bar, so the bars get the height (R-03.8).
   const isSideways = useShortScreen() && isPhone;
-  // An iPad held upright: the top bar takes two lines, so no button's word is cut (T-3032).
-  const isUpright = usePortrait() && !isPhone;
   // View's Show notes, kept on the device (T-2843).
   const hideNotes = useHiddenNotes();
   const [isSheetOpen, setSheetOpen] = useState(false);
@@ -556,7 +554,6 @@ function StandModeView({
     ) : (
       <Selector
         label={t("viewAs")}
-        size="lg"
         options={viewAs.options.map((option) => ({ value: option.label, label: option.label }))}
         value={viewAsValue}
         onChange={chooseView}
@@ -692,7 +689,6 @@ function StandModeView({
   const songForm = (
     <SongForm
       label={c("songForm")}
-      size="lg"
       current={current}
       notesLabel={labels.notesForYou}
       isStrip={isPhone}
@@ -718,7 +714,6 @@ function StandModeView({
       label={set.songOf}
       tooltip={t("setSongs")}
       variant="ghost"
-      size="lg"
       isIconOnly={isPhone}
       icon={<Icon icon={QueueListIcon} />}
       onClick={() => setSongsOpen(true)}
@@ -992,11 +987,6 @@ function StandModeView({
   // band's audio and, for the MD in a set, Live.
   const actions = (
     <HStack gap={2} vAlign="center">
-      {!isPlaying && counter && (
-        <Text type="large" weight="bold">
-          {counter}
-        </Text>
-      )}
       {metronomeButton}
       {audio}
       {set && <LiveButton sections={sectionNames} />}
@@ -1007,7 +997,6 @@ function StandModeView({
     <Button
       label={t("settings")}
       variant="ghost"
-      size="lg"
       icon={<Icon icon={Cog6ToothIcon} />}
       onClick={() => setSheetOpen(true)}
     >
@@ -1040,7 +1029,6 @@ function StandModeView({
                     href={back.href}
                     as={Link}
                     variant="ghost"
-                    size="lg"
                     isIconOnly
                     icon={<Icon icon={ArrowUturnLeftIcon} />}
                   />
@@ -1064,7 +1052,6 @@ function StandModeView({
                   <Button
                     label={t("settings")}
                     variant="secondary"
-                    size="lg"
                     isIconOnly
                     icon={<Icon icon={Cog6ToothIcon} />}
                     onClick={() => setSheetOpen(true)}
@@ -1076,7 +1063,6 @@ function StandModeView({
                     <Button
                       label={following.label}
                       href={following.href}
-                      size="lg"
                       variant="primary"
                       isIconOnly
                       icon={<Icon icon={ChevronRightIcon} />}
@@ -1086,61 +1072,60 @@ function StandModeView({
               </nav>
             ) : (
               <>
-                {/* The top bar on an iPad or a desktop (T-2706, T-3032): the way back, the song and
-                  the set's songs, then what is done while playing, each with its icon and its
-                  word (the metronome, the band's audio, Live for the MD), and Settings apart,
-                  for what is set once. One line in landscape; two upright, so no word is cut. */}
+                {/* The top bar on an iPad or a desktop (T-2706, T-3032, T-3036): one line, always.
+                  The way back and the song, then the actions by how much they are used: the
+                  metronome, the band's audio, Live for the MD, the set's songs, and Settings
+                  last. When room runs short the song's title shortens, never the controls. */}
                 <nav aria-label={set ? t("setBar") : t("turn")}>
-                  <VStack gap={2}>
-                    <HStack gap={3} vAlign="center">
-                      {/* The way back is quiet: used once, at the end, so the song's title leads
-                        the line (T-2810); it keeps the large touch size. */}
-                      <Button
-                        label={back.label}
-                        href={back.href}
-                        as={Link}
-                        variant="ghost"
-                        size="lg"
-                        isIconOnly
-                        tooltip={back.label}
-                        icon={<Icon icon={set ? ArrowUturnLeftIcon : XMarkIcon} />}
-                      />
-                      <StackItem size="fill">
-                        <VStack gap={0}>
-                          {set && (
-                            <Text type="supporting" maxLines={1}>
-                              {/* "Song 3 of 8" is the button beside it when the set's songs are known. */}
-                              {songsButton ? set.name : `${set.name} · ${set.songOf}`}
-                            </Text>
-                          )}
-                          <Heading level={1} maxLines={1}>
-                            {title}
-                          </Heading>
-                          <Text type="supporting" maxLines={1}>
-                            {[
-                              `${c("key")} ${shown}`,
-                              shown !== written ? c("writtenIn", { key: written }) : null,
-                              chart.header.meter,
-                              chart.header.tempo ? `${c("tempo")} ${tempoText}` : null,
-                              position,
-                            ]
-                              .filter(Boolean)
-                              .join(" · ")}
-                          </Text>
-                        </VStack>
-                      </StackItem>
-                      {songsButton}
-                      {!isUpright && actions}
-                      {!isUpright && settingsButton}
-                    </HStack>
-                    {isUpright && (
+                  <HStack gap={3} vAlign="center">
+                    <StackItem size="fill">
                       <HStack gap={3} vAlign="center">
-                        {actions}
-                        <StackItem size="fill" />
-                        {settingsButton}
+                        {/* The way back is quiet: used once, at the end, so the song's title leads
+                          the line (T-2810). */}
+                        <Button
+                          label={back.label}
+                          href={back.href}
+                          as={Link}
+                          variant="ghost"
+                          isIconOnly
+                          tooltip={back.label}
+                          icon={<Icon icon={set ? ArrowUturnLeftIcon : XMarkIcon} />}
+                        />
+                        <StackItem size="fill">
+                          <VStack gap={0}>
+                            {set && (
+                              <Text type="supporting" maxLines={1}>
+                                {/* "Song 3 of 8" is the button beside it when the set's songs are known. */}
+                                {songsButton ? set.name : `${set.name} · ${set.songOf}`}
+                              </Text>
+                            )}
+                            <Heading level={1} maxLines={1}>
+                              {title}
+                            </Heading>
+                            <Text type="supporting" maxLines={1}>
+                              {[
+                                // "Starts at bar 3", chosen with a tap (R-11.2): said first here, so
+                                // the controls keep their line and it is never shortened (T-3036).
+                                !isPlaying ? counter : null,
+                                `${c("key")} ${shown}`,
+                                shown !== written ? c("writtenIn", { key: written }) : null,
+                                chart.header.meter,
+                                chart.header.tempo ? `${c("tempo")} ${tempoText}` : null,
+                                position,
+                              ]
+                                .filter(Boolean)
+                                .join(" · ")}
+                            </Text>
+                          </VStack>
+                        </StackItem>
                       </HStack>
-                    )}
-                  </VStack>
+                    </StackItem>
+                    <HStack gap={2} vAlign="center">
+                      {actions}
+                      {songsButton}
+                      {settingsButton}
+                    </HStack>
+                  </HStack>
                 </nav>
                 <LiveStrip sections={sectionNames} hasOptions={false} />
                 {songForm}
@@ -1224,7 +1209,6 @@ function StandModeView({
                   {previous ? (
                     <Button
                       label={previous.label}
-                      size="lg"
                       href={previous.href}
                       icon={<Icon icon={ChevronLeftIcon} />}
                     />
@@ -1251,7 +1235,6 @@ function StandModeView({
                   {following ? (
                     <Button
                       label={following.label}
-                      size="lg"
                       href={following.href}
                       variant="primary"
                       endContent={<Icon icon={ChevronRightIcon} />}
@@ -1294,7 +1277,6 @@ function StandModeView({
                   onChange={(tab) => setSettingsTab(tab as SettingsTab)}
                   role="tablist"
                   layout="fill"
-                  size="lg"
                   hasDivider
                 >
                   {SETTINGS_TABS.map((tab) => (

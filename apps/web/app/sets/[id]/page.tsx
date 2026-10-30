@@ -1,6 +1,6 @@
 import { keyName, parse } from "chartdown";
 import { Avatar } from "@astryxdesign/core/Avatar";
-import { Banner } from "@astryxdesign/core/Banner";
+import { Banner } from "../../_components/Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Heading } from "@astryxdesign/core/Heading";
@@ -268,9 +268,10 @@ export default async function SetPage({
               <EmptyState title={canArrange ? t("emptyMd") : t("empty")} />
             ) : (
               <List
+                // Numbered: no edge compensation, which pulls a numbered list's rows out of
+                // the column (owner's review, October 30, 2026).
                 listStyle="decimal"
                 hasDividers
-                edgeCompensation="inline"
                 header={<Text className="cd-visually-hidden">{t("songsTitle")}</Text>}
               >
                 {items.map((item, index) => {

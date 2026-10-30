@@ -1,4 +1,4 @@
-import { Banner } from "@astryxdesign/core/Banner";
+import { Banner } from "../_components/Banner";
 import { Card } from "@astryxdesign/core/Card";
 import { Heading } from "@astryxdesign/core/Heading";
 import { Layout, LayoutContent } from "@astryxdesign/core/Layout";

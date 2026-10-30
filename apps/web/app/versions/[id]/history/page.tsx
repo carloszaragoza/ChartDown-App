@@ -1,19 +1,18 @@
-import { Banner } from "@astryxdesign/core/Banner";
+import { Banner } from "../../../_components/Banner";
 import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
 import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Item } from "@astryxdesign/core/Item";
 import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
 import { List } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../../lib/auth/enabled";
 import { createClient, readUser } from "../../../../lib/supabase/server";
+import { LinkRow } from "../../../_components/LinkRow";
 import { loadVersion } from "../load";
 
 type Search = Promise<{ restored?: string; as?: string }>;
@@ -94,14 +93,11 @@ export default async function HistoryPage({
                   : revision.author;
                 const from = revision.restored_from_id && numberOf.get(revision.restored_from_id);
                 return (
-                  <Item
+                  // The whole row opens the revision, as every list's rows do (T-3035).
+                  <LinkRow
                     key={revision.id}
-                    as="li"
-                    label={
-                      <Link href={`/versions/${version.id}/revisions/${revision.number}`}>
-                        {t("revision", { number: revision.number })}
-                      </Link>
-                    }
+                    href={`/versions/${version.id}/revisions/${revision.number}`}
+                    title={t("revision", { number: revision.number })}
                     description={`${format.dateTime(new Date(revision.created_at), {
                       dateStyle: "medium",
                       timeStyle: "short",
