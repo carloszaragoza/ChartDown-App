@@ -19,6 +19,8 @@ import {
   isOpen,
   LEADER_TIMEOUT_MS,
   liveTopic,
+  readClockPing,
+  readClockPong,
   readMetronome,
   readPosition,
   samePosition,
@@ -28,10 +30,13 @@ import {
   type LivePosition,
   type LiveSession,
 } from "../../../lib/live/protocol";
+import { deviceNow, sampleOf, SharedClock } from "../../../lib/live/clock";
 import { createClient } from "../../../lib/supabase/browser";
 
 export type LiveRole = "leader" | "follower" | "none";
 export type LiveStatus = "idle" | "connecting" | "live" | "paused";
+/** How well a device knows the leader's clock (R-14.1): within 5 ms, or still measuring. */
+export type LiveSync = "in" | "syncing";
 
 /** Live mode on this device (SPEC-12): the set's session, this person's part in it, and its acts. */
 export interface Live {
@@ -52,7 +57,11 @@ export interface Live {
   target: (LivePosition & { seq: number }) | null;
   /** The leader's cue, on every device in the session (R-12.4). */
   cue: number | null;
-  connected: { id: string; name: string }[];
+  connected: { id: string; name: string; sync?: LiveSync | undefined }[];
+  /** This follower's knowledge of the leader's clock (R-14.1); null for the leader or outside. */
+  sync: LiveSync | null;
+  /** The leader's clock as this device knows it (SPEC-14), for scheduling on it (T-3038). */
+  clock: SharedClock | null;
   leaderMetronome: LiveMetronome | null;
   /** The song this device's stand mode shows, or null on another page of the set. */
   song: number | null;
@@ -81,6 +90,11 @@ export function useLive(): Live | null {
 }
 
 const SELECT = "id, set_id, leader_id, song_position, section, cue, leader_seen_at, ended_at";
+// The clock exchange's rhythm (Technical Plan 7.2): 8 on joining, then 3 every 10 seconds.
+const PINGS_ON_JOIN = 8;
+const PINGS_EVERY = 3;
+const PING_EVERY_MS = 10_000;
+const PING_GAP_MS = 120;
 // Which sessions this device follows: kept for the tab, so a reload stays in (R-12.9).
 const joinedKey = (session: string) => `cd-live-joined:${session}`;
 const joinedHere = new Set<string>();
@@ -149,6 +163,9 @@ export function LiveProvider({
   const [cueHeard, setCueShown] = useState<number | null | undefined>(undefined);
   const [connected, setConnected] = useState<Live["connected"]>([]);
   const [leaderMetronome, setLeaderMetronome] = useState<LiveMetronome | null>(null);
+  // The leader's clock as this device measures it (SPEC-14, T-3037), one per session.
+  const [sync, setSync] = useState<LiveSync | null>(null);
+  const clock = useMemo(() => (sessionId ? new SharedClock() : null), [sessionId]);
   const [error, setError] = useState<string | null>(null);
   const channel = useRef<RealtimeChannel | null>(null);
   const seq = useRef(0);
@@ -246,6 +263,22 @@ export function LiveProvider({
     let stopped = false;
     let wasPaused = false;
     let current: RealtimeChannel | null = null;
+    let told: LiveSync | null = null;
+    const timers: number[] = [];
+    /** Sends `count` clock questions, a moment apart, so one of them meets a quiet network. */
+    const ask = (count: number) => {
+      for (let index = 0; index < count; index++)
+        timers.push(
+          window.setTimeout(() => {
+            void current?.send({
+              type: "broadcast",
+              event: "clock-ping",
+              payload: { from: me.id, sent: deviceNow() },
+            });
+          }, index * PING_GAP_MS),
+        );
+    };
+    if (!isLeading) timers.push(window.setInterval(() => ask(PINGS_EVERY), PING_EVERY_MS));
     void (async () => {
       const { data } = await supabase.auth.getSession();
       if (stopped) return;
@@ -264,21 +297,49 @@ export function LiveProvider({
           setLeaderMetronome(readMetronome(payload));
         })
         .on("broadcast", { event: "leader" }, () => void refresh())
+        // The clock exchange (R-14.1, Technical Plan 7.2): a follower asks, the leader answers
+        // with when it got the question and when it answered, both on its clock.
+        .on("broadcast", { event: "clock-ping" }, ({ payload }) => {
+          if (!isLeading) return;
+          const received = deviceNow();
+          const ask = readClockPing(payload);
+          if (!ask) return;
+          void current?.send({
+            type: "broadcast",
+            event: "clock-pong",
+            payload: { to: ask.from, sent: ask.sent, received, answered: deviceNow() },
+          });
+        })
+        .on("broadcast", { event: "clock-pong" }, ({ payload }) => {
+          const got = deviceNow();
+          const answer = readClockPong(payload);
+          if (isLeading || !answer || answer.to !== me.id || !clock) return;
+          clock.add(sampleOf(answer.sent, answer.received, answer.answered, got));
+          const now: LiveSync = clock.isInSync ? "in" : "syncing";
+          setSync(now);
+          if (now !== told) {
+            told = now;
+            void current?.track({ id: me.id, name: me.name, sync: now });
+          }
+        })
         .on("broadcast", { event: "ended" }, () => {
           setEnded(true);
           setSession(null);
         })
         .on("presence", { event: "sync" }, () => {
-          const state = current?.presenceState<{ id: string; name: string }>() ?? {};
-          const people = new Map<string, string>();
+          const state =
+            current?.presenceState<{ id: string; name: string; sync?: LiveSync }>() ?? {};
+          const people = new Map<string, { name: string; sync?: LiveSync | undefined }>();
           for (const metas of Object.values(state))
-            for (const meta of metas) people.set(meta.id, meta.name);
-          setConnected([...people].map(([id, name]) => ({ id, name })));
+            for (const meta of metas) people.set(meta.id, { name: meta.name, sync: meta.sync });
+          setConnected([...people].map(([id, person]) => ({ id, ...person })));
         })
         .subscribe((state) => {
           if (state === "SUBSCRIBED") {
             setStatus("live");
-            void current?.track({ id: me.id, name: me.name });
+            void current?.track({ id: me.id, name: me.name, ...(told ? { sync: told } : {}) });
+            // A follower measures the leader's clock: 8 quick exchanges now, 3 every 10 s.
+            if (!isLeading) ask(PINGS_ON_JOIN);
             // Back after losing the connection: to where the leader is now (R-12.9).
             if (wasPaused) {
               wasPaused = false;
@@ -300,13 +361,18 @@ export function LiveProvider({
     window.addEventListener("offline", offline);
     return () => {
       stopped = true;
+      for (const timer of timers) {
+        window.clearTimeout(timer);
+        window.clearInterval(timer);
+      }
+      setSync(null);
       window.removeEventListener("offline", offline);
       channel.current = null;
       setStatus("idle");
       setConnected([]);
       if (current) void supabase.removeChannel(current);
     };
-  }, [supabase, sessionId, isJoined, isLeading, me.id, me.name, aim, refresh]);
+  }, [supabase, sessionId, isJoined, isLeading, me.id, me.name, aim, refresh, clock]);
 
   // A follower whose leader is gone 5 minutes: the session counts as ended (R-12.10).
   const leaderHere = connected.some((person) => person.id === leaderId);
@@ -471,6 +537,8 @@ export function LiveProvider({
     target,
     cue: cueHeard === undefined ? (session?.cue ?? null) : cueHeard,
     connected,
+    sync: role === "follower" && isJoined ? (sync ?? "syncing") : null,
+    clock: role === "follower" && isJoined ? clock : null,
     leaderMetronome,
     song,
     error,
