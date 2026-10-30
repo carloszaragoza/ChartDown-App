@@ -34,7 +34,7 @@ async function pressOn(page: Page, key: string) {
   await page.keyboard.press(key);
 }
 
-test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 the band follows the MD live, hands-free, looks ahead and comes back", async ({
+test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 R-12.13 R-14.2 the band follows the MD live, hands-free, looks ahead and comes back", async ({
   page,
   browser,
   request,
