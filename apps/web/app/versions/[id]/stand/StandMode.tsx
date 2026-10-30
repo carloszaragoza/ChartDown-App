@@ -220,6 +220,7 @@ function StandModeView({
     toggle,
     resume,
     chooseStart,
+    jumpTo,
     startIn,
   } = useMetronomeControls(chart, current);
   const timelineBars = player.bars;
@@ -939,12 +940,15 @@ function StandModeView({
   // current one a tapped bar is where Play starts (R-11.2), and after a fermata it goes on (R-11.6).
   const onCard = (index: number, event: MouseEvent<HTMLElement>) => {
     if (isWaiting) return resume();
+    const bar = (event.target as HTMLElement).closest<HTMLElement>(".cd-chart__bar");
+    // Playing, a tap on a bar goes on from there at once, in this section or another, and the
+    // view follows the metronome; a follower's metronome is the MD's (R-11.18, R-12.5).
+    if (isPlaying && bar && !isFollowing) return jumpTo(index, Number(bar.dataset.bar));
     if (index !== current) {
       if (isPlaying) queue(index);
       else move(() => index);
       return;
     }
-    const bar = (event.target as HTMLElement).closest<HTMLElement>(".cd-chart__bar");
     if (!isPlaying && bar) chooseStart(current, Number(bar.dataset.bar));
   };
 

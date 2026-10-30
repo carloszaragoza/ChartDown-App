@@ -25,6 +25,7 @@ import {
 import { EIGHTHS_PER_BEAT, meterBeat, type BeatUnit, type Chart } from "chartdown";
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
+import { jumpTarget } from "../../lib/metronome/jump";
 import { speedFor, tapTempo } from "../../lib/metronome/tapTempo";
 import {
   clampTempo,
@@ -110,6 +111,12 @@ export function useMetronomeControls(
   const chooseStart = (inSection: number, number: number) => {
     const index = bars.findIndex((bar) => bar.section === inSection && bar.number === number);
     if (index >= 0) setChosen((now) => (now === index ? null : index));
+  };
+  /** A tap on a bar while it plays: the metronome goes on from there (R-11.18). */
+  const jumpTo = (inSection: number, number: number) => {
+    const at = metronome.position?.click.bar ?? 0;
+    const to = jumpTarget(bars, inSection, number, Math.max(at, 0));
+    if (to !== null) metronome.jump(to);
   };
   const startIn = (inSection: number): StartBar | undefined => {
     const bar = start !== null ? bars[start] : undefined;
@@ -447,6 +454,7 @@ export function useMetronomeControls(
     toggle,
     resume: metronome.resume,
     chooseStart,
+    jumpTo,
     startIn,
   };
 }

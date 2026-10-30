@@ -175,6 +175,18 @@ export function useMetronome(chart: Chart) {
     [bars, stop],
   );
 
+  /**
+   * Moves the playing metronome to a place in the play order at once (R-11.18): the same tempo,
+   * speed and unit, and no count-in, so the beat goes on from there.
+   */
+  const jump = useCallback(
+    (to: number) => {
+      if (!engine.current?.isPlaying) return;
+      play(to, { ...asked.current, countIn: false });
+    },
+    [play],
+  );
+
   // Leaving the page stops it and lets the audio go.
   useEffect(
     () => () => {
@@ -242,6 +254,7 @@ export function useMetronome(chart: Chart) {
     isPlaying,
     isWaiting,
     play,
+    jump,
     stop,
     resume,
     firstBarOf,

@@ -406,3 +406,25 @@ test("R-11.17 T-2845 Metronome options mix the beat, its eighths and its sixteen
   await page.getByRole("button", { name: "Metronome options" }).click();
   await expect(fader("Eighths")).toHaveAttribute("aria-valuenow", "70");
 });
+
+test("R-11.18 playing, a tap on a bar of another section goes on from there at once", async ({
+  page,
+  request,
+}) => {
+  const song = "---\ntempo: 60\n---\n## Verse\n1 | 4 | 5 | 1\n## Chorus\n4 | 5 | 6m | 1\n";
+  const id = await createVersion(request, { title: "Tap To Jump", content: song });
+  await page.goto(`/versions/${id}/stand`);
+  await page.getByRole("button", { name: "Play" }).click();
+  await expectStandNow(page, "Verse");
+  // Bar 3 of the Chorus, while the Verse plays: the Chorus is Now on that bar, and it never stops.
+  const chorus = page.locator('.cd-stand-card[data-state="upcoming"]').first();
+  await chorus.locator(".cd-chart__bar").nth(2).click();
+  await expectStandNow(page, "Chorus");
+  await expect(standNow(page)).toContainText("Bar 3 of 4");
+  await expect(standNow(page).locator(".cd-chart__bar").nth(2)).toHaveAttribute(
+    "aria-current",
+    "step",
+  );
+  await expect(page.getByRole("button", { name: "Stop" })).toBeVisible();
+  await expect(standNow(page)).toContainText("Bar 4 of 4", { timeout: 4000 });
+});
