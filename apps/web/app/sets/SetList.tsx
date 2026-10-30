@@ -1,12 +1,11 @@
 import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { Item } from "@astryxdesign/core/Item";
 import { List } from "@astryxdesign/core/List";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
-import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { localToday } from "../../lib/sets/today";
 import { compareSets, setWhen } from "../../lib/sets/when";
+import { LinkRow } from "../_components/LinkRow";
 import { PageTabs } from "../_components/PageTabs";
 
 export interface ListedSet {
@@ -56,10 +55,11 @@ export async function SetList({
         ) : (
           <List hasDividers edgeCompensation="inline">
             {shown.map((set) => (
-              <Item
+              // The whole row opens the set, as every list's rows do (T-3035).
+              <LinkRow
                 key={set.id}
-                as="li"
-                label={<Link href={`/sets/${set.id}`}>{set.name}</Link>}
+                href={`/sets/${set.id}`}
+                title={set.name}
                 description={[set.band, setWhen(format, set.date, set.time) ?? t("noDate")]
                   .filter(Boolean)
                   .join(" · ")}
