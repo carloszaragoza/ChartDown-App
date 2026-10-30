@@ -1,6 +1,6 @@
 import type { Chart } from "chartdown";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { audioClock, clicks, continueWith, Metronome, sectionEnd, type Click } from "./engine";
+import { runClock, clicks, continueWith, Metronome, sectionEnd, type Click } from "./engine";
 import {
   clickSounds,
   DEFAULT_SOUND,
@@ -127,8 +127,11 @@ export function useMetronome(chart: Chart) {
       if (heard.current.click && heard.current.keepAwake && !humming.current)
         humming.current = keepSpeakersAwake(audio);
       const list = clicks(bars, { from, countIn: heard.current.countIn, ...options });
-      const metronome = new Metronome(list, audioClock(audio), (click, at) => {
-        if (!heard.current.click) return;
+      // The clock is chosen when the run begins: the audio's if it runs, else the device's,
+      // silent, so the pulse never waits on audio a browser keeps asleep (F-013).
+      let run = runClock(audio);
+      const metronome = new Metronome(list, { now: () => run.clock.now() }, (click, at) => {
+        if (!run.isAudible || !heard.current.click) return;
         // The beat and its subdivisions at the faders' levels (R-11.17); a count-in in its
         // starting bar's meter.
         const meter = (bars[click.bar] ?? bars[from])?.meter ?? { beats: 4, unit: 4 };
@@ -163,6 +166,7 @@ export function useMetronome(chart: Chart) {
       const begin = () => {
         if (begun || engine.current !== metronome) return;
         begun = true;
+        run = runClock(audio);
         metronome.start();
         frame.current = requestAnimationFrame(tick);
       };

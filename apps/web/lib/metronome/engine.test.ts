@@ -1,6 +1,14 @@
 import { parse } from "chartdown";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { clicks, continueWith, Metronome, sectionEnd, START_DELAY, type Click } from "./engine";
+import {
+  clicks,
+  continueWith,
+  Metronome,
+  runClock,
+  sectionEnd,
+  START_DELAY,
+  type Click,
+} from "./engine";
 import { timeline } from "./timeline";
 
 // A 4-minute song: 76 bars of 4/4 at 76 bpm is exactly 240 seconds.
@@ -260,5 +268,35 @@ describe("T-2825 a tempo's beat unit (ChartDown 0.9)", () => {
     const eighth = clicks(bars, { unit: "e" });
     expect(dotted[1]?.time).toBeCloseTo(60 / 174);
     expect(eighth[1]?.time).toBeCloseTo(60 / 58);
+  });
+});
+
+describe("F-013 the pulse never waits on audio a browser keeps asleep", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it("R-11.12 F-013 audio that runs gives the audio clock, and the click sounds", () => {
+    const audio = { state: "running" as const, currentTime: 12.5 };
+    const run = runClock(audio, fakeClock());
+    expect(run.isAudible).toBe(true);
+    expect(run.clock.now()).toBe(12.5);
+  });
+
+  it("R-11.12 F-013 audio asleep, as Safari keeps it, counts on the device's clock, silently", () => {
+    // Suspended, its clock stays at 0: on it the first click would never come.
+    const audio = { state: "suspended" as const, currentTime: 0 };
+    const device = fakeClock();
+    const run = runClock(audio, device);
+    expect(run.isAudible).toBe(false);
+    const list = clicks(timeline(parse("---\ntempo: 120\n---\n## A\n1 | 4\n")));
+    const metronome = new Metronome(list, run.clock);
+    metronome.start();
+    for (let step = 0; step < 25; step++) {
+      device.advance((START_DELAY + 0.6) / 25);
+      vi.advanceTimersByTime(25);
+    }
+    // Half a second a beat at 120: the pulse is on the second beat, with no sound.
+    expect(metronome.position()?.count).toBe(2);
+    expect(audio.currentTime).toBe(0);
   });
 });

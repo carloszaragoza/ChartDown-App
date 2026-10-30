@@ -3,7 +3,7 @@
 -- R-12.12), and a set with no lineup of its own (F-012). Run with: supabase test db
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(31);
+select plan(35);
 
 create function pg_temp.login(person uuid) returns void language plpgsql as $$
 begin
@@ -175,6 +175,21 @@ select ok(not private.can_listen_live('live:' || current_setting('test.default')
 do $$ begin perform pg_temp.login('00000000-0000-0000-0000-0000000000d1'); end $$;
 select ok(not private.can_listen_live('live:' || current_setting('test.default')),
   'R-12.12 with no lineup of its own, someone outside the band still cannot join');
+
+-- Live sync (T-3037, R-14.12): every member of an open session sends on its channel, its clock
+-- exchanges; nobody outside it, and nobody once it ended.
+do $$ begin perform pg_temp.login('00000000-0000-0000-0000-0000000000c1'); end $$;
+select ok(private.may_send_live('live:' || current_setting('test.default')),
+  'R-14.12 a member of an open session sends on its channel');
+do $$ begin perform pg_temp.login('00000000-0000-0000-0000-0000000000d1'); end $$;
+select ok(not private.may_send_live('live:' || current_setting('test.default')),
+  'R-14.12 someone outside the band never sends on it');
+select ok(not private.may_send_live('live:not-a-session'), 'R-14.12 a topic naming no session takes nothing');
+do $$ begin perform pg_temp.login('00000000-0000-0000-0000-0000000000a1'); end $$;
+do $$ begin perform public.live_end(pg_temp.setting('test.default')); end $$;
+do $$ begin perform pg_temp.login('00000000-0000-0000-0000-0000000000c1'); end $$;
+select ok(not private.may_send_live('live:' || current_setting('test.default')),
+  'R-14.12 once the session ended, nobody sends on its channel');
 
 select * from finish();
 rollback;

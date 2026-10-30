@@ -106,6 +106,16 @@ export function LiveStrip({
           </Text>
         </StackItem>
       )}
+      {/* How well this device knows the leader's clock, in words (R-14.1). */}
+      {status !== "paused" && live.sync && (
+        <HStack gap={1} vAlign="center">
+          <StatusDot
+            variant={live.sync === "in" ? "success" : "neutral"}
+            label={t(live.sync === "in" ? "inSync" : "syncing")}
+          />
+          <Text type="supporting">{t(live.sync === "in" ? "inSync" : "syncing")}</Text>
+        </HStack>
+      )}
       {isDetached && <Button label={t("backToLive")} variant="primary" onClick={live.backToLive} />}
     </HStack>
   );
@@ -161,6 +171,9 @@ function LiveOptions({
                   key={person.id}
                   as="li"
                   label={person.name}
+                  {...(person.sync
+                    ? { description: t(person.sync === "in" ? "inSync" : "syncing") }
+                    : {})}
                   endContent={
                     <Button
                       label={t("handOver", { name: person.name })}
