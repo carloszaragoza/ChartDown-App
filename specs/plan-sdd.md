@@ -501,6 +501,52 @@ People see the catalog as **Songs** ("Canciones" in Spanish) in the side navigat
 9. Whether the chart's MD notes written here (R-13.14) and a band's private MD layer should be told apart better for the reader, since both say MD.
 8. Where it is reached: the side navigation's Create section, a version's Edit, or both.
 
+### SPEC-14 · Live sync: the band plays on one clock
+
+**Goal:** in live mode (SPEC-12) every device starts, moves and clicks at the same moment, as if the whole band heard one metronome, whether it sits in the same room on the same Wi-Fi, in the next room, or away on another network. When the MD taps Play, Next or a bar, the band changes together, on the beat (owner's request, October 30, 2026).
+
+**Phase:** 2, after SPEC-12. **Status:** draft, written for the owner's review on October 30, 2026; nothing is built until it is approved.
+
+**What is possible, said plainly**
+
+- **No message is instant.** Over Wi-Fi one takes a few milliseconds; through the internet tens to hundreds, and never the same twice. So the band can't be in time by *reacting* to the MD's tap the moment it arrives, as it does today: each device would start when its own message landed, each a little later than the others (today a follower may even be a whole bar off before it corrects itself).
+- **What works is what a conductor does: count in.** Every device agrees on one shared clock first. Then the MD's tap never says "start now"; it says "start at 8:14:03.250 on our clock", a moment a little ahead (the count-in, or about half a second without one). The message has that time to arrive, by any path; every device then starts its first click on its own audio clock at that exact moment. The network's delay stops mattering as long as the message arrives before the moment.
+- **How close.** Measured clocks agree within a few milliseconds on the same Wi-Fi and within about 10 to 20 ms through the internet. The aim is **within 5 ms on the same Wi-Fi and within 20 ms elsewhere**, under the 20 to 30 ms at which ears start to hear two clicks instead of one. "The same millisecond" exactly is not something any network can promise; under 5 ms is heard as one click. The real figures are measured in development before the spec is closed (R-14.11).
+- **Bluetooth and AirPlay speakers add their own delay** (often 100 to 250 ms) after the device has played the click. The app subtracts what the browser reports for it, and each musician can fine-tune it by ear on their own device (R-14.8).
+- **The same Wi-Fi.** A web app can't search the network for the MD's iPad by itself, nor talk to it with no internet at all: browsers forbid it (it would need a native app, section 10). What a web app can do is be introduced by the server once, then talk **device to device over the Wi-Fi** (WebRTC, built into Safari and Chrome), with no trip through the internet for every message. If a direct link can't be made (different networks, a guest Wi-Fi that isolates devices), the session goes on through the internet as today (R-14.7). Because the shared clock already removes the network's delay from the timing, the direct link makes moves arrive sooner and the clock sharper; the band is in time either way.
+
+**Requirements**
+
+- R-14.1 **One clock for the session:** when a device joins a live session, and every few seconds while it stays, it measures how far its own clock is from the leader's, with several quick exchanges, keeping the fastest. Each device's line says whether it is **In sync** (its clock known within 5 ms) or **Syncing**, in words, never color alone. The leader sees each musician's state.
+- R-14.2 **Start on a count:** the leader's Play doesn't start the metronome at once, on any device: it sets a start moment on the shared clock, the end of the count-in when it is on (R-11.8), or a moment about half a second ahead without one, never less than the slowest connected device needs (twice its measured delay). Every device, the leader's included, plays its first click at that moment, from the bar chosen (R-11.2). A follower whose message arrives after the moment doesn't start late: it starts on the next beat, on the bar and beat the band is on, as if it had started with them.
+- R-14.3 **Together while playing:** once started, each device counts the beats from the shared start moment and the tempo, never from the messages it receives, so devices never drift apart; the clock measured again every few seconds corrects the small drift of each device's own clock by easing it, never with a jump in the beat.
+- R-14.4 **Moves on the beat:** while playing, the leader's moves take effect for everyone at the same musical moment: a section queued with the song form, Next, Previous, a swipe or a pedal at the end of the section playing (R-11.15); a tap on a bar (R-11.18) at the start of the next bar; Stop at the next beat; a fermata (R-11.6) goes on at the leader's tap, at a moment a little ahead, for everyone. Stopped, moving to another section or song reaches everyone within half a second (R-12.3), as today.
+- R-14.5 **Tempo and speed** changed by the leader while playing (R-11.9) take effect for everyone at the start of the next bar.
+- R-14.6 **The click stays personal** (R-11.14): sounding or not, its volumes and the beat line are each device's choice; only the time is shared.
+- R-14.7 **The shortest path:** devices in the same session that can reach each other directly, as on one Wi-Fi, talk device to device after the server introduces them; otherwise they go on through the internet, with nothing for the musician to do. The leader's Live options say how each musician is connected, **Direct** or **Through the internet**, and how in sync.
+- R-14.8 **The speakers' own delay:** each device takes off the output delay its browser reports, and Settings › Metronome › More has **Sound delay** for the musician to fine-tune by ear (from −250 to +250 ms, 0 by default), kept on the device. It moves the click only, never the pulse on screen.
+- R-14.9 **A lost connection:** a device that loses it keeps playing on the shared clock it has, in time with the band for minutes, and says "Offline – following paused" (R-12.9); it doesn't take moves until it is back, then measures the clock again and lands where the band is.
+- R-14.10 **Privacy and safety:** only times and positions travel, as today (R-12.12); a direct link is made only between members allowed in the session, introduced by the server, and is encrypted (WebRTC always is). No new personal data is kept.
+- R-14.11 **Measured, not assumed:** a test page in development plays a session on several devices and records, for each click, when it sounded against the shared clock; R-14's figures (5 ms on the same Wi-Fi, 20 ms elsewhere, no drift over 10 minutes) pass on real iPads with Safari before the spec is closed.
+
+**Acceptance criteria**
+
+- Given the MD and three iPads with Safari on the same Wi-Fi, all in sync, when the MD taps Play with the count-in off, then the four first clicks sound within 5 ms of each other, recorded with one microphone in the room.
+- Given a musician on another network, when the MD taps Play, then their first click sounds within 20 ms of the MD's.
+- Given a follower whose message arrives after the start moment, when it arrives, then that follower starts on the next beat, on the band's bar and beat, not late.
+- Given the band playing for 10 minutes without a move, then every device is still within 5 ms of the leader's beat.
+- Given the band playing the Verse, when the MD taps bar 3 of the Chorus, then every device moves to it at the start of the same next bar.
+- Given a guest Wi-Fi that keeps devices apart, when the band goes live, then the session works through the internet and the leader sees "Through the internet" for each musician.
+- Given a musician with Bluetooth headphones, when they set Sound delay by ear, then their click sounds with the room's, and their screen's pulse doesn't move.
+
+**Proposed order** (for the owner to approve with the spec)
+
+1. **The shared clock and the scheduled start** (R-14.1 to R-14.6, R-14.9, R-14.11), over the session's Realtime channel as it is. It brings the band in time on any network, and alone answers "everyone starts together".
+2. **Device to device on the same Wi-Fi** (R-14.7, R-14.10): moves arrive sooner, and the clock is sharper.
+3. **The speakers' delay** (R-14.8).
+
+A native app that works on the Wi-Fi with no internet at all stays out of scope (section 10).
+
 ## 7. Phases
 
 | Phase                                      | Includes                                                                                                                                                                                                                                          | Outcome                                                                                                 |
@@ -545,6 +591,7 @@ These came out of the decisions above and were all resolved. The specs cite them
 
 - Architecture, database and stack (they belong to the Technical Plan).
 - A native phone app (the web app reads on phones, R-03.8).
+- Live mode over a local network with no internet at all (SPEC-14): a browser can't find other devices on the Wi-Fi nor talk to them without a server's introduction; it needs a native app.
 - Audio playback of songs or YouTube sync (the metronome's click, SPEC-11, is not song playback).
 - Payments or subscriptions.
 
