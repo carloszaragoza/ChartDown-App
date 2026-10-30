@@ -172,6 +172,49 @@ export function runClock(
     : { clock: device, isAudible: false };
 }
 
+/**
+ * Between the page's own clock, in milliseconds as `deviceNow()` gives them (the band's moments
+ * arrive on it, SPEC-14), and the clock a run plays on (T-3038): the audio clock in seconds,
+ * paired with the page's by `getOutputTimestamp` where the browser gives it, or the device's own
+ * seconds when the audio is asleep (F-013).
+ */
+export interface ClockMap {
+  toClock(moment: number): number;
+  toDevice(time: number): number;
+}
+
+export function clockMap(
+  context: Pick<AudioContext, "currentTime"> & {
+    getOutputTimestamp?: () => { contextTime?: number; performanceTime?: number };
+  },
+  isAudible: boolean,
+  timeOrigin: number = performance.timeOrigin,
+  pageNow: () => number = () => performance.now(),
+): ClockMap {
+  if (!isAudible)
+    return {
+      toClock: (moment) => (moment - timeOrigin) / 1000,
+      toDevice: (time) => time * 1000 + timeOrigin,
+    };
+  /** The audio clock and the page's at the same instant, read afresh each time. */
+  const pair = () => {
+    const stamp = context.getOutputTimestamp?.();
+    return stamp?.contextTime !== undefined && stamp.performanceTime
+      ? { audio: stamp.contextTime, page: stamp.performanceTime }
+      : { audio: context.currentTime, page: pageNow() };
+  };
+  return {
+    toClock: (moment) => {
+      const now = pair();
+      return now.audio + (moment - timeOrigin - now.page) / 1000;
+    },
+    toDevice: (time) => {
+      const now = pair();
+      return timeOrigin + now.page + (time - now.audio) * 1000;
+    },
+  };
+}
+
 /** How far ahead clicks are handed to the audio clock, and how often the queue is filled. */
 export const LOOKAHEAD = 0.1;
 /**
@@ -218,12 +261,19 @@ export class Metronome {
     this.list = [...this.list.slice(0, this.next), ...list.slice(this.next)];
   }
 
-  /** Starts a short moment from now, so the first click is never late. */
-  start(): void {
+  /**
+   * Starts a short moment from now, so the first click is never late; or at a given clock time,
+   * the band's (SPEC-14, R-14.2): a time already gone lands on the beat the clock is on, its
+   * past clicks never played.
+   */
+  start(at?: number): void {
     this.stop();
-    this.next = 0;
     this.waiting = false;
-    this.startedAt = this.clock.now() + START_DELAY;
+    const now = this.clock.now();
+    this.startedAt = at ?? now + START_DELAY;
+    let next = 0;
+    while (next < this.list.length && this.at(this.list[next] as Click) < now) next++;
+    this.next = next;
     this.fill();
     this.timer = setInterval(() => this.fill(), FILL_EVERY_MS);
   }
@@ -253,19 +303,24 @@ export class Metronome {
     return this.waiting;
   }
 
-  /** Goes on after a fermata: the rest of the song moves to start a moment from now. */
-  resume(): void {
+  /**
+   * Goes on after a fermata: the rest of the song moves to start a moment from now, or at a given
+   * clock time, the band's (R-14.4).
+   */
+  resume(at?: number): void {
     if (!this.waiting) return;
     this.waiting = false;
     const next = this.list[this.next];
-    if (next) this.startedAt = this.clock.now() + START_DELAY - next.time;
+    if (next) this.startedAt = (at ?? this.clock.now() + START_DELAY) - next.time;
     this.fill();
   }
 
   /** The index of the click the clock has reached, or -1; never past what is scheduled. */
   index(): number {
     const now = this.clock.now();
-    if (!this.isPlaying || now < this.startedAt || this.next === 0) return -1;
+    if (!this.isPlaying || this.next === 0) return -1;
+    const first = this.list[0];
+    if (!first || now < this.at(first)) return -1;
     let low = 0;
     let high = Math.min(this.next, this.list.length) - 1;
     while (low < high) {

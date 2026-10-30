@@ -1,6 +1,16 @@
 import type { Chart } from "chartdown";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { runClock, clicks, continueWith, Metronome, sectionEnd, type Click } from "./engine";
+import { deviceNow } from "../live/clock";
+import {
+  clicks,
+  clockMap,
+  continueWith,
+  Metronome,
+  runClock,
+  sectionEnd,
+  type Click,
+  type ClockMap,
+} from "./engine";
 import {
   clickSounds,
   DEFAULT_SOUND,
@@ -31,6 +41,26 @@ const WAKE_WAIT_MS = 500;
 
 /** How long the hum keeps the speakers awake after Stop, so playing again is heard at once. */
 const HUM_AFTER_STOP_MS = 30_000;
+
+/**
+ * Where a run of the metronome starts on the page's clock, as the band shares it (SPEC-14,
+ * T-3038): the timeline bar it plays from, the moment that bar's first beat sounds, and its
+ * tempo. Every change to what plays (Play, a queued section, a bar tapped, a fermata's end)
+ * makes a new one, with its own id.
+ */
+export interface MetronomeRun {
+  id: string;
+  from: number;
+  moment: number;
+  speed: number;
+  tempo?: number;
+  unit?: BeatUnit;
+}
+
+/** A restart or a stop for a moment ahead happens this long before it, so no click is lost. */
+const EARLY_MS = 150;
+
+const runId = () => Math.random().toString(36).slice(2, 10);
 
 export function useMetronome(chart: Chart) {
   const bars = useMemo(() => timeline(chart), [chart]);
@@ -64,6 +94,25 @@ export function useMetronome(chart: Chart) {
   // The section queued after the one that sounds (R-11.15), and the click it starts on.
   const [queued, setQueued] = useState<number | null>(null);
   const queuedAt = useRef(-1);
+  // The run playing, as the band shares it, and a stop asked for a moment ahead (T-3038).
+  const [run, setRun] = useState<MetronomeRun | null>(null);
+  const [stopping, setStopping] = useState<number | null>(null);
+  const mapping = useRef<ClockMap | null>(null);
+  const later = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  /** A run starting at a click of the playing list, on the page's clock. */
+  const runAt = useCallback((metronome: Metronome, index: number): MetronomeRun | null => {
+    const click = metronome.clicks[index];
+    const map = mapping.current;
+    if (!click || click.bar < 0 || !map) return null;
+    return {
+      id: runId(),
+      from: click.bar,
+      moment: map.toDevice(metronome.at(click)),
+      speed: asked.current.speed ?? 1,
+      ...(asked.current.tempo !== undefined ? { tempo: asked.current.tempo } : {}),
+      ...(asked.current.unit !== undefined ? { unit: asked.current.unit } : {}),
+    };
+  }, []);
 
   // The hum goes on a while after Stop (T-2822), unless the click is off; Play again keeps it.
   const humTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -73,6 +122,9 @@ export function useMetronome(chart: Chart) {
     humming.current = null;
   }, []);
   const stop = useCallback(() => {
+    clearTimeout(later.current);
+    setRun(null);
+    setStopping(null);
     awake.current?.();
     awake.current = null;
     clearTimeout(humTimer.current);
@@ -110,7 +162,16 @@ export function useMetronome(chart: Chart) {
   const play = useCallback(
     (
       from: number,
-      options: { tempo?: number; speed?: number; countIn?: boolean; unit?: BeatUnit } = {},
+      options: {
+        tempo?: number;
+        speed?: number;
+        countIn?: boolean;
+        unit?: BeatUnit;
+        /** The band's moment for its first beat, on the page's clock (T-3038). */
+        startAt?: number;
+        /** The run's id when it was announced ahead (T-3038). */
+        runId?: string;
+      } = {},
     ) => {
       stop();
       asked.current = {
@@ -126,7 +187,18 @@ export function useMetronome(chart: Chart) {
       clearTimeout(humTimer.current);
       if (heard.current.click && heard.current.keepAwake && !humming.current)
         humming.current = keepSpeakersAwake(audio);
-      const list = clicks(bars, { from, countIn: heard.current.countIn, ...options });
+      const { startAt, runId: id, ...timing } = options;
+      const list = clicks(bars, { from, countIn: heard.current.countIn, ...timing });
+      // Announced at once when its moment is known, so the band hears of it before it starts.
+      if (startAt !== undefined)
+        setRun({
+          id: id ?? runId(),
+          from,
+          moment: startAt,
+          speed: timing.speed ?? 1,
+          ...(timing.tempo !== undefined ? { tempo: timing.tempo } : {}),
+          ...(timing.unit !== undefined ? { unit: timing.unit } : {}),
+        });
       // The clock is chosen when the run begins: the audio's if it runs, else the device's,
       // silent, so the pulse never waits on audio a browser keeps asleep (F-013).
       let run = runClock(audio);
@@ -167,7 +239,13 @@ export function useMetronome(chart: Chart) {
         if (begun || engine.current !== metronome) return;
         begun = true;
         run = runClock(audio);
-        metronome.start();
+        const map = clockMap(audio, run.isAudible);
+        mapping.current = map;
+        metronome.start(startAt === undefined ? undefined : map.toClock(startAt));
+        if (startAt === undefined) {
+          const first = metronome.clicks.findIndex((click) => click.bar >= 0);
+          setRun(runAt(metronome, first));
+        }
         frame.current = requestAnimationFrame(tick);
       };
       if (!waking) begin();
@@ -176,7 +254,60 @@ export function useMetronome(chart: Chart) {
         setTimeout(begin, WAKE_WAIT_MS);
       }
     },
-    [bars, stop],
+    [bars, stop, runAt],
+  );
+
+  /**
+   * Plays from a bar at the band's moment (T-3038): the run is announced at once; the playing
+   * one goes on until just before it, so no beat is lost; a moment already gone lands on the
+   * band's beat.
+   */
+  const restartAt = useCallback(
+    (
+      from: number,
+      moment: number,
+      timing: { speed?: number; tempo?: number; unit?: BeatUnit } = {},
+    ) => {
+      clearTimeout(later.current);
+      const id = runId();
+      const options = { ...asked.current, ...timing, countIn: false, startAt: moment, runId: id };
+      const speed = options.speed ?? 1;
+      setRun({ id, from, moment, speed });
+      const wait = moment - deviceNow() - EARLY_MS;
+      if (wait > 0) later.current = setTimeout(() => play(from, options), wait);
+      else play(from, options);
+    },
+    [play],
+  );
+
+  /** Stops at the band's moment (R-14.4): the beats before it still sound. */
+  const stopAt = useCallback(
+    (moment: number) => {
+      clearTimeout(later.current);
+      setStopping(moment);
+      later.current = setTimeout(stop, Math.max(0, moment - deviceNow() - EARLY_MS));
+    },
+    [stop],
+  );
+
+  /** The first bar, or beat, that starts at least `ahead` ms from now, on the page's clock. */
+  const nextAt = useCallback(
+    (ahead: number, bar: boolean): { bar: number; moment: number } | null => {
+      const metronome = engine.current;
+      const map = mapping.current;
+      if (!metronome?.isPlaying || !map) return null;
+      const list = metronome.clicks;
+      const from = Math.max(metronome.index(), 0);
+      const playing = list[from];
+      for (let index = from + 1; index < list.length; index++) {
+        const click = list[index] as Click;
+        if (bar && (click.beat !== 0 || click.bar === playing?.bar)) continue;
+        const moment = map.toDevice(metronome.at(click));
+        if (moment >= deviceNow() + ahead) return { bar: click.bar, moment };
+      }
+      return null;
+    },
+    [],
   );
 
   /**
@@ -243,12 +374,25 @@ export function useMetronome(chart: Chart) {
       const cancel = queued === section;
       queuedAt.current = cancel ? -1 : next.at;
       setQueued(cancel ? null : section);
+      // The band changes there too, at the same beat (R-14.4).
+      setRun(runAt(metronome, next.at));
     },
-    [bars, firstBarOf, queued],
+    [bars, firstBarOf, queued, runAt],
   );
 
-  /** Goes on after a fermata (R-11.6). */
-  const resume = useCallback(() => engine.current?.resume(), []);
+  /** Goes on after a fermata (R-11.6), at once or at the band's moment (R-14.4). */
+  const resume = useCallback(
+    (moment?: number) => {
+      const metronome = engine.current;
+      if (!metronome) return;
+      const map = mapping.current;
+      // The click after the fermata, before resuming hands the next ones over.
+      const after = metronome.scheduled;
+      metronome.resume(moment === undefined || !map ? undefined : map.toClock(moment));
+      setRun(runAt(metronome, after));
+    },
+    [runAt],
+  );
 
   return {
     bars,
@@ -260,6 +404,11 @@ export function useMetronome(chart: Chart) {
     play,
     jump,
     stop,
+    run,
+    stopping,
+    restartAt,
+    stopAt,
+    nextAt,
     resume,
     firstBarOf,
     queue,

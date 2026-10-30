@@ -24,7 +24,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { EIGHTHS_PER_BEAT, meterBeat, type BeatUnit, type Chart } from "chartdown";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { deviceNow } from "../../lib/live/clock";
 import { jumpTarget } from "../../lib/metronome/jump";
 import { speedFor, tapTempo } from "../../lib/metronome/tapTempo";
 import {
@@ -68,6 +69,11 @@ export function useMetronomeControls(
   chart: Chart,
   section: number | null,
   size: "md" | "lg" = "md",
+  /**
+   * Leading a live session (SPEC-14, T-3038): how far ahead the band's moments are set, so every
+   * device hears of them in time; null otherwise, and the metronome answers at once.
+   */
+  lead: number | null = null,
 ) {
   const t = useTranslations("stand");
   const c = useTranslations("chart");
@@ -106,7 +112,24 @@ export function useMetronomeControls(
       ...(tempo !== undefined ? { tempo } : {}),
       ...(counted ? { unit: counted } : {}),
       speed: speed / 100,
+      // Leading, the whole band starts together a moment ahead, with no count-in (R-14.2).
+      ...(lead !== null ? { countIn: false, startAt: deviceNow() + lead } : {}),
     });
+  // Leading, a speed or tempo changed while it plays reaches the whole band at the next bar's
+  // downbeat (R-14.5); alone, it waits for the next Play, as before.
+  const playedAt = useRef({ speed, tapped });
+  useEffect(() => {
+    const before = playedAt.current;
+    playedAt.current = { speed, tapped };
+    if (before.speed === speed && before.tapped === tapped) return;
+    if (lead === null || !metronome.isPlaying) return;
+    const next = metronome.nextAt(lead, true);
+    if (next)
+      metronome.restartAt(next.bar, next.moment, {
+        speed: speed / 100,
+        ...(tapped !== null ? { tempo: tapped } : {}),
+      });
+  }, [speed, tapped, lead, metronome]);
   /** A tap on a bar: start there, or, tapped again, from the top as before (R-11.2). */
   const chooseStart = (inSection: number, number: number) => {
     const index = bars.findIndex((bar) => bar.section === inSection && bar.number === number);
@@ -116,7 +139,11 @@ export function useMetronomeControls(
   const jumpTo = (inSection: number, number: number) => {
     const at = metronome.position?.click.bar ?? 0;
     const to = jumpTarget(bars, inSection, number, Math.max(at, 0));
-    if (to !== null) metronome.jump(to);
+    if (to === null) return;
+    // Leading, the band goes there together at the next bar's downbeat (R-14.4).
+    const next = lead !== null ? metronome.nextAt(lead, true) : null;
+    if (next) metronome.restartAt(to, next.moment);
+    else metronome.jump(to);
   };
   const startIn = (inSection: number): StartBar | undefined => {
     const bar = start !== null ? bars[start] : undefined;
@@ -125,8 +152,13 @@ export function useMetronomeControls(
 
   /** Play or Stop, from the button or the space bar (R-11.10). */
   const toggle = () => {
-    if (metronome.isPlaying) metronome.stop();
-    else if (metronome.needsTempo && tapped === null) setTempoOpen(true);
+    if (metronome.isPlaying) {
+      // Leading, the band stops together on a beat a moment ahead; a second tap stops at once.
+      const beat =
+        lead !== null && metronome.stopping === null ? metronome.nextAt(lead, false) : null;
+      if (beat) metronome.stopAt(beat.moment);
+      else metronome.stop();
+    } else if (metronome.needsTempo && tapped === null) setTempoOpen(true);
     else if (metronome.needsUnit && unit === null) setUnitOpen(true);
     else playFrom(tapped ?? undefined);
   };
@@ -463,7 +495,14 @@ export function useMetronomeControls(
     isPlaying: metronome.isPlaying,
     isWaiting: metronome.isWaiting,
     toggle,
-    resume: metronome.resume,
+    /** Goes on after a fermata; leading, at a moment ahead, for the whole band (R-14.4). */
+    resume: () => metronome.resume(lead !== null ? deviceNow() + lead : undefined),
+    /** The run playing and a stop asked for, as the band shares them (T-3038). */
+    run: metronome.run,
+    stopping: metronome.stopping,
+    /** For a follower: play from a bar, or stop, at the band's moment (T-3038). */
+    restartAt: metronome.restartAt,
+    stopAt: metronome.stopAt,
     chooseStart,
     jumpTo,
     startIn,

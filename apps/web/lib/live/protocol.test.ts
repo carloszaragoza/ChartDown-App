@@ -10,6 +10,9 @@ import {
   samePosition,
   sessionFromRow,
   standSong,
+  readRun,
+  runStep,
+  type LiveMetronome,
 } from "./protocol";
 
 describe("SPEC-12 live mode's messages", () => {
@@ -76,6 +79,9 @@ describe("SPEC-12 live mode's messages", () => {
       playing: true,
       at: 3,
       speed: 0.8,
+      // No run nor stop from a leader that doesn't share its clock yet (T-3038).
+      run: null,
+      stopAt: null,
     });
     expect(readMetronome({ song: 1 })).toBeNull();
   });
@@ -98,5 +104,97 @@ describe("SPEC-12 live mode's messages", () => {
     expect(followAddress("set", session, "?view=letters")).toBe(
       "/sets/set/songs/2/stand?view=letters&s=2",
     );
+  });
+});
+
+describe("T-3038 a follower plays the leader's runs at their moments", () => {
+  const leader = (over: Partial<LiveMetronome> = {}): LiveMetronome => ({
+    song: 1,
+    playing: true,
+    at: 0,
+    speed: 1,
+    run: { id: "r1", from: 4, moment: 10_000, speed: 0.9 },
+    stopAt: null,
+    ...over,
+  });
+  // The leader's clock is 250 ms ahead of this device's.
+  const toLocal = (moment: number) => moment - 250;
+
+  it("R-14.2 a new run starts at its moment on this device's clock, from its bar", () => {
+    expect(runStep(leader(), null, { playing: false, stopping: null }, toLocal)).toEqual({
+      kind: "start",
+      run: { id: "r1", from: 4, moment: 10_000, speed: 0.9 },
+      at: 9750,
+    });
+  });
+
+  it("R-14.3 the run already followed changes nothing, however often it is said", () => {
+    expect(runStep(leader(), "r1", { playing: true, stopping: null }, toLocal)).toEqual({
+      kind: "none",
+    });
+  });
+
+  it("R-14.4 a stop at the leader's moment, once; at once when the leader has stopped", () => {
+    const stopping = leader({ stopAt: 12_000 });
+    expect(runStep(stopping, "r1", { playing: true, stopping: null }, toLocal)).toEqual({
+      kind: "stop",
+      at: 11_750,
+    });
+    expect(runStep(stopping, "r1", { playing: true, stopping: 11_750 }, toLocal)).toEqual({
+      kind: "none",
+    });
+    expect(
+      runStep(
+        leader({ playing: false, run: null }),
+        "r1",
+        { playing: true, stopping: null },
+        toLocal,
+      ),
+    ).toEqual({ kind: "stop", at: null });
+  });
+
+  it("R-14.5 a speed or tempo changed while it plays is a new run: the follower takes it at its moment", () => {
+    const faster = leader({ run: { id: "r2", from: 6, moment: 14_000, speed: 1.1, tempo: 96 } });
+    expect(runStep(faster, "r1", { playing: true, stopping: null }, toLocal)).toEqual({
+      kind: "start",
+      run: { id: "r2", from: 6, moment: 14_000, speed: 1.1, tempo: 96 },
+      at: 13_750,
+    });
+  });
+
+  it("R-14.6 a run carries the time only: the click and its levels stay each musician's", () => {
+    const run = readRun({
+      id: "x",
+      from: 1,
+      moment: 2,
+      speed: 1,
+      click: true,
+      beat: 90,
+      eighths: 40,
+      countIn: true,
+    });
+    expect(Object.keys(run ?? {}).sort()).toEqual(["from", "id", "moment", "speed"]);
+  });
+
+  it("R-14.2 a run read from the channel, or nothing when it is not one", () => {
+    expect(readRun({ id: "x", from: 2, moment: 5.5, speed: 1, tempo: 90 })).toEqual({
+      id: "x",
+      from: 2,
+      moment: 5.5,
+      speed: 1,
+      tempo: 90,
+    });
+    expect(readRun({ id: "x", from: -1, moment: 1 })).toBeNull();
+    expect(readRun({ from: 2, moment: 1 })).toBeNull();
+    expect(
+      readMetronome({
+        song: 1,
+        playing: true,
+        at: 3,
+        speed: 1,
+        run: { id: "x", from: 3, moment: 9 },
+        stopAt: 20,
+      }),
+    ).toMatchObject({ run: { id: "x", from: 3, moment: 9 }, stopAt: 20 });
   });
 });

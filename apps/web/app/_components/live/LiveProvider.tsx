@@ -57,7 +57,18 @@ export interface Live {
   target: (LivePosition & { seq: number }) | null;
   /** The leader's cue, on every device in the session (R-12.4). */
   cue: number | null;
-  connected: { id: string; name: string; sync?: LiveSync | undefined }[];
+  connected: {
+    id: string;
+    name: string;
+    sync?: LiveSync | undefined;
+    /** Its measured round trip to the leader, in milliseconds (R-14.1). */
+    delay?: number | undefined;
+  }[];
+  /**
+   * How far ahead the leader sets the band's moments (R-14.2, Technical Plan 7.2): half a second,
+   * or twice the slowest connected device's round trip.
+   */
+  lead: number;
   /** This follower's knowledge of the leader's clock (R-14.1); null for the leader or outside. */
   sync: LiveSync | null;
   /** The leader's clock as this device knows it (SPEC-14), for scheduling on it (T-3038). */
@@ -95,6 +106,8 @@ const PINGS_ON_JOIN = 8;
 const PINGS_EVERY = 3;
 const PING_EVERY_MS = 10_000;
 const PING_GAP_MS = 120;
+/** The least the band's moments are set ahead (R-14.2): half a second. */
+const MIN_LEAD_MS = 500;
 // Which sessions this device follows: kept for the tab, so a reload stays in (R-12.9).
 const joinedKey = (session: string) => `cd-live-joined:${session}`;
 const joinedHere = new Set<string>();
@@ -264,6 +277,7 @@ export function LiveProvider({
     let wasPaused = false;
     let current: RealtimeChannel | null = null;
     let told: LiveSync | null = null;
+    let toldDelay = 0;
     const timers: number[] = [];
     /** Sends `count` clock questions, a moment apart, so one of them meets a quiet network. */
     const ask = (count: number) => {
@@ -316,10 +330,13 @@ export function LiveProvider({
           if (isLeading || !answer || answer.to !== me.id || !clock) return;
           clock.add(sampleOf(answer.sent, answer.received, answer.answered, got));
           const now: LiveSync = clock.isInSync ? "in" : "syncing";
+          const delay = Math.round(clock.best()?.delay ?? 0);
           setSync(now);
-          if (now !== told) {
+          // Said again when it changes enough to change the leader's lead.
+          if (now !== told || Math.abs(delay - toldDelay) >= 5) {
             told = now;
-            void current?.track({ id: me.id, name: me.name, sync: now });
+            toldDelay = delay;
+            void current?.track({ id: me.id, name: me.name, sync: now, delay });
           }
         })
         .on("broadcast", { event: "ended" }, () => {
@@ -328,10 +345,19 @@ export function LiveProvider({
         })
         .on("presence", { event: "sync" }, () => {
           const state =
-            current?.presenceState<{ id: string; name: string; sync?: LiveSync }>() ?? {};
-          const people = new Map<string, { name: string; sync?: LiveSync | undefined }>();
+            current?.presenceState<{
+              id: string;
+              name: string;
+              sync?: LiveSync;
+              delay?: number;
+            }>() ?? {};
+          const people = new Map<
+            string,
+            { name: string; sync?: LiveSync | undefined; delay?: number | undefined }
+          >();
           for (const metas of Object.values(state))
-            for (const meta of metas) people.set(meta.id, { name: meta.name, sync: meta.sync });
+            for (const meta of metas)
+              people.set(meta.id, { name: meta.name, sync: meta.sync, delay: meta.delay });
           setConnected([...people].map(([id, person]) => ({ id, ...person })));
         })
         .subscribe((state) => {
@@ -537,6 +563,12 @@ export function LiveProvider({
     target,
     cue: cueHeard === undefined ? (session?.cue ?? null) : cueHeard,
     connected,
+    lead: Math.max(
+      MIN_LEAD_MS,
+      ...connected.map((person) =>
+        typeof person.delay === "number" && Number.isFinite(person.delay) ? person.delay * 2 : 0,
+      ),
+    ),
     sync: role === "follower" && isJoined ? (sync ?? "syncing") : null,
     clock: role === "follower" && isJoined ? clock : null,
     leaderMetronome,

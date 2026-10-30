@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EASE_MS, IN_SYNC_DELAY_MS, KEPT, sampleOf, SharedClock } from "./clock";
+import { DIRECT_DELAY_MS, EASE_MS, IN_SYNC_SAMPLES, KEPT, sampleOf, SharedClock } from "./clock";
 
 /** A device clock the test moves by hand. */
 function handClock(start = 1000) {
@@ -17,15 +17,24 @@ describe("T-3037 live sync's shared clock", () => {
     expect(sampleOf(sent, received, answered, got)).toEqual({ offset: 250, delay: 8 });
   });
 
-  it("R-14.1 the fastest exchange kept sets the offset; In sync once one is under 10 ms", () => {
+  it("R-14.1 the fastest exchange kept sets the offset; In sync once 3 are kept", () => {
     const clock = new SharedClock(handClock().now);
     expect(clock.isKnown).toBe(false);
     clock.add({ offset: 262, delay: 40 });
     expect(clock.isInSync).toBe(false);
-    clock.add({ offset: 251, delay: IN_SYNC_DELAY_MS - 2 });
+    clock.add({ offset: 251, delay: DIRECT_DELAY_MS - 2 });
+    expect(clock.isInSync).toBe(IN_SYNC_SAMPLES <= 2);
     clock.add({ offset: 270, delay: 60 });
     expect(clock.best()).toEqual({ offset: 251, delay: 8 });
     expect(clock.isInSync).toBe(true);
+  });
+
+  it("R-14.7 a round trip under 10 ms, as on one Wi-Fi, bounds the error to 5 ms: direct", () => {
+    const clock = new SharedClock(handClock().now);
+    clock.add({ offset: 10, delay: 120 });
+    expect(clock.isDirect).toBe(false);
+    clock.add({ offset: 12, delay: DIRECT_DELAY_MS - 1 });
+    expect(clock.isDirect).toBe(true);
   });
 
   it("R-14.1 only the last 16 exchanges count", () => {
@@ -52,7 +61,7 @@ describe("T-3037 live sync's shared clock", () => {
   it("R-14.9 a lost connection keeps the clock it knows", () => {
     const device = handClock();
     const clock = new SharedClock(device.now);
-    clock.add({ offset: -40, delay: 5 });
+    for (let index = 0; index < IN_SYNC_SAMPLES; index++) clock.add({ offset: -40, delay: 5 });
     device.advance(10 * 60 * 1000);
     expect(clock.leaderNow()).toBe(device.now() - 40);
     expect(clock.isInSync).toBe(true);

@@ -55,7 +55,8 @@ import { BeatsControl } from "../../../_components/BeatsControl";
 import { barIn, usePlaybackBar } from "../../../_components/usePlaybackBar";
 import { GoLive, LiveButton, LiveStrip } from "../../../_components/live/LiveControls";
 import { useLive } from "../../../_components/live/LiveProvider";
-import { metronomeStep } from "../../../../lib/live/protocol";
+import type { BeatUnit } from "chartdown";
+import { metronomeStep, runStep } from "../../../../lib/live/protocol";
 import { copyAt } from "../../../../lib/chart/copies";
 import { glide, nearestCard, stackTarget, type StandMotion } from "../../../../lib/stand/motion";
 import { barProgress } from "../../../../lib/stand/progress";
@@ -209,6 +210,9 @@ function StandModeView({
   // The set's songs, to jump to another one when a song is cut short (R-03.13).
   const [isSongsOpen, setSongsOpen] = useState(false);
   const [current, setCurrent] = useState(() => readSection(chart, String(initial + 1)));
+  // Live mode (SPEC-12, SPEC-14): leading, the metronome sets the band's moments a lead ahead.
+  const session = useLive();
+  const liveLead = session?.role === "leader" ? session.lead : null;
   // The visual metronome (R-11.1 to R-11.5): it plays from the section being read, and the
   // section follows it.
   const {
@@ -233,7 +237,11 @@ function StandModeView({
     chooseStart,
     jumpTo,
     startIn,
-  } = useMetronomeControls(chart, current);
+    run,
+    stopping,
+    restartAt,
+    stopAt,
+  } = useMetronomeControls(chart, current, "md", liveLead);
   const timelineBars = player.bars;
   // Numbers or letters, Beats and the theme change here at once, with no trip to the server
   // (F-005); the address follows, so a reload or a shared link shows the same.
@@ -333,16 +341,25 @@ function StandModeView({
 
   // Live mode (SPEC-12): the leader's device says where it is and what its metronome does; a
   // follower's moves with it, unless they looked away (R-12.3 to R-12.7).
-  const session = useLive();
   const isLeading = session?.role === "leader";
   const report = session?.report;
   const reportMetronome = session?.reportMetronome;
   useEffect(() => {
     if (isLeading) report?.({ section: current, queued });
   }, [isLeading, report, current, queued]);
+  // The leader's metronome, with its run and any stop on the leader's clock, so the band plays
+  // the same beats at the same moments (R-14.2 to R-14.4); sent again every bar, so a musician
+  // who joins late starts on the band's beat.
   useEffect(() => {
-    if (isLeading) reportMetronome?.({ playing: isPlaying, at: playingAt ?? null, speed });
-  }, [isLeading, reportMetronome, isPlaying, playingAt, speed]);
+    if (isLeading)
+      reportMetronome?.({
+        playing: isPlaying,
+        at: playingAt ?? null,
+        speed,
+        run,
+        stopAt: stopping,
+      });
+  }, [isLeading, reportMetronome, isPlaying, playingAt, speed, run, stopping]);
   const isFollowing = session?.role === "follower" && session.isJoined && !session.isDetached;
   const aim = isFollowing && session.target?.song === session.song ? session.target : null;
   const [aimed, setAimed] = useState<number | null>(null);
@@ -352,8 +369,33 @@ function StandModeView({
   }
   const leaderMetronome = isFollowing ? (session?.leaderMetronome ?? null) : null;
   const liveSong = session?.song ?? null;
+  // A follower that knows the leader's clock plays the leader's runs at their moments, on its own
+  // clock (R-14.2 to R-14.4); one that doesn't yet follows the leader's bar as before.
+  const followedRun = useRef<string | null>(null);
+  const clock = session?.clock ?? null;
   useEffect(() => {
-    if (!leaderMetronome || liveSong === null) return;
+    if (!leaderMetronome || liveSong === null || leaderMetronome.song !== liveSong) return;
+    if (clock?.isKnown && (leaderMetronome.run || !leaderMetronome.playing)) {
+      const step = runStep(
+        leaderMetronome,
+        followedRun.current,
+        { playing: isPlaying, stopping },
+        (moment) => clock.toLocal(moment),
+      );
+      if (step.kind === "start") {
+        followedRun.current = step.run.id;
+        restartAt(step.run.from, step.at, {
+          speed: step.run.speed,
+          ...(step.run.tempo !== undefined ? { tempo: step.run.tempo } : {}),
+          ...(step.run.unit !== undefined ? { unit: step.run.unit as BeatUnit } : {}),
+        });
+      } else if (step.kind === "stop") {
+        followedRun.current = null;
+        if (step.at === null) player.stop();
+        else stopAt(step.at);
+      }
+      return;
+    }
     const step = metronomeStep(leaderMetronome, {
       song: liveSong,
       playing: isPlaying,
@@ -362,7 +404,7 @@ function StandModeView({
     // The beat follows the leader's; the click stays this musician's choice (R-12.7).
     if (step.kind === "start") player.play(step.at, { speed: step.speed, countIn: false });
     else if (step.kind === "stop") player.stop();
-  }, [leaderMetronome, liveSong, isPlaying, playingAt, player]);
+  }, [leaderMetronome, liveSong, isPlaying, playingAt, player, clock, stopping, restartAt, stopAt]);
   // A follower who moves on their own looks away; Back to live returns them (R-12.5).
   const detach = session?.detach;
 
