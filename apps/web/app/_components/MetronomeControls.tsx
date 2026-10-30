@@ -24,7 +24,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { EIGHTHS_PER_BEAT, meterBeat, type BeatUnit, type Chart } from "chartdown";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { deviceNow } from "../../lib/live/clock";
 import { jumpTarget } from "../../lib/metronome/jump";
 import { speedFor, tapTempo } from "../../lib/metronome/tapTempo";
@@ -115,6 +115,21 @@ export function useMetronomeControls(
       // Leading, the whole band starts together a moment ahead, with no count-in (R-14.2).
       ...(lead !== null ? { countIn: false, startAt: deviceNow() + lead } : {}),
     });
+  // Leading, a speed or tempo changed while it plays reaches the whole band at the next bar's
+  // downbeat (R-14.5); alone, it waits for the next Play, as before.
+  const playedAt = useRef({ speed, tapped });
+  useEffect(() => {
+    const before = playedAt.current;
+    playedAt.current = { speed, tapped };
+    if (before.speed === speed && before.tapped === tapped) return;
+    if (lead === null || !metronome.isPlaying) return;
+    const next = metronome.nextAt(lead, true);
+    if (next)
+      metronome.restartAt(next.bar, next.moment, {
+        speed: speed / 100,
+        ...(tapped !== null ? { tempo: tapped } : {}),
+      });
+  }, [speed, tapped, lead, metronome]);
   /** A tap on a bar: start there, or, tapped again, from the top as before (R-11.2). */
   const chooseStart = (inSection: number, number: number) => {
     const index = bars.findIndex((bar) => bar.section === inSection && bar.number === number);

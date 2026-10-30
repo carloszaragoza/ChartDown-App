@@ -153,6 +153,29 @@ describe("T-3038 a follower plays the leader's runs at their moments", () => {
     ).toEqual({ kind: "stop", at: null });
   });
 
+  it("R-14.5 a speed or tempo changed while it plays is a new run: the follower takes it at its moment", () => {
+    const faster = leader({ run: { id: "r2", from: 6, moment: 14_000, speed: 1.1, tempo: 96 } });
+    expect(runStep(faster, "r1", { playing: true, stopping: null }, toLocal)).toEqual({
+      kind: "start",
+      run: { id: "r2", from: 6, moment: 14_000, speed: 1.1, tempo: 96 },
+      at: 13_750,
+    });
+  });
+
+  it("R-14.6 a run carries the time only: the click and its levels stay each musician's", () => {
+    const run = readRun({
+      id: "x",
+      from: 1,
+      moment: 2,
+      speed: 1,
+      click: true,
+      beat: 90,
+      eighths: 40,
+      countIn: true,
+    });
+    expect(Object.keys(run ?? {}).sort()).toEqual(["from", "id", "moment", "speed"]);
+  });
+
   it("R-14.2 a run read from the channel, or nothing when it is not one", () => {
     expect(readRun({ id: "x", from: 2, moment: 5.5, speed: 1, tempo: 90 })).toEqual({
       id: "x",
