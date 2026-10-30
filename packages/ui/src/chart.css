@@ -993,13 +993,6 @@
   }
 }
 
-/* Stand mode's top bar (T-3036): the song takes the line's room, never narrower than this, so
-   when the actions don't fit beside it they go under it together instead of squeezing it. */
-.cd-stand-bar__song {
-  flex: 1 1 calc(var(--spacing-12) * 6);
-  min-width: 0;
-}
-
 /* Stand mode v2 (R-03.12, design handoff 03 Stand mode v2): the sections as a stack that scrolls
    inside itself, each card snapping to the top, the active zone. Every card is one size, current
    or not: the frame is always there, only its color changes, so nothing moves while scrolling. */

@@ -987,11 +987,6 @@ function StandModeView({
   // band's audio and, for the MD in a set, Live.
   const actions = (
     <HStack gap={2} vAlign="center">
-      {!isPlaying && counter && (
-        <Text type="large" weight="bold">
-          {counter}
-        </Text>
-      )}
       {metronomeButton}
       {audio}
       {set && <LiveButton sections={sectionNames} />}
@@ -1077,13 +1072,13 @@ function StandModeView({
               </nav>
             ) : (
               <>
-                {/* The top bar on an iPad or a desktop (T-2706, T-3032, T-3036): the way back and
-                  the song, then the actions by how much they are used: the metronome, the band's
-                  audio, Live for the MD, the set's songs, and Settings last. One line when it
-                  fits; otherwise the actions go under the song together, never a gap between. */}
+                {/* The top bar on an iPad or a desktop (T-2706, T-3032, T-3036): one line, always.
+                  The way back and the song, then the actions by how much they are used: the
+                  metronome, the band's audio, Live for the MD, the set's songs, and Settings
+                  last. When room runs short the song's title shortens, never the controls. */}
                 <nav aria-label={set ? t("setBar") : t("turn")}>
-                  <HStack gap={3} vAlign="center" wrap="wrap">
-                    <div className="cd-stand-bar__song">
+                  <HStack gap={3} vAlign="center">
+                    <StackItem size="fill">
                       <HStack gap={3} vAlign="center">
                         {/* The way back is quiet: used once, at the end, so the song's title leads
                           the line (T-2810). */}
@@ -1109,6 +1104,9 @@ function StandModeView({
                             </Heading>
                             <Text type="supporting" maxLines={1}>
                               {[
+                                // "Starts at bar 3", chosen with a tap (R-11.2): said first here, so
+                                // the controls keep their line and it is never shortened (T-3036).
+                                !isPlaying ? counter : null,
                                 `${c("key")} ${shown}`,
                                 shown !== written ? c("writtenIn", { key: written }) : null,
                                 chart.header.meter,
@@ -1121,8 +1119,8 @@ function StandModeView({
                           </VStack>
                         </StackItem>
                       </HStack>
-                    </div>
-                    <HStack gap={2} vAlign="center" wrap="wrap">
+                    </StackItem>
+                    <HStack gap={2} vAlign="center">
                       {actions}
                       {songsButton}
                       {settingsButton}
