@@ -1,14 +1,15 @@
 import type { ReactNode } from "react";
 import { authEnabled } from "../../../lib/auth/enabled";
 import { isOpen, sessionFromRow, type LiveSession } from "../../../lib/live/protocol";
+import { effectiveLineup } from "../../../lib/sets/lineup";
 import { createClient, readUser } from "../../../lib/supabase/server";
 import { UUID } from "../../versions/[id]/load";
 import { LiveProvider } from "../../_components/live/LiveProvider";
 
 /**
  * A set's pages share its live session (SPEC-12), so the channel stays open from song to song.
- * Only whoever may join it gets one: the band's MD, the set's temporary MD and its lineup
- * (R-12.12); the database says the same to anyone else.
+ * Only whoever may join it gets one: the band's MD, the set's temporary MD and its lineup, its
+ * own or else the band's default instruments (R-12.12, R-05.3); the database says the same to anyone else.
  */
 export default async function SetLayout({
   params,
@@ -36,17 +37,19 @@ export default async function SetLayout({
   ]);
   if (!member) return children;
   const today = new Date().toISOString().slice(0, 10);
-  const [{ data: temp }, { count: plays }] = await Promise.all([
+  const [{ data: temp }, { data: lineup }, { data: defaults }] = await Promise.all([
     supabase.from("set_temp_md").select("until").eq("set_id", id).eq("member_id", member.id),
-    supabase
-      .from("set_lineup")
-      .select("member_id", { count: "exact", head: true })
-      .eq("set_id", id)
-      .eq("member_id", member.id),
+    supabase.from("set_lineup").select("member_id, instrument_id").eq("set_id", id),
+    supabase.from("member_instruments").select("instrument_id").eq("member_id", member.id),
   ]);
   const canLead =
     member.role === "md" ||
     (temp ?? []).some((row) => row.until === null || (row.until as string) >= today);
+  // The set's own lineup, or the band's default instruments when it has none (R-05.3, F-012).
+  const plays = effectiveLineup(
+    [{ id: member.id, defaults: (defaults ?? []).map((row) => row.instrument_id as string) }],
+    (lineup ?? []) as { member_id: string; instrument_id: string }[],
+  ).get(member.id)?.length;
   if (!canLead && !plays) return children;
 
   const { data: row } = await supabase
