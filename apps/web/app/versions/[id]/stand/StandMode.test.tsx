@@ -54,7 +54,9 @@ describe("R-03.3 R-03.12 stand mode", () => {
     expect(current).toMatch(/^data-state="current" aria-current="true"/);
     expect(html.match(/data-state="\w+" aria-current="true"/g)).toHaveLength(1);
     // A compact card's name: a step smaller, still a heading of level 2 (T-3032).
-    expect(current).toMatch(/cd-stand-card__now">Now<.*?<h3[^>]*aria-level="2"[^>]*>Chorus<\/h3>/s);
+    expect(current).toMatch(
+      /cd-stand-card__now">Now<.*?<h2[^>]*cd-section-name--compact[^>]*>Chorus<\/h2>/s,
+    );
     expect(html.match(/cd-stand-card__now/g)).toHaveLength(1);
     expect(html.match(/cd-chart cd-chart--lg/g)?.length).toBeGreaterThan(7);
     // Verse 2, still to come, shows its note in its own card (R-06.4 filters them on the server).

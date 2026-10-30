@@ -1,7 +1,7 @@
 "use client";
 
 import { BottomSheet } from "@astryxdesign/core/BottomSheet";
-import { Dialog } from "@astryxdesign/core/Dialog";
+import { AlertDialog } from "@astryxdesign/core/AlertDialog";
 import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
@@ -264,33 +264,32 @@ export function LiveButton({ sections }: { sections: readonly string[] }) {
       >
         {t("live")}
       </Button>
-      <Dialog isOpen={isAsking} onOpenChange={setAsking} padding={4}>
-        <VStack gap={4}>
-          <Heading level={2}>{t("confirmTitle")}</Heading>
-          <Text>{t("confirmText", { count: live.audience })}</Text>
-          {live.error && (
-            <Text type="supporting">{live.error === "already" ? t("already") : t("failed")}</Text>
-          )}
-          <HStack gap={2} hAlign="end" wrap="wrap">
-            <Button label={t("cancel")} variant="secondary" onClick={() => setAsking(false)} />
-            <Button
-              label={t("start")}
-              variant="primary"
-              icon={<Icon icon={LiveIcon} />}
-              isLoading={isStarting}
-              onClick={() => {
-                setStarting(true);
-                void live
-                  .start()
-                  .then((started) => {
-                    if (started) setAsking(false);
-                  })
-                  .finally(() => setStarting(false));
-              }}
-            />
-          </HStack>
-        </VStack>
-      </Dialog>
+      {/* A confirmation, its focus on Cancel: a tap on stage reaches the whole band. */}
+      <AlertDialog
+        isOpen={isAsking}
+        onOpenChange={setAsking}
+        title={t("confirmTitle")}
+        description={
+          live.error === "already"
+            ? t("already")
+            : live.error
+              ? t("failed")
+              : t("confirmText", { count: live.audience })
+        }
+        actionLabel={t("start")}
+        actionVariant="primary"
+        cancelLabel={t("cancel")}
+        isActionLoading={isStarting}
+        onAction={() => {
+          setStarting(true);
+          void live
+            .start()
+            .then((started) => {
+              if (started) setAsking(false);
+            })
+            .finally(() => setStarting(false));
+        }}
+      />
     </>
   );
 }

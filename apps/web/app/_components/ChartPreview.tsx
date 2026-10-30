@@ -102,7 +102,8 @@ export function ChartSection({
       <VStack gap={isCompact ? 2 : 3}>
         <HStack gap={2} vAlign="center" wrap="wrap">
           {badge}
-          <Heading level={isCompact ? 3 : 2} accessibilityLevel={2}>
+          {/* A compact card's name looks a step smaller, still a heading of level 2. */}
+          <Heading level={2} {...(isCompact ? { className: "cd-section-name--compact" } : {})}>
             {section.name}
           </Heading>
           <Text type="supporting">

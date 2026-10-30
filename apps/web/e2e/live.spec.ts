@@ -87,13 +87,13 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 the band follows 
   // notice, and Cancel starts nothing.
   await page.goto(`${setAddress}/songs/1/stand`);
   await page.getByRole("button", { name: "Go live" }).click();
-  const ask = page.getByRole("dialog", { name: "Start live mode?" });
+  const ask = page.getByRole("alertdialog", { name: "Start live mode?" });
   await expect(ask).toContainText("The musician in this set's lineup gets a notice");
   await ask.getByRole("button", { name: "Cancel" }).click();
   await expect(page.getByText("You lead", { exact: false })).toHaveCount(0);
   await page.getByRole("button", { name: "Go live" }).click();
   await page
-    .getByRole("dialog", { name: "Start live mode?" })
+    .getByRole("alertdialog", { name: "Start live mode?" })
     .getByRole("button", { name: "Go live" })
     .click();
   await expect(page.getByText("You lead", { exact: false })).toBeVisible(FOLLOW);

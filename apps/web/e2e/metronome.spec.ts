@@ -241,7 +241,8 @@ test("R-11.9 T-2808 the tempo stepper plays at 74 while the chart still says 71"
   await expect(sheet.getByText("104% · 74 bpm")).toBeVisible();
   await page.keyboard.press("Escape");
   // The metronome plays at 74; the chart still says 71.
-  await expect(page.getByRole("group", { name: "Metronome" }).first()).toContainText("74");
+  // The top bar's metronome is one button, Play with the tempo on it (T-3032).
+  await expect(page.getByRole("button", { name: "Play" }).first()).toContainText("74");
   await expect(page.getByText(/Tempo 71/).first()).toBeVisible();
 });
 
@@ -254,8 +255,7 @@ test("R-11.9 T-2808 a tempo with a decimal plays as written: 85.5, then 86.5", a
     content: "---\ntempo: 85.5\n---\n## Verse\n1 | 4 | 5 | 1\n",
   });
   await page.goto(`/versions/${id}/stand`);
-  const metronome = page.getByRole("group", { name: "Metronome" }).first();
-  await expect(metronome).toContainText("85.5");
+  await expect(page.getByRole("button", { name: "Play" }).first()).toContainText("85.5");
   await openStandSettings(page, "Metronome", true);
   const sheet = page.getByRole("dialog");
   await expect(sheet.getByRole("spinbutton", { name: "Tempo" })).toHaveValue("85.5");

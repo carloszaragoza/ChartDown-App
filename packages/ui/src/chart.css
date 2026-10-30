@@ -1055,8 +1055,13 @@
   --chart-bar-line: calc(var(--border-width) * 3) solid var(--color-border-emphasized);
   --chart-repeat-line: calc(var(--border-width) * 5) double var(--color-border-emphasized);
 }
-.cd-stand-card:not([data-state="current"]) :is(h2, h3) {
+.cd-stand-card:not([data-state="current"]) h2 {
   color: var(--color-text-secondary);
+}
+/* A compact card's name (T-3032): a heading of level 2, at the theme's third heading size. */
+.cd-stand-card .cd-section-name--compact {
+  font-size: var(--text-heading-3-size);
+  line-height: var(--text-heading-3-leading);
 }
 .cd-stand-card[data-state="past"] {
   opacity: 0.45;
@@ -1115,7 +1120,12 @@
   padding: var(--spacing-2) var(--spacing-3) var(--spacing-3);
   scroll-snap-align: none;
 }
-.cd-stand-stack[data-layout="song"] .cd-stand-card[data-state="past"] {
+.cd-stand-stack[data-layout="song"] /* A compact card's name (T-3032): a heading of level 2, at the theme's third heading size. */
+.cd-stand-card .cd-section-name--compact {
+  font-size: var(--text-heading-3-size);
+  line-height: var(--text-heading-3-leading);
+}
+.cd-stand-card[data-state="past"] {
   opacity: 1;
 }
 .cd-stand-stack[data-layout="song"] .cd-stand-card:not([data-state="current"]) .cd-chart {
@@ -1123,7 +1133,7 @@
   --chart-bar-line: calc(var(--border-width) * 3) solid var(--chart-ink);
   --chart-repeat-line: calc(var(--border-width) * 5) double var(--chart-ink);
 }
-.cd-stand-stack[data-layout="song"] .cd-stand-card:not([data-state="current"]) :is(h2, h3) {
+.cd-stand-stack[data-layout="song"] .cd-stand-card:not([data-state="current"]) h2 {
   color: var(--color-text-primary);
 }
 .cd-stand-stack[data-layout="song"] .cd-chart {
