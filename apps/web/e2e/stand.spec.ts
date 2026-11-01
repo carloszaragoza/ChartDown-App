@@ -295,6 +295,43 @@ test("R-03.12 Next, a pedal, a tap on a card and a settled scroll each make a se
   await expect(page).toHaveURL(/\?s=3$/);
 });
 
+test("R-11.10 T-3044 on a touch screen a tap readies the pedal's field, and its arrows turn sections", async ({
+  page,
+  request,
+}) => {
+  const id = await createVersion(request, { title: `Pedal ${Date.now()}`, content: STACK });
+  await page.goto(`/versions/${id}/stand`);
+  await expectStandNow(page, "Verse");
+  const field = page.locator("[data-pedal]");
+  await expect(field).toHaveCount(1);
+  await standNow(page).getByRole("heading", { level: 2, name: "Verse", exact: true }).tap();
+  await expect(field).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await expectStandNow(page, "Chorus");
+  await page.keyboard.press("ArrowLeft");
+  await expectStandNow(page, "Verse");
+  // A tap in Settings leaves the focus to the sheet.
+  const sheet = await openStandSettings(page);
+  await sheet.getByRole("tab", { name: "Screen" }).tap();
+  await expect(field).not.toBeFocused();
+});
+
+test.describe("on a computer", () => {
+  test.use({ hasTouch: false });
+
+  test("R-11.10 T-3044 there is no pedal's field, and the arrow keys turn sections as before", async ({
+    page,
+    request,
+  }) => {
+    const id = await createVersion(request, { title: `Keys ${Date.now()}`, content: STACK });
+    await page.goto(`/versions/${id}/stand`);
+    await expectStandNow(page, "Verse");
+    await expect(page.locator("[data-pedal]")).toHaveCount(0);
+    await page.keyboard.press("ArrowRight");
+    await expectStandNow(page, "Chorus");
+  });
+});
+
 test("R-03.12 T-2823 the whole song, which a pinch chose, shows every section on one screen", async ({
   page,
   request,
