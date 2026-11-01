@@ -1,7 +1,7 @@
 "use client";
 
 import { HStack } from "@astryxdesign/core/HStack";
-import { Item } from "@astryxdesign/core/Item";
+import { ListItem } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import { useEffect, useRef, type ReactNode } from "react";
@@ -39,8 +39,7 @@ export function ActionRow({
   const link = isLink ? { interactiveRef: first } : {};
   if (!isPhone)
     return (
-      <Item
-        as="li"
+      <ListItem
         label={label}
         {...(description ? { description } : {})}
         {...(startContent ? { startContent } : {})}
@@ -53,8 +52,7 @@ export function ActionRow({
       />
     );
   return (
-    <Item
-      as="li"
+    <ListItem
       label={label}
       {...(startContent ? { startContent } : {})}
       description={

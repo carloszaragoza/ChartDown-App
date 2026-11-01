@@ -6,9 +6,8 @@ import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Item } from "@astryxdesign/core/Item";
 import { LayoutHeader } from "@astryxdesign/core/Layout";
-import { List } from "@astryxdesign/core/List";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import {
@@ -286,7 +285,7 @@ export async function HomeView({
                     {t("done", { count: steps.filter((step) => step.done).length })}
                   </Text>
                 </HStack>
-                <List hasDividers edgeCompensation="inline">
+                <List hasDividers edge="outset">
                   {steps.map((step, index) => (
                     // A step to do is a tap target whole, following its button (T-3035).
                     <ActionRow
@@ -435,11 +434,10 @@ export async function HomeView({
                 </Heading>
                 <Button label={t("allNotices")} variant="ghost" href="/notices" />
               </HStack>
-              <List hasDividers edgeCompensation="inline">
+              <List hasDividers edge="outset">
                 {recent.map((notice) => (
-                  <Item
+                  <ListItem
                     key={notice.id}
-                    as="li"
                     href={`/notices/${notice.id}`}
                     startContent={
                       <StatusDot
@@ -485,11 +483,10 @@ export async function HomeView({
             <Heading level={2} id="attention">
               {t("attention.title")}
             </Heading>
-            <List hasDividers edgeCompensation="inline">
+            <List hasDividers edge="outset">
               {attentionItems.map((item) => (
-                <Item
+                <ListItem
                   key={item.key}
-                  as="li"
                   href={item.href}
                   startContent={item.icon}
                   label={item.label}
@@ -514,11 +511,10 @@ export async function HomeView({
             <Text type="supporting">
               {t("bandLine", { band: data.band.name, count: data.members.length })}
             </Text>
-            <List hasDividers edgeCompensation="inline">
+            <List hasDividers edge="outset">
               {data.members.map((member, index) => (
-                <Item
+                <ListItem
                   key={index}
-                  as="li"
                   startContent={<Avatar name={member.name} size="sm" tooltip={false} />}
                   label={member.you ? t("you", { name: member.name }) : member.name}
                   description={[member.md && t("md"), member.instruments.join(", ")]

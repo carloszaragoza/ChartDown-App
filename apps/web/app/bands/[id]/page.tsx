@@ -5,9 +5,8 @@ import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Item } from "@astryxdesign/core/Item";
 import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
-import { List } from "@astryxdesign/core/List";
+import { List, ListItem } from "@astryxdesign/core/List";
 import {
   Table,
   TableBody,
@@ -186,77 +185,81 @@ export default async function BandPage({
             {tab === "members" && (
               <section aria-labelledby="members">
                 <VStack gap={3}>
-                  <Heading level={2} id="members">
-                    {t("members", { count: members.length })}
-                  </Heading>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHeaderCell>{t("musicianColumn")}</TableHeaderCell>
-                        <TableHeaderCell>{t("roleColumn")}</TableHeaderCell>
-                        <TableHeaderCell>{t("instrumentsColumn")}</TableHeaderCell>
-                        {isMd && <TableHeaderCell>{t("actionsColumn")}</TableHeaderCell>}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {members.map((member) => {
-                        const name = profileName(member);
-                        const plays = member.instruments.map(
-                          (item) => nameById.get(item.instrument_id) ?? "",
-                        );
-                        return (
-                          <TableRow key={member.id}>
-                            <TableCell>
-                              <HStack gap={2} vAlign="center">
-                                <Avatar name={name} size="sm" tooltip={false} />
-                                <Text>
-                                  {name}
-                                  {member.user_id === auth.user.id ? ` (${t("you")})` : ""}
-                                </Text>
-                              </HStack>
-                            </TableCell>
-                            <TableCell>
-                              <Token
-                                label={member.role === "md" ? t("md") : t("musician")}
-                                size="sm"
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <Text color={plays.length > 0 ? "primary" : "secondary"}>
-                                {plays.length > 0 ? plays.join(", ") : t("noInstruments")}
-                              </Text>
-                            </TableCell>
-                            {isMd && (
-                              <TableCell>
-                                <HStack gap={2}>
-                                  <Button
-                                    label={t("instrumentsOf", { name })}
-                                    href={`/bands/${band.id}?tab=members&edit=${member.id}#edit-instruments`}
-                                    variant="ghost"
-                                  >
-                                    {t("editInstruments")}
-                                  </Button>
-                                  {member.role === "musician" && (
-                                    <form action={removeMember}>
-                                      <input type="hidden" name="bandId" value={band.id} />
-                                      <input type="hidden" name="memberId" value={member.id} />
-                                      <Button
-                                        type="submit"
-                                        variant="ghost"
-                                        label={t("removeName", { name })}
-                                      >
-                                        {t("remove")}
-                                      </Button>
-                                    </form>
-                                  )}
-                                </HStack>
-                              </TableCell>
-                            )}
+                  <Card>
+                    <VStack gap={3}>
+                      <Heading level={2} id="members">
+                        {t("members", { count: members.length })}
+                      </Heading>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHeaderCell>{t("musicianColumn")}</TableHeaderCell>
+                            <TableHeaderCell>{t("roleColumn")}</TableHeaderCell>
+                            <TableHeaderCell>{t("instrumentsColumn")}</TableHeaderCell>
+                            {isMd && <TableHeaderCell>{t("actionsColumn")}</TableHeaderCell>}
                           </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {members.map((member) => {
+                            const name = profileName(member);
+                            const plays = member.instruments.map(
+                              (item) => nameById.get(item.instrument_id) ?? "",
+                            );
+                            return (
+                              <TableRow key={member.id}>
+                                <TableCell>
+                                  <HStack gap={2} vAlign="center">
+                                    <Avatar name={name} size="sm" tooltip={false} />
+                                    <Text>
+                                      {name}
+                                      {member.user_id === auth.user.id ? ` (${t("you")})` : ""}
+                                    </Text>
+                                  </HStack>
+                                </TableCell>
+                                <TableCell>
+                                  <Token
+                                    label={member.role === "md" ? t("md") : t("musician")}
+                                    size="sm"
+                                  />
+                                </TableCell>
+                                <TableCell>
+                                  <Text color={plays.length > 0 ? "primary" : "secondary"}>
+                                    {plays.length > 0 ? plays.join(", ") : t("noInstruments")}
+                                  </Text>
+                                </TableCell>
+                                {isMd && (
+                                  <TableCell>
+                                    <HStack gap={2}>
+                                      <Button
+                                        label={t("instrumentsOf", { name })}
+                                        href={`/bands/${band.id}?tab=members&edit=${member.id}#edit-instruments`}
+                                        variant="ghost"
+                                      >
+                                        {t("editInstruments")}
+                                      </Button>
+                                      {member.role === "musician" && (
+                                        <form action={removeMember}>
+                                          <input type="hidden" name="bandId" value={band.id} />
+                                          <input type="hidden" name="memberId" value={member.id} />
+                                          <Button
+                                            type="submit"
+                                            variant="ghost"
+                                            label={t("removeName", { name })}
+                                          >
+                                            {t("remove")}
+                                          </Button>
+                                        </form>
+                                      )}
+                                    </HStack>
+                                  </TableCell>
+                                )}
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </VStack>
+                  </Card>
                   {editing && (
                     <Card>
                       <section aria-labelledby="edit-instruments-title" id="edit-instruments">
@@ -309,11 +312,10 @@ export default async function BandPage({
                     {(invitations ?? []).length === 0 ? (
                       <Text color="secondary">{t("noPending")}</Text>
                     ) : (
-                      <List hasDividers edgeCompensation="inline">
+                      <List hasDividers edge="outset">
                         {(invitations ?? []).map((invitation) => (
-                          <Item
+                          <ListItem
                             key={invitation.id as string}
-                            as="li"
                             label={invitation.email as string}
                             endContent={
                               <HStack gap={2} vAlign="center">

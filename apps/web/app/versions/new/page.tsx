@@ -3,9 +3,8 @@ import { Button } from "@astryxdesign/core/Button";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Item } from "@astryxdesign/core/Item";
 import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
-import { List } from "@astryxdesign/core/List";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import { notFound, redirect } from "next/navigation";
@@ -120,13 +119,12 @@ export default async function NewVersionPage({ searchParams }: { searchParams: S
               ) : (
                 <List
                   hasDividers
-                  edgeCompensation="inline"
+                  edge="outset"
                   header={<Heading level={2}>{t("search.results")}</Heading>}
                 >
                   {results.map((result) => (
-                    <Item
+                    <ListItem
                       key={result.id}
-                      as="li"
                       label={result.title}
                       {...(result.artists.length > 0
                         ? { description: result.artists.join(", ") }

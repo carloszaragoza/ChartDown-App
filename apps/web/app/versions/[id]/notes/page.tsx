@@ -5,7 +5,7 @@ import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Item } from "@astryxdesign/core/Item";
 import { LayoutHeader } from "@astryxdesign/core/Layout";
-import { List } from "@astryxdesign/core/List";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import { notFound } from "next/navigation";
@@ -289,11 +289,10 @@ export default async function NotesPage({
                     {t("unplacedTitle", { count: placement.unplaced.length })}
                   </Heading>
                   <Text color="secondary">{t("unplacedHint")}</Text>
-                  <List hasDividers edgeCompensation="inline">
+                  <List hasDividers edge="outset">
                     {placement.unplaced.map(({ note, reason }) => (
-                      <Item
+                      <ListItem
                         key={note.id}
-                        as="li"
                         label={note.text}
                         description={
                           reason === "bar"

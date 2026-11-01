@@ -1,8 +1,7 @@
 import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
 import { Heading } from "@astryxdesign/core/Heading";
-import { Item } from "@astryxdesign/core/Item";
 import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
-import { List } from "@astryxdesign/core/List";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -72,15 +71,14 @@ export default async function SongPage({ params }: { params: Promise<{ id: strin
         <LayoutContent>
           <List
             hasDividers
-            edgeCompensation="inline"
+            edge="outset"
             header={
               <Text className="cd-visually-hidden">{t("versionsOf", { title: song.title })}</Text>
             }
           >
             {versions.map((version) => (
-              <Item
+              <ListItem
                 key={version.id}
-                as="li"
                 href={`/versions/${version.id}`}
                 startContent={
                   <Token

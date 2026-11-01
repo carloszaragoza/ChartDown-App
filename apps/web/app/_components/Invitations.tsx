@@ -2,8 +2,7 @@ import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Item } from "@astryxdesign/core/Item";
-import { List } from "@astryxdesign/core/List";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { VStack } from "@astryxdesign/core/VStack";
 import { getTranslations } from "next-intl/server";
 import { answerInvitation } from "../bands/actions";
@@ -25,11 +24,10 @@ export async function Invitations({ invitations }: { invitations: Invitation[] }
           <Heading level={2} id="invitations">
             {t("invitations")}
           </Heading>
-          <List hasDividers edgeCompensation="inline">
+          <List hasDividers edge="outset">
             {invitations.map((invitation) => (
-              <Item
+              <ListItem
                 key={invitation.id}
-                as="li"
                 label={
                   invitation.invited_by_name
                     ? t("invitedBy", {

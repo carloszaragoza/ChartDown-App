@@ -9,7 +9,7 @@ import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Item } from "@astryxdesign/core/Item";
 import { Layout, LayoutContent, LayoutHeader, LayoutPanel } from "@astryxdesign/core/Layout";
-import { List } from "@astryxdesign/core/List";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
@@ -147,11 +147,10 @@ export function OfflineReader() {
                 {all.length === 0 ? (
                   <EmptyState title={t("noneDownloaded")} />
                 ) : (
-                  <List hasDividers edgeCompensation="inline">
+                  <List hasDividers edge="outset">
                     {all.map((item) => (
-                      <Item
+                      <ListItem
                         key={item.set.id}
-                        as="li"
                         href={`${READER}/${item.set.id}`}
                         label={item.set.name}
                         description={`${item.set.personal ? s("mySets") : item.set.band} · ${

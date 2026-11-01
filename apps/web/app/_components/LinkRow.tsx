@@ -1,8 +1,8 @@
 "use client";
 
-import { Item } from "@astryxdesign/core/Item";
+import { ListItem, type ListItemProps } from "@astryxdesign/core/List";
 import Link from "next/link";
-import { useRef, type ComponentProps } from "react";
+import { useRef } from "react";
 
 /**
  * A list row that leads somewhere (T-3035): its title is the link, and a tap anywhere on the row
@@ -13,14 +13,13 @@ export function LinkRow({
   href,
   title,
   ...item
-}: Omit<ComponentProps<typeof Item>, "label" | "href" | "onClick" | "interactiveRef" | "as"> & {
+}: Omit<ListItemProps, "label" | "href" | "onClick" | "interactiveRef"> & {
   href: string;
   title: string;
 }) {
   const link = useRef<HTMLAnchorElement>(null);
   return (
-    <Item
-      as="li"
+    <ListItem
       {...item}
       label={
         <Link ref={link} href={href}>

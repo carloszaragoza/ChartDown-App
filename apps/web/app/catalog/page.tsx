@@ -4,9 +4,8 @@ import { Card } from "@astryxdesign/core/Card";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Item } from "@astryxdesign/core/Item";
 import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
-import { List } from "@astryxdesign/core/List";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -194,7 +193,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
                       </HStack>
                       <List
                         hasDividers
-                        edgeCompensation="inline"
+                        edge="outset"
                         header={
                           <Text className="cd-visually-hidden">
                             {t("versionsOf", { title: open.title })}
@@ -293,13 +292,12 @@ export default async function CatalogPage({ searchParams }: { searchParams: Sear
                 {others.length > 0 && (
                   <List
                     hasDividers
-                    edgeCompensation="inline"
+                    edge="outset"
                     header={<Text className="cd-visually-hidden">{t("otherSongs")}</Text>}
                   >
                     {others.map((song) => (
-                      <Item
+                      <ListItem
                         key={song.song_id}
-                        as="li"
                         href={href({ song: song.song_id })}
                         label={song.title}
                         {...(song.artists.length > 0

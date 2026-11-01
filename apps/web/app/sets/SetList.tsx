@@ -53,7 +53,7 @@ export async function SetList({
         {shown.length === 0 ? (
           <EmptyState title={showPast ? t("noPast") : t("noUpcoming")} />
         ) : (
-          <List hasDividers edgeCompensation="inline">
+          <List hasDividers edge="outset">
             {shown.map((set) => (
               // The whole row opens the set, as every list's rows do (T-3035).
               <LinkRow

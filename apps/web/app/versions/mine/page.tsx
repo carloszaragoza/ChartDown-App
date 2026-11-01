@@ -118,7 +118,7 @@ export default async function YourVersionsPage({
                 actions={<Button label={t("newVersion")} variant="primary" href="/versions/new" />}
               />
             ) : (
-              <List hasDividers edgeCompensation="inline">
+              <List hasDividers edge="outset">
                 {versions.map((row) => (
                   <ActionRow
                     key={row.id}

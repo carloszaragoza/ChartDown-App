@@ -5,9 +5,8 @@ import { BreadcrumbItem, Breadcrumbs } from "@astryxdesign/core/Breadcrumbs";
 import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Item } from "@astryxdesign/core/Item";
 import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
-import { List } from "@astryxdesign/core/List";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -257,9 +256,9 @@ export default async function SetSongPage({
                   <Heading level={2} id="unplaced">
                     {t("unplacedNotes")}
                   </Heading>
-                  <List hasDividers edgeCompensation="inline">
+                  <List hasDividers edge="outset">
                     {shown.unplaced.map(({ note }) => (
-                      <Item key={note.id} as="li" label={note.text} description={note.section} />
+                      <ListItem key={note.id} label={note.text} description={note.section} />
                     ))}
                   </List>
                 </VStack>
