@@ -2,13 +2,22 @@ import { expect, test, type Page } from "@playwright/test";
 import { createVersion, makeAdmin, songOf } from "./admin";
 import { createSet, signUpAndConfirm, unique } from "./flows";
 
-/** A row's text starts on the line of the page's title, never in the page's gutter. */
+/**
+ * A row's first content starts on the line of the page's title (T-3045). With an avatar, that
+ * avatar is the first content and the words follow it (Astryx lines the avatar up, not the label).
+ */
 async function expectOnTitleLine(page: Page, text: string) {
   const title = await page.getByRole("heading", { level: 1 }).first().boundingBox();
-  const row = await page.getByRole("main").getByText(text, { exact: true }).first().boundingBox();
+  const item = page.getByRole("listitem").filter({ hasText: text }).first();
+  const lead = await item.evaluate((node) => {
+    const row = node.getBoundingClientRect();
+    const boxes = [...node.querySelectorAll("*")]
+      .map((element) => element.getBoundingClientRect())
+      .filter((box) => box.width > 8 && box.width < row.width * 0.85 && box.height > 8);
+    return Math.min(...boxes.map((box) => box.left));
+  });
   expect(title, "the page's title").not.toBeNull();
-  expect(row, text).not.toBeNull();
-  expect(Math.abs((row?.x ?? 0) - (title?.x ?? 0)), text).toBeLessThan(1.5);
+  expect(Math.abs(lead - (title?.x ?? 0)), text).toBeLessThan(1.5);
 }
 
 test("R-03.9 T-3045 the catalog's rows start on the title's line", async ({ page, request }) => {
