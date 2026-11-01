@@ -506,7 +506,8 @@ function StandModeView({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [forward, backward, toggle, isWaiting, resume, pedal]);
-  const readyPedal = (event: TouchEvent<HTMLDivElement>) => {
+  // At the touch's end and again at its click, whose mouse down would take the focus back.
+  const readyPedal = (event: TouchEvent<HTMLDivElement> | MouseEvent<HTMLDivElement>) => {
     const field = pedal.current;
     if (!field || document.activeElement === field) return;
     if (readiesPedal(event.target, event.currentTarget)) field.focus({ preventScroll: true });
@@ -1121,7 +1122,7 @@ function StandModeView({
   );
 
   return (
-    <div ref={root} onClickCapture={onClickCapture} onTouchEnd={readyPedal}>
+    <div ref={root} onClickCapture={onClickCapture} onClick={readyPedal} onTouchEnd={readyPedal}>
       {/* Following the device, the theme follows its appearance by CSS, so the first paint is
           already right; a choice is the server's to paint (T-3031). */}
       <Theme
