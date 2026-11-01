@@ -150,6 +150,12 @@ describe("F-005 stand mode feels local", () => {
   });
 });
 
+describe("R-11.10 T-3044 the pedal's field", () => {
+  it("R-11.10 the first paint has no pedal's field, so a computer's page is as before", () => {
+    expect(render()).not.toContain("data-pedal");
+  });
+});
+
 describe("F-006 View as follows the songs", () => {
   const view = { style: "numbers", beats: "auto", theme: "light" } as const;
 

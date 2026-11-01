@@ -44,6 +44,7 @@ import {
   useSyncExternalStore,
   type MouseEvent,
   type ReactNode,
+  type RefObject,
   type TouchEvent,
 } from "react";
 import { ChartSection } from "../../../_components/ChartPreview";
@@ -176,7 +177,41 @@ const TAB_LABEL = {
 
 export function StandMode(props: StandModeProps) {
   const place = new URLSearchParams(props.keep ?? {}).toString();
-  return <StandModeView key={`${props.path ?? props.versionId}?${place}`} {...props} />;
+  const pedal = useRef<HTMLInputElement>(null);
+  const isTouch = useSyncExternalStore(
+    noChanges,
+    () => window.matchMedia("(pointer: coarse)").matches,
+    () => false,
+  );
+  return (
+    <>
+      {/* On an iPad a pedal's keys reach the page only while a text field has focus from a touch
+          (R-11.10, T-3044). Outside the keyed view, so its focus lasts from song to song. */}
+      {isTouch && (
+        <input
+          ref={pedal}
+          className="cd-stand-pedal"
+          inputMode="none"
+          autoComplete="off"
+          aria-hidden="true"
+          tabIndex={-1}
+          data-pedal=""
+          onInput={(event) => {
+            event.currentTarget.value = "";
+          }}
+        />
+      )}
+      <StandModeView key={`${props.path ?? props.versionId}?${place}`} {...props} pedal={pedal} />
+    </>
+  );
+}
+
+/** Whether a touch there may give the pedal's field focus: not in a text field or a sheet. */
+export function readiesPedal(target: EventTarget | null, within: Element): boolean {
+  if (!(target instanceof Element) || !within.contains(target)) return false;
+  return !target.closest(
+    'input, select, textarea, [contenteditable="true"], dialog, [role="dialog"], [role="listbox"], [role="menu"]',
+  );
 }
 
 function StandModeView({
@@ -195,7 +230,8 @@ function StandModeView({
   set,
   phone: phoneGuess = false,
   audio,
-}: StandModeProps) {
+  pedal,
+}: StandModeProps & { pedal: RefObject<HTMLInputElement | null> }) {
   const t = useTranslations("stand");
   const c = useTranslations("chart");
   const v = useTranslations("viewer");
@@ -447,7 +483,11 @@ function StandModeView({
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.target instanceof HTMLElement && event.target.closest("input, select, textarea"))
+      if (
+        event.target !== pedal.current &&
+        event.target instanceof HTMLElement &&
+        event.target.closest("input, select, textarea")
+      )
         return;
       // The space bar plays and stops (R-11.10); on a focused button it presses that button.
       if (event.key === " ") {
@@ -465,7 +505,12 @@ function StandModeView({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [forward, backward, toggle, isWaiting, resume]);
+  }, [forward, backward, toggle, isWaiting, resume, pedal]);
+  const readyPedal = (event: TouchEvent<HTMLDivElement>) => {
+    const field = pedal.current;
+    if (!field || document.activeElement === field) return;
+    if (readiesPedal(event.target, event.currentTarget)) field.focus({ preventScroll: true });
+  };
 
   // A sideways swipe on the chart turns the section, on an iPad or a phone (R-03.3); a vertical
   // drag still scrolls it, and a row that scrolls sideways itself keeps its own swipe.
@@ -1076,7 +1121,7 @@ function StandModeView({
   );
 
   return (
-    <div ref={root} onClickCapture={onClickCapture}>
+    <div ref={root} onClickCapture={onClickCapture} onTouchEnd={readyPedal}>
       {/* Following the device, the theme follows its appearance by CSS, so the first paint is
           already right; a choice is the server's to paint (T-3031). */}
       <Theme

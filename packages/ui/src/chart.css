@@ -1008,6 +1008,21 @@
   /* Room for the current card's halo, which the scrolling area would clip. */
   padding-inline: var(--spacing-1-5);
 }
+/* The pedal's field on a touch screen (R-11.10, T-3044): out of sight, and 16 px so Safari doesn't
+   zoom in when it takes focus. */
+.cd-stand-pedal {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  font-size: 16px;
+  pointer-events: none;
+}
 .cd-stand-stack__list {
   display: flex;
   flex-direction: column;
