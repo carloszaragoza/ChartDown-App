@@ -10,11 +10,19 @@ async function expectOnTitleLine(page: Page, text: string) {
   const title = await page.getByRole("heading", { level: 1 }).first().boundingBox();
   const item = page.getByRole("listitem").filter({ hasText: text }).first();
   const lead = await item.evaluate((node) => {
-    const row = node.getBoundingClientRect();
-    const boxes = [...node.querySelectorAll("*")]
-      .map((element) => element.getBoundingClientRect())
-      .filter((box) => box.width > 8 && box.width < row.width * 0.85 && box.height > 8);
-    return Math.min(...boxes.map((box) => box.left));
+    const avatar = node.querySelector(".astryx-avatar");
+    if (avatar) return avatar.getBoundingClientRect().left;
+    const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+    let text = walker.nextNode();
+    while (text) {
+      if (text.textContent?.trim()) {
+        const range = document.createRange();
+        range.selectNodeContents(text);
+        return range.getBoundingClientRect().left;
+      }
+      text = walker.nextNode();
+    }
+    return Number.NaN;
   });
   expect(title, "the page's title").not.toBeNull();
   expect(Math.abs(lead - (title?.x ?? 0)), text).toBeLessThan(1.5);
