@@ -98,7 +98,7 @@ export function EditorProposal() {
             {charts.length === 0 ? (
               <EmptyState title="No charts match" description="Try another word." />
             ) : (
-              <List edge="flush" density="spacious">
+              <List edge="outset" density="spacious">
                 {charts.map((chart) => (
                   <ListItem
                     key={chart.title}

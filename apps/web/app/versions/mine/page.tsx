@@ -159,7 +159,7 @@ export default async function YourVersionsPage({
                 }
               />
             ) : (
-              <List density="spacious" edge="flush">
+              <List density="spacious" edge="outset">
                 {versions.map((row) => (
                   <LinkRow
                     key={row.id}

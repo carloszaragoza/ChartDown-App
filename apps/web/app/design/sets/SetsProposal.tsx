@@ -142,7 +142,7 @@ export function SetsProposal() {
                 }
               />
             ) : (
-              <List edge="flush" density="spacious">
+              <List edge="outset" density="spacious">
                 {shown.map((set) => (
                   <ListItem
                     key={set.id}

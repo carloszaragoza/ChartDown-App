@@ -87,7 +87,7 @@ export async function SetList({
             {...(all.length === 0 && emptyHint ? { description: emptyHint } : {})}
           />
         ) : (
-          <List density="spacious" edge="flush">
+          <List density="spacious" edge="outset">
             {shown.map((set) => (
               // The whole row opens the set, as every list's rows do (T-3035).
               <LinkRow

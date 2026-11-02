@@ -141,7 +141,7 @@ export default async function NewVersionPage({ searchParams }: { searchParams: S
               (results.length === 0 ? (
                 <EmptyState title={t("search.none")} />
               ) : (
-                <List density="spacious" edge="flush">
+                <List density="spacious" edge="outset">
                   {results.map((result) => {
                     const line = [
                       result.artists.join(", "),

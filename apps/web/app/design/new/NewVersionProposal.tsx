@@ -100,7 +100,7 @@ export function NewVersionProposal() {
                   <Text color="secondary">
                     {songs.length} {songs.length === 1 ? "song matches" : "songs match"} “{query.trim()}”
                   </Text>
-                  <List edge="flush" density="spacious">
+                  <List edge="outset" density="spacious">
                     {songs.map((song) => (
                       <ListItem
                         key={song.title}
