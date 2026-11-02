@@ -54,7 +54,7 @@ test("T-1301 a signed-in person gets every section; only admins get Administrati
 
   // With no version open, the editor and the notes lead to Your versions.
   await nav.getByRole("link", { name: "Chart editor", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Your versions" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Chart editor" })).toBeVisible();
   await expect(page.getByText("No versions yet")).toBeVisible();
 
   await makeAdmin(request, name);

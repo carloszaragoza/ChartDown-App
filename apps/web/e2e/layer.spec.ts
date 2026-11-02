@@ -91,7 +91,7 @@ test("R-00.2 a note whose section is gone is marked unplaced, not lost, and anch
   await signUpAndConfirm(page, unique("anchor"), "Rae Anchor");
   await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
-  await page.getByRole("button", { name: "Search" }).click();
+  await expect(page).toHaveURL(/[?&]q=/);
   await page.getByRole("link", { name: "Create a new song" }).click();
   await page
     .getByLabel("Chart (ChartDown)")

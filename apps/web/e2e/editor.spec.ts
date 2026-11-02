@@ -6,7 +6,7 @@ test("R-03.1 the preview updates without reloading", async ({ page }) => {
   await signUpAndConfirm(page, unique("editor"), "Eli Editor");
   await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
-  await page.getByRole("button", { name: "Search" }).click();
+  await expect(page).toHaveURL(/[?&]q=/);
   await page.getByRole("link", { name: "Create a new song" }).click();
   await page.getByLabel("Chart (ChartDown)").fill("## Verse\n1 | 4 | 5 | 1\n");
   await page.getByLabel("Studio recording").check();
@@ -80,7 +80,7 @@ test("R-03.1 saving refuses a version that changed elsewhere and keeps the text"
   await signUpAndConfirm(page, unique("tabs"), "Tess Tabs");
   await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
-  await page.getByRole("button", { name: "Search" }).click();
+  await expect(page).toHaveURL(/[?&]q=/);
   await page.getByRole("link", { name: "Create a new song" }).click();
   await page.getByLabel("Chart (ChartDown)").fill("## Verse\n1 | 4\n");
   await page.getByLabel("Live").check();
@@ -218,7 +218,7 @@ test("R-03.1 T-2837 the chart's text stays in view while the page scrolls down t
   await signUpAndConfirm(page, unique("sticky"), "Sol Sticky");
   await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
-  await page.getByRole("button", { name: "Search" }).click();
+  await expect(page).toHaveURL(/[?&]q=/);
   await page.getByRole("link", { name: "Create a new song" }).click();
   const sections = Array.from(
     { length: 12 },

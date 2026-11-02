@@ -49,7 +49,7 @@ test("R-05.2 a new revision from the author doesn't change the set until accepte
   await switchTo(page, ana, "Ana Pin");
   await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
-  await page.getByRole("button", { name: "Search" }).click();
+  await expect(page).toHaveURL(/[?&]q=/);
   await page.getByRole("link", { name: "Create a new song" }).click();
   await page.getByLabel("Chart (ChartDown)").fill("## Verse\n1 | 4\n");
   await page.getByLabel("Live").check();

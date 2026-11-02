@@ -6,7 +6,7 @@ import { signOut, signUpAndConfirm, unique } from "./flows";
 async function startNewSong(page: Page, title: string) {
   await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
-  await page.getByRole("button", { name: "Search" }).click();
+  await expect(page).toHaveURL(/[?&]q=/);
   await expect(page.getByText("No songs match")).toBeVisible();
   await page.getByRole("link", { name: "Create a new song" }).click();
 }
@@ -62,8 +62,8 @@ test("R-02.1 a version of a song already in the catalog", async ({ page, request
   await signUpAndConfirm(page, unique("second"), "Cleo Second");
   await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
-  await page.getByRole("button", { name: "Search" }).click();
-  await page.getByRole("link", { name: `Use ${title}` }).click();
+  await expect(page).toHaveURL(/[?&]q=/);
+  await page.getByRole("link", { name: title, exact: true }).click();
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
   await expect(page.getByLabel("Song title")).toHaveCount(0);
   // The artists under the title, and Choose another song beside Cancel, in the header.

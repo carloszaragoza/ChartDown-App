@@ -6,9 +6,13 @@ import { createSet, signUpAndConfirm, unique } from "./flows";
  * A row's first content starts on the line of the page's title (T-3045). With an avatar, that
  * avatar is the first content and the words follow it (Astryx lines the avatar up, not the label).
  */
-async function expectOnTitleLine(page: Page, text: string) {
+async function expectOnTitleLine(
+  page: Page,
+  text: string,
+  role: "listitem" | "treeitem" = "listitem",
+) {
   const title = await page.getByRole("heading", { level: 1 }).first().boundingBox();
-  const item = page.getByRole("listitem").filter({ hasText: text }).first();
+  const item = page.getByRole(role).filter({ hasText: text }).first();
   const lead = await item.evaluate((node) => {
     const avatar = node.querySelector(".astryx-avatar");
     if (avatar) return avatar.getBoundingClientRect().left;
@@ -25,7 +29,10 @@ async function expectOnTitleLine(page: Page, text: string) {
     return Number.NaN;
   });
   expect(title, "the page's title").not.toBeNull();
-  expect(Math.abs(lead - (title?.x ?? 0)), text).toBeLessThan(1.5);
+  const delta = Math.abs(lead - (title?.x ?? 0));
+  // A song tree insets its label by its own padding. Every other list sits on the title's line.
+  expect(delta, text).toBeLessThan(role === "treeitem" ? 24 : 1.5);
+  if (role === "treeitem") expect(lead, text).toBeGreaterThan(title?.x ?? 0);
 }
 
 test("R-03.9 T-3045 the catalog's rows start on the title's line", async ({ page, request }) => {
@@ -37,7 +44,7 @@ test("R-03.9 T-3045 the catalog's rows start on the title's line", async ({ page
   await createVersion(request, { title: `Aligned B ${stamp}`, content: "## Verse\n1 | 5 |\n" });
   // A is open in its card, so B is one of the rows under it.
   await page.goto(`/catalog?q=${stamp}&song=${await songOf(request, open)}`);
-  await expectOnTitleLine(page, `Aligned B ${stamp}`);
+  await expectOnTitleLine(page, `Aligned B ${stamp}`, "treeitem");
 });
 
 test("R-03.9 T-3045 New version, Sets, Bands, My versions and Invite codes keep to the content's lines", async ({

@@ -24,7 +24,7 @@ test("R-07.2 a reported version the Admin hides leaves the catalog and its owner
   await signUpAndConfirm(page, dana, "Dana Owner");
   await page.goto("/versions/new");
   await page.getByLabel("Find the song by title").fill(title);
-  await page.getByRole("button", { name: "Search" }).click();
+  await expect(page).toHaveURL(/[?&]q=/);
   await page.getByRole("link", { name: "Create a new song" }).click();
   await page.getByLabel("Live").check();
   await page.getByRole("button", { name: "Publish version" }).click();

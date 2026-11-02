@@ -12,7 +12,7 @@ test("R-02.8 restoring revision 3 creates a new revision", async ({ page, reques
   // Revision 1 through the app, revisions 2 to 5 as later saves.
   await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
-  await page.getByRole("button", { name: "Search" }).click();
+  await expect(page).toHaveURL(/[?&]q=/);
   await page.getByRole("link", { name: "Create a new song" }).click();
   await page.getByLabel("Chart (ChartDown)").fill(chart(1));
   await page.getByLabel("Own arrangement").check();

@@ -1,10 +1,9 @@
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { List } from "@astryxdesign/core/List";
-import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { localToday } from "../../lib/sets/today";
-import { compareSets, setWhen } from "../../lib/sets/when";
+import { compareSets, setSummary } from "../../lib/sets/when";
 import { LinkRow } from "../_components/LinkRow";
 import { PageTabs } from "../_components/PageTabs";
 
@@ -26,44 +25,81 @@ export async function SetList({
   sets,
   path,
   when,
+  query = "",
+  emptyHint,
 }: {
   sets: ListedSet[];
   /** The page's address, for the tabs. */
   path: string;
   when: string | undefined;
+  /** Narrows by name, band and type. Empty shows every set. */
+  query?: string;
+  /** Said only when that tab has no sets at all. */
+  emptyHint?: string;
 }) {
   const t = await getTranslations("sets");
   const format = await getFormatter();
   const today = await localToday();
-  const upcoming = sets.filter((set) => !set.date || set.date >= today).sort(compareSets);
-  const past = sets.filter((set) => set.date && set.date < today).sort((a, b) => compareSets(b, a));
+  const words = { today: t("today"), noDate: t("noDate") };
+  const needle = query.trim().toLowerCase();
+  const matches = (set: ListedSet) => {
+    if (!needle) return true;
+    return [set.name, set.band, t(`types.${set.type}`)]
+      .filter(Boolean)
+      .join("\n")
+      .toLowerCase()
+      .includes(needle);
+  };
+  const upcomingAll = sets.filter((set) => !set.date || set.date >= today).sort(compareSets);
+  const pastAll = sets
+    .filter((set) => set.date && set.date < today)
+    .sort((a, b) => compareSets(b, a));
+  const upcoming = upcomingAll.filter(matches);
+  const past = pastAll.filter(matches);
   const showPast = when === "past";
   const shown = showPast ? past : upcoming;
+  const all = showPast ? pastAll : upcomingAll;
   const label = showPast ? t("past") : t("upcoming");
+  const tabHref = (pastTab: boolean) => {
+    const params = new URLSearchParams();
+    if (pastTab) params.set("when", "past");
+    if (query.trim()) params.set("q", query.trim());
+    const text = params.toString();
+    return text ? `${path}?${text}` : path;
+  };
   return (
     <VStack gap={4}>
       <PageTabs
         current={showPast ? "past" : "upcoming"}
         tabs={[
-          { value: "upcoming", label: `${t("upcoming")} (${upcoming.length})`, href: path },
-          { value: "past", label: `${t("past")} (${past.length})`, href: `${path}?when=past` },
+          {
+            value: "upcoming",
+            label: `${t("upcoming")} (${upcoming.length})`,
+            href: tabHref(false),
+          },
+          { value: "past", label: `${t("past")} (${past.length})`, href: tabHref(true) },
         ]}
       />
       <section aria-label={label}>
         {shown.length === 0 ? (
-          <EmptyState title={showPast ? t("noPast") : t("noUpcoming")} />
+          <EmptyState
+            title={needle && all.length > 0 ? t("none") : showPast ? t("noPast") : t("noUpcoming")}
+            {...(all.length === 0 && emptyHint ? { description: emptyHint } : {})}
+          />
         ) : (
-          <List hasDividers edge="outset">
+          <List density="spacious" edge="flush">
             {shown.map((set) => (
               // The whole row opens the set, as every list's rows do (T-3035).
               <LinkRow
                 key={set.id}
                 href={`/sets/${set.id}`}
                 title={set.name}
-                description={[set.band, setWhen(format, set.date, set.time) ?? t("noDate")]
-                  .filter(Boolean)
-                  .join(" · ")}
-                endContent={<Token label={t(`types.${set.type}`)} size="sm" />}
+                description={setSummary(
+                  format,
+                  { ...set, type: t(`types.${set.type}`) },
+                  today,
+                  words,
+                )}
               />
             ))}
           </List>

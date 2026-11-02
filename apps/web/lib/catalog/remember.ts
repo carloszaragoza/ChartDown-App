@@ -1,12 +1,12 @@
 // Where the person was in the catalog, so a version opened from it leads back there (R-02.10):
-// the search, the source, the page and the open song, kept for this tab only.
+// the search, the source, the page and the songs on that page, kept for this tab only.
 
 const KEY = "cd-catalog";
 
-/** Keeps the catalog's address, with the open song in it. */
-export function rememberCatalog(url: string, song: string): void {
+/** Keeps the catalog's address, with the songs that were on the page. */
+export function rememberCatalog(url: string, songs: readonly string[]): void {
   try {
-    sessionStorage.setItem(KEY, JSON.stringify({ url, song }));
+    sessionStorage.setItem(KEY, JSON.stringify({ url, songs }));
   } catch {
     // No storage, as in a private window: the version just has no way back.
   }
@@ -18,8 +18,14 @@ export function catalogFor(song: string): string | null {
     const kept = JSON.parse(sessionStorage.getItem(KEY) ?? "null") as {
       url?: unknown;
       song?: unknown;
+      songs?: unknown;
     } | null;
-    return kept?.song === song && typeof kept.url === "string" && kept.url.startsWith("/catalog")
+    const songs = Array.isArray(kept?.songs)
+      ? kept.songs.filter((id): id is string => typeof id === "string")
+      : typeof kept?.song === "string"
+        ? [kept.song]
+        : [];
+    return songs.includes(song) && typeof kept?.url === "string" && kept.url.startsWith("/catalog")
       ? kept.url
       : null;
   } catch {
