@@ -154,7 +154,7 @@ export function CatalogProposal() {
             <Text type="supporting" color="secondary">
               Search sits with New version, and the sources are a line of text. A row highlights
               when the pointer is over it. A song with one version opens from the row. A song with
-              several versions shows the tree's own chevron, set in from the row, and its versions
+              several versions shows the tree chevron, set in from the row, and its versions
               sit indented under it, in the smaller text. Open and Fork are not on this list. Fork is on the song, after
               it has been opened. Harbor Lights is the chart from the screenshot. Every other key,
               meter and tempo is a stand-in.

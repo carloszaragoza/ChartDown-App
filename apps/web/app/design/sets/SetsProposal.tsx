@@ -157,7 +157,7 @@ export function SetsProposal() {
               The title and the rows share one edge. Search sits with the title, and Upcoming and
               Past are a line of text. The rows have no rules between them, and a row highlights
               when the pointer is over it, in Upcoming and in Past, because the row opens the
-              set. LifeStone Church's
+              set. The LifeStone Church
               service keeps the name 11/1/2026, and the line under it says the band, Service and
               Today. The rehearsal and Youth night are stand-ins. The Sets page itself is unchanged.
             </Text>

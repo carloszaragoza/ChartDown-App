@@ -124,7 +124,7 @@ export function EditorProposal() {
             )}
             <Text type="supporting" color="secondary">
               The row edits the chart, and it highlights when the pointer is over it. There is no
-              Open, no Edit button and no Director's notes: those notes stay in Director's notes.
+              Open, no Edit button and no Director notes: those notes stay on the notes page.
               Public and Private are an icon only: a globe or a lock, named for the reader, with no
               word repeated on the line. The line is the key, the meter, the tempo and the date.
               Every key, meter and tempo is a stand-in. Search sits with New version and filters as
