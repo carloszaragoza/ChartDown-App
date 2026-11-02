@@ -376,17 +376,15 @@ export async function HomeView({
                         : t("usage.noneYet")}
                     </Text>
                   </VStack>
-                  {played && (
-                    <LinkChoice
-                      label={t("usage.period")}
-                      current={String(usage ?? "all")}
-                      options={(["7", "30", "all"] as const).map((value) => ({
-                        value,
-                        label: t(`usage.choice.${value}`),
-                        href: value === "30" ? "/" : `/?usage=${value}`,
-                      }))}
-                    />
-                  )}
+                  <LinkChoice
+                    label={t("usage.period")}
+                    current={String(usage ?? "all")}
+                    options={(["7", "30", "all"] as const).map((value) => ({
+                      value,
+                      label: t(`usage.choice.${value}`),
+                      href: value === "30" ? "/" : `/?usage=${value}`,
+                    }))}
+                  />
                 </HStack>
                 {played && (
                   <Table>
