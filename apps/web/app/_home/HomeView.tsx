@@ -7,7 +7,6 @@ import { Grid } from "@astryxdesign/core/Grid";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { LayoutHeader } from "@astryxdesign/core/Layout";
-import { Link } from "@astryxdesign/core/Link";
 import { List, ListItem } from "@astryxdesign/core/List";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
@@ -28,7 +27,6 @@ import type { ReactNode } from "react";
 import { localTimeZone } from "../../lib/sets/today";
 import { setWhen, todayIn } from "../../lib/sets/when";
 import { ActionRow } from "../_components/ActionRow";
-import { Banner } from "../_components/Banner";
 import {
   AddIcon,
   GoIcon,
@@ -145,11 +143,7 @@ export async function HomeView({
     description: string;
     href: string;
   }[];
-  // A version nobody played stays off the report, so a library of zeros does not fill the page.
-  const used = data.usage.rows.filter((row) => row.bands > 0 || row.musicians > 0);
-  const shown = used.slice(0, 5);
-  const top = Math.max(1, ...shown.map((row) => row.musicians));
-  const played = used.length > 0;
+  const top = Math.max(1, ...data.usage.rows.map((row) => row.musicians));
   const steps = [
     { done: data.steps.instruments, key: "instruments", href: "/profile" },
     { done: data.steps.band, key: "band", href: "/bands" },
@@ -182,8 +176,13 @@ export async function HomeView({
         </VStack>
         {!isNew && (
           <HStack gap={2}>
-            {data.next && <Button label={t("createSet")} href={setsHref} icon={<AddIcon />} />}
-            <Button label={t("newVersion")} href="/versions/new" icon={<VersionIcon />} />
+            <Button label={t("createSet")} href={setsHref} icon={<AddIcon />} />
+            <Button
+              label={t("newVersion")}
+              variant="primary"
+              href="/versions/new"
+              icon={<VersionIcon />}
+            />
           </HStack>
         )}
       </HStack>
@@ -251,26 +250,12 @@ export async function HomeView({
     <EmptyState
       title={t("noUpcoming")}
       description={isNew ? t("noUpcomingNew") : t("noUpcomingHint")}
-      {...(!isNew
-        ? {
-            actions: (
-              <HStack gap={2} wrap="wrap" hAlign="center">
-                <Button
-                  label={t("createSet")}
-                  variant="primary"
-                  href={setsHref}
-                  icon={<AddIcon />}
-                />
-                <Button label={t("seeAllSets")} href="/sets" />
-              </HStack>
-            ),
-          }
-        : {})}
+      {...(!isNew ? { actions: <Button label={t("createSet")} href={setsHref} /> } : {})}
     />
   );
 
   const stat = (label: string, value: number, hint: string, href: string) => (
-    <ClickableCard label={hint ? `${label}: ${value}. ${hint}` : `${label}: ${value}`} href={href}>
+    <ClickableCard label={`${label}: ${value}`} href={href}>
       <VStack gap={1}>
         <Text type="supporting">{label}</Text>
         <Text size="3xl" weight="bold">
@@ -359,34 +344,34 @@ export async function HomeView({
         )}
         {!isNew &&
           (data.versions.public > 0 ? (
-            <section aria-labelledby="usage">
-              <VStack gap={3}>
-                <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
-                  <VStack gap={0.5}>
-                    <Heading level={2} id="usage">
-                      {t("usage.title")}
-                    </Heading>
-                    <Text type="supporting">
-                      {played && data.usage.total
-                        ? t("usage.summary", {
-                            musicians: data.usage.total.musicians,
-                            bands: data.usage.total.bands,
-                            period: t(`usage.${usage ?? "all"}`),
-                          })
-                        : t("usage.noneYet")}
-                    </Text>
-                  </VStack>
-                  <LinkChoice
-                    label={t("usage.period")}
-                    current={String(usage ?? "all")}
-                    options={(["7", "30", "all"] as const).map((value) => ({
-                      value,
-                      label: t(`usage.choice.${value}`),
-                      href: value === "30" ? "/" : `/?usage=${value}`,
-                    }))}
-                  />
-                </HStack>
-                {played && (
+            <Card>
+              <section aria-labelledby="usage">
+                <VStack gap={3}>
+                  <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
+                    <VStack gap={0.5}>
+                      <Heading level={2} id="usage">
+                        {t("usage.title")}
+                      </Heading>
+                      <Text type="supporting">
+                        {data.usage.total && data.usage.total.musicians > 0
+                          ? t("usage.summary", {
+                              musicians: data.usage.total.musicians,
+                              bands: data.usage.total.bands,
+                              period: t(`usage.${usage ?? "all"}`),
+                            })
+                          : t("usage.noneYet")}
+                      </Text>
+                    </VStack>
+                    <LinkChoice
+                      label={t("usage.period")}
+                      current={String(usage ?? "all")}
+                      options={(["7", "30", "all"] as const).map((value) => ({
+                        value,
+                        label: t(`usage.choice.${value}`),
+                        href: value === "30" ? "/" : `/?usage=${value}`,
+                      }))}
+                    />
+                  </HStack>
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -396,13 +381,11 @@ export async function HomeView({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {shown.map((row) => (
+                      {data.usage.rows.map((row) => (
                         <TableRow key={row.id}>
                           <TableCell>
                             <VStack gap={0.5}>
-                              <Link href={`/versions/${row.id}`}>
-                                <Text weight="semibold">{row.title}</Text>
-                              </Link>
+                              <Text weight="semibold">{row.title}</Text>
                               <Text type="supporting">
                                 {[sources(row.sourceType as "live"), row.year]
                                   .filter(Boolean)
@@ -427,15 +410,10 @@ export async function HomeView({
                       ))}
                     </TableBody>
                   </Table>
-                )}
-                <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
                   <Text type="supporting">{t("usage.privacy")}</Text>
-                  {data.usage.rows.length > shown.length && (
-                    <Button label={t("usage.editor")} variant="ghost" href="/versions/mine" />
-                  )}
-                </HStack>
-              </VStack>
-            </section>
+                </VStack>
+              </section>
+            </Card>
           ) : (
             <Card>
               <HStack gap={3} vAlign="center" hAlign="between" wrap="wrap">
@@ -554,36 +532,26 @@ export async function HomeView({
             <Heading level={2} id="your-instruments">
               {t("yourInstruments")}
             </Heading>
-            <Button
-              label={t("edit")}
-              href="/profile"
-              variant={data.instruments.length > 0 ? "ghost" : "secondary"}
-            />
+            <Button label={t("edit")} variant="ghost" href="/profile" />
           </HStack>
-          {data.instruments.length > 0 ? (
-            <>
-              <HStack gap={2} wrap="wrap">
-                {data.instruments.map((instrument) => (
-                  <Token
-                    key={instrument.slug}
-                    label={instrument.name}
-                    color="purple"
-                    size="sm"
-                    {...(hasInstrumentIcon(instrument.slug)
-                      ? { icon: <Icon name={instrument.slug} size={16} /> }
-                      : {})}
-                  />
-                ))}
-              </HStack>
-              <Text type="supporting">{t("instrumentsHint")}</Text>
-            </>
-          ) : (
-            <Banner
-              status="warning"
-              title={t("noInstrumentTitle")}
-              description={t("noInstrumentHint")}
-            />
-          )}
+          <HStack gap={2} wrap="wrap">
+            {data.instruments.length > 0 ? (
+              data.instruments.map((instrument) => (
+                <Token
+                  key={instrument.slug}
+                  label={instrument.name}
+                  color="purple"
+                  size="sm"
+                  {...(hasInstrumentIcon(instrument.slug)
+                    ? { icon: <Icon name={instrument.slug} size={16} /> }
+                    : {})}
+                />
+              ))
+            ) : (
+              <Text color="secondary">{t("noInstruments")}</Text>
+            )}
+          </HStack>
+          <Text type="supporting">{t("instrumentsHint")}</Text>
         </VStack>
       </section>
     </VStack>

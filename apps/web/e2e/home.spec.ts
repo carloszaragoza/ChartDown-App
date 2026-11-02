@@ -50,7 +50,6 @@ test("T-1308 Home grows from the new user's first steps to the director's view o
   const usage = page.getByRole("region", { name: "How your versions are used" });
   await expect(usage).toContainText("1 musician in 1 band played your public versions");
   await expect(usage.getByRole("row").filter({ hasText: title })).toContainText("1");
-  await expect(usage.getByRole("link", { name: title })).toHaveAttribute("href", version);
   await expect(usage).toContainText("Totals only");
   await expect(page.getByRole("region", { name: "Your band" })).toContainText("Hana Home (you)");
 });

@@ -27,7 +27,6 @@
     "noUpcoming": "No upcoming sets",
     "noUpcomingNew": "When your music director adds you to a set, it shows up here.",
     "noUpcomingHint": "Create one in your band or your personal space.",
-    "seeAllSets": "See all sets",
     "getStarted": "Get started",
     "done": "{count} of 4 done",
     "stepDone": "Done",
@@ -78,10 +77,9 @@
         "30": "30 days",
         "all": "All time"
       },
-      "version": "Chart",
-      "bands": "In sets",
-      "musicians": "Players",
-      "editor": "Chart editor",
+      "version": "Version",
+      "bands": "Bands",
+      "musicians": "Musicians",
       "relative": "How {title} compares with your most played version",
       "privacy": "Totals only: you never see which bands or musicians they are."
     },
@@ -123,8 +121,6 @@
     "yourInstruments": "Your instruments",
     "edit": "Edit",
     "noInstruments": "No instruments yet.",
-    "noInstrumentTitle": "No instrument yet",
-    "noInstrumentHint": "Choose the instruments you play. Notes for those instruments reach you, and the ones you write reach your band.",
     "instrumentsHint": "Your director's notes follow these instruments."
   },
   "language": {
