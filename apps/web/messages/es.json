@@ -27,6 +27,7 @@
     "noUpcoming": "No hay sets próximos",
     "noUpcomingNew": "Cuando tu director musical te agregue a un set, aparecerá aquí.",
     "noUpcomingHint": "Crea uno en tu banda o en tu espacio personal.",
+    "seeAllSets": "Ver todos los sets",
     "getStarted": "Primeros pasos",
     "done": "{count} de 4 listos",
     "stepDone": "Listo",
@@ -77,9 +78,9 @@
         "30": "30 días",
         "all": "Siempre"
       },
-      "version": "Versión",
-      "bands": "Bandas",
-      "musicians": "Músicos",
+      "version": "Cifrado",
+      "bands": "En sets",
+      "musicians": "Quienes tocan",
       "relative": "Cómo se compara {title} con tu versión más tocada",
       "privacy": "Solo totales: nunca ves qué bandas o músicos son."
     },
@@ -121,6 +122,8 @@
     "yourInstruments": "Tus instrumentos",
     "edit": "Editar",
     "noInstruments": "Aún no hay instrumentos.",
+    "noInstrumentTitle": "Aún no hay instrumento",
+    "noInstrumentHint": "Elige los instrumentos que tocas. Las notas de esos instrumentos te llegan, y las que escribes llegan a tu banda.",
     "instrumentsHint": "Las notas de tu director siguen estos instrumentos."
   },
   "language": {
