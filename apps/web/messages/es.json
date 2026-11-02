@@ -81,6 +81,7 @@
       "version": "Cifrado",
       "bands": "En sets",
       "musicians": "Quienes tocan",
+      "editor": "Editor de charts",
       "relative": "Cómo se compara {title} con tu versión más tocada",
       "privacy": "Solo totales: nunca ves qué bandas o músicos son."
     },

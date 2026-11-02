@@ -145,10 +145,11 @@ export async function HomeView({
     description: string;
     href: string;
   }[];
-  const top = Math.max(1, ...data.usage.rows.map((row) => row.musicians));
-  const played = Boolean(
-    data.usage.total && (data.usage.total.musicians > 0 || data.usage.total.bands > 0),
-  );
+  // A version nobody played stays off the report, so a library of zeros does not fill the page.
+  const used = data.usage.rows.filter((row) => row.bands > 0 || row.musicians > 0);
+  const shown = used.slice(0, 5);
+  const top = Math.max(1, ...shown.map((row) => row.musicians));
+  const played = used.length > 0;
   const steps = [
     { done: data.steps.instruments, key: "instruments", href: "/profile" },
     { done: data.steps.band, key: "band", href: "/bands" },
@@ -397,7 +398,7 @@ export async function HomeView({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {data.usage.rows.map((row) => (
+                      {shown.map((row) => (
                         <TableRow key={row.id}>
                           <TableCell>
                             <VStack gap={0.5}>
@@ -429,7 +430,12 @@ export async function HomeView({
                     </TableBody>
                   </Table>
                 )}
-                <Text type="supporting">{t("usage.privacy")}</Text>
+                <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
+                  <Text type="supporting">{t("usage.privacy")}</Text>
+                  {data.usage.rows.length > shown.length && (
+                    <Button label={t("usage.editor")} variant="ghost" href="/versions/mine" />
+                  )}
+                </HStack>
               </VStack>
             </section>
           ) : (

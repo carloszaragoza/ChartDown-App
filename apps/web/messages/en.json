@@ -81,6 +81,7 @@
       "version": "Chart",
       "bands": "In sets",
       "musicians": "Players",
+      "editor": "Chart editor",
       "relative": "How {title} compares with your most played version",
       "privacy": "Totals only: you never see which bands or musicians they are."
     },
