@@ -119,98 +119,100 @@ export default async function AdminInvitesPage({ searchParams }: { searchParams:
             </Card>
 
             <section aria-labelledby="codes-title">
-              <VStack gap={3}>
-                <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
-                  <Heading level={2} id="codes-title">
-                    {t("codes")}
-                  </Heading>
-                  <Text type="supporting">{t("codeCount", { count: codes.length })}</Text>
-                </HStack>
-                {codes.length === 0 ? (
-                  <EmptyState title={t("none")} description={t("noneDescription")} isCompact />
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHeaderCell>{t("codeColumn")}</TableHeaderCell>
-                        <TableHeaderCell>{t("kindColumn")}</TableHeaderCell>
-                        <TableHeaderCell>{t("usesColumn")}</TableHeaderCell>
-                        <TableHeaderCell>{t("forColumn")}</TableHeaderCell>
-                        <TableHeaderCell>{t("createdColumn")}</TableHeaderCell>
-                        <TableHeaderCell>{t("statusColumn")}</TableHeaderCell>
-                        <TableHeaderCell>
-                          <VisuallyHidden>{t("actionsColumn")}</VisuallyHidden>
-                        </TableHeaderCell>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {codes.map((code) => {
-                        const status = statusOf(code);
-                        return (
-                          <TableRow key={code.id}>
-                            <TableCell>
-                              <HStack gap={1} vAlign="center">
-                                <Text type="code" weight="bold">
-                                  {code.code}
+              <Card>
+                <VStack gap={3}>
+                  <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
+                    <Heading level={2} id="codes-title">
+                      {t("codes")}
+                    </Heading>
+                    <Text type="supporting">{t("codeCount", { count: codes.length })}</Text>
+                  </HStack>
+                  {codes.length === 0 ? (
+                    <EmptyState title={t("none")} description={t("noneDescription")} isCompact />
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHeaderCell>{t("codeColumn")}</TableHeaderCell>
+                          <TableHeaderCell>{t("kindColumn")}</TableHeaderCell>
+                          <TableHeaderCell>{t("usesColumn")}</TableHeaderCell>
+                          <TableHeaderCell>{t("forColumn")}</TableHeaderCell>
+                          <TableHeaderCell>{t("createdColumn")}</TableHeaderCell>
+                          <TableHeaderCell>{t("statusColumn")}</TableHeaderCell>
+                          <TableHeaderCell>
+                            <VisuallyHidden>{t("actionsColumn")}</VisuallyHidden>
+                          </TableHeaderCell>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {codes.map((code) => {
+                          const status = statusOf(code);
+                          return (
+                            <TableRow key={code.id}>
+                              <TableCell>
+                                <HStack gap={1} vAlign="center">
+                                  <Text type="code" weight="bold">
+                                    {code.code}
+                                  </Text>
+                                  <CopyCode
+                                    code={code.code}
+                                    copy={t("copy", { code: code.code })}
+                                    copied={t("copied", { code: code.code })}
+                                  />
+                                </HStack>
+                              </TableCell>
+                              <TableCell>
+                                <Token label={t(`kinds.${code.kind}`)} size="sm" />
+                              </TableCell>
+                              <TableCell>
+                                <Text>
+                                  {code.max_uses === null
+                                    ? t("usesNoLimit", { uses: code.uses })
+                                    : t("uses", { uses: code.uses, max: code.max_uses })}
                                 </Text>
-                                <CopyCode
-                                  code={code.code}
-                                  copy={t("copy", { code: code.code })}
-                                  copied={t("copied", { code: code.code })}
-                                />
-                              </HStack>
-                            </TableCell>
-                            <TableCell>
-                              <Token label={t(`kinds.${code.kind}`)} size="sm" />
-                            </TableCell>
-                            <TableCell>
-                              <Text>
-                                {code.max_uses === null
-                                  ? t("usesNoLimit", { uses: code.uses })
-                                  : t("uses", { uses: code.uses, max: code.max_uses })}
-                              </Text>
-                            </TableCell>
-                            <TableCell>
-                              <Text>{code.note ?? ""}</Text>
-                            </TableCell>
-                            <TableCell>
-                              <Text>
-                                {format.dateTime(new Date(code.created_at), {
-                                  dateStyle: "medium",
-                                })}
-                              </Text>
-                            </TableCell>
-                            <TableCell>
-                              <HStack gap={1.5} vAlign="center">
-                                <StatusDot
-                                  variant={STATUS_DOT[status]}
-                                  label={t(`statuses.${status}`)}
-                                />
-                                <Text>{t(`statuses.${status}`)}</Text>
-                              </HStack>
-                            </TableCell>
-                            <TableCell>
-                              {status === "active" && (
-                                <form action={revokeInvite}>
-                                  <input type="hidden" name="id" value={code.id} />
-                                  <Button
-                                    type="submit"
-                                    variant="destructive"
-                                    size="sm"
-                                    label={t("revoke", { code: code.code })}
-                                  >
-                                    {t("revokeShort")}
-                                  </Button>
-                                </form>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                )}
-              </VStack>
+                              </TableCell>
+                              <TableCell>
+                                <Text>{code.note ?? ""}</Text>
+                              </TableCell>
+                              <TableCell>
+                                <Text>
+                                  {format.dateTime(new Date(code.created_at), {
+                                    dateStyle: "medium",
+                                  })}
+                                </Text>
+                              </TableCell>
+                              <TableCell>
+                                <HStack gap={1.5} vAlign="center">
+                                  <StatusDot
+                                    variant={STATUS_DOT[status]}
+                                    label={t(`statuses.${status}`)}
+                                  />
+                                  <Text>{t(`statuses.${status}`)}</Text>
+                                </HStack>
+                              </TableCell>
+                              <TableCell>
+                                {status === "active" && (
+                                  <form action={revokeInvite}>
+                                    <input type="hidden" name="id" value={code.id} />
+                                    <Button
+                                      type="submit"
+                                      variant="destructive"
+                                      size="sm"
+                                      label={t("revoke", { code: code.code })}
+                                    >
+                                      {t("revokeShort")}
+                                    </Button>
+                                  </form>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  )}
+                </VStack>
+              </Card>
             </section>
           </VStack>
         </LayoutContent>

@@ -2,9 +2,8 @@ import { Button } from "@astryxdesign/core/Button";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Item } from "@astryxdesign/core/Item";
 import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
-import { List } from "@astryxdesign/core/List";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -70,13 +69,12 @@ export default async function NoticesPage() {
           ) : (
             <List
               hasDividers
-              edgeCompensation="inline"
+              edge="outset"
               header={<Text className="cd-visually-hidden">{t("list")}</Text>}
             >
               {notices.map((notice) => (
-                <Item
+                <ListItem
                   key={notice.id}
-                  as="li"
                   href={`/notices/${notice.id}`}
                   align="start"
                   startContent={

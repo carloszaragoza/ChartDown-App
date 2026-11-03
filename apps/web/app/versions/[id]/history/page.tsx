@@ -84,7 +84,7 @@ export default async function HistoryPage({
             <List
               listStyle="none"
               hasDividers
-              edgeCompensation="inline"
+              edge="outset"
               header={<Text className="cd-visually-hidden">{t("title")}</Text>}
             >
               {revisions.map((revision) => {

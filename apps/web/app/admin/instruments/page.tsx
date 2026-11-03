@@ -1,5 +1,6 @@
 import { Banner } from "../../_components/Banner";
 import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
@@ -159,97 +160,106 @@ export default async function AdminInstrumentsPage({ searchParams }: { searchPar
                 }
               />
             )}
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHeaderCell>{t("instrumentColumn")}</TableHeaderCell>
-                  <TableHeaderCell>{t("slug")}</TableHeaderCell>
-                  <TableHeaderCell>{t("aliases")}</TableHeaderCell>
-                  <TableHeaderCell>{t("statusColumn")}</TableHeaderCell>
-                  <TableHeaderCell>
-                    <VisuallyHidden>{t("actionsColumn")}</VisuallyHidden>
-                  </TableHeaderCell>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {instruments.map((instrument) => {
-                  const name = nameOf(instrument);
-                  return (
-                    <TableRow key={instrument.id}>
-                      <TableCell>
-                        <HStack gap={2} vAlign="center">
-                          {hasInstrumentIcon(instrument.slug) && (
-                            <Icon name={instrument.slug} size={20} />
-                          )}
+            <Card>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHeaderCell>{t("instrumentColumn")}</TableHeaderCell>
+                    <TableHeaderCell>{t("slug")}</TableHeaderCell>
+                    <TableHeaderCell>{t("aliases")}</TableHeaderCell>
+                    <TableHeaderCell>{t("statusColumn")}</TableHeaderCell>
+                    <TableHeaderCell>
+                      <VisuallyHidden>{t("actionsColumn")}</VisuallyHidden>
+                    </TableHeaderCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {instruments.map((instrument) => {
+                    const name = nameOf(instrument);
+                    return (
+                      <TableRow key={instrument.id}>
+                        <TableCell>
+                          <HStack gap={2} vAlign="center">
+                            {hasInstrumentIcon(instrument.slug) && (
+                              <Icon name={instrument.slug} size={20} />
+                            )}
+                            <VStack gap={0}>
+                              <Text
+                                weight="bold"
+                                color={instrument.active ? "primary" : "secondary"}
+                              >
+                                {name}
+                              </Text>
+                              <Text type="supporting" color="secondary">
+                                {otherName(instrument)}
+                              </Text>
+                            </VStack>
+                          </HStack>
+                        </TableCell>
+                        <TableCell>
+                          <Text type="code">{instrument.slug}</Text>
+                        </TableCell>
+                        <TableCell>
+                          <Text type="code" color="secondary">
+                            {instrument.aliases.join(", ")}
+                          </Text>
+                        </TableCell>
+                        <TableCell>
                           <VStack gap={0}>
-                            <Text weight="bold" color={instrument.active ? "primary" : "secondary"}>
-                              {name}
-                            </Text>
+                            <HStack gap={1.5} vAlign="center">
+                              <StatusDot
+                                variant={instrument.active ? "success" : "neutral"}
+                                label={instrument.active ? t("active") : t("inactive")}
+                              />
+                              <Text>{instrument.active ? t("active") : t("inactive")}</Text>
+                            </HStack>
                             <Text type="supporting" color="secondary">
-                              {otherName(instrument)}
+                              {t("musicians", { count: musicians.get(instrument.id) ?? 0 })}
                             </Text>
                           </VStack>
-                        </HStack>
-                      </TableCell>
-                      <TableCell>
-                        <Text type="code">{instrument.slug}</Text>
-                      </TableCell>
-                      <TableCell>
-                        <Text type="code" color="secondary">
-                          {instrument.aliases.join(", ")}
-                        </Text>
-                      </TableCell>
-                      <TableCell>
-                        <VStack gap={0}>
-                          <HStack gap={1.5} vAlign="center">
-                            <StatusDot
-                              variant={instrument.active ? "success" : "neutral"}
-                              label={instrument.active ? t("active") : t("inactive")}
-                            />
-                            <Text>{instrument.active ? t("active") : t("inactive")}</Text>
-                          </HStack>
-                          <Text type="supporting" color="secondary">
-                            {t("musicians", { count: musicians.get(instrument.id) ?? 0 })}
-                          </Text>
-                        </VStack>
-                      </TableCell>
-                      <TableCell>
-                        <HStack gap={1} hAlign="end">
-                          <Button
-                            label={t("edit", { name })}
-                            tooltip={t("edit", { name })}
-                            icon={<EditIcon />}
-                            isIconOnly
-                            variant="ghost"
-                            href={`/admin/instruments?edit=${instrument.id}#instrument-form`}
-                          />
-                          <form action={setInstrumentActive}>
-                            <input type="hidden" name="id" value={instrument.id} />
-                            <input type="hidden" name="active" value={String(!instrument.active)} />
+                        </TableCell>
+                        <TableCell>
+                          <HStack gap={1} hAlign="end">
                             <Button
-                              type="submit"
-                              label={
-                                instrument.active
-                                  ? t("deactivate", { name })
-                                  : t("reactivate", { name })
-                              }
-                              tooltip={
-                                instrument.active
-                                  ? t("deactivate", { name })
-                                  : t("reactivate", { name })
-                              }
-                              icon={instrument.active ? <DeactivateIcon /> : <ReactivateIcon />}
+                              label={t("edit", { name })}
+                              tooltip={t("edit", { name })}
+                              icon={<EditIcon />}
                               isIconOnly
                               variant="ghost"
+                              href={`/admin/instruments?edit=${instrument.id}#instrument-form`}
                             />
-                          </form>
-                        </HStack>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                            <form action={setInstrumentActive}>
+                              <input type="hidden" name="id" value={instrument.id} />
+                              <input
+                                type="hidden"
+                                name="active"
+                                value={String(!instrument.active)}
+                              />
+                              <Button
+                                type="submit"
+                                label={
+                                  instrument.active
+                                    ? t("deactivate", { name })
+                                    : t("reactivate", { name })
+                                }
+                                tooltip={
+                                  instrument.active
+                                    ? t("deactivate", { name })
+                                    : t("reactivate", { name })
+                                }
+                                icon={instrument.active ? <DeactivateIcon /> : <ReactivateIcon />}
+                                isIconOnly
+                                variant="ghost"
+                              />
+                            </form>
+                          </HStack>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </Card>
           </VStack>
         </>
       }

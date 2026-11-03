@@ -160,7 +160,7 @@ export default async function BandsPage({ searchParams }: { searchParams: Search
                 <Heading level={2} id="my-bands">
                   {t("mine")}
                 </Heading>
-                <List hasDividers edgeCompensation="inline">
+                <List hasDividers edge="outset">
                   {bands.map(({ role, band }) => (band ? rowOf(band, role) : null))}
                   {personal && (
                     <LinkRow

@@ -3,7 +3,6 @@ import { Button } from "@astryxdesign/core/Button";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Item } from "@astryxdesign/core/Item";
 import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
 import { List } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
@@ -13,7 +12,8 @@ import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../../lib/auth/enabled";
 import { createClient, readUser } from "../../../lib/supabase/server";
 import { AddIcon } from "../../_components/ActionIcons";
-import { SearchField } from "../../_components/SearchField";
+import { LinkRow } from "../../_components/LinkRow";
+import { LiveSearch } from "../../_components/LiveSearch";
 import { VersionForm } from "./VersionForm";
 import { guessPhone } from "../../../lib/shell/guessPhone";
 
@@ -22,6 +22,8 @@ interface Song {
   id: string;
   title: string;
   artists: string[];
+  album: string | null;
+  year: number | null;
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -71,7 +73,33 @@ export default async function NewVersionPage({ searchParams }: { searchParams: S
         .order("title")
         .limit(20)
     : { data: null };
-  const results = (found ?? []) as Song[];
+  const results = ((found ?? []) as Omit<Song, "album" | "year">[]).map((song) => ({
+    ...song,
+    album: null as string | null,
+    year: null as number | null,
+  }));
+  if (results.length > 0) {
+    const { data: sources } = await supabase
+      .from("versions")
+      .select("song_id, source_album, source_year, updated_at")
+      .in(
+        "song_id",
+        results.map((song) => song.id),
+      )
+      .eq("visibility", "public")
+      .eq("status", "active")
+      .order("updated_at", { ascending: false });
+    const seen = new Set<string>();
+    for (const row of sources ?? []) {
+      const songId = row.song_id as string;
+      if (seen.has(songId)) continue;
+      seen.add(songId);
+      const song = results.find((item) => item.id === songId);
+      if (!song) continue;
+      song.album = (row.source_album as string | null) ?? null;
+      song.year = (row.source_year as number | null) ?? null;
+    }
+  }
 
   const newSong = query
     ? `/versions/new?song=new&q=${encodeURIComponent(query)}`
@@ -94,6 +122,7 @@ export default async function NewVersionPage({ searchParams }: { searchParams: S
               <Text color="secondary">{t("intro")}</Text>
             </VStack>
             <HStack gap={2} vAlign="center" wrap="wrap">
+              <LiveSearch path="/versions/new" query={query} label={t("search.label")} />
               <Button label={t("import.open")} href="/versions/new/import" />
               <Button
                 label={t("search.newSong")}
@@ -108,39 +137,28 @@ export default async function NewVersionPage({ searchParams }: { searchParams: S
       content={
         <LayoutContent>
           <VStack gap={4}>
-            <SearchField
-              path="/versions/new"
-              query={query}
-              label={t("search.label")}
-              submit={t("search.submit")}
-            />
             {query &&
               (results.length === 0 ? (
                 <EmptyState title={t("search.none")} />
               ) : (
-                <List
-                  hasDividers
-                  edgeCompensation="inline"
-                  header={<Heading level={2}>{t("search.results")}</Heading>}
-                >
-                  {results.map((result) => (
-                    <Item
-                      key={result.id}
-                      as="li"
-                      label={result.title}
-                      {...(result.artists.length > 0
-                        ? { description: result.artists.join(", ") }
-                        : {})}
-                      endContent={
-                        <Button
-                          label={t("search.use", { title: result.title })}
-                          href={`/versions/new?song=${result.id}`}
-                        >
-                          {t("search.useShort")}
-                        </Button>
-                      }
-                    />
-                  ))}
+                <List density="spacious" edge="outset">
+                  {results.map((result) => {
+                    const line = [
+                      result.artists.join(", "),
+                      result.album,
+                      result.year && String(result.year),
+                    ]
+                      .filter(Boolean)
+                      .join(" · ");
+                    return (
+                      <LinkRow
+                        key={result.id}
+                        href={`/versions/new?song=${result.id}`}
+                        title={result.title}
+                        {...(line ? { description: line } : {})}
+                      />
+                    );
+                  })}
                 </List>
               ))}
           </VStack>

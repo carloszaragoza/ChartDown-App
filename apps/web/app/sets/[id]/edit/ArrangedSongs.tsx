@@ -3,8 +3,7 @@
 import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
-import { Item } from "@astryxdesign/core/Item";
-import { List } from "@astryxdesign/core/List";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { ArrowDownIcon, ArrowUpIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useOptimistic, type ReactNode } from "react";
@@ -63,11 +62,10 @@ export function ArrangedSongs({
     </>
   );
   return (
-    <List hasDividers edgeCompensation="inline">
+    <List hasDividers edge="outset">
       {shown.map((song, index) => (
-        <Item
+        <ListItem
           key={song.id}
-          as="li"
           align="start"
           startContent={<Text weight="semibold">{index + 1}</Text>}
           label={song.label}

@@ -1,6 +1,6 @@
 import { createFormatter } from "next-intl";
 import { describe, expect, it } from "vitest";
-import { compareSets, nextSet, personTimeZone, setWhen, todayIn } from "./when";
+import { compareSets, nextSet, personTimeZone, setSummary, setWhen, todayIn } from "./when";
 
 const en = createFormatter({ locale: "en", timeZone: "UTC" });
 const es = createFormatter({ locale: "es", timeZone: "UTC" });
@@ -31,6 +31,61 @@ describe("R-05.1 a set's date and time", () => {
       "Evening",
       "Someday",
     ]);
+  });
+});
+
+describe("R-05.6 the line under a set", () => {
+  const words = { today: "Today", noDate: "No date" };
+
+  it("R-05.6 a date used as the name says Today when that day is today, and does not repeat the date", () => {
+    expect(
+      setSummary(
+        en,
+        {
+          name: "11/1/2026",
+          date: "2026-11-01",
+          time: null,
+          band: "LifeStone Church",
+          type: "Service",
+        },
+        "2026-11-01",
+        words,
+      ),
+    ).toBe("LifeStone Church · Service · Today");
+  });
+
+  it("R-05.6 a named set says the band, the type and the date", () => {
+    expect(
+      setSummary(
+        en,
+        {
+          name: "Youth night",
+          date: "2026-10-18",
+          time: null,
+          band: "LifeStone Church",
+          type: "Service",
+        },
+        "2026-11-01",
+        words,
+      ),
+    ).toBe("LifeStone Church · Service · Oct 18, 2026");
+  });
+
+  it("R-05.6 a past set whose name is the date keeps the time and drops the second date", () => {
+    expect(
+      setSummary(
+        en,
+        {
+          name: "10/25/2026",
+          date: "2026-10-25",
+          time: "18:00",
+          band: "LifeStone Church",
+          type: "Rehearsal",
+        },
+        "2026-11-01",
+        words,
+      ),
+    ).toBe("LifeStone Church · Rehearsal · 6:00 PM");
   });
 });
 

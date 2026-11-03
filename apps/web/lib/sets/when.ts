@@ -2,6 +2,42 @@ import type { createFormatter } from "next-intl";
 
 type Formatter = ReturnType<typeof createFormatter>;
 
+/** The clock only, in the band's local time as written (R-05.1). */
+export function setClock(format: Formatter, date: string, time: string | null): string | null {
+  if (!time) return null;
+  return format.dateTime(new Date(`${date}T${time.slice(0, 5)}:00Z`), {
+    timeStyle: "short",
+    timeZone: "UTC",
+  });
+}
+
+const DATE_NAME = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
+
+/**
+ * The line under a set's stored name (R-05.6): band, type, then the day. A name that is already
+ * the date is not written again; when that day is today the line says Today.
+ */
+export function setSummary(
+  format: Formatter,
+  set: { name: string; date: string | null; time: string | null; band?: string; type: string },
+  today: string,
+  words: { today: string; noDate: string },
+): string {
+  const named = DATE_NAME.test(set.name.trim());
+  let day: string | null = null;
+  if (!set.date) {
+    day = named ? null : words.noDate;
+  } else if (set.date === today) {
+    const clock = setClock(format, set.date, set.time);
+    day = clock ? `${words.today} · ${clock}` : words.today;
+  } else if (named) {
+    day = setClock(format, set.date, set.time);
+  } else {
+    day = setWhen(format, set.date, set.time);
+  }
+  return [set.band, set.type, day].filter(Boolean).join(" · ");
+}
+
 /**
  * A set's date, and its time when it has one (R-05.1, T-708). The time is the band's local time
  * as written, so both are formatted as written, with no time zone conversion.

@@ -223,7 +223,7 @@ test("R-06.7 T-2834 the chart editor plays the band's audio, and its preview fol
   await signUpAndConfirm(page, unique("audioeditor"), "Eda Editor");
   await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
-  await page.getByRole("button", { name: "Search" }).click();
+  await expect(page).toHaveURL(/[?&]q=/);
   await page.getByRole("link", { name: "Create a new song" }).click();
   await page
     .getByLabel("Chart (ChartDown)")

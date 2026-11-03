@@ -6,8 +6,7 @@ import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
-import { Item } from "@astryxdesign/core/Item";
-import { List } from "@astryxdesign/core/List";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { StackItem } from "@astryxdesign/core/Stack";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Text } from "@astryxdesign/core/Text";
@@ -179,11 +178,10 @@ function LiveOptions({
           {others.length === 0 ? (
             <Text type="supporting">{t("nobodyYet")}</Text>
           ) : (
-            <List hasDividers edgeCompensation="inline">
+            <List hasDividers edge="outset">
               {others.map((person) => (
-                <Item
+                <ListItem
                   key={person.id}
-                  as="li"
                   label={person.name}
                   {...(person.sync
                     ? { description: t(person.sync === "in" ? "inSync" : "syncing") }

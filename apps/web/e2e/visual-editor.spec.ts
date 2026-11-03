@@ -8,7 +8,7 @@ test("T-3012 a chart written by hand opens in the visual editor: the notice asks
   await signUpAndConfirm(page, unique("visual"), "Vera Visual");
   await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
-  await page.getByRole("button", { name: "Search" }).click();
+  await expect(page).toHaveURL(/[?&]q=/);
   await page.getByRole("link", { name: "Create a new song" }).click();
   // Written by hand: spacing the canonical text would change.
   await page.getByLabel("Chart (ChartDown)").fill("## Verse\n1  |  4 | 5 | 1\n");

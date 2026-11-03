@@ -10,7 +10,7 @@ async function publish(page: Page, title: string) {
   return new URL(page.url()).pathname;
 }
 
-test("R-03.5 Your versions is searched by title, and a row's icons open, edit and annotate it", async ({
+test("R-03.1 the Chart editor list filters as you type, and a row opens the editor", async ({
   page,
 }) => {
   const stamp = Date.now();
@@ -19,24 +19,22 @@ test("R-03.5 Your versions is searched by title, and a row's icons open, edit an
   const second = await publish(page, `Copper Kite ${stamp}`);
 
   await page.goto("/versions/mine");
+  await expect(page.getByRole("heading", { level: 1, name: "Chart editor" })).toBeVisible();
   await page.getByLabel("Search your versions by title").fill("Copper Kite");
-  await page.getByRole("button", { name: "Search" }).click();
   const rows = page.getByRole("main").getByRole("listitem");
   await expect(rows).toHaveCount(1);
   await expect(rows).toContainText(`Copper Kite ${stamp}`);
+  await expect(rows).toContainText("Key G · 4/4 · Tempo 72");
 
-  // The actions are icons, named for the version.
+  // The row opens the editor. Open, Edit and Director's notes are not buttons on it.
   const row = rows.first();
-  await expect(
-    row.getByRole("link", { name: `Director's notes for Copper Kite ${stamp}` }),
-  ).toHaveAttribute("href", `${second}/notes`);
-  await row.getByRole("link", { name: `Edit Copper Kite ${stamp}` }).click();
+  await expect(row.getByRole("img", { name: "Public" })).toBeVisible();
+  await expect(row.getByText("Public", { exact: true })).toHaveCount(0);
+  await expect(row.getByRole("link", { name: /Director's notes/ })).toHaveCount(0);
+  await expect(row.getByRole("link", { name: /^Open / })).toHaveCount(0);
+  await expect(row.getByRole("link", { name: /^Edit / })).toHaveCount(0);
+  await row.getByRole("link", { name: `Copper Kite ${stamp}` }).click();
   await expect(page).toHaveURL(new RegExp(`${second}/edit$`));
-
-  // The row itself opens the version (R-02.10's rows, T-2406).
-  await page.goto("/versions/mine?q=Copper%20Kite");
-  await page.getByRole("main").getByText(`Copper Kite ${stamp}`).click();
-  await expect(page).toHaveURL(new RegExp(`${second}$`));
 
   await page.goto("/versions/mine?q=Nothing%20Like%20This");
   await expect(page.getByText("None of your versions match.")).toBeVisible();

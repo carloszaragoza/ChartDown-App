@@ -20,6 +20,7 @@ import {
   MusicalNoteIcon,
   DocumentDuplicateIcon,
   GlobeAltIcon,
+  LockClosedIcon,
   PencilSquareIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
@@ -45,6 +46,19 @@ export function AddIcon() {
 
 export function PublicIcon() {
   return <Icon icon={GlobeAltIcon} size="sm" color="secondary" />;
+}
+
+/** Public or private, as an icon with its own name (owner's review, November 1, 2026). */
+export function VisibilityIcon({ kind, label }: { kind: "public" | "private"; label: string }) {
+  return (
+    <Icon
+      icon={kind === "private" ? LockClosedIcon : GlobeAltIcon}
+      size="sm"
+      color="secondary"
+      label={label}
+      aria-hidden={false}
+    />
+  );
 }
 
 export function RevisionIcon() {

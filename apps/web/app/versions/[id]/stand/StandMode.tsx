@@ -8,8 +8,7 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { Collapsible } from "@astryxdesign/core/Collapsible";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
-import { Item } from "@astryxdesign/core/Item";
-import { List } from "@astryxdesign/core/List";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Selector } from "@astryxdesign/core/Selector";
 import { StackItem } from "@astryxdesign/core/Stack";
@@ -855,11 +854,10 @@ function StandModeView({
             setSongsOpen(false);
           }}
         >
-          <List hasDividers edgeCompensation="inline">
+          <List hasDividers edge="outset">
             {set.songs.map((song) => (
-              <Item
+              <ListItem
                 key={song.position}
-                as="li"
                 href={song.href}
                 isSelected={song.current}
                 startContent={<Text weight="bold">{song.position}</Text>}

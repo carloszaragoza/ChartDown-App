@@ -125,7 +125,7 @@ export default async function AdminReportsPage({ searchParams }: { searchParams:
                   icon={<ReportIcon />}
                 />
               ) : (
-                <List aria-label={t("open")} hasDividers edgeCompensation="inline">
+                <List aria-label={t("open")} hasDividers edge="outset">
                   {open.map((report) => {
                     const version = one(report.version);
                     if (!version) return null;
@@ -191,7 +191,7 @@ export default async function AdminReportsPage({ searchParams }: { searchParams:
               (hiddenVersions.length === 0 ? (
                 <EmptyState title={t("noneHidden")} description={t("noneHiddenDescription")} />
               ) : (
-                <List aria-label={t("hidden")} hasDividers edgeCompensation="inline">
+                <List aria-label={t("hidden")} hasDividers edge="outset">
                   {hiddenVersions.map((version) => {
                     const title = titleOf(version);
                     return (

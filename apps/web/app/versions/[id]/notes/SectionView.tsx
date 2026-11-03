@@ -2,8 +2,7 @@ import { Button } from "@astryxdesign/core/Button";
 import { Divider } from "@astryxdesign/core/Divider";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Item } from "@astryxdesign/core/Item";
-import { List } from "@astryxdesign/core/List";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import { chordFormatter, type Chart } from "chartdown";
@@ -53,7 +52,7 @@ export function SectionView({
         {notes.length > 0 && (
           <List
             hasDividers
-            edgeCompensation="inline"
+            edge="outset"
             header={
               <Text className="cd-visually-hidden">
                 {t("sectionNotes", { section: section.name })}
@@ -61,9 +60,8 @@ export function SectionView({
             }
           >
             {notes.map((note, position) => (
-              <Item
+              <ListItem
                 key={position}
-                as="li"
                 label={<MDNotes notes={[note]} instrumentName={labels.bar.instrument} />}
                 {...(note.editHref
                   ? {

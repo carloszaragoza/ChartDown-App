@@ -7,7 +7,7 @@ test("R-02.7 the fork shows “Based on the version by…”", async ({ page }) 
   await signUpAndConfirm(page, unique("original"), "Ana Original");
   await page.getByRole("main").getByRole("link", { name: "New version" }).click();
   await page.getByLabel("Find the song by title").fill(title);
-  await page.getByRole("button", { name: "Search" }).click();
+  await expect(page).toHaveURL(/[?&]q=/);
   await page.getByRole("link", { name: "Create a new song" }).click();
   await page.getByLabel("Chart (ChartDown)").fill("## Bridge\n4 | 5 | 6m | 1\n");
   await page.getByLabel("Live").check();

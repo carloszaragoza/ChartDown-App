@@ -3,9 +3,8 @@ import { Banner } from "../_components/Banner";
 import { Card } from "@astryxdesign/core/Card";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Item } from "@astryxdesign/core/Item";
 import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
-import { List } from "@astryxdesign/core/List";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -203,12 +202,11 @@ export default async function ProfilePage({ searchParams }: { searchParams: Sear
                     <Heading level={2} id="sign-in-methods">
                       {t("signIn.title")}
                     </Heading>
-                    <List hasDividers edgeCompensation="inline">
+                    <List hasDividers edge="outset">
                       {PROVIDERS.filter((provider) => identities.includes(provider)).map(
                         (provider) => (
-                          <Item
+                          <ListItem
                             key={provider}
-                            as="li"
                             label={t(`signIn.${provider}`)}
                             description={email}
                             endContent={
@@ -220,8 +218,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Sear
                           />
                         ),
                       )}
-                      <Item
-                        as="li"
+                      <ListItem
                         label={t("signIn.password")}
                         description={identities.includes("email") ? email : t("signIn.notSet")}
                         {...(identities.includes("email")

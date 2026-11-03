@@ -1,4 +1,5 @@
 import { Heading } from "@astryxdesign/core/Heading";
+import { HStack } from "@astryxdesign/core/HStack";
 import { Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -6,6 +7,7 @@ import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { authEnabled } from "../../lib/auth/enabled";
 import { createClient, readUser } from "../../lib/supabase/server";
+import { LiveSearch } from "../_components/LiveSearch";
 import { SetList } from "./SetList";
 
 type One<T> = T | T[] | null;
@@ -26,7 +28,7 @@ interface Row {
 export default async function AllSetsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ when?: string }>;
+  searchParams: Promise<{ when?: string; q?: string }>;
 }) {
   if (!authEnabled()) notFound();
   const supabase = await createClient();
@@ -40,7 +42,8 @@ export default async function AllSetsPage({
     const band = Array.isArray(set.band) ? set.band[0] : set.band;
     return { ...set, band: band?.is_personal ? t("mySets") : (band?.name ?? "") };
   });
-  const { when } = await searchParams;
+  const { when, q = "" } = await searchParams;
+  const query = q.trim().slice(0, 200);
 
   return (
     <Layout
@@ -50,15 +53,30 @@ export default async function AllSetsPage({
       contentWidth={760}
       header={
         <LayoutHeader>
-          <VStack gap={1}>
-            <Heading level={1}>{t("allSets")}</Heading>
-            <Text color="secondary">{t("allSetsHint")}</Text>
-          </VStack>
+          <HStack gap={4} vAlign="center" hAlign="between" wrap="wrap">
+            <VStack gap={1}>
+              <Heading level={1}>{t("allSets")}</Heading>
+              <Text color="secondary">{t("allSetsHint")}</Text>
+            </VStack>
+            <LiveSearch
+              path="/sets"
+              query={query}
+              params={when === "past" ? { when: "past" } : {}}
+              label={t("search")}
+              placeholder={t("search")}
+            />
+          </HStack>
         </LayoutHeader>
       }
       content={
         <LayoutContent>
-          <SetList sets={sets} path="/sets" when={when} />
+          <SetList
+            sets={sets}
+            path="/sets"
+            when={when}
+            query={query}
+            emptyHint={t("emptyCreate")}
+          />
         </LayoutContent>
       }
     />

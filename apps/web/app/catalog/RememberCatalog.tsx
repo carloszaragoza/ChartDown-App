@@ -4,21 +4,13 @@ import { useEffect } from "react";
 import { rememberCatalog } from "../../lib/catalog/remember";
 
 /**
- * Keeps where the person is in the catalog, and brings the open song into view when they come
- * back to it (R-02.10).
+ * Keeps where the person is in the catalog, so a version opened from this page leads back here
+ * (R-02.10).
  */
-export function RememberCatalog({
-  url,
-  song,
-  target,
-}: {
-  url: string;
-  song: string;
-  target: string;
-}) {
+export function RememberCatalog({ url, songs }: { url: string; songs: string[] }) {
+  const ids = songs.join(" ");
   useEffect(() => {
-    rememberCatalog(url, song);
-    document.getElementById(target)?.scrollIntoView({ block: "nearest" });
-  }, [url, song, target]);
+    rememberCatalog(url, ids ? ids.split(" ") : []);
+  }, [url, ids]);
   return null;
 }
