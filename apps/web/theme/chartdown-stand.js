@@ -340,6 +340,10 @@ export const chartdownStandTheme = {
       "size:md": {
         "minWidth": "var(--size-element-md)"
       },
+      "variant:director": {
+        "backgroundColor": "var(--color-icon-red)",
+        "color": "var(--color-on-accent)"
+      },
       "size:lg": {
         "minWidth": "var(--size-element-lg)",
         "fontSize": "var(--font-size-xl)",
