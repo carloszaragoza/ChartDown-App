@@ -316,6 +316,8 @@ test("R-12.1 R-12.2 T-3046 the MD's Live button is Rosewood; on an iPad and a ph
   });
   const handset = await phone.newPage();
   await signIn(handset, mia, PASSWORD);
+  // Signed in once the sign-in page is left; a phone's navigation keeps her name in a menu.
+  await expect(handset).not.toHaveURL(/\/auth\/sign-in/);
   await handset.goto("/");
   await expect(handset.getByText(`Live now: ${set}`)).toBeVisible(FOLLOW);
   await expectRosewood(
