@@ -201,25 +201,25 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 R-12.13 R-14.2 th
   await luisDevice.close();
 });
 
-// The MD's own button: Join on a touch screen, calling the musician in, and the leader's Live
-// button. Its fill is the MD's Rosewood (the theme's red).
-async function expectDirector(join: Locator) {
-  await expect(join).toHaveAttribute("data-variant", "director");
-  const [fill, rosewood] = await join.evaluate((button) => {
+// The MD's own color on a button: the leader's Live button (the theme's `director`) and, on a
+// touch screen, Join (the theme's `join`), calling the musician in. Its fill is the MD's Rosewood
+// (the theme's red); the color is compared, not stand mode's slight translucency.
+async function expectRosewood(button: Locator, variant: "director" | "join") {
+  await expect(button).toHaveAttribute("data-variant", variant);
+  const rgb = (color: string) => color.match(/\d+/g)?.slice(0, 3).join(",") ?? "";
+  const rosewood = await button.evaluate((element) => {
     const probe = document.createElement("div");
     probe.style.backgroundColor = "var(--color-icon-red)";
-    document.body.append(probe);
-    const colors = [
-      getComputedStyle(button).backgroundColor,
-      getComputedStyle(probe).backgroundColor,
-    ];
+    element.ownerDocument.body.append(probe);
+    const color = getComputedStyle(probe).backgroundColor;
     probe.remove();
-    return colors;
+    return color;
   });
-  // The color is compared, not its alpha: stand mode's bar draws its controls a touch translucent.
-  const rgb = (color: string) => color.match(/\d+/g)?.slice(0, 3).join(",");
-  expect(rgb(fill ?? "")).toBe(rgb(rosewood ?? ""));
-  expect(fill).not.toBe("rgba(0, 0, 0, 0)");
+  await expect
+    .poll(async () =>
+      rgb(await button.evaluate((element) => getComputedStyle(element).backgroundColor)),
+    )
+    .toBe(rgb(rosewood));
 }
 
 test("R-12.1 R-12.2 T-3046 the MD's Live button is Rosewood; on an iPad and a phone, so is Join until the musician joins", async ({
@@ -277,7 +277,7 @@ test("R-12.1 R-12.2 T-3046 the MD's Live button is Rosewood; on an iPad and a ph
     .click();
   await expect(page.getByText("You lead", { exact: false })).toBeVisible(FOLLOW);
   // While it runs, Ana's Live button is filled in Rosewood, with its word.
-  await expectDirector(page.getByRole("button", { name: "Live options" }));
+  await expectRosewood(page.getByRole("button", { name: "Live options" }), "director");
 
   // On Mia's iPad: Home, Notices and the set call her in.
   const ipad = await browser.newContext({ viewport: { width: 1180, height: 820 }, hasTouch: true });
@@ -288,7 +288,7 @@ test("R-12.1 R-12.2 T-3046 the MD's Live button is Rosewood; on an iPad and a ph
   for (const address of ["/", "/notices", setAddress]) {
     await tablet.goto(address);
     await expect(tablet.getByText(`Live now: ${set}`)).toBeVisible(FOLLOW);
-    await expectDirector(joinLink);
+    await expectRosewood(joinLink, "join");
   }
   await testInfo.attach("join-ipad-set", {
     body: await tablet.screenshot(),
@@ -298,7 +298,7 @@ test("R-12.1 R-12.2 T-3046 the MD's Live button is Rosewood; on an iPad and a ph
   // Stand mode's live line, before she joins; once she joins, the line is as before.
   await tablet.goto(`${setAddress}/songs/1/stand`);
   const join = tablet.getByRole("button", { name: "Join", exact: true });
-  await expectDirector(join);
+  await expectRosewood(join, "join");
   await testInfo.attach("join-ipad-stand", {
     body: await tablet.screenshot(),
     contentType: "image/png",
@@ -318,7 +318,10 @@ test("R-12.1 R-12.2 T-3046 the MD's Live button is Rosewood; on an iPad and a ph
   await signIn(handset, mia, PASSWORD);
   await handset.goto("/");
   await expect(handset.getByText(`Live now: ${set}`)).toBeVisible(FOLLOW);
-  await expectDirector(handset.getByRole("main").getByRole("link", { name: "Join", exact: true }));
+  await expectRosewood(
+    handset.getByRole("main").getByRole("link", { name: "Join", exact: true }),
+    "join",
+  );
   await testInfo.attach("join-phone-home", {
     body: await handset.screenshot(),
     contentType: "image/png",

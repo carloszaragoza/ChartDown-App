@@ -1,12 +1,9 @@
-"use client";
-
 import { Button } from "@astryxdesign/core/Button";
-import { useTouchScreen } from "../../../lib/shell/phone";
 
 /**
- * Join, on the live line of stand mode, the set, Home and Notices (R-12.2, T-3046). On a touch
- * screen it is the MD calling the musician in: filled in Rosewood, with its word. A computer
- * keeps the primary button.
+ * Join, on the live line of stand mode, the set, Home and Notices (R-12.2, T-3046). The theme's
+ * `join` button is primary on a computer and, on a touch screen, the MD calling the musician in:
+ * filled in Rosewood, with its word. The screen decides in CSS, from the first paint.
  */
 export function JoinButton({
   label,
@@ -17,11 +14,10 @@ export function JoinButton({
   href?: string;
   onClick?: () => void;
 }) {
-  const isTouch = useTouchScreen();
   return (
     <Button
       label={label}
-      variant={isTouch ? "director" : "primary"}
+      variant="join"
       {...(href ? { href } : {})}
       {...(onClick ? { onClick } : {})}
     />

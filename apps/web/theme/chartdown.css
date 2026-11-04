@@ -415,6 +415,11 @@
     color: var(--color-on-accent);
   }
 
+  .astryx-button[data-variant="join"] {
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
   .astryx-badge[data-variant="info"] {
     background-color: var(--astryx-theme-neutral-color-status-fill-accent);
     color: var(--color-on-accent);
@@ -749,6 +754,11 @@
 
     .astryx-item {
     min-height: var(--size-element-md);
+  }
+
+    .astryx-button[data-variant="join"] {
+    background-color: var(--color-icon-red);
+    color: var(--color-on-accent);
   }
   }
 }

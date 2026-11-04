@@ -12,6 +12,7 @@ export {};
 declare module '@astryxdesign/core/Button' {
   interface ButtonVariantMap {
     'director': true;
+    'join': true;
   }
 }
 
