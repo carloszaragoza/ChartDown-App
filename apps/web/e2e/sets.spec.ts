@@ -181,7 +181,12 @@ test("R-05.6 T-3048 Sets keeps the stored name, says band, type and day under it
 
   // Upcoming and Past are the catalog's line of text, at its own width: inside the content's line.
   const heading = await page.getByRole("heading", { level: 1, name: "Sets" }).boundingBox();
-  const line = await page.getByRole("main").getByRole("tablist").boundingBox();
+  // Tabs that are links are a navigation strip, not a tablist.
+  const line = await page
+    .getByRole("main")
+    .getByRole("navigation")
+    .filter({ has: page.getByRole("link", { name: /^Upcoming/ }) })
+    .boundingBox();
   expect(line?.x ?? 0).toBeGreaterThanOrEqual((heading?.x ?? 0) - 1);
 
   // Typing narrows the list, with no Enter.
