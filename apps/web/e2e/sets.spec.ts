@@ -139,3 +139,56 @@ test("R-03.11 T-2844 a set's song plays its version's video", async ({ page, req
     "https://www.youtube.com/watch?v=hBL9EBKB5DI",
   );
 });
+
+test("R-05.6 T-3048 Sets keeps the stored name, says band, type and day under it, and filters as you type", async ({
+  page,
+}) => {
+  const stamp = Date.now();
+  const band = `Harbor Choir ${stamp}`;
+  const youth = `Youth night ${stamp}`;
+  await signUpAndConfirm(page, unique("setlist"), "Sol Sets");
+  // Today as the browser sees it: the set's day is the person's own day (F-004).
+  const today = await page.evaluate(() =>
+    new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit", day: "2-digit" }).format(
+      new Date(),
+    ),
+  );
+  const [year, month, day] = today.split("-").map(Number);
+  const dateName = `${month}/${day}/${year}`;
+
+  await page.goto("/bands");
+  await page.getByLabel("Band name").fill(band);
+  await page.getByRole("button", { name: "Create band" }).click();
+  await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
+  const bandSets = page.url();
+  await createSet(page, { name: dateName, type: "Service", date: today });
+  await expect(page.getByRole("heading", { level: 1, name: dateName })).toBeVisible();
+  await page.goto(bandSets);
+  await createSet(page, { name: youth, type: "Service", date: "2030-10-18" });
+  await expect(page.getByRole("heading", { level: 1, name: youth })).toBeVisible();
+
+  await page.goto("/sets");
+  const rows = page.getByRole("main").getByRole("listitem");
+  // A name that is only the date keeps it as the title, and the line says Today, not the date again.
+  const dated = rows.filter({ hasText: dateName });
+  await expect(dated).toContainText(`${band} · Service · Today`);
+  await expect(dated.getByText(String(year))).toHaveCount(1);
+  await expect(rows.filter({ hasText: youth })).toContainText(`${band} · Service · Oct 18, 2030`);
+  // How to create a set is said only on an empty list.
+  await expect(page.getByText("To create one, open the band.")).toHaveCount(0);
+
+  // Upcoming and Past are the catalog's line of text, at its own width: inside the content's line.
+  const heading = await page.getByRole("heading", { level: 1, name: "Sets" }).boundingBox();
+  const line = await page.getByRole("main").getByRole("tablist").boundingBox();
+  expect(line?.x ?? 0).toBeGreaterThanOrEqual((heading?.x ?? 0) - 1);
+
+  // Typing narrows the list, with no Enter.
+  await page.getByLabel("Search by name, band or type").fill(`Youth night ${stamp}`);
+  await expect(page).toHaveURL(/[?&]q=/);
+  await expect(rows.filter({ hasText: youth })).toHaveCount(1);
+  await expect(rows.filter({ hasText: dateName })).toHaveCount(0);
+
+  // The row opens the set.
+  await rows.filter({ hasText: youth }).getByRole("link").click();
+  await expect(page.getByRole("heading", { level: 1, name: youth })).toBeVisible();
+});

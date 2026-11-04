@@ -48,6 +48,7 @@ export async function createVersion(
     songId,
     sourceType = "own_arrangement",
     album,
+    year,
     youtube,
   }: {
     title: string;
@@ -57,6 +58,7 @@ export async function createVersion(
     songId?: string;
     sourceType?: "studio" | "live" | "acoustic" | "own_arrangement";
     album?: string;
+    year?: number;
     youtube?: string;
   },
 ): Promise<string> {
@@ -75,6 +77,7 @@ export async function createVersion(
     author_name: "ChartDown",
     source_type: sourceType,
     source_album: album ?? null,
+    source_year: year ?? null,
     source_youtube_url: youtube ?? null,
     visibility,
   });

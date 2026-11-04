@@ -58,11 +58,22 @@ test("R-02.3 a new version is public: a visitor reads it", async ({ page }) => {
 
 test("R-02.1 a version of a song already in the catalog", async ({ page, request }) => {
   const title = `Quiet Mile ${Date.now()}`;
-  await createVersion(request, { title, content: "## Verse\n1 | 4" });
+  await createVersion(request, {
+    title,
+    content: "## Verse\n1 | 4",
+    album: "Harbor Songs",
+    year: 2024,
+  });
   await signUpAndConfirm(page, unique("second"), "Cleo Second");
   await page.getByRole("main").getByRole("link", { name: "New version" }).click();
+  // T-3049 the field narrows the songs as it is typed, with no Enter.
   await page.getByLabel("Find the song by title").fill(title);
   await expect(page).toHaveURL(/[?&]q=/);
+  // The line under the title is the artists, the album and the year; the row is the choice.
+  const row = page.getByRole("main").getByRole("listitem").filter({ hasText: title });
+  await expect(row).toContainText("ChartDown examples · Harbor Songs · 2024");
+  await expect(page.getByRole("main").getByRole("link", { name: /^Use / })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Create a new song" })).toBeVisible();
   await page.getByRole("link", { name: title, exact: true }).click();
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
   await expect(page.getByLabel("Song title")).toHaveCount(0);

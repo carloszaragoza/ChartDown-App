@@ -9,12 +9,15 @@ import { Tab, TabList } from "@astryxdesign/core/TabList";
 export function PageTabs({
   current,
   tabs,
+  isFullBleed = true,
 }: {
   current: string;
   tabs: { value: string; label: string; href: string }[];
+  /** False keeps the line at its own width, as the catalog's sources (R-05.6). */
+  isFullBleed?: boolean;
 }) {
   return (
-    <TabList value={current} onChange={() => undefined} hasDivider isFullBleed>
+    <TabList value={current} onChange={() => undefined} hasDivider isFullBleed={isFullBleed}>
       {tabs.map((tab) => (
         <Tab key={tab.value} value={tab.value} label={tab.label} href={tab.href} />
       ))}

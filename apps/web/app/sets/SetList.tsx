@@ -18,7 +18,7 @@ export interface ListedSet {
 }
 
 /**
- * Sets in two tabs that live in the address (Design Handoff 2.0 screen 10): upcoming, undated
+ * Sets in two tabs that live in the address, filtered by name, band and type (Design Handoff 2.0 screen 10): upcoming, undated
  * ones last, and past, newest first. Past means dated before today (UTC).
  */
 export async function SetList({
@@ -71,6 +71,8 @@ export async function SetList({
     <VStack gap={4}>
       <PageTabs
         current={showPast ? "past" : "upcoming"}
+        // The same line of text as the catalog's sources, at its own width (T-3048).
+        isFullBleed={false}
         tabs={[
           {
             value: "upcoming",

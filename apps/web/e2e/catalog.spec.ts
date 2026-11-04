@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { createVersion, songOf } from "./admin";
+import { signUpAndConfirm, unique } from "./flows";
 
 test("R-02.10 a visitor searches the catalog and opens a version", async ({ page, request }) => {
   // One song: a live and a studio version in public, and a private acoustic one.
@@ -63,10 +64,7 @@ test("R-02.10 a visitor searches the catalog and opens a version", async ({ page
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
 });
 
-test("R-02.10 a version's whole row opens it, not only its Open button", async ({
-  page,
-  request,
-}) => {
+test("R-02.10 a song with one version opens from its whole row", async ({ page, request }) => {
   const title = `Slate Harbor ${Date.now()}`;
   const id = await createVersion(request, {
     title,
@@ -103,4 +101,49 @@ test("R-02.10 back from a version, the catalog keeps the search and the open son
   const open = page.getByRole("treeitem", { name: `Ember Road ${stamp} B` });
   await expect(open).toBeVisible();
   await expect(open).toBeInViewport();
+});
+
+test("R-02.9 T-3047 a song with three versions opens them indented under it, in the smaller text", async ({
+  page,
+  request,
+}) => {
+  const title = `Willow Pass ${Date.now()}`;
+  const first = await createVersion(request, {
+    title,
+    content: "## Verse\n1 | 4\n",
+    sourceType: "live",
+  });
+  const songId = await songOf(request, first);
+  for (const sourceType of ["studio", "acoustic"] as const)
+    await createVersion(request, { title, content: "## Verse\n1 | 5\n", songId, sourceType });
+
+  // Signed in, so the version offers Fork once it is open.
+  await signUpAndConfirm(page, unique("threeversions"), "Tess Versions");
+  await page.goto("/catalog");
+  await page.getByLabel("Search by title, artist or album").fill(title);
+  const song = page.getByRole("treeitem", { name: title });
+  await expect(song).toContainText("3 versions");
+  // The list has no Open and no Fork: the row is the way in.
+  await expect(page.getByRole("main").getByRole("link", { name: /^Open / })).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("link", { name: /Fork/ })).toHaveCount(0);
+
+  await song.getByRole("button", { name: "Toggle children" }).click();
+  const versions = page.getByRole("treeitem", { name: /Key C/ });
+  await expect(versions).toHaveCount(3);
+  // Indented under the song, in the smaller text.
+  const songTitle = song.getByText(title, { exact: true });
+  const live = versions.filter({ hasText: "Live" });
+  // A version's title is what is played: its key, meter and tempo.
+  const liveLabel = live.getByText(/^Key C/);
+  const fontSize = (text: typeof songTitle) =>
+    text.evaluate((element) => parseFloat(getComputedStyle(element).fontSize));
+  expect((await liveLabel.boundingBox())?.x ?? 0).toBeGreaterThan(
+    (await songTitle.boundingBox())?.x ?? 0,
+  );
+  expect(await fontSize(liveLabel)).toBeLessThan(await fontSize(songTitle));
+
+  // A version opens from its own row, and Fork is there once it is open.
+  await live.getByRole("link").click();
+  await expect(page).toHaveURL(new RegExp(`/versions/${first}$`));
+  await expect(page.getByRole("button", { name: "Fork" })).toBeVisible();
 });
