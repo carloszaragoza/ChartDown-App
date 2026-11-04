@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { createVersion } from "./admin";
 import {
   addToSet,
@@ -199,4 +199,124 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 R-12.13 R-14.2 th
   await expect(luisPage.getByText("Live mode ended. You stay where you were.")).toBeVisible(FOLLOW);
   await expectNow(luisPage, "Intro");
   await luisDevice.close();
+});
+
+// Join on a touch screen is the MD calling the musician in: the director's button, its fill the
+// MD's Rosewood (the theme's red).
+async function expectCalledIn(join: Locator) {
+  await expect(join).toHaveAttribute("data-variant", "director");
+  const [fill, rosewood] = await join.evaluate((button) => {
+    const probe = document.createElement("div");
+    probe.style.backgroundColor = "var(--color-icon-red)";
+    document.body.append(probe);
+    const colors = [
+      getComputedStyle(button).backgroundColor,
+      getComputedStyle(probe).backgroundColor,
+    ];
+    probe.remove();
+    return colors;
+  });
+  expect(fill).toBe(rosewood);
+}
+
+test("R-12.2 T-3046 on an iPad and a phone, Join is the filled Rosewood button until the musician joins", async ({
+  page,
+  browser,
+  request,
+}, testInfo) => {
+  test.setTimeout(120_000);
+  const stamp = Date.now();
+  const band = `Rosewood Call ${stamp}`;
+  const set = `Evening ${stamp}`;
+  const ana = unique("callmd");
+  const mia = unique("callkeys");
+  const song = await createVersion(request, { title: `North Light ${stamp}`, content: FIRST });
+
+  // Ana's band, with Mia on keys in the set's lineup.
+  await signUpAndConfirm(page, ana, "Ana Call");
+  await page.goto("/bands");
+  await page.getByLabel("Band name").fill(band);
+  await page.getByRole("button", { name: "Create band" }).click();
+  await page.getByLabel("Their email").fill(mia);
+  await page.getByRole("button", { name: "Send invitation" }).click();
+  await expectStatus(page, "Invitation sent.");
+  await page.goto("/");
+  await signOut(page);
+  await signUpAndConfirm(page, mia, "Mia Call");
+  await page
+    .getByRole("region", { name: "Invitations" })
+    .getByRole("button", { name: `Accept the invitation to ${band}` })
+    .click();
+  await expectStatus(page, "Welcome to the band.");
+  await page.goto("/");
+  await signOut(page);
+  await signIn(page, ana, PASSWORD);
+  await expectSignedIn(page, "Ana Call");
+  await page.goto("/bands");
+  await page.getByRole("link", { name: band, exact: true }).click();
+  await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
+  await createSet(page, { name: set, type: "Service" });
+  await expect(page.getByRole("heading", { level: 1, name: set })).toBeVisible();
+  const setAddress = new URL(page.url()).pathname;
+  await page.goto(`/versions/${song}`);
+  await addToSet(page, `${band} · ${set}`);
+  await page.goto(`${setAddress}/edit`);
+  await chooseInstrument(page, "Mia Call", "Keys");
+  await page.getByRole("button", { name: "Save lineup" }).click();
+  await expectStatus(page, "The lineup was saved.");
+
+  // Ana goes live.
+  await page.goto(`${setAddress}/songs/1/stand`);
+  await page.getByRole("button", { name: "Go live" }).click();
+  await page
+    .getByRole("alertdialog", { name: "Start live mode?" })
+    .getByRole("button", { name: "Go live" })
+    .click();
+  await expect(page.getByText("You lead", { exact: false })).toBeVisible(FOLLOW);
+
+  // On Mia's iPad: Home, Notices and the set call her in.
+  const ipad = await browser.newContext({ viewport: { width: 1180, height: 820 }, hasTouch: true });
+  const tablet = await ipad.newPage();
+  await signIn(tablet, mia, PASSWORD);
+  await expectSignedIn(tablet, "Mia Call");
+  const joinLink = tablet.getByRole("main").getByRole("link", { name: "Join", exact: true });
+  for (const address of ["/", "/notices", setAddress]) {
+    await tablet.goto(address);
+    await expect(tablet.getByText(`Live now: ${set}`)).toBeVisible(FOLLOW);
+    await expectCalledIn(joinLink);
+  }
+  await testInfo.attach("join-ipad-set", {
+    body: await tablet.screenshot(),
+    contentType: "image/png",
+  });
+
+  // Stand mode's live line, before she joins; once she joins, the line is as before.
+  await tablet.goto(`${setAddress}/songs/1/stand`);
+  const join = tablet.getByRole("button", { name: "Join", exact: true });
+  await expectCalledIn(join);
+  await testInfo.attach("join-ipad-stand", {
+    body: await tablet.screenshot(),
+    contentType: "image/png",
+  });
+  await join.click();
+  await expect(tablet.getByText("Following Ana Call")).toBeVisible(FOLLOW);
+  await expect(join).toHaveCount(0);
+  await ipad.close();
+
+  // On a phone, Home calls her in the same way.
+  const phone = await browser.newContext({
+    viewport: { width: 393, height: 852 },
+    hasTouch: true,
+    isMobile: true,
+  });
+  const handset = await phone.newPage();
+  await signIn(handset, mia, PASSWORD);
+  await handset.goto("/");
+  await expect(handset.getByText(`Live now: ${set}`)).toBeVisible(FOLLOW);
+  await expectCalledIn(handset.getByRole("main").getByRole("link", { name: "Join", exact: true }));
+  await testInfo.attach("join-phone-home", {
+    body: await handset.screenshot(),
+    contentType: "image/png",
+  });
+  await phone.close();
 });

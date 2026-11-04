@@ -339,6 +339,10 @@ export const chartdownTheme = {
       },
       "size:md": {
         "minWidth": "var(--size-element-md)"
+      },
+      "variant:director": {
+        "backgroundColor": "var(--color-icon-red)",
+        "color": "var(--color-on-accent)"
       }
     },
     "badge": {

@@ -34,3 +34,8 @@ export function usePortrait(): boolean {
 export function useShortScreen(): boolean {
   return useMedia(SHORT_QUERY, false);
 }
+
+/** Whether the screen is a touch screen, an iPad's or a phone's; the server cannot tell, so it says no. */
+export function useTouchScreen(): boolean {
+  return useMedia("(pointer: coarse)", false);
+}

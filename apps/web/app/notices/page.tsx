@@ -12,6 +12,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { authEnabled } from "../../lib/auth/enabled";
 import { type Notice } from "../../lib/notices/notice";
 import { createClient, readUser } from "../../lib/supabase/server";
+import { LiveNow } from "../_components/live/LiveNow";
 import { markAllRead } from "./actions";
 import { noticeTexts } from "./text";
 
@@ -64,35 +65,41 @@ export default async function NoticesPage() {
       }
       content={
         <LayoutContent>
-          {notices.length === 0 ? (
-            <EmptyState title={t("caughtUp")} description={t("none")} />
-          ) : (
-            <List
-              hasDividers
-              edge="outset"
-              header={<Text className="cd-visually-hidden">{t("list")}</Text>}
-            >
-              {notices.map((notice) => (
-                <ListItem
-                  key={notice.id}
-                  href={`/notices/${notice.id}`}
-                  align="start"
-                  startContent={
-                    <StatusDot
-                      variant={notice.read_at ? "neutral" : "accent"}
-                      label={notice.read_at ? t("read") : t("new")}
-                    />
-                  }
-                  label={<Text weight={notice.read_at ? "normal" : "semibold"}>{notice.text}</Text>}
-                  endContent={
-                    <Text type="supporting">
-                      {format.relativeTime(new Date(notice.created_at), now)}
-                    </Text>
-                  }
-                />
-              ))}
-            </List>
-          )}
+          <VStack gap={4}>
+            {/* Live now, with Join, as on Home and the set (R-12.2, T-3046). */}
+            <LiveNow supabase={supabase} me={auth.user.id} />
+            {notices.length === 0 ? (
+              <EmptyState title={t("caughtUp")} description={t("none")} />
+            ) : (
+              <List
+                hasDividers
+                edge="outset"
+                header={<Text className="cd-visually-hidden">{t("list")}</Text>}
+              >
+                {notices.map((notice) => (
+                  <ListItem
+                    key={notice.id}
+                    href={`/notices/${notice.id}`}
+                    align="start"
+                    startContent={
+                      <StatusDot
+                        variant={notice.read_at ? "neutral" : "accent"}
+                        label={notice.read_at ? t("read") : t("new")}
+                      />
+                    }
+                    label={
+                      <Text weight={notice.read_at ? "normal" : "semibold"}>{notice.text}</Text>
+                    }
+                    endContent={
+                      <Text type="supporting">
+                        {format.relativeTime(new Date(notice.created_at), now)}
+                      </Text>
+                    }
+                  />
+                ))}
+              </List>
+            )}
+          </VStack>
         </LayoutContent>
       }
     />
