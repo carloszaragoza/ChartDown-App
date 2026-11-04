@@ -267,7 +267,8 @@ export function LiveButton({ sections }: { sections: readonly string[] }) {
       <>
         <Button
           label={t("options")}
-          variant="destructive"
+          // Filled in the MD's Rosewood while the session runs, with its word.
+          variant="director"
           icon={<Icon icon={LiveIcon} />}
           onClick={() => setOpen(true)}
         >

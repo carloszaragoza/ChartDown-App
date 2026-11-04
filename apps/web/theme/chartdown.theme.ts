@@ -64,7 +64,7 @@ export const chartdownTheme = defineTheme({
       // (T-2833).
       "size:md": { minWidth: "var(--size-element-md)" },
       // The music director calling the band in: filled in Rosewood, the MD's color, with its
-      // word (R-12.2, T-3046). Only Join on a touch screen uses it.
+      // word (R-12.2, T-3046): Join on a touch screen, and the leader's Live button while the session runs.
       "variant:director": {
         backgroundColor: "var(--color-icon-red)",
         color: "var(--color-on-accent)",

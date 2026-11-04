@@ -201,9 +201,9 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 R-12.13 R-14.2 th
   await luisDevice.close();
 });
 
-// Join on a touch screen is the MD calling the musician in: the director's button, its fill the
-// MD's Rosewood (the theme's red).
-async function expectCalledIn(join: Locator) {
+// The MD's own button: Join on a touch screen, calling the musician in, and the leader's Live
+// button. Its fill is the MD's Rosewood (the theme's red).
+async function expectDirector(join: Locator) {
   await expect(join).toHaveAttribute("data-variant", "director");
   const [fill, rosewood] = await join.evaluate((button) => {
     const probe = document.createElement("div");
@@ -219,7 +219,7 @@ async function expectCalledIn(join: Locator) {
   expect(fill).toBe(rosewood);
 }
 
-test("R-12.2 T-3046 on an iPad and a phone, Join is the filled Rosewood button until the musician joins", async ({
+test("R-12.1 R-12.2 T-3046 the MD's Live button is Rosewood; on an iPad and a phone, so is Join until the musician joins", async ({
   page,
   browser,
   request,
@@ -273,6 +273,8 @@ test("R-12.2 T-3046 on an iPad and a phone, Join is the filled Rosewood button u
     .getByRole("button", { name: "Go live" })
     .click();
   await expect(page.getByText("You lead", { exact: false })).toBeVisible(FOLLOW);
+  // While it runs, Ana's Live button is filled in Rosewood, with its word.
+  await expectDirector(page.getByRole("button", { name: "Live options" }));
 
   // On Mia's iPad: Home, Notices and the set call her in.
   const ipad = await browser.newContext({ viewport: { width: 1180, height: 820 }, hasTouch: true });
@@ -283,7 +285,7 @@ test("R-12.2 T-3046 on an iPad and a phone, Join is the filled Rosewood button u
   for (const address of ["/", "/notices", setAddress]) {
     await tablet.goto(address);
     await expect(tablet.getByText(`Live now: ${set}`)).toBeVisible(FOLLOW);
-    await expectCalledIn(joinLink);
+    await expectDirector(joinLink);
   }
   await testInfo.attach("join-ipad-set", {
     body: await tablet.screenshot(),
@@ -293,7 +295,7 @@ test("R-12.2 T-3046 on an iPad and a phone, Join is the filled Rosewood button u
   // Stand mode's live line, before she joins; once she joins, the line is as before.
   await tablet.goto(`${setAddress}/songs/1/stand`);
   const join = tablet.getByRole("button", { name: "Join", exact: true });
-  await expectCalledIn(join);
+  await expectDirector(join);
   await testInfo.attach("join-ipad-stand", {
     body: await tablet.screenshot(),
     contentType: "image/png",
@@ -313,7 +315,7 @@ test("R-12.2 T-3046 on an iPad and a phone, Join is the filled Rosewood button u
   await signIn(handset, mia, PASSWORD);
   await handset.goto("/");
   await expect(handset.getByText(`Live now: ${set}`)).toBeVisible(FOLLOW);
-  await expectCalledIn(handset.getByRole("main").getByRole("link", { name: "Join", exact: true }));
+  await expectDirector(handset.getByRole("main").getByRole("link", { name: "Join", exact: true }));
   await testInfo.attach("join-phone-home", {
     body: await handset.screenshot(),
     contentType: "image/png",
