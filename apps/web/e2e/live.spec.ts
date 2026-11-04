@@ -216,7 +216,10 @@ async function expectDirector(join: Locator) {
     probe.remove();
     return colors;
   });
-  expect(fill).toBe(rosewood);
+  // The color is compared, not its alpha: stand mode's bar draws its controls a touch translucent.
+  const rgb = (color: string) => color.match(/\d+/g)?.slice(0, 3).join(",");
+  expect(rgb(fill ?? "")).toBe(rgb(rosewood ?? ""));
+  expect(fill).not.toBe("rgba(0, 0, 0, 0)");
 }
 
 test("R-12.1 R-12.2 T-3046 the MD's Live button is Rosewood; on an iPad and a phone, so is Join until the musician joins", async ({
