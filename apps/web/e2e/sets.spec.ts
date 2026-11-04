@@ -160,6 +160,8 @@ test("R-05.6 T-3048 Sets keeps the stored name, says band, type and day under it
   await page.getByLabel("Band name").fill(band);
   await page.getByRole("button", { name: "Create band" }).click();
   await page.getByRole("main").getByRole("link", { name: "Sets", exact: true }).click();
+  // The band's Sets page, once it is there: its address is where the second set is created.
+  await expect(page.getByRole("region", { name: "Create a set" })).toBeVisible();
   const bandSets = page.url();
   await createSet(page, { name: dateName, type: "Service", date: today });
   await expect(page.getByRole("heading", { level: 1, name: dateName })).toBeVisible();
