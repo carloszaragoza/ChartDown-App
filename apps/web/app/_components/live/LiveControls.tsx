@@ -15,6 +15,7 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { LiveIcon } from "../StandIcons";
+import { JoinButton } from "./JoinButton";
 import { useLive } from "./LiveProvider";
 
 /**
@@ -84,7 +85,7 @@ export function LiveStrip({
         <StackItem size="fill">
           <Text>{t("isLeading", { name: session.leaderName })}</Text>
         </StackItem>
-        <Button label={t("join")} variant="primary" onClick={live.join} />
+        <JoinButton label={t("join")} onClick={live.join} />
       </HStack>
     );
 
@@ -266,7 +267,8 @@ export function LiveButton({ sections }: { sections: readonly string[] }) {
       <>
         <Button
           label={t("options")}
-          variant="destructive"
+          // Filled in the MD's Rosewood while the session runs, with its word.
+          variant="director"
           icon={<Icon icon={LiveIcon} />}
           onClick={() => setOpen(true)}
         >

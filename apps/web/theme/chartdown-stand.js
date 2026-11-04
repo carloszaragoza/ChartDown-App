@@ -340,6 +340,14 @@ export const chartdownStandTheme = {
       "size:md": {
         "minWidth": "var(--size-element-md)"
       },
+      "variant:director": {
+        "backgroundColor": "var(--color-icon-red)",
+        "color": "var(--color-on-accent)"
+      },
+      "variant:join": {
+        "backgroundColor": "var(--color-accent)",
+        "color": "var(--color-on-accent)"
+      },
       "size:lg": {
         "minWidth": "var(--size-element-lg)",
         "fontSize": "var(--font-size-xl)",
@@ -589,6 +597,12 @@ export const chartdownStandTheme = {
             "item": {
               "base": {
                 "minHeight": "var(--size-element-md)"
+              }
+            },
+            "button": {
+              "variant:join": {
+                "backgroundColor": "var(--color-icon-red)",
+                "color": "var(--color-on-accent)"
               }
             }
           }

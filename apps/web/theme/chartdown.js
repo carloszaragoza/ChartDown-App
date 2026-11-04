@@ -339,6 +339,14 @@ export const chartdownTheme = {
       },
       "size:md": {
         "minWidth": "var(--size-element-md)"
+      },
+      "variant:director": {
+        "backgroundColor": "var(--color-icon-red)",
+        "color": "var(--color-on-accent)"
+      },
+      "variant:join": {
+        "backgroundColor": "var(--color-accent)",
+        "color": "var(--color-on-accent)"
       }
     },
     "badge": {
@@ -584,6 +592,12 @@ export const chartdownTheme = {
             "item": {
               "base": {
                 "minHeight": "var(--size-element-md)"
+              }
+            },
+            "button": {
+              "variant:join": {
+                "backgroundColor": "var(--color-icon-red)",
+                "color": "var(--color-on-accent)"
               }
             }
           }

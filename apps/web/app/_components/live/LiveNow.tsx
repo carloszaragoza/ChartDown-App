@@ -1,12 +1,12 @@
 import { Banner } from "../Banner";
-import { Button } from "@astryxdesign/core/Button";
 import { VStack } from "@astryxdesign/core/VStack";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getTranslations } from "next-intl/server";
 import { heardSince } from "../../../lib/live/protocol";
+import { JoinButton } from "./JoinButton";
 
 /**
- * "Live now" on Home and on a set (R-12.2, T-1607): each open session the person may join, with
+ * "Live now" on Home, in Notices and on a set (R-12.2, T-1607): each open session the person may join, with
  * who leads it and Join, which opens the leader's song. Row-level security shows only the sessions
  * of sets they are in; a session they lead themselves is not news to them.
  */
@@ -51,9 +51,7 @@ export async function LiveNow({
             description={t("bannerLeader", {
               name: nameOf.get(session.leader_id as string) ?? "",
             })}
-            endContent={
-              <Button label={t("join")} variant="primary" href={`/sets/${session.set_id}/live`} />
-            }
+            endContent={<JoinButton label={t("join")} href={`/sets/${session.set_id}/live`} />}
           />
         );
       })}

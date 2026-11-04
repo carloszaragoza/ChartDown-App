@@ -63,6 +63,19 @@ export const chartdownTheme = defineTheme({
       // Square at least, so a one-letter section in the song form ("I") is a whole touch target
       // (T-2833).
       "size:md": { minWidth: "var(--size-element-md)" },
+      // The music director's own button: filled in Rosewood, the MD's color, with its word
+      // (R-12.1, T-3046): the leader's Live button while the session runs.
+      "variant:director": {
+        backgroundColor: "var(--color-icon-red)",
+        color: "var(--color-on-accent)",
+      },
+      // Join (R-12.2, T-3046): primary on a computer; on a touch screen the MD calling the
+      // musician in, in Rosewood (below). The screen decides in CSS, so it never changes color
+      // once the page is on screen.
+      "variant:join": {
+        backgroundColor: "var(--color-accent)",
+        color: "var(--color-on-accent)",
+      },
     },
   },
   adaptations: {
@@ -83,6 +96,12 @@ export const chartdownTheme = defineTheme({
           components: {
             "side-nav-heading": { base: { minHeight: "44px" } },
             item: { base: { minHeight: "var(--size-element-md)" } },
+            button: {
+              "variant:join": {
+                backgroundColor: "var(--color-icon-red)",
+                color: "var(--color-on-accent)",
+              },
+            },
           },
         },
       },

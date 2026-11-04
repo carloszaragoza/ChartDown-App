@@ -410,6 +410,16 @@
     min-width: var(--size-element-md);
   }
 
+  .astryx-button[data-variant="director"] {
+    background-color: var(--color-icon-red);
+    color: var(--color-on-accent);
+  }
+
+  .astryx-button[data-variant="join"] {
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
   .astryx-button[data-size="lg"] {
     min-width: var(--size-element-lg);
     font-size: var(--font-size-xl);
@@ -750,6 +760,11 @@
 
     .astryx-item {
     min-height: var(--size-element-md);
+  }
+
+    .astryx-button[data-variant="join"] {
+    background-color: var(--color-icon-red);
+    color: var(--color-on-accent);
   }
   }
 }
