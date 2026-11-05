@@ -209,7 +209,8 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 R-12.13 R-14.2 th
   await page.getByRole("button", { name: "Live options" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "End live mode" }).click();
   await expect(luisPage.getByText("Live mode ended. You stay where you were.")).toBeVisible(FOLLOW);
-  await expectNow(luisPage, "Intro");
+  // Where Ana's tap took the band (T-3052).
+  await expectNow(luisPage, "Outro");
   await luisDevice.close();
 });
 
