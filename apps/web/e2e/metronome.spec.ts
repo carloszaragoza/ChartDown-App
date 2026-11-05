@@ -428,3 +428,45 @@ test("R-11.18 playing, a tap on a bar of another section goes on from there at o
   await expect(page.getByRole("button", { name: "Stop" })).toBeVisible();
   await expect(standNow(page)).toContainText("Bar 4 of 4", { timeout: 4000 });
 });
+
+test("R-11.19 scrolled past the header, the metronome is in the pinned row, stopped or playing", async ({
+  page,
+  request,
+}) => {
+  // A long, slow chart: the page scrolls well past its header and the bar playing stays on row 1.
+  const rows = Array.from({ length: 12 }, (_, n) => `## Part ${n + 1}\n1 | 4 | 5 | 1\n`).join("");
+  const id = await createVersion(request, {
+    title: "Long Song",
+    content: `---\ntempo: 40\n---\n${rows}`,
+  });
+  await page.goto(`/versions/${id}`);
+  const header = page.locator("#cd-chart-controls");
+  const play = page.getByRole("button", { name: "Play" });
+  const stop = page.getByRole("button", { name: "Stop" });
+  // Down to the last section and back up, whichever element scrolls the page.
+  const down = () => page.locator("#section-12").scrollIntoViewIfNeeded();
+  const up = () => header.scrollIntoViewIfNeeded();
+
+  // At the top, Play is the header's.
+  await expect(header.getByRole("button", { name: "Play" })).toBeInViewport();
+
+  // Scrolled down and stopped, Play is in the pinned row and starts on a bar tapped there.
+  await down();
+  await expect(header).not.toBeInViewport();
+  await expect(play).toBeInViewport();
+  await expect(header.getByRole("button", { name: "Play" })).toHaveCount(0);
+  const bar = page.locator("#section-12 .cd-chart__bar").first();
+  await bar.click();
+  await play.click();
+  await expect(bar).toHaveAttribute("aria-current", "step");
+
+  // Playing, Stop is there too, and stops it.
+  await expect(stop).toBeInViewport();
+  await stop.click();
+  await expect(page.locator('[aria-current="step"]')).toHaveCount(0);
+  await expect(play).toBeInViewport();
+
+  // Back at the top it is the header's again.
+  await up();
+  await expect(header.getByRole("button", { name: "Play" })).toBeInViewport();
+});

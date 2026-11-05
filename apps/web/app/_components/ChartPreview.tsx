@@ -34,7 +34,7 @@ import { barSeek, videoClock } from "../../lib/video/clock";
 import { useMetronomeControls } from "./MetronomeControls";
 import { SongForm } from "./SongForm";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useChartControlsSlot } from "./ChartControlsSlot";
 import { barIn, usePlaybackBar } from "./usePlaybackBar";
@@ -222,6 +222,10 @@ export function ChartPreview({
   useEffect(() => () => barSeek.forget(), []);
   const root = useRef<HTMLDivElement>(null);
   const slot = useChartControlsSlot(hasControlsInHeader);
+  // Once the header is scrolled away, the metronome comes down to the pinned row, playing or not,
+  // so Play and Stop are always in reach; back in the header once it shows again (R-11.19).
+  const isHeaderSeen = useInView(slot);
+  const isPinned = Boolean(slot) && !isHeaderSeen;
   // An open player takes the screen's bottom: the bar being followed is centered above it (T-2505).
   const room = useDockRoomSize();
   const playingRow =
@@ -289,7 +293,14 @@ export function ChartPreview({
               <>
                 {/* On a phone the metronome sits on its own line, under the strip (R-03.9). */}
                 {hasControlsInHeader ? (
-                  form
+                  isPinned ? (
+                    <HStack gap={2} vAlign="center">
+                      <StackItem size="fill">{form}</StackItem>
+                      {control}
+                    </HStack>
+                  ) : (
+                    form
+                  )
                 ) : isPhone ? (
                   <VStack gap={2}>
                     {form}
@@ -318,7 +329,7 @@ export function ChartPreview({
             reading(
               <HStack gap={2} vAlign="center" wrap="wrap">
                 {!isPlaying && counterText}
-                {control}
+                {!isPinned && control}
                 {viewOptions}
               </HStack>,
             ),
@@ -358,4 +369,16 @@ export function ChartPreview({
       <DockRoom />
     </div>
   );
+}
+
+/** Whether any of an element is on screen; true until it is known, and for no element. */
+function useInView(element: HTMLElement | null): boolean {
+  const [isSeen, setSeen] = useState(true);
+  useEffect(() => {
+    if (!element || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => setSeen(entry?.isIntersecting ?? true));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [element]);
+  return !element || isSeen;
 }
