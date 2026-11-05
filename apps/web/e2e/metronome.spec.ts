@@ -454,7 +454,8 @@ test("R-11.19 playing on the version page, Stop comes down to the pinned row onc
   await up();
   await expect(header).toBeInViewport();
   await header.getByRole("button", { name: "Play" }).click();
-  await expect(header.getByRole("button", { name: "Stop" })).toBeVisible();
+  // Play centers the first bar, which may already scroll the header away: Stop stays in reach.
+  await expect(stop).toBeInViewport();
 
   await down();
   await expect(header).not.toBeInViewport();
