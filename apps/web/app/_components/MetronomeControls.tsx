@@ -65,6 +65,14 @@ export interface StartBar {
  * on the chart (R-11.6). Its buttons are the app's own size everywhere, stand mode included
  * (owner's review, October 30, 2026, T-3036); a phone's version page asks for the large one.
  */
+/**
+ * How the leader's Play starts (R-14.2): at once, as alone, with no count-in and no moment ahead;
+ * its first click is the band's start, and each follower lands on the leader's next beat.
+ */
+export function leadingStart(lead: number | null): { countIn?: false } {
+  return lead !== null ? { countIn: false } : {};
+}
+
 export function useMetronomeControls(
   chart: Chart,
   section: number | null,
@@ -112,9 +120,7 @@ export function useMetronomeControls(
       ...(tempo !== undefined ? { tempo } : {}),
       ...(counted ? { unit: counted } : {}),
       speed: speed / 100,
-      // Leading, it starts at once with no count-in: its first click is the band's start, and
-      // each follower lands on the leader's next beat (R-14.2).
-      ...(lead !== null ? { countIn: false } : {}),
+      ...leadingStart(lead),
     });
   // Leading, a speed or tempo changed while it plays reaches the whole band at the next bar's
   // downbeat (R-14.5); alone, it waits for the next Play, as before.
