@@ -156,10 +156,12 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 R-12.13 R-14.2 th
   await expect(luisPage).toHaveURL(new RegExp(`${setAddress}/songs/2/stand`), FOLLOW);
   await expectNow(luisPage, "Intro");
 
-  // R-14.2 R-14.3 T-3038 Ana taps Play: the band starts together a moment ahead, on Ana's bar
-  // and beat, and stays together; Luis never touches his metronome.
+  // R-14.2 R-14.3 T-3052 Ana taps Play: her metronome starts at once, as alone, and Luis lands on
+  // her beat; they stay together, and Luis never touches his metronome.
   await page.bringToFront();
   await page.getByRole("button", { name: "Play" }).first().click();
+  // A beat lasts a second: the first one still shows, where half a second ahead showed nothing.
+  await expect(page.locator(".cd-metronome-count").first()).toHaveText("1 / 4", { timeout: 400 });
   await expect(luisPage.getByRole("button", { name: "Stop" }).first()).toBeVisible(FOLLOW);
   const beatOf = (device: Page) =>
     device.locator(".cd-metronome-count").first().textContent({ timeout: 2000 });
@@ -172,6 +174,23 @@ test("R-12.1 R-12.2 R-12.3 R-12.4 R-12.5 R-12.6 R-12.8 R-12.10 R-12.13 R-14.2 th
   // A beat lasts a second here: sampled together, they read the same beat (a sample may fall on
   // a beat's edge).
   expect(together).toBeGreaterThanOrEqual(5);
+  // R-14.4 T-3052 Ana taps the Outro's second bar while the Intro plays: she is there at once,
+  // and Luis lands on her beat there.
+  await page
+    .locator(".cd-stand-card")
+    .filter({ hasText: "Outro" })
+    .locator(".cd-chart__bar")
+    .nth(1)
+    .click();
+  await expectStandNow(page, "Outro");
+  await expectNow(luisPage, "Outro");
+  await expect(
+    luisPage
+      .locator(".cd-stand-card")
+      .filter({ hasText: "Outro" })
+      .locator(".cd-chart__bar")
+      .nth(1),
+  ).toHaveAttribute("aria-current", "step", FOLLOW);
   // R-14.4 Ana taps Stop: the band stops on the same beat.
   await page.getByRole("button", { name: "Stop" }).first().click();
   await expect(page.getByRole("button", { name: "Play" }).first()).toBeVisible(FOLLOW);

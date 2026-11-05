@@ -112,8 +112,9 @@ export function useMetronomeControls(
       ...(tempo !== undefined ? { tempo } : {}),
       ...(counted ? { unit: counted } : {}),
       speed: speed / 100,
-      // Leading, the whole band starts together a moment ahead, with no count-in (R-14.2).
-      ...(lead !== null ? { countIn: false, startAt: deviceNow() + lead } : {}),
+      // Leading, it starts at once with no count-in: its first click is the band's start, and
+      // each follower lands on the leader's next beat (R-14.2).
+      ...(lead !== null ? { countIn: false } : {}),
     });
   // Leading, a speed or tempo changed while it plays reaches the whole band at the next bar's
   // downbeat (R-14.5); alone, it waits for the next Play, as before.
@@ -140,10 +141,8 @@ export function useMetronomeControls(
     const at = metronome.position?.click.bar ?? 0;
     const to = jumpTarget(bars, inSection, number, Math.max(at, 0));
     if (to === null) return;
-    // Leading, the band goes there together at the next bar's downbeat (R-14.4).
-    const next = lead !== null ? metronome.nextAt(lead, true) : null;
-    if (next) metronome.restartAt(to, next.moment);
-    else metronome.jump(to);
+    // At once, leading too: the band lands on the leader's beat there (R-14.4).
+    metronome.jump(to);
   };
   const startIn = (inSection: number): StartBar | undefined => {
     const bar = start !== null ? bars[start] : undefined;
