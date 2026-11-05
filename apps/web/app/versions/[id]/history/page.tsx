@@ -101,8 +101,7 @@ export default async function HistoryPage({
                     description={`${format.dateTime(new Date(revision.created_at), {
                       dateStyle: "medium",
                       timeStyle: "short",
-                      timeZone: "UTC",
-                    })} UTC · ${author?.name ?? "ChartDown"}${
+                    })} · ${author?.name ?? "ChartDown"}${
                       from ? ` · ${t("restoredFrom", { number: from })}` : ""
                     }`}
                     {...(revision.id === version.currentRevisionId
