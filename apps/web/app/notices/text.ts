@@ -15,7 +15,9 @@ export async function noticeTexts<T extends Notice>(
   const words: NoticeWords = {
     instrument: (slug) => (instruments.has(slug) ? instruments(slug) : slug),
     when: (date, time) => setWhen(format, date, time) ?? t("noDate"),
-    day: (date) => format.dateTime(new Date(`${date}T00:00:00`), { dateStyle: "medium" }),
+    // A day with no time is that day wherever the person is (F-014).
+    day: (date) =>
+      format.dateTime(new Date(`${date}T00:00:00Z`), { dateStyle: "medium", timeZone: "UTC" }),
     writtenKey: t("writtenKey"),
     everyone: t("everyone"),
     place: (section, bar) => (bar ? t("place", { section, bar }) : section),
