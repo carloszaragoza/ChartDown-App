@@ -429,7 +429,7 @@ test("R-11.18 playing, a tap on a bar of another section goes on from there at o
   await expect(standNow(page)).toContainText("Bar 4 of 4", { timeout: 4000 });
 });
 
-test("R-11.19 playing on the version page, Stop comes down to the pinned row once the header scrolls away", async ({
+test("R-11.19 scrolled past the header, the metronome is in the pinned row, stopped or playing", async ({
   page,
   request,
 }) => {
@@ -441,31 +441,32 @@ test("R-11.19 playing on the version page, Stop comes down to the pinned row onc
   });
   await page.goto(`/versions/${id}`);
   const header = page.locator("#cd-chart-controls");
+  const play = page.getByRole("button", { name: "Play" });
   const stop = page.getByRole("button", { name: "Stop" });
   // Down to the last section and back up, whichever element scrolls the page.
   const down = () => page.locator("#section-12").scrollIntoViewIfNeeded();
   const up = () => header.scrollIntoViewIfNeeded();
 
-  // Stopped and scrolled, the pinned row keeps only the song form.
+  // At the top, Play is the header's.
+  await expect(header.getByRole("button", { name: "Play" })).toBeInViewport();
+
+  // Scrolled down and stopped, Play is in the pinned row and starts on a bar tapped there.
   await down();
   await expect(header).not.toBeInViewport();
-  await expect(page.getByRole("button", { name: "Play" })).not.toBeInViewport();
+  await expect(play).toBeInViewport();
+  await expect(header.getByRole("button", { name: "Play" })).toHaveCount(0);
+  const bar = page.locator("#section-12 .cd-chart__bar").first();
+  await bar.click();
+  await play.click();
+  await expect(bar).toHaveAttribute("aria-current", "step");
 
-  await up();
-  await expect(header).toBeInViewport();
-  await header.getByRole("button", { name: "Play" }).click();
-  // Play centers the first bar, which may already scroll the header away: Stop stays in reach.
+  // Playing, Stop is there too, and stops it.
   await expect(stop).toBeInViewport();
-
-  await down();
-  await expect(header).not.toBeInViewport();
-  await expect(stop).toBeInViewport();
-  await expect(header.getByRole("button", { name: "Stop" })).toHaveCount(0);
+  await stop.click();
+  await expect(page.locator('[aria-current="step"]')).toHaveCount(0);
+  await expect(play).toBeInViewport();
 
   // Back at the top it is the header's again.
   await up();
-  await expect(header.getByRole("button", { name: "Stop" })).toBeInViewport();
-  await down();
-  await stop.click();
-  await expect(page.locator('[aria-current="step"]')).toHaveCount(0);
+  await expect(header.getByRole("button", { name: "Play" })).toBeInViewport();
 });

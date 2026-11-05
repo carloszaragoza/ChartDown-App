@@ -222,10 +222,10 @@ export function ChartPreview({
   useEffect(() => () => barSeek.forget(), []);
   const root = useRef<HTMLDivElement>(null);
   const slot = useChartControlsSlot(hasControlsInHeader);
-  // While it plays and the header is scrolled away, the metronome comes down to the pinned row,
-  // so Stop is always in reach; back in the header once the header shows again (R-11.19).
+  // Once the header is scrolled away, the metronome comes down to the pinned row, playing or not,
+  // so Play and Stop are always in reach; back in the header once it shows again (R-11.19).
   const isHeaderSeen = useInView(slot);
-  const isPinned = Boolean(slot) && (isPlaying || isWaiting) && !isHeaderSeen;
+  const isPinned = Boolean(slot) && !isHeaderSeen;
   // An open player takes the screen's bottom: the bar being followed is centered above it (T-2505).
   const room = useDockRoomSize();
   const playingRow =
