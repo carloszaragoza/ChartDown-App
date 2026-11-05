@@ -442,26 +442,29 @@ test("R-11.19 playing on the version page, Stop comes down to the pinned row onc
   await page.goto(`/versions/${id}`);
   const header = page.locator("#cd-chart-controls");
   const stop = page.getByRole("button", { name: "Stop" });
+  // Down to the last section and back up, whichever element scrolls the page.
+  const down = () => page.locator("#section-12").scrollIntoViewIfNeeded();
+  const up = () => header.scrollIntoViewIfNeeded();
 
   // Stopped and scrolled, the pinned row keeps only the song form.
-  await page.mouse.wheel(0, 3000);
+  await down();
   await expect(header).not.toBeInViewport();
   await expect(page.getByRole("button", { name: "Play" })).not.toBeInViewport();
 
-  await page.mouse.wheel(0, -6000);
+  await up();
   await expect(header).toBeInViewport();
   await header.getByRole("button", { name: "Play" }).click();
   await expect(header.getByRole("button", { name: "Stop" })).toBeVisible();
 
-  await page.mouse.wheel(0, 3000);
+  await down();
   await expect(header).not.toBeInViewport();
   await expect(stop).toBeInViewport();
   await expect(header.getByRole("button", { name: "Stop" })).toHaveCount(0);
 
   // Back at the top it is the header's again.
-  await page.mouse.wheel(0, -6000);
+  await up();
   await expect(header.getByRole("button", { name: "Stop" })).toBeInViewport();
-  await page.mouse.wheel(0, 3000);
+  await down();
   await stop.click();
   await expect(page.locator('[aria-current="step"]')).toHaveCount(0);
 });
