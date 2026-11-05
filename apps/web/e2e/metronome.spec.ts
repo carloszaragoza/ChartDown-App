@@ -428,3 +428,40 @@ test("R-11.18 playing, a tap on a bar of another section goes on from there at o
   await expect(page.getByRole("button", { name: "Stop" })).toBeVisible();
   await expect(standNow(page)).toContainText("Bar 4 of 4", { timeout: 4000 });
 });
+
+test("R-11.19 playing on the version page, Stop comes down to the pinned row once the header scrolls away", async ({
+  page,
+  request,
+}) => {
+  // A long, slow chart: the page scrolls well past its header and the bar playing stays on row 1.
+  const rows = Array.from({ length: 12 }, (_, n) => `## Part ${n + 1}\n1 | 4 | 5 | 1\n`).join("");
+  const id = await createVersion(request, {
+    title: "Long Song",
+    content: `---\ntempo: 40\n---\n${rows}`,
+  });
+  await page.goto(`/versions/${id}`);
+  const header = page.locator("#cd-chart-controls");
+  const stop = page.getByRole("button", { name: "Stop" });
+
+  // Stopped and scrolled, the pinned row keeps only the song form.
+  await page.mouse.wheel(0, 3000);
+  await expect(header).not.toBeInViewport();
+  await expect(page.getByRole("button", { name: "Play" })).not.toBeInViewport();
+
+  await page.mouse.wheel(0, -6000);
+  await expect(header).toBeInViewport();
+  await header.getByRole("button", { name: "Play" }).click();
+  await expect(header.getByRole("button", { name: "Stop" })).toBeVisible();
+
+  await page.mouse.wheel(0, 3000);
+  await expect(header).not.toBeInViewport();
+  await expect(stop).toBeInViewport();
+  await expect(header.getByRole("button", { name: "Stop" })).toHaveCount(0);
+
+  // Back at the top it is the header's again.
+  await page.mouse.wheel(0, -6000);
+  await expect(header.getByRole("button", { name: "Stop" })).toBeInViewport();
+  await page.mouse.wheel(0, 3000);
+  await stop.click();
+  await expect(page.locator('[aria-current="step"]')).toHaveCount(0);
+});
